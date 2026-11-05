@@ -1,0 +1,378 @@
+# Corrections for Staffordshire County Council (minerals and waste authority), from the audit of
+# Staffordshire. The current list is Validation Checklists 1-4 with the A to Z Guide, all 'Latest
+# update - 17 July 2017'. The workbook captured almost nothing; Checklist 1's 26-item local list
+# (Full/Outline/RM/s73 for minerals, waste and Reg 3 county development) is added from the audit's
+# summary of the A to Z Guide triggers, scoped to mineral-app, waste-dev and reg-3. Checklist 3 items
+# (prior notification of demolition) add pa-demo-building where the audit lists them.
+local-authority: STS
+drop:
+- id: photos
+  sheets:
+  - Discharge of conditions
+  reason: 'not_a_requirement: Checklist 4''s local list is only form prompts (permission reference, conditions
+    being discharged)'
+drop-unmapped:
+- local-name: Lawful development evidence (statutory declarations etc.)
+  reason: 'wrong_trigger: cut-off excerpt; re-added with the Checklist 2 wording'
+requirements:
+- id: air-quality-assessment
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in: &id002
+        - mineral-app
+        - waste-dev
+        - reg-3
+    - any:
+      - site:
+          in:
+          - air-quality-management-area
+          description: The site is in or next to an Air Quality Management Area.
+      - discretionary
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/A-to-Z-Planning-Guide-Latest-update-17-July-2017.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): Air Quality Assessment including dust/odour, in or next
+    to an AQMA, or where dust/odour issues are likely (officer discretion).'
+- id: arboriculturist-report
+  action: add
+  required-if:
+    application-type:
+      in: &id001
+      - mineral-app
+      - waste-dev
+      - reg-3
+      - pa-demo-building
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/A-to-Z-Planning-Guide-Latest-update-17-July-2017.pdf
+  confidence: low
+  notes: 'From the audit (missing_requirement): Tree Survey and Protection Plan is on Checklist 1 and
+    Checklist 3 (demolition prior notification); the audit gives no trigger.'
+- id: biodiversity-survey-report
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in: *id001
+    - any:
+      - condition:
+          field: protected-species
+          value: true
+          description: Possible impact on protected species.
+      - condition:
+          field: demolition
+          value: true
+          description: The proposal involves demolition.
+      - condition:
+          field: roof-alteration
+          value: true
+          description: The proposal involves roof works.
+      - condition:
+          field: loss-of-habitat-features
+          value: true
+          description: The proposal involves tree or hedge removal.
+      - discretionary
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/A-to-Z-Planning-Guide-Latest-update-17-July-2017.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): Biodiversity/Geodiversity Survey and Report where there
+    is a possible impact on biodiversity/geodiversity (officer discretion) or protected species, including
+    demolition, roof works and tree/hedge removal. Also on Checklist 3 (demolition prior notification).'
+- id: construction-management-plan
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in: *id002
+    - discretionary
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/A-to-Z-Planning-Guide-Latest-update-17-July-2017.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): a CEMP may be required for site preparation, demolition
+    and construction.'
+- id: daylight-sunlight-assessment
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in: *id002
+    - discretionary
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/A-to-Z-Planning-Guide-Latest-update-17-July-2017.pdf
+  must-include:
+  - item: Cast-shadow drawings
+    level: must
+    required-if:
+      condition:
+        field: storey-count
+        operator: '>'
+        value: 2
+        description: New buildings over 2 storeys near dwellings or workplaces.
+  confidence: medium
+  notes: 'From the audit (missing_requirement): where there may be an adverse daylight impact.'
+- id: environmental-statement
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in: *id002
+    - condition:
+        field: eia-development
+        value: true
+        description: EIA development.
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/A-to-Z-Planning-Guide-Latest-update-17-July-2017.pdf
+  confidence: medium
+  notes: From the audit (missing_requirement).
+- id: flood-risk-assessment
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in: *id002
+    - any:
+      - site:
+          in:
+          - flood-risk-zone
+          description: New development in Flood Zone 2 or 3.
+      - condition:
+          field: site-area-non-residential
+          operator: '>='
+          value: 1
+          description: The site is 1 hectare or more in Flood Zone 1.
+      - condition:
+          field: site-area-residential
+          operator: '>='
+          value: 1
+          description: The site is 1 hectare or more in Flood Zone 1.
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/A-to-Z-Planning-Guide-Latest-update-17-July-2017.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): FRA for 1ha+ in Flood Zone 1 and new development in Flood
+    Zones 2/3. The SuDS drainage strategy for all major development is unmapped.'
+- id: heritage-statement
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in: *id002
+    - site:
+        in:
+        - listed-building
+        - listed-building-setting
+        - conservation-area
+        - scheduled-monument
+        - park-and-garden
+        - archaeological-priority-area
+        description: Possible impact on a designated heritage asset or its setting, or on known archaeological
+          sensitivity.
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/A-to-Z-Planning-Guide-Latest-update-17-July-2017.pdf
+  confidence: medium
+  notes: From the audit (missing_requirement).
+- id: land-contamination-assessment
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in: *id002
+    - any:
+      - site:
+          in:
+          - contaminated-land
+          - coal-mining-high-risk-area
+          description: Contamination or instability is known or suspected, or the site is in a Coal Authority
+            high-risk area.
+      - condition:
+          field: sensitive-end-use
+          value: true
+          description: A vulnerable use.
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/A-to-Z-Planning-Guide-Latest-update-17-July-2017.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): Land Contamination and Land/Slope Stability, including
+    a Coal Mining Risk Assessment.'
+- id: landscaping-plan
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in: *id002
+    - discretionary
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/A-to-Z-Planning-Guide-Latest-update-17-July-2017.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): landscaping details, and an LVIA for large schemes or
+    sensitive locations.'
+- id: lighting-assessment
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in: *id002
+    - condition:
+        field: external-lighting
+        value: true
+        description: Publicly accessible development with external lighting near housing, highways, listed
+          buildings, conservation areas, open countryside or habitats.
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/A-to-Z-Planning-Guide-Latest-update-17-July-2017.pdf
+  confidence: medium
+  notes: From the audit (missing_requirement).
+- id: noise-assessment
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in: *id002
+    - any:
+      - condition:
+          field: noise-generating-use
+          value: true
+          description: The proposal may cause noise disturbance.
+      - condition:
+          field: noise-sensitive-use
+          value: true
+          description: Noise-sensitive development.
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/A-to-Z-Planning-Guide-Latest-update-17-July-2017.pdf
+  confidence: medium
+  notes: From the audit (missing_requirement).
+- id: recreation-facilities-assessment
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in: *id002
+    - site:
+        in:
+        - open-space
+        description: Development of open space or playing pitches.
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/A-to-Z-Planning-Guide-Latest-update-17-July-2017.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): Open Space/Playing Pitch Assessment.'
+- id: planning-statement
+  action: replace
+  required-if:
+    any:
+    - application-type:
+        in:
+        - ldc
+        - ldc-existing-use
+        - ldc-prospective-use
+        - pa-demo-building
+    - all:
+      - application-type:
+          in: *id002
+      - discretionary
+  source-text: Planning Statement
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/Validation-Checklist-2-Latest-update-17-July-2017.pdf
+  confidence: medium
+  notes: 'Checklist 2 lists a Planning Statement for existing and proposed LDCs; the audit says Checklist
+    3 (demolition prior notification) lists one too. From the audit: on Checklist 1 for larger proposals
+    (officer discretion).'
+- id: photos
+  action: update
+  source-text: Plans / Drawings / Photographs
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/Validation-Checklist-2-Latest-update-17-July-2017.pdf
+  confidence: medium
+  notes: 'Audit (wrong_trigger): the Checklist 2 item is ''Plans / Drawings / Photographs'', for existing
+    and proposed LDCs.'
+- id: sci
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in: *id002
+    - discretionary
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/A-to-Z-Planning-Guide-Latest-update-17-July-2017.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): Statement of Community Involvement, depending on scale
+    and impact.'
+- id: transport-assessment
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in: *id002
+    - any:
+      - condition:
+          field: pupil-increase
+          operator: '>='
+          value: 30
+          description: A new school or nursery, or an increase of 30 or more pupils, needs scoping.
+      - discretionary
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/A-to-Z-Planning-Guide-Latest-update-17-July-2017.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): Transport, Access, Parking and Travel Plan where there
+    is significant traffic generation (officer discretion).'
+- id: travel-plan
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in: *id002
+    - any:
+      - condition:
+          field: pupil-increase
+          operator: '>='
+          value: 30
+          description: A new school or nursery, or an increase of 30 or more pupils, needs scoping.
+      - discretionary
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/A-to-Z-Planning-Guide-Latest-update-17-July-2017.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): as transport-assessment.'
+- id: waste-management-plan
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in: *id002
+    - discretionary
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/A-to-Z-Planning-Guide-Latest-update-17-July-2017.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): Site Waste Management Plan/Waste Audit for larger projects
+    or significant waste.'
+unmapped:
+- local-name: Lawful development certificate supporting information
+  source-text: Lawful Development Certificate (LDC) supporting information (e.g. sworn affidavit(s) from
+    people with personal knowledge of the existing use)
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/Validation-Checklist-2-Latest-update-17-July-2017.pdf
+  suggested-id: lawful-development-evidence
+- local-name: County Development Statement
+  source-text: A County Development Statement, which should accompany all planning applications for county
+    developments
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/A-to-Z-Planning-Guide-Latest-update-17-July-2017.pdf
+  suggested-id: county-development-statement
+- local-name: Mineral Development Statement
+  source-text: 'From the audit: all mineral applications'
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/A-to-Z-Planning-Guide-Latest-update-17-July-2017.pdf
+  suggested-id: mineral-development-statement
+- local-name: Waste Development Statement
+  source-text: 'From the audit: waste applications'
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/A-to-Z-Planning-Guide-Latest-update-17-July-2017.pdf
+  suggested-id: waste-development-statement
+- local-name: Mineral Safeguarding Statement
+  source-text: 'From the audit: inside a Mineral Safeguarding Area or near mineral infrastructure'
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/A-to-Z-Planning-Guide-Latest-update-17-July-2017.pdf
+  suggested-id: minerals-safeguarding-statement
+- local-name: Waste Management Facility Safeguarding Statement
+  source-text: 'From the audit: listed on Checklist 1; trigger in the A to Z Guide'
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/A-to-Z-Planning-Guide-Latest-update-17-July-2017.pdf
+  suggested-id: waste-safeguarding-statement
+- local-name: Drainage strategy (SuDS)
+  source-text: 'From the audit: drainage strategy for all major development'
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/A-to-Z-Planning-Guide-Latest-update-17-July-2017.pdf
+  suggested-id: drainage-strategy
+- local-name: Economic Statement
+  source-text: 'From the audit: significant investment or job creation/loss'
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/A-to-Z-Planning-Guide-Latest-update-17-July-2017.pdf
+  suggested-id: economic-statement
+- local-name: Foul Sewage and Utilities Assessment
+  source-text: 'From the audit: listed on Checklist 1; trigger in the A to Z Guide'
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/A-to-Z-Planning-Guide-Latest-update-17-July-2017.pdf
+  suggested-id: foul-sewage-assessment
+- local-name: Planning Obligations Heads of Terms
+  source-text: 'From the audit: listed on Checklist 1; trigger in the A to Z Guide'
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/A-to-Z-Planning-Guide-Latest-update-17-July-2017.pdf
+  suggested-id: heads-of-terms
+- local-name: Structural Survey
+  source-text: 'From the audit: substantial demolition or conversion (also on Checklist 3, demolition
+    prior notification)'
+  source-url: https://www.staffordshire.gov.uk/sites/default/files/2026-03/A-to-Z-Planning-Guide-Latest-update-17-July-2017.pdf
+  suggested-id: structural-survey
+new-fields:
+- field: loss-of-habitat-features
+  kind: boolean
+  label: Loss of trees, hedges, ponds or ditches
+  description: The proposal involves the loss of trees, removal of a hedge, or filling in a natural pond
+    or ditch.

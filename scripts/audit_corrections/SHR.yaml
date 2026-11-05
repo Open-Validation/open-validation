@@ -1,0 +1,459 @@
+# Corrections for Shropshire Council, from the council's audit.
+# The link is the current 2022 Shropshire validation checklist (the cover gives only the year; the
+# build takes '2022' from the audit). It has 24 application-type checklists, each with national
+# requirements and 'Local Validation Requirements ... may also be required, where applicable'.
+# Grokbot ignored the checklists and filed everything under Full planning. The application types
+# below follow the checklists as the audit lists them (1-2 householder, 4 full, 5-6 outline, 10 LBC,
+# 11 advertisement, 12-13 lawful development, 19 reserved matters, 20 s73, 23 non-material
+# amendment); because the list says local items are needed 'where applicable', most are officer
+# discretion within those types. The prior notification checklists (14-16, 18) and the mineral
+# working checklist (22) are only summarised by the audit. Items marked "From the audit" use the
+# audit's paraphrase.
+local-authority: SHR
+
+submission-standards:
+  - item: All documents and attachments saved in PDF format before submission
+    level: should
+  - item: Drawings clearly titled (e.g. existing front elevation, proposed site plan), and file names
+      accurately reflect the content
+    level: should
+
+drop:
+  - id: design-and-access-statement
+    reason: "wrong_trigger: boilerplate; the checklist lists it among the national requirements ('where
+      applicable')"
+  - id: floor-plan-existing
+    reason: "wrong_trigger: boilerplate ('Local Validation Requirements In addition to the National...');
+      national plans only"
+  - id: floor-plan-proposed
+    reason: "wrong_trigger: as above"
+  - id: elevation-existing
+    reason: "wrong_trigger: as above"
+  - id: elevation-proposed
+    reason: "wrong_trigger: as above"
+
+drop-unmapped:
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_app_type: a national advertisement consent requirement, and the excerpt is boilerplate"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: boilerplate"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advice to seek pre-application advice on ecology"
+
+requirements:
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 10
+                description: Open-market schemes of 10 or more houses in market towns and key centres.
+            - all:
+                - site:
+                    in: [designated-rural-area]
+                    description: The site is in a designated rural area.
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 5
+                    description: Open-market schemes of 5 or more houses.
+    source-url: &list https://next.shropshire.gov.uk/media/xsnj0cye/validation-checklist-2022.pdf
+    must-include:
+      - item: Affordable Housing S106 pro-forma
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): open-market schemes of 10+ houses in market towns/key
+      centres, 5+ in designated rural areas (checklists 4, 5, 6 and 19)."
+
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters, s73]
+        - any:
+            - site:
+                in: [air-quality-management-area]
+                description: Adverse impact in a declared Air Quality Management Area.
+            - discretionary
+    source-url: *list
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt ended at a page number. From the audit: adverse impact in a
+      declared AQMA, or sensitive development near pollution sources (shown as officer discretion);
+      listed in checklists 5, 6, 19 and 20.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, reserved-matters, ldc-prospective-use]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: There are trees or hedges on or near the site that could be affected.
+    must-include:
+      - item: Arboricultural Method Statement, for operations within or affecting the canopy spread or root
+          protection area of retained trees and hedges
+        level: should
+        source-text: >-
+          Arboricultural Method Statement A Method Statement may be required for any operations (
+          including demolition, site clearance and levelling, installation of utilities and
+          construction activities) proposed within or that could affect, the canopy spread or root
+          protection area of retained trees and hedges.
+    confidence: medium
+    notes: "Audit (wrong_app_type): Tree Survey/AIA/TPP/AMS is listed in the householder, full, outline,
+      reserved matters and proposed lawful development checklists."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, reserved-matters, lbc, ldc-prospective-use, s73]
+        - discretionary
+    confidence: medium
+    notes: "Audit (wrong_app_type): Ecological Assessment and Protected Species Surveys are listed in checklists
+      1, 4, 5, 6, 10, 13, 19 and 20, 'where applicable'."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    source-url: *list
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt is a definition with no Schedule 1/2 threshold. Listed in the
+      outline and reserved matters checklists."
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building of 18 metres or more.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building of 7 or more storeys.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 2
+            description: The building contains two or more dwellings.
+    confidence: medium
+    notes: "'for schemes involving a relevant high-rise residential building' (18m or 7+ storeys with 2+
+      dwellings)."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3 (including minor development).
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare in Flood Zone 1.
+    source-url: *list
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt was boilerplate. The drainage note requires an FRA 'in flood
+      zone 2 or 3 including minor development' or over 1 ha in Flood Zone 1."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [hh, demolition-con-area, full, outline, reserved-matters, s73]
+        - any:
+            - site:
+                in: [contaminated-land, near-landfill-site]
+                description: The site is or may be contaminated, or is within 250m of a former landfill.
+            - discretionary
+    source-url: *list
+    must-include:
+      - item: Landfill gas risk assessment
+        level: must
+        required-if:
+          site:
+            in: [near-landfill-site]
+            description: The site is within 250m of a former landfill.
+    confidence: medium
+    notes: "From the audit (missing_requirement): listed in checklists 2, 4, 5, 6, 19 and 20, including
+      landfill gas risk within 250m of a former landfill."
+
+  - id: landscaping-plan
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - discretionary
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): Landscape Assessment and Landscaping Proposals in the full,
+      outline and reserved matters checklists."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: floodlighting
+            value: true
+            description: Floodlighting proposals, particularly for sports grounds or near residential buildings.
+        - condition:
+            field: illuminated
+            value: true
+            description: The advertisement is illuminated.
+        - discretionary
+    confidence: medium
+    notes: "Audit (wrong_app_type): also a lighting assessment for illuminated advertisements (checklist 11),
+      and listed in the outline and reserved matters checklists."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters, s73]
+        - discretionary
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): listed in checklists 4, 5, 6, 19 and 20 without a trigger."
+
+  - id: photos
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [hh, demolition-con-area, full, outline, reserved-matters, lbc, advertising, ldc-existing-use]
+        - discretionary
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): photographs/photomontages in checklists 2, 4, 5, 6, 10, 11,
+      12 and 19."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [demolition-con-area, full, outline, reserved-matters, lbc, ldc-prospective-use]
+        - discretionary
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): listed in checklists 2 (householder with demolition in a
+      conservation area), 4, 5, 6, 10, 13 and 19."
+
+  - id: roof-plan-existing
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full]
+        - discretionary
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (wrong_app_type, missing_requirement): roof plans in the householder and full
+      checklists."
+
+  - id: roof-plan-proposed
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full]
+        - discretionary
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (wrong_app_type, missing_requirement): roof plans in the householder and full
+      checklists."
+
+  - id: schedule-of-works
+    action: replace
+    required-if:
+      application-type:
+        in: [lbc]
+    source-url: *list
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the Arboricultural Method Statement (now a must-include
+      item under arboriculturist-report). From the audit: listed building consent (checklist 10)."
+
+  - id: sci
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - discretionary
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): Statement of Community Involvement in checklists 4, 5, 6
+      and 19."
+
+  - id: section-existing
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full]
+        - discretionary
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt is a fragment. Cross Sectional Drawings are listed in the
+      householder and full checklists."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full]
+        - discretionary
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt is a fragment. Cross Sectional Drawings are listed in the
+      householder and full checklists."
+
+  - id: site-plan
+    action: replace
+    required-if:
+      application-type:
+        in: [s73, non-material-amendment]
+    source-url: *list
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was contact boilerplate. From the audit: a
+      location/block plan is a local requirement for s73 (checklist 20) and non-material amendments (23)."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Retail development outside existing town centres.
+    confidence: medium
+    notes: "'Proposals for major retail development outside existing town centres'."
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      ref: major-development
+    confidence: medium
+    notes: "'will be required for all major development'."
+
+  - id: travel-plan
+    action: replace
+    required-if: discretionary
+    source-url: *list
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the Structural Survey text. From the audit:
+      medium-to-large developments other than private housing."
+
+  - id: viability-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - discretionary
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): Financial Viability Assessment in checklists 4, 5, 6 and 19."
+
+  - id: waste-management-plan
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - discretionary
+    confidence: medium
+    notes: "Site Waste Management Plan; the excerpt says all new housing developments must accommodate waste
+      and recycling collection. Listed in the outline and reserved matters checklists."
+
+unmapped:
+  - local-name: River Clun information checklist
+    source-text: "From the audit: completed River Clun information checklist, in the River Clun catchment
+      (householder, full, outline, reserved matters, LBC and s73 checklists)"
+    source-url: *list
+    suggested-id: nutrient-neutrality-statement
+  - local-name: Coal Mining Assessment
+    source-text: "From the audit: in relevant areas (householder, full, outline and reserved matters
+      checklists)"
+    source-url: *list
+    suggested-id: ground-stability-assessment
+  - local-name: NPPF Sequential and Exception Tests
+    source-text: "From the audit: in relevant areas (householder, full, outline and reserved matters
+      checklists)"
+    source-url: *list
+    suggested-id: flood-sequential-exception-test
+  - local-name: Drainage Assessment / Surface Water Management
+    source-text: "From the audit: a Drainage Assessment (householder, full, outline, reserved matters) and
+      Surface Water Management for major development"
+    source-url: *list
+    suggested-id: drainage-strategy
+  - local-name: Housing Statement
+    source-text: "From the audit: listed in the full, outline and reserved matters checklists"
+    source-url: *list
+    suggested-id: housing-mix-statement
+  - local-name: Odour Assessment
+    source-text: "From the audit: listed in the full, outline and reserved matters checklists"
+    source-url: *list
+    suggested-id: odour-assessment
+  - local-name: Visual Impact Assessment
+    source-text: "From the audit: listed in the full, outline and reserved matters checklists"
+    source-url: *list
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Marketing Report
+    source-text: "From the audit: listed in the full, outline and reserved matters checklists"
+    source-url: *list
+    suggested-id: marketing-evidence
+  - local-name: Business Plan
+    source-text: "From the audit: listed in the full, outline and reserved matters checklists"
+    source-url: *list
+    suggested-id: business-plan
+  - local-name: Method of Demolition Statement
+    source-text: "From the audit: householder with demolition in a conservation area, and demolition in a
+      conservation area (checklists 2 and 7)"
+    source-url: *list
+    suggested-id: demolition-method-statement
+  - local-name: Detailed plans (listed building consent)
+    source-text: "From the audit: detailed plans at not less than 1:20 (checklist 10)"
+    source-url: *list
+    suggested-id: joinery-details
+  - local-name: Structural Survey (listed building consent)
+    source-text: "From the audit: listed in the listed building consent checklist (10)"
+    source-url: *list
+    suggested-id: structural-survey
+  - local-name: Sworn affidavits and existing plans (lawful development, existing)
+    source-text: "From the audit: sworn affidavits, existing plans/site survey and photos (checklist 12)"
+    source-url: *list
+    suggested-id: lawful-development-evidence
+  - local-name: Mineral working requirements
+    source-text: "From the audit: Blasting Assessment, Dust Assessment, Land Stability, Soil Handling Strategy,
+      Reclamation/Aftercare plans, Working plan, hydrogeology assessment (checklist 22)"
+    source-url: *list
+    suggested-id: minerals-waste-statement
