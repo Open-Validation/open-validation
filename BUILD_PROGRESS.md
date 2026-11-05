@@ -11,13 +11,13 @@ Working branch: `ccr-f743743a-pji9c0` (the session's designated branch, used ins
   - MHCLG spec read at commit `a3519413aa2a550471ae08af986e80b861c7c2d5` (clone into `vendor/mhclg-spec`)
   - Council codes from MHCLG's organisation register, saved in `data/organisation.csv` by
     `scripts/update_register.py` (tries planning.data.gov.uk, falls back to MHCLG's GitHub;
-    planning.data.gov.uk is blocked from the build machine). Monthly check: `.github/workflows/register.yml`
+    planning.data.gov.uk is blocked from the build machine). Monthly check: `.github/workflows/register.yml` fails on ANY change and opens a `register-change` issue mentioning @Open-Validation (email alert)
   - 328 English councils matched (`scripts/lpa_match.csv`: 326 exact, 2 by normalised name)
   - 328 folders with `_lpa.yaml`, `data/lpa.csv`, `FORMAT.md`, `review.py`, `set_status.py`,
     `apply_reviews.py`, `check.py`, workflows, README
   - [x] Checkpoint 1 approved: branch OK; national parks use short codes (BROADS, DNPA, ... YDNPA)
     instead of MHCLG's Wikidata ids (ids kept in lpa_match.csv `organisation`)
-  - [ ] Licence still to confirm (MIT code + CC BY 4.0 data in place)
+  - [x] Licence: MIT code + CC BY 4.0 data (confirmed); build_lpas.py kept as a separate script
 - [ ] **B. Fill in every council's requirements** (`build_from_workbook.py`)
   - [ ] Checkpoint 2: SHR and CMD
   - [ ] Checkpoint 3: one region, then all regions (one commit per region)

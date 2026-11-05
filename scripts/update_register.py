@@ -2,8 +2,7 @@
 
 Run:  python scripts/update_register.py           (download, show changes, save)
       python scripts/update_register.py --check   (download and show changes; save nothing.
-                                                   Fails if a change affects our councils or
-                                                   adds a planning authority. Runs monthly in
+                                                   Fails if anything changed at all. Runs monthly in
                                                    GitHub Actions: .github/workflows/register.yml)
 
 Our copy is data/organisation.csv: one row per English planning authority
@@ -148,6 +147,7 @@ def compare(old, new):
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--check", action="store_true", help="only report changes; fail if there are any")
+    p.add_argument("--report", help="also write the list of changes to this file (used by the workflow)")
     a = p.parse_args()
 
     new = sorted(download(), key=lambda r: r["code"])
@@ -161,14 +161,15 @@ def main():
         print("No changes: our copy of the register is up to date.")
         return
     affecting = sum(1 for hit, _ in changes if hit)
-    print(f"\n{len(changes)} change(s) in MHCLG's register ({affecting} affect our councils):")
-    for _, text in changes:
-        print("  -", text)
+    lines = [f"{len(changes)} change(s) in MHCLG's register ({affecting} affect our councils):", ""]
+    lines += [f"- {text}" for _, text in changes]
+    print("\n" + "\n".join(lines))
+    if a.report:
+        with open(a.report, "w", encoding="utf-8") as f:
+            f.write("\n".join(lines) + "\n")
     if a.check:
-        if not affecting:
-            print("\nNone of these affect our councils, so the check passes. "
-                  "Run python scripts/update_register.py to save them anyway.")
-            return
+        # Any change at all (merger, rename, new body, new code) fails the check,
+        # so the workflow opens an issue and you get an email.
         print("\nNothing saved (--check). To update: python scripts/update_register.py, "
               "then python scripts/build_lpas.py")
         sys.exit(1)

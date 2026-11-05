@@ -117,7 +117,7 @@ Install once: `pip install -r requirements.txt`. Then, from the repo root:
 | `python scripts/check.py` | Checks everything and prints a summary (also runs on every push) |
 | `python scripts/set_status.py ...` | Marks cells; `--recompute` refreshes every status |
 | `python scripts/apply_reviews.py` | Applies marks waiting in `reviews/pending/` |
-| `python scripts/update_register.py` | Checks MHCLG's register of planning authorities for new, abolished or renamed councils and updates `data/organisation.csv` (runs monthly as a check) |
+| `python scripts/update_register.py` | Checks MHCLG's register of planning authorities for new, abolished or renamed councils and updates `data/organisation.csv` (runs monthly; opens an issue if anything changed) |
 | `python scripts/build_lpas.py` | Matches workbook councils to MHCLG codes; creates folders, `_lpa.yaml`, `lpa.csv` |
 | `python scripts/build_from_workbook.py` | Builds requirement files from the workbook + audit |
 | `python scripts/build_map.py` | Builds `docs/map/uk-lpa.geojson` from the boundary files |
@@ -136,7 +136,9 @@ To read MHCLG's spec locally: `git clone https://github.com/digital-land/plannin
 - **Council codes**: MHCLG's organisation register, saved in `data/organisation.csv` by
   `scripts/update_register.py` (from planning.data.gov.uk, or MHCLG's
   [organisation-collection](https://github.com/digital-land/organisation-collection) repo if that's
-  unreachable). A GitHub Action checks it monthly and fails if a change affects our councils.
+  unreachable). A GitHub Action checks it on the 3rd of each month. If anything changed (a
+  merger, a rename, a new body, a new code) or the check couldn't run, it opens an issue labelled
+  `register-change` that mentions the repo owner, so you get an email.
 
 ## Out of scope for now
 
