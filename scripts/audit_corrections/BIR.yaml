@@ -1,0 +1,579 @@
+# Corrections for Birmingham City Council, from the council's audit.
+# Birmingham's local list is 'Local Information Requirements for Planning Applications'. The council
+# pages now link file 24677, which the audit could not read; the copy Grokbot and the audit read
+# (id 7362, local_validation_criteria_2021.pdf) is dated December 2021. Grokbot read the
+# type-specific checklists instead, including combined ones, so planning-only items landed under
+# Listed building consent (from the Full + LBC checklist), Advertisement consent (from the Full +
+# adverts checklist) and Change of use prior approval (from the telecoms prior notification
+# checklist), and several triggers were swapped (fire/flood, flood sequential/retail). Rules below
+# follow the list's own triggers with no application type unless the list names one.
+local-authority: BIR
+
+validation-list:
+  date: 2021-12
+  date-basis: >-
+    audit: the local list read (id 7362) is headed 'Local Information Requirements for Planning
+    Applications, December 2021'; the current file 24677 could not be read, so its date is unconfirmed
+
+submission-standards:
+  - item: The scale annotated on each plan
+    level: must
+  - item: Drawings preferably on paper smaller than A2
+    level: should
+  - item: Existing and proposed drawings at a similar scale to aid comparison
+    level: should
+
+drop:
+  - id: air-quality-assessment
+    sheets: [Listed building consent, Advertisement consent]
+    reason: "wrong_app_type: from the combined Full + LBC and Full + adverts checklists; a planning-only item"
+  - id: design-and-access-statement
+    sheets: [Advertisement consent]
+    reason: "wrong_app_type: from the combined Full + adverts checklist"
+  - id: daylight-sunlight-assessment
+    sheets: [Householder, Listed building consent]
+    reason: "wrong_app_type: the trigger concerns new dwellings, not householder or LBC works"
+  - id: floor-plan-existing
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: from the telecoms prior notification checklist, not change-of-use prior approval"
+  - id: floor-plan-proposed
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: as above"
+  - id: elevation-existing
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: as above"
+  - id: elevation-proposed
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: as above"
+
+drop-unmapped:
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: the excerpt is the retail impact text, nothing about flood"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "wrong_trigger: landscaping and land contamination text"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advice to contact the Environment Agency"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: the excerpt is the Financial Viability Assessment and Fire Assessment text"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: a fragment of the site plan contents ('site including access arrangements;')"
+  - local-name: Advertisement drawings / illumination details
+    reason: >-
+      wrong_trigger / wrong_app_type: run-on text under most types ('method of illumination All
+      applications for major development'); re-added below once
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "duplicate: fragments in several rows; re-added below once with the full trigger"
+  - local-name: Structural Survey
+    reason: "wrong_trigger: several rows start with Site Waste Strategy text; re-added below once"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 15
+        description: 15 or more dwellings are proposed.
+    source-text: Affordable Housing Statement When 15 or more dwellings are proposed.
+    source-url: https://www.birmingham.gov.uk/download/downloads/id/1080/application_for_full_planning_permission_checklist.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): a planning-only item, wrongly listed under LBC and advertisement consent."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: The application involves works that may affect trees on or adjacent to the site.
+    source-text: >-
+      Tree Survey/Arboricultural Statement All planning applications where the application involves
+      works that may affect any trees on or adjacent to the site.
+    source-url: https://www.birmingham.gov.uk/download/downloads/id/1080/application_for_full_planning_permission_checklist.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the householder excerpt was telecoms text."
+
+  - id: condition-of-trees
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [consent-under-tpo]
+        - discretionary
+    source-text: provide written arboricultural advice from an appropriate expert.
+    source-url: https://www.birmingham.gov.uk/download/downloads/id/4692/application_for_tree_works_checklist.pdf
+    confidence: low
+    notes: "From the tree works checklist (the workbook mapped it to a tree survey). The excerpt is cut off, so the trigger is shown as officer discretion."
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: new-build
+                value: true
+                description: The development includes a new building.
+            - condition:
+                field: ground-disturbance
+                value: true
+                description: The development includes ground disturbance.
+        - site:
+            in: [archaeological-priority-area]
+            description: On or adjoining a heritage asset of archaeological interest.
+    source-text: >-
+      Archaeological Assessment When any proposed development includes new building or ground
+      disturbance on or adjoining a heritage asset of archaeological interest (regardless of the need
+      for a Design and Access Statement).
+    source-url: https://www.birmingham.gov.uk/download/downloads/id/1080/application_for_full_planning_permission_checklist.pdf
+    confidence: medium
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [site-of-special-scientific-interest, local-wildlife-site]
+            description: In or adjacent to a designated site of national or local importance (SSSI, NNR,
+              LNR …).
+        - condition:
+            field: protected-species
+            value: true
+            description: Likely to affect protected species and other important species.
+    source-text: >-
+      Biodiversity and Geological Survey and Report Applications in or adjacent to designated sites of
+      national or local importance (Site of Special Scientific Interest [SSSI], National Nature Reserve
+      [NNR], Local Nature Re… to affect protected species and other important species.
+    source-url: https://www.birmingham.gov.uk/download/downloads/id/4689/application_for_outline_planning_permission_with_all_matters_reserved_checklist.pdf
+    confidence: medium
+    notes: "The trigger was split across the workbook's DAS and ecology rows."
+
+  - id: site-plan
+    action: replace
+    required-if:
+      condition:
+        field: building-works
+        value: true
+        description: Operational development is taking place.
+    source-text: >-
+      Site Plan (Only required if operational development is taking place) ☐ All applications must be
+      submitted with a site plan (sometimes called a block plan) which should: Be at a scale of 1:500
+      or 1:200; and
+    source-url: https://www.birmingham.gov.uk/download/downloads/id/1080/application_for_full_planning_permission_checklist.pdf
+    must-include:
+      - item: Scale of 1:500 or 1:200, annotated on the plan
+        level: must
+      - item: The direction of North
+        level: must
+      - item: The development in relation to adjoining properties
+        level: must
+    confidence: medium
+    notes: >-
+      The local list says all applications except non-material amendments and discharge of
+      conditions; the checklists add 'only required if operational development is taking place'.
+
+  - id: cil-form
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 100
+            description: Over 100 square metres of new floorspace or change of use.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: A new dwelling.
+    source-text: CIL Additional Information Form ... >100 sqm new floorspace ... new dwelling
+    source-url: https://www.birmingham.gov.uk/downloads/file/24677/local_information_requirements_for_planning_applications
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement): it applies to full and outline applications and prior approvals,
+      not only householder and LBC as the workbook had it.
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      ref: major-development
+    source-url: https://www.birmingham.gov.uk/downloads/file/24677/local_information_requirements_for_planning_applications
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Sustainable Construction Statement for all major
+      development. The workbook's row here was the Energy Statement (now energy-statement).
+
+  - id: energy-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-text: Energy Statement All planning applications for major development.
+    source-url: https://www.birmingham.gov.uk/download/downloads/id/1080/application_for_full_planning_permission_checklist.pdf
+    confidence: medium
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development requires an EIA.
+    source-text: Where development requires an EIA.
+    source-url: https://www.birmingham.gov.uk/download/downloads/id/4689/application_for_outline_planning_permission_with_all_matters_reserved_checklist.pdf
+    confidence: medium
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-text: Fire Assessment Applications involving the provision of one or more relevant
+      buildings, or;
+    source-url: https://www.birmingham.gov.uk/download/downloads/id/1080/application_for_full_planning_permission_checklist.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook carried the Flood Risk Assessment text. The list covers
+      relevant buildings (18m+ or 7+ storeys), works to them, development within their curtilage and
+      change of use; the last three can't be expressed separately.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: All new development, including minor development and change of use, in flood
+              zones 2 and 3.
+        - discretionary
+    source-text: >-
+      A site specific flood risk assessment will be required for all new development (including minor
+      development and change of use) in: flood zones 2 and 3; or
+    source-url: https://www.birmingham.gov.uk/download/downloads/id/1080/application_for_full_planning_permission_checklist.pdf
+    confidence: medium
+    notes: "The excerpt is cut off after 'or'; the remaining cases are shown as officer discretion."
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: Full elevations showing all sides of the development, even if they contain no window or
+          door openings
+        level: must
+      - item: A typical scale of 1:50 or 1:100, annotated on the plan
+        level: should
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, park-and-garden, conservation-area]
+            description: The development affects a designated heritage asset (listed building,
+              registered park or conservation area).
+    source-text: >-
+      Heritage Statement All Planning Applications where the development affects a designated heritage
+      asset (listed building, registered park or conservation area).
+    source-url: https://www.birmingham.gov.uk/download/downloads/id/1080/application_for_full_planning_permission_checklist.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): the list ties listed building consent mainly to the Heritage Statement, Structural Survey, Photographs and Planning Statement."
+
+  - id: landscaping-plan
+    action: update
+    required-if: discretionary
+    confidence: low
+    notes: "'The proposed landscaping scheme' is listed among additional plans and drawings 'if required'; the excerpts are fragments."
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: external-lighting
+                value: true
+                description: External lighting, including lighting for a publicly accessible
+                  development.
+            - condition:
+                field: floodlighting
+                value: true
+                description: Floodlighting.
+        - any:
+            - site:
+                in: [listed-building-setting, conservation-area, local-wildlife-site]
+                description: In the vicinity of a listed building, conservation area or site of nature
+                  conservation importance.
+            - discretionary
+    source-text: >-
+      Lighting Assessment Proposals for external lighting including floodlighting and lighting in
+      connection with a publicly accessible development or proposals in the vicinity of a residential
+      property, listed building, conservation area, a site of nature conservat…
+    source-url: https://www.birmingham.gov.uk/download/downloads/id/4691/application_for_reserved_matters_following_an_outline_approval_checklist.pdf
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement): also applies to full applications. The vicinity of residential
+      property is shown as officer discretion.
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: food-or-drink-use
+            value: true
+            description: Change of use to A3, A4 or A5 (food and drink).
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Conversion of buildings to residential use, or new residential development.
+        - discretionary
+    source-text: >-
+      The following developments should include a noise impact assessment / noise mitigation scheme
+      for the impact of noise on nearby residential uses: (i) change of use to A3, A4, A5 (ii)
+      conversion of buildings to residential use (iii) new residential development…
+    source-url: https://www.birmingham.gov.uk/download/downloads/id/1080/application_for_full_planning_permission_checklist.pdf
+    confidence: medium
+    notes: >-
+      The list is cut off after (iii). The householder checklist says a householder scheme 'may
+      require a noise impact assessment', particularly for a habitable room (officer discretion).
+
+  - id: recreation-facilities-assessment
+    action: replace
+    required-if:
+      condition:
+        field: loss-of-open-space
+        value: true
+        description: Loss of open space, playing fields, sports and recreation facilities, bowling
+          greens or allotments.
+    source-text: >-
+      Open Space / Playing Fields / Sports and Physical Facilities Assessment Development involving the
+      loss of open space, playing fields, sports and recreation facilities, bowling greens,
+      allotments, etc.
+    source-url: https://www.birmingham.gov.uk/download/downloads/id/4689/application_for_outline_planning_permission_with_all_matters_reserved_checklist.pdf
+    confidence: medium
+
+  - id: photos
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [consent-under-tpo, notice-trees-in-con-area, lbc]
+        - condition:
+            field: telecommunications-development
+            value: true
+            description: Telecommunications development (photographs and photomontages).
+    source-text: >-
+      Works to Trees – Specification of Works and Photographic Evidence Where works are required to a
+      protected tree (Tree Perseveration Order or tree in Conservation Area) and are not included in a
+      planning application.
+    source-url: https://www.birmingham.gov.uk/download/downloads/id/4692/application_for_tree_works_checklist.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the full planning row quoted the works-to-trees text and the householder
+      row the parking text. Photographs are tied to listed building consent in the local list, and
+      the telecoms checklist lists photographs and photomontages; dated photographs are also accepted
+      as lawful development evidence.
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+    source-text: >-
+      Planning Statement including Statement of Community Involvement All major applications, major
+      change of use applications or listed building applications.
+    source-url: https://www.birmingham.gov.uk/download/downloads/id/4691/application_for_reserved_matters_following_an_outline_approval_checklist.pdf
+    confidence: medium
+    notes: "'Major change of use' is covered by the major-development rule."
+
+  - id: sci
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+    source-text: >-
+      Planning Statement including Statement of Community Involvement All major applications, major
+      change of use applications or listed building applications.
+    source-url: https://www.birmingham.gov.uk/download/downloads/id/4691/application_for_reserved_matters_following_an_outline_approval_checklist.pdf
+    confidence: medium
+
+  - id: telecommunications-report
+    action: replace
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Prior approval and full planning applications for telecommunications development.
+    source-url: https://www.birmingham.gov.uk/download/downloads/id/4697/prior_notification_of_telecommunications_code_systems_operators_checklist.pdf
+    must-include:
+      - item: For masts within 3km of Birmingham International Airport, evidence of consultation with
+          the airport
+        level: must
+        source-text: All applications for masts within 3km of Birmingham International Airport must
+          provide evidence of consultation with Birmingham International Airport.
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, wrong_trigger): telecoms items were placed under householder, LBC,
+      advertisement consent and change-of-use prior approval.
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Retail, leisure or office development outside the hierarchy of centres in the
+              BDP.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 2500
+            description: Greater than 2,500 square metres.
+    source-text: >-
+      An impact assessment is required for retail, leisure and office development proposals greater
+      than 2,500sqm which are outside of the hierarchy of centres identified in the BDP and not in
+      accordance with the Local Plan
+    source-url: https://www.birmingham.gov.uk/download/downloads/id/1080/application_for_full_planning_permission_checklist.pdf
+    confidence: medium
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      ref: major-development
+    source-text: Transport Assessment and Statements (including Travel Plans) All major applications.
+    source-url: https://www.birmingham.gov.uk/download/downloads/id/1080/application_for_full_planning_permission_checklist.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's trigger was circular ('Where the development requires a Transport Assessment')."
+  - id: travel-plan
+    action: replace
+    required-if:
+      ref: major-development
+    source-text: Transport Assessment and Statements (including Travel Plans) All major applications.
+    source-url: https://www.birmingham.gov.uk/download/downloads/id/1080/application_for_full_planning_permission_checklist.pdf
+    confidence: medium
+
+  - id: viability-assessment
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      Financial Viability Assessment Where an applicant is proposing that they cannot provide the full
+      range of Section 106 requirements (including affordable housing), due to financial viability
+      issues.
+    source-url: https://www.birmingham.gov.uk/download/downloads/id/1080/application_for_full_planning_permission_checklist.pdf
+    confidence: medium
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: Development vulnerable to the effects of contamination (residential housing,
+              schools and preschool nurseries).
+        - site:
+            in: [contaminated-land]
+            description: The site is known, or suspected, to have been contaminated.
+    source-text: >-
+      Land Contamination Assessment All developments vulnerable to the effects of contamination
+      (residential housing, schools and preschool nurseries) or where the site is known, or suspected
+      to, have been contaminated.
+    source-url: https://www.birmingham.gov.uk/download/downloads/id/4691/application_for_reserved_matters_following_an_outline_approval_checklist.pdf
+    confidence: medium
+
+unmapped:
+  - local-name: Advertisement drawings (cross-section)
+    source-text: Cross-section – for advertisement applications clearly showing method of illumination
+    source-url: https://www.birmingham.gov.uk/download/downloads/id/1080/application_for_full_planning_permission_checklist.pdf
+    suggested-id: advert-drawings
+  - local-name: Residential Standards Statement (NDSS, Part M4(2) and outdoor amenity)
+    source-text: >-
+      Residential Standards Statement (NDSS, Part M4(2) and outdoor amenity) All developments creating
+      new dwellings including changes of use and conversions.
+    source-url: https://www.birmingham.gov.uk/download/downloads/id/4691/application_for_reserved_matters_following_an_outline_approval_checklist.pdf
+    suggested-id: residential-standards-statement
+  - local-name: Structural Survey
+    source-text: >-
+      Structural Survey A structural survey will be required, but not limited to the following: i) The
+      demolition of a listed building(s), ii) The conversion of a listed building(s) iii) Conversion of
+      rural buildings
+    source-url: https://www.birmingham.gov.uk/download/downloads/id/4691/application_for_reserved_matters_following_an_outline_approval_checklist.pdf
+    suggested-id: structural-survey
+  - local-name: Site Waste Strategy
+    source-text: Site Waste Strategy Applications for sites over 5ha.
+    source-url: https://www.birmingham.gov.uk/download/downloads/id/1080/application_for_full_planning_permission_checklist.pdf
+    suggested-id: waste-management-plan
+  - local-name: Parking Management Plan / Strategy
+    source-text: All applications where parking is proposed.
+    source-url: https://www.birmingham.gov.uk/download/downloads/id/4689/application_for_outline_planning_permission_with_all_matters_reserved_checklist.pdf
+    suggested-id: parking-plan
+  - local-name: Aerodrome Safeguarding Assessment
+    source-text: >-
+      From the audit: buildings or structures over 90m, or affecting protected surfaces, navigation
+      aids or bird hazard
+    source-url: https://www.birmingham.gov.uk/downloads/file/24677/local_information_requirements_for_planning_applications
+    suggested-id: aviation-impact-assessment
+  - local-name: Coal Mining Risk Assessment
+    source-text: >-
+      From the audit: full (not change of use), outline or minerals applications within a Coal Mining
+      Referral Area
+    source-url: https://www.birmingham.gov.uk/downloads/file/24677/local_information_requirements_for_planning_applications
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Health Impact Assessment
+    source-text: "From the audit: all applications requiring EIA"
+    source-url: https://www.birmingham.gov.uk/downloads/file/24677/local_information_requirements_for_planning_applications
+    suggested-id: health-impact-assessment
+  - local-name: Mineral Deposits Investigation
+    source-text: "From the audit: sites over 5ha"
+    source-url: https://www.birmingham.gov.uk/downloads/file/24677/local_information_requirements_for_planning_applications
+    suggested-id: mineral-resource-assessment
+  - local-name: Places of worship and faith-related community use information
+    source-text: "From the audit: all such applications"
+    source-url: https://www.birmingham.gov.uk/downloads/file/24677/local_information_requirements_for_planning_applications
+    suggested-id: ""
+  - local-name: Student Accommodation Statement and Management Plan
+    source-text: "From the audit: off-campus student accommodation, or conversions of over 1,000 sqm"
+    source-url: https://www.birmingham.gov.uk/downloads/file/24677/local_information_requirements_for_planning_applications
+    suggested-id: student-housing-management-plan
+
+low-confidence:
+  - id: air-quality-assessment
+    note: "Audit (wrong_trigger): the excerpts are cut off ('are proposed. ☐ Air Quality Assessment'); no trigger is given."
+  - id: design-and-access-statement
+    note: "Audit (wrong_trigger): the excerpt is cut off ('Required only for'); the national rules apply."
+  - id: daylight-sunlight-assessment
+    note: >-
+      Audit (wrong_trigger): the full planning excerpt is the tail of the guidance run into the Energy
+      Statement; the checklists suggest it concerns new dwellings, but no clear trigger was captured.
+  - id: section-existing
+    note: "Audit (wrong_trigger): the excerpt is run-on text about advert cross-sections and major development."
+  - id: section-proposed
+    note: "Audit (wrong_trigger): the excerpt is run-on text about advert cross-sections and major development."
+  - id: schedule-of-works
+    note: "The workbook guessed the type; the excerpt ('should include a schedule of works to the heritage asset(s)') reads like heritage statement content."

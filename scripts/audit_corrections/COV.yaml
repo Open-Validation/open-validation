@@ -1,0 +1,255 @@
+# Corrections for Coventry City Council, from the audit of Coventry.
+# The audit could not read the list (validation-checklist-17-3-25), so contents were not checked; a
+# council 'LVLconsultation' page may lead to a newer list. This file drops the clearly misfiled rows,
+# fixes the types the workbook got wrong (prior approval) and structures the triggers the excerpts
+# state plainly. Most items are site- or proposal-based and apply to every application type that meets
+# them.
+local-authority: COV
+
+validation-list:
+  date: 2025-03-17
+  date-basis: "URL slug 'validation-checklist-17-3-25'; the audit couldn't read the document to confirm it"
+
+submission-standards:
+  - item: Elevation and section drawings at a scale of 1:50 or 1:100, with a title, drawing number and scale
+      bar
+    level: should
+  - item: Documents over 10MB split into smaller files
+    level: should
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is the tree AIA/AMS text"
+
+drop-unmapped:
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: the excerpt is the 6.5 flue and ventilation text, duplicated under Ventilation"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 25
+            description: 25 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: The site is more than 1 hectare.
+    must-include:
+      - item: The number and mix of residential units and the affordable housing provision within the
+          development
+        level: must
+    confidence: medium
+
+  - id: air-quality-assessment
+    action: replace
+    required-if: discretionary
+    source-text: "5.1 Air Quality Assessment All applications where there may be relevant exposure to pollutant
+      concentrations above statutory limits (EU or UK) Where the development meets DfT threshold criteria for
+      Transport Assessment"
+    source-url: https://www.coventry.gov.uk/downloads/file/44597/validation-checklist-17-3-25
+    confidence: low
+    notes: "Audit (wrong_app_type, other): the workbook also placed a row under prior approval, but it means
+      planning applications for change of use. The PDF and the council's web page give different triggers
+      (the web page: new build, conversion or change of use affecting the air quality action plan or local
+      air quality); which is current isn't known, so it is shown as officer discretion."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: demolition
+            value: true
+            description: Minor residential development that includes demolition.
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Minor residential development that affects roof space.
+        - condition:
+            field: protected-species
+            value: true
+            description: The proposal is likely to impact on bats, a European protected species.
+    confidence: medium
+    notes: "This is item 5.6 Bat Survey (a bat scoping survey, with further surveys depending on the
+      findings). It applies to householder and other types too (audit wrong_app_type)."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: All applications unless an exemption applies.
+    confidence: medium
+
+  - id: construction-management-plan
+    action: update
+    required-if:
+      condition:
+        field: demolition
+        value: true
+        description: The proposal involves demolition.
+    confidence: low
+    notes: "Audit (wrong_trigger): the excerpt is demolition-only text (CEMP, bat scoping report, method of
+      demolition, hoardings and how the land will be left); other CMP triggers weren't captured."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    confidence: medium
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, conservation-area]
+            description: The application affects a listed building or is in a Conservation Area.
+    source-text: "4.2 Heritage Statement Applications affecting a listed building or in a Conservation Area;
+      listed building consent applications Heritage statement: A document that describes the significance
+      of any heritage assets affected, including any contribution made by their setting."
+    source-url: https://www.coventry.gov.uk/downloads/file/44597/validation-checklist-17-3-25
+    must-include:
+      - item: The significance of any heritage assets affected, including any contribution made by their
+          setting
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type, missing_requirement): the workbook placed it under Listed building consent
+      only."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: floodlighting
+        value: true
+        description: The proposal includes floodlighting.
+    policy: Coventry Local Plan 2017 DE1 and GE3
+    must-include:
+      - item: Hours of operation
+        level: must
+      - item: Light levels and off-site light spillage
+        level: must
+      - item: Column heights and equipment design
+        level: must
+      - item: Layout plan with beam orientations
+        level: must
+      - item: Details of any mitigation measures required
+        level: must
+    confidence: medium
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      condition:
+        field: loss-of-open-space
+        value: true
+        description: The proposal involves the loss of playing fields.
+    must-include:
+      - item: Full details of the existing playing fields and associated facilities to be lost
+        level: must
+      - item: The reason for the proposed location of the development
+        level: must
+      - item: Any proposed changes in sports provision on the site
+        level: must
+    confidence: low
+    notes: "The excerpt gives the content needed where playing fields are lost; the item's full trigger
+      wasn't captured."
+
+  - id: site-plan
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: building-works
+            value: true
+            description: Built development.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: A change of use.
+    source-text: "2.1 Block/site plan All planning applications for built development or change of use;"
+    source-url: https://www.coventry.gov.uk/downloads/file/44597/validation-checklist-17-3-25
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook placed it under prior approval; the trigger is planning
+      applications for built development or change of use."
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Telecommunications development.
+    must-include:
+      - item: An ICNIRP certificate
+        level: must
+      - item: Detailed justification for the proposed siting of the development
+        level: must
+    confidence: medium
+
+  - id: transport-assessment
+    action: replace
+    source-url: https://www.coventry.gov.uk/downloads/file/44597/validation-checklist-17-3-25
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook excerpt was the Air Quality report text; the list refers to DfT
+      threshold criteria for a Transport Assessment, but its own trigger wasn't captured."
+
+  - id: waste-management-plan
+    action: update
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 1
+        description: Residential development (including changes of use) that will have an impact on the
+          generation of waste.
+    must-include:
+      - item: The location of bin storage
+        level: must
+      - item: The size of bins
+        level: must
+      - item: The design and materials of any proposed bin enclosure
+        level: must
+    confidence: medium
+
+low-confidence:
+  - id: section-existing
+    note: "Audit (wrong_trigger): the excerpt is tree root protection area text."
+  - id: section-proposed
+    note: "Audit (wrong_trigger): the excerpt is tree root protection area text."
+  - id: floor-plan-existing
+    note: "Audit (wrong_trigger): the excerpt is external wall insulation text."
+  - id: floor-plan-proposed
+    note: "Audit (wrong_trigger): the excerpt is external wall insulation text."
+  - id: elevation-existing
+    note: "Audit (wrong_trigger): the excerpt is external wall insulation text. The list also asks for
+      elevations for lawful development certificates where relevant."
+  - id: elevation-proposed
+    note: "Audit (wrong_trigger): the excerpt is external wall insulation text."
+  - id: photos
+    note: "Audit (wrong_trigger): the excerpt is external wall insulation text."
+  - id: flood-risk-assessment
+    note: "Audit (wrong_trigger): the excerpt is cut off ('appropriate to the scale and nature of the'), with
+      no flood-zone or site-size condition."
+  - id: fire-statement
+    note: "Audit (wrong_trigger): the excerpt is mostly gov.uk URL fragments and doesn't state the 18m /
+      7-storey threshold."
+  - id: travel-plan
+    note: "Audit (wrong_trigger): only the first threshold was captured ('A1 food retail up between 250-800
+      sq.m'), using the old A1 use class."
+  - id: noise-assessment
+    note: "Audit (wrong_trigger): the excerpt gives no trigger ('must be prepared by a qualified
+      acoustician')."

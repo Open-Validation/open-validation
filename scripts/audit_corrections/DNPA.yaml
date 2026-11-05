@@ -1,0 +1,516 @@
+# Corrections for Dartmoor National Park Authority, from inputs/audit/dartmoor-national-park-authority.json.
+# A national park authority with its own Local Validation Checklist. The audit read the November
+# 2025 checklist (effective 7 November 2025). Grokbot read an 'Updated-21-10-26' revision behind
+# bot-blocking, which the audit could not open; whether it is newer is unclear. Items marked
+# "From the audit" use the audit's paraphrase.
+local-authority: DNPA
+
+validation-list:
+  date: 2025-11
+  date-basis: >-
+    audit: cover date November 2025; the 'New Local Validation Checklist 2025' page says it takes
+    effect on 7 November 2025. Grokbot's link ('Updated-21-10-26') may be a later revision that
+    could not be checked.
+
+submission-standards:
+  - item: All drawings and documents referenced with their full, clear and detailed title and drawing number
+    level: should
+
+drop:
+  - id: floor-plan-existing
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: the Prior Notification checklist asks only for fee, form and a scaled site plan"
+  - id: floor-plan-proposed
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: as above"
+  - id: elevation-existing
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: as above"
+  - id: elevation-proposed
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: as above"
+
+drop-unmapped:
+  - local-name: Validation checklist form (completed)
+    reason: "duplicate: repeats the Dartmoor Householder Wildlife Checklist row"
+  - local-name: Character / Conservation area appraisal reference
+    reason: "wrong_trigger: the excerpt is BNG text"
+  - local-name: Drainage Strategy / SuDS
+    reason: "duplicate / wrong_trigger: quotes the Foul Drainage Assessment text; SuDS strategy re-added below"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: a block plan fragment"
+  - local-name: Pre-application advice / engagement details
+    reason: "wrong_trigger: quotes the LVIA text"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: fragment ('flood risk Sequential Test can be satisfied.')"
+  - local-name: Structural Survey
+    reason: "wrong_trigger: fragment ('engineer or structural engineer is required.')"
+  - local-name: Minerals / Waste specific statements (county matters)
+    reason: "the Waste Audit Statement, now in waste-management-plan"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_app_type / wrong_trigger: the Noise Impact Assessment trigger, now in noise-assessment"
+
+requirements:
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - site:
+            in: [contaminated-land]
+            description: On or adjacent to potentially contaminated land, including land previously used for
+              waste disposal or quarrying.
+    source-text: >-
+      Contaminated Land Assessment When required: development (except Householder development) on or
+      adjacent to potentially contaminated land, including land which has previously been used for:
+      waste disposal/quarrying
+    source-url: &dnpa-url https://www.dartmoor.gov.uk/__data/assets/pdf_file/0026/571805/2025-Local-Validation-Checklist-final.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): the workbook put this under Householder, which the list excludes. The
+      rule can't say "not householder", so it lists full, outline and reserved matters.
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - condition:
+            field: external-lighting
+            value: true
+            description: Schemes incorporating external lighting.
+    source-text: >-
+      Lighting Assessment/ Plan When required: all schemes incorporating external lighting (except
+      Householder applications) What is required: The Lighting Assessment must be undertaken by a
+      suitably qualified and competent person
+    source-url: *dnpa-url
+    must-include:
+      - item: Undertaken by a suitably qualified and competent person
+        level: must
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): the workbook put this under Householder, which the list excludes. The
+      rule can't say "not householder", so it lists full, outline and reserved matters.
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - site:
+            in: [air-quality-management-area]
+            description: Within 1km of an Air Quality Management Area (Dean Prior, Ivybridge).
+    must-include:
+      - item: Prepared by a suitably qualified assessor
+        level: must
+    confidence: medium
+    notes: "The excerpt states the trigger. It applies to outline and reserved matters too, not only full."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: All development, excluding statutory exemptions.
+    must-include:
+      - item: For on-site BNG, a completed metric showing the post-development biodiversity value of the
+          on-site habitat
+        level: must
+      - item: For on-site BNG, a site plan showing indicative habitat detail
+        level: must
+    confidence: medium
+    notes: "The excerpt states the trigger; the items are from the council's BNG text."
+
+  - id: site-plan
+    action: update
+    required-if:
+      always: true
+    must-include:
+      - item: Scale 1:200 or 1:500
+        level: must
+      - item: Both existing and proposed block plans
+        level: must
+      - item: Site area matching the red line on the Site Location Plan
+        level: must
+      - item: The location of the development and its relationship to other buildings and boundaries on or
+          adjoining the site
+        level: must
+      - item: Any buildings to be demolished
+        level: must
+      - item: Any drainage works
+        level: must
+    confidence: medium
+    notes: "'When required: all development proposals'."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc, reserved-matters]
+        - discretionary
+    source-url: *dnpa-url
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type, missing_requirement): the workbook quoted a 'You may also
+      need to submit' list. From the audit: mandatory for Full (major), Reserved Matters and Listed
+      Building Consent; conditional for Full (minor).
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if: discretionary
+    source-text: Ecology Surveys (see Dartmoor Wildlife Trigger Table)
+    source-url: *dnpa-url
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted hedgerow and accessible-dwellings text. Ecology
+      surveys are needed where the Dartmoor Wildlife Trigger Table says so.
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      application-type:
+        in: [hh, full, outline, reserved-matters]
+    source-url: *dnpa-url
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Carbon Reduction Statement, new in 2025, 'When required:
+      all planning applications', including Householder, Outline and Reserved Matters.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: Schedule 1 or Schedule 2 development likely to have a significant effect on the environment.
+    confidence: medium
+
+  - id: section-proposed
+    action: update
+    must-include: &dnpa-levels
+      - item: Ground levels either side of any structure where a change of level is proposed
+        level: must
+      - item: Existing and proposed finished floor and/or ground levels, with a datum point
+        level: should
+    notes: &dnpa-levels-note "The excerpt lists contents; the trigger was not captured."
+
+  - id: section-existing
+    action: update
+    must-include: *dnpa-levels
+    notes: *dnpa-levels-note
+
+  - id: flood-risk-assessment
+    action: update
+    must-include:
+      - item: Carried out by a suitably qualified person in accordance with Planning Practice Guidance
+        level: must
+    confidence: low
+    notes: >-
+      The excerpt's trigger is cut off; the cases shown include sites the SFRA shows at increased risk
+      during the development's lifetime, and proposals that increase the vulnerability
+      classification and are at risk of surface water flooding.
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      ref: major-development
+    source-text: >-
+      Waste Audit Statement When required: all major development What is required: The statement
+      should demonstrate how through the demolition, construction and building phases of development,
+      waste has been minimised and that it will be managed in accordance with the waste hierarchy.
+    source-url: *dnpa-url
+    must-include:
+      - item: How waste has been minimised through the demolition, construction and building phases
+        level: should
+      - item: How waste will be managed in accordance with the waste hierarchy
+        level: should
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's row here quoted equestrian development text."
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Noise generating development (industrial uses, restaurants, cafes, pubs, external
+              heating, ventilation, air-conditioning and refrigeration) near existing noise sensitive
+              development.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise sensitive uses (dwellings, schools) next to existing noise generating uses.
+        - application-type:
+            in: [mineral-app]
+        - discretionary
+    confidence: medium
+    notes: >-
+      The excerpt states the triggers. Energy generation (including wind turbines) and noise
+      generating development in isolated locations are shown as officer discretion.
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [outline, reserved-matters]
+    source-url: *dnpa-url
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the workbook quoted a 'You may also need to submit'
+      list. From the audit: mandatory for Outline and Reserved Matters, and on the Full (major) list.
+
+  - id: telecommunications-report
+    action: replace
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Telecommunications development.
+    source-url: *dnpa-url
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted LVIA text. From the audit: a Telecommunications
+      Statement is listed; its trigger was not given.
+
+  - id: transport-assessment
+    action: update
+    required-if: &dnpa-transport
+      any:
+        - ref: major-development
+        - discretionary
+    confidence: medium
+    notes: &dnpa-transport-note >-
+      'A Transport Statement and Travel Plan is required for: all major applications which are likely
+      to introduce new trips on the surrounding highway'. The cases for a full Transport Assessment
+      were cut off and are shown as officer discretion.
+
+  - id: travel-plan
+    action: update
+    required-if: *dnpa-transport
+    confidence: medium
+    notes: *dnpa-transport-note
+
+  - id: floor-plan-existing
+    action: update
+    required-if: &dnpa-floor
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New or replacement buildings.
+        - condition:
+            field: footprint-increase
+            value: true
+            description: Extended buildings.
+        - application-type:
+            in: [lbc]
+        - condition:
+            field: external-alterations
+            value: true
+            description: Changes to existing layouts which affect external appearance.
+        - all:
+            - condition:
+                field: involves-change-of-use
+                value: true
+                description: Change of use of existing buildings.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: To dwellings.
+    must-include: &dnpa-floor-items
+      - item: Scale 1:50 or 1:100
+        level: must
+      - item: The direction of north
+        level: must
+      - item: The whole building
+        level: must
+    confidence: medium
+    notes: &dnpa-floor-note >-
+      The excerpt states the triggers; for listed building consent, where works are proposed to the
+      internal layout or extend the floor space.
+
+  - id: floor-plan-proposed
+    action: update
+    required-if: *dnpa-floor
+    must-include: *dnpa-floor-items
+    confidence: medium
+    notes: *dnpa-floor-note
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, demolition-con-area]
+        - site:
+            in: [listed-building, conservation-area, scheduled-monument, park-and-garden,
+              archaeological-priority-area, locally-listed-building]
+            description: Within the curtilage of a listed building, in a conservation area, or affecting a
+              scheduled monument, registered park and garden, archaeological site or non-designated
+              heritage asset.
+    source-text: >-
+      Statement Of Heritage Significance When required: applications for Listed Building consent
+      applications within the curtilage of a Listed Building applications in Conservation Areas
+      (including demolition) applications affecting Scheduled Monuments applications affecting a
+      Registered Park and Garden applications affecting an archaeological site applications affecting
+      non-designated heritage assets, such as those identified on the Historic Environment Record (HER)
+    source-url: *dnpa-url
+    confidence: medium
+    notes: "The excerpt states the triggers (cut off after the HER case). Not only listed building consent."
+
+  - id: schedule-of-works
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: Conversion of a non-residential building to an alternative use.
+    must-include:
+      - item: The extent of works, including repair, demolition, rebuilding or building, needed to
+          accommodate the proposal
+        level: must
+    confidence: medium
+    notes: "The excerpt states the triggers."
+
+  - id: archaeological-assessment
+    action: update
+    required-if: discretionary
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): the workbook put this under advertisement consent, but the text is the
+      tail of the listed building consent 'may also need' list. No trigger was captured.
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: 18m or more in height.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: 7 storeys or more.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: 2 or more dwellings (including flats).
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: Educational accommodation.
+    confidence: medium
+    notes: >-
+      The excerpt states the trigger (a national requirement). Audit (wrong_app_type): not a prior
+      approval requirement.
+
+  - id: roof-plan-existing
+    action: add
+    required-if: &dnpa-roof
+      condition:
+        field: roof-alteration
+        value: true
+        description: Development involving new roofs or roof alterations.
+    source-url: *dnpa-url
+    confidence: medium
+    notes: &dnpa-roof-note "From the audit (missing_requirement): Roof Plan (existing and proposed)."
+
+  - id: roof-plan-proposed
+    action: add
+    required-if: *dnpa-roof
+    source-url: *dnpa-url
+    confidence: medium
+    notes: *dnpa-roof-note
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      condition:
+        field: town-centre-use-floorspace
+        operator: ">="
+        value: 150
+        description: Main town centre uses of 150 square metres or more.
+    source-url: *dnpa-url
+    confidence: medium
+    notes: "From the audit (missing_requirement): Town Centre Sequential Test and Impact Assessment."
+
+unmapped:
+  - local-name: Dartmoor Wildlife Trigger Table
+    source-text: "From the audit: mandatory for Householder, Full (major and minor), Outline and Listed
+      Building Consent; for s73 where relevant"
+    source-url: &dnpa-u https://www.dartmoor.gov.uk/__data/assets/pdf_file/0026/571805/2025-Local-Validation-Checklist-final.pdf
+    suggested-id: biodiversity-checklist
+  - local-name: Sustainable Drainage Strategy
+    source-text: "all planning applications which could affect drainage on or around the site"
+    source-url: *dnpa-u
+    suggested-id: drainage-strategy
+  - local-name: Equestrian Development Information
+    source-text: "grazing and waste management regime how all buildings/land will be used and any required
+      lighting how soils, Dartmoor’s priority habitats and water quality will be protected, and
+      preferably enhanced how buildings and structures will be removed when redundant"
+    source-url: *dnpa-u
+    suggested-id: ""
+  - local-name: Habitable Floorspace Calculation
+    source-text: "From the audit: any increase in habitable floorspace, and replacement dwellings"
+    source-url: *dnpa-u
+    suggested-id: ""
+  - local-name: Evidence for Replacement Homes
+    source-text: "From the audit: wholescale replacement of a dwelling"
+    source-url: *dnpa-u
+    suggested-id: ""
+  - local-name: Housing Needs Assessment
+    source-text: "development of 6 houses or more within Local Centres ... 4 homes or more within Rural
+      Settlements, Villages and Hamlets"
+    source-url: *dnpa-u
+    suggested-id: housing-needs-survey
+  - local-name: Low Impact Residential Development Evidence
+    source-text: "From the audit: proposals under policy 3.12"
+    source-url: *dnpa-u
+    suggested-id: ""
+  - local-name: Agriculture or Forestry Business Plan
+    source-text: "From the audit: new agricultural buildings, and diversification schemes"
+    source-url: *dnpa-u
+    suggested-id: agricultural-appraisal
+  - local-name: Renewable and Low Carbon Energy
+    source-text: "From the audit: proposals incorporating renewables"
+    source-url: *dnpa-u
+    suggested-id: ""
+  - local-name: Simple Calculation of Atmospheric Impact Levels (SCAIL)
+    source-text: "From the audit: listed in the checklist; no trigger given"
+    source-url: *dnpa-u
+    suggested-id: ""
+  - local-name: Energy Efficiency Report
+    source-text: "From the audit: listed in the checklist; no trigger given"
+    source-url: *dnpa-u
+    suggested-id: ""
+  - local-name: Hedgerow Removal Notice checklist
+    source-text: "Other Plans to indicate extent of hedgerow to be removed Evidence that the hedgerow is less
+      than 30 years old"
+    source-url: *dnpa-u
+    suggested-id: ""
+
+low-confidence:
+  - id: arboriculturist-report
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('such as arboriculturist, drainage engineer or structural engineer is required.')."
+  - id: elevation-existing
+    note: "The excerpt is the floor plan trigger; the elevation trigger was not captured."
+  - id: elevation-proposed
+    note: "The excerpt is the floor plan trigger; the elevation trigger was not captured."

@@ -1,0 +1,427 @@
+# Corrections for Hinckley and Bosworth Borough Council, from inputs/audit/hinckley-and-bosworth-borough-council.json.
+# The council's only published list is file 6017 (document text dated March 2018, final version
+# published January 2019, reviewed January 2021 with no changes). Grokbot missed the whole
+# householder section (section 2) and about 20 other numbered local items, and many excerpts are
+# scrambled table headers. Section 8 items apply to 'all types of development' by trigger, so the
+# rules below give no application type unless the list names one.
+local-authority: HIN
+
+validation-list:
+  date: 2019-01
+  date-basis: "audit: council page says the final version was published January 2019 (document text
+    March 2018; reviewed 11 January 2021 with no changes)"
+
+submission-standards:
+  - item: Plans proportionate to the nature and size of the proposal, titled and numbered
+      identifying revisions, and annotated with dimensions and a scale bar
+    level: should
+
+drop:
+  - id: sci
+    reason: "wrong_trigger: heading text; the list's SCI applies only to wind turbine installations
+      (moved to unmapped)"
+
+drop-unmapped:
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "duplicate: the same scrambled header as the ecology row"
+  - local-name: Employment / Economic Statement
+    reason: "not_a_requirement: policy-reference text; the list's item is 8t Marketing information"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: national location plan text"
+  - local-name: Structural Survey
+    reason: "wrong_trigger: heading text; re-added below with the list's trigger"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 15
+            description: 15 dwellings or more within the urban areas of Hinckley, Burbage, Barwell
+              and Earl Shilton.
+        - all:
+            - site:
+                in: [rural-area]
+                description: The site is in the rural area.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 11
+                description: 11 or more dwellings in rural areas.
+    source-text: >-
+      5a Affordable housing statement … If your proposal is for 15 dwellings or more within the
+      urban areas or Hinckley, Burbage, Barwell and Earl Shilton … 11 or more dwellings in rural
+      areas
+    source-url: https://www.hinckley-bosworth.gov.uk/download/downloads/id/6017/validation_requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt dropped the rural threshold."
+
+  - id: air-quality-assessment
+    action: update
+    required-if: discretionary
+    source-text: >-
+      8b Air quality assessment If your proposal could have a significant impact on air quality,
+      either directly or indirectly … You must submit an air quality assessment.
+    confidence: medium
+
+  - id: arboriculturist-report
+    action: update
+    must-include:
+      - item: A tree survey, in line with BS5837:2012
+        level: must
+      - item: A tree constraints plan
+        level: must
+      - item: An arboricultural implications assessment
+        level: must
+      - item: An arboricultural method statement including a tree protection plan
+        level: must
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is listed under Schedule 1 or Schedule 2 of the EIA Regulations
+          2017.
+    source-text: >-
+      8d Environment impact assessment … Required for developments that: are listed under Schedule
+      1 and Schedule 2 of the Town and Country planning (Environmental Impact Assessment)
+      Regulations 2017.
+    confidence: medium
+    notes: "Audit (not_a_requirement): statutory, not a local item."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The development is in Flood Zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is one hectare or greater in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is one hectare or greater in Flood Zone 1.
+    source-text: >-
+      8e Flood risk assessment (FRA) … Planning applications for development proposals of one
+      hectare or greater in Flood Zone 1 and all development proposals located in Flood Zones 2
+      and 3 should be accompanied by a Flood Risk Assessment.
+    confidence: medium
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building-setting]
+            description: The application impacts on the setting of a listed building.
+    source-text: >-
+      7a Heritage statement Types of application and when required All listed building consent
+      applications and applications which impact on the setting of listed buildings.
+    confidence: medium
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: Redevelopment or significant change of use of land which could potentially be
+          contaminated as a result of current or historic use.
+    source-text: >-
+      8c Contaminated land assessment … If your proposal is to re-develop or significantly change
+      the use of a piece of land which could potentially be contaminated as a result of current or
+      historic use
+    confidence: medium
+
+  - id: landscaping-plan
+    action: update
+    must-include:
+      - item: Clearly differentiates between retained existing trees and those proposed, and does
+          not include trees to be removed
+        level: must
+    confidence: low
+    notes: "The excerpt gives contents only; the trigger isn't captured."
+
+  - id: lighting-assessment
+    action: add
+    source-url: https://www.hinckley-bosworth.gov.uk/download/downloads/id/6017/validation_requirements.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): 8g light impact assessment; the audit gives no trigger."
+
+  - id: noise-assessment
+    action: add
+    source-url: https://www.hinckley-bosworth.gov.uk/download/downloads/id/6017/validation_requirements.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): 8h noise impact assessment; the audit gives no trigger."
+
+  - id: photos
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [demolition-con-area]
+        - all:
+            - site:
+                in: [listed-building]
+                description: The works affect a listed building.
+            - condition:
+                field: demolition
+                value: true
+                description: The proposal involves demolition.
+    source-url: https://www.hinckley-bosworth.gov.uk/download/downloads/id/6017/validation_requirements.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): 7b photographs for demolition in a conservation area or
+      of a listed building. The workbook's excerpt ran materials-sample text into the ventilation
+      item.
+
+  - id: planning-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.hinckley-bosworth.gov.uk/download/downloads/id/6017/validation_requirements.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): 8i planning statement, all major development."
+
+  - id: roof-plan-existing
+    action: replace
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The proposal alters the roof layout.
+    source-url: https://www.hinckley-bosworth.gov.uk/download/downloads/id/6017/validation_requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): filed under Advertisement consent; item 3e applies to alterations to
+      the roof layout."
+
+  - id: roof-plan-proposed
+    action: replace
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The proposal alters the roof layout.
+    source-url: https://www.hinckley-bosworth.gov.uk/download/downloads/id/6017/validation_requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): filed under Advertisement consent; item 3e applies to alterations to
+      the roof layout."
+
+  - id: schedule-of-works
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [lbc]
+        - any:
+            - condition:
+                field: structural-alteration
+                value: true
+                description: Structural alteration of a listed building.
+            - condition:
+                field: demolition
+                value: true
+                description: Demolition of a listed building.
+    source-url: https://www.hinckley-bosworth.gov.uk/download/downloads/id/6017/validation_requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook quoted tree text under Full planning; item 7f applies to
+      structural alteration or demolition of a listed building."
+
+  - id: section-existing
+    action: replace
+    source-text: >-
+      Existing and proposed sections … They should show clearly the proposed works in relation to
+      what is already there, highlighting any structures to be demolished, and the relationship to
+      neighbouring buildings.
+    source-url: https://www.hinckley-bosworth.gov.uk/download/downloads/id/6017/validation_requirements.pdf
+    must-include:
+      - item: The proposed works in relation to what is already there, any structures to be
+          demolished, and the relationship to neighbouring buildings
+        level: should
+    confidence: low
+    notes: "The workbook filed this under Advertisement consent; the trigger is scrambled with the roof
+      plan heading and isn't captured."
+
+  - id: section-proposed
+    action: replace
+    source-text: >-
+      Existing and proposed sections … They should show clearly the proposed works in relation to
+      what is already there, highlighting any structures to be demolished, and the relationship to
+      neighbouring buildings.
+    source-url: https://www.hinckley-bosworth.gov.uk/download/downloads/id/6017/validation_requirements.pdf
+    must-include:
+      - item: The proposed works in relation to what is already there, any structures to be
+          demolished, and the relationship to neighbouring buildings
+        level: should
+    confidence: low
+    notes: "The workbook filed this under Advertisement consent; the trigger is scrambled with the roof
+      plan heading and isn't captured."
+
+  - id: site-plan
+    action: update
+    required-if:
+      always: true
+    must-include:
+      - item: An identified standard metric scale (1:500 or 1:200)
+        level: must
+    confidence: medium
+    notes: "Items 2a (householder) and 3a (all other applications): 'Types of application and when
+      required All'."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 2500
+            description: Main town centre uses development over 2,500 square metres gross floor
+              space.
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Main town centre uses outside a centre.
+    source-text: >-
+      8n Retail impact assessment … Retail impact assessment are required for all main town centre
+      uses development over 2,500 square metres gross floor space
+    must-include:
+      - item: Retail impact assessment
+        level: must
+        required-if:
+          condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 2500
+            description: Over 2,500 square metres gross floor space.
+      - item: Sequential test
+        level: must
+        required-if:
+          condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Main town centre uses outside a centre.
+    confidence: medium
+    notes: "From the audit (missing_requirement): 8o sequential test for main town centre uses outside a
+      centre."
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    source-text: 8l 8m Transport statement or transport assessment and travel plan Thresholds are
+      identified in the Leicestershire Highways Design Guide.
+    confidence: medium
+    notes: "The thresholds are in the Leicestershire Highways Design Guide, not the list. Audit
+      (duplicate): one combined item with the travel plan."
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    source-text: 8l 8m Transport statement or transport assessment and travel plan Thresholds are
+      identified in the Leicestershire Highways Design Guide.
+    confidence: medium
+    notes: "The thresholds are in the Leicestershire Highways Design Guide, not the list. Audit
+      (duplicate): one combined item with the transport assessment."
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: Residential development.
+        - ref: major-development
+        - condition:
+            field: food-or-drink-use
+            value: true
+            description: A3, A4 or A5 uses (restaurants and cafes, drinking establishments, hot food
+              takeaways).
+    source-url: https://www.hinckley-bosworth.gov.uk/download/downloads/id/6017/validation_requirements.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): 8m site waste management plan (residential, major,
+      A3-A5)."
+
+unmapped:
+  - local-name: Structural survey
+    source-text: "From the audit: conversion of rural buildings, or listed buildings where works involve
+      demolition or affect structural integrity"
+    source-url: https://www.hinckley-bosworth.gov.uk/download/downloads/id/6017/validation_requirements.pdf
+    suggested-id: structural-survey
+  - local-name: Statement of community involvement (wind turbines)
+    source-text: "From the audit: wind installations of more than two turbines or hub height over 15 m (8j)"
+    source-url: https://www.hinckley-bosworth.gov.uk/download/downloads/id/6017/validation_requirements.pdf
+    suggested-id: sci
+  - local-name: Detailed drawings (householder roof works and window/door replacement)
+    source-text: "From the audit: 2d detailed drawings for roof extensions, roof terraces, dormers and
+      window/door replacement"
+    source-url: https://www.hinckley-bosworth.gov.uk/download/downloads/id/6017/validation_requirements.pdf
+    suggested-id: joinery-details
+  - local-name: Parking plan
+    source-text: "From the audit: 2e all householder applications; 3g increase or reduction in on-site
+      parking"
+    source-url: https://www.hinckley-bosworth.gov.uk/download/downloads/id/6017/validation_requirements.pdf
+    suggested-id: parking-plan
+  - local-name: Hardstanding details
+    source-text: "From the audit: 2f/3j where hard standing is laid"
+    source-url: https://www.hinckley-bosworth.gov.uk/download/downloads/id/6017/validation_requirements.pdf
+    suggested-id: hardstanding-details
+  - local-name: Floor space / accommodation schedule
+    source-text: "From the audit: 3h major development"
+    source-url: https://www.hinckley-bosworth.gov.uk/download/downloads/id/6017/validation_requirements.pdf
+    suggested-id: accommodation-schedule
+  - local-name: Bin stores / recycling
+    source-text: "From the audit: 3i new development needing bin storage"
+    source-url: https://www.hinckley-bosworth.gov.uk/download/downloads/id/6017/validation_requirements.pdf
+    suggested-id: waste-management-plan
+  - local-name: Retail shop fronts
+    source-text: "From the audit: 4a retail shop fronts"
+    source-url: https://www.hinckley-bosworth.gov.uk/download/downloads/id/6017/validation_requirements.pdf
+    suggested-id: shopfront-details
+  - local-name: Plant, flues, ventilation or air conditioning (retail/business premises)
+    source-text: "From the audit: 4b plant, flues, ventilation or air conditioning at retail/business premises"
+    source-url: https://www.hinckley-bosworth.gov.uk/download/downloads/id/6017/validation_requirements.pdf
+    suggested-id: plant-details
+  - local-name: Street scene
+    source-text: "From the audit: 5b all new-build residential"
+    source-url: https://www.hinckley-bosworth.gov.uk/download/downloads/id/6017/validation_requirements.pdf
+    suggested-id: street-scene
+  - local-name: Character analysis and appraisal
+    source-text: "From the audit: 5c new-build residential; 6c non-residential new buildings"
+    source-url: https://www.hinckley-bosworth.gov.uk/download/downloads/id/6017/validation_requirements.pdf
+    suggested-id: character-appraisal
+  - local-name: Samples of materials
+    source-text: "From the audit: 5d/6a/7c samples of materials"
+    source-url: https://www.hinckley-bosworth.gov.uk/download/downloads/id/6017/validation_requirements.pdf
+    suggested-id: materials-samples
+  - local-name: Statement of justification (listed building)
+    source-text: "From the audit: 7e substantial harm or total loss of a listed building"
+    source-url: https://www.hinckley-bosworth.gov.uk/download/downloads/id/6017/validation_requirements.pdf
+    suggested-id: heritage-statement
+  - local-name: Application-specific drawings (adverts, NMA, LBC, LDC, s73, outline)
+    source-text: "From the audit: 4c-4i application-specific drawings for adverts, NMA, LBC, LDCs, s73 and
+      outline"
+    source-url: https://www.hinckley-bosworth.gov.uk/download/downloads/id/6017/validation_requirements.pdf
+    suggested-id: ""
+
+low-confidence:
+  - id: archaeological-assessment
+    note: "Audit (wrong_trigger): the excerpt is scrambled table text; the trigger can't be read."
+  - id: biodiversity-survey-report
+    note: "Audit (wrong_trigger): the excerpt is a scrambled table header; no trigger is captured."
+  - id: arboriculturist-report
+    note: "The excerpt lists contents only; the trigger isn't captured (section 8 items apply by trigger)."
+  - id: design-and-access-statement
+    note: "Audit (not_a_requirement): the excerpt is guidance text; the DAS is a national requirement."
