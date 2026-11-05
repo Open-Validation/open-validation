@@ -1,0 +1,655 @@
+# Corrections for Stroud District Council, from inputs/audit/stroud-district-council.json.
+# Stroud's local list is a set of 20 application-type checklists on its 'Validation checklists'
+# page, most titled 'Updated 23.05.2025' (the build uses that page and date). Grokbot's link is one
+# of them, the combined 'Full Planning Permission and Advertisement Consent' checklist, and its
+# Householder, LBC and Advertisement rows came from combined checklists (Householder + LBC,
+# Full + LBC, Full + Advert), so full-planning items were filed under adverts and LBC.
+# The audit's reading of the standalone checklists:
+#   Full / Outline / Reserved matters: the Local Requirement List (affordable housing ... SWMP).
+#   Householder: Archaeological Assessment, Biodiversity Survey, CIL, Daylight/Sunlight, Flood
+#     Risk Assessment, Heritage Statement, Tree Survey.
+#   Listed building consent: Archaeological Assessment, Biodiversity Survey, Other plans (1:20
+#     joinery details), Photographs, Structural Survey (plus a Heritage Statement with a full
+#     schedule of works and a DAS).
+#   Advertisement consent: Heritage Statement, Lighting Assessment, Other plans.
+# Neither Grokbot nor the audit read the Discharge of Conditions, Non Material Amendment and Tree
+# checklists. Below, "full, outline and reserved matters" stands for the Full/Outline/RM checklists.
+local-authority: STO
+
+drop:
+  - id: floor-plan-existing
+    sheets: [Advertisement consent]
+    reason: "wrong_app_type: from the combined Full + Advert checklist; the standalone advert checklist asks for advert drawings instead"
+  - id: floor-plan-proposed
+    sheets: [Advertisement consent]
+    reason: "wrong_app_type: as above"
+  - id: roof-plan-existing
+    sheets: [Advertisement consent]
+    reason: "wrong_app_type: as above"
+  - id: roof-plan-proposed
+    sheets: [Advertisement consent]
+    reason: "wrong_app_type: as above"
+
+drop-unmapped:
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "duplicate: quotes the CIL Form 1/Form 2 sentence; the S106 item is re-added below"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "duplicate: part of the Noise Impact Assessment item (now in its must-include)"
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_trigger: a fragment; the advert drawing details are now in elevation-proposed"
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "wrong_trigger: a fragment ('architectural features Streetscene'); re-added below as Other plans"
+  - local-name: Structural Survey
+    reason: "wrong_app_type: from combined checklists (the Householder checklist has none; the prior approval row is a fragment); re-added below for LBC"
+  - local-name: Landscape and Visual Impact Assessment
+    reason: "wrong_trigger: omits the Cotswolds AONB / National Landscape trigger; re-added below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - discretionary
+    policy: Stroud District Local Plan CP9
+    source-text: >-
+      Affordable Housing Statement Required where a proposal should include the provision of
+      affordable housing under Stroud District Local Plan (SDLP) Policy CP9: Number, mix and tenure
+      of units Gross internal floor area per unit in m2
+    source-url: https://www.stroud.gov.uk/media/ij3g4c0x/local-validation-checklist-full-planning-permission-and-advertisement-consent-updated-23052025.pdf
+    must-include:
+      - item: Number, mix and tenure of units
+        level: must
+      - item: Gross internal floor area per unit in m2
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): not an advert or LBC requirement. The policy CP9 threshold is not in the checklist, so it is shown as officer discretion."
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      application-type:
+        in: [full, outline, reserved-matters]
+    source-url: https://www.stroud.gov.uk/media/ij3g4c0x/local-validation-checklist-full-planning-permission-and-advertisement-consent-updated-23052025.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): on the Full/Outline/RM Local Requirement List with no trigger stated."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, reserved-matters]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Development (including hard surfaces, compounds, utilities, excavations or
+              level changes) within 15m of a TPO tree or a tree in a conservation area, or within
+              10m of any other tree 5m or more tall or with a trunk diameter of 250mm or more.
+    source-text: >-
+      Tree Survey Required for any development (including the provision of hard surfaces, site
+      construction compound areas, utilities, excavations or changes in ground levels) that would
+      be within 15m of any tree protected by a Tree Preservation Order or in a Conservation Area
+      be within 10m of any other tree that is 5m or over in height or has a trunk diameter of 250mm
+      or more Tree surveys must be written in accordance with the guidance in British Standard 5837
+    source-url: https://www.stroud.gov.uk/media/ij3g4c0x/local-validation-checklist-full-planning-permission-and-advertisement-consent-updated-23052025.pdf
+    must-include:
+      - item: Written in accordance with BS 5837 'Trees in relation to design, demolition and
+          construction'
+        level: must
+    confidence: medium
+    notes: "Audit (missing_requirement, wrong_app_type): also on the Householder checklist; not on the LBC or advert checklists."
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh, lbc, full, outline, reserved-matters]
+        - site:
+            in: [archaeological-priority-area]
+            description: On or adjoining a heritage asset of archaeological importance.
+        - condition:
+            field: ground-disturbance
+            value: true
+            description: The development includes new buildings or ground disturbance.
+    source-text: >-
+      Archaeological Assessment For developments that includes new buildings or ground disturbance
+      on or adjoining a heritage asset of archaeological importance.
+    source-url: https://www.stroud.gov.uk/media/ewtmz2o4/local-validation-checklist-householder-and-listed-building-consent-updated-23052025.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement): also on the Full and Outline checklists."
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [hh, lbc, full, outline, reserved-matters, prior-approval]
+        - any:
+            - site:
+                in: [site-of-special-scientific-interest, special-area-of-conservation,
+                  special-protection-area, local-wildlife-site, priority-habitat]
+                description: The proposal (including offsite works) affects designated sites or
+                  priority habitats.
+            - condition:
+                field: protected-species
+                value: true
+                description: The proposal affects other biodiversity features, species protected
+                  by law or priority species.
+    source-text: >-
+      Biodiversity Survey You should submit a biodiversity survey when the development proposal
+      (including any offsite works) will affect: Designated sites Priority Habitats Other
+      biodiversity features Species protected by law Priority Species
+    source-url: https://www.stroud.gov.uk/media/eachhw1y/local-validation-checklist-prior-approvals-updated-23052025.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): on the Householder, LBC and Full/Outline/RM checklists;
+      the council's wording was in the workbook's prior approval rows.
+
+  - id: cil-form
+    action: replace
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [hh]
+            - condition:
+                field: floorspace
+                operator: ">"
+                value: 100
+                description: An extension over 100sqm.
+        - application-type:
+            in: [full, outline, reserved-matters, prior-approval]
+    source-text: >-
+      CIL Levy is applicable to extensions over 100sqm. Both Form 1 (Additional Information) and
+      Form 2 (Assumption of Liability) must be submitted with the planning application in order to
+      establish CIL liability.
+    source-url: https://www.stroud.gov.uk/media/ij3g4c0x/local-validation-checklist-full-planning-permission-and-advertisement-consent-updated-23052025.pdf
+    must-include:
+      - item: Form 1 (Additional Information) and Form 2 (Assumption of Liability)
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): not on the advert or LBC checklists."
+
+  - id: daylight-sunlight-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, reserved-matters]
+        - any:
+            - condition:
+                field: storey-count
+                operator: ">"
+                value: 1
+                description: The proposal is greater than one storey in height.
+            - discretionary
+    source-text: >-
+      Daylight/Sunlight Assessment Required to show the impact of the proposed development on a
+      neighbouring property and garden if the proposal is greater than one storey in height or a
+      large single storey extension.
+    source-url: https://www.stroud.gov.uk/media/ij3g4c0x/local-validation-checklist-full-planning-permission-and-advertisement-consent-updated-23052025.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): stray prefixes removed; not on the advert or LBC checklists. 'A large single storey extension' is shown as officer discretion."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - ref: major-development
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The development is in a Conservation Area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: One or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: 100sqm of new floor space.
+    source-text: >-
+      Design and Access Statement Required for development: that is major development of one or
+      more dwelling in a Conservation Area of 100sqm new floor space to be created in a
+      Conservation Area for applications for listed building consent
+    source-url: https://www.stroud.gov.uk/media/30ig4z4o/local-validation-checklist-advertisement-listed-building-consent-updated-23052025.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the Householder and LBC rows were a fragment ('formulation of design and access statements.')."
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: The proposed development in relation to any adjacent buildings
+        level: must
+      - item: Advertisement drawings (1:100 or 1:50) detailing position, size, materials, colours,
+          height above ground, projection and illumination details
+        level: must
+        required-if:
+          application-type:
+            in: [advertising]
+    confidence: medium
+    notes: "Elevations at 1:100 or 1:50. The advertisement drawings item is from the advert checklist's block plan/drawings section."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - condition:
+            field: eia-development
+            value: true
+            description: The proposal falls within Schedule 1 or Schedule 2 of the EIA regulations
+              and will have a significant environmental impact.
+    source-text: >-
+      Environmental Statement Required for any proposal where there will be a significant
+      environmental impact and where the proposal falls within Schedule 1 or Schedule 2 of the
+      relevant regulations.
+    source-url: https://www.stroud.gov.uk/media/ij3g4c0x/local-validation-checklist-full-planning-permission-and-advertisement-consent-updated-23052025.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): not on the advert or LBC checklists."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, reserved-matters, prior-approval]
+        - any:
+            - site:
+                in: [flood-risk-zone]
+                description: The site is in flood zone 2 or 3.
+            - all:
+                - application-type:
+                    in: [prior-approval]
+                - site:
+                    in: [critical-drainage-area]
+                    description: A site with critical drainage problems identified by the
+                      Environment Agency.
+    source-text: Flood Risk Assessment Required if the proposed site is located in flood zones 2 or 3.
+    source-url: https://www.stroud.gov.uk/media/ij3g4c0x/local-validation-checklist-full-planning-permission-and-advertisement-consent-updated-23052025.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): not on the advert or LBC checklists. The prior approval checklist
+      adds "or for a site which has critical drainage problems identified by the Environment
+      Agency".
+
+  - id: floor-plan-proposed
+    action: update
+    must-include:
+      - item: The dimensions and proposed use of each room, and the position and dimensions of
+          windows, doors and walls
+        level: must
+        required-if:
+          application-type:
+            in: [prior-approval]
+    confidence: medium
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, scheduled-monument,
+              park-and-garden, locally-listed-building, archaeological-priority-area]
+            description: The development may affect a designated or undesignated heritage asset.
+    source-text: >-
+      Heritage Statement Required if the proposed development may affect a designated or
+      undesignated heritage asset and including archaeologically sensitive areas, Ancient
+      monuments, The building is Listed or may affect the setting of a Listed Building, Registered
+      Parks and Gardens, Development in or affecting the character of a Conservation Area
+    source-url: https://www.stroud.gov.uk/media/ij3g4c0x/local-validation-checklist-full-planning-permission-and-advertisement-consent-updated-23052025.pdf
+    must-include:
+      - item: A full schedule of proposed works
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the Householder row quoted the LBC wording ('Must include a full
+      schedule of proposed works'); the householder and advert trigger is the heritage asset one.
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters, prior-approval]
+        - site:
+            in: [contaminated-land]
+            description: The site is known or suspected to be contaminated.
+    source-text: >-
+      Land Contamination Assessment Required where sites are known or suspected to be contaminated;
+      a report is required to assess necessary investigations and remediation.
+    source-url: https://www.stroud.gov.uk/media/ij3g4c0x/local-validation-checklist-full-planning-permission-and-advertisement-consent-updated-23052025.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): not on the advert or LBC checklists."
+
+  - id: landscaping-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: New residential development.
+            - condition:
+                field: floorspace-non-residential
+                operator: ">"
+                value: 0
+                description: New commercial development.
+    source-text: Landscape Scheme Required for any new residential or commercial development.
+    source-url: https://www.stroud.gov.uk/media/ij3g4c0x/local-validation-checklist-full-planning-permission-and-advertisement-consent-updated-23052025.pdf
+    must-include:
+      - item: Hard and soft boundary treatments
+        level: must
+      - item: Position of trees and vegetation to be retained
+        level: must
+      - item: Any trees or vegetation to be removed
+        level: must
+      - item: Any new planting, including a 5-year schedule of maintenance
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): not on the advert or LBC checklists."
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters, advertising]
+        - any:
+            - condition:
+                field: floodlighting
+                value: true
+                description: The development proposes floodlighting.
+            - condition:
+                field: external-lighting
+                value: true
+                description: The development proposes significant external lighting.
+    source-text: Lighting Assessment For any development proposing floodlighting or significant external lighting.
+    source-url: https://www.stroud.gov.uk/media/ij3g4c0x/local-validation-checklist-full-planning-permission-and-advertisement-consent-updated-23052025.pdf
+    must-include:
+      - item: Technical details of proposed lighting and hours of operation
+        level: must
+      - item: A layout plan showing beam orientation
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): on the Full/Outline/RM and standalone advert checklists, not LBC."
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - any:
+            - condition:
+                field: noise-sensitive-use
+                value: true
+                description: Noise affecting the proposed development (e.g. a trunk road next to new
+                  housing).
+            - condition:
+                field: noise-generating-use
+                value: true
+                description: Noise from the proposed development (e.g. new commercial or industrial
+                  development).
+            - condition:
+                field: plant-equipment
+                value: true
+                description: The proposal includes ventilation or extraction.
+    source-text: >-
+      Noise Impact Assessment Required for impacts of noise upon proposed developments (such as
+      impact of trunk road on a proposed housing development) Required for impact of noise from
+      proposed developments (such as impact arising from a new commercial/industrial development)
+      Also required for proposals including ventilation or extraction which must also include exact
+      details of proposed ventilation/extraction, acoustic noise characteristics and odour
+      abatement measures.
+    source-url: https://www.stroud.gov.uk/media/ij3g4c0x/local-validation-checklist-full-planning-permission-and-advertisement-consent-updated-23052025.pdf
+    must-include:
+      - item: Exact details of proposed ventilation/extraction, acoustic noise characteristics and
+          odour abatement measures
+        level: must
+        required-if:
+          condition:
+            field: plant-equipment
+            value: true
+            description: The proposal includes ventilation or extraction.
+    confidence: medium
+    notes: "Audit (wrong_app_type): not on the advert or LBC checklists."
+
+  - id: photos
+    action: replace
+    required-if:
+      application-type:
+        in: [lbc]
+    source-text: Photographs Including internal and external areas and features and any elements to be demolished.
+    source-url: https://www.stroud.gov.uk/media/jonfldxb/local-validation-checklist-full-planning-permission-and-listed-building-consent-updated-23052025.pdf
+    must-include:
+      - item: Internal and external areas and features, and any elements to be demolished
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): photographs are on the standalone LBC checklist. The Full and Advert
+      rows came from combined checklists, and the LDC row is the lawful-use evidence text (kept
+      under unmapped).
+
+  - id: section-proposed
+    action: replace
+    required-if:
+      application-type:
+        in: [full, outline, reserved-matters, lbc]
+    source-text: >-
+      Site sections (at a scale of 1:50 or 1:100 through buildings or 1:200 or 1:500 through land)
+      Site sections should clearly indicate any changes in land levels, finished floor levels and
+      the relationship to any neighbouring development.
+    source-url: https://www.stroud.gov.uk/media/ij3g4c0x/local-validation-checklist-full-planning-permission-and-advertisement-consent-updated-23052025.pdf
+    must-include:
+      - item: Any changes in land levels, finished floor levels and the relationship to any
+          neighbouring development
+        level: must
+        required-if:
+          application-type:
+            in: [full, outline, reserved-matters]
+      - item: Finished floor and site levels (at a scale of 1:200 or 1:500) with a fixed datum point
+        level: must
+        required-if:
+          application-type:
+            in: [full, outline, reserved-matters]
+      - item: Listed building drawings at a scale of not less than 1:20 showing joinery, panelling,
+          fireplaces, plaster moulding etc.; 1:5 sections may be required (e.g. glazing bar/cill)
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the Householder, Outline and prior approval rows quoted DAS, tree
+      survey and biodiversity text. The 1:20 drawings are the LBC checklist's 'Other plans'.
+  - id: section-existing
+    action: replace
+    required-if:
+      application-type:
+        in: [full, outline, reserved-matters]
+    source-text: >-
+      Site sections (at a scale of 1:50 or 1:100 through buildings or 1:200 or 1:500 through land)
+      Site sections should clearly indicate any changes in land levels, finished floor levels and
+      the relationship to any neighbouring development.
+    source-url: https://www.stroud.gov.uk/media/ij3g4c0x/local-validation-checklist-full-planning-permission-and-advertisement-consent-updated-23052025.pdf
+    confidence: low
+    notes: "Audit (wrong_trigger): as for section-proposed. Whether existing sections are needed is not stated."
+
+  - id: sci
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 10
+                description: Developments of 10 or more dwellings.
+            - condition:
+                field: retail-floorspace
+                operator: ">="
+                value: 1000
+                description: Retail development of 1000sqm or more.
+            - all:
+                - condition:
+                    field: floorspace
+                    operator: ">"
+                    value: 1000
+                    description: Other developments in excess of 1000sqm.
+                - discretionary
+    source-text: >-
+      Statement of Community Involvement Required for: Developments of 10 or more dwellings.
+      Retail development of 1000sqm or more. Other developments proposing in excess of 1000sqm and
+      likely to generate significant public interest. Waste management facilities.
+    source-url: https://www.stroud.gov.uk/media/ij3g4c0x/local-validation-checklist-full-planning-permission-and-advertisement-consent-updated-23052025.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): not on the advert or LBC checklists. Waste management facilities are county matters and are not shown."
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: The proposed development in relation to the site boundaries and adjacent buildings
+        level: must
+        required-if:
+          application-type:
+            in: [advertising]
+      - item: Location of proposed signage
+        level: must
+        required-if:
+          application-type:
+            in: [advertising]
+      - item: Any existing structures on the site, any existing trees or public rights of way, and
+          parking areas
+        level: must
+        required-if:
+          application-type:
+            in: [ldc]
+    confidence: medium
+    notes: "Block plan at 1:200 or 1:500 (existing and proposed)."
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      application-type:
+        in: [full, outline, reserved-matters]
+    source-url: https://www.stroud.gov.uk/media/ij3g4c0x/local-validation-checklist-full-planning-permission-and-advertisement-consent-updated-23052025.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Sustainability Checklist is on the Full/Outline/RM list; the audit gives no trigger."
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - any:
+            - condition:
+                field: out-of-centre-town-centre-use
+                value: true
+                description: Commercial uses outside identified centres.
+            - discretionary
+    policy: Stroud District Local Plan EI9
+    source-text: Retail impact assessment (RIA) in compliance with SDLP Policy EI9.
+    source-url: https://www.stroud.gov.uk/media/ij3g4c0x/local-validation-checklist-full-planning-permission-and-advertisement-consent-updated-23052025.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): from the audit, commercial uses outside identified
+      centres, extensions to commercial sites and retail floorspace (the latter two shown as
+      officer discretion). Not an LBC or advert requirement.
+
+  - id: transport-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - discretionary
+    source-url: https://www.stroud.gov.uk/media/ij3g4c0x/local-validation-checklist-full-planning-permission-and-advertisement-consent-updated-23052025.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): proposals likely to have significant highway implications."
+
+  - id: travel-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - discretionary
+    source-text: Travel Plan Required for all proposals likely to have significant transport implications.
+    source-url: https://www.stroud.gov.uk/media/ij3g4c0x/local-validation-checklist-full-planning-permission-and-advertisement-consent-updated-23052025.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): not on the advert or LBC checklists."
+
+  - id: viability-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - discretionary
+    source-text: Viability appraisal must be provided if less affordable units than required are proposed.
+    source-url: https://www.stroud.gov.uk/media/ij3g4c0x/local-validation-checklist-full-planning-permission-and-advertisement-consent-updated-23052025.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): not on the advert or LBC checklists."
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - ref: major-development
+    source-text: >-
+      Site Waste Management Plan Required for any major development proposals: 10+ dwellings or
+      residential development on sites over 0.5ha Non-residential development where floor area
+      exceeds 1000 sqm or site area is 1 hectare or more.
+    source-url: https://www.stroud.gov.uk/media/ij3g4c0x/local-validation-checklist-full-planning-permission-and-advertisement-consent-updated-23052025.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): this is the Site Waste Management Plan for major development, not bin storage details."
+
+unmapped:
+  - local-name: Structural Survey (listed building consent)
+    source-text: Structural Survey A survey of the building, including information on efforts to retain the structure in a sustainable condition.
+    source-url: https://www.stroud.gov.uk/media/u1ebxlda/listed-building-consent.pdf
+    suggested-id: structural-survey
+  - local-name: Planning Obligations (S106)
+    source-text: "From the audit: heads of terms, a costs undertaking, solicitor details and proof of title where developer contributions are needed"
+    source-url: https://www.stroud.gov.uk/media/ij3g4c0x/local-validation-checklist-full-planning-permission-and-advertisement-consent-updated-23052025.pdf
+    suggested-id: heads-of-terms
+  - local-name: Landscape Visual Impact Assessment
+    source-text: "Required for proposals that will have an impact on the landscape. (mandatory for sites within or affecting the Cotswold AONB)"
+    source-url: https://www.stroud.gov.uk/media/ij3g4c0x/local-validation-checklist-full-planning-permission-and-advertisement-consent-updated-23052025.pdf
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Other plans (architectural features / streetscene)
+    source-text: "From the audit: on the advertisement consent checklist (architectural features / streetscene) and the LBC checklist (1:20 joinery details)"
+    source-url: https://www.stroud.gov.uk/media/oulhveis/local-validation-checklist-advertisement-consent-updated-23052025.pdf
+    suggested-id: ""
+  - local-name: Surface Water Drainage Strategy
+    source-text: "From the audit: all major development (10+ dwellings or 1000 sqm+)"
+    source-url: https://www.stroud.gov.uk/media/ij3g4c0x/local-validation-checklist-full-planning-permission-and-advertisement-consent-updated-23052025.pdf
+    suggested-id: drainage-strategy
+  - local-name: Agricultural/Forestry Dwelling Justification
+    source-text: "From the audit: agricultural or forestry dwelling proposals (SDLP CP15)"
+    source-url: https://www.stroud.gov.uk/media/ij3g4c0x/local-validation-checklist-full-planning-permission-and-advertisement-consent-updated-23052025.pdf
+    suggested-id: agricultural-justification

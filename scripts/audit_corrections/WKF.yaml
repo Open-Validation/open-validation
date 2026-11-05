@@ -1,0 +1,769 @@
+# Corrections for Wakefield Metropolitan District Council, from inputs/audit/wakefield-metropolitan-district-council.json.
+# The current list is 'Wakefield Council Local Validation List September 2026' (local-validation-
+# list.docx), not the 2015 full/outline checklist the workbook linked. The audit read the docx
+# (manual upload). Grokbot captured about 30 of its roughly 55 items, often with triggers borrowed
+# from nearby sections, filed most under Full planning by inference, and filled the s73 sheet with
+# bare item names from the superseded 2015 checklist. Those s73 rows are dropped; each item's own
+# 'When is it required?' text is used as its trigger, with no application-type limit unless the
+# list gives one. Items marked "From the audit" use the audit's paraphrase.
+local-authority: WKF
+
+validation-list:
+  url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+  date: 2026-09
+  date-basis: "audit: document heading 'Wakefield Council Local Validation List September 2026' (month only)"
+
+submission-standards:
+  - item: Plans submitted as PDFs that can be measured electronically, and when printed at the
+      indicated scale
+    level: must
+  - item: A scale bar and/or figured dimensions in addition to the stated scale, wherever possible
+    level: should
+  - item: Electronic files (drawings and supporting documents) no bigger than 5MB
+    level: should
+
+drop:
+  - id: daylight-sunlight-assessment
+    reason: "other: only a bare s73 name from the superseded 2015 checklist; the 2026 list doesn't require it"
+  - id: photos
+    reason: "other: only a bare s73 name from the superseded 2015 checklist; the 2026 list doesn't require it"
+  - id: environmental-statement
+    reason: "other: only a bare s73 name from the 2015 checklist; a national EIA matter"
+  - id: cil-form
+    sheets: [Variation of condition s73]
+    reason: "other: bare 2015 checklist name"
+
+drop-unmapped:
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "wrong_trigger: a misnamed Initial Biodiversity Statement (now in bng-metric)"
+  - local-name: Agricultural Land Classification / Soils
+    reason: "wrong_trigger: merges the Soil Resource Survey and Agricultural Land Assessment; both re-added below"
+  - local-name: Cycle parking details
+    reason: "duplicate: a content list from the Parking Provision section"
+  - local-name: Electric vehicle charging details
+    reason: "wrong_trigger: mid-sentence fragment"
+  - local-name: Water efficiency / water usage statement
+    reason: "wrong_trigger: mid-sentence fragment (part of the energy and sustainability statement)"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: encouragement at the end of the BNG section"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: Location Plan red-line text; Highways Details re-added below"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "wrong_trigger: floor-plan labelling rules (now in floor-plan-proposed); housing items re-added below"
+  - local-name: Landscape and Visual Impact Assessment
+    reason: "wrong_trigger: the optional cumulative LVIA sentence; re-added below with the main trigger"
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_trigger: fragment; re-added below"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: viability fragment; re-added below"
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_trigger: stray 'CIL liability' text and a bare s73 name; re-added below"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "duplicate: a bare s73 name alongside the Full row; re-added below"
+  - local-name: Structural Survey
+    reason: "wrong_app_type: re-added below with the list's trigger"
+  - local-name: Crime prevention / Secured by Design statement
+    reason: "other: bare 2015 s73 name; Crime and Safety Assessment re-added below"
+  - local-name: Foul Sewage / Utilities Statement
+    reason: "other: bare 2015 s73 name; Utilities Information re-added below"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "other: bare 2015 s73 name; now a flood-risk-assessment must-include item"
+
+requirements:
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [hh]
+            - site:
+                in: [listed-building, conservation-area]
+                description: The house is a listed building or in a Conservation Area.
+        - application-type:
+            in: [lbc]
+    source-text: >-
+      Design and Access Statement (only if a listed building/in a Conservation Area)
+    source-url: https://www.wakefield.gov.uk/media/elgp4cry/validation-checklist-householder-applications.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the list itself sets no DAS trigger; the Full row quoted the Masterplan
+      sentence and the other rows were run-together checklist items. The householder checklist's
+      wording is used; the national rules apply to other types.
+
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: The development is inside, or adjacent to, an Air Quality Management Area.
+        - discretionary
+    source-text: >-
+      An Air Quality Assessment is required where a development: is proposed inside, or adjacent to
+      an air quality management area (AQMA),
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the list also covers development that could itself result in an AQMA
+      designation or conflict with an air quality action plan (officer discretion).
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Hedgerows, trees (including street trees) or woodland within or adjacent to the
+          site may be affected.
+    source-text: >-
+      Arboricultural Impact Assessment When is it required? Where there are hedgerows and/or trees
+      (including street trees) and/or woodland within, or adjacent to, the application site which
+      may be affected by a proposed development.
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    confidence: medium
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [archaeological-priority-area, scheduled-monument]
+            description: The site includes or affects heritage assets with archaeological interest.
+        - discretionary
+    source-text: "all applications within the Design Improvement Areas identified in the Policies Map: Pontefract Inset Map"
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    must-include:
+      - item: An appropriate desk-based assessment and, where necessary, a field evaluation
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted the 'What is required?' text. Every application in
+      the Pontefract Design Improvement Areas also needs a desk-based assessment (no field for
+      these areas, so shown as officer discretion).
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the general biodiversity gain condition.
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    must-include:
+      - item: An Initial Biodiversity Statement (type and condition of existing on-site habitat,
+          expected balance of on-site and off-site gains, how off-site gains will be secured, and
+          whether statutory credits will be used)
+        level: must
+        source-text: >-
+          An Initial Biodiversity Statement setting out the type and condition of existing onsite
+          habitat, the expected balance of on-site gains and off-site gains, how any off-site net
+          gains will be secured … and whether any statutory biodiversity credits are intended to be
+          used for the development, taking account of the Biodiversity Gain Hierarchy.
+      - item: GIS shapefiles for pre- and post-development habitats
+        level: must
+        required-if:
+          ref: major-development
+      - item: A Preliminary Ecological Appraisal, and an Ecological Impact Assessment where the
+          habitat impact is substantial
+        level: must
+        required-if:
+          ref: major-development
+      - item: A draft Biodiversity Gain Plan, Condition Assessment and draft 30-year Habitat
+          Management and Monitoring Plan
+        level: must
+        required-if: discretionary
+      - item: The Statutory or Small Sites Metric and a habitat plan, showing at least 10% gain
+        level: must
+        required-if:
+          condition:
+            field: minor-development
+            value: true
+            description: Minor development.
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement, wrong_trigger): the list's local BNG requirements for
+      major development (the draft Gain Plan set is needed where significant on-site gain is
+      proposed) and for minor development. Anyone claiming an exemption must submit the council's
+      Exemption Declaration Form.
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [site-of-special-scientific-interest, special-area-of-conservation, local-wildlife-site]
+            description: Development on or near designated nature sites (including near the Denby
+              Grange Colliery Ponds SAC).
+        - site:
+            in: [priority-habitat]
+            description: Development affecting notable habitats.
+        - condition:
+            field: protected-species
+            value: true
+            description: Development affecting protected or notable species.
+        - discretionary
+    source-text: "in proximity to the Denby Grange Colliery Ponds Special Area of Conservation"
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook had the fragment 'habitats or protected species.'
+      Wildlife corridors and bat reports in Bat Alert zones are shown as officer discretion. Near
+      the SAC an Appropriate Ecological Assessment is needed.
+
+  - id: site-plan
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: The application includes new built form.
+        - condition:
+            field: footprint-increase
+            value: true
+            description: The application includes new built form.
+    confidence: medium
+    notes: "'A Block or Site Plan is required for all applications which include new built form.'"
+
+  - id: location-plan
+    action: add
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    must-include:
+      - item: Normally drawn at 1:1250
+        level: should
+      - item: Red line including the access, visibility splays, landscaping and car parking
+        level: must
+      - item: Blue line around other land owned by the applicant
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): the list's Location Plan rules."
+
+  - id: cil-form
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: New dwellinghouses, including those created through a change of use.
+        - discretionary
+    source-text: >-
+      CIL Additional Information Form (CIL Form 1) Must be provided for all applications which
+      include: The provision of new dwellinghouses – including dwellinghouses created through a
+      change of use.
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    confidence: medium
+    notes: "The list also names new supermarkets, retail warehouses and other CIL-liable development (officer discretion)."
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: Known or suspected contamination.
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: A sensitive end use.
+        - discretionary
+    source-text: "Land Contamination Assessment When is it required? All applications for sites: Where there is known contamination;"
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    confidence: medium
+    notes: "Audit (wrong_trigger): the list also covers radon and ground gas (officer discretion), suspected contamination and sensitive receptors."
+
+  - id: sustainability-statement
+    action: replace
+    required-if: discretionary
+    policy: "SP24, LP32, LP33, LP34, LP36"
+    source-text: >-
+      Energy and Sustainability Statement Applications must be accompanied by information to address
+      the requirements of national planning policy, and the requirements of Local Plan Policies SP24,
+      LP32, LP33, LP34 and LP36 insofar as these are relevant to the proposed development.
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    must-include:
+      - item: Evidence of BREEAM Excellent (LP33)
+        level: must
+        required-if:
+          condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 1000
+            description: Non-residential development over 1,000 square metres.
+      - item: District heating and cooling details, where LP36 applies
+        level: must
+        required-if: discretionary
+    confidence: medium
+    notes: "From the audit (missing_requirement): the BREEAM and district heating items; the Energy Assessment is in energy-statement."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: A site of 0.5 hectares or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 0.5
+            description: A site of 0.5 hectares or more.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more dwellings.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: 1,000 square metres or more of employment, commercial, leisure or community
+              floorspace (conversions included).
+    policy: "LP32"
+    source-text: >-
+      All developments of 0.5 hectares or more in site area, or 10 or more dwellings, or 1,000 square
+      metres or more floor area … must be accompanied by an Energy Assessment
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    confidence: medium
+
+  - id: section-proposed
+    action: replace
+    required-if: discretionary
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    must-include:
+      - item: One section for each house type where the Nationally Described Space Standard applies
+        level: must
+    confidence: low
+    notes: "From the audit (missing_requirement). The workbook's excerpt was the fragment 'this is site levels, or the level of buildings).'"
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, conservation-area, locally-listed-building, scheduled-monument, park-and-garden]
+        description: The development affects designated or non-designated heritage assets.
+    source-text: "Heritage Statement When is it required? For all developments affecting Historic Assets (designated or non-designated)."
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    confidence: medium
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: External lighting is proposed.
+    source-text: "For applications where external lighting is proposed What is required? A layout plan showing the location of lighting;"
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    must-include:
+      - item: A layout plan showing the location of lighting
+        level: must
+    confidence: medium
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Development that raises issues of disturbance by noise to occupants of
+              nearby existing buildings.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise-sensitive development close to existing sources of noise.
+    source-text: >-
+      Noise Impact Assessment When is it required? Applications for developments that raise issues
+      of disturbance by noise to the occupants of nearby existing buildings, and for developments
+      that are considered to be noise sensitive and which are close to existing sources of noise.
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    confidence: medium
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: departure-from-development-plan
+            value: true
+            description: The application involves a departure from the development plan.
+        - ref: major-development
+    source-text: >-
+      A Planning Statement is required for all applications which involve a departure from the
+      development plan, and for all major applications.
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    confidence: medium
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Main town centre uses not within an existing centre or in accordance with
+              an up-to-date plan.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 300
+            description: More than 300 square metres gross external floorspace.
+    source-text: >-
+      Sequential Assessment A Sequential Assessment will be required for all proposals for main town
+      centre uses with a gross external floorspace exceeding 300 square metres and which are not
+      within an existing centre or in accordance with an up-to-date plan.
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    must-include:
+      - item: A Retail Impact Assessment, for retail and leisure proposals outside a defined centre
+          that do not accord with the Local Plan (over 700 sq m gross external floorspace in
+          sub-regional cities, principal towns and main towns; over 300 sq m in District and Local
+          Retail Centres)
+        level: must
+        required-if: discretionary
+    confidence: medium
+    notes: "Audit (missing_requirement): the Impact Assessment thresholds depend on the centre type, which no field expresses."
+
+  - id: sci
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-text: >-
+      Applicants are expected to consult the community about major applications or development which
+      is likely to affect large numbers of people and/or be controversial (such as regeneration
+      projects, mineral extraction and major infrastructure projects).
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    confidence: medium
+
+  - id: transport-assessment
+    action: replace
+    required-if: discretionary
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    confidence: medium
+    notes: "Audit (wrong_trigger): developments generating significant transport movement."
+
+  - id: travel-plan
+    action: replace
+    required-if: discretionary
+    policy: "LP22"
+    source-text: >-
+      Local Plan Policy LP22 requires that applications for major office development require the
+      submission of a Travel Plan
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    confidence: medium
+    notes: "Audit (wrong_trigger): developments generating significant vehicular movement, and all major office development."
+
+  - id: viability-assessment
+    action: replace
+    required-if: discretionary
+    policy: "LP7"
+    source-text: >-
+      Where an applicant wishes to make a case for an exceptional circumstance where policy
+      requirements cannot be met
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    must-include:
+      - item: An electronic copy of the viability appraisal
+        level: must
+      - item: Agreement to pay for the council's independent review
+        level: must
+    confidence: medium
+    notes: "From the audit (wrong_trigger): the must-include items are the audit's summary."
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      always: true
+    source-text: "All applications must be accompanied by a Waste Management Plan."
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the end of the Soil Resource Survey sentence."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if: discretionary
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    must-include:
+      - item: A Sequential Test and Exception Test, where policy requires them
+        level: must
+        required-if: discretionary
+      - item: A Householder Flood Risk Assessment on the council's questionnaire template
+        level: must
+        required-if:
+          application-type:
+            in: [hh]
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): an FRA, Sequential Test and Exception Test where Local
+      Plan or national policy and guidance require them (shown as officer discretion).
+
+  - id: landscaping-plan
+    action: replace
+    required-if: discretionary
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    confidence: medium
+    notes: "From the audit (missing_requirement): Landscaping Information for all applications with new or changed landscaping."
+
+  - id: recreation-facilities-assessment
+    action: replace
+    required-if:
+      site:
+        in: [open-space]
+        description: Development of an existing area of open space.
+    policy: "LP46"
+    source-text: "development of an existing area of open space"
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    confidence: medium
+    notes: "Open Space Impact Assessment."
+
+  - id: elevation-existing
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: building-works
+            value: true
+            description: Operational development.
+        - condition:
+            field: external-alterations
+            value: true
+            description: External alterations to existing buildings.
+        - application-type:
+            in: [advertising]
+    source-text: >-
+      Elevations Existing and Proposed Elevations must be provided for all applications which
+      involve operational development and/or external alterations to existing buildings. (This
+      includes applications for advertisement consent).
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    must-include:
+      - item: Every elevation
+        level: must
+    confidence: medium
+
+  - id: elevation-proposed
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: building-works
+            value: true
+            description: Operational development.
+        - condition:
+            field: external-alterations
+            value: true
+            description: External alterations to existing buildings.
+        - application-type:
+            in: [advertising]
+    source-text: >-
+      Elevations Existing and Proposed Elevations must be provided for all applications which
+      involve operational development and/or external alterations to existing buildings. (This
+      includes applications for advertisement consent).
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    must-include:
+      - item: Every elevation
+        level: must
+    confidence: medium
+
+  - id: floor-plan-existing
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New buildings.
+        - condition:
+            field: building-works
+            value: true
+            description: Changes to existing buildings.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: A change of use.
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    confidence: medium
+    notes: "From the audit (missing_requirement): floor plans for new buildings, changes to existing buildings and changes of use. The workbook had advertisement consent only."
+
+  - id: floor-plan-proposed
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New buildings.
+        - condition:
+            field: building-works
+            value: true
+            description: Changes to existing buildings.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: A change of use.
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    must-include:
+      - item: All bedrooms identified and labelled as either a single or a double/twin room
+        level: must
+        required-if: discretionary
+        source-text: >-
+          where the Nationally Described Space Standard applies and/or must be considered: All
+          bedrooms must be identified labelled as either a single, or a double/twin room
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): floor plans for new buildings, changes to existing
+      buildings and changes of use. The bedroom labelling applies where the Nationally Described
+      Space Standard applies (officer discretion).
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      all:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The application includes the provision of housing.
+    source-text: >-
+      Every major application which includes the provision of housing must be accompanied by details
+      of the proposed Affordable Housing provision.
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    must-include:
+      - item: A plan showing each affordable home with its type and tenure
+        level: must
+    confidence: medium
+
+  - id: water-impact-assessment
+    action: add
+    required-if: discretionary
+    policy: "LP67"
+    source-text: "must be submitted for all applications which have the potential to result in water pollution"
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    confidence: medium
+    notes: "From the audit (missing_requirement): including during construction or demolition."
+
+unmapped:
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    source-text: >-
+      Coal Mining Risk Assessment A Coal Mining Risk Assessment must be submitted with all planning
+      applications within a Referral Area ("Development High Risk Area") - except where the
+      application falls under the Coal Authority's Exemptions List.
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Ventilation / Extraction details (odour)
+    source-text: "Ventilation and/or Extraction Information When is it required? For all applications where ventilation or extraction equipment is to be installed."
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    suggested-id: ventilation-extraction-statement
+  - local-name: Structural Survey
+    source-text: "For applications (including those which involve conversion or demolition) where structural matters need to be considered."
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    suggested-id: structural-survey
+  - local-name: Crime and Safety Assessment
+    source-text: "Crime and Safety Assessment - When is it required? All applications."
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    suggested-id: crime-prevention-statement
+  - local-name: Highways Details
+    source-text: "Highways Details - When is it required? All applications."
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    suggested-id: ""
+  - local-name: Road Safety Audit
+    source-text: >-
+      A Stage 1 Road Safety Audit is required for applications which include a connection to an
+      existing highway and/or the provision of a new highway.
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    suggested-id: road-safety-audit
+  - local-name: Parking Provision
+    source-text: "From the audit: applications that affect existing parking or servicing, or create a need for more"
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    suggested-id: parking-statement
+  - local-name: Draft S106 agreement
+    source-text: "From the audit: only where viability reduces contributions below policy"
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    suggested-id: heads-of-terms
+  - local-name: Visual Impact Assessment
+    source-text: "All applications likely to result in significant effects on the landscape and/or visual amenity"
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Soil Resource Survey
+    source-text: "From the audit: prior to any earthwork operations on new major development sites"
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    suggested-id: ""
+  - local-name: Agricultural Land Assessment
+    source-text: "Applications which involve the non-agricultural use, or loss...of land suitable for commercial agricultural use"
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    suggested-id: agricultural-land-assessment
+  - local-name: Housing Information
+    source-text: "All applications which involve the provision of one or more new dwellings (including changes of use)"
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    suggested-id: ""
+  - local-name: Accessible Housing
+    source-text: "From the audit: applications providing accessible homes, or meeting the policy thresholds for them; details and a plan by type"
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    suggested-id: accessibility-statement
+  - local-name: Space Standards Statement
+    source-text: >-
+      From the audit: where the Nationally Described Space Standard applies; bedrooms, bedspaces,
+      gross internal area, bedroom widths and storage for each dwelling
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    suggested-id: space-standards-statement
+  - local-name: Wakefield District Design Code Checklist
+    source-text: "The application must be accompanied by sufficient information and a Design Code Checklist"
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    suggested-id: design-code-checklist
+  - local-name: Green Belt Information
+    source-text: >-
+      Calculations showing the volume and footprint of the proposed building(s) and of the existing
+      building(s)
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    suggested-id: green-belt-statement
+  - local-name: Utilities Information
+    source-text: "all applications to which Local Plan Policy SP9 applies"
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    suggested-id: ""
+  - local-name: Pollution Assessment
+    source-text: "From the audit: developments likely to cause pollution or be exposed to it (LP67)"
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    suggested-id: ""
+  - local-name: Phasing Plan
+    source-text: "A Phasing Plan must be provided for all phased developments"
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    suggested-id: phasing-plan
+  - local-name: Minerals Details
+    source-text: >-
+      From the audit: minerals extraction applications must address LP37; non-minerals development
+      on sites over 2 hectares must address LP38
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    suggested-id: mineral-resource-assessment
+  - local-name: Hydrocarbons Assessment
+    source-text: "From the audit: hydrocarbons exploration, appraisal or production (LP39, LP40)"
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    suggested-id: ""
+  - local-name: Waste Application Requirements
+    source-text: "From the audit: waste applications, e.g. distances to sensitive receptors, groundwater and geology"
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    suggested-id: ""
+  - local-name: Landmark Sites Assessment
+    source-text: "From the audit: landmark buildings and sites identified in LP19"
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    suggested-id: ""
+  - local-name: Skylines and Strategic Views Assessment
+    source-text: "From the audit: development likely to affect the city skyline or strategic views of the spires and towers (LP17)"
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    suggested-id: views-analysis
+  - local-name: Public Services Impact Statement
+    source-text: "From the audit: development catering for users of publicly provided support services (LP45 Part 2)"
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    suggested-id: ""
+  - local-name: Digital Infrastructure Details; Skills and Employment Information; Site Specific Requirements (Allocated Sites)
+    source-text: "From the audit: listed with no stated trigger (Digital Infrastructure: Policy SP20)"
+    source-url: https://www.wakefield.gov.uk/media/lrcldwgq/local-validation-list.docx
+    suggested-id: ""
+
+low-confidence:
+  - id: section-existing
+    note: "The workbook's excerpt is the fragment 'this is site levels, or the level of buildings).'; no trigger was captured."

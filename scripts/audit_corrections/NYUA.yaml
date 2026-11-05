@@ -1,0 +1,246 @@
+# Corrections for North Yorkshire Council, from the council's audit.
+# The workbook's list is the March 2016 North Yorkshire Planning Authorities (NYPA) 'Validation
+# Requirements for Planning and Other Applications' (2015-16 update of the 2013 joint list; the
+# build now takes March 2016 from the audit, not the 2023 upload folder). The council's minerals and
+# waste / council-own-development page still links it as the County Planning Authority's local list,
+# so today it applies to minerals, waste and the council's own (Reg 3) development. Since 2023 most
+# ordinary applications are validated against separate lists for each former district area
+# (Craven, Hambleton, Harrogate, Richmondshire, Ryedale, Scarborough, Selby), which nobody has
+# captured yet; so every file here is low confidence (audit issue 1, wrong_document).
+# The NYPA document has 17 per-type checklists (NYPA1 householder, NYPA2 outline or full, NYPA4
+# listed building consent, NYPA6 lawful development, NYPA7 non-material amendment, NYPA12 approval
+# of details, NYPA13 s73, NYPA15 minerals/waste, NYPA17 onshore oil and gas). Grokbot read mostly the
+# general notes; the per-type checklists other than the householder items the audit lists, and the
+# onshore oil and gas requirements, still need a manual read.
+local-authority: NYUA
+
+submission-standards:
+  - item: All drawings correctly orientated for on-screen display, with a scale bar and key dimensions
+    level: must
+  - item: All documents and drawings named in accordance with the RIBA naming conventions
+    level: must
+  - item: PDF is the recommended file format
+    level: should
+
+drop:
+  - id: waste-management-plan
+    reason: "wrong_trigger: the excerpt is odour/ventilation text for waste sites, not a waste management item"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: Freedom of Information boilerplate"
+  - local-name: Character / Conservation area appraisal reference
+    reason: "not_a_requirement: a cross-reference fragment"
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong mapping: the excerpt is lighting assessment guidance (isolux drawings), not advertisements"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "duplicate: the same Daylight/Sunlight Assessment text"
+  - local-name: Ground investigation / Geotechnical / Basement Impact Assessment
+    reason: "duplicate: the same trigger as the Coal Mining / Land Stability row"
+  - local-name: Lawful development evidence (statutory declarations etc.)
+    reason: "wrong_app_type: from NYPA6 (lawful development), filed under non-material amendment; re-added
+      below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      This will be required for housing developments where the number of units exceeds the threshold
+      set out in the Authority’s Affordable Housing Policy
+    source-url: &list https://www.northyorks.gov.uk/sites/default/files/2023-07/Application%20validation%20requirements%20-%20accessible_1.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt merged three headings. The threshold is in the authority's
+      affordable housing policy, not the list."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: The development is inside, or adjacent to, an Air Quality Management Area.
+        - discretionary
+    confidence: medium
+    notes: "Also where the development could itself lead to an AQMA or conflict with the Air Quality Action
+      Plan (officer discretion)."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: >-
+          There are trees within the site, or on adjacent land, that could influence or be affected by
+          the development (including street trees).
+    must-include:
+      - item: Which trees are to be retained
+        level: must
+      - item: The means of protecting retained trees during construction works
+        level: must
+    confidence: medium
+    notes: "Audit (missing_requirement): NYPA1 (householder) also asks for it where works are within 10m of
+      the crown spread of a TPO tree or a conservation area tree."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: Protected species are likely to be affected.
+        - site:
+            in: [site-of-special-scientific-interest, special-protection-area, special-area-of-conservation,
+              local-wildlife-site, priority-habitat]
+            description: Designated sites or priority habitats are likely to be affected.
+        - discretionary
+    confidence: medium
+    notes: "Audit (missing_requirement): NYPA1 householder: where protected species, designated sites,
+      priority habitats or geological features are likely to be affected (geological features shown as
+      officer discretion)."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the statutory biodiversity gain condition.
+    confidence: medium
+    notes: "Audit (other): the workbook cites the 12 February 2024 statutory date from the web page, not the
+      2016 list."
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: >-
+      Where there is a potential adverse impact on the sunlight/daylight of adjoining properties,
+      gardens or amenity space. Audit (missing_requirement): NYPA1 householder: where habitable
+      windows may lose light or be overshadowed, or a building taller than one storey is within 2m of
+      a neighbouring residential boundary.
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - any:
+            - ref: major-development
+            - all:
+                - site:
+                    in: [conservation-area, world-heritage-site]
+                    description: Any part of the development is in a designated area.
+                - discretionary
+    confidence: medium
+    notes: "Outline or full applications for major development, or for development in a designated area (the
+      excerpt is cut off before the designated-area thresholds)."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: Development of 1 hectare or greater in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Development of 1 hectare or greater in Flood Zone 1.
+        - site:
+            in: [flood-risk-zone]
+            description: New development in Flood Zone 2 or 3 (where Flood Risk Standing Advice requires it).
+    confidence: medium
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, park-and-garden,
+              scheduled-monument, world-heritage-site]
+            description: The application is likely to affect a designated heritage asset or its setting.
+    confidence: medium
+    notes: "Audit (wrong_app_type): it applies to planning applications generally, not only listed building
+      consent ('in appropriate circumstances')."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: >-
+          Publicly accessible development near residential property, a listed building, a conservation
+          area or open countryside, where external lighting would be provided or made necessary.
+    must-include:
+      - item: Details of the proposed external lighting
+        level: must
+      - item: The hours when the lighting would be switched on
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): it applies to planning applications generally, not only listed building
+      consent."
+
+  - id: noise-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Audit (wrong_app_type): the excerpt is the householder checklist's note that 'a noise assessment
+      may be required for domestic wind turbines'."
+
+  - id: schedule-of-works
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [lbc]
+        - discretionary
+    confidence: medium
+    notes: "A statement including a schedule of works to the listed building 'may be required'."
+
+  - id: telecommunications-report
+    action: replace
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Telecommunications development.
+    source-url: *list
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook's excerpt was the fragment 'Radiation Protection (ICNIRP).'."
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "'All developments which generate significant amount of movement'."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Where the case rests on financial grounds, a viability assessment by a suitably qualified valuer."
+
+unmapped:
+  - local-name: Sworn affidavits (certificate of lawfulness, existing use)
+    source-text: >-
+      Sworn affidavit(s) from people with personal knowledge of the use or development Required where
+      the application is for an existing use or development
+    source-url: *list
+    suggested-id: lawful-development-evidence
+
+low-confidence:
+  - id: "*"
+    note: >-
+      Audit (wrong_document): this is the 2016 County Planning Authority list, now used for minerals,
+      waste and the council's own development; most applications are validated against the former
+      district areas' own lists, which are not captured yet.
