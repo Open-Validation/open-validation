@@ -1,0 +1,421 @@
+# Corrections for Rochford District Council, from the council's audit.
+# The audit read Rochford's Local Validation List web pages (in effect from 22 November 2022, page last
+# updated 8 May 2025). For about 20 requirements the workbook captured only the column headings 'What
+# must you do? When is it needed? Why is it needed?', so most triggers below are the audit's summary
+# ("From the audit"). The list applies to householder, full, outline, LBC and advertisement consent.
+local-authority: ROC
+
+drop:
+  - id: waste-management-plan
+    reason: "wrong_trigger: Parking/Energy text; the list has no separate refuse requirement"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advice text inside the Heritage guidance"
+  - local-name: Drainage Strategy / SuDS
+    reason: "duplicate: one item with the Flood Risk Assessment"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "duplicate: the Affordable Housing Statement and/or Viability Appraisal text (now in
+      affordable-housing-statement)"
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_trigger: Landscaping Details text; Parking and Access Details re-added below"
+  - local-name: Highways / access details (visibility splays)
+    reason: "duplicate: column headings only; Parking and Access Details re-added below"
+  - local-name: Structural Survey
+    reason: "wrong_app_type: placed under LDC and prior approval, which the list does not cover; re-added below"
+  - local-name: Design Code / Masterplan / Parameter plans
+    reason: "wrong_app_type: belongs under Outline (Parameters Plans); re-added below"
+  - local-name: Crime prevention / Secured by Design statement
+    reason: "wrong_trigger: column headings only; re-added below with the audit's trigger"
+  - local-name: Employment / Economic Statement
+    reason: "wrong_trigger: column headings only; re-added below with the audit's trigger"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: column headings only; re-added below with the audit's trigger"
+  - local-name: Landscape and Visual Impact Assessment
+    reason: "wrong_trigger: column headings only; re-added below with the audit's trigger"
+
+requirements:
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: Developments of 10 dwellings or more.
+    source-text: >-
+      Please do describe how the homes will be kept affordable in perpetuity adhere to the Requirement
+      for 10% affordable housing provision for 10 dwellings or more (NPPF), 35% affordable housing
+      provision for 15 dwellings or more (policy H4 of the Core Strategy 2011) include plans or details of
+      numbers of affordable units, tenures, numbers of habitable rooms and bedrooms, floor space justify
+      any variation from policy
+    source-url: https://www.rochford.gov.uk/how-to-prepare-a-valid-planning-application
+    policy: Core Strategy 2011 H4
+    must-include:
+      - item: How the homes will be kept affordable in perpetuity
+        level: must
+      - item: Plans or details of the numbers of affordable units, tenures, numbers of habitable rooms and
+          bedrooms, and floor space
+        level: must
+      - item: Justification of any variation from policy
+        level: must
+    confidence: medium
+    notes: "Audit (duplicate): the source heading is 'Affordable Housing Statement and/or Viability Appraisal -
+      Developments of 10 dwellings or more'; the workbook filed it under Planning Obligations and Viability."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 4
+            description: The site is over 4 hectares.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 4
+            description: The site is over 4 hectares.
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 10000
+            description: 10,000 square metres or more of floorspace.
+        - site:
+            in: [air-quality-management-area]
+            description: Air Quality Management Area triggers.
+    confidence: medium
+    notes: "From the audit (wrong_trigger): major development, sites over 4 ha, 10,000 sq m or more, and AQMA
+      triggers. The workbook captured only column headings."
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees on or next to the site.
+    source-url: https://www.rochford.gov.uk/how-to-prepare-a-valid-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): Tree Survey and Arboricultural Impact Assessment, for trees
+      on or next to the site, householder included."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      site:
+        in: [archaeological-priority-area, scheduled-monument]
+        description: Sites on or adjacent to a heritage asset of archaeological interest.
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: roof-alteration
+            value: true
+            description: A roof alteration.
+        - condition:
+            field: upper-floor-extension
+            value: true
+            description: Alterations or extensions above eaves level.
+        - condition:
+            field: external-alterations
+            value: true
+            description: Works affecting external cladding.
+        - condition:
+            field: demolition
+            value: true
+            description: Demolition.
+    notes: "Bat Declaration / Bat Survey. Audit (missing_requirement): this also covers householder work."
+
+  - id: construction-management-plan
+    action: update
+    required-if:
+      ref: major-development
+    confidence: medium
+    notes: "From the audit (wrong_trigger): major applications."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is EIA development.
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: 1 hectare or more in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: 1 hectare or more in Flood Zone 1.
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in a flood zone.
+    confidence: medium
+    notes: "From the audit (wrong_trigger): 1 ha or more in Flood Zone 1, plus flood zone triggers. The Surface
+      Water Drainage Strategy/SuDS is part of the same item."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [conservation-area, listed-building, listed-building-setting]
+            description: The site is within or next to a Conservation Area or a listed building.
+    confidence: medium
+    notes: "From the audit (wrong_trigger, missing_requirement): within or next to a CA or listed building, and
+      LBC applications; householder included."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: Contamination is known or suspected.
+    source-url: https://www.rochford.gov.uk/how-to-prepare-a-valid-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement)."
+
+  - id: landscaping-plan
+    action: update
+    required-if: discretionary
+    source-text: >-
+      Detail the proposed planting around the site and maintenance during and post development, supported
+      by an annotated plan All applications except those with no change to the existing landscaping,
+      access, or use of open areasOutline applications where landscaping is not reserved.
+    must-include:
+      - item: The proposed planting around the site, supported by an annotated plan
+        level: must
+      - item: Maintenance during and after development
+        level: must
+    notes: "Needed for all applications except those with no change to the existing landscaping, access or use
+      of open areas, and outline applications where landscaping is not reserved; there is no field for that."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: A noise-generating use near homes.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: A noise-sensitive use near a noise source.
+    source-url: https://www.rochford.gov.uk/how-to-prepare-a-valid-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): Noise and Vibration Impact Assessment."
+
+  - id: photos
+    action: update
+    must-include:
+      - item: An annotated plan showing where each photograph was taken from
+        level: must
+      - item: Photomontages and visuals from all key visual directions, with an assessment of the impact
+        level: must
+    notes: "The trigger was not captured; the must-include items are the council's 'Please do' list."
+
+  - id: planning-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [green-belt, listed-building]
+            description: The site is in the Green Belt or involves a listed building.
+    confidence: medium
+    notes: "From the audit (wrong_trigger): major, Green Belt, or listed building."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: Major residential development.
+    confidence: medium
+    notes: "From the audit (wrong_trigger): Open Space Assessment for major residential development."
+
+  - id: sci
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.rochford.gov.uk/how-to-prepare-a-valid-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): major applications."
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 5
+            description: 5 or more dwellings.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: 1,000 square metres or more of non-residential floorspace.
+    confidence: medium
+    notes: "From the audit (wrong_trigger): Energy and Sustainability Assessment / On-Site Renewable and Low
+      Carbon Energy Generation Statement."
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [prior-approval, full]
+        - condition:
+            field: telecommunications-development
+            value: true
+            description: The application is for a telecommunications mast.
+    confidence: medium
+    notes: "From the audit (wrong_trigger): prior approval and full applications for masts."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: A commercial proposal outside a town centre boundary.
+    source-url: https://www.rochford.gov.uk/how-to-prepare-a-valid-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): Town Centre/Retail/Leisure Impact Assessment."
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 50
+            description: 50 or more dwellings.
+        - discretionary
+    confidence: medium
+    notes: "From the audit (wrong_trigger): major traffic-generating development (shown as discretionary), or
+      50 or more dwellings. One item with the Travel Plan."
+
+  - id: travel-plan
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 50
+            description: 50 or more dwellings.
+        - discretionary
+    confidence: medium
+    notes: "From the audit (wrong_trigger): major traffic-generating development (shown as discretionary), or
+      50 or more dwellings. One item with the Transport Assessment."
+
+  - id: viability-assessment
+    action: update
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: Developments of 10 dwellings or more.
+    notes: "Audit (duplicate): one item with the Affordable Housing Statement ('Affordable Housing Statement
+      and/or Viability Appraisal - Developments of 10 dwellings or more')."
+
+unmapped:
+  - local-name: Parking and Access Details
+    source-text: "From the audit: change of use; new buildings or extensions; new dwellings or commercial uses;
+      outline/reserved matters where layout is determined"
+    source-url: https://www.rochford.gov.uk/how-to-prepare-a-valid-planning-application
+    suggested-id: parking-plan
+  - local-name: Structural Survey (demolition and conversions)
+    source-text: "A structural survey will be required in the following circumstances:demolition, or partial
+      demolition of a Listed building(s) or Locally Listed Buildingconversion of a listed building where
+      significant structural alterations are proposed.conversion of Agricultural Buildingsdemolition, or
+      partial demolition of a dwelling to implement extension either under planning permission or permitted
+      development (LDC proposed applications)"
+    source-url: https://www.rochford.gov.uk/how-to-prepare-a-valid-planning-application
+    suggested-id: structural-survey
+  - local-name: Parameters Plans (outline)
+    source-text: "Parameters Plans - Outline applications where some or all matters are reserved"
+    source-url: https://www.rochford.gov.uk/how-to-prepare-a-valid-planning-application
+    suggested-id: parameter-plans
+  - local-name: Crime Impact Statement or Security Consideration Assessment
+    source-text: "From the audit: major development, or non-major development with significant crime risk"
+    source-url: https://www.rochford.gov.uk/how-to-prepare-a-valid-planning-application
+    suggested-id: crime-prevention-statement
+  - local-name: Economic Statement
+    source-text: "From the audit: non-residential major development"
+    source-url: https://www.rochford.gov.uk/how-to-prepare-a-valid-planning-application
+    suggested-id: employment-statement
+  - local-name: Health Impact Assessment
+    source-text: "From the audit: 10 or more dwellings, or 1,000 sq m or more of non-residential floorspace"
+    source-url: https://www.rochford.gov.uk/how-to-prepare-a-valid-planning-application
+    suggested-id: health-impact-assessment
+  - local-name: Landscape and Visual Assessment
+    source-text: "From the audit: major applications"
+    source-url: https://www.rochford.gov.uk/how-to-prepare-a-valid-planning-application
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Alternative Site Assessment
+    source-text: "From the audit: residential development on Metropolitan Green Belt land"
+    source-url: https://www.rochford.gov.uk/how-to-prepare-a-valid-planning-application
+    suggested-id: ""
+  - local-name: BREEAM Statement
+    source-text: "From the audit: new non-residential buildings"
+    source-url: https://www.rochford.gov.uk/how-to-prepare-a-valid-planning-application
+    suggested-id: sustainability-statement
+  - local-name: Education Assessment
+    source-text: "From the audit: major residential development"
+    source-url: https://www.rochford.gov.uk/how-to-prepare-a-valid-planning-application
+    suggested-id: ""
+  - local-name: Equality and Diversity Impact Statement
+    source-text: "From the audit: major applications, plus physical changes to employment, community or public
+      buildings"
+    source-url: https://www.rochford.gov.uk/how-to-prepare-a-valid-planning-application
+    suggested-id: ""
+  - local-name: Foul Sewage and Utilities Assessment
+    source-text: "From the audit: major applications"
+    source-url: https://www.rochford.gov.uk/how-to-prepare-a-valid-planning-application
+    suggested-id: utilities-statement
+  - local-name: Materials Schedule
+    source-text: "From the audit: new or altered shop fronts, conservation area or listed building, major"
+    source-url: https://www.rochford.gov.uk/how-to-prepare-a-valid-planning-application
+    suggested-id: materials-schedule
+  - local-name: Play Space / Playing Pitch / Sports Justification
+    source-text: "From the audit: major residential, or loss of play space"
+    source-url: https://www.rochford.gov.uk/how-to-prepare-a-valid-planning-application
+    suggested-id: recreation-facilities-assessment
+  - local-name: Demolition Justification and Site Management Plan
+    source-text: "From the audit: demolition with no redevelopment"
+    source-url: https://www.rochford.gov.uk/how-to-prepare-a-valid-planning-application
+    suggested-id: ""
+  - local-name: Youth and Community Facilities Assessment
+    source-text: "From the audit: major residential development"
+    source-url: https://www.rochford.gov.uk/how-to-prepare-a-valid-planning-application
+    suggested-id: ""
+  - local-name: Heritage Drawings
+    source-text: "From the audit: works to a listed building or in a conservation area (including outline in a
+      conservation area)"
+    source-url: https://www.rochford.gov.uk/how-to-prepare-a-valid-planning-application
+    suggested-id: ""

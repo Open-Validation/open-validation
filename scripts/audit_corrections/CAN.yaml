@@ -1,0 +1,448 @@
+# Corrections for Cannock Chase District Council, from inputs/audit/cannock-chase-district-council.json.
+# The workbook links the council's current checklist ('CCDC validations_document_Jan 2024'), a
+# .docx the audit could not read (contents_checked: false). The audit compared Grokbot's excerpts
+# with the superseded 'Draft, May 2022' document, which has the same six checklists:
+# 1 Householder; 2 Residential and 3 Non-residential (full, outline and reserved matters);
+# 4 Advertisements; 5 Listed building consent; 6 Lawful development certificates.
+# Grokbot also mixed in rows from that May 2022 draft. Corrections are kept light; items without
+# the council's own words use the audit's paraphrase ("From the audit").
+local-authority: CAN
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is the arboricultural trigger; there is no LBC schedule-of-works item"
+  - id: photos
+    sheets: [Listed building consent]
+    reason: "wrong_trigger: the LBC row carries the advertisement photographs text"
+  - id: floor-plan-existing
+    sheets: [Full planning]
+    reason: "duplicate: the Full planning row is the May 2022 draft's street scene text"
+  - id: floor-plan-proposed
+    sheets: [Full planning]
+    reason: "duplicate: as above"
+  - id: elevation-existing
+    sheets: [Full planning]
+    reason: "duplicate: as above"
+  - id: elevation-proposed
+    sheets: [Full planning]
+    reason: "duplicate: as above"
+
+drop-unmapped:
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "misnamed: the excerpt is the Biodiversity Survey and Report trigger (now in biodiversity-survey-report)"
+  - local-name: Advertisement drawings / illumination details
+    reason: "duplicate: a fragment of the lighting details text (lighting-assessment)"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: a fragment that drops the 10+ houses trigger; re-added below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Required where a proportion of affordable housing is required, whether via on-site provision or off-site contribution."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      all:
+        - site:
+            in: [air-quality-management-area]
+            description: The site is in an Air Quality Management Area.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: New residential development.
+    confidence: medium
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [hh]
+            - condition:
+                field: trees-on-or-near-site
+                value: true
+                description: Trees within 15m (edge of trunk) of the development, on the site or
+                  adjoining land, including street trees.
+        - all:
+            - application-type:
+                in: [full, outline, reserved-matters]
+            - condition:
+                field: trees-on-or-near-site
+                value: true
+                description: Building, demolition or engineering works where there are trees within
+                  or adjoining the site with a stem of more than 75mm diameter at 1.5m above ground.
+    source-text: >-
+      Arboricultural Impact Statement Required where trees are located within 15m (edge of trunk)
+      of development (on the site or adjoining land, including street trees).
+
+      … and Arboricultural Method Statements All developments involving building, demolition or
+      engineering works where there are trees within or adjoining the application site which have
+      a stem of more than 75mm (3 inches approx.) diameter at 1.5 metres above ground level.
+    source-url: https://www.cannockchasedc.gov.uk/sites/default/files/document-library/CCDC%20validations_document_Jan%202024_final_0_0.docx
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, wrong_trigger): the 15m trigger is from the householder checklist; the
+      75mm trigger was in the workbook's 'schedule of works' row. Which checklist the 75mm text
+      belongs to is the audit's reading of the structure.
+
+  - id: archaeological-assessment
+    action: update
+    must-include:
+      - item: Description of the site, the potential for archaeology and its significance
+        level: must
+      - item: Impact of the proposed development on this archaeology
+        level: must
+      - item: Confirmation of the need or otherwise for field evaluation
+        level: must
+      - item: Advice on the most appropriate way to avoid or minimise conflict between the
+          conservation of any archaeology and any aspect of the proposed development
+        level: must
+    confidence: low
+    notes: "Audit (wrong_trigger): the excerpt gives the desk-based assessment's contents, not when it is required."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      condition:
+        field: protected-species
+        value: true
+        description: Demolition or conversion of buildings or roof spaces, alterations to cellars, or
+          loss of semi-natural habitats that may affect protected species.
+    source-text: >-
+      Biodiversity Survey and Report Required when certain proposals which include
+      demolition/conversion of buildings or roof spaces and alterations to cellars or loss of
+      semi-natural habitats that may affect protected species such as bats nesting birds and great
+      crested newts.
+    source-url: https://www.cannockchasedc.gov.uk/sites/default/files/document-library/CCDC%20validations_document_Jan%202024_final_0_0.docx
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's ecology excerpt was a fragment; the full trigger was in its 'Biodiversity Checklist' row."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development would be subject to the general biodiversity gain condition.
+    confidence: medium
+
+  - id: construction-management-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - any:
+            - ref: major-development
+            - condition:
+                field: dwelling-count
+                operator: ">"
+                value: 10
+                description: Over 10 dwellings.
+            - discretionary
+    source-url: https://www.cannockchasedc.gov.uk/sites/default/files/document-library/CCDC%20validations_document_Jan%202024_final_0_0.docx
+    confidence: medium
+    notes: >-
+      Audit (not_a_requirement, missing_requirement): the workbook's Outline row says outline
+      applications will not normally require one. From the audit (May 2022 draft): full
+      applications for major development, over 10 dwellings, near sensitive uses or with
+      restricted access (the last two shown as officer discretion).
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: building-height
+            operator: ">"
+            value: 2.5
+            description: A proposed building over 2.5m high within 2m of a boundary.
+        - discretionary
+    confidence: medium
+    notes: "Householder checklist item. 'Within 2m of a boundary' cannot be expressed; other cases with impacts on neighbours' amenity are officer discretion."
+
+  - id: elevation-proposed
+    action: update
+    required-if:
+      application-type:
+        in: [lbc, ldc, advertising]
+    must-include:
+      - item: Details of internal alterations or joinery at 1:1, 1:10 or 1:20 (as appropriate)
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+      - item: Existing and proposed buildings shown with the advertisements in situ
+        level: must
+        required-if:
+          application-type:
+            in: [advertising]
+    confidence: low
+    notes: >-
+      "All applications unless disproportionate to the nature of the change proposed" (LBC
+      checklist). From the audit (missing_requirement): Checklist 6 asks for existing and proposed
+      elevations and floor plans for lawful development certificates, and Checklist 4 for
+      elevations with the advertisements in situ.
+  - id: elevation-existing
+    action: update
+    required-if:
+      application-type:
+        in: [lbc, ldc]
+    confidence: low
+  - id: floor-plan-existing
+    action: update
+    required-if:
+      application-type:
+        in: [lbc, ldc]
+    confidence: low
+  - id: floor-plan-proposed
+    action: update
+    required-if:
+      application-type:
+        in: [lbc, ldc]
+    must-include:
+      - item: Details of internal alterations or joinery at 1:1, 1:10 or 1:20 (as appropriate)
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+    confidence: low
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is EIA development.
+    confidence: medium
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: The building is 18 metres or more in height.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: The building contains 7 or more storeys.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 2
+            description: A high-rise residential building.
+    confidence: low
+    notes: "From the superseded May 2022 draft (audit: outdated_link)."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      site:
+        in: [flood-risk-zone]
+        description: The development is within Flood Zone 2 or 3.
+    source-text: A site-specific flood risk assessment is required for all development within Flood Zone 2 or 3.
+    source-url: https://www.cannockchasedc.gov.uk/sites/default/files/document-library/CCDC%20validations_document_Jan%202024_final_0_0.docx
+    confidence: medium
+    notes: "Audit (wrong_app_type): filed under prior approval only because the draft's text mentions change of use."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [locally-listed-building, conservation-area]
+            description: The proposal affects a building of character, a locally listed building or
+              another building in a conservation area.
+    source-text: >-
+      Heritage Statement Required for proposals affecting buildings of character, locally listed
+      buildings and other buildings in a conservation area. … Heritage Statement / Planning
+      Statement All applications in order to provide the context for the nature of the change
+      sought.
+    source-url: https://www.cannockchasedc.gov.uk/sites/default/files/document-library/CCDC%20validations_document_Jan%202024_final_0_0.docx
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the LBC row carried the householder conservation-area text. The LBC
+      checklist asks for a Heritage Statement / Planning Statement on all applications.
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: external-lighting
+            value: true
+            description: The proposal involves lighting or floodlighting.
+        - condition:
+            field: illuminated
+            value: true
+            description: Illumination of advertisements.
+    must-include:
+      - item: Details of the precise means of illumination
+        level: must
+      - item: Siting, numbers and timing of lights, with their intensity expressed as a Lux
+          measurement
+        level: should
+    confidence: medium
+    notes: >-
+      "Proposals involving lighting, floodlighting or other illumination of advertisements shall
+      provide details of the precise means of illumination." The siting/Lux item is from the May
+      2022 draft.
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: plant-equipment
+            value: true
+            description: Air-conditioning units and some micro-generation technologies.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise-sensitive development near roads, rail or other noise sources.
+    confidence: medium
+    notes: >-
+      Air-conditioning and micro-generation are householder checklist items. From the audit
+      (missing_requirement): a Noise/Vibration Impact Assessment for sensitive development near
+      roads, rail or noise sources (May 2022 draft).
+
+  - id: photos
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [advertising]
+        - discretionary
+    confidence: low
+    notes: "Photographs and photomontages are 'optional but advised for proposals where substantial advertisements are proposed'."
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - ref: major-development
+        - condition:
+            field: departure-from-development-plan
+            value: true
+            description: The development is not in accordance with adopted policy.
+    source-text: all major developments and any development not in accordance with adopted policy
+    source-url: https://www.cannockchasedc.gov.uk/sites/default/files/document-library/CCDC%20validations_document_Jan%202024_final_0_0.docx
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook used the LBC 'Heritage Statement / Planning Statement All applications' text, which still applies to listed building consent."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: New retail, leisure and office development outside existing town centres.
+    confidence: medium
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    confidence: medium
+
+  - id: viability-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - discretionary
+    source-text: >-
+      Financial Viability Appraisal Where financial considerations are relied upon to justify the
+      proposal or where viability is relied upon to justify a departure from adopted planning policy
+      - a financial appraisal will be required
+    source-url: https://www.cannockchasedc.gov.uk/sites/default/files/document-library/CCDC%20validations_document_Jan%202024_final_0_0.docx
+    confidence: medium
+    notes: "Audit (wrong_app_type): it belongs to Checklists 2/3, not the listed building consent checklist."
+
+  - id: waste-management-plan
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: New dwellings.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 0
+            description: New business floorspace.
+    must-include:
+      - item: The location of bin stores in relation to the proposed development
+        level: must
+      - item: The location of bins on collection day, with 'bin carry' distances clearly shown
+        level: must
+    confidence: medium
+
+unmapped:
+  - local-name: Planning Obligations / draft Heads of Terms
+    source-text: "then draft heads of terms clearly setting out the obligations that are likely to be bound in a section 106 agreement. (From the audit: 10+ houses)"
+    source-url: https://www.cannockchasedc.gov.uk/sites/default/files/document-library/CCDC%20validations_document_Jan%202024_final_0_0.docx
+    suggested-id: heads-of-terms
+  - local-name: Public Open Space calculation
+    source-text: A detailed calculation showing provision … on and off site POS must be incorporated … into the application.
+    source-url: https://www.cannockchasedc.gov.uk/sites/default/files/site-old/draft_validations_document.pdf
+    suggested-id: open-space-assessment
+  - local-name: Foul Sewerage Details
+    source-text: "From the audit: non-mains foul disposal (May 2022 draft)"
+    source-url: https://www.cannockchasedc.gov.uk/sites/default/files/site-old/draft_validations_document.pdf
+    suggested-id: foul-sewage-assessment
+  - local-name: Green Belt Statement
+    source-text: "From the audit: inappropriate development claiming very special circumstances (May 2022 draft)"
+    source-url: https://www.cannockchasedc.gov.uk/sites/default/files/site-old/draft_validations_document.pdf
+    suggested-id: green-belt-statement
+  - local-name: Housing Mix Statement
+    source-text: "From the audit: major residential development departing from the SHMA/policy (May 2022 draft)"
+    source-url: https://www.cannockchasedc.gov.uk/sites/default/files/site-old/draft_validations_document.pdf
+    suggested-id: housing-mix-statement
+  - local-name: Marketing Information
+    source-text: "From the audit: loss of employment or community facilities, about 6 months' marketing (May 2022 draft)"
+    source-url: https://www.cannockchasedc.gov.uk/sites/default/files/site-old/draft_validations_document.pdf
+    suggested-id: marketing-report
+  - local-name: Odour Impact Assessment
+    source-text: "From the audit: listed in Checklists 2/3 (May 2022 draft); no trigger given"
+    source-url: https://www.cannockchasedc.gov.uk/sites/default/files/site-old/draft_validations_document.pdf
+    suggested-id: odour-assessment
+  - local-name: Topographical Survey
+    source-text: "From the audit: major sites, and minor sites with level changes (May 2022 draft)"
+    source-url: https://www.cannockchasedc.gov.uk/sites/default/files/site-old/draft_validations_document.pdf
+    suggested-id: topographical-survey
+  - local-name: Lawful development certificate evidence
+    source-text: "From the audit: photographs; for existing uses, affidavits and utility or tenancy records (Checklist 6)"
+    source-url: https://www.cannockchasedc.gov.uk/sites/default/files/site-old/draft_validations_document.pdf
+    suggested-id: lawful-development-evidence
+  - local-name: Visibility splay details (advertisements)
+    source-text: "From the audit: signs near a junction (Checklist 4)"
+    source-url: https://www.cannockchasedc.gov.uk/sites/default/files/site-old/draft_validations_document.pdf
+    suggested-id: ""
+
+low-confidence:
+  - id: land-contamination-assessment
+    note: "Audit (wrong_trigger): the excerpt is content guidance, not when the assessment is required."
+  - id: transport-assessment
+    note: "Audit (wrong_trigger): the excerpt is a fragment that drops the Transport Assessment thresholds (e.g. over 200 dwellings), which the audit does not give in full."
+  - id: landscaping-plan
+    note: "Audit (wrong_trigger): the excerpt is cut off at 'Will be required for: 1.'"
+  - id: sci
+    note: "Audit (outdated_link): the excerpt is from the superseded May 2022 draft and gives contents, not a trigger."

@@ -1,0 +1,359 @@
+# Corrections for Teignbridge District Council, from the council's audit.
+# teignbridge.gov.uk blocked the audit (contents_checked: false), so this file rests on the
+# workbook's own excerpts from the main and householder validation guides (Updated February 2026).
+# It drops junk and swapped excerpts and structures the clear 'Required for:' triggers. Revised
+# guides went to consultation in Sept-Oct 2026 to reflect the new Local Plan and may since have been
+# adopted. The audit also notes sections with no row (3.13 Outstanding Conditions, 3.15 Designing
+# out Crime, 3.31 Retail and Leisure, 3.38 Vacant Building Credit) and type-specific guides
+# (listed building, advertisement, prior approval) that Grokbot did not read.
+local-authority: TEI
+
+validation-list:
+  date: 2026-02
+  date-basis: >-
+    document text 'Updated February 2026' (audit, wrong_date); a revised set was consulted on in
+    Sept-Oct 2026 and may supersede it
+
+submission-standards:
+  - item: Plans drawn to a recognised metric scale (e.g. 1:50), marked clearly on the plan
+    level: must
+  - item: A scale bar so that the scale can be checked
+    level: must
+  - item: A unique drawing number on each plan
+    level: must
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: both rows quote the Arboricultural Method Statement text"
+  - id: cil-form
+    sheets: [Full planning]
+    reason: "wrong_trigger: the Full planning excerpt is the site sections and levels trigger (2.5)"
+
+drop-unmapped:
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "not_a_requirement: a note that Devon's wildlife checklist doesn't replace the guide's criteria"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "wrong_trigger: the excerpt is '3.2 Agricultural Appraisal', which has its own row"
+  - local-name: Pre-application advice / engagement details
+    reason: >-
+      wrong_trigger: the householder row is a table-of-contents line and the full row is 3.19
+      Surface Water Management (re-added below)
+  - local-name: Landscape and Visual Impact Assessment
+    reason: "duplicate: the same section 3.25 as landscaping-plan"
+
+requirements:
+  - id: cil-form
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - any:
+            - condition:
+                field: floorspace
+                operator: ">"
+                value: 100
+                description: An extension over 100 square metres.
+            - condition:
+                field: residential-annexe
+                value: true
+                description: A residential annexe.
+    source-text: >-
+      3.3 Community Infrastructure Levy Form – Required for any extension over 100m2 or any
+      residential annexe
+    confidence: low
+    notes: "From the householder guide; the main guide's CIL section (3.12) was not captured."
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - application-type:
+                in: [hh]
+            - site:
+                in: [listed-building]
+                description: The householder application is accompanied by a listed building
+                  application.
+    confidence: low
+    notes: >-
+      Main guide 3.14: all major applications. Householder guide 3.4: when the householder
+      application is accompanied by a listed building application.
+
+  - id: section-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: Proposed new buildings.
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: There are variations in site levels.
+    source-text: >-
+      Existing and proposed site sections and finished floor and site levels Required for all
+      proposed new buildings or where there are variations in site levels.
+    confidence: low
+  - id: section-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: Proposed new buildings.
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: There are variations in site levels.
+    source-text: >-
+      Existing and proposed site sections and finished floor and site levels Required for all
+      proposed new buildings or where there are variations in site levels.
+    confidence: low
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      ref: major-development
+    confidence: low
+    notes: >-
+      Main guide 3.18: 'All Major Development (regardless of whether or not in a Flood Zone)'. The
+      rest of the trigger was not captured; the householder guide's simple FRA follows the
+      standing advice.
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area]
+            description: Affects a listed building, or a dwelling within or adjacent to a conservation
+              area or close to a heritage asset.
+        - discretionary
+    confidence: low
+    notes: >-
+      Householder guide 3.7 (affecting or combined with listed building applications; dwellings
+      within or adjacent to a conservation area; close to a heritage asset) and main guide 3.23
+      ('Affect a Listed Building').
+
+  - id: noise-assessment
+    action: update
+    required-if: discretionary
+    confidence: low
+    notes: "Householder guide: 'Noise assessment as appropriate'. The main guide's trigger (3.29) is cut off."
+
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: Residential development.
+    confidence: low
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: The proposal is in an AQMA.
+        - condition:
+            field: parking-spaces
+            operator: ">="
+            value: 100
+            description: New car parking of 100 spaces outside an AQMA (50 in an AQMA).
+        - discretionary
+    confidence: low
+    notes: >-
+      Main guide 3.3. Congestion, significant changes in traffic volume or composition, dust
+      emissions and impacts on nearby residents are shown as officer discretion.
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The application is not exempt from the biodiversity gain condition, as stated on
+          the application form.
+    confidence: low
+    notes: >-
+      Main guide 3.10: 'All applications in accordance with statement on the completed application
+      form'. The Devon BNG Statement for Validation checklist must also be completed (audit, wrong_app_type).
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: The answer to any 'Existing Use' question on the application form is 'yes'.
+        - discretionary
+    confidence: low
+    notes: "Main guide 3.24. A proposal likely to pose a risk to controlled waters is shown as officer discretion."
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      ref: major-development
+    confidence: low
+    notes: "Main guide 3.11 Carbon Reduction Plan: all major applications for residential or commercial development."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: Development within Schedule 1 or 2 of the EIA Regulations 2017 that needs EIA.
+    confidence: low
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building of 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: Educational accommodation.
+    confidence: low
+
+  - id: landscaping-plan
+    action: update
+    required-if: discretionary
+    confidence: low
+    notes: "Main guide 3.25: 'All Applications likely to have a significant landscape or visual impact'."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: The application involves significant external lighting.
+    confidence: low
+
+  - id: planning-statement
+    action: update
+    required-if:
+      ref: major-development
+    confidence: low
+
+  - id: sci
+    action: update
+    required-if:
+      ref: major-development
+    confidence: low
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: A telecommunications application.
+    must-include:
+      - item: The area of search
+        level: should
+      - item: Details of any consultation undertaken
+        level: should
+      - item: Details of the proposed structure
+        level: should
+      - item: Technical justification and information about the proposed development
+        level: should
+    confidence: low
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    confidence: low
+    notes: "Main guide 3.37: 'Schemes with significant transport implications'."
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    confidence: low
+    notes: "Main guide 3.37: 'Schemes with significant transport implications'."
+
+  - id: viability-assessment
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: Residential development.
+        - discretionary
+    confidence: low
+    notes: "Main guide 3.40: 'Major Residential applications not meeting Affordable Housing targets'."
+
+  - id: waste-management-plan
+    action: update
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 1
+        description: New residential development.
+    confidence: low
+    notes: "Main guide 3.5 Bin Storage: 'All Applications for new residential development'."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - all:
+            - any:
+                - condition:
+                    field: new-build
+                    value: true
+                    description: New builds.
+                - condition:
+                    field: involves-change-of-use
+                    value: true
+                    description: Change of use.
+            - condition:
+                field: greenfield-site
+                value: true
+                description: On a greenfield site.
+        - discretionary
+    confidence: low
+    notes: >-
+      Main guide 3.9: new builds or change of use on greenfield or vegetated brownfield sites (the
+      workbook put it under prior approval only). Vegetated brownfield sites are shown as officer
+      discretion; the guide's other ecology triggers were not captured.
+
+unmapped:
+  - local-name: Surface Water Management
+    source-text: >-
+      3.19 Surface Water Management Required for: All major new developments in accordance with
+      Planning and development - Flood Risk Management (devon.gov.uk).
+    source-url: https://www.teignbridge.gov.uk/media/d1mkeba1/validation-guide-february-2026.pdf
+    suggested-id: drainage-strategy

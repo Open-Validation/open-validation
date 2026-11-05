@@ -1,0 +1,565 @@
+# Corrections for Rossendale Borough Council, from inputs/audit/rossendale-borough-council.json.
+# Grokbot's link is the current Planning Validation Checklist ('Adopted September 2026', which the
+# build already takes). The checklist applies its Local Requirements list to every relevant
+# application, including householder (Appendix A), so the INFERRED 'Full planning' type is not
+# kept where a trigger is structured below. Lawful development certificate items had been filed
+# under Listed building consent. Items marked "From the audit" use the audit's paraphrase.
+local-authority: ROS
+
+submission-standards:
+  - item: All plans and drawings must include a unique drawing number (including revision number) and
+      unique title
+    level: must
+  - item: Plans submitted electronically must be in PDF format, with file names in the format
+      DrawingNumber_RevisionNumber_DrawingTitle.PDF; other filename formats cannot be accepted
+    level: must
+  - item: The drawing number, revision number and drawing title in the filename must be exactly the same
+      as those stated on the plan / drawing
+    level: must
+  - item: All applications accompanied by a list of submitted drawings (drawing register sheet), showing
+      the drawing number, revision number and drawing title
+    level: must
+  - item: Plans provided at the stated scale including the paper size (e.g. 1:200 at A1), accurately
+      showing the direction of north (where appropriate)
+    level: should
+
+drop:
+  - id: environmental-statement
+    reason: "wrong_trigger: the excerpt is 'the CMRA should be included within the ES', not a trigger"
+  - id: schedule-of-works
+    reason: "wrong_trigger: a method-statement fragment about safeguarding a retained structure"
+  - id: roof-plan-existing
+    reason: "wrong_trigger: the excerpt is fee text"
+  - id: roof-plan-proposed
+    reason: "wrong_trigger: the excerpt is fee text"
+
+drop-unmapped:
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_trigger: quotes the Mineral Resource Assessment (kept in its own unmapped row)"
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "wrong_trigger: the table of contents and introduction"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advice"
+  - local-name: Employment / Economic Statement
+    reason: "wrong_trigger: a fragment; the Proof of Marketing Statement is added below"
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "missing_requirement: the row held only the Land Stability Report text; both added below"
+  - local-name: Lawful development evidence (statutory declarations etc.)
+    reason: "the excerpt runs into the LBC section; re-added below with the LDC wording only"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if: discretionary
+    must-include:
+      - item: How the required percentage of affordable housing will be achieved on site
+        level: must
+      - item: The tenure of the proposed affordable units
+        level: must
+      - item: The number of bedrooms of the proposed affordable units
+        level: must
+      - item: Details of the Registered Provider or Housing Association who will manage the affordable
+          units (if applicable)
+        level: must
+    confidence: medium
+    notes: "For housing schemes that require affordable housing under policy; the list gives no threshold here."
+
+  - id: air-quality-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt omits the trigger for development within 10km of a designated
+      site (Local requirement 5)."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: The proposal could impact on trees within or adjacent to the site.
+    confidence: medium
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      site:
+        in: [archaeological-priority-area]
+        description: The site is in an area of known or potential archaeological interest.
+    confidence: medium
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development would be subject to the general biodiversity gain condition.
+    confidence: medium
+    notes: "From the audit (missing_requirement): local extras are a draft Biodiversity Gain Plan, HMMP and
+      GIS files."
+
+  - id: condition-of-trees
+    action: add
+    required-if:
+      application-type:
+        in: [consent-under-tpo]
+    source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+    confidence: medium
+    notes: "From the audit (missing_requirement): the Tree Works section asks for expert or diagnostic
+      evidence for TPO trees and evidence of damage or disease."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a Conservation Area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: One or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: 100 square metres or more of floorspace.
+        - application-type:
+            in: [lbc]
+    source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the householder plan list. From the audit: National
+      requirement 5, major development, Conservation Area 1+ dwelling or 100sqm, and LBC."
+
+  - id: elevation-existing
+    action: replace
+    required-if:
+      application-type:
+        in: [lbc]
+    source-text: >-
+      Applications for listed building consent shall be accompanied by: … Existing and proposed
+      elevation plans at a scale of 1:100 or 1:200
+    source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+    must-include:
+      - item: At a scale of 1:100 or 1:200
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type and missing_requirement): the workbook's LBC row quoted the LDC section."
+
+  - id: elevation-proposed
+    action: replace
+    required-if:
+      application-type:
+        in: [lbc]
+    source-text: >-
+      Applications for listed building consent shall be accompanied by: … Existing and proposed
+      elevation plans at a scale of 1:100 or 1:200
+    source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+    must-include:
+      - item: At a scale of 1:100 or 1:200
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type and missing_requirement): the workbook's LBC row quoted the LDC section."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: The building is 18m or more in height.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: The building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-text: >-
+      developers are now required to submit a fire statement for "relevant buildings" setting out
+      fire safety considerations specific to the development.
+    source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt ran into a footnote defining major development."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more in Flood Zone 1.
+        - site:
+            in: [flood-risk-zone]
+            description: All new development in Flood Zones 2 and 3.
+        - discretionary
+    source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was a fragment. From the audit (Local requirement
+      15): sites of 1ha+ in Flood Zone 1, all new development in Zones 2 and 3, and more-vulnerable
+      development at risk from any flood source (shown as officer discretion). Also on the
+      householder checklist.
+
+  - id: floor-plan-existing
+    action: replace
+    required-if:
+      application-type:
+        in: [ldc]
+    source-text: >-
+      Existing and proposed floor plans (for all applications involving use of a building) to a scale
+      not less than 1:100
+    source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+    must-include:
+      - item: At a scale not less than 1:100
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): this is the Lawful Development Certificate section, filed under LBC."
+
+  - id: floor-plan-proposed
+    action: replace
+    required-if:
+      application-type:
+        in: [ldc]
+    source-text: >-
+      Existing and proposed floor plans (for all applications involving use of a building) to a scale
+      not less than 1:100
+    source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+    must-include:
+      - item: At a scale not less than 1:100
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): this is the Lawful Development Certificate section, filed under LBC."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, scheduled-monument, park-and-garden,
+          conservation-area, locally-listed-building]
+        description: The proposal involves a Listed Building, Scheduled Monument, Registered Park or
+          Garden, the setting of a Listed Building, work in a Conservation Area or work to a local
+          heritage asset.
+    source-text: >-
+      Heritage Statement For planning applications which involve a Listed Building, Scheduled
+      Monument, Registered Park or Garden, impact on the setting of a Listed Building, involve work
+      within a Conservation Area and/or involve work to a local heritage asset, a Heritage Statement
+      will need to accompany the applications.
+    source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+    confidence: medium
+    notes: "Not limited to LBC: it is also on the householder checklist (audit: missing_requirement)."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: There is reason to suspect contamination (e.g. former industrial uses or
+              infilled ground).
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: The proposed end use is sensitive to contamination.
+    confidence: medium
+    notes: "The excerpt is cut off in the second case."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: The application includes new external lighting.
+    confidence: medium
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      condition:
+        field: noise-generating-use
+        value: true
+        description: The proposal is likely to generate noise and is close to noise sensitive areas
+          (e.g. residential areas).
+    confidence: medium
+
+  - id: photos
+    action: replace
+    required-if:
+      application-type:
+        in: [lbc, consent-under-tpo]
+    source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted bat-survey text. From the audit: the Listed Building
+      Consent and Tree Works sections both ask for photographs.
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [ldc]
+    source-text: >-
+      Supporting Planning Statement (to include statement of grounds on which the Certificate is
+      sought)
+    source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+    must-include:
+      - item: A statement of the grounds on which the Certificate is sought
+        level: must
+        required-if:
+          application-type:
+            in: [ldc]
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type and missing_requirement): the workbook filed the LDC wording under LBC.
+      From the audit: a Planning Statement is also required for all major development.
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      site:
+        in: [open-space]
+        description: The application affects playing field land.
+    confidence: medium
+
+  - id: sci
+    action: update
+    required-if:
+      ref: major-development
+    confidence: medium
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: Ground levels would be modified.
+    confidence: low
+    notes: "The excerpt is a fragment ('...where ground levels outside the extension would be modified')."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: Ground levels would be modified.
+    must-include:
+      - item: A section plan through the building at a scale of 1:1 or 1:2
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+    confidence: low
+    notes: >-
+      The LBC section asks for 'A section plan through the building at a scale of 1:1 or 1:2'. The
+      levels excerpt is a fragment.
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: Block plan at a scale of 1:100 or 1:200
+        level: must
+      - item: Site boundaries, and the type and height of boundary treatment (e.g. walls, fences)
+        level: must
+      - item: The position of any building or structure on the other side of the boundaries
+        level: must
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: minor-development
+            value: true
+            description: Minor development.
+    source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Climate Change Statement for all minor and major development."
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: The application incorporates telecommunications.
+    must-include:
+      - item: Layout plan (1:100/1:200) detailing the position of the structure
+        level: must
+      - item: Elevation plan (1:50/1:100) detailing the height and design of the structure
+        level: must
+      - item: Section through the structure (1:10/1:20) detailing its width
+        level: must
+      - item: Elevation and layout plan (1:100/1:200) of associated equipment
+        level: must
+      - item: Certificate/statement confirming compliance with ICNIRP
+        level: must
+    confidence: medium
+    notes: "The list of items is cut off after the ICNIRP certificate."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: Main town centre uses not in an existing centre and not in accordance with an
+          up-to-date Local Plan.
+    confidence: medium
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 50
+            description: Residential development above 50 units (Transport Statement; above 80 units a
+              Transport Assessment).
+        - discretionary
+    source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted parking-statement text. From the audit: Local
+      requirement 36 sets thresholds, e.g. dwellings above 50 units for a TS and above 80 for a TA;
+      the other thresholds are shown as officer discretion.
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Where the application would not provide the obligations, affordable housing, contributions or
+      infrastructure required by policy."
+
+  - id: waste-management-plan
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates new dwellings.
+        - condition:
+            field: residential-extension
+            value: true
+            description: An extension to an existing dwelling.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 0
+            description: New retail, business or industrial development.
+    confidence: medium
+
+unmapped:
+  - local-name: Coal Mining Risk Assessment
+    source-text: "From the audit: non-householder applications in the Coal Authority Development High Risk
+      Area, excluding householder, heritage consents, advertisements, LDCs, hazardous substances, tree works
+      and prior notifications"
+    source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Land Stability Report
+    source-text: "Where an application is made in relation to a site where there is potential for land
+      instability, where any excavation of slopes is proposed, where significant retaining structures are
+      proposed, or where development is in proximity to land or property which would be particularly
+      sensitive to any land instability, a Land Stability Report is required to be submitted."
+    source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+    suggested-id: land-stability-report
+  - local-name: Lawful development evidence
+    source-text: "Sworn affidavit(s) from people with personal knowledge of the existing use or works carried
+      out Description of all uses of land within the site (if relevant)"
+    source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+    suggested-id: lawful-development-evidence
+  - local-name: Listed building detailed plans (1:20)
+    source-text: "Detailed plans at a scale of 1:20 showing all new doors, windows, panelling, fireplaces,
+      plaster moulding and other decorative details"
+    source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+    suggested-id: joinery-details
+  - local-name: Crime Impact Statement
+    source-text: "From the audit: residential of 25+ dwellings, multi-occupancy of 20+ rooms, commercial
+      units over 100 sqm or more than 3 units, hotels, care homes, licensed premises and similar listed uses"
+    source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+    suggested-id: crime-prevention-statement
+  - local-name: Proof of Marketing Statement
+    source-text: "From the audit: re-use of employment sites for housing under Local Plan Policy EMP3,
+      normally with 12 months' marketing"
+    source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+    suggested-id: marketing-evidence
+  - local-name: Surface water drainage strategy
+    source-text: "From the audit: all development (the Lancashire SuDS pro-forma is for major applications)"
+    source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+    suggested-id: drainage-strategy
+  - local-name: Access Ramp Details
+    source-text: "From the audit: a new external ramp"
+    source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+    suggested-id: ""
+  - local-name: Adoption Statement
+    source-text: "From the audit: new internal roads or connections to highways/services"
+    source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+    suggested-id: ""
+  - local-name: Shopfront Details
+    source-text: "From the audit: new shopfronts"
+    source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+    suggested-id: shopfront-details
+  - local-name: Accessible homes (M4(2)) plan
+    source-text: "From the audit: 5 or more dwellings"
+    source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+    suggested-id: accessible-housing-statement
+  - local-name: Demolition requirements
+    source-text: "From the audit: prior approval outside a Conservation Area, or full permission inside one
+      with floor plans, structural survey, ecology, tree survey and heritage statement"
+    source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+    suggested-id: ""
+  - local-name: Wind Energy information
+    source-text: "From the audit: all wind energy applications - photomontages/wireframes, ZTV maps, Public
+      Rights of Way plan, noise and shadow flicker (ETSU-R-97), peat and hydrology, decommissioning bond and
+      communications impacts, with thresholds by turbine number and height"
+    source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+    suggested-id: ""
+  - local-name: Domestic microgeneration / wind turbine details
+    source-text: "From the audit: householder checklist - manufacturer's specification, site plan 1:100/1:200,
+      elevations and roof plans 1:50/1:100"
+    source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+    suggested-id: ""
+  - local-name: Amendment documents (S73 and non-material amendments)
+    source-text: "From the audit: a description listing all amendments, a supporting statement, and original
+      and amended plans with changes identified"
+    source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+    suggested-id: amendment-documents
+
+low-confidence:
+  - id: biodiversity-survey-report
+    note: "The excerpt ('An ecological survey and report (to include where necessary a bat survey).') gives
+      no trigger; the designated-sites list in the workbook's HRA row may be the trigger."

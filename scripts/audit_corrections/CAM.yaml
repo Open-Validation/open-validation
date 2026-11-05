@@ -1,0 +1,524 @@
+# Corrections for Cambridgeshire County Council, from the council's audit (contents read from a
+# manual upload of the June 2025 documents).
+# The County's 'Our Local Validation List Requirements (June 2025)' and 'Local Validation
+# Checklist (Revised June 2025)' apply the same 22 items to every waste and County Council
+# (Regulation 3) planning application, including s73 and s73A, and do NOT apply to minerals.
+# So requirements here are scoped to waste-dev, reg-3 and s73 (the County's own s73
+# applications). The 'Minerals & waste' rows from the separate Mineral and Waste Policy Guidance
+# Checklist are not part of the validation list and are dropped. Several sub-items apply only in
+# one district (South Cambridgeshire, Huntingdonshire, Cambridge City, Fenland); the rules can't
+# express district, so those are noted. Items marked "From the audit" use the audit's paraphrase.
+# The build takes the date (June 2025) from the audit.
+local-authority: CAM
+
+submission-standards:
+  - item: All scale plans and drawings to a recognisable scale with a scale bar, in addition to the
+      national requirement of a north point
+    level: must
+
+drop:
+  - id: environmental-statement
+    reason: "wrong_app_type: Outline row from a biodiversity guidance-note fragment; the list says EIA is outside its scope"
+
+drop-unmapped:
+  - local-name: Advertisement drawings / illumination details
+    reason: "other: the text is the item 16 lighting assessment (isolux map); now in lighting-assessment"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "other: the text is the item 7A dry weather flows assessment; re-added below"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: the list only encourages pre-application advice"
+  - local-name: Minerals / Waste specific statements (county matters)
+    reason: "other: item 19 Waste Audit (now in waste-management-plan) and mineral policy-checklist text outside the list"
+  - local-name: Agricultural Land Classification / Soils
+    reason: "wrong_app_type: from the Mineral and Waste Policy Guidance Checklist, not the validation list"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: foul-drainage text, a bare heading and policy-checklist text; re-added below as item 7A"
+  - local-name: Foul Sewage / Utilities Statement
+    reason: "duplicate: part of item 7A, re-added below"
+  - local-name: Odour / Dust / Vibration assessment
+    reason: "wrong_trigger: quotes noise text; dust and bioaerosol items are added below"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: cut off and mixed with item 21; re-added below"
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_trigger: quotes the item 22 red-line rule"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "other: the text is the item 17 Odour Management Scheme; re-added below under its own name"
+
+requirements:
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3, s73]
+        - any:
+            - site:
+                in: [air-quality-management-area]
+                description: The site is within or next to an Air Quality Management Area.
+            - discretionary
+    source-text: >-
+      Is a waste proposal where there will be emissions to air, including dust, odour and bioaerosols.
+      … Within Huntingdonshire District Council’s area Air Quality Assessments are also required for the
+      following proposals: For developments where the floor space to be built is 10,000 square metres
+      or more or where the site area is 2 Hectares or more).
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted only the Huntingdonshire extra trigger. From the
+      audit: within or next to an AQMA; risk of AQMA designation or significant worsening; conflict
+      with an air quality action plan; or a waste proposal with emissions to air. These, and the
+      Huntingdonshire-only thresholds, have no fields, so they are shown as officer judgement.
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3, s73]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Trees or hedges on or next to the site could be affected.
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the 2014 biodiversity guidance notes. From the audit:
+      trees or hedges on or next to the site that could be affected."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3, s73]
+        - discretionary
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    confidence: low
+    notes: "Audit (other): the workbook quoted the Huntingdonshire low-emissions clause. Item 4 (biodiversity
+      survey and report) is triggered through the Biodiversity Checklist, whose answers aren't captured
+      here."
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      application-type:
+        in: [waste-dev, reg-3, s73]
+    source-text: Required for all applications except for BNG exempt developments
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    must-include:
+      - item: The watercourse metric
+        level: must
+        required-if:
+          condition:
+            field: near-watercourse
+            value: true
+            description: The site is within 10m of a watercourse.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook excerpt was cut off."
+
+  - id: construction-management-plan
+    action: update
+    required-if:
+      application-type:
+        in: [waste-dev, reg-3, s73]
+    confidence: low
+    notes: "Item 13A (construction environmental management plans and traffic management plans); the
+      workbook has only the checklist heading, without a trigger."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3, s73]
+        - any:
+            - site:
+                in: [flood-risk-zone]
+                description: The site is in Flood Zone 2 or 3.
+            - condition:
+                field: site-area-residential
+                operator: ">"
+                value: 1
+                description: A Flood Zone 1 site over 1 hectare.
+            - condition:
+                field: site-area-non-residential
+                operator: ">"
+                value: 1
+                description: A Flood Zone 1 site over 1 hectare.
+            - site:
+                in: [critical-drainage-area, surface-water-flood-risk]
+                description: A site with critical drainage problems or other sources of flooding.
+            - discretionary
+    source-text: >-
+      … include an FRA whether or not the development is likely to have an impact on flood risk (as
+      set out in footnote 63 of the NPPF).
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook kept only the Flood Zone 2/3 clause. From the audit: also
+      Flood Zone 1 sites over 1 ha, and smaller sites with other flood sources, a more vulnerable use,
+      hardstanding changes, SFRA future-risk areas or critical drainage problems (the last few shown
+      as officer judgement).
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3, s73]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, scheduled-monument,
+              park-and-garden, locally-listed-building, archaeological-priority-area]
+            description: The proposal may affect a heritage asset.
+    source-text: A Heritage Statement is required as part of or to accompany all planning applications 
+      which may affect Heritage Assets.
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    confidence: medium
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3, s73]
+        - any:
+            - site:
+                in: [contaminated-land]
+                description: Contamination is known or suspected on or near the site.
+            - condition:
+                field: sensitive-end-use
+                value: true
+                description: A vulnerable use such as a school or care home.
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted a guidance link. From the audit: contamination known or
+      suspected, a site near contaminated land, or a vulnerable use such as schools or care homes."
+
+  - id: landscaping-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3, s73]
+        - discretionary
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): from the audit, needed where tree or hedgerow removal needs compensatory
+      planting, or where planting could mitigate a visual impact."
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3, s73]
+        - condition:
+            field: external-lighting
+            value: true
+            description: External lighting is provided or made necessary, near residential property, a
+              listed building or a conservation area.
+    source-text: >-
+      Where external lighting would be provided or made necessary by development in the vicinity of
+      residential property, a listed building, conservation area, …
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    must-include:
+      - item: An isolux contour map, including vertical illuminance and showing neighbouring buildings
+        level: must
+        source-text: "and vertical illuminance and showing neighbouring buildings."
+      - item: A comprehensive lighting assessment for floodlit sports pitches
+        level: must
+        required-if:
+          all:
+            - application-type:
+                in: [reg-3]
+            - condition:
+                field: floodlighting
+                value: true
+                description: Floodlit sports pitches.
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook filed this under Listed building consent, which the County
+      list does not cover; the trigger list is cut off."
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3, s73]
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Development that will potentially generate noise (e.g. waste development, outdoor
+              sports pitches), particularly near noise-sensitive uses.
+    source-text: >-
+      A noise impact assessment is likely to be required for the following: Developments that will
+      potentially generate noise (e.g. waste development, outdoor sports pitches), particularly those in
+      the vicinity of existing noise sensitive uses such as residential, offices, schools, and hospitals.
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    must-include:
+      - item: Appropriate mitigation measures, in a Noise Management Scheme where necessary
+        level: must
+        source-text: "The noise/vibration assessment should identify appropriate mitigation measures and,
+          where necessary, these should be included in a Noise Management Scheme."
+    confidence: medium
+    notes: "Audit (wrong_app_type): applies to all applications under the list, not only Minerals & waste."
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      application-type:
+        in: [waste-dev, reg-3, s73]
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    must-include:
+      - item: The context and need for the proposed development, and how it accords with national and
+          development plan policies
+        level: must
+      - item: Consideration of Public Art (South Cambridgeshire District Council area only)
+        level: must
+        required-if:
+          condition:
+            field: floorspace
+            operator: ">="
+            value: 1000
+            description: Developments of 1,000 square metres and above.
+        source-text: "(i) Consideration of Public Art for developments of 1,000 square metres and above (South
+          Cambridgeshire District Council only)"
+    confidence: medium
+    notes: "Audit (wrong_trigger): the trigger should read 'All, except very minor developments with no policy
+      implications'."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      application-type:
+        in: [waste-dev, reg-3, s73]
+    confidence: low
+    notes: "Item 20 (Open Space / Playing Field Assessment); the workbook has only the checklist heading."
+
+  - id: roof-plan-existing
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3, s73]
+        - discretionary
+    source-text: Roof plans (e.g. at a scale of 1:50 or 1:100) - required only for complex roof 
+      structures.
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    must-include:
+      - item: At a scale such as 1:50 or 1:100
+        level: should
+    confidence: medium
+    notes: "Complex roof structures only; there is no field for that."
+
+  - id: roof-plan-proposed
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3, s73]
+        - discretionary
+    source-text: Roof plans (e.g. at a scale of 1:50 or 1:100) - required only for complex roof 
+      structures.
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    must-include:
+      - item: At a scale such as 1:50 or 1:100
+        level: should
+    confidence: medium
+    notes: "Complex roof structures only; there is no field for that."
+
+  - id: sci
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3, s73]
+        - discretionary
+    source-text: >-
+      … County Council’s Statement of Community Involvement, including how the views of the local
+      community have been sought and considered in the formulation of development proposals.
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    confidence: medium
+    notes: "From the audit (wrong_trigger): the trigger is 'Category A development' as defined in the SCI
+      (January 2019), which has no field."
+
+  - id: section-existing
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3, s73]
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: A sloping site, or the application involves level changes.
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): from the audit, sloping sites and all applications with level changes.
+      New landfill sites and extensions also need cross-sections (item 21)."
+
+  - id: section-proposed
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3, s73]
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: A sloping site, or the application involves level changes.
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): from the audit, sloping sites and all applications with level changes.
+      New landfill sites and extensions also need cross-sections (item 21)."
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3, s73]
+        - any:
+            - condition:
+                field: floorspace
+                operator: ">"
+                value: 1000
+                description: Development creating more than 1,000 square metres of floorspace.
+            - discretionary
+    source-text: For new schools and all developments creating more than 1,000m² of floor space.
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    must-include:
+      - item: How the proposal addresses climate change
+        level: must
+      - item: New buildings expected to reach BREEAM Very Good overall, with Excellent credits for Energy
+          and Water
+        level: should
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): item 5, Statement of sustainable design and construction.
+      In South Cambridgeshire it is needed for all applications; elsewhere for new schools and over
+      1,000 sq m (new schools and the district case shown as officer judgement). Not needed in
+      Cambridge City, which uses its own Sustainable Development Checklist (5(i)).
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3, s73]
+        - discretionary
+    source-text: Transport Assessment – where the proposed development has significant transport 
+      implications including new schools
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the low-emissions sentence. A Transport Statement is
+      needed where there are some transport implications."
+
+  - id: travel-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3, s73]
+        - any:
+            - condition:
+                field: pupil-increase
+                operator: ">="
+                value: 30
+                description: A school gains one or more classrooms (30 pupils).
+            - discretionary
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): from the audit, where vehicle movements rise significantly, a school gains
+      a net increase of one or more classrooms (30 pupils), or a pre-school is proposed."
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3, s73]
+        - any:
+            - condition:
+                field: demolition
+                value: true
+                description: The development involves demolition.
+            - site:
+                in: [contaminated-land]
+                description: Possibly contaminated brownfield land.
+            - condition:
+                field: earthworks
+                value: true
+                description: Significant earthmoving.
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    confidence: medium
+    notes: >-
+      Item 19 Waste Audit and Management Strategy. Audit (wrong_trigger, other): the workbook's rows were
+      waste-site aftercare text and mineral policy-checklist text. From the audit: demolition,
+      possibly contaminated brownfield land, or significant earthmoving. Guidance: 'Guidance on Waste
+      Audit and Management Strategies' (Cambridgeshire County Council, June 2013).
+
+unmapped:
+  - local-name: Local Authority Development Letter
+    source-text: "2. Local Authority Development Letter ... All applications submitted under Regulation 3 of
+      the 1992 Regulations."
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    suggested-id: local-authority-development-letter
+  - local-name: Information in support of applications for the storage, treatment or disposal of waste
+    source-text: "21. Information in support of applications for the storage, treatment, or disposal of
+      waste ... 1) New landfill sites or extensions ... 2) Proposals involving ... hazardous waste ...
+      incineration"
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    suggested-id: waste-facility-statement
+  - local-name: Health Impact Assessment
+    source-text: "A Health Impact Assessment for waste development involving hazardous waste and / or
+      incineration"
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-Checklist-2025.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Landscape and biodiversity enhancement management scheme
+    source-text: "11. Landscape and biodiversity enhancement management scheme ... Applications for new
+      landfill sites or their extension will require aftercare"
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    suggested-id: landscape-ecological-management-plan
+  - local-name: Cambridge City Sustainable Development Checklist
+    source-text: "(i) Cambridge City Completed Sustainable Development Checklist (Within Cambridge City only)"
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-Checklist-2025.pdf
+    suggested-id: ""
+  - local-name: Water Conservation Strategy
+    source-text: "(ii) Water Conservation Strategy (Within South Cambridgeshire only)"
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-Checklist-2025.pdf
+    suggested-id: water-efficiency-statement
+  - local-name: Surface water drainage strategy and foul drainage strategy
+    source-text: "From the audit: item 7A, major development, 1,000 sq m+ floorspace, sites of 1 ha+ in any
+      flood zone, or waste applications"
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    suggested-id: drainage-strategy
+  - local-name: Dry weather flows assessment
+    source-text: "Dry Weather Flows An appropriate assessment of dry weather flows is needed to avoid the risk
+      of increased flooding elsewhere, because of additional flows into the receiving watercourse"
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    suggested-id: ""
+  - local-name: Odour Management Scheme
+    source-text: "Where odour is likely to be an issue an Odour Management Scheme will normally be required
+      which sets out the possible odour sources, sensitive receptors, mitigation measures and monitoring
+      arrangements."
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    suggested-id: odour-assessment
+  - local-name: Dust Management Scheme
+    source-text: "From the audit: where dust is likely to be an issue (item 17)"
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    suggested-id: dust-management-plan
+  - local-name: Bioaerosols risk assessment
+    source-text: "A bioaerosols risk assessment is required for open air composting facilities within 250m of
+      a residential property."
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    suggested-id: bioaerosol-risk-assessment
+  - local-name: Low Emissions Strategy Statement
+    source-text: "that where a Transport Assessment / Statement or Travel Plan is required, a Low Emissions
+      Strategy statement should be integrated (See policies SC/12 and TI/2)."
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    suggested-id: low-emissions-strategy
+  - local-name: Parking justification and cyclist facilities (Huntingdonshire only)
+    source-text: "within Huntingdonshire District Councils area proposals for new non-residential buildings
+      over 2,500 square metres ... changing and showering facilities for cyclists"
+    source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
+    suggested-id: parking-plan

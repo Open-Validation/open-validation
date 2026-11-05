@@ -1,0 +1,407 @@
+# Corrections for East Cambridgeshire District Council, from
+# inputs/audit/east-cambridgeshire-district-council.json.
+# The audit compared the workbook with the council's Validation guidance document (linked from
+# the 'apply for planning permission' page; undated). Section 3 is national requirements and
+# Section 4 the local list, laid out in two columns, so many workbook excerpts bled into the
+# neighbouring entry. The list sets triggers by threshold, not by application type. Items marked
+# "From the audit" use the audit's paraphrase of the document.
+local-authority: ECA
+
+validation-list:
+  url: https://eastcambs.gov.uk/sites/default/files/2026-07/Validation%20Document%20for%20web%20proof%20links%20%284%29.pdf
+  date: 2026-07
+  date-basis: "URL upload folder '2026-07'; the document itself gives no date ('correct at the date of publication')"
+
+submission-standards:
+  - item: Drawings carry a unique drawing number which also indicates any revisions (for example, 1234
+      Rev B)
+    level: must
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_app_type: placed under Outline; the excerpt is about arboricultural method statements (now unmapped)"
+
+drop-unmapped:
+  - local-name: Structural Survey
+    reason: "wrong_trigger: shows the SCI trigger; re-added below with the real trigger"
+  - local-name: Foul Sewage / Utilities Statement
+    reason: "wrong_trigger: Building Regulations sentence; re-added below with the real trigger"
+  - local-name: Water efficiency / water usage statement
+    reason: "wrong_trigger: heading only; the Renewable Energy and Water Consumption Assessment is now energy-statement"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: retail sequential test text (now in town-centre-impact-assessment), not a flood test"
+  - local-name: Landscape and Visual Impact Assessment
+    reason: "wrong_app_type/wrong_trigger: shows the heritage trigger under LBC; re-added below"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: fragment of the air quality trigger (now in air-quality-assessment)"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not a separate requirement: a fragment of the block plan contents"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: Applications for 10 or more dwellings.
+        - condition:
+            field: housing-floorspace
+            operator: ">="
+            value: 1000
+            description: Fewer dwellings, if combined gross floorspace totals 1,000 square metres or more.
+    confidence: medium
+
+  - id: air-quality-assessment
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      Air Quality Assessment … Only required for the following: … Applications that have the
+      potential to cause or be affected by significant levels of air pollution or odour or any
+      potential air quality matters for future occupants.
+    source-url: https://eastcambs.gov.uk/sites/default/files/2026-07/Validation%20Document%20for%20web%20proof%20links%20%284%29.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt mixed in the Local BNG text ('Required for every application')."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees or hedge of any size in the red line boundary or next to it.
+    confidence: medium
+    notes: "The audit says this reaches householder schemes too."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      condition:
+        field: protected-species
+        value: true
+        description: Protected species or habitats may be affected.
+    source-url: https://eastcambs.gov.uk/sites/default/files/2026-07/Validation%20Document%20for%20web%20proof%20links%20%284%29.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted application form text. From the audit: where protected species or habitats may be affected, including householder schemes."
+
+  - id: cil-form
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: Any new dwelling.
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 100
+            description: An extension creating 100 square metres or more.
+    source-url: https://eastcambs.gov.uk/sites/default/files/2026-07/Validation%20Document%20for%20web%20proof%20links%20%284%29.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook placed it under Outline and Reserved matters only; it applies to any new dwelling or 100 sq m+ extension (CIL Form 1)."
+
+  - id: design-and-access-statement
+    action: replace
+    source-url: https://eastcambs.gov.uk/sites/default/files/2026-07/Validation%20Document%20for%20web%20proof%20links%20%284%29.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger, other): the workbook's excerpt was fee text. The Design and Access
+      Statement is in Section 3 (national requirements); its trigger was not captured, so the
+      national rules apply.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is deemed to be EIA development.
+    confidence: medium
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building of 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-text: >-
+      Fire Statements … Only required for the following: … Proposals that include creation,
+      development of existing or in the curtilage of a ‘relevant building’.
+    source-url: https://eastcambs.gov.uk/sites/default/files/2026-07/Validation%20Document%20for%20web%20proof%20links%20%284%29.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, other): the excerpt was mixed with the Drawings entry. A 'relevant
+      building' is the national definition (18m+ or 7+ storeys with 2+ dwellings or educational
+      accommodation). This is a Section 3 national requirement.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      site:
+        in: [flood-risk-zone]
+        description: Every application in Flood Zones 2, 3 or 3b, including minor development and
+          change of use.
+    source-text: >-
+      Flood Risk Assessment Only required for the following: every application in Flood Zones 2, 3
+      or 3b including minor development and change of use
+    source-url: https://eastcambs.gov.uk/sites/default/files/2026-07/Validation%20Document%20for%20web%20proof%20links%20%284%29.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement): this reaches householder schemes too, so no application type is given."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, conservation-area]
+        description: Proposals affecting any listed building, including development within its
+          curtilage and setting, or in a conservation area.
+    source-text: >-
+      Heritage Statement (Assessment of Significance) … Only required for the following: proposals
+      affecting any listed building, including development within their curtilage and setting
+    source-url: https://eastcambs.gov.uk/sites/default/files/2026-07/Validation%20Document%20for%20web%20proof%20links%20%284%29.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): it also applies to conservation areas and to householder schemes."
+
+  - id: landscaping-plan
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "In most cases this would not be required to validate an application (council's wording)."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - condition:
+            field: external-lighting
+            value: true
+            description: The application is likely to have a visual impact from lighting.
+    confidence: medium
+
+  - id: noise-assessment
+    action: replace
+    source-url: https://eastcambs.gov.uk/sites/default/files/2026-07/Validation%20Document%20for%20web%20proof%20links%20%284%29.pdf
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook's excerpt is the Lighting trigger; the real noise trigger was not captured."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      condition:
+        field: loss-of-open-space
+        value: true
+        description: Development that results in the loss of open space.
+    confidence: medium
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: Changes to a roof are proposed that cannot be easily assessed from the elevations.
+    source-text: >-
+      Where changes to a roof are proposed and these cannot be easily assessed from the elevation
+      plans a separate roof plan will be required.
+    confidence: medium
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: Changes to a roof are proposed that cannot be easily assessed from the elevations.
+    source-text: >-
+      Where changes to a roof are proposed and these cannot be easily assessed from the elevation
+      plans a separate roof plan will be required.
+    confidence: medium
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal involves a change in ground levels.
+    must-include:
+      - item: Both existing and finished levels
+        level: must
+    confidence: medium
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal involves a change in ground levels.
+    must-include:
+      - item: Both existing and finished levels
+        level: must
+    confidence: medium
+
+  - id: sci
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 50
+            description: Development in excess of 50 dwellings.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 1000
+            description: Development in excess of 1000 square metres of commercial floorspace.
+    confidence: medium
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "All developments that generate significant amounts of traffic (this can vary) or vehicle movement."
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "All developments that generate significant amounts of traffic (this can vary) or vehicle movement."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+
+  - id: waste-management-plan
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: Applications for dwellings.
+        - discretionary
+    confidence: low
+    notes: "Refuse Collection: 'all applications for dwellings under the following circumstances:' (the circumstances are cut off in the excerpt)."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Main town centre uses outside centres (sequential test).
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 280
+            description: Impact Assessment above 280 square metres.
+    source-text: >-
+      a Sequential Test – which considers whether there are any preferable sites against the
+      requirement that development should be in town centres, then edge of centre and finally out
+      of centre.
+    source-url: https://eastcambs.gov.uk/sites/default/files/2026-07/Validation%20Document%20for%20web%20proof%20links%20%284%29.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Retail and Town Centre Uses statement for main town centre uses outside centres, with an Impact Assessment above 280 sq m."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 1000
+            description: Buildings of 1,000 square metres or more gross external.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 5
+            description: Residential development of 5 or more units.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: Residential sites of 0.5 hectares or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Any site of 1 hectare or more.
+    source-url: https://eastcambs.gov.uk/sites/default/files/2026-07/Validation%20Document%20for%20web%20proof%20links%20%284%29.pdf
+    confidence: medium
+    notes: "From the audit (wrong_trigger): the Renewable Energy and Water Consumption Assessment ('1,000 sq m+ gross external... residential 5+ units... 0.5ha+'; 1ha+ any)."
+
+unmapped:
+  - local-name: Structural Survey
+    source-text: "From the audit: substantial demolition or alteration of a listed building, demolition in a Conservation Area, or conversion or restoration (including prior approval)"
+    source-url: https://eastcambs.gov.uk/sites/default/files/2026-07/Validation%20Document%20for%20web%20proof%20links%20%284%29.pdf
+    suggested-id: structural-survey
+  - local-name: Foul drainage / sewage details
+    source-text: "From the audit: new sewage system, 10+ dwellings, 1,000 sq m or 0.5ha"
+    source-url: https://eastcambs.gov.uk/sites/default/files/2026-07/Validation%20Document%20for%20web%20proof%20links%20%284%29.pdf
+    suggested-id: foul-sewage-assessment
+  - local-name: Landscape and Visual Impact Assessment
+    source-text: "From the audit: majors with significant visual impact and all EIA development"
+    source-url: https://eastcambs.gov.uk/sites/default/files/2026-07/Validation%20Document%20for%20web%20proof%20links%20%284%29.pdf
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Green Belt Statement
+    source-text: "From the audit: any application in the Green Belt at Bottisham, Lode or Swaffham Bulbeck"
+    source-url: https://eastcambs.gov.uk/sites/default/files/2026-07/Validation%20Document%20for%20web%20proof%20links%20%284%29.pdf
+    suggested-id: green-belt-statement
+  - local-name: Wildlife Hazard Risk Assessment
+    source-text: "From the audit: development within 13km of an aerodrome likely to attract hazardous birds"
+    source-url: https://eastcambs.gov.uk/sites/default/files/2026-07/Validation%20Document%20for%20web%20proof%20links%20%284%29.pdf
+    suggested-id: ""
+  - local-name: Utilities Statement
+    source-text: "From the audit: 10+ dwellings or 1,000 sq m+ commercial"
+    source-url: https://eastcambs.gov.uk/sites/default/files/2026-07/Validation%20Document%20for%20web%20proof%20links%20%284%29.pdf
+    suggested-id: utilities-statement
+  - local-name: Arboricultural Method Statement
+    source-text: "If it is apparent that the proposal will impact significantly on retained trees an Arboricultural Method Statement will be required."
+    source-url: https://eastcambs.gov.uk/sites/default/files/2026-07/Validation%20Document%20for%20web%20proof%20links%20%284%29.pdf
+    suggested-id: ""
+  - local-name: Parking/Servicing Details
+    source-text: "From the audit: 10+ dwellings or 1,000 sq m+, changed parking or access, or a change of use that intensifies parking. 'Submit details with all applications that have implications for parking and servicing.'"
+    source-url: https://eastcambs.gov.uk/sites/default/files/2026-07/Validation%20Document%20for%20web%20proof%20links%20%284%29.pdf
+    suggested-id: parking-plan
+  - local-name: Local Biodiversity Net Gain
+    source-text: "Local Biodiversity Net Gain … Required for every application"
+    source-url: https://eastcambs.gov.uk/sites/default/files/2026-07/Validation%20Document%20for%20web%20proof%20links%20%284%29.pdf
+    suggested-id: biodiversity-gain-statement
+
+low-confidence:
+  - id: land-contamination-assessment
+    note: "Audit (wrong_trigger): the excerpt is cut off before the threshold ('and possible land contamination test will be needed...')."
+  - id: site-plan
+    note: "Audit (wrong_trigger, other): the excerpt mixes block plan and location plan text from Section 3 (national requirements)."
+  - id: bng-metric
+    note: "Audit (other): the Mandatory BNG statement is a Section 3 national requirement, mixed in with the local list."

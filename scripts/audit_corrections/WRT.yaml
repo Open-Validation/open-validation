@@ -1,0 +1,505 @@
+# Corrections for Warrington Borough Council, from the audit of Warrington.
+# Grokbot read the superseded June 2020 checklist (amended 19 October 2023). The current list was
+# adopted 28 March 2024 (45 local items); a February 2026 draft was consulted on (5 March - 17 April
+# 2026) but has not been adopted. The workbook's excerpts are from the 2020/2023 version; audit
+# additions cite the 2024 list. Items the audit says are new in 2024 could not be verified by Grok
+# and are marked low. Submission standards are from the 2020/2023 version.
+# Items marked "From the audit" use the audit's paraphrase, not the council's exact words.
+local-authority: WRT
+
+submission-standards:
+  - item: No individual file larger than 10MB, and no more than 25MB in total; large documents broken
+      into manageable files
+    level: must
+  - item: Scanned documents at least 200 dpi for black and white and 100 dpi for colour
+    level: must
+  - item: All drawings correctly orientated for on-screen display
+    level: must
+  - item: Drawings include the scale they are drawn at and a scale bar
+    level: should
+
+drop:
+  - id: site-plan
+    reason: "wrong_trigger: the excerpt is file-naming and scanning text"
+  - id: design-and-access-statement
+    reason: "wrong_trigger, duplicate: the same file-naming and scanning text as the site plan row"
+  - id: daylight-sunlight-assessment
+    reason: "other: from a tree-survey bullet ('Sunlight and shading'); the list has no daylight
+      requirement"
+  - id: section-existing
+    reason: "wrong_trigger: the excerpt is the tree survey bullet list"
+  - id: section-proposed
+    reason: "wrong_trigger: the excerpt is the tree survey bullet list"
+
+drop-unmapped:
+  - local-name: Advertisement drawings / illumination details
+    reason: "other, duplicate: the floodlighting assessment text (now in lighting-assessment)"
+  - local-name: Tall buildings / Wind microclimate assessment
+    reason: "other: 'lighting to tall buildings' from the Lighting item; no wind requirement exists"
+  - local-name: Cycle parking details
+    reason: "duplicate: one Parking and Access item in the source (re-added below)"
+  - local-name: Electric vehicle charging details
+    reason: "duplicate: one Parking and Access item in the source (re-added below)"
+  - local-name: Parking provision / Parking plan
+    reason: "duplicate: guidance sentence of the Parking and Access item (re-added below)"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: fragment of site plan contents"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: the Affordable Housing text (now affordable-housing-statement)"
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "wrong_trigger: the demolition/structural survey trigger; re-added below with its own trigger"
+  - local-name: Structural Survey
+    reason: "wrong_trigger: Site Treatment Plan text; both re-added below"
+  - local-name: Biodiversity / Swift bricks / bird & bat boxes
+    reason: "wrong_app_type: the source says ecology statements are not required with prior
+      notifications"
+
+requirements:
+  - id: arboriculturist-report
+    action: replace
+    source-url:
+      https://warrington-lb.councilplatform.com/sites/default/files/2024-04/Adopted%20Validation%20Checklist%20-%2028-3-24.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted tree-works text (now condition-of-trees). The
+      list's tree survey covers matters such as site levels, services, demolition, sunlight and
+      shading, construction access and replacement planting (from the workbook's misfiled rows),
+      but its trigger was not captured.
+
+  - id: condition-of-trees
+    action: add
+    required-if:
+      application-type:
+        in: [consent-under-tpo, notice-trees-in-con-area]
+    source-text: damage and arboriculturist's report if the work required relates to the condition of
+      the tree.
+    source-url:
+      https://www.warrington.gov.uk/sites/default/files/2023-10/Adopted%20Validation%20Checklist%20-%20June%202020%20%28amended%20Sept%2023%29.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): tree-works text the workbook filed as an arboricultural
+      impact assessment under Full planning."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the biodiversity gain condition (major from 12 Feb
+          2024, minor from 2 April 2024, with exemptions).
+    confidence: medium
+    notes: "From the audit (missing_requirement): the 2024 list adds a Biodiversity Net Gain Strategy."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    confidence: medium
+    notes: "All applications over 0.5ha are screened by the council."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, conservation-area]
+            description: The site is a listed building or in a conservation area.
+    confidence: medium
+    notes: "Audit (wrong_app_type): also for Householder (para 1.28 and Section 3) and listed building
+      consent."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: floodlighting
+            value: true
+            description: A floodlighting scheme.
+        - discretionary
+    source-text: >-
+      For floodlighting schemes, the following is also required: an assessment that will cover such
+      matters as, light spillage, hours of illumination, light levels, column heights,
+      specification and colour, treatment for lamps and luminaries, levels of impact on nearby
+      dwellings and highways and mitigation of potential impacts
+    must-include:
+      - item: Light spillage, hours of illumination and light levels
+        level: must
+        required-if:
+          condition:
+            field: floodlighting
+            value: true
+            description: A floodlighting scheme.
+      - item: Column heights, specification and colour, and treatment for lamps and luminaires
+        level: must
+        required-if:
+          condition:
+            field: floodlighting
+            value: true
+            description: A floodlighting scheme.
+      - item: Impact on nearby dwellings and highways, and mitigation of potential impacts
+        level: must
+        required-if:
+          condition:
+            field: floodlighting
+            value: true
+            description: A floodlighting scheme.
+    confidence: medium
+    notes: "The item covers 'Floodlighting schemes and lighting to tall buildings' (audit quote); tall
+      buildings have no threshold, so they are shown as officer discretion."
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      condition:
+        field: noise-sensitive-use
+        value: true
+        description: The development is in proximity to a known noise source.
+    confidence: medium
+
+  - id: photos
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, demolition-con-area]
+        - site:
+            in: [listed-building]
+            description: Works to a listed building.
+    source-text: "Photographs: demolition in conservation areas, listed building works"
+    source-url:
+      https://warrington-lb.councilplatform.com/sites/default/files/2024-04/Adopted%20Validation%20Checklist%20-%2028-3-24.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): the workbook quoted the photo file-size rule. The
+      Photographic Evidence for works to protected trees is listed with the tree works specification."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: A town centre use located outside town, district or local centres.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 500
+            description: Over 500 square metres of gross floor space.
+    policy: SN5
+    must-include:
+      - item: A sequential test
+        level: must
+      - item: The impact on existing, committed and planned public and private investment in centres in
+          the catchment area
+        level: must
+      - item: The impact on the vitality and viability of adjacent centres, including local consumer
+          choice and trade
+        level: must
+    confidence: medium
+
+  - id: schedule-of-works
+    action: update
+    required-if:
+      application-type:
+        in: [lbc]
+    confidence: medium
+    notes: "Audit (wrong_app_type): belongs to listed building consent, not Full planning."
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: A telecommunication mast application.
+    confidence: medium
+    notes: "Audit (wrong_app_type): also applies to prior approval."
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      any:
+        - discretionary
+    policy: Core Strategy MP7
+    confidence: medium
+    notes: "Thresholds are in Guidance Note DGN3 (not captured); smaller developments generating
+      significant traffic in or near AQMAs, or worsening existing traffic problems, also need one."
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    policy: Core Strategy MP7
+    confidence: medium
+    notes: "Triggers in the excerpt (significant harm from road capacity or safety problems, pollution in
+      AQMAs) have no threshold, so they are shown as officer discretion."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, reserved-matters]
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: Two or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: Educational accommodation.
+    source-text: Any application (excluding outline apps) that would result in two or more dwellings or
+      educational accommodation and…
+    source-url:
+      https://warrington-lb.councilplatform.com/sites/default/files/2024-04/Adopted%20Validation%20Checklist%20-%2028-3-24.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): the source expressly excludes outline applications."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: Bats, newts or other protected species may be affected.
+        - discretionary
+    confidence: low
+    notes: "Audit (wrong_trigger, wrong_app_type): the workbook's excerpt is a fragment. Para 1.28 and
+      Section 3 set bat-survey triggers for Householder; ecology statements are not required with prior
+      notifications."
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      all:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: Major residential development.
+    source-text: Affordable housing shall be secures through S106 agreement (see Heads of Terms below).
+    source-url:
+      https://warrington-lb.councilplatform.com/sites/default/files/2024-04/Adopted%20Validation%20Checklist%20-%2028-3-24.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): 2024 item 1, major residential."
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: The site is in or near an Air Quality Management Area.
+        - discretionary
+    source-url:
+      https://warrington-lb.councilplatform.com/sites/default/files/2024-04/Adopted%20Validation%20Checklist%20-%2028-3-24.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): in or near AQMAs, or above Transport Assessment thresholds
+      (shown as officer discretion)."
+
+  - id: archaeological-assessment
+    action: add
+    required-if:
+      site:
+        in: [archaeological-priority-area, scheduled-monument]
+        description: The site is on or adjacent to an archaeological heritage asset.
+    source-url:
+      https://warrington-lb.councilplatform.com/sites/default/files/2024-04/Adopted%20Validation%20Checklist%20-%2028-3-24.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): on or adjacent to archaeological heritage assets."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url:
+      https://warrington-lb.councilplatform.com/sites/default/files/2024-04/Adopted%20Validation%20Checklist%20-%2028-3-24.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): an Energy and Sustainability Assessment for major and
+      renewable schemes (renewable schemes shown as officer discretion)."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [green-belt, listed-building]
+            description: The site is in the Green Belt or is a listed building.
+    source-url:
+      https://warrington-lb.councilplatform.com/sites/default/files/2024-04/Adopted%20Validation%20Checklist%20-%2028-3-24.pdf
+    must-include:
+      - item: Statement of Community Involvement
+        level: must
+        required-if:
+          ref: major-development
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Planning Statement including a Statement of Community
+      Involvement, for major, Green Belt and listed building applications (including Householder in
+      the Green Belt). Which cases need the SCI part is our reading.
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: loss-of-open-space
+            value: true
+            description: The proposal would lose playing fields.
+        - discretionary
+    source-url:
+      https://warrington-lb.councilplatform.com/sites/default/files/2024-04/Adopted%20Validation%20Checklist%20-%2028-3-24.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Playing Pitch / Sports Justification for loss of playing
+      fields and for artificial pitches (shown as officer discretion)."
+
+  - id: water-impact-assessment
+    action: add
+    required-if:
+      site:
+        in: [source-protection-zone]
+        description: The site is in a Source Protection Zone.
+    source-url:
+      https://warrington-lb.councilplatform.com/sites/default/files/2024-04/Adopted%20Validation%20Checklist%20-%2028-3-24.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement, Stands): a Groundwater Risk Assessment, new in the 2024
+      list. Not verified by Grok."
+
+unmapped:
+  - local-name: Parking and Access details
+    source-text: "Parking and Access details including provision for cycle storage and electrical charging
+      points"
+    source-url:
+      https://www.warrington.gov.uk/sites/default/files/2023-10/Adopted%20Validation%20Checklist%20-%20June%202020%20%28amended%20Sept%2023%29.pdf
+    suggested-id: parking-plan
+  - local-name: Street Scene Elevations
+    source-text: "Residential infill; major residential with varied house types; new development in
+      conservation areas"
+    source-url:
+      https://warrington-lb.councilplatform.com/sites/default/files/2024-04/Adopted%20Validation%20Checklist%20-%2028-3-24.pdf
+    suggested-id: street-scene-elevations
+  - local-name: Structural Survey
+    source-text: "Structural Survey: demolition of listed buildings..."
+    source-url:
+      https://warrington-lb.councilplatform.com/sites/default/files/2024-04/Adopted%20Validation%20Checklist%20-%2028-3-24.pdf
+    suggested-id: structural-survey
+  - local-name: Site Treatment and Management Plan
+    source-text: "All applications that include demolition works … The Scheme shall include phasing,
+      interim treatment of the site and management plan for maintaining the vacant land until such time
+      when redevelopment commences."
+    source-url:
+      https://www.warrington.gov.uk/sites/default/files/2023-10/Adopted%20Validation%20Checklist%20-%20June%202020%20%28amended%20Sept%2023%29.pdf
+    suggested-id: demolition-plan
+  - local-name: Open Space Details
+    source-text: "Development proposals will be expected to make clear what impact they will have, if any,
+      on the level and availability of open space and sport and recreation provision within a given
+      locality."
+    source-url:
+      https://www.warrington.gov.uk/sites/default/files/2023-10/Adopted%20Validation%20Checklist%20-%20June%202020%20%28amended%20Sept%2023%29.pdf
+    suggested-id: open-space-plan
+  - local-name: Trees Specification of Works and Photographic Evidence
+    source-text: "Trees Specification of Works and Photographic Evidence: works to protected trees"
+    source-url:
+      https://warrington-lb.councilplatform.com/sites/default/files/2024-04/Adopted%20Validation%20Checklist%20-%2028-3-24.pdf
+    suggested-id: tree-works-plan
+  - local-name: Battery Energy Storage Statement
+    source-text: "From the audit: battery storage schemes of 1MW or more"
+    source-url:
+      https://warrington-lb.councilplatform.com/sites/default/files/2024-04/Adopted%20Validation%20Checklist%20-%2028-3-24.pdf
+    suggested-id: ""
+  - local-name: Coal Mining Risk Assessment
+    source-text: "From the audit: Coal Authority High Risk areas, excluding change of use and reserved
+      matters"
+    source-url:
+      https://warrington-lb.councilplatform.com/sites/default/files/2024-04/Adopted%20Validation%20Checklist%20-%2028-3-24.pdf
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Crime Impact Assessment
+    source-text: "From the audit: major residential (10+), education, commercial, leisure, takeaways and
+      HMOs"
+    source-url:
+      https://warrington-lb.councilplatform.com/sites/default/files/2024-04/Adopted%20Validation%20Checklist%20-%2028-3-24.pdf
+    suggested-id: crime-prevention-statement
+  - local-name: Equality and Diversity Impact Statement
+    source-text: "From the audit: changes to employment, community or public buildings without a Design and
+      Access Statement"
+    source-url:
+      https://warrington-lb.councilplatform.com/sites/default/files/2024-04/Adopted%20Validation%20Checklist%20-%2028-3-24.pdf
+    suggested-id: ""
+  - local-name: Materials
+    source-text: "From the audit: shopfronts, conservation areas, listed buildings and the Green Belt"
+    source-url:
+      https://warrington-lb.councilplatform.com/sites/default/files/2024-04/Adopted%20Validation%20Checklist%20-%2028-3-24.pdf
+    suggested-id: materials-schedule
+  - local-name: Fiddlers Ferry Policy Compliance Statement
+    source-text: "From the audit: within the MD3 allocation (new in 2024; not verified)"
+    source-url:
+      https://warrington-lb.councilplatform.com/sites/default/files/2024-04/Adopted%20Validation%20Checklist%20-%2028-3-24.pdf
+    suggested-id: ""
+  - local-name: South East Warrington Urban Extension Compliance Statement
+    source-text: "From the audit: within the MD2 allocation (new in 2024; not verified)"
+    source-url:
+      https://warrington-lb.councilplatform.com/sites/default/files/2024-04/Adopted%20Validation%20Checklist%20-%2028-3-24.pdf
+    suggested-id: ""
+  - local-name: Warrington Waterfront Policy Compliance Statement
+    source-text: "From the audit: listed in the 2024 list (not verified)"
+    source-url:
+      https://warrington-lb.councilplatform.com/sites/default/files/2024-04/Adopted%20Validation%20Checklist%20-%2028-3-24.pdf
+    suggested-id: ""
+  - local-name: Green Belt Compensation Scheme
+    source-text: "From the audit: inappropriate development in the Green Belt (new in 2024; not verified)"
+    source-url:
+      https://warrington-lb.councilplatform.com/sites/default/files/2024-04/Adopted%20Validation%20Checklist%20-%2028-3-24.pdf
+    suggested-id: ""
+  - local-name: Green Belt Statement (House Extensions)
+    source-text: "From the audit: householder development in the Green Belt, with volume, floorspace and
+      footprint calculations (new in 2024; not verified)"
+    source-url:
+      https://warrington-lb.councilplatform.com/sites/default/files/2024-04/Adopted%20Validation%20Checklist%20-%2028-3-24.pdf
+    suggested-id: green-belt-statement
+  - local-name: Mineral Resource Assessment
+    source-text: "From the audit: Mineral Safeguarding Area, or within 250m of safeguarded infrastructure
+      (new in 2024; not verified)"
+    source-url:
+      https://warrington-lb.councilplatform.com/sites/default/files/2024-04/Adopted%20Validation%20Checklist%20-%2028-3-24.pdf
+    suggested-id: minerals-assessment
+  - local-name: Parameter Plans
+    source-text: "From the audit: all outline applications (new in 2024; not verified)"
+    source-url:
+      https://warrington-lb.councilplatform.com/sites/default/files/2024-04/Adopted%20Validation%20Checklist%20-%2028-3-24.pdf
+    suggested-id: parameter-plans
+
+low-confidence:
+  - id: viability-assessment
+    note: "Audit (wrong_trigger): fragment ('below). (See Viability Assessment below if applicable). 2.');
+      no trigger captured."
+  - id: waste-management-plan
+    note: "Audit (wrong_trigger): the excerpt is table headers for the Refuse Storage item; no trigger
+      captured."
+  - id: "*"
+    note: "Audit (outdated_link): the workbook text is from the superseded June 2020 (amended October 2023)
+      checklist; the current list was adopted 28 March 2024."

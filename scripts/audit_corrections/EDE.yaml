@@ -1,0 +1,580 @@
+# Corrections for East Devon District Council, from inputs/audit/east-devon-district-council.json.
+# The list is the October 2022 Validation Checklist (adopted by Strategic Planning Committee on
+# 7 October 2022), now hosted as 'oct-22-v2'; the build takes that url and date from the audit.
+# The workbook's excerpts are the list's own Section 3.10 entries, but many are cut to the first
+# bullet or start with the tail of the previous section, and about 25 rows were filed under Full
+# planning by inference. The list applies its reports by scale or location, so the guessed types
+# are removed. "Large scale major" can't be expressed with the major-development definition, so
+# those items are shown as major development plus officer discretion.
+# Source issue (audit, other): the 2022 list predates statutory BNG and Fire Statements and still
+# uses the pre-2020 A3/A4/A5 use classes.
+local-authority: EDE
+
+submission-standards:
+  - item: All plans and drawings accurate, using a conventional metric scale such as 1:100 or 1:50
+    level: must
+
+drop:
+  - id: site-plan
+    reason: "wrong_trigger: the excerpt is the location plan text (para 2.9), now in location-plan"
+
+drop-unmapped:
+  - local-name: Advertisement drawings / illumination details
+    reason: "duplicate: a fragment of the Lighting Report; the list has no advertisement-specific item"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "duplicate: a fragment of the Daylight/Sunlight Assessment entry"
+  - local-name: Drainage Strategy / SuDS
+    reason: "duplicate: repeats the Foul Drainage Assessment trigger; the real Sustainable Drainage Strategy is re-added below"
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "wrong_trigger: this is the Biodiversity Survey and Report, now in biodiversity-survey-report"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "wrong_trigger: the excerpt is the Health Impact Statement trigger (re-added below); the list has no NDSS item"
+  - local-name: Structural Survey
+    reason: "wrong_trigger: misses the list's triggers; re-added below"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: a fragment of drawing contents ('public highway, visibility splays, areas around buildings and car parks.')"
+
+requirements:
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees within falling distance of the development, or trees or hedges to be
+          removed or pruned to carry out the development.
+    source-text: >-
+      Tree Survey/Arboricultural Impact Assessment & Method Statements Required for the following
+      types of application/development: Householder applications - Where there are trees within
+      falling distance of the proposed development and/or where trees or hedges will need to be
+      removed or pruned in order to carry out the development, a Tree Survey and AIA information in
+      accordance with BS 5837:2012 or any superseding standard will be required.
+    source-url: https://eastdevon.gov.uk/media/pugbu2ns/validation-checklist-document-oct-22-v2.pdf
+    must-include:
+      - item: Tree Survey and AIA information in accordance with BS 5837:2012
+        level: must
+      - item: Survey findings shown on the existing and proposed site plans, or on a single plan at a
+          scale no smaller than 1:200
+        level: should
+        source-text: >-
+          Depending on the number of trees and scale of development details could be annotated on
+          existing and proposed site plans, or take the form of a single plan at an appropriate scale
+          (no smaller than 1:200) with the finding of the survey included.
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook had Householder only. The list also covers 'Major Full,
+      Outline or Reserve Matters applications' and minor applications; the audit doesn't give their
+      wording, so the householder trigger is used for all.
+
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: Residential or mixed-use development of 10 or more dwellings.
+    source-text: >-
+      Affordable Housing Statement Required for the following types of application/development:
+      Major planning applications for residential or mixed-use development of 10 or more dwellings;
+    confidence: medium
+    notes: "Only the first bullet was captured; the list may give further cases."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    source-text: "Air Quality Statement Required for the following types of application/development: Large Scale Major planning applications;"
+    confidence: low
+    notes: "Large scale major applications (first bullet only captured); the list may give further cases."
+
+  - id: archaeological-assessment
+    action: update
+    required-if: discretionary
+    source-text: >-
+      Archaeology Assessment Required for the following types of application/development:
+      Applications where there is potential for archaeological implications;
+    confidence: medium
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [site-of-special-scientific-interest, special-area-of-conservation, local-wildlife-site]
+            description: The site is in or near a designated site (SSSI, SAC, LNR etc.).
+        - condition:
+            field: demolition
+            value: true
+            description: Site clearance, or demolition of older buildings or works to roof spaces.
+        - discretionary
+    source-text: >-
+      Biodiversity Survey and Report Required for the following types of application/development:
+      Where there is a reasonable likelihood that any important biodiversity or geological
+      conservation feature may be present or nearby and where they are likely to be affected by the
+      proposal.
+    source-url: https://eastdevon.gov.uk/media/pugbu2ns/validation-checklist-document-oct-22-v2.pdf
+    must-include:
+      - item: Any further surveys identified by a Phase 1 Ecological Survey (or similar report) as
+          needed before commencement
+        level: must
+        source-text: >-
+          Where a Phase 1 Ecological Survey (or similar Ecological Report) identifies the need for
+          further surveys before commencement of development, these further surveys will be
+          required for validation purposes.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the workbook split this between an unmapped
+      'Biodiversity Checklist' row and this one. From the audit: the list also names designated
+      sites and site clearance / demolition of older buildings or roof spaces, and it applies to
+      householder and listed building works too.
+
+  - id: location-plan
+    action: add
+    required-if:
+      always: true
+    source-text: >-
+      All applications must include copies of a location plan based on an up-to-date Ordnance Survey
+      Plan (please detail the license number on the plan) which is centered around the application
+      site showing clear reference points such as road/street names and/or neighbouring properties.
+    source-url: https://eastdevon.gov.uk/media/pugbu2ns/validation-checklist-document-oct-22-v2.pdf
+    must-include:
+      - item: Ordnance Survey licence number shown on the plan
+        level: must
+      - item: Centred on the application site
+        level: must
+      - item: Clear reference points such as road/street names and/or neighbouring properties
+        level: must
+    confidence: medium
+    notes: "The workbook filed this under the site plan."
+
+  - id: cil-form
+    action: replace
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [full, reserved-matters]
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: A chargeable residential use.
+                - condition:
+                    field: retail-floorspace
+                    operator: ">"
+                    value: 0
+                    description: A chargeable retail use.
+        - all:
+            - application-type:
+                in: [hh]
+            - condition:
+                field: floorspace
+                operator: ">"
+                value: 100
+                description: Over 100 square metres of new floorspace.
+        - application-type:
+            in: [ldc]
+        - all:
+            - application-type:
+                in: [s73]
+            - discretionary
+        - all:
+            - condition:
+                field: involves-change-of-use
+                value: true
+                description: A conversion or change of use.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: To residential.
+                - condition:
+                    field: retail-floorspace
+                    operator: ">"
+                    value: 0
+                    description: To retail.
+        - all:
+            - condition:
+                field: residential-annexe
+                value: true
+                description: A residential annexe.
+            - condition:
+                field: new-build
+                value: true
+                description: The annexe is new build.
+    source-text: >-
+      Householder applications over 100sqm …; Reserved Matters applications following outline
+      permission …; Applications for lawful development certificates; Application for a variation
+      of condition if additional chargeable floorspace is proposed; … New build annexes
+    source-url: https://eastdevon.gov.uk/media/pugbu2ns/validation-checklist-document-oct-22-v2.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook had Full planning only ('Full applications for
+      chargeable/CIL liable uses (residential and retail)'). The s73 case (additional chargeable
+      floorspace) is shown as officer discretion.
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      all:
+        - site:
+            in: [contaminated-land]
+            description: Contamination is known or suspected on the site or on land in its vicinity.
+        - condition:
+            field: ground-disturbance
+            value: true
+            description: Ground works are proposed.
+    source-text: >-
+      Land Contamination Assessment Required for the following types of application/development: All
+      applications where contamination is known or suspected or the development site is in the
+      vicinity of such land, and ground works are proposed.
+    confidence: medium
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+    source-text: >-
+      Daylight/Sunlight Assessment Required for the following types of application/development:
+      Applications where there is potential to result in a significant loss of daylight or sunlight
+      to adjoining properties including associated gardens and amenity space.
+    confidence: medium
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [conservation-area, world-heritage-site]
+                description: The site is in a conservation area or World Heritage Site.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: One or more dwelling houses.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: A building or buildings creating 100 square metres or more of
+                      floorspace.
+        - application-type:
+            in: [lbc]
+    confidence: medium
+    notes: "The council's list repeats the national rules (para 2.15)."
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      ref: major-development
+    source-text: "Sustainability Statement Required for the following types of application/development: All major applications."
+    confidence: medium
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook's excerpt was a fragment ('require an Environmental Impact Assessment.')."
+
+  - id: section-proposed
+    action: update
+    must-include:
+      - item: Existing and proposed levels on the site, with any differences from the adjoining land
+          shown clearly
+        level: must
+        source-text: >-
+          The Site Levels Plan(s) must: Clearly show existing and proposed levels on the site and
+          where this differs from the adjoining land clearly show the differences;
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: All development in Flood Zones 2 and 3, including minor development and
+              changes of use.
+        - site:
+            in: [critical-drainage-area]
+            description: Development in a Critical Drainage Area.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: Development of 1 hectare or more in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Development of 1 hectare or more in Flood Zone 1.
+        - all:
+            - condition:
+                field: involves-change-of-use
+                value: true
+                description: Less than 1 hectare in Flood Zone 1, including a change to a more
+                  vulnerable use.
+            - discretionary
+    source-text: >-
+      All development of 1 hectare of more in Flood Zone 1; … Development in a critical drainage
+      areas; less than 1 ha in flood zone 1, including a change of use … All development in Flood
+      Zones 2 and 3 including minor development and changes of use.
+    source-url: https://eastdevon.gov.uk/media/pugbu2ns/validation-checklist-document-oct-22-v2.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): the workbook captured only the first bullet and Full planning only."
+
+  - id: elevation-existing
+    action: update
+    must-include:
+      - item: A scale of 1:100 or 1:50
+        level: must
+    source-text: "The elevations must: Be to a scale of 1:100 or 1:50;"
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: A scale of 1:100 or 1:50
+        level: must
+    source-text: "The elevations must: Be to a scale of 1:100 or 1:50;"
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, conservation-area, locally-listed-building]
+        description: The proposal affects a heritage asset.
+    must-include:
+      - item: A Statement of Significance explaining what is important about the building
+        level: must
+      - item: How the proposals impact on these features
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): also applies to householder and listed building works. The workbook's
+      excerpt starts mid-sentence, so the trigger is the general one (affects a heritage asset).
+
+  - id: landscaping-plan
+    action: update
+    must-include:
+      - item: Details of new tree planting, including planting pit design, tree specifications
+          (species, size and nursery production system), planting methodology, and irrigation and
+          maintenance programmes, in accordance with BS 8545
+        level: must
+    source-text: >-
+      The landscaping plan shall include details of new tree planting to include planting pit
+      design, new tree specifications (including species, size and nursery production system),
+      planting methodology, irrigation and maintenance programmes in accordance with the most
+      up-to-date version of British Standard 8545.
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: The proposal includes external lighting.
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook's excerpt was the fragment 'amount of external lighting.'"
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      condition:
+        field: noise-generating-use
+        value: true
+        description: Uses that involve activities that may generate significant levels of noise.
+    source-text: >-
+      Noise Assessment Required for the following types of application/development: For uses that
+      involve activities that may generate significant levels of noise;
+    confidence: medium
+    notes: "Only the first bullet was captured; the list may give further cases."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    source-text: >-
+      Open Space Assessment Required for the following types of application/development: All major
+      applications that generate a need for open space;
+    confidence: medium
+
+  - id: planning-statement
+    action: update
+    required-if:
+      ref: major-development
+    source-text: "Planning Statement Required for the following types of application/development: All major planning applications."
+    confidence: medium
+
+  - id: sci
+    action: update
+    required-if:
+      ref: major-development
+    source-text: >-
+      Statement of Community Involvement Required for the following types of application/development:
+      All major planning applications.
+    confidence: medium
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: A main town centre use not in an existing town centre area as defined by
+              the Adopted Local Plan.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 500
+            description: More than 500 square metres of main town centre uses.
+    source-text: >-
+      Retail Impact Assessment Required for the following types of application/development:
+      Proposals for main town centre uses that are in excess of 500sqm and are not in an existing
+      town centre area as defined by the Adopted Local Plan.
+    confidence: medium
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: A new roof, or alterations or extensions to existing roofs.
+    source-text: >-
+      Existing and Proposed Roof Plans 3.7 Roof plans should show the full span of the roof detailing
+      its design as seen from above and must be provided for application involving new roof, or
+      alterations/extension to existing roofs.
+    confidence: medium
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: A new roof, or alterations or extensions to existing roofs.
+    source-text: >-
+      Existing and Proposed Roof Plans 3.7 Roof plans should show the full span of the roof detailing
+      its design as seen from above and must be provided for application involving new roof, or
+      alterations/extension to existing roofs.
+    must-include:
+      - item: The full span of the roof, detailing its design as seen from above
+        level: should
+    confidence: medium
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    source-text: >-
+      Transport Statement/Assessment Required for the following types of application/development:
+      All major development where there are likely to be significant transport implications.
+    confidence: medium
+
+  - id: travel-plan
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    source-text: "Travel Plan Required for the following types of application/development: All large scale major planning applications."
+    confidence: low
+    notes: "Large scale major applications only; shown as major development plus officer discretion."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Where the proposal cannot meet the policy-compliant obligations (council's wording)."
+
+  - id: waste-management-plan
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    source-text: >-
+      Site Waste Management Plan Required for the following types of application/development: All
+      large scale major planning applications.
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): this is the Site Waste Management Plan (construction waste) for large
+      scale major applications, not refuse storage. Shown as major development plus officer
+      discretion.
+
+unmapped:
+  - local-name: Unilateral Undertaking / Section 111 Form
+    source-text: >-
+      All new residential development (including conversions) that generate the need for financial
+      contributions … towards habitat mitigation (or alternatively a Unilateral Undertaking)
+    source-url: https://eastdevon.gov.uk/media/pugbu2ns/validation-checklist-document-oct-22-v2.pdf
+    suggested-id: unilateral-undertaking
+  - local-name: Sustainable Drainage Strategy
+    source-text: >-
+      Residential development of 10 or more units and other development of 1000sqm or more
+      floorspace; Development within Critical Drainage Areas.
+    source-url: https://eastdevon.gov.uk/media/pugbu2ns/validation-checklist-document-oct-22-v2.pdf
+    suggested-id: drainage-strategy
+  - local-name: Health Impact Statement
+    source-text: "Health Impact Statement Required for the following types of application/development: Residential development over 100 units and all other large scale major development."
+    source-url: https://eastdevon.gov.uk/media/pugbu2ns/validation-checklist-document-oct-22-v2.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Structural Survey
+    source-text: >-
+      Demolition of the whole or part of a listed building where demolition is sought for structural
+      reasons A Structural Survey by a suitable qualified person accurately detailing the physical
+      condition of the building and extent of demolition …
+    source-url: https://eastdevon.gov.uk/media/pugbu2ns/validation-checklist-document-oct-22-v2.pdf
+    suggested-id: structural-survey
+  - local-name: Green Infrastructure Plan
+    source-text: >-
+      From the audit: major full applications with strategic landscaping (major housing, employment,
+      solar farms) and major outline applications where landscaping is being discharged
+    source-url: https://eastdevon.gov.uk/media/pugbu2ns/validation-checklist-document-oct-22-v2.pdf
+    suggested-id: green-infrastructure-plan
+  - local-name: Economic Impact Assessment
+    source-text: "From the audit: major applications involving loss of land or buildings last used for employment, retail or community purposes"
+    source-url: https://eastdevon.gov.uk/media/pugbu2ns/validation-checklist-document-oct-22-v2.pdf
+    suggested-id: employment-statement
+  - local-name: Marketing Strategy Statement
+    source-text: "From the audit: all applications proposing loss of commercial or community facilities"
+    source-url: https://eastdevon.gov.uk/media/pugbu2ns/validation-checklist-document-oct-22-v2.pdf
+    suggested-id: marketing-evidence
+  - local-name: Foul Sewerage and Utilities Assessment
+    source-text: "From the audit: all large scale major development"
+    source-url: https://eastdevon.gov.uk/media/pugbu2ns/validation-checklist-document-oct-22-v2.pdf
+    suggested-id: foul-drainage-assessment
+  - local-name: Street Scenes
+    source-text: "From the audit: works visible from a road, for new buildings or large extensions (Section 3.8)"
+    source-url: https://eastdevon.gov.uk/media/pugbu2ns/validation-checklist-document-oct-22-v2.pdf
+    suggested-id: street-scene
+  - local-name: Additional Local Requirements for Listed Building Consent (Section 4)
+    source-text: >-
+      From the audit: details to submit for thatching, re-roofing in slate/tile, replacement windows
+      (joinery sections at 1:2 or 1:5), render, shopfronts, internal alterations, new
+      flues/vents/extractors/chimneys, and demolition for structural reasons
+    source-url: https://eastdevon.gov.uk/media/pugbu2ns/validation-checklist-document-oct-22-v2.pdf
+    suggested-id: ""
+
+low-confidence:
+  - id: photos
+    note: >-
+      Audit (missing_requirement): the workbook built this from a fragment of the Section 4 text on
+      new flues/vents/extractors/chimneys for listed building consent ('Plans / elevations or
+      photographs as existing Plans / elevations or photomontage as proposed …'); photographs are
+      an alternative to plans there, not a standalone requirement.
