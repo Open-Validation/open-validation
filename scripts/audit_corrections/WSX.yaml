@@ -1,0 +1,444 @@
+# Corrections for West Sussex County Council, from the council's audit.
+# WSCC only determines county-matter minerals and waste applications and the County Council's
+# own development (Regulation 3), so every requirement is scoped to those types, not Full
+# planning. The audit read the Local List (November 2025). Many triggers were cut off after
+# 'Applications for:'; items marked "From the audit" use the audit's paraphrase.
+local-authority: WSX
+
+submission-standards:
+  - item: Drawings and plans at an appropriate, identified metric scale, with a north point
+    level: must
+  - item: A linear scale bar
+    level: should
+  - item: Files in PDF format, named appropriately and informatively (e.g. 'Site Location Plan – Ref Dwg 01')
+    level: should
+  - item: No individual file greater than 20MB
+    level: must
+
+drop:
+  - id: bng-metric
+    sheets: [Variation of condition s73]
+    reason: "wrong_app_type: the source excludes s73 applications (where the original permission was not subject to statutory BNG)"
+  - id: environmental-statement
+    reason: "not_a_requirement: taken from the Number of Copies note"
+
+drop-unmapped:
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: text from the national Site Boundary Plan row"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: EMAQ citation, page footer and Planning Obligation text; the Odour Assessment is re-added below"
+  - local-name: Ground investigation / Geotechnical / Basement Impact Assessment
+    reason: "wrong_trigger: mislabelled; it is the Hydrological/Hydrogeological Assessment, re-added below"
+  - local-name: Odour / Dust / Vibration assessment
+    reason: "wrong_trigger: mislabelled; it is the Dust Assessment, re-added below"
+
+requirements:
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - site:
+                in: [air-quality-management-area]
+                description: The site is close to an Air Quality Management Area.
+            - discretionary
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the workbook gave only the first bullet. From the audit:
+      putrescible waste (including anaerobic digestion and composting), incineration, significant
+      HGV increases and AQMA proximity; the process triggers are shown as officer discretion.
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - site:
+                in: [scheduled-monument, park-and-garden, listed-building, conservation-area, flood-risk-zone]
+                description: >-
+                  Within or within 250m of a Scheduled Monument or registered park, affecting a
+                  listed building or conservation area, or in flood zone 2 or 3.
+            - condition:
+                field: site-area-non-residential
+                operator: ">"
+                value: 1
+                description: A greenfield site over 1 hectare.
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    must-include:
+      - item: Relevant information from the Historic Environment Record (WSCC's, or Chichester District Council's for Chichester District)
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the 'What is required' column. Triggers from the audit."
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Felling or pruning, or works affecting trees, hedges or root protection areas.
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Tree (Arboricultural) Survey/Information."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - site:
+                in: [special-area-of-conservation, special-protection-area, site-of-special-scientific-interest, local-wildlife-site]
+                description: An internationally, nationally or locally designated site (SAC, SPA, Ramsar, SSSI, local designation).
+            - discretionary
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    must-include:
+      - item: Ecological surveys as appropriate
+        level: must
+      - item: A full assessment of the likely effects of the development
+        level: must
+      - item: Avoidance or mitigation measures if applicable
+        level: must
+      - item: Information to support any proposals for mitigation/compensation measures
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted the contents bullets (kept as must-include). From
+      the audit: designated sites, brownfield land, demolition, vegetation removal, within 500m of
+      a pond; the last four are shown as officer discretion.
+
+  - id: bng-metric
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: medium
+    notes: "'All applications for Minor and Major Development except for applications made under Section 73' (where the original permission was not subject to statutory BNG)."
+
+  - id: elevation-proposed
+    action: add
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): elevations for new or altered buildings (no field for that, so only the types are set)."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the description. From the audit: 2+ dwellings or educational accommodation and 18m+ or 7+ storeys."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - site:
+                in: [flood-risk-zone]
+                description: The site is in flood zone 2 or 3.
+            - condition:
+                field: site-area-non-residential
+                operator: ">"
+                value: 1
+                description: A site over 1 hectare in flood zone 1.
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook gave a policy reference. From the audit: flood zones 2/3 and flood zone 1 sites over 1ha."
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building]
+            description: The proposal affects a listed building, conservation area or non-designated heritage asset, or its setting.
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Heritage Statement."
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - site:
+                in: [contaminated-land]
+                description: Contamination is known or suspected, or the site is within 250m of an existing or historic landfill.
+            - discretionary
+    source-text: >-
+      contamination is known to/suspected to exist; … sites within 250m of an existing or historic
+      landfill site; … a potentially polluting land use is proposed.
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger, duplicate): the workbook quoted the LVIA row. A potentially polluting land use is shown as officer discretion."
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: external-lighting
+            value: true
+            description: Lighting likely to be visible off site.
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Lighting Assessment."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [mineral-app]
+        - all:
+            - application-type:
+                in: [waste-dev, reg-3]
+            - any:
+                - condition:
+                    field: noise-generating-use
+                    value: true
+                    description: Noisy waste processes or other development with adverse noise potential.
+                - discretionary
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): adverse noise potential, noise-sensitive receptors (shown as officer discretion), mineral extraction, noisy waste processes."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    source-text: Planning Statement - All applications (proportionate and specific to the development)
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement)."
+
+  - id: section-existing
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: Land levels will be altered.
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Topographic Survey and cross-sections where land levels are altered."
+
+  - id: section-proposed
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: Land levels will be altered.
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Topographic Survey and cross-sections where land levels are altered."
+
+  - id: site-plan
+    action: add
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Site Layout Plans for all applications."
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [mineral-app, waste-dev]
+        - all:
+            - application-type:
+                in: [reg-3]
+            - ref: major-development
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Sustainability/Energy/Climate Change Resilience Assessment for minerals, waste and other major applications."
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: floorspace
+                operator: ">="
+                value: 2500
+                description: 2,500 square metres or more of minerals/waste floorspace.
+            - site:
+                in: [air-quality-management-area]
+                description: Traffic affecting an Air Quality Management Area.
+            - discretionary
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    must-include:
+      - item: A full Transport Assessment (rather than a Transport Statement)
+        level: must
+        required-if:
+          condition:
+            field: floorspace
+            operator: ">"
+            value: 4000
+            description: Over 4,000 square metres of floorspace.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook gave no thresholds. From the audit: Transport Statement for
+      2,500-4,000 sqm minerals/waste floorspace; Transport Assessment for over 4,000 sqm, 40+ two-way
+      HGV movements a day, 30 an hour or 100 a day vehicle movements, or AQMA. The movement
+      thresholds have no field, so they are shown as officer discretion.
+
+  - id: travel-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [reg-3]
+        - condition:
+            field: pupil-increase
+            operator: ">="
+            value: 30
+            description: A school expansion likely to increase pupil numbers by generally at least 30.
+    source-text: >-
+      School Travel Plan Any school expansion or development that is likely to significantly
+      increase the numbers of journeys to and from school (generally an increase of at least 30 pupils).
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): this is the School Travel Plan, a County Council own-development (Reg 3) requirement."
+
+unmapped:
+  - local-name: Odour Assessment
+    source-text: "New/amended waste development involving odour-generating processes; … Ventilation/extraction equipment reports should follow EMAQ guidance where appropriate."
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    suggested-id: odour-assessment
+  - local-name: Hydrological/Hydrogeological Assessment
+    source-text: "Hydrological/Hydrogeological Assessment Applications for mineral extraction or landfill/waste deposit in groundwater source protection zones 1, 2 or 3 and principal and secondary aquifers."
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    suggested-id: hydrogeological-assessment
+  - local-name: Dust Assessment
+    source-text: "Dust Assessment Applications involving: A report setting out: the open-air management of waste; which activities may generate dust (during construction and/or operation);"
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    suggested-id: dust-assessment
+  - local-name: Mineral Resource Assessment
+    source-text: "From the audit: major development in Mineral Consultation Zones"
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    suggested-id: minerals-assessment
+  - local-name: Alternative Sites Assessment
+    source-text: "From the audit: minerals and waste development on unallocated sites"
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    suggested-id: ""
+  - local-name: Need Statement (Community Facilities)
+    source-text: "From the audit: all WSCC development, including schools, libraries and fire stations"
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    suggested-id: need-statement
+  - local-name: Need Statement (Minerals)
+    source-text: "From the audit: new or expanded minerals development on unallocated sites"
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    suggested-id: need-statement
+  - local-name: Need Statement (Waste Management)
+    source-text: "From the audit: new or enhanced waste development on unallocated sites"
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    suggested-id: need-statement
+  - local-name: Recovery v. Disposal Statement
+    source-text: "From the audit: disposal of inert waste to land"
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    suggested-id: ""
+  - local-name: Waste Infrastructure Statement
+    source-text: "From the audit: non-waste development within 250m of existing, permitted or allocated waste sites"
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    suggested-id: ""
+  - local-name: Working and/or Restoration and Aftercare Scheme
+    source-text: "From the audit: minerals extraction and waste deposit sites"
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    suggested-id: restoration-aftercare-scheme
+  - local-name: Aerodrome Safeguarding Statement
+    source-text: "From the audit: development over 90m, wind turbines, aviation uses, or within 15km of Gatwick, Goodwood or Brighton City Airport with specified features"
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    suggested-id: aerodrome-safeguarding-statement
+  - local-name: Foul and Surface Water Drainage Assessment
+    source-text: "From the audit: new or changed drainage systems"
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    suggested-id: drainage-strategy
+  - local-name: Public Rights of Way Statement
+    source-text: "From the audit: development affecting a public right of way"
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    suggested-id: ""
+  - local-name: Stage 1 Road Safety Audit
+    source-text: "From the audit: major applications with highway alterations, new or intensified access, or off-site works"
+    source-url: https://www.westsussex.gov.uk/media/e2clz34k/local_list.pdf
+    suggested-id: road-safety-audit
+
+new-fields:
+  - field: change-in-ground-levels
+    kind: boolean
+    label: Change in ground levels
+    description: The proposal changes ground levels, or is proposed next to changing ground levels.
+  - field: special-area-of-conservation
+    kind: designation
+    label: Special Area of Conservation
+    description: Site is in or near a Special Area of Conservation (dataset special-area-of-conservation).
+  - field: scheduled-monument
+    kind: designation
+    label: Scheduled monument
+    description: The proposal affects a scheduled monument (dataset scheduled-monument).
+  - field: park-and-garden
+    kind: designation
+    label: Registered park or garden
+    description: Site is in or near a registered historic park or garden (dataset park-and-garden).
+  - field: pupil-increase
+    kind: number
+    label: Increase in pupil numbers
+    description: The increase in school pupil numbers the proposal would allow.
