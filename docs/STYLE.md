@@ -58,8 +58,13 @@ cells that hold codes. Large, plain headings.
 
 ## Shapes
 
-- Site pills: 999px radius. Unknown = white 1px outline; yes = filled `--accent` with `--bg`
-  text; no = struck through, `--text-muted`.
+- Site details live in a **Filter** pop-up (a `<dialog>` with an ✕ to close), opened from the
+  Filter button above the results. Questions are listed most important first ("affects N
+  requirements"), with a search box; yes/no questions use a two-part Yes | No switch (the chosen
+  half filled `--accent` with `--bg` text), numbers use a small input. Answers show above the
+  results as removable chips (1px `--accent` outline, ✕ to remove). Check cards repeat their
+  key questions inline as small Yes | No switches. Application types: one drop-down per type,
+  "+ Add another type", ✕ to remove one.
 - Cards: 12px radius, 1px `--line` border. Tables: 1px `--line` border on every cell, no zebra
   stripes (the status tints do that job). Header row semi-bold `--text` on `--bg`.
 - Generous spacing. Visible focus outline (2px `--accent`) on everything focusable.

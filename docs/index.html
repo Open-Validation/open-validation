@@ -57,20 +57,33 @@ label.field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; 
 .btn.small { padding: 4px 10px; font-size: 13px; }
 .btn[disabled] { opacity: 0.45; cursor: not-allowed; }
 
-/* ===== Site pills ===== */
-.pills { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 0 12px; }
-.pills .lead { color: var(--text-muted); font-size: 13px; margin-right: 4px; }
-.pill { border-radius: 999px; border: 1px solid var(--text); background: transparent; padding: 4px 11px; cursor: pointer; font-size: 13.5px; line-height: 1.3; color: var(--text); display: inline-flex; align-items: center; gap: 5px; max-width: 100%; }
-.pill .lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 24ch; }
-.pill[aria-pressed="true"] { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 600; }
-.pill[aria-pressed="false"] { text-decoration: line-through; color: var(--text-muted); border-color: var(--line-soft); }
-.pill .mark { font-size: 12px; font-weight: 600; }
-.pill.num input { width: 64px; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; color: var(--text); }
-.pill.num select { background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 1px 4px; color: var(--text); }
-.pill.num.open { border-color: var(--accent); }
-.pill.num.open label { display: inline-flex; align-items: center; gap: 8px; }
-.pill.num.set { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 600; }
-.pill.flash { box-shadow: 0 0 0 3px var(--check); }
+/* ===== Application types and the site-details filter ===== */
+.typerows { display: flex; flex-direction: column; gap: 6px; }
+.typerow { display: flex; gap: 6px; align-items: center; }
+.typerow select { flex: 1; min-width: 0; }
+.iconbtn { background: transparent; border: 1px solid var(--line-soft); color: var(--text); border-radius: 8px; width: 36px; height: 36px; cursor: pointer; flex: none; font-size: 16px; }
+.iconbtn:hover { border-color: var(--accent); }
+.addtype { align-self: flex-start; margin-top: 2px; }
+.filterbar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.chip-ans { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--accent); color: var(--text); background: rgba(127,178,240,0.12); border-radius: 999px; padding: 2px 4px 2px 10px; font-size: 13px; }
+.chip-ans button { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; padding: 0 4px; }
+dialog.filter { width: min(640px, calc(100vw - 24px)); max-height: min(86vh, 900px); padding: 0; overflow: hidden; }
+dialog.filter[open] { display: flex; flex-direction: column; }
+.fhead { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.fhead h2 { margin: 0; font-size: 20px; }
+.fbody { padding: 4px 16px 10px; margin-top: 8px; overflow-y: auto; border-top: 1px solid var(--line-soft); }
+.ffoot { display: flex; gap: 8px; justify-content: space-between; padding: 12px 16px; border-top: 1px solid var(--line); }
+.qrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line-soft); }
+.qrow .q { font-weight: 600; } .qrow .q small { display: block; font-weight: 400; color: var(--text-muted); font-size: 12px; }
+.qrow.answered .q { color: var(--accent); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+.seg button { background: transparent; border: none; color: var(--text); padding: 5px 12px; cursor: pointer; font-size: 13px; }
+.seg button + button { border-left: 1px solid var(--line-soft); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--bg); font-weight: 600; }
+.qrow input, .qrow select { width: 110px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px; color: var(--text); }
+.inlineq { display: inline-flex; align-items: center; gap: 4px; margin-right: 8px; }
+.inlineq .seg button { padding: 2px 10px; }
+.typetags { font-size: 12px; color: var(--text-muted); }
 
 /* ===== Tabs ===== */
 .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); overflow-x: auto; }
@@ -222,14 +235,14 @@ footer.foot { border-top: 1px solid var(--line); padding: 16px; color: var(--tex
       <input id="councilInput" class="input" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="councilList" placeholder="Search by name or code, e.g. Shrop or SHR" autocomplete="off">
       <ul id="councilList" class="suggest" role="listbox" hidden></ul>
     </label>
-    <label class="field">Application type
-      <select id="typeSelect" class="input"><option value="">Any application type</option></select>
-    </label>
-    <label class="field">Filter requirements
+    <div class="field" role="group" aria-labelledby="typeLabel"><span id="typeLabel">Application type</span>
+      <div id="typeRows" class="typerows"></div>
+      <button class="btn small addtype" id="addType" type="button">+ Add another type</button>
+    </div>
+    <label class="field">Search requirements
       <input id="filterInput" class="input" type="search" placeholder="e.g. tree, flood, heritage">
     </label>
   </div>
-  <div class="pills" id="pills" aria-label="Describe the site"></div>
 
   <nav class="tabs" role="tablist" aria-label="Views">
     <button class="tab" role="tab" data-tab="map" id="tab-map">Map</button>
@@ -252,6 +265,7 @@ footer.foot { border-top: 1px solid var(--line); padding: 16px; color: var(--tex
 <div id="tooltip" class="tooltip" hidden></div>
 
 <dialog id="dialog"></dialog>
+<dialog id="filterDialog" class="filter" aria-labelledby="filterTitle"></dialog>
 
 <script>
 "use strict";
@@ -296,7 +310,7 @@ var S = {
   lpas: [], lpaByCode: {}, types: [], typeById: {}, reqs: {}, nationalTypes: {}, nationalFiles: {},
   fields: {}, defs: {}, geo: null, index: null, tree: undefined,
   councils: {}, lpaYaml: {}, confirmed: {},
-  lpa: "", type: "", tab: "", q: "", site: {}, showMoreFields: false,
+  lpa: "", chosen: [], tab: "", q: "", site: {},
   highlight: "", patterns: false, review: false, pending: [], sort: {}, statusFilter: "", browseFile: ""
 };
 
@@ -473,10 +487,20 @@ function fieldKind(f) {
   if (x && x.kind) return x.kind === "designation" ? "boolean" : x.kind;
   return "boolean";
 }
-function appTypeObj() {
-  if (!S.type) return null;
-  var t = S.typeById[S.type] || {};
-  return { id: S.type, parent: t.parent || "", children: S.types.filter(function (x) { return x.parent === S.type; }).map(function (x) { return x.reference; }) };
+// The application types you chose (several are allowed: a project can need more than one consent)
+function typeObj(id) {
+  if (!id) return null;
+  var t = S.typeById[id] || {};
+  return { id: id, parent: t.parent || "", children: S.types.filter(function (x) { return x.parent === id; }).map(function (x) { return x.reference; }) };
+}
+function appTypeObj() { return typeObj(S.chosen[0]); }
+// Evaluate a rule for every chosen type: required if it's required for any of them.
+// Returns { result, types: [ids it's required or possibly required for] }.
+function evalForTypes(rule) {
+  if (!S.chosen.length) return { result: evaluate(rule, S.site, null, S.defs), types: [] };
+  var res = S.chosen.map(function (id) { return evaluate(rule, S.site, typeObj(id), S.defs); });
+  var result = res.indexOf(true) !== -1 ? true : res.indexOf(UNKNOWN) !== -1 ? UNKNOWN : false;
+  return { result: result, types: S.chosen.filter(function (id, i) { return res[i] === true || (result !== true && res[i] === UNKNOWN); }) };
 }
 
 // ======================================================================
@@ -607,7 +631,7 @@ function isEmpty(v) { return v == null || v === "" || (Array.isArray(v) && !v.le
 function writeHash(replace) {
   var p = [];
   if (S.lpa) p.push("lpa=" + encodeURIComponent(S.lpa));
-  if (S.type) p.push("type=" + encodeURIComponent(S.type));
+  if (S.chosen.length) p.push("type=" + S.chosen.map(encodeURIComponent).join(","));
   if (S.tab) p.push("tab=" + S.tab);
   if (S.q) p.push("q=" + encodeURIComponent(S.q));
   Object.keys(S.site).sort().forEach(function (f) {
@@ -619,7 +643,7 @@ function writeHash(replace) {
 }
 function readHash() {
   var p = {}; location.hash.replace(/^#/, "").split("&").forEach(function (kv) { if (!kv) return; var i = kv.indexOf("="); p[decodeURIComponent(kv.slice(0, i))] = decodeURIComponent(kv.slice(i + 1)); });
-  S.lpa = S.lpaByCode[p.lpa] ? p.lpa : ""; S.type = S.typeById[p.type] ? p.type : ""; S.q = p.q || "";
+  S.lpa = S.lpaByCode[p.lpa] ? p.lpa : ""; S.chosen = String(p.type || "").split(",").filter(function (t, i, a) { return S.typeById[t] && a.indexOf(t) === i; }); S.q = p.q || "";
   S.tab = ["map", "councils", "results", "table", "browse"].indexOf(p.tab) !== -1 ? p.tab : (S.lpa ? "results" : "map");
   S.site = {};
   Object.keys(p).forEach(function (k) {
@@ -653,23 +677,45 @@ function setupPickers() {
   list.addEventListener("mousedown", function (e) { var li = e.target.closest("li"); if (li) { e.preventDefault(); selectCouncil(li.dataset.code); } });
   input.addEventListener("blur", function () { setTimeout(function () { list.hidden = true; input.setAttribute("aria-expanded", "false"); }, 150); });
 
-  // Application types grouped by parent (Prior approval > pa-storey ...)
-  var sel = $("#typeSelect"), parents = S.types.filter(function (t) { return !t.parent; });
-  var html = '<option value="">Any application type</option>';
+  // Application types grouped by parent (Prior approval > pa-storey ...), used by every type row
+  var parents = S.types.filter(function (t) { return !t.parent; });
   var solo = parents.filter(function (p) { return !S.types.some(function (c) { return c.parent === p.reference; }); });
-  html += '<optgroup label="Application types">' + solo.map(function (t) { return '<option value="' + t.reference + '">' + esc(t.name) + "</option>"; }).join("") + "</optgroup>";
+  var html = '<optgroup label="Application types">' + solo.map(function (t) { return '<option value="' + t.reference + '">' + esc(t.name) + "</option>"; }).join("") + "</optgroup>";
   parents.filter(function (p) { return solo.indexOf(p) === -1; }).forEach(function (p) {
     html += '<optgroup label="' + esc(p.name) + '"><option value="' + p.reference + '">' + esc(p.name) + " (all)</option>" +
       S.types.filter(function (c) { return c.parent === p.reference; }).map(function (c) { return '<option value="' + c.reference + '">&nbsp;&nbsp;' + esc(c.name) + "</option>"; }).join("") + "</optgroup>";
   });
-  sel.innerHTML = html;
-  sel.addEventListener("change", function () { S.type = sel.value; writeHash(); render(); });
+  S.typeOptions = html;
+  var rows = $("#typeRows");
+  rows.addEventListener("change", function (e) {
+    var sel = e.target.closest("select"); if (!sel) return;
+    var i = Number(sel.dataset.i), v = sel.value;
+    if (!v) S.chosen.splice(i, 1); else if (S.chosen.indexOf(v) === -1 || S.chosen.indexOf(v) === i) S.chosen[i] = v;
+    S.chosen = S.chosen.filter(Boolean); writeHash(); render();
+  });
+  rows.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-remove]"); if (!b) return;
+    S.chosen.splice(Number(b.dataset.remove), 1); S.addingType = false; writeHash(); render();
+  });
+  $("#addType").addEventListener("click", function () { S.addingType = true; renderTypeRows(); var last = rows.querySelector("select:last-of-type, .typerow:last-child select"); if (last) last.focus(); });
   var f = $("#filterInput"), timer;
   f.addEventListener("input", function () { clearTimeout(timer); timer = setTimeout(function () { S.q = f.value.trim(); writeHash(true); renderPanel(); }, 200); });
 }
 function syncPickers() {
   $("#councilInput").value = S.lpa ? S.lpaByCode[S.lpa].name : "";
-  $("#typeSelect").value = S.type; $("#filterInput").value = S.q;
+  $("#filterInput").value = S.q; renderTypeRows();
+}
+// One drop-down per chosen type, plus an empty one when adding another; ✕ removes a type
+function renderTypeRows() {
+  var list = S.chosen.slice(); if (!list.length || S.addingType) list.push("");
+  $("#typeRows").innerHTML = list.map(function (t, i) {
+    return '<div class="typerow"><select class="input" data-i="' + i + '" aria-label="Application type ' + (i + 1) + '">' +
+      '<option value="">' + (i === 0 ? "Any application type" : "Choose another type…") + "</option>" + S.typeOptions + "</select>" +
+      (t || i > 0 ? '<button class="iconbtn" type="button" data-remove="' + i + '" aria-label="Remove ' + esc(t ? typeName(t) : "this type") + '">✕</button>' : "") + "</div>";
+  }).join("");
+  $("#typeRows").querySelectorAll("select").forEach(function (sel, i) { sel.value = list[i]; });
+  $("#addType").hidden = !S.chosen.length || S.addingType;
+  S.addingType = false;
 }
 function selectCouncil(code) {
   S.lpa = code || ""; $("#councilList").hidden = true;
@@ -678,7 +724,7 @@ function selectCouncil(code) {
 }
 
 // ======================================================================
-// Site pills
+// Site details: a Filter pop-up (pros see everything first, then narrow it down)
 // ======================================================================
 function currentRules() {
   var rules = [];
@@ -688,90 +734,73 @@ function currentRules() {
   Object.keys(S.nationalFiles).forEach(function (id) { rules.push(S.nationalFiles[id]["required-if"]); });
   return rules;
 }
-function renderPills() {
+// Every site question that matters here, most important first: { field: number of rules using it }
+function siteQuestions() {
   var counts = {};
-  currentRules().forEach(function (r) { ruleFields(r, counts); });
+  currentRules().forEach(function (r) { Object.keys(ruleFields(r)).forEach(function (f) { counts[f] = (counts[f] || 0) + 1; }); });
   if (counts["major-development"]) Object.keys(ruleFields(S.defs["major-development"])).forEach(function (f) { counts[f] = (counts[f] || 0) + 1; });
-  Object.keys(S.site).forEach(function (f) { if (!counts[f]) counts[f] = 0.5; });  // keep pills that are set
-  // Pills you've set come first (so they never hide under "More"), then the most-used
-  var fields = Object.keys(counts).sort(function (a, b) {
-    return (isSet(S.site[b]) - isSet(S.site[a])) || counts[b] - counts[a] || fieldLabel(a).localeCompare(fieldLabel(b)); });
-  var few = window.innerWidth <= 600 ? 6 : 10;   // fewer pills before "More" on a phone
-  var limit = S.showMoreFields ? fields.length : few;
-  var el = $("#pills");
-  if (!fields.length) { el.innerHTML = '<span class="lead">Choose a council to describe your site.</span>'; return; }
-  el.innerHTML = '<span class="lead">Describe the site:</span>' + fields.slice(0, limit).map(pillHTML).join("") +
-    (fields.length > limit ? '<button class="btn small" id="morePills">More (' + (fields.length - limit) + ")</button>" : (fields.length > few ? '<button class="btn small" id="morePills">Fewer</button>' : "")) +
-    (Object.keys(S.site).length ? '<button class="btn small" id="clearSite">Clear site</button>' : "");
+  Object.keys(S.site).forEach(function (f) { if (!counts[f]) counts[f] = 0; });
+  return Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a] || fieldLabel(a).localeCompare(fieldLabel(b)); }).map(function (f) { return { field: f, count: counts[f] }; });
 }
-// Pills are short: yes/no pills show their state by style (outline = not set, filled ✓ = yes,
-// struck through ✕ = no); number pills show only their label (and value) until tapped.
-function pillHTML(f) {
-  var kind = fieldKind(f), v = S.site[f], label = esc(fieldLabel(f));
-  var desc = esc((S.fields[f] && S.fields[f].description) || fieldLabel(f));
-  if (kind === "number" || kind === "text") {
-    if (S.openPill === f) {
-      var control = kind === "number"
-        ? '<input type="number" min="0" step="any" inputmode="decimal" value="' + (isSet(v) ? esc(v) : "") + '" aria-label="' + label + '">'
-        : '<select aria-label="' + label + '">' + ["", "student", "shared", "older-people", "general"].map(function (o) { return '<option value="' + o + '"' + (v === o ? " selected" : "") + ">" + (o ? tidy(o) : "not set") + "</option>"; }).join("") + "</select>";
-      return '<span class="pill num open" data-field="' + esc(f) + '"><label><span class="lbl">' + label + "</span> " + control + "</label></span>";
-    }
-    return '<button class="pill num' + (isSet(v) ? " set" : "") + '" data-field="' + esc(f) + '" data-kind="' + kind + '" aria-expanded="false" title="' + desc + '"><span class="lbl">' + label + (isSet(v) ? ": " + esc(kind === "text" ? tidy(v) : v) : "") + "</span></button>";
+function answerText(f) { var v = S.site[f]; return v === true ? "yes" : v === false ? "no" : fieldKind(f) === "text" ? tidy(v) : String(v); }
+// The bar above the results: Filter button, your answers as removable chips, Clear
+function filterBarHTML() {
+  var set = Object.keys(S.site).filter(function (f) { return isSet(S.site[f]); });
+  return '<div class="filterbar"><button class="btn primary" id="openFilter" type="button">Filter' + (set.length ? " (" + set.length + ")" : "") + "</button>" +
+    set.map(function (f) { return '<span class="chip-ans">' + esc(fieldLabel(f)) + ": " + esc(answerText(f)) + '<button type="button" data-unset="' + esc(f) + '" aria-label="Remove ' + esc(fieldLabel(f)) + '">✕</button></span>'; }).join("") +
+    (set.length ? '<button class="btn small" id="clearSite" type="button">Clear</button>' : "") + "</div>";
+}
+function setAnswer(f, v) {
+  if (v === undefined || v === "" || (typeof v === "number" && isNaN(v))) delete S.site[f]; else S.site[f] = v;
+  writeHash(true); renderPanel();
+}
+function questionRow(q) {
+  var f = q.field, kind = fieldKind(f), v = S.site[f], label = esc(fieldLabel(f));
+  var desc = (S.fields[f] && S.fields[f].description) || (MHCLG_FIELDS[f] ? "" : "");
+  var control;
+  if (kind === "number") control = '<input type="number" min="0" step="any" inputmode="decimal" data-q="' + esc(f) + '" value="' + (isSet(v) ? esc(v) : "") + '" aria-label="' + label + '">';
+  else if (kind === "text") control = '<select data-q="' + esc(f) + '" aria-label="' + label + '">' + ["", "student", "shared", "older-people", "general"].map(function (o) { return '<option value="' + o + '"' + (v === o ? " selected" : "") + ">" + (o ? tidy(o) : "not set") + "</option>"; }).join("") + "</select>";
+  else control = '<span class="seg" role="group" aria-label="' + label + '">' + [["yes", true], ["no", false]].map(function (o) {
+    return '<button type="button" data-q="' + esc(f) + '" data-val="' + o[0] + '" aria-pressed="' + (v === o[1]) + '">' + (o[1] ? "Yes" : "No") + "</button>"; }).join("") + "</span>";
+  return '<div class="qrow' + (isSet(v) ? " answered" : "") + '" data-row="' + esc(f) + '"><span class="q">' + label +
+    "<small>" + (q.count ? "affects " + q.count + " requirement" + (q.count === 1 ? "" : "s") : "") + (desc ? (q.count ? " · " : "") + esc(desc) : "") + "</small></span>" + control + "</div>";
+}
+function openFilter(focusField) {
+  var dlg = $("#filterDialog");
+  function stillToCheck() { var items = buildResults(S.lpa ? S.councils[S.lpa] : null); return items.filter(function (i) { return i.result === UNKNOWN; }).length; }
+  function draw(keepFocus) {
+    var q = (dlg.querySelector("#fsearch") || {}).value || "";
+    var list = siteQuestions().filter(function (x) { return !q || (fieldLabel(x.field) + " " + x.field).toLowerCase().indexOf(q.toLowerCase()) !== -1; });
+    dlg.querySelector(".fbody").innerHTML = list.map(questionRow).join("") || '<p class="muted">No questions match.</p>';
+    dlg.querySelector("#fcount").textContent = stillToCheck() + " requirement(s) still to check. Answer what you know; the results update behind this.";
   }
-  var state = v === true ? "true" : v === false ? "false" : "mixed";
-  var word = v === true ? "yes" : v === false ? "no" : "not set";
-  return '<button class="pill" data-field="' + esc(f) + '" aria-pressed="' + state + '" title="' + label + ": " + word + ". " + desc + '">' +
-    (v === true ? '<span class="mark" aria-hidden="true">✓</span>' : v === false ? '<span class="mark" aria-hidden="true">✕</span>' : "") +
-    '<span class="lbl">' + label + '</span><span class="sr-only">: ' + word + "</span></button>";
-}
-function setupPills() {
-  var el = $("#pills");
-  el.addEventListener("click", function (e) {
-    var b = e.target.closest("button"); if (!b) return;
-    if (b.id === "morePills") { S.showMoreFields = !S.showMoreFields; renderPills(); return; }
-    if (b.id === "clearSite") { S.site = {}; writeHash(); render(); return; }
-    var f = b.dataset.field; if (!f) return;
-    if (b.dataset.kind) {   // a number or housing-type pill: open it for typing
-      S.openPill = f; renderPills();
-      var ctl = el.querySelector('[data-field="' + f + '"] input, [data-field="' + f + '"] select'); if (ctl) ctl.focus();
-      return;
-    }
-    var v = S.site[f]; S.site[f] = v === undefined ? true : v === true ? false : undefined;   // unknown -> yes -> no
-    if (S.site[f] === undefined) delete S.site[f];
-    writeHash(true); renderPills(); renderPanel(); var again = el.querySelector('[data-field="' + f + '"]'); if (again) again.focus();
+  dlg.innerHTML = '<div class="fhead"><h2 id="filterTitle">Site details</h2><button class="iconbtn" type="button" id="fclose" aria-label="Close">✕</button></div>' +
+    '<div style="padding:10px 16px 0"><p class="muted" id="fcount" style="margin:0 0 8px"></p><input class="input" id="fsearch" type="search" placeholder="Search questions, e.g. tree, flood, homes"></div>' +
+    '<div class="fbody"></div><div class="ffoot"><button class="btn" type="button" id="fclear">Clear all</button><button class="btn primary" type="button" id="fdone">Done</button></div>';
+  draw();
+  dlg.showModal();
+  $("#fclose").onclick = $("#fdone").onclick = function () { dlg.close(); };
+  $("#fclear").onclick = function () { S.site = {}; writeHash(true); renderPanel(); draw(); };
+  $("#fsearch").addEventListener("input", function () { draw(); });
+  dlg.querySelector(".fbody").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-q]"); if (!b) return;
+    var f = b.dataset.q, val = b.dataset.val === "yes";
+    setAnswer(f, S.site[f] === val ? undefined : val);   // tap the chosen answer again to clear it
+    draw(); var again = dlg.querySelector('button[data-q="' + f + '"][data-val="' + b.dataset.val + '"]'); if (again) again.focus();
   });
-  el.addEventListener("change", function (e) {
-    var wrap = e.target.closest("[data-field]"); if (!wrap) return;
-    var f = wrap.dataset.field, v = e.target.value;
-    if (v === "") delete S.site[f]; else S.site[f] = e.target.type === "number" ? Number(v) : v;
-    S.openPill = ""; writeHash(true); renderPills(); renderPanel();
-    var again = el.querySelector('[data-field="' + f + '"]'); if (again) again.focus();
+  dlg.querySelector(".fbody").addEventListener("change", function (e) {
+    var c = e.target.closest("[data-q]"); if (!c) return;
+    setAnswer(c.dataset.q, c.type === "number" ? (c.value === "" ? undefined : Number(c.value)) : c.value || undefined);
+    draw(); var again = dlg.querySelector('[data-q="' + c.dataset.q + '"]'); if (again) again.focus();
   });
-  // Close an open number pill when you press Enter or Escape, or move away from it
-  el.addEventListener("keydown", function (e) {
-    if (!S.openPill || (e.key !== "Enter" && e.key !== "Escape")) return;
-    e.preventDefault(); var f = S.openPill;
-    if (e.key === "Enter") e.target.dispatchEvent(new Event("change", { bubbles: true }));
-    else { S.openPill = ""; renderPills(); var p = el.querySelector('[data-field="' + f + '"]'); if (p) p.focus(); }
-  });
-  el.addEventListener("focusout", function (e) {
-    var wrap = e.target.closest(".pill.open"); if (!wrap) return;
-    setTimeout(function () { if (S.openPill && !el.querySelector(".pill.open").contains(document.activeElement)) { S.openPill = ""; renderPills(); } }, 150);
-  });
-}
-function flashPill(f) {
-  if (!document.querySelector('#pills [data-field="' + f + '"]')) { S.showMoreFields = true; renderPills(); }
-  var p = document.querySelector('#pills [data-field="' + f + '"]'); if (!p) return;
-  p.scrollIntoView({ block: "center", behavior: "smooth" });
-  if (p.dataset.kind) { S.openPill = f; renderPills(); p = document.querySelector('#pills [data-field="' + f + '"]'); }
-  var target = p.querySelector("input,select") || p; target.focus();
-  p.classList.add("flash"); setTimeout(function () { p.classList.remove("flash"); }, 1600);
+  if (focusField) { var row = dlg.querySelector('[data-row="' + focusField + '"]'); if (row) { row.scrollIntoView({ block: "center" }); (row.querySelector("input,select,button") || row).focus(); } }
+  else $("#fsearch").focus();
 }
 
 // ======================================================================
 // Tabs
 // ======================================================================
-function render() { syncPickers(); renderTabs(); renderPills(); renderPanel(); renderReviewBar(); }
+function render() { syncPickers(); renderTabs(); renderPanel(); renderReviewBar(); }
 function renderTabs() {
   document.querySelectorAll(".tab").forEach(function (t) { t.setAttribute("aria-selected", String(t.dataset.tab === S.tab)); t.tabIndex = t.dataset.tab === S.tab ? 0 : -1; });
 }
@@ -783,7 +812,7 @@ function renderPanel() {
   if (!S.lpa) { if (S.tab === "results") return renderResults(panel, null); panel.innerHTML = emptyState("Choose a council to see its " + (S.tab === "table" ? "table" : "files") + "."); return; }
   if (!S.councils[S.lpa]) {
     panel.innerHTML = loadingState("Loading " + esc(S.lpaByCode[S.lpa].name) + "…");
-    loadCouncil(S.lpa).then(function () { renderPills(); renderPanel(); })
+    loadCouncil(S.lpa).then(function () { renderPanel(); })
       .catch(function (e) { panel.innerHTML = '<div class="error">Couldn\'t load this council\'s files (' + esc(e.message) + "). Check your connection and try again.</div>"; });
     return;
   }
@@ -1038,9 +1067,10 @@ function buildResults(council) {
     var nat = nationalRule(id); if (!nat || seen[id]) return;
     items.push({ id: id, data: S.nationalFiles[id] || { reference: id }, local: false, national: true, rule: nat });
   });
-  var site = S.site, at = appTypeObj();
   return filtered(items).map(function (it) {
-    var r = it.local && it.national ? evalAny([it.rule === undefined ? "discretionary" : it.rule, it.natRule], site, at, S.defs) : evaluate(it.rule, site, at, S.defs);
+    // local and national rules together: required if either says so, for any chosen type
+    var e = evalForTypes(it.local && it.national ? { any: [it.rule === undefined ? "discretionary" : it.rule, it.natRule] } : it.rule);
+    var r = e.result; it.forTypes = e.types;
     // A low-confidence file whose only rule is the application type: the trigger wasn't structured yet.
     var onlyType = it.local && it.data.confidence === "low" && it.rule && Object.keys(ruleFields(it.rule)).length === 0 && JSON.stringify(it.rule).indexOf('"always"') === -1;
     if (r === true && onlyType && !it.national) { r = UNKNOWN; it.why = "The trigger hasn't been structured yet: read the council's wording."; }
@@ -1050,11 +1080,18 @@ function buildResults(council) {
 function renderResults(panel, council) {
   var items = buildResults(council);
   var groups = { req: items.filter(function (i) { return i.result === true; }), chk: items.filter(function (i) { return i.result === UNKNOWN; }), not: items.filter(function (i) { return i.result === false; }) };
-  var html = council ? councilPanel(council) : '<div class="card"><h2>National requirements</h2><p class="muted" style="margin:0">Choose a council above to add its local requirements. ' + (S.type ? "" : "Choose an application type to narrow the list.") + "</p></div>";
-  html += '<div class="toolbar"><p class="muted" style="margin:0">' + groups.req.length + " required, " + groups.chk.length + " to check, " + groups.not.length + ' not required.</p><button class="btn" id="copyChecklist"' + (groups.req.length ? "" : " disabled") + ">Copy checklist</button></div>";
+  var html = council ? councilPanel(council) : '<div class="card"><h2>National requirements</h2><p class="muted" style="margin:0">Choose a council above to add its local requirements. ' + (S.chosen.length ? "" : "Choose an application type to narrow the list.") + "</p></div>";
+  html += '<div class="toolbar">' + filterBarHTML() + '<button class="btn" id="copyChecklist"' + (groups.req.length ? "" : " disabled") + ">Copy checklist</button></div>" +
+    '<p class="muted" style="margin:-4px 0 8px">' + groups.req.length + " required, " + groups.chk.length + " to check, " + groups.not.length + " not required" +
+    (groups.chk.length ? ". Use Filter, or answer the questions on the cards, to settle the ones to check." : ".") + "</p>";
   html += groupHTML("Required", "required", groups.req, true) + groupHTML("Check", "check", groups.chk, true) + groupHTML("Not required", "notreq", groups.not, false);
   panel.innerHTML = html;
-  panel.querySelectorAll("[data-settle]").forEach(function (b) { b.addEventListener("click", function () { flashPill(b.dataset.settle); }); });
+  // Filter bar, answer chips and the quick questions on Check cards
+  var of = $("#openFilter"); if (of) of.addEventListener("click", function () { openFilter(); });
+  var cs = $("#clearSite"); if (cs) cs.addEventListener("click", function () { S.site = {}; writeHash(); renderPanel(); });
+  panel.querySelectorAll("[data-unset]").forEach(function (b) { b.addEventListener("click", function () { setAnswer(b.dataset.unset, undefined); }); });
+  panel.querySelectorAll("[data-answer]").forEach(function (b) { b.addEventListener("click", function () { setAnswer(b.dataset.answer, b.dataset.val === "yes"); }); });
+  panel.querySelectorAll("[data-ask]").forEach(function (b) { b.addEventListener("click", function () { openFilter(b.dataset.ask); }); });
   panel.querySelectorAll("[data-feedback]").forEach(function (b) { b.addEventListener("click", function () { openFeedback(b.dataset.feedback, b.dataset.id); }); });
   var cc = $("#copyChecklist"); if (cc) cc.addEventListener("click", function () { copyChecklist(groups.req, council); });
   var officer = $("#officer"); if (officer) officer.addEventListener("click", function () { window.open(issueURL("council.yml", "Council: " + S.lpa + " ", { council: S.lpa, list: ((council.lpa["validation-list"] || {}).url) || "" }), "_blank", "noopener"); });
@@ -1075,7 +1112,7 @@ function cardHTML(it, cls, icon) {
   if (it.national) trig.push("National: " + (describe(it.natRule || it.rule) || "see the national rules") + ".");
   var settle = it.result === UNKNOWN ? unsetFields(it.local ? { any: [it.rule, it.natRule] } : it.rule).slice(0, 6) : [];
   var must = (d["must-include"] || []).map(function (m) {
-    var r = m["required-if"] ? evaluate(m["required-if"], S.site, appTypeObj(), S.defs) : true;
+    var r = m["required-if"] ? evalForTypes(m["required-if"]).result : true;
     if (r === false) return "";
     return '<li class="' + (m.level === "should" ? "advised" : "") + (r === UNKNOWN ? " unknown" : "") + '">' + esc(m.item) + (m.level === "should" ? ' <span class="muted">(advised)</span>' : "") + (r === UNKNOWN ? ' <span class="warn">Check: ' + esc(describe(m["required-if"])) + "</span>" : "") + "</li>";
   }).join("");
@@ -1085,9 +1122,15 @@ function cardHTML(it, cls, icon) {
   return '<article class="card result ' + cls + '"><header><div class="title">' + icon + "<h3>" + esc(reqName(it.id)) + '</h3></div><div class="meta" style="margin:0">' +
     (it.local ? '<span class="badge local">Local</span>' : "") + (it.national ? '<span class="badge national">National</span>' : "") +
     (it.local ? badge(status) + ' <span class="badge plain">Confidence: ' + esc(d.confidence || "?") + "</span>" : "") + "</div></header>" +
+    (S.chosen.length > 1 && it.forTypes && it.forTypes.length ? '<p class="typetags">For: ' + it.forTypes.map(function (t) { return esc(typeName(t)); }).join(", ") + "</p>" : "") +
     '<p class="trigger">' + trig.map(esc).join("<br>") + "</p>" +
     (it.why ? '<p class="warn">' + esc(it.why) + "</p>" : "") +
-    (settle.length ? '<p class="settle">Would be settled by: ' + settle.map(function (f) { return '<button data-settle="' + esc(f) + '">' + esc(fieldLabel(f)) + "</button>"; }).join("") + "</p>" : "") +
+    (settle.length ? '<p class="settle">' + settle.slice(0, 3).map(function (f) {
+      var label = esc(fieldLabel(f));
+      if (fieldKind(f) === "boolean") return '<span class="inlineq">' + label + '? <span class="seg" role="group" aria-label="' + label + '">' +
+        '<button type="button" data-answer="' + esc(f) + '" data-val="yes">Yes</button><button type="button" data-answer="' + esc(f) + '" data-val="no">No</button></span></span>';
+      return '<button type="button" data-ask="' + esc(f) + '">Set ' + label + "</button>";
+    }).join("") + (settle.length > 3 ? '<button type="button" data-ask="' + esc(settle[3]) + '">More…</button>' : "") + "</p>" : "") +
     (must ? "<strong>What it must show</strong><ul class=\"must\">" + must + "</ul>" : "") +
     (d["source-text"] ? "<details><summary>The council's wording</summary><blockquote>" + esc(d["source-text"]) + "</blockquote></details>" : "") +
     (d.notes ? '<details><summary>Notes</summary><p class="muted">' + esc(d.notes) + "</p></details>" : "") +
@@ -1138,7 +1181,7 @@ function issueURL(template, title, fields) {
   Object.keys(fields || {}).forEach(function (k) { p.push(encodeURIComponent(k) + "=" + encodeURIComponent(fields[k])); });
   return GH_NEW_ISSUE + "?" + p.join("&");
 }
-function siteText() { return Object.keys(S.site).map(function (f) { return fieldLabel(f) + ": " + (S.site[f] === true ? "yes" : S.site[f] === false ? "no" : S.site[f]); }).join("\n") + (S.type ? "\nApplication type: " + typeName(S.type) : ""); }
+function siteText() { return Object.keys(S.site).map(function (f) { return fieldLabel(f) + ": " + (S.site[f] === true ? "yes" : S.site[f] === false ? "no" : S.site[f]); }).join("\n") + (S.chosen.length ? "\nApplication type: " + S.chosen.map(typeName).join(", ") : ""); }
 function openFeedback(kind, id) {
   var council = S.councils[S.lpa], list = ((council.lpa["validation-list"] || {}).url) || "";
   var file = "specification/planning-requirement/" + S.lpa + "/" + id + ".yaml";
@@ -1175,10 +1218,10 @@ function copyChecklist(items, council) {
   $("#checkedList").addEventListener("change", function (e) { $("#doCopy").disabled = !e.target.checked; });
   $("#cancelCopy").addEventListener("click", function () { dlg.close(); });
   $("#doCopy").addEventListener("click", function () {
-    var lines = ["Validation checklist" + (S.lpa ? " - " + S.lpaByCode[S.lpa].name : "") + (S.type ? " - " + typeName(S.type) : ""), "(open-validation draft data; checked against the council's list)", ""];
+    var lines = ["Validation checklist" + (S.lpa ? " - " + S.lpaByCode[S.lpa].name : "") + (S.chosen.length ? " - " + S.chosen.map(typeName).join(", ") : ""), "(open-validation draft data; checked against the council's list)", ""];
     items.forEach(function (it) {
       lines.push("[ ] " + reqName(it.id));
-      (it.data["must-include"] || []).forEach(function (m) { var r = m["required-if"] ? evaluate(m["required-if"], S.site, appTypeObj(), S.defs) : true; if (r !== false) lines.push("    - " + m.item + (m.level === "should" ? " (advised)" : "") + (r === UNKNOWN ? " (check)" : "")); });
+      (it.data["must-include"] || []).forEach(function (m) { var r = m["required-if"] ? evalForTypes(m["required-if"]).result : true; if (r !== false) lines.push("    - " + m.item + (m.level === "should" ? " (advised)" : "") + (r === UNKNOWN ? " (check)" : "")); });
     });
     var std = council ? council.lpa["submission-standards"] || [] : [];
     if (std.length) { lines.push("", "Submission standards:"); std.forEach(function (s) { lines.push("- " + s.item + (s.level === "should" ? " (advised)" : "")); }); }
@@ -1193,7 +1236,7 @@ function copyChecklist(items, council) {
 // Browse files tab
 // ======================================================================
 function renderBrowse(panel, council) {
-  var files = filtered(council.files).filter(function (f) { return !S.type || evaluate({ "application-type": { "in": cellValue(f.data, "application-type") } }, {}, appTypeObj(), {}) !== false || !cellValue(f.data, "application-type").length; });
+  var files = filtered(council.files).filter(function (f) { return !S.chosen.length || !cellValue(f.data, "application-type").length || S.chosen.some(function (t) { return evaluate({ "application-type": { "in": cellValue(f.data, "application-type") } }, {}, typeObj(t), {}) !== false; }); });
   var names = ["_lpa"].concat(files.map(function (f) { return f.id; }));
   if (names.indexOf(S.browseFile) === -1) S.browseFile = "_lpa";
   panel.innerHTML = '<div class="browse"><nav aria-label="Files"><p class="mono muted" style="margin:0 0 6px">specification/planning-requirement/' + esc(S.lpa) + '/</p><ul class="tree">' +
@@ -1354,7 +1397,7 @@ function start() {
   panel.innerHTML = loadingState("Loading…");
   if (!window.jsyaml) { panel.innerHTML = '<div class="error">Couldn\'t load the YAML reader from cdn.jsdelivr.net. Check your connection or any content blocker.</div>'; return; }
   loadBase().then(function () {
-    loadPending(); readHash(); setupPickers(); setupPills(); setupTabs(); setupReview();
+    loadPending(); readHash(); setupPickers(); setupTabs(); setupReview();
     document.body.classList.toggle("patterns", S.patterns);
     window.addEventListener("hashchange", function () { readHash(); render(); });
     window.addEventListener("popstate", function () { readHash(); render(); });
