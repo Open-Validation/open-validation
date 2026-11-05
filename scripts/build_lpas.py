@@ -44,6 +44,28 @@ def normalise(name):
     return re.sub(r"\s+", " ", n).strip()
 
 
+# MHCLG's codes for national parks and development corporations are Wikidata
+# ids (e.g. Q72617988), which aren't readable as folder names. We use the
+# authorities' own short names instead. The Wikidata id is kept in the
+# 'organisation' column of scripts/lpa_match.csv, so the data can still be
+# matched back to MHCLG's register.
+SHORT_CODES = {
+    "Q4972284": "BROADS",    # Broads Authority
+    "Q5225646": "DNPA",      # Dartmoor National Park Authority
+    "Q72617784": "ENPA",     # Exmoor National Park Authority
+    "Q27159704": "LDNPA",    # Lake District National Park Authority
+    "Q72617158": "NFNPA",    # New Forest National Park Authority
+    "Q72617669": "NYMNPA",   # North York Moors National Park Authority
+    "Q72617890": "NNPA",     # Northumberland National Park Authority
+    "Q72617988": "PDNPA",    # Peak District National Park Authority
+    "Q20198711": "SDNPA",    # South Downs National Park Authority
+    "Q27178932": "YDNPA",    # Yorkshire Dales National Park Authority
+    "Q20648596": "OPDC",     # Old Oak and Park Royal Development Corporation
+    "Q6670544": "LLDC",      # London Legacy Development Corporation
+    "Q72463795": "EDC",      # Ebbsfleet Development Corporation
+}
+
+
 def register():
     """Current English LPAs from MHCLG's register: list of dicts with code, ons, name, org."""
     today = date.today().isoformat()
@@ -59,7 +81,8 @@ def register():
         for r in read_csv(org / file):
             if r["end-date"] or not r["local-planning-authority"]:
                 continue
-            rows.append({"code": r["reference"], "ons": r["local-planning-authority"],
+            rows.append({"code": SHORT_CODES.get(r["reference"], r["reference"]),
+                         "ons": r["local-planning-authority"],
                          "name": r["name"], "org": f"{prefix}:{r['reference']}"})
     return rows
 

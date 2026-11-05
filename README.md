@@ -52,8 +52,10 @@ The rules for writing the files are in **[FORMAT.md](FORMAT.md)**.
 | `reviews/pending/`, `reviews/applied/` | Cell marks waiting to be applied, and those already applied |
 | `docs/` | The explorer tool (`docs/index.html`) and the map |
 
-National parks use MHCLG's own codes for them, which are Wikidata ids (e.g. Peak District is
-`Q72617988`).
+Councils use MHCLG's three-letter codes. For national parks MHCLG's code is a Wikidata id
+(e.g. Peak District is `Q72617988`), so we use the parks' own short names instead: `BROADS`, `DNPA`,
+`ENPA`, `LDNPA`, `NFNPA`, `NYMNPA`, `NNPA`, `PDNPA`, `SDNPA`, `YDNPA`. The Wikidata id is kept in
+`scripts/lpa_match.csv` (column `organisation`) so the data can be matched back to MHCLG's register.
 
 ## The four review statuses
 

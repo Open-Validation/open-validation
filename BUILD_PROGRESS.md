@@ -14,7 +14,9 @@ Working branch: `ccr-f743743a-pji9c0` (the session's designated branch, used ins
   - 328 English councils matched (`scripts/lpa_match.csv`: 326 exact, 2 by normalised name)
   - 328 folders with `_lpa.yaml`, `data/lpa.csv`, `FORMAT.md`, `review.py`, `set_status.py`,
     `apply_reviews.py`, `check.py`, workflows, README
-  - [ ] Checkpoint 1 approved (licence: MIT code + CC BY 4.0 data proposed)
+  - [x] Checkpoint 1 approved: branch OK; national parks use short codes (BROADS, DNPA, ... YDNPA)
+    instead of MHCLG's Wikidata ids (ids kept in lpa_match.csv `organisation`)
+  - [ ] Licence still to confirm (MIT code + CC BY 4.0 data in place)
 - [ ] **B. Fill in every council's requirements** (`build_from_workbook.py`)
   - [ ] Checkpoint 2: SHR and CMD
   - [ ] Checkpoint 3: one region, then all regions (one commit per region)
