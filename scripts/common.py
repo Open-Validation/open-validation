@@ -30,9 +30,15 @@ def load_yaml(path):
         return yaml.safe_load(f)
 
 
+class _NoAnchors(yaml.SafeDumper):
+    """Write a repeated rule out in full each time, never as an &id001 anchor."""
+    def ignore_aliases(self, data):
+        return True
+
+
 def dump_yaml(data):
     """Turn data into YAML text in the house style (see FORMAT.md)."""
-    return yaml.safe_dump(data, sort_keys=False, allow_unicode=True, width=100)
+    return yaml.dump(data, Dumper=_NoAnchors, sort_keys=False, allow_unicode=True, width=100)
 
 
 def write_yaml(path, data):

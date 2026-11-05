@@ -6,6 +6,7 @@ It prints every problem it finds in plain English and exits with an error if
 there are any. Then it prints a summary of the data.
 """
 
+import re
 import sys
 from collections import Counter
 from datetime import date, timedelta
@@ -51,6 +52,8 @@ def load_all():
         text = path.read_text(encoding="utf-8")
         if any(line.strip() == "---" for line in text.splitlines()):
             problem(f"{rel(path)}: contains a '---' line. Our files are plain YAML, not Markdown front matter")
+        if re.search(r"(^|[\s:\-\[,])[&*]id\d+", text, re.M):
+            problem(f"{rel(path)}: contains a YAML anchor (&id001 / *id001). Write each rule out in full")
         try:
             loaded[path] = yaml.safe_load(text) or {}
         except yaml.YAMLError as e:
