@@ -1,0 +1,374 @@
+# Corrections for Adur District Council, from the council's audit.
+# Adur still uses the joint Adur & Worthing Local Validation List (Media,99591, last updated
+# June 2020). The source list is general: it does not name application types, so most rows are
+# left for every type with a structured trigger. A draft Adur-only list went to consultation in
+# July 2026 and may replace this one. Items marked "From the audit" use the audit's paraphrase.
+local-authority: ADU
+
+validation-list:
+  url: https://www.adur-worthing.gov.uk/media/Media,99591,smxx.pdf
+  date: 2020-06
+  date-basis: >-
+    audit: last updated June 2020; still the operative Adur list in June 2026. A Draft Adur
+    Validation Requirements was approved for consultation on 25 June 2026 (decision
+    A/REG/003/26-27); re-check when it is adopted.
+
+drop:
+  - id: daylight-sunlight-assessment
+    reason: "not_a_requirement: the council says it is 'not considered an appropriate requirement at validation stage'"
+  - id: schedule-of-works
+    sheets: [Full planning]
+    reason: "wrong_trigger: the Full planning row quoted BS5837 tree survey text"
+
+drop-unmapped:
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: the excerpt omits the thresholds; replaced below"
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "duplicate: same Economic Statement text as the Employment / Economic Statement row"
+  - local-name: Employment / Economic Statement
+    reason: "wrong_trigger: mixes in Worthing-only SPD text; replaced below with the Adur wording"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_app_type: placed under prior approval; re-added below without the type"
+
+requirements:
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: The site has 10 or more dwellings (gross).
+    source-text: Adur uses the 10-dwelling threshold from 8 April 2020
+    source-url: https://www.adur-worthing.gov.uk/media/Media,99591,smxx.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): sites of 10 or more dwellings (gross)."
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      always: true
+    source-url: https://www.adur-worthing.gov.uk/media/Media,99591,smxx.pdf
+    must-include:
+      - item: A statement that the Sussex Air Quality and Emissions Mitigation Guidance has been followed
+        level: must
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): applies to all developments; a statement showing the
+      Sussex air quality guidance was followed is needed with every application, with a full Air
+      Quality Assessment where relevant.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees within the application site or on land adjacent to it could be affected by the development.
+    source-text: >-
+      Tree Survey Required in all cases where trees within the application site or on land adjacent
+      to it could be affected by the development.
+    confidence: medium
+    notes: "The source list is general (not tied to an application type), so no type is given."
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [archaeological-priority-area]
+            description: The site is in an Archaeological Notification Area.
+        - discretionary
+    source-url: https://www.adur-worthing.gov.uk/media/Media,99591,smxx.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was a mid-sentence fragment. From the audit: a
+      Historic Environment Record search/assessment where there is any indication of archaeology
+      (Archaeological Notification Areas, guidance thresholds).
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      on any protected species of flora or fauna or have an adverse impact on biodiversity or
+      geological features.
+    source-url: https://www.adur-worthing.gov.uk/media/Media,99591,smxx.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was a fragment. From the audit: a biodiversity
+      survey and report where works may affect protected species, for example vegetation removal,
+      changes to watercourses, demolition of older buildings or roof works.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3 (wholly or partly).
+        - all:
+            - ref: major-development
+            - any:
+                - condition:
+                    field: site-area-residential
+                    operator: ">="
+                    value: 1
+                    description: The site is 1 hectare or more.
+                - condition:
+                    field: site-area-non-residential
+                    operator: ">="
+                    value: 1
+                    description: The site is 1 hectare or more.
+    source-url: https://www.adur-worthing.gov.uk/media/Media,99591,smxx.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted generic web text. From the audit: major development
+      of 1ha+ in Flood Zone 1 and all new development in Flood Zones 2 and 3. For householder
+      applications the council asks for 'A Householder Flood Risk Assessment form if the site is
+      wholly or partly in an Environment Agency flood zone' (Appendix 1).
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, conservation-area, locally-listed-building]
+        description: The proposal affects a heritage asset.
+    confidence: medium
+    notes: "From the audit (wrong_app_type): a Heritage Statement is needed wherever heritage assets are affected."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: The land is or may be contaminated.
+    source-url: https://www.adur-worthing.gov.uk/media/Media,99591,smxx.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): development on land that is or may be contaminated."
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 5
+                description: The proposal is for five or more dwellings.
+            - condition:
+                field: floorspace-non-residential
+                operator: ">"
+                value: 1000
+                description: >-
+                  Business, commercial or leisure development of more than 1,000sqm gross
+                  (excluding conversions of existing buildings).
+    source-text: >-
+      Landscaping Details All full planning applications for five or more dwellings or business,
+      commercial and leisure developments of more than 1,000sqm gross (excluding conversions of
+      existing buildings) must be accompanied by full landscaping details in the form of drawing/s
+      and schedule/s.
+    must-include:
+      - item: Full landscaping details in the form of drawings and schedules
+        level: must
+    confidence: medium
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: >-
+          The proposal includes floodlighting, in particular for car parks, outdoor leisure
+          facilities and commercial premises near homes or open countryside.
+    source-text: >-
+      Lighting Assessment Applications which include, or are for the provision of, floodlighting in
+      particular in relation to car parks, outdoor leisure facilities and commercial premises
+      particularly in the vicinity of residential properties or open countryside must be
+      accompanied by a lighting impact assessment.
+    confidence: medium
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The development is likely to generate noise that could disturb occupiers nearby.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise-sensitive development near existing noise sources (railways, major roads, industry).
+    source-url: https://www.adur-worthing.gov.uk/media/Media,99591,smxx.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Noise Impact Assessment."
+
+  - id: sci
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: telecommunications-development
+            value: true
+            description: The application is for telecommunications equipment.
+    source-text: >-
+      Statement of Community Involvement A Statement of Community Involvement is required for all
+      major applications as well as planning applications for telecommunications equipment.
+    confidence: medium
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [regeneration-area]
+            description: The site is within the Shoreham Harbour regeneration area.
+    source-url: https://www.adur-worthing.gov.uk/media/Media,99591,smxx.pdf
+    must-include:
+      - item: How renewables will provide at least 10% of predicted energy demand
+        level: must
+        required-if:
+          ref: major-development
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, missing_requirement): the workbook's excerpt was a cut-off fragment. From
+      the audit: an Energy/Sustainability Statement for all new major development in Adur (showing
+      renewables provide at least 10% of predicted energy demand), and a Sustainability Statement
+      for applications within the Shoreham Harbour area.
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: The proposal is telecommunications development.
+    source-text: >-
+      Telecommunications Development A supporting statement is required in connection with all
+      telecommunications development setting out the operational need/requirements, including an
+      analysis of alternative sites which could be considered, ICNIRP compliance and public
+      consultation undertaken.
+    must-include:
+      - item: Operational need / requirements
+        level: must
+      - item: Analysis of alternative sites which could be considered
+        level: must
+      - item: ICNIRP compliance
+        level: must
+      - item: Public consultation undertaken
+        level: must
+    confidence: medium
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: >-
+          Main town centre uses outside a centre and not in accordance with an up-to-date Local
+          Plan.
+    source-url: https://www.adur-worthing.gov.uk/media/Media,99591,smxx.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Town Centre Uses (Sequential Test and Impact Assessment).
+      In Adur an impact assessment is needed for retail outside the Primary Shopping Area of 1,000
+      sqm net or more.
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    source-text: >-
+      Transport Issues A Transport Statement (accompanied by a Travel Plan Statement) or a Transport
+      Assessment (accompanied by a Full Travel Plan) will be required where the size of development
+      exceeds the thresholds defined for each type of development in the West Sussex County Council
+      (WSCC) Transport Assessment Methodology
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt was cut off with a URL fragment. The thresholds are in the
+      WSCC Transport Assessment Methodology, not in the list, so this is shown as officer discretion.
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    source-text: >-
+      Transport Issues A Transport Statement (accompanied by a Travel Plan Statement) or a Transport
+      Assessment (accompanied by a Full Travel Plan) will be required where the size of development
+      exceeds the thresholds defined for each type of development in the West Sussex County Council
+      (WSCC) Transport Assessment Methodology
+    confidence: medium
+    notes: "As for transport-assessment: the thresholds are in the WSCC methodology."
+
+  - id: waste-management-plan
+    action: add
+    required-if: discretionary
+    source-url: https://www.adur-worthing.gov.uk/media/Media,99591,smxx.pdf
+    must-include:
+      - item: Bin storage shown on a plan
+        level: must
+      - item: Likely collection method
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): Refuse and Recycling Provision; all relevant applications must show bin storage and likely collection method on a plan."
+
+unmapped:
+  - local-name: Sustainable Drainage Systems (SuDS)
+    source-text: >-
+      From the audit: more than two dwellings or 1,000 sqm+ commercial floorspace, sites at fluvial
+      or pluvial flood risk, and increases in impermeable area where there is no public surface
+      water sewer
+    source-url: https://www.adur-worthing.gov.uk/media/Media,99591,smxx.pdf
+    suggested-id: drainage-strategy
+  - local-name: Foul Sewerage Assessment (FSA)
+    source-text: >-
+      From the audit: major developments of 10+ dwellings (excluding conversions), sites of 0.5ha+
+      or 1,000 sqm+ floorspace, or any proposal involving a change to the sewerage system
+    source-url: https://www.adur-worthing.gov.uk/media/Media,99591,smxx.pdf
+    suggested-id: foul-sewage-assessment
+  - local-name: Stage 1 Road Safety Audit
+    source-text: "A Stage 1 Road Safety Audit is required for major applications..."
+    source-url: https://www.adur-worthing.gov.uk/media/Media,99591,smxx.pdf
+    suggested-id: road-safety-audit
+  - local-name: Economic Statement
+    source-text: >-
+      In the case of applications involving the net loss of employment space in Adur please refer to
+      the Demonstrating Genuine Loss of Employment Floorspace SPD, which was adopted on 26th March
+      2019, and provides detailed advice as to information
+    source-url: https://www.adur-worthing.gov.uk/media/Media,99591,smxx.pdf
+    suggested-id: employment-statement
+  - local-name: Ventilation and Air Conditioning Statement
+    source-text: >-
+      Ventilation and Air Conditioning Statement Required for all applications for the use of
+      premises for purposes within Use Classes A3 (Restaurants and Cafes), A4 (Drinking
+      Establishments), A5 (Hot Food Takeaways) and D2 (Assembly and Leisure) including change of use
+      and any other applications which require ventilation or extraction equipment to be installed.
+    source-url: https://www.adur-worthing.gov.uk/media/Media,99591,smxx.pdf
+    suggested-id: ventilation-extraction-statement
+
+low-confidence:
+  - id: schedule-of-works
+    note: >-
+      The Listed building consent excerpt is the heritage statement wording ('a schedule of works
+      to the listed building(s) ... may be required'); check the list's own trigger.
+
+new-fields:
+  - field: telecommunications-development
+    kind: boolean
+    label: Telecommunications development
+    description: The proposal is for telecommunications equipment (masts, antennas, cabinets and similar).
+  - field: out-of-centre-town-centre-use
+    kind: boolean
+    label: Main town centre use outside a centre
+    description: >-
+      The proposal is for a main town centre use (retail, leisure, offices and similar) at an
+      edge-of-centre or out-of-centre location, outside a defined town centre or primary shopping area.
+  - field: regeneration-area
+    kind: designation
+    label: In a regeneration area
+    description: Site is within a regeneration or area action plan area identified by the council.
