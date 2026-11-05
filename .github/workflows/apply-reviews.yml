@@ -1,0 +1,44 @@
+# When a pull request adds cell marks to reviews/pending/, apply them and
+# commit the result back to the pull request, so the diff shows exactly
+# which cells changed. Pull requests from forks are only checked.
+name: apply-reviews
+on:
+  pull_request:
+    paths:
+      - "reviews/pending/**"
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+
+      - name: Apply the marks (pull requests from this repo)
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        run: |
+          python scripts/apply_reviews.py
+          python scripts/check.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A specification data reviews
+          if git diff --cached --quiet; then
+            echo "Nothing changed."
+          else
+            git commit -m "Apply cell marks from reviews/pending"
+            git push
+          fi
+
+      - name: Check only (pull requests from forks)
+        if: github.event.pull_request.head.repo.full_name != github.repository
+        run: |
+          echo "This pull request comes from a fork, so the marks are not applied automatically."
+          echo "A maintainer must apply them: python scripts/apply_reviews.py, then commit."
+          python scripts/check.py
