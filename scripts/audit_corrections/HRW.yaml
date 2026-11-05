@@ -1,0 +1,442 @@
+# Corrections for London Borough of Harrow, from inputs/audit/london-borough-of-harrow.json.
+# The audit compared the workbook with Harrow's 'Local Planning Validation Requirements'
+# (file 23287, cover date 1 February 2024; the build already takes that date from the audit).
+# Most workbook rows are sentence fragments placed under Full planning as 'INFERRED'. Items
+# marked "From the audit" use the audit's paraphrase, not the council's exact words.
+local-authority: HRW
+
+submission-standards:
+  - item: All documents in PDF format
+    level: must
+  - item: No individual file larger than 10 MB
+    level: must
+
+drop-unmapped:
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: a truncated fragment of the parking provision item, which has its own row"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: the excerpt is a viability sentence; re-added below without it"
+
+requirements:
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: The proposal is for 10 or more dwellings.
+    source-text: This is required for proposals of 10 or more dwellings.
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement): Affordable Housing Statement."
+
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      all:
+        - ref: major-development
+        - any:
+            - site:
+                in: [air-quality-management-area]
+                description: The site is in or near an Air Quality Management Area.
+            - discretionary
+    source-text: This is for Major Planning Applications only.
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was a fragment. From the audit: major
+      applications only, for schemes that may affect air quality or are in or near an AQMA.
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees on the site, on the street or on adjoining land.
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Tree survey/arboricultural assessment for trees on site, on the street or on adjoining land, including householder applications."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: >-
+      From the audit: the preliminary protected species survey applies where there are alterations
+      to a roof or loft space ("If there are to be alterations to a roof or loft space"), mainly
+      householder work, judged case by case.
+
+  - id: cil-form
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 100
+            description: New buildings or extensions creating 100 square metres or more.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates a new dwelling.
+    source-text: Applications for new buildings or extensions which involve the creation of 100 square metres or more
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was a fragment. From the audit: also any new dwelling; the Householder section asks for the CIL PAAIR form."
+
+  - id: daylight-sunlight-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: storey-count
+            operator: ">"
+            value: 4
+            description: Buildings exceeding four storeys in height where adjoining other developed land or public open space.
+        - discretionary
+    source-text: >-
+      buildings exceeding four storeys in height where adjoining other developed land … lead to
+      overshadowing of other proposed buildings or spaces within the same development site, ▪ where
+      the application site is itself subject to significant shading from adjoining buildings or
+      trees.
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook lost the main trigger (buildings over four storeys adjoining developed land or public open space)."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [conservation-area, world-heritage-site]
+                description: The site is in a designated area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: One or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: 100 square metres or more of floorspace.
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted heritage statement text. From the audit: major
+      development, or development in a designated area of one or more dwellings or 100 sqm or more
+      (including householder work in a conservation area).
+
+  - id: energy-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-text: each major development proposal to submit a detailed energy assessment
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook filed this under sustainability-statement with the fragment 'a detailed energy assessment.'"
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    source-text: whether an EIA is required before submitting the application.
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was truncated."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone, critical-drainage-area]
+            description: The site is in Flood Zone 2 or 3, a surface-water flood area or a Critical Drainage Area.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more.
+    source-text: a SiteSpecific Flood Risk Assessment with the planning application.
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    must-include:
+      - item: Surface water drainage strategy
+        level: must
+        source-text: Surface water drainage strategy must be set out within the FRA for all new development applications including a single dwelling.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, missing_requirement): the excerpt omitted the triggers. From the audit:
+      Flood Zones 2 and 3, surface-water areas, sites of 1 ha or more and Critical Drainage Areas,
+      including minor development and householder extensions, outbuildings and hard surfacing.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [lbc, hh, full, outline, reserved-matters, advertising]
+        - site:
+            in: [conservation-area, listed-building, listed-building-setting, locally-listed-building, archaeological-priority-area]
+            description: >-
+              Affects a registered park and garden, conservation area, listed building, non-designated
+              heritage asset, scheduled ancient monument or archaeological priority area, or its setting.
+    source-text: >-
+      A heritage statement is needed for any application for listed building consent, planning
+      permission or advertisement consent that affects one or more of these heritage assets: … a
+      registered park and garden or its setting a conservation area or its setting a listed building
+      or its setting a non-designated heritage asset or it’s setting e.g. a locally listed building,
+      park or garden, or its setting a scheduled ancient monument or its setting an archaeological
+      priority area
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook had it only under LBC and adverts. It can be incorporated
+      within a Design and Access Statement under the heading 'Heritage Statement'.
+
+  - id: landscaping-plan
+    action: replace
+    source-text: >-
+      Hard landscaping details such as structures and surfaces and ancillary objects Details of how
+      retained vegetation will be protected during construction A Maintenance and Management Plan
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    must-include:
+      - item: Hard landscaping details such as structures, surfaces and ancillary objects
+        level: must
+      - item: Details of how retained vegetation will be protected during construction
+        level: must
+      - item: A maintenance and management plan
+        level: must
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): not an LBC item; the source's landscaping details are a general
+      planning requirement. The audit gives no trigger.
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: external-lighting
+            value: true
+            description: External lighting would be provided or made necessary by a publicly accessible development.
+        - any:
+            - site:
+                in: [listed-building-setting, conservation-area]
+                description: In the vicinity of a listed building or conservation area.
+            - discretionary
+    source-text: >-
+      Proposals involving the provision of publicly accessible developments in the vicinity of
+      residential property, a listed building or conservation area or open countryside where external
+      lighting would be provided or made necessary by the development will need a lighting assessment.
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted a biodiversity sentence; the council's wording was in the landscaping row. Near residential property or open countryside is shown as officer judgement."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      condition:
+        field: noise-generating-use
+        value: true
+        description: Development that would generate noise disturbance.
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Noise Impact Assessment for development that would generate noise disturbance."
+
+  - id: photos
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: demolition
+            value: true
+            description: The proposal involves demolition.
+        - site:
+            in: [conservation-area, listed-building]
+            description: The development affects a conservation area or listed building.
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): photographs/photomontages for demolition, or development affecting a conservation area or listed building."
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if:
+      condition:
+        field: loss-of-use
+        value: true
+        description: Development on designated open space that results in a net loss of open space.
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Open Space Assessment for development on designated open space that results in a net loss."
+
+  - id: roof-plan-proposed
+    action: add
+    required-if: discretionary
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): roof plans where a roof is created or altered."
+
+  - id: sci
+    action: add
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Statement of Community Involvement is listed, but the audit gives no trigger."
+
+  - id: section-existing
+    action: replace
+    required-if: discretionary
+    source-text: "sections and finished floor and site levels Scale 1:50 or 1:100 with a scale bar … development is proposed next to changing ground levels."
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    must-include:
+      - item: Scale 1:50 or 1:100, with a scale bar
+        level: must
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook's excerpt was mixed with vehicular access text. Sections appear to be needed where development is proposed next to changing ground levels; the source text is garbled."
+
+  - id: section-proposed
+    action: replace
+    required-if: discretionary
+    source-text: "sections and finished floor and site levels Scale 1:50 or 1:100 with a scale bar … development is proposed next to changing ground levels."
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    must-include:
+      - item: Finished floor and site levels
+        level: must
+      - item: Scale 1:50 or 1:100, with a scale bar
+        level: must
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook's excerpt was mixed with vehicular access text. Sections appear to be needed where development is proposed next to changing ground levels; the source text is garbled."
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      application-type:
+        in: [full, outline]
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    confidence: low
+    notes: >-
+      From the audit: a sustainability statement for major and minor schemes. The workbook's
+      fragment ('a detailed energy assessment.') is the energy statement (see energy-statement).
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      application-type:
+        in: [pa-ecomms-network]
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    must-include:
+      - item: Evidence of notice to the aerodrome operator, CAA or MoD where the site is within 3 km of an aerodrome
+        level: must
+    confidence: low
+    notes: "From the audit (missing_requirement): Section 3 telecoms prior notification item."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 2500
+            description: Retail and leisure developments over 2,500 square metres of gross floor space.
+        - discretionary
+    confidence: medium
+    notes: "Smaller developments may need one, for example where likely to have a significant impact on smaller centres (council's wording)."
+
+  - id: transport-assessment
+    action: add
+    required-if: discretionary
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Transport Statement/Assessment for development with car parking or traffic implications."
+
+  - id: travel-plan
+    action: add
+    required-if: discretionary
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Travel Plan for development with significant transport implications."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    must-include:
+      - item: A second version with any commercially sensitive information redacted
+        level: should
+      - item: A clear explanation of why the redaction is appropriate, having regard to the Freedom of Information Act tests
+        level: should
+    confidence: medium
+    notes: >-
+      Required where on-site affordable housing is not proposed to be met (council's wording). The
+      redacted second version is the one publicised with the application.
+
+  - id: waste-management-plan
+    action: replace
+    required-if: discretionary
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted the construction site waste management plan
+      sentence. From the audit: small developments show refuse storage and disposal on plans; larger
+      developments provide a waste management strategy. No threshold is given.
+
+unmapped:
+  - local-name: Planning obligations draft heads of terms
+    source-text: "From the audit: listed in the requirements; the workbook's excerpt was viability text, so the trigger wasn't captured"
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    suggested-id: planning-obligations-heads-of-terms
+  - local-name: Protected View Assessment
+    source-text: "required for all new development that affects a protected view"
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    suggested-id: views-analysis
+  - local-name: Statement of Need
+    source-text: "applications for community facilities (D1 and D2)"
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    suggested-id: statement-of-need
+  - local-name: Accommodation Management Plan
+    source-text: "From the audit: specialist housing such as care homes, nursing homes, supported and student housing"
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    suggested-id: management-plan
+  - local-name: Airport safeguarding details (RAF Northolt)
+    source-text: "From the audit: sites near RAF Northolt"
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    suggested-id: aerodrome-safeguarding
+  - local-name: GLA Planning Data Standard
+    source-text: "From the audit: all applications in the GLA area"
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    suggested-id: planning-data-standard
+  - local-name: Material details
+    source-text: "All major, minor and householder planning applications involving new development visible"
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    suggested-id: materials-schedule
+  - local-name: Reasonable exception statement
+    source-text: "From the audit: a fire-safety item listed in the requirements"
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    suggested-id: fire-safety-statement
+  - local-name: Plans of new doors, windows, shopfronts, panelling, fireplaces and plaster moulding
+    source-text: "From the audit: listed building consent (and householder plus LBC), Section 3"
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    suggested-id: architectural-details
+  - local-name: Existing and proposed level surveys (minerals)
+    source-text: "From the audit: minerals applications, Section 3"
+    source-url: https://www.harrow.gov.uk/downloads/file/23287/planning-application-requirements.pdf
+    suggested-id: topographical-survey
+
+low-confidence:
+  - id: archaeological-assessment
+    note: "Audit (wrong_trigger): the workbook's excerpt is truncated ('an appropriate desk-based assessment and, where necessary, a field evaluation'); the trigger wasn't captured."
+  - id: planning-statement
+    note: "Audit (wrong_trigger): the workbook's excerpt is truncated ('of the planning statement suitable for a wider audience'); the trigger wasn't captured."

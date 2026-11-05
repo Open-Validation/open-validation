@@ -1,0 +1,409 @@
+# Corrections for Swale Borough Council, from the council's audit.
+# Maidstone and Swale share one joint validation list (published 15 November 2024; Part A and B
+# items apply to both unless marked "Maidstone only" or "Swale only"); keep this file consistent
+# with MAI.yaml. Most workbook rows came from a superseded 2021 PDF, several are Maidstone-only
+# items, and many triggers belong to other entries. Items marked "From the audit" use the audit's
+# paraphrase of the current list.
+local-authority: SWL
+
+submission-standards:
+  - item: All applications require scale bars; plans required as a national requirement or under Part A produced to a recognised scale with a scale bar
+    level: must
+  - item: Drawings accurately titled, with drawing numbers (and, where relevant, a revision number identifying the change and date), a scale and scale bars
+    level: should
+  - item: Plans to be determined must not be labelled preliminary, illustrative, draft, for information only or do not scale (unless 'do not scale' is followed by 'for planning purposes only')
+    level: should
+  - item: The direction of north shown on plans
+    level: must
+  - item: Plans and documents not submitted in booklet form
+    level: must
+  - item: Preferred plan size A1
+    level: should
+  - item: "File types: plans and documents .pdf; photographs .jpg, .jpeg, .tif, .tiff or .pdf"
+    level: must
+  - item: Individual files no larger than 10 MB
+    level: should
+
+drop:
+  - id: affordable-housing-statement
+    reason: "other: A9 Affordable Housing Statement is Maidstone only"
+  - id: cil-form
+    reason: "other: A11 CIL form is Maidstone only; Swale is not a CIL charging authority"
+  - id: design-and-access-statement
+    reason: "wrong_trigger: Part A heading text; the Design and Access Statement is a national requirement, not a local item"
+  - id: fire-statement
+    reason: "wrong_trigger: Part A/B heading text; the Fire Statement is a national requirement, not a local item"
+  - id: environmental-statement
+    reason: "wrong_trigger: a fragment of general reasoning text, not a requirement"
+  - id: sustainability-statement
+    reason: "wrong_trigger: only the B5 heading; replaced by energy-statement below"
+  - id: floor-plan-existing
+    reason: "duplicate: the excerpt is the street scene elevations text (kept as the Street scene item)"
+  - id: floor-plan-proposed
+    reason: "duplicate: as above"
+  - id: elevation-existing
+    reason: "duplicate: as above"
+  - id: elevation-proposed
+    reason: "duplicate: as above"
+  - id: photos
+    reason: "wrong_trigger: the excerpt is the Heritage Statement's contents (photographs are a must-include there)"
+  - id: schedule-of-works
+    reason: "wrong_trigger: tree method statement text; the list has no listed-building schedule of works item"
+
+drop-unmapped:
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: a fragment of the FRA entry, not a standalone requirement"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_trigger: a generic NPPG quote; the real item (A8 Shadow HRA) is added below"
+  - local-name: Nutrient Neutrality statement / calculator
+    reason: "duplicate: a fragment of A8 Shadow HRA, added below"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: a fragment with no requirement in it"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: runs on into the B5 heading; re-added below without it"
+  - local-name: Self-build / custom build information
+    reason: "wrong_trigger: CIL exemption text; the real A15 item is re-added below"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "duplicate: part of the FRA entry (now a must-include of flood-risk-assessment)"
+  - local-name: Structural Survey
+    reason: "wrong_trigger: superseded 2021 wording; the current B7 item is re-added below"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: the excerpt is the Maidstone public art threshold; the real B10 item is re-added below"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: A significant proposal in, or significantly increasing traffic through, an Air Quality Management Area.
+        - discretionary
+    source-text: >-
+      Proposals that are likely to generate highlevels of air pollution, such as significant
+      industrial developments; or Significant proposals that are located in any Air Quality
+      Management Area (AQMA); or That would result in a significant increasein traffic passing
+      through any AQMA; or Development that may result in the exceedance of ai…
+    confidence: medium
+    notes: "'Significant' proposals and other polluting development have no threshold, so they are shown as officer discretion. Wording from the 2021 PDF; the current B1 is the same in substance (see MAI)."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: >-
+          Trees or hedges will be removed or substantially pruned, retained trees or hedges could be
+          affected, or construction is within 30m of ancient woodland or a veteran tree.
+    source-text: >-
+      Where there are trees/hedges within the application site, or on land adjacent to it, that
+      could influence or be affected by the development, information will be required in
+      accordance with the current edition of British Standard, BS5837.
+    source-url: https://swale.gov.uk/planning-and-regeneration/planning-permission/validation-checklist/local-requirements
+    confidence: medium
+    notes: "Audit (wrong_trigger): the 2021 wording omits tree removal/pruning and the 30m ancient woodland / veteran tree trigger in the current A7 (also householder)."
+
+  - id: archaeological-assessment
+    action: add
+    required-if:
+      site:
+        in: [archaeological-priority-area]
+        description: The site is in an area of archaeological importance.
+    source-url: https://swale.gov.uk/planning-and-regeneration/planning-permission/validation-checklist/local-requirements
+    confidence: medium
+    notes: "From the audit (missing_requirement): B25 archaeological information for areas of archaeological importance."
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      any:
+        - discretionary
+        - site:
+            in: [site-of-special-scientific-interest, special-protection-area, special-area-of-conservation]
+            description: The site is in a SSSI (or within a 200m buffer), a Special Protection Area or a Special Area of Conservation.
+    source-url: https://swale.gov.uk/planning-and-regeneration/planning-permission/validation-checklist/local-requirements
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): A6, likely effect on protected species, or SSSI incl.
+      200m buffer, SPA or SAC (also householder). 'Likely to affect protected species' is shown as
+      officer discretion.
+
+  - id: bng-metric
+    action: add
+    source-url: https://swale.gov.uk/planning-and-regeneration/planning-permission/validation-checklist/local-requirements
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): A13, where a Biodiversity Gain Plan is required or an
+      exemption claimed, excluding householder applications; Swale minimum 10%. No rule is set for
+      when a Gain Plan is required.
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal erects a new building.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: The proposal converts a building.
+    source-url: https://swale.gov.uk/planning-and-regeneration/planning-permission/validation-checklist/local-requirements
+    confidence: medium
+    notes: "From the audit (wrong_trigger): B5 'New development involving erection or conversion of a building ... Swale: energy assessment under Policy DM19'."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in flood zone 2, 3 or 3b.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (flood zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (flood zone 1).
+        - site:
+            in: [critical-drainage-area]
+            description: The site is in a critical drainage area or an area of increased future flood risk in the SFRA.
+    source-text: >-
+      A Flood Risk Assessment (FRA) will be required for development proposals of 1 hectare or
+      greater in Flood Zone 1 and for all proposals for new development located in Flood Zones 2 and
+      3 as designated by the Environment Agency.
+    source-url: https://swale.gov.uk/planning-and-regeneration/planning-permission/validation-checklist/local-requirements
+    must-include:
+      - item: A sequential assessment, for relevant development in flood zones 2 and 3
+        level: should
+        required-if:
+          site:
+            in: [flood-risk-zone]
+            description: The site is in flood zone 2 or 3.
+        source-text: "A Sequential Assessment (to allow the LPA to do a sequential test) should be provided for relevant development (as defined in the NPPF and NPPG on flooding in Flood Zones 2 and 3)."
+      - item: An exception test, if required
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook omitted the critical drainage area and SFRA increased-risk triggers of the current A5 (also householder)."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [conservation-area, listed-building, scheduled-monument]
+            description: The proposal will affect a conservation area, a listed building or a scheduled monument.
+    source-text: >-
+      If the proposal will affect a conservation area, a listed buildingor scheduled monument The
+      heritage statement as a minimum should include photographs and an impact assessment.
+    source-url: https://services.swale.gov.uk/assets/Planning-General/Development-Control/Validation%20Checklist%20Final%202021%20A.pdf
+    must-include:
+      - item: Photographs
+        level: should
+      - item: An impact assessment
+        level: should
+    confidence: medium
+    notes: "Audit (wrong_app_type): A4 applies to all applications where triggered, including householder and outline, not only listed building consent."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Development that generates high levels of noise.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise-sensitive uses near roads, railways or commercial noise.
+    source-url: https://swale.gov.uk/planning-and-regeneration/planning-permission/validation-checklist/local-requirements
+    confidence: medium
+    notes: "From the audit (missing_requirement): B3, noisy development, or noise-sensitive uses near roads, rail or commercial noise."
+
+  - id: section-existing
+    action: add
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal changes land levels or is on a sloping site.
+    source-url: https://swale.gov.uk/planning-and-regeneration/planning-permission/validation-checklist/local-requirements
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): A14 Site levels and sections at 1:50/1:100, for changes in land level or sloping sites (also householder)."
+
+  - id: section-proposed
+    action: add
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal changes land levels or is on a sloping site.
+    source-url: https://swale.gov.uk/planning-and-regeneration/planning-permission/validation-checklist/local-requirements
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): A14 Site levels and sections at 1:50/1:100, for changes in land level or sloping sites (also householder)."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre
+            value: true
+            description: The site is outside the town centre.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 500
+            description: Over 500 square metres.
+    source-url: https://swale.gov.uk/planning-and-regeneration/planning-permission/validation-checklist/local-requirements
+    must-include:
+      - item: Sequential test
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): B6 retail and town centre impact assessment including sequential test; Swale threshold over 500 sqm outside the town centre."
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more dwellings.
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 1000
+            description: 1,000 square metres or more of floorspace.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.25
+            description: A site of 0.25 hectares or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 0.25
+            description: A site of 0.25 hectares or more.
+    source-url: https://swale.gov.uk/planning-and-regeneration/planning-permission/validation-checklist/local-requirements
+    must-include:
+      - item: A full Transport Assessment (rather than a Transport Statement)
+        level: must
+        required-if:
+          any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 40
+                description: 40 or more dwellings.
+            - condition:
+                field: floorspace
+                operator: ">="
+                value: 2500
+                description: 2,500 square metres or more gross floorspace.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted NPPF glossary text. From the audit: Transport
+      Assessment for 40+ dwellings or 2,500 sqm+; Transport Statement for 10-39 dwellings,
+      1,000-2,499 sqm or 0.25 ha+ (B8/B9).
+
+  - id: viability-assessment
+    action: add
+    required-if: discretionary
+    source-url: https://swale.gov.uk/planning-and-regeneration/planning-permission/validation-checklist/local-requirements
+    confidence: medium
+    notes: "From the audit (missing_requirement): B15, where viability is used to justify a departure from policy."
+
+  - id: water-impact-assessment
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 1
+        description: All new dwellings.
+    source-url: https://swale.gov.uk/planning-and-regeneration/planning-permission/validation-checklist/local-requirements
+    confidence: low
+    notes: "From the audit (missing_requirement): B24 water efficiency at 110 litres/person/day for all new dwellings."
+
+  - id: coastal-change-assessment
+    action: add
+    required-if:
+      site:
+        in: [coastal-erosion-zone]
+        description: The site is in Erosion Zone 1 or 2 on the Proposals Map.
+    source-url: https://swale.gov.uk/planning-and-regeneration/planning-permission/validation-checklist/local-requirements
+    confidence: medium
+    notes: "From the audit (missing_requirement): B26 (Swale only) coastal erosion vulnerability assessment for Erosion Zones 1 and 2."
+
+unmapped:
+  - local-name: Shadow habitat regulation assessment (nutrient neutrality)
+    source-text: "If the development results “in a net increase in population served by a wastewater system” – see the Natural England advice letter on the Council website, and falls within the catchment of the River Stour then the applicant will be expected to show how they going to achieve nutrient neutrality as part of their application."
+    source-url: https://services.swale.gov.uk/assets/Planning-General/Development-Control/Validation%20Checklist%20Final%202021%20A.pdf
+    suggested-id: habitats-regulations-assessment
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    source-text: "Proposals where it is reasonable to expect that a Planning Obligation/S106 Agreement is likely to be required"
+    source-url: https://services.swale.gov.uk/assets/Planning-General/Development-Control/Validation%20Checklist%20Final%202021%20A.pdf
+    suggested-id: heads-of-terms
+  - local-name: Self-build / custom build proforma
+    source-text: "From the audit: A15, applications made under s.1(A1) of the Self-build and Custom Housebuilding Act 2015"
+    source-url: https://swale.gov.uk/planning-and-regeneration/planning-permission/validation-checklist/local-requirements
+    suggested-id: ""
+  - local-name: Structural survey or statement
+    source-text: "From the audit: B7, countryside conversions relying on structural soundness, and works to listed buildings"
+    source-url: https://swale.gov.uk/planning-and-regeneration/planning-permission/validation-checklist/local-requirements
+    suggested-id: structural-survey
+  - local-name: Ventilation and extraction details
+    source-text: "From the audit: B10, hot-food takeaways, pubs/bars, restaurants, launderettes and uses with substantial extraction"
+    source-url: https://swale.gov.uk/planning-and-regeneration/planning-permission/validation-checklist/local-requirements
+    suggested-id: ""
+  - local-name: Minerals assessment
+    source-text: "Site in a Minerals Safeguarding Area, unless exempt"
+    source-url: https://swale.gov.uk/planning-and-regeneration/planning-permission/validation-checklist/local-requirements
+    suggested-id: minerals-assessment
+  - local-name: Drawings for off-site highway works
+    source-text: "From the audit: B18, listed; no trigger given"
+    source-url: https://swale.gov.uk/planning-and-regeneration/planning-permission/validation-checklist/local-requirements
+    suggested-id: ""
+
+low-confidence:
+  - id: land-contamination-assessment
+    note: "Audit (wrong_document): the excerpt is from the superseded 2021 PDF and gives no trigger."
+
+new-fields:
+  - field: change-in-ground-levels
+    kind: boolean
+    label: Change in ground levels
+    description: The proposal changes ground levels, or is proposed next to changing ground levels.
+  - field: special-area-of-conservation
+    kind: designation
+    label: Special Area of Conservation
+    description: Site is in or near a Special Area of Conservation (dataset special-area-of-conservation).
+  - field: scheduled-monument
+    kind: designation
+    label: Scheduled monument
+    description: The proposal affects a scheduled monument (dataset scheduled-monument).
+  - field: out-of-centre
+    kind: boolean
+    label: Edge or out of centre
+    description: A town centre use is proposed in an edge-of-centre or out-of-centre location.
+  - field: coastal-erosion-zone
+    kind: designation
+    label: Coastal erosion zone
+    description: Site is in a coastal erosion zone or coastal change management area identified by the council.

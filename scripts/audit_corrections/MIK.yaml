@@ -1,0 +1,429 @@
+# Corrections for Milton Keynes City Council, from inputs/audit/milton-keynes-city-council.json.
+# The audit read the March 2025 Planning Application Validation Requirements (PAVR, adopted
+# 12 March 2025; the build takes the date from the audit). Most workbook excerpts are Annex B
+# definitions or text from other sections, so few triggers can be read from them. Items marked
+# "From the audit" use the audit's paraphrase.
+# Not fully actionable here (audit missing_requirement): each of reserved matters, LBC, LDC,
+# demolition in a conservation area, s73, approval of details, NMA, tree works, PiP and s106
+# modification has its own PAVR section (6.4, 9.6, 12.4, 13.5, 16.5, 17.3, 19, Annex D) with
+# local requirements; only the ones the audit names are added below.
+local-authority: MIK
+
+submission-standards:
+  - item: Documents provided as PDF files
+    level: must
+  - item: Each file accurately, logically and clearly named (e.g. 'Site Layout - 9453_07 Rev A.pdf') and categorised correctly
+    level: must
+  - item: File sizes no more than 10MB
+    level: should
+  - item: Personal data, including signatures, minimised in documents other than the application form
+    level: should
+
+drop:
+  - id: sustainability-statement
+    reason: "wrong_trigger: the item is the Energy and climate statement; re-added as energy-statement below"
+
+drop-unmapped:
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_app_type: the hedgerow-removal land-type list (s14), not a requirement"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_app_type: the Relevant Demolition Consent exceptions list (s10); re-added below as Planning obligations statement"
+  - local-name: Tall buildings / Wind microclimate assessment
+    reason: "wrong_trigger: the excerpt is the Design and access statement definition"
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "duplicate: the same excerpt as Employment / Economic Statement"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advice to seek pre-application advice; matched 'outline' as a verb"
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "wrong_app_type: this is the s73 marketing report for removing occupancy conditions; re-added below"
+
+requirements:
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [tree-preservation-zone]
+            description: Protected trees are affected.
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Significant trees are affected.
+    source-url: https://www.milton-keynes.gov.uk/file/19351/download?token=flfqBbYj
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook's excerpt was the works-to-trees-in-a-conservation-area
+      list. From the audit: householder applications where protected or significant trees are
+      affected; TPO works need an AIA for removals; s73 applications need an updated AIA where the
+      original is over 5 years old.
+
+  - id: bng-metric
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [reserved-matters]
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 5
+                description: 5 or more dwellings.
+            - condition:
+                field: floorspace
+                operator: ">="
+                value: 1000
+                description: 1,000 square metres or more of floorspace.
+    source-text: >-
+      Biodiversity Impact Assessment Metric (BIAM) An assessment to demonstrate the impact on existing
+      biodiversity and demonstrate whether there will be a net gain or loss in biodiversity as a
+      result of the proposal.
+    source-url: https://www.milton-keynes.gov.uk/file/19351/download?token=flfqBbYj
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): reserved matters need a BIAM for 5+ dwellings or
+      1,000 sqm. The BIAM is Milton Keynes' own metric; its Full planning trigger isn't given.
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+    confidence: low
+    notes: >-
+      The excerpt is the Annex B definition. From the audit (missing_requirement): reserved matters
+      need it where scale is being considered with significant shading.
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: One or more dwellings.
+        - all:
+            - condition:
+                field: floorspace
+                operator: ">="
+                value: 100
+                description: 100 square metres or more of floorspace.
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+    source-url: https://www.milton-keynes.gov.uk/file/19351/download?token=flfqBbYj
+    confidence: medium
+    notes: "Audit (wrong_trigger, duplicate): the excerpt was a fragment shared with the fire statement. From the audit: major, 1+ dwellings, or 100 sqm+ in a conservation area."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 11
+            description: 11 or more dwellings.
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 1000
+            description: 1,000 square metres or more of floorspace.
+    source-text: "Energy and climate statement: for development of 11 or more dwellings or 1,000 square metres or more of floorspace"
+    source-url: https://www.milton-keynes.gov.uk/file/19351/download?token=flfqBbYj
+    policy: Plan:MK SC3
+    must-include:
+      - item: A 19% carbon reduction improvement over Part L of the Building Regulations 2013 (or any higher standard later required)
+        level: must
+      - item: On-site renewable energy generation or connection to a low carbon community energy network achieving a further 20% reduction
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the Plan:MK 19% carbon policy under 'Energy / Sustainability Statement'. The must-include items are that policy text."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    source-url: https://www.milton-keynes.gov.uk/file/19351/download?token=flfqBbYj
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was a rule about paper copies for parish councils."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: The building is 7 storeys or more.
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: The building is 18 metres or more in height.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: Dwellings are being provided.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: Educational accommodation is being provided.
+    source-text: >-
+      for development involving or within a curtilage of a ‘relevant building’ where dwellings or
+      educational accommodation are being provided, and where the building is 7 storeys or 18 metres
+      or more in height, a fire statement
+    source-url: https://www.milton-keynes.gov.uk/file/19351/download?token=flfqBbYj
+    confidence: medium
+    notes: "Audit (wrong_trigger): the Fire Statement row was cut to 'in height, a fire statement15.'; the full sentence was in the DAS row."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in flood zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare in flood zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare in flood zone 1.
+    source-url: https://www.milton-keynes.gov.uk/file/19351/download?token=flfqBbYj
+    must-include:
+      - item: Evidence to apply the Sequential Test and, if necessary, to show the development will be safe and pass the Exception Test
+        level: must
+        source-text: "apply the Sequential Test; and if necessary, evidence to establish whether the development will be safe and pass the Exception Test."
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt was cut to 'or 3, a flood risk assessment'. From the audit: flood zone 2/3, or over 1 ha in zone 1."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [demolition-con-area, lbc]
+        - site:
+            in: [listed-building, listed-building-setting]
+            description: A listed building, its curtilage or setting is affected.
+    source-text: >-
+      a heritage impact assessment to justify the proposed demolition, having regard to the
+      significance of the structure affected and the impact of the demolition on the character and
+      appearance of the conservation area, including the effect of any restoration of the site.
+    source-url: https://www.milton-keynes.gov.uk/file/19351/download?token=flfqBbYj
+    must-include:
+      - item: Justification for the demolition, having regard to the significance of the structure and the impact on the conservation area, including any restoration of the site
+        level: must
+        required-if:
+          application-type:
+            in: [demolition-con-area]
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the excerpt is from the demolition in a conservation area section.
+      From the audit: householder works affecting a listed building, its curtilage or setting; LBC
+      where significance is notably affected.
+
+  - id: photos
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - condition:
+            field: residential-extension
+            value: true
+            description: A side or rear extension or alteration.
+    must-include:
+      - item: Each photograph titled to make clear which elevation is shown
+        level: must
+      - item: Clear, of sufficient resolution and not obscured by structures, trees or vehicles
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): householder site photos for side/rear extensions or alterations. The must-include items are the council's wording from the workbook excerpt; no Full planning trigger is given."
+
+  - id: recreation-facilities-assessment
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      Sports and open space analysis An analysis of existing sports facilities and playing fields
+      (whether publicly adopted or not) and open space of public value within the surrounding area of
+      the site (whether publicly adopted or not), relative to the size and function of the facility,
+      field or space to be affected/lost, along with justification for impact…
+    source-url: https://www.milton-keynes.gov.uk/file/19351/download?token=flfqBbYj
+    confidence: low
+    notes: "Audit (wrong_app_type): the workbook's excerpt was from the prior approval section. The definition above (found in the waste row) applies where sports facilities, playing fields or open space would be affected or lost."
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      application-type:
+        in: [hh]
+    confidence: low
+    notes: "Audit (duplicate, wrong_app_type): the excerpt is the householder drawing list ('existing and proposed roof plans')."
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      application-type:
+        in: [hh]
+    confidence: low
+    notes: "Audit (duplicate, wrong_app_type): the excerpt is the householder drawing list ('existing and proposed roof plans')."
+
+  - id: schedule-of-works
+    action: update
+    required-if:
+      application-type:
+        in: [lbc]
+    confidence: medium
+    notes: "Audit (wrong_app_type): from the LBC section. From the audit: LBC needs a schedule of works and methodology."
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: A block plan showing the lowered kerb and hard surfaces in the public highway, with details of the materials and drainage to any driveway created
+        level: must
+        required-if:
+          condition:
+            field: new-vehicle-access
+            value: true
+            description: The proposal provides or alters a vehicular access.
+    confidence: low
+    notes: "The excerpt is the householder drawing list: \"for proposals involving the provision or alteration of a vehicular access, a block plan showing the position for the lowered kerb and hard surfaces in the public highway, along with details of the materials and drainage to any driveway created.\""
+
+  - id: structural-damage
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [consent-under-tpo, notice-trees-in-con-area]
+        - discretionary
+    source-text: substantiated evidence describing any structural damage to property or in relation to tree health or safety, as applicable.
+    source-url: https://www.milton-keynes.gov.uk/file/19351/download?token=flfqBbYj
+    confidence: medium
+    notes: "From the audit (missing_requirement): tree works need evidence of structural damage where that is the basis of the application. The wording was in the workbook's arboricultural row."
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: A telecommunications mast or radio equipment housing.
+    must-include:
+      - item: Evidence that prior notice of the application has been given to any landowner and/or agricultural tenant
+        level: must
+      - item: Where in a safeguarding area, evidence that the Civil Aviation Authority or Secretary of State has been notified
+        level: must
+    confidence: low
+    notes: "Audit (wrong_app_type): the excerpt is from the prior approval section (15.29). The safeguarding item is cut off in the excerpt."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      condition:
+        field: floorspace-non-residential
+        operator: ">"
+        value: 350
+        description: Over 350 square metres gross of retail floorspace (over 900 square metres in the city centre).
+    policy: Plan:MK ER9 and ER10
+    confidence: low
+    notes: "From the audit (wrong_trigger): retail impact for over 900 sqm gross in the city centre and 350 sqm elsewhere (impact on the Primary Shopping Area in CMK). The rule shows the lower threshold."
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: structural-demolition
+            value: true
+            description: Significant demolition.
+    source-url: https://www.milton-keynes.gov.uk/file/19351/download?token=flfqBbYj
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt was soil quality / sports text. From the audit (missing_requirement): a site waste management plan for major development or significant demolition."
+
+unmapped:
+  - local-name: Drawing schedule
+    source-text: "Drawing schedule A full list of plans and drawings submitted, setting out the description of each plan/drawing, its scale, reference number, revision number/letter and issue date, and which is capable of revision throughout the course of the application."
+    source-url: https://www.milton-keynes.gov.uk/file/19351/download?token=flfqBbYj
+    suggested-id: drawing-schedule
+  - local-name: Conditions proforma
+    source-text: "Conditions proforma (for applications seeking approval of details required by conditions) A schedule of the planning conditions subject of the application; the document(s) submitted in respect of each condition(s) and a description thereof; and, if relevant, the assessment, report, plan or drawing reference number(s) (and revision number(s)) relevant to each condition(s)."
+    source-url: https://www.milton-keynes.gov.uk/file/19351/download?token=flfqBbYj
+    suggested-id: conditions-schedule
+  - local-name: Marketing report (removal of occupancy or restrictive use conditions)
+    source-text: "For rural worker occupancy conditions, retail and employment land/buildings and community premises, this must include: (a) the period which the property has been marketed for; (b) the use(s) which the property has been marketed for, taking into account reasonable alternatives under the same use class and/or allowed for by permitted development rights; (c) the publications/websites in which and locations where marketing has taken place; (d) the price at which the property has been valued (taking…"
+    source-url: https://www.milton-keynes.gov.uk/file/19351/download?token=flfqBbYj
+    suggested-id: marketing-evidence
+  - local-name: Planning obligations statement
+    source-text: "From the audit: major development"
+    source-url: https://www.milton-keynes.gov.uk/file/19351/download?token=flfqBbYj
+    suggested-id: planning-obligations-heads-of-terms
+  - local-name: Parking plan (householder)
+    source-text: "From the audit: where bedrooms are added or parking/driveways are affected"
+    source-url: https://www.milton-keynes.gov.uk/file/19351/download?token=flfqBbYj
+    suggested-id: parking-plan
+  - local-name: Window and door drawings/details
+    source-text: "From the audit: where windows/doors change in an Article 4 area (householder)"
+    source-url: https://www.milton-keynes.gov.uk/file/19351/download?token=flfqBbYj
+    suggested-id: joinery-details
+  - local-name: Conveyancing plan
+    source-text: "From the audit: public/private spaces"
+    source-url: https://www.milton-keynes.gov.uk/file/19351/download?token=flfqBbYj
+    suggested-id: conveyancing-plan
+  - local-name: Topographical survey
+    source-text: "From the audit: major development"
+    source-url: https://www.milton-keynes.gov.uk/file/19351/download?token=flfqBbYj
+    suggested-id: topographical-survey
+  - local-name: Phasing plan
+    source-text: "From the audit: phased major development"
+    source-url: https://www.milton-keynes.gov.uk/file/19351/download?token=flfqBbYj
+    suggested-id: phasing-plan
+  - local-name: Housing accommodation schedule
+    source-text: "From the audit: major residential (Annex E template)"
+    source-url: https://www.milton-keynes.gov.uk/file/19351/download?token=flfqBbYj
+    suggested-id: accommodation-schedule
+  - local-name: Housing statement
+    source-text: "From the audit: major residential outside settlement boundaries or >31% affordable"
+    source-url: https://www.milton-keynes.gov.uk/file/19351/download?token=flfqBbYj
+    suggested-id: housing-statement
+  - local-name: Health impact assessment
+    source-text: "From the audit: 50+ dwellings or any C2"
+    source-url: https://www.milton-keynes.gov.uk/file/19351/download?token=flfqBbYj
+    suggested-id: health-impact-assessment
+  - local-name: Digital connectivity statement
+    source-text: "From the audit: all new premises"
+    source-url: https://www.milton-keynes.gov.uk/file/19351/download?token=flfqBbYj
+    suggested-id: digital-connectivity-statement
+  - local-name: Statutory declarations and hatched site plan (LDC s191)
+    source-text: "From the audit: LDC s191 needs statutory declarations and a hatched site plan where multiple uses are claimed"
+    source-url: https://www.milton-keynes.gov.uk/file/19351/download?token=flfqBbYj
+    suggested-id: lawful-development-evidence
+
+low-confidence:
+  - id: archaeological-assessment
+    note: "Audit (wrong_trigger): the excerpt is the BIAM definition; no trigger is given."
+  - id: planning-statement
+    note: "Audit (wrong_trigger): the excerpt is para 15.42 boilerplate; no trigger is given."
+  - id: transport-assessment
+    note: "Audit (wrong_trigger): the excerpt is a definition; the thresholds are in Annex C of the PAVR."
+  - id: biodiversity-survey-report
+    note: "The excerpt is the PEA definition. From the audit: s73 applications need an updated ecological appraisal where the original survey is over 2 years old."
+
+new-fields:
+  - field: telecommunications-development
+    kind: boolean
+    label: Telecommunications equipment
+    description: The proposal is for telecommunications masts, antennas or related equipment.

@@ -1,0 +1,652 @@
+# Corrections for London Borough of Haringey, from the council's audit.
+# The audit checked the current list (August 2024, in effect from 29 August 2024). The list has a
+# 'Types of Application' column; "All" means all applications. Grokbot captured about 20 of
+# roughly 60 items. A draft 2026 list was consulted on in October 2026 and is not yet adopted.
+# Items marked "From the audit" use the audit's paraphrase; quoted words are the council's.
+local-authority: HRY
+
+validation-list:
+  url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+  date: 2024-08-29
+  date-basis: >-
+    audit: cover 'August 2024'; the council page says the list took effect on 29 August 2024. A
+    draft 2026 checklist was consulted on until 23 October 2026; re-check when it is adopted.
+
+submission-standards:
+  - item: All drawings labelled with a drawing number and a note of any revisions
+    level: must
+  - item: All plans to have a scale bar and one significant dimension
+    level: must
+
+drop:
+  - id: land-contamination-assessment
+    sheets: [Householder, Minerals & waste (county)]
+    reason: "wrong_app_type: the source says 'All applications excluding householder'; there is no minerals/waste category (re-added below)"
+  - id: waste-management-plan
+    sheets: [Minerals & waste (county)]
+    reason: "wrong_app_type: fragment under a category the source doesn't have (re-added below)"
+  - id: flood-risk-assessment
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: 'change of use' means planning applications; the list doesn't cover prior approvals"
+
+drop-unmapped:
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "duplicate: same excerpt as the Ecological Survey row; Haringey has no biodiversity questionnaire"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: pre-application advice is recommended, not required for validation"
+  - local-name: Crime prevention / Secured by Design statement
+    reason: "wrong_trigger: runs into the SCI text; re-added below"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: only the template sentence; re-added below as two items"
+  - local-name: Tall buildings / Wind microclimate assessment
+    reason: "wrong_trigger: runs into the sunlight/daylight text; re-added below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">"
+        value: 10
+        description: More than 10 net residential units.
+    policy: London Plan
+    source-text: >-
+      Affordable housing statement More than 1O net residential units All London Plan The statement
+      will need to include: the number of residential units
+    must-include:
+      - item: The number of residential units
+        level: must
+    confidence: medium
+    notes: "The list of contents is cut off in the workbook after the first item."
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      ref: major-development
+    source-text: All applications for major development
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): majors; the whole borough is an Air Quality Management Area."
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: The development proposes tree works or affects trees on or adjacent to the site.
+        - application-type:
+            in: [consent-under-tpo, notice-trees-in-con-area]
+    source-text: Any development proposing tree works
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): any development proposing tree works or affecting trees on or adjacent to the site, including householder and works to TPO or Conservation Area trees."
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      site:
+        in: [archaeological-priority-area]
+        description: Within or adjacent to an Area of Archaeological Potential or Archaeological Priority Area.
+    source-text: All applications that may have an impact on archaeology within or adjacent to Areas of Archaeological Potential
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    must-include:
+      - item: >-
+          An appropriate desk-based assessment and, where necessary, a field evaluation
+        level: must
+        source-text: >-
+          an appropriate desk-based assessment should be submitted and, where necessary, a field
+          evaluation undertaken.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook left out the location condition. The source also asks for GLAAS consultation."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [local-wildlife-site]
+            description: >-
+              A site designated for its biodiversity value (Sites of Importance for Nature
+              Conservation, Local Nature Reserves, Ecological Corridors).
+        - discretionary
+    source-text: >-
+      Biodiversity survey and report Including- Preliminary Ecological Appraisal (also known as
+      Extended Phase 1 or Ecological Assessment) - Ecological Impact Assessment … All applications
+      Any site designated for its biodiversity value (such as: Sites of Importance for Nature
+      Conservation (SINGS), Local Nature Reserves, Ecological Corridors)or where significant wildlife
+      interest or protected species is known to be present or is reasonable
+    confidence: medium
+    notes: "Applies to all application types. Sites where protected species are known or likely are shown as officer discretion."
+
+  - id: bng-metric
+    action: add
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the statutory biodiversity gain condition (major and small sites).
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Biodiversity Net Gain statement and the statutory metric, for major and small sites."
+
+  - id: cil-form
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 100
+            description: More than 100 sqm GIA.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: A new dwelling.
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): CIL form for more than 100 sqm GIA or a new dwelling, including householder."
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - condition:
+                field: new-build
+                value: true
+                description: The major development is new build.
+        - condition:
+            field: building-height
+            operator: ">="
+            value: 18
+            description: A tall building (18m or more).
+        - condition:
+            field: storey-count
+            operator: ">="
+            value: 6
+            description: A tall building (6 storeys or more).
+    source-text: >-
+      All major new build applications and tall buildings as defined under the tall buildings
+      statement requirement
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): sunlight/daylight assessment for major new build and
+      tall buildings; tall buildings are defined as 6 storeys or 18m. The council's words were found
+      in the workbook's tall buildings row.
+
+  - id: design-and-access-statement
+    action: update
+    policy: Haringey DM1
+    must-include:
+      - item: A response to the Design Charter
+        level: must
+    notes: "From the audit (missing_requirement): the DAS must include a Design Charter response (Policy DM1). The national rules for when a DAS is needed still apply."
+
+  - id: elevation-proposed
+    action: update
+    source-text: Elevations must include any rooftop plant.
+    must-include:
+      - item: Any rooftop plant
+        level: must
+    confidence: medium
+    notes: "The list marks plans and elevations as needed for all applications."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: Minor development creating new residential units.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 0
+            description: Minor development creating new commercial units.
+    policy: London Plan SI2; Haringey Local Plan SP4
+    source-text: >-
+      SP4 Majors Energy Statements should demonstrate a 100% reduction below Building regulations
+      Part L 2013 following the Energy Hierarchy, as required by current London Plan Policy Sl2 and
+      Local Plan Policy SP4.
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    must-include:
+      - item: Be Seen energy monitoring template
+        level: must
+        required-if:
+          ref: major-development
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's row covered majors only and was mapped to the
+      sustainability statement. The source also requires an Energy Statement for 'minor developments
+      creating new residential and/or commercial units'. The Be Seen template for majors is from the
+      audit.
+
+  - id: fire-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: building-height
+            operator: ">="
+            value: 18
+            description: A relevant building of 18m or more.
+        - condition:
+            field: storey-count
+            operator: ">="
+            value: 7
+            description: A relevant building of 7 or more storeys.
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Gateway 1 Fire Statement for relevant buildings of 18m or more, or 7 or more storeys."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: Proposals of 1 hectare or greater in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Proposals of 1 hectare or greater in Flood Zone 1.
+        - site:
+            in: [flood-risk-zone]
+            description: New development (including minor development and change of use) in Flood Zones 2 and 3.
+        - site:
+            in: [critical-drainage-area]
+            description: An area within Flood Zone 1 which has critical drainage problems.
+    source-text: >-
+      Proposals of 1 hectare or greater in Flood Zone 1; all proposals for new development (including
+      minor development and change of use) in Flood Zones 2 and 3, or in an area within Flood Zone 1
+      which has critical drainage problems (as notified to the local planning authority by the
+      Environment Agency);
+    confidence: medium
+    notes: "From the audit: minor development includes householder, so this applies to householder applications too."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      site:
+        in: [conservation-area, listed-building, listed-building-setting, locally-listed-building, scheduled-monument]
+        description: >-
+          Development affecting heritage assets (conservation areas, statutorily or locally listed
+          buildings, Scheduled Ancient Monuments, Registered Parks and Gardens and other
+          designations).
+    source-text: >-
+      Heritage statement For all development affecting all heritage assets (conservation areas,
+      statutorily or locally listed buildings, Scheduled Ancient Monuments, Registered Parks and
+      Gardens and any other designations) All National Planning Policy Framework (NPPF) Statements
+      should describe the significance of any heritage asset affected, including any contribution
+      made by their setting.
+    must-include:
+      - item: The significance of any heritage asset affected, including any contribution made by its setting
+        level: must
+    confidence: medium
+    notes: >-
+      The source excludes 'Householder applications in Conservation Areas'; that exclusion can't be
+      written as a rule here. From the audit: householder works affecting listed or locally listed
+      buildings do need one.
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters, s73, change-of-use]
+        - site:
+            in: [contaminated-land]
+            description: >-
+              Sites known or suspected to be affected by land contamination (landfill, railway land,
+              waste disposal sites, scrapyards, petrol stations and other industrial uses).
+    source-text: >-
+      Contaminated Land Assessment … All applications excluding householder Sites known or suspected
+      to be affected by land contamination such as a landfill site, railway land, waste disposal
+      site.scrapyards, petrol stations and other industrial uses.
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook put this under Householder, which the source excludes.
+      The application types listed stand in for 'all applications excluding householder'.
+
+  - id: landscaping-plan
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    must-include:
+      - item: Urban Greening Factor
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): a landscape report with Urban Greening Factor for majors."
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [advertising]
+        - condition:
+            field: illuminated
+            value: true
+            description: The advertisement is illuminated.
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): advertisement consent is missing the lighting scheme. The audit doesn't say whether it is only for illuminated adverts."
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Noise-generating uses near housing.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Housing near major roads, rail or industry.
+        - discretionary
+    source-text: When proposal will result in a change to the qualitative or quantitative acoustic environment
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook joined ventilation and archaeology text."
+
+  - id: photos
+    action: add
+    required-if:
+      always: true
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    must-include:
+      - item: A signed statement
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): site photographs with a signed statement, for all applications."
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if:
+      condition:
+        field: existing-open-space
+        value: true
+        description: The proposal affects playing-field land.
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): the Sport England checklist for playing-field land."
+
+  - id: sci
+    action: update
+    required-if:
+      ref: major-development
+    source-text: >-
+      Statement of Community Involvement All major applications All Haringey Statement of A
+      Statement of Community Involvement should identify the consultation undertaken and its
+      results, together with how this has been incorporated into the submitted planning application.
+    must-include:
+      - item: The consultation undertaken and its results
+        level: should
+      - item: How the results have been incorporated into the submitted application
+        level: should
+    confidence: medium
+
+  - id: site-plan
+    action: update
+    source-text: >-
+      Block Plan: drawn to at least 1:500 scale showing properties either side and to rear of site
+      with North point.
+    must-include:
+      - item: Drawn to at least 1:500 scale
+        level: must
+      - item: Properties either side and to the rear of the site
+        level: must
+    confidence: medium
+    notes: "The list marks the block plan as needed for all applications."
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      condition:
+        field: new-build
+        value: true
+        description: Any new buildings.
+    policy: Haringey Local Plan DM21
+    source-text: Any new buildings
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    must-include:
+      - item: >-
+          Details of sustainable design and construction measures showing how the development will
+          reduce the energy, water and materials used in design and construction
+        level: must
+        source-text: >-
+          Provide details of sustainable design and construction measures showing how the
+          development proposes to reduce the energy, water and materials used in design and
+          construction in accordance with current London Plan and Local Plan requirements.
+      - item: Sustainable Design and Construction (SDC) checklist
+        level: must
+      - item: BREEAM pre-assessment
+        level: must
+        required-if:
+          condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 0
+            description: Non-residential schemes.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, missing_requirement): a sustainability statement and SDC checklist for any
+      new building. The workbook's row was the Energy Statement text (now energy-statement). The
+      BREEAM pre-assessment for non-residential schemes is from the audit.
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      application-type:
+        in: [pa-ecomms-network]
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    must-include:
+      - item: ICNIRP certificate
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): telecoms prior approvals need a supporting statement with an ICNIRP certificate."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      condition:
+        field: floorspace-non-residential
+        operator: ">"
+        value: 2500
+        description: Retail floorspace over 2,500 sqm.
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): retail assessment for retail over 2,500 sqm."
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 1000
+            description: Proposal including more than 1000 sqm of retail (A1) or business (B1).
+        - discretionary
+    policy: Haringey Local Plan SP4
+    source-text: Transport Assessment I Transport Statement Proposal including > 1000 sqm Retail (A1) or Business (B1).
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the excerpt gives only the 1,000 sqm retail/B1 threshold and omits the
+      other uses, places of worship and sensitive TLRN, rail and Underground locations (shown as
+      officer discretion).
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    policy: Haringey Local Plan DM31, DM32, DM36; London Plan
+    source-text: >-
+      Where a development is located in a sensitive area (Areas where redevelopment proposals could
+      impact on the SRN or TLRN, bus … standing/garages/interchan ges, operation
+    confidence: low
+    notes: "Audit (wrong_trigger): the excerpt starts with an email address and stops mid-table; the thresholds were not captured."
+
+  - id: viability-assessment
+    action: add
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">"
+                value: 10
+                description: More than 10 units.
+            - condition:
+                field: floorspace
+                operator: ">"
+                value: 1000
+                description: More than 1,000 sqm.
+        - discretionary
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    must-include:
+      - item: A redacted copy
+        level: must
+      - item: Reasons for any information to be redacted
+        level: must
+        source-text: Applicants will need to provide reasons for any information to be redacted at this stage.
+    confidence: medium
+    notes: "From the audit (missing_requirement): where affordable housing is below 35% (50% on industrial or public land); that test is shown as officer discretion."
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: New residential units.
+        - discretionary
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    must-include:
+      - item: Bin storage details
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook's row was a fragment under minerals and waste. From the
+      audit: bin storage details for new residential units or any new commercial building (shown as
+      officer discretion), and a Waste Management Plan for majors and larger HMOs.
+
+unmapped:
+  - local-name: Basement Impact Assessment
+    source-text: All applications proposing, new basement development
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    suggested-id: basement-impact-assessment
+  - local-name: Accessibility statement
+    source-text: All applications that involve the creation of any new residential units
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    suggested-id: accessibility-statement
+  - local-name: Crime prevention statement
+    source-text: Crime prevention statement All major applications All London Plan Local Plan
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    suggested-id: crime-prevention-statement
+  - local-name: S106 draft heads of terms
+    source-text: "From the audit: major developments (recommended rather than mandatory)"
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    suggested-id: heads-of-terms
+  - local-name: Completed draft S106 (council template)
+    source-text: >-
+      All development proposing a new building that is not zero carbon (from the audit: also
+      car-free proposals). A template S106 will be provided on the Council's website to complete and
+      submit with such applications.
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    suggested-id: heads-of-terms
+  - local-name: Wind Impact Assessment
+    source-text: >-
+      Wind Impact Assessment or more detailed study as appropriate that shows the tall building will
+      not impact negatively on the microclimatic condition
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    suggested-id: wind-microclimate-assessment
+  - local-name: Geo-located 3D Massing Model (FBX)
+    source-text: Development of 25 residential units or 2,500sqm of commercial floorspace or more.
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    suggested-id: 3d-model
+  - local-name: Ventilation / extraction details with acoustic report
+    source-text: "From the audit: commercial extraction flues, and change of use to A3/A4/A5"
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    suggested-id: ventilation-extraction-statement
+  - local-name: London Datahub (1APP) data
+    source-text: "From the audit: all applications"
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    suggested-id: london-datahub-data
+  - local-name: Fire strategy (London Plan D11)
+    source-text: "From the audit: independent fire strategy for majors, under London Plan D11"
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    suggested-id: fire-strategy
+  - local-name: Water/wastewater utilities capacity letter
+    source-text: "From the audit: majors"
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    suggested-id: utilities-statement
+  - local-name: Drainage / SuDS plan and Haringey pro-formas
+    source-text: "All major developments (from the audit: also new residential units in Critical Drainage Areas)"
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    suggested-id: drainage-strategy
+  - local-name: Overheating assessment (TM59/TM52)
+    source-text: "From the audit: majors"
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    suggested-id: overheating-assessment
+  - local-name: Dust and emissions assessment (with NRMM)
+    source-text: "From the audit: majors"
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    suggested-id: dust-assessment
+  - local-name: Circular Economy Statement and Whole Life Carbon Assessment
+    source-text: "From the audit: applications referable to the Mayor"
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    suggested-id: circular-economy-statement
+  - local-name: Architectural details (1:20)
+    source-text: "From the audit: listed building consent; doors, windows, shopfronts, railings"
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    suggested-id: architectural-details
+  - local-name: Structural / historic building survey
+    source-text: "From the audit: listed building consent"
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    suggested-id: structural-survey
+  - local-name: GLA/TfL consultation for adverts affecting the TLRN
+    source-text: "From the audit: advertisement consent for adverts affecting the TLRN"
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    suggested-id: ""
+  - local-name: Outline application height/width/length plans
+    source-text: "From the audit: outline applications; parameter plans with upper and lower limits"
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    suggested-id: parameter-plans
+  - local-name: Statement identifying the outline permission and conditions
+    source-text: "From the audit: reserved matters and discharge of conditions applications"
+    source-url: https://www.haringey.gov.uk/sites/default/files/2024-09/planning_local_validation_list.pdf
+    suggested-id: ""
+
+new-fields:
+  - field: biodiversity-gain-condition
+    kind: boolean
+    label: Subject to the biodiversity gain condition
+    description: >-
+      The development is subject to the statutory biodiversity gain condition (Schedule 7A, Town and
+      Country Planning Act 1990), i.e. it is not exempt.
+  - field: scheduled-monument
+    kind: designation
+    label: Scheduled monument
+    description: Site is, contains or affects the setting of a scheduled monument (dataset scheduled-monument).
+  - field: existing-open-space
+    kind: boolean
+    label: On existing open space
+    description: The site includes existing public open space, playing fields or sports facilities.

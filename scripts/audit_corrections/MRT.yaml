@@ -1,0 +1,450 @@
+# Corrections for London Borough of Merton, from the council's audit.
+# The audit compared the workbook with Merton's Validation Checklist 2025 (December 2024, updated
+# June 2026), which has 66 numbered items; Grokbot captured about 20, some from the superseded
+# 2024 v2 checklist. Items marked 'From the audit' use the audit's summary of the checklist (item
+# numbers in notes), not the council's exact words. The council says permitted development,
+# non-material amendments, adverts, telecoms prior notification, tree works and listed buildings
+# have separate checklists, which Grokbot did not read.
+local-authority: MRT
+
+validation-list:
+  date: 2026-06
+  date-basis: "audit: cover reads 'December 2024 (Updated June 2026)'"
+
+submission-standards:
+  - item: All drawings at an identified metric scale, with a relevant scale bar, key dimensions in metric units and the direction of north
+    level: must
+  - item: Each drawing has a title and drawing number
+    level: must
+  - item: File names describe the contents clearly and accurately in plain English
+    level: must
+  - item: Every drawing's file name begins with the word 'Drawing' (e.g. 'Drawing - Site Location Plan')
+    level: must
+  - item: The Planning Portal 'document description' matches the file name
+    level: should
+
+drop:
+  - id: waste-management-plan
+    reason: "wrong_trigger: item 63 covers waste management facility applications (South London Waste Plan), not refuse storage; re-added below as item 26 and unmapped"
+
+drop-unmapped:
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: the excerpt is the retail town-centre sequential test (now in town-centre-impact-assessment)"
+
+requirements:
+  - id: fire-statement
+    action: replace
+    required-if:
+      ref: major-development
+    source-text: "Fire Statement - All major development"
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook merged item 23 (Fire Statement, all major development)
+      with item 22 (Planning Fire Safety Strategy or Reasonable Exception Statement, all
+      developments), which is listed as unmapped.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare (in Flood Zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare (in Flood Zone 1).
+        - site:
+            in: [critical-drainage-area]
+            description: The site is in a critical drainage area.
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was column-interleaved. From the audit: item 27 thresholds are Flood Zones 2/3, Zone 1 over 1 ha, and critical drainage areas."
+
+  - id: schedule-of-works
+    action: replace
+    required-if:
+      application-type:
+        in: [lbc]
+    source-text: "Schedule of Works (Listed Buildings) - Listed building consent"
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type, wrong_trigger): the workbook quoted arboricultural and construction method statement text under Full planning and Outline. Item 13."
+
+  - id: travel-plan
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: staff-count
+            operator: ">="
+            value: 20
+            description: The development will have 20 or more staff.
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 50
+            description: The proposal creates over 50 homes.
+        - condition:
+            field: car-free
+            value: true
+            description: The proposal is car-free housing.
+    source-text: "Travel Plan Statements - 20+ staff, over 50 homes, or all car-free housing"
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was garbled ('All proposals for car ... free housing') and left out the thresholds. Item 20."
+
+  - id: construction-management-plan
+    action: replace
+    required-if:
+      condition:
+        field: basement
+        value: true
+        description: The scheme includes a basement or subterranean development.
+    source-text: "Outline Construction Method Statement (CMS) All schemes including basements or subterranean development"
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    policy: "Local Plan 2024 policy D12.11"
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): 'Outline' is part of the document's name (item 65), not the
+      application type; it applies to all schemes with basements, householder included. Item 66
+      (Construction Traffic Management Plan) is also for basements; item 24 (Construction
+      Logistics Plan) has no trigger in the audit.
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates 1 to 9 units (Transport Statement).
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 100
+            description: The proposal creates over 100 square metres of commercial floorspace (Transport Statement).
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook's only row was a garbled LBC row from the superseded
+      2024 checklist. From the audit: item 16 Transport Statement (1 to 9 units or over 100m2
+      commercial) and item 17 Transport Assessment (all major).
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 26 Site Waste Management Plan, for major development."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      condition:
+        field: main-town-centre-use-out-of-centre
+        value: true
+        description: Main town centre uses proposed outside an existing centre.
+    notes: "Sequential test: 'required where main town centre uses are proposed not in an existing centre' (council's wording, cut off in the excerpt)."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is listed in Schedule 1 or Schedule 2 of the EIA Regulations 2017.
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [site-of-special-scientific-interest, local-wildlife-site]
+            description: The proposal is likely to affect a designated site.
+        - discretionary
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 9 Preliminary Ecological Appraisal, where there is a likely impact on protected species, priority habitats or designated sites."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building]
+            description: The proposal involves a listed building.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates new dwellings.
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 11 Supporting Planning Statement, for major development, major change of use, listed buildings and new dwellings."
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building]
+            description: The proposal could affect a heritage asset.
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 12 Statement of Heritage Significance, for listed building consent or impact on heritage assets (householder included)."
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: The proposal creates 10 or more units.
+        - condition:
+            field: loss-of-use
+            value: true
+            description: The site is a former employment site.
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 30, for 10+ units or former employment sites."
+
+  - id: viability-assessment
+    action: add
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): item 31 Viability Report is listed, but the audit gives no trigger."
+
+  - id: sci
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 34 Statement of Community Involvement, for major development."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates one or more dwellings.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 500
+            description: The proposal creates 500 square metres or more of non-residential floorspace.
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): item 37 SAP/BRUKL outputs, for 1+ dwellings or 500m2+
+      non-residential. Mapped to energy-statement as the nearest MHCLG id; check against the list.
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if:
+      condition:
+        field: affects-open-space
+        value: true
+        description: The proposal affects Metropolitan Open Land, designated open space, playing fields or sports facilities.
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 45 Open Space Assessment (MOL or designated open space) and item 46 Playing Fields and Sport Facilities Assessment."
+
+  - id: archaeological-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [archaeological-priority-area]
+            description: The site is in an Archaeological Priority Area.
+        - site:
+            in: [scheduled-monument]
+            description: The site is near a scheduled monument.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.4
+            description: The site is 0.4 hectares or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 0.4
+            description: The site is 0.4 hectares or more.
+        - condition:
+            field: eia-development
+            value: true
+            description: The development is EIA development.
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 49 Archaeological Statement/Evaluation, for APAs, sites near scheduled monuments, sites of 0.4ha+ and EIA development."
+
+  - id: noise-assessment
+    action: add
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): item 50 Acoustic Assessment is listed, but the audit gives no trigger."
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 52 Air Quality Assessment, for major development."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      all:
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: A change of use to residential.
+        - site:
+            in: [contaminated-land]
+            description: The site is within 50 m of potentially contaminated land.
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 56, for residential change of use within 50m of potentially contaminated land."
+
+unmapped:
+  - local-name: Planning Fire Safety Strategy / Reasonable Exception Statement
+    source-text: >-
+      Householder & Non-major developments must submit a Planning Fire Safety Strategy (PFSS) or a
+      Reasonable Exception Statement, if it is considered that parts or all of policy D12A of the
+      London Plan are not relevant.
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    suggested-id: planning-fire-safety-strategy
+  - local-name: Waste management applications information
+    source-text: "All waste management applications Refer to the Schedule: 'Information which may be required for a planning application list of documents', within the South London Waste Plan 2022."
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    suggested-id: minerals-waste-statement
+  - local-name: Biodiversity Enhancement Statement
+    source-text: "From the audit: item 8, for BNG-exempt applications"
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    suggested-id: biodiversity-enhancement-details
+  - local-name: Urban Greening Factor
+    source-text: "From the audit: item 10, for major development"
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    suggested-id: urban-greening-factor
+  - local-name: Structural Impact Assessment
+    source-text: "From the audit: item 14, a listed building consent item"
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    suggested-id: structural-survey
+  - local-name: Parking Survey
+    source-text: "From the audit: item 19, outside CPZs with poor PTAL"
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    suggested-id: parking-plan
+  - local-name: Delivery and Servicing Plan
+    source-text: "From the audit: item 25, for major development"
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    suggested-id: delivery-servicing-plan
+  - local-name: Foul Sewage and Utilities Statement
+    source-text: "From the audit: item 29, for major development"
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    suggested-id: foul-sewage-utilities-statement
+  - local-name: Marketing Report
+    source-text: "From the audit: item 32, for change of use"
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    suggested-id: marketing-evidence
+  - local-name: GLA Carbon Reporting Spreadsheet, Overheating Assessment, BREEAM Pre-Assessment
+    source-text: "From the audit: items 38, 40 and 43; no triggers given"
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    suggested-id: ""
+  - local-name: Whole Life Carbon Assessment
+    source-text: "From the audit: item 41, for 30+ dwellings or 1,000m2+, and minor schemes that demolish and rebuild one dwelling"
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    suggested-id: whole-life-carbon-assessment
+  - local-name: Circular Economy Statement
+    source-text: "From the audit: item 42, for Mayor-referable schemes"
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    suggested-id: circular-economy-statement
+  - local-name: National Water Standards Statement
+    source-text: "From the audit: item 44, for any new dwellings"
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    suggested-id: water-efficiency-statement
+  - local-name: Play Strategy
+    source-text: "From the audit: item 47, for major development"
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    suggested-id: play-strategy
+  - local-name: Ventilation/Extraction Statement
+    source-text: "From the audit: item 51, for commercial kitchen extraction"
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    suggested-id: ventilation-extraction-details
+  - local-name: Air Quality Neutral
+    source-text: "From the audit: item 53, for all development"
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    suggested-id: air-quality-neutral-assessment
+  - local-name: Residential Standards Statement
+    source-text: "From the audit: item 55, for 1+ dwellings"
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    suggested-id: housing-standards-statement
+  - local-name: Health Impact Assessment
+    source-text: "From the audit: item 60, for 100+ homes or 10,000m2+"
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Outbuildings / Granny Annexes Statement
+    source-text: "Outbuildings / Granny Annexes Statement - Applications proposing outbuildings"
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    suggested-id: outbuildings-statement
+  - local-name: Section 96A and Section 73 Documents
+    source-text: "Section 96A and Section 73 Documents - All s96A and s73 applications"
+    source-url: https://www.merton.gov.uk/sites/default/files/2026-06/260610%20Local%20Validation%20Checklist%202025%20%28Updated%29.pdf
+    suggested-id: amendment-documents
+
+low-confidence:
+  - id: arboriculturist-report
+    note: "Audit (wrong_trigger): the excerpt is column-interleaved ('BS5837 comprising a dwelling or dwellings, or other a. a tree survey; ...'); the trigger is unclear."
+  - id: cil-form
+    note: "Audit (wrong_trigger): the excerpt 'of the CIL Regulations 2010 (as amended) 2.' is a fragment."
+  - id: daylight-sunlight-assessment
+    note: "Audit (wrong_trigger): the excerpt 'and Average Daylight Factor (ADF) is required.' is a fragment with no threshold."
+  - id: sustainability-statement
+    note: "Audit (wrong_trigger): the excerpt is EIA screening text, not an energy or sustainability trigger."
+  - id: section-existing
+    note: "Audit (wrong_trigger): the excerpt is tree survey text."
+  - id: section-proposed
+    note: "Audit (wrong_trigger): the excerpt is tree survey text."
+
+new-fields:
+  - field: scheduled-monument
+    kind: designation
+    label: Scheduled monument
+    description: Site is in, contains or is near a scheduled monument (dataset scheduled-monument).
+  - field: main-town-centre-use-out-of-centre
+    kind: boolean
+    label: Town centre use outside a centre
+    description: The proposal is for a main town centre use in an edge-of-centre or out-of-centre location.
+  - field: staff-count
+    kind: number
+    label: Staff
+    description: Number of staff (employees) the development will accommodate.
+  - field: car-free
+    kind: boolean
+    label: Car-free development
+    description: The proposal is car-free (no general car parking is provided).
+  - field: affects-open-space
+    kind: boolean
+    label: Affects open space or playing fields
+    description: The proposal affects existing open space, Metropolitan Open Land, sports or recreation land, or playing fields.

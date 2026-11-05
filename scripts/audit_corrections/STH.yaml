@@ -1,0 +1,479 @@
+# Corrections for Southampton City Council, from the council's audit.
+# The audit read the current Validation Checklists PDF (updated September 2026), which has a
+# separate checklist per application type. Grokbot guessed most types, misplaced the noise and
+# retail items under prior approval, and many triggers are fragments or text from other items.
+local-authority: STH
+
+submission-standards:
+  - item: Drawings show the print (page) size, a scale bar showing 1 and 10 metres, key dimensions, and whether they need to be printed in colour
+    level: must
+  - item: Attachments only as PDF, JPG, DOC or XLS files
+    level: must
+
+drop:
+  - id: bng-metric
+    reason: "other: the checklist labels BNG a 'National Validation Requirement', not a local one"
+  - id: design-and-access-statement
+    reason: "other: a national requirement; the excerpt is cut off mid-sentence"
+  - id: site-plan
+    reason: "wrong_trigger: a fragment ('application including: o Block plan of the site (eg.')"
+  - id: photos
+    reason: "wrong_trigger: the excerpt is the archaeology desk-based assessment text (now in archaeological-assessment)"
+  - id: floor-plan-existing
+    reason: "wrong_trigger: an equipment maintenance schedule fragment"
+  - id: floor-plan-proposed
+    reason: "wrong_trigger: as above"
+  - id: elevation-existing
+    reason: "wrong_trigger: as above"
+  - id: elevation-proposed
+    reason: "wrong_trigger: as above"
+
+drop-unmapped:
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "wrong_trigger: the excerpt is the Biodiversity Survey and Report trigger (now in biodiversity-survey-report)"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: a fragment with no requirement in it"
+  - local-name: Parking provision / Parking plan
+    reason: "not_a_requirement: 'Best practice, but not a validation requirement'"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: web-page text"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: Planning Performance Agreement fee text; the real item is re-added below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: 10 or more residential units.
+    source-url: https://www.southampton.gov.uk/media/fgvnzbbg/1app-2026-170926.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Affordable Housing Statement for 10+ units (policy-compliant schemes)."
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - application-type:
+                in: [full, outline]
+            - site:
+                in: [air-quality-management-area, site-of-special-scientific-interest, special-protection-area]
+                description: In or next to an AQMA, or within 200m of a statutory nature conservation site.
+        - discretionary
+    source-url: https://www.southampton.gov.uk/media/fgvnzbbg/1app-2026-170926.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): all major development; non-householder development in
+      or next to an AQMA or within 200m of a statutory nature conservation site; energy/industrial
+      processes with direct emissions (shown as officer discretion).
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Trees or hedgerows (including overhanging off-site canopies) are to be lost or would be affected.
+        - site:
+            in: [tree-preservation-zone]
+            description: Protected (TPO) trees would be affected.
+    source-text: Required for all applications where trees or hedgerows are proposed to be lost or would be affected
+    source-url: https://www.southampton.gov.uk/media/fgvnzbbg/1app-2026-170926.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): the workbook quoted only 'carry out a tree survey.'; it also applies to householder applications."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: ground-disturbance
+            value: true
+            description: Ground disturbance is proposed.
+        - site:
+            in: [archaeological-priority-area]
+            description: A site of archaeological interest, particularly in Local Areas of Archaeological Potential 1-15.
+    source-text: >-
+      planning applications involving ground disturbance shall be submitted with a HS that include
+      an appropriate archaeological desk-based assessment and, where necessary, a field evaluation:
+      Development affecting any site identified as being of archaeological interest (during the
+      pre-application) where ground disturbance is proposed, particularly in Local Areas of
+      Archaeological Potential 1-15;
+    confidence: medium
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [site-of-special-scientific-interest, special-protection-area, local-wildlife-site]
+            description: Development likely to affect a local or national designated nature conservation habitat.
+        - discretionary
+    source-text: >-
+      Biodiversity Survey and Report Circumstances when document should be submitted Required for
+      any development, including demolition, likely to affect a local or national designated nature
+      conservation habitat or one that would have an impact on a designated protected species.
+    source-url: https://www.southampton.gov.uk/media/fgvnzbbg/1app-2026-170926.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's row read only 'a designated protected species.' Impact on protected species is shown as officer discretion."
+
+  - id: cil-form
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 100
+            description: Over 100 square metres (GIA) of additional floorspace, including extensions, annexes and outbuildings.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates one or more new dwellings.
+    source-text: >-
+      Householder Development Where the proposed development will add over 100sq.m of additional
+      floorspace (measured as GROSS Internal Area) to the dwelling including extensions, annexes and
+      outbuildings
+    source-url: https://www.southampton.gov.uk/media/fgvnzbbg/1app-2026-170926.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): the workbook quoted submission-process text. The 100 sqm / new dwelling trigger applies to householder, full, s73 and prior approval applications."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-text: >-
+      Fire Statements must be submitted on a form published by the Secretary of State (or a form to
+      a similar effect that contains the particulars specified or referred to in the Form)
+    source-url: https://www.southampton.gov.uk/media/fgvnzbbg/1app-2026-170926.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt omits the 'relevant building' trigger (2+ dwellings or educational accommodation, 18m+ or 7+ storeys)."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in flood zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (flood zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (flood zone 1).
+    source-url: https://www.southampton.gov.uk/media/fgvnzbbg/1app-2026-170926.pdf
+    must-include:
+      - item: Minimum flood details for householder extensions and outbuildings (finished floor levels, flood level, Environment Agency Flood Warning sign-up)
+        level: must
+        required-if:
+          application-type:
+            in: [hh]
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the SuDS sentence. From the audit: all proposals in flood zones 2/3 and sites of 1ha+ in flood zone 1; householders give minimum flood details."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, conservation-area, locally-listed-building, scheduled-monument]
+            description: The works involve a heritage asset.
+    source-text: Heritage Statement (HS) Required for all development works involving a heritage asset.
+    confidence: medium
+    notes: "Audit (wrong_app_type): also the local requirement on the standalone listed building consent checklist, and applies to householder works."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      ref: major-development
+    source-text: "Contaminated Land Assessment NPPF (2026) Policy P2 Required for: for all MAJOR development applications (10+ dwellings/1,000sq.m non-residential); and…"
+    confidence: low
+    notes: "The trigger is cut off after the first limb ('and…'); other cases were not captured."
+
+  - id: landscaping-plan
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.southampton.gov.uk/media/fgvnzbbg/1app-2026-170926.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Landscape (Hard & Soft) Design for all major development."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: The proposal involves large areas of lighting (for example sports facilities).
+    source-text: "Lighting Assessment Required for all proposals involving large areas of lighting including, but not limited to: Sports facilities;"
+    confidence: medium
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Residential development affected by existing noise.
+        - condition:
+            field: plant-equipment
+            value: true
+            description: Air source heat pumps or other external plant.
+        - all:
+            - ref: major-development
+            - condition:
+                field: noise-generating-use
+                value: true
+                description: Major development generating noise.
+    source-url: https://www.southampton.gov.uk/media/fgvnzbbg/1app-2026-170926.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, missing_requirement): the workbook's row under prior approval was the
+      Ventilation/Extraction Statement (now unmapped below). From the audit: a separate Noise
+      Assessment for residential development affected by existing noise, major development
+      generating or affected by noise, and air source heat pumps/external plant.
+
+  - id: roof-plan-existing
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: roof-alteration
+            value: true
+            description: A new pitched roof or changes to a roof.
+        - all:
+            - application-type:
+                in: [hh]
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 2
+                description: An extension of 2 or more storeys.
+    source-text: 2 or more storey extensions, and all roof alterations
+    source-url: https://www.southampton.gov.uk/media/fgvnzbbg/1app-2026-170926.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement, wrong_app_type): Roof Plan for new pitched roofs and roof changes; householder: 2+ storey extensions and all roof alterations."
+
+  - id: roof-plan-proposed
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: roof-alteration
+            value: true
+            description: A new pitched roof or changes to a roof.
+        - all:
+            - application-type:
+                in: [hh]
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 2
+                description: An extension of 2 or more storeys.
+    source-text: 2 or more storey extensions, and all roof alterations
+    source-url: https://www.southampton.gov.uk/media/fgvnzbbg/1app-2026-170926.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement, wrong_app_type): Roof Plan for new pitched roofs and roof changes; householder: 2+ storey extensions and all roof alterations."
+
+  - id: sci
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 50
+            description: 50 or more dwellings.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: 1,000 square metres or more of non-residential floorspace.
+    source-url: https://www.southampton.gov.uk/media/fgvnzbbg/1app-2026-170926.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): formally required for 50+ dwellings or 1,000 sq m+ non-residential."
+
+  - id: section-existing
+    action: add
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: Changes to ground levels, or a sloping site.
+    source-url: https://www.southampton.gov.uk/media/fgvnzbbg/1app-2026-170926.pdf
+    must-include:
+      - item: Levels
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): Site Sections including levels, for changes to ground levels or sloping sites (also householder where triggered)."
+
+  - id: section-proposed
+    action: add
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: Changes to ground levels, or a sloping site.
+    source-url: https://www.southampton.gov.uk/media/fgvnzbbg/1app-2026-170926.pdf
+    must-include:
+      - item: Levels
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): Site Sections including levels, for changes to ground levels or sloping sites (also householder where triggered)."
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: One or more residential units (or other overnight accommodation, such as hotels).
+        - condition:
+            field: housing-type
+            value: hmo
+            description: An increase in HMO occupancy.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 500
+            description: 500 square metres or more of non-residential floorspace.
+    source-text: >-
+      This revised checklist includes further assistance with the Nitrogen Budget calculation, which
+      is needed ahead of validation for all applications comprising a residential use and/or any
+      other form of overnight accommodation including hotels.
+    source-url: https://www.southampton.gov.uk/media/fgvnzbbg/1app-2026-170926.pdf
+    must-include:
+      - item: Nitrogen Budget calculation
+        level: must
+        required-if:
+          condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: Residential use or other overnight accommodation, including hotels.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, duplicate): the Sustainability Checklist & Nitrogen Budget Calculation
+      (two workbook rows, one item). From the audit: 1+ residential units or overnight
+      accommodation, HMO occupancy increases, or 500 sq m+ non-residential. Hotels have no field.
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre
+            value: true
+            description: Outside a defined City, Town, District or Local Centre.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 2500
+            description: 2,500 square metres or more of retail, leisure and/or office (Class E) floorspace.
+    source-text: >-
+      Retail Impact Assessment (RIA) NPPF (2026) Policy TC4 Required for applications of 2,500sq.m or
+      more retail, leisure and/or office development (Class E) outside of a defined City, Town,
+      District or Local Centre.
+    source-url: https://www.southampton.gov.uk/media/fgvnzbbg/1app-2026-170926.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook filed this under prior approval; it is for planning applications."
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 50
+            description: 50 or more residential units.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: 1,000 square metres or more of non-residential/commercial floorspace.
+    source-text: Transport Assessment (TA) NPPF (2026) Policy TR6 Needed for all developments proposing 50+ residential units and/or 1,000sq.m or more non-residential/commercial floorspace.
+    confidence: medium
+
+  - id: viability-assessment
+    action: update
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: 10 or more residential units.
+    must-include:
+      - item: The fee for an independent review, submitted with the assessment
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt omits the 10+ residential units threshold."
+
+  - id: waste-management-plan
+    action: replace
+    required-if: discretionary
+    source-url: https://www.southampton.gov.uk/media/fgvnzbbg/1app-2026-170926.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement): the workbook quoted a drawing fragment. From the audit: a Refuse Management Plan where carry distances are exceeded or private collection is proposed."
+
+unmapped:
+  - local-name: Ventilation/Extraction Statement (including Acoustic Assessment)
+    source-text: "Ventilation/Extraction Statement (including Acoustic Assessment) Required for all applications for uses involving food preparation (including speculative applications where the end user is unknown) including restaurants, cafes, takeaways and pubs (typically within the Class E use class) and commercial / industrial premises discharging gas, fumes, dust through mechanical extraction systems."
+    source-url: https://www.southampton.gov.uk/media/fgvnzbbg/1app-2026-170926.pdf
+    suggested-id: ventilation-extraction-statement
+
+new-fields:
+  - field: change-in-ground-levels
+    kind: boolean
+    label: Change in ground levels
+    description: The proposal changes ground levels, or is proposed next to changing ground levels.
+  - field: out-of-centre
+    kind: boolean
+    label: Edge or out of centre
+    description: A town centre use is proposed in an edge-of-centre or out-of-centre location.
+  - field: scheduled-monument
+    kind: designation
+    label: Scheduled monument
+    description: The proposal affects a scheduled monument (dataset scheduled-monument).
+  - field: roof-alteration
+    kind: boolean
+    label: New or altered roof
+    description: The proposal includes a new roof or alters an existing roof.

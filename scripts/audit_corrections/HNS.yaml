@@ -1,0 +1,261 @@
+# Corrections for London Borough of Hounslow, from the audit of Hounslow.
+# The audit could not read the live checklists (fetch budget used up). Grokbot's link is only the
+# Full planning (major or minor) checklist, one of a set of per-application-type checklists (now
+# 'Validation checklist v.8'), so the other types were never read. Its rows also look offset by one
+# row of the checklist table. This file only drops the clearly wrong rows and structures the
+# triggers the Full planning checklist states plainly.
+local-authority: HNS
+
+drop:
+  - id: schedule-of-works
+    reason: "other: the excerpt is the Design and Construction Method Statement trigger (now under construction-management-plan)"
+  - id: sustainability-statement
+    reason: "the excerpt is the Energy Statement item; now under energy-statement"
+  - id: planning-statement
+    reason: "the excerpt is the Cover Letter item, not a planning statement trigger (Cover Letter re-added as unmapped)"
+
+drop-unmapped:
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: carries the Details of materials text; re-added below"
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "duplicate: the retail impact assessment trigger (now under town-centre-impact-assessment)"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "duplicate: the same general CIL Regulations sentence as the CIL row; no trigger"
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_trigger: a cut-off fragment of the Transport Assessment trigger"
+  - local-name: Character / Conservation area appraisal reference
+    reason: "duplicate: the Historical and Archaeological Assessment trigger (archaeological-assessment)"
+
+requirements:
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      all:
+        - site:
+            in: [listed-building]
+            description: The proposal involves works to a listed building.
+        - site:
+            in: [conservation-area]
+            description: The site is within a conservation area.
+    source-text: >-
+      Historical and Archaeological Assessment Required if the proposal involves works to a listed
+      building and is within a conservation area.
+    source-url: https://www.hounslow.gov.uk/downloads/file/11164/full-planning-major-or-minor-checklist
+    confidence: medium
+    notes: "Audit (wrong_app_type): this comes from the Full planning checklist, not a Listed building consent list."
+
+  - id: biodiversity-survey-report
+    action: replace
+    source-url: https://www.hounslow.gov.uk/downloads/file/11164/full-planning-major-or-minor-checklist
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was the Retail / Office Assessment text. The
+      Ecological Assessment is listed in the Full planning checklist, but its trigger is not known.
+
+  - id: construction-management-plan
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: basement
+            value: true
+            description: The development includes the creation of a basement.
+    must-include:
+      - item: >-
+          How on-site impacts on homes, other sensitive uses and biodiversity will be managed during
+          demolition and construction, including traffic management, dust, noise, vibration and stability
+        level: must
+    confidence: medium
+    notes: "The council's item is the Design and Construction Method Statement."
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      all:
+        - site:
+            in: [conservation-area]
+            description: The site is within a conservation area.
+        - any:
+            - condition:
+                field: floorspace
+                operator: ">="
+                value: 100
+                description: The proposal creates 100 square metres or more of floorspace.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: The proposal creates one or more dwelling houses.
+    confidence: medium
+    notes: "The local trigger only; the national rules for a Design and Access Statement still apply."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: All new builds.
+        - ref: major-development
+    source-text: >-
+      Energy Statement Required for all new builds, and all applications for major developments to
+      provide an assessment of how they will contribute towards energy and carbon reduction targets.
+    source-url: https://www.hounslow.gov.uk/downloads/file/11164/full-planning-major-or-minor-checklist
+    confidence: medium
+    notes: "The workbook mapped this Energy Statement item to sustainability-statement."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: An Environmental Impact Assessment is required.
+    source-text: >-
+      Where an Environmental Impact Assessment (EIA) is required, Schedule 4 to the regulations sets
+      out the information that should be included in an Environmental Statement.
+    source-url: https://www.hounslow.gov.uk/downloads/file/11164/full-planning-major-or-minor-checklist
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt mixed roof-plan and EIA text; this is the EIA part."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: The site has a land contamination history or could be contaminated.
+    confidence: medium
+
+  - id: landscaping-plan
+    action: replace
+    source-url: https://www.hounslow.gov.uk/downloads/file/11164/full-planning-major-or-minor-checklist
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was the Details of materials description. Landscape
+      Plans are listed in the Full planning checklist, but the trigger is not known.
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: >-
+          Publicly accessible development near homes, a listed building, a conservation area or open
+          countryside, where external lighting would be provided or made necessary.
+    source-text: >-
+      Lighting Assessment Proposals involving the provision of publicly accessible developments, in
+      the vicinity of residential property, a listed building or a conservation area, or open
+      countryside, where external lighting would be provided or made necessary by the development,
+      should be required to be accompanied by details of external lighting and the proposed hours
+      when the lighting would be switched on.
+    source-url: https://www.hounslow.gov.uk/downloads/file/11164/full-planning-major-or-minor-checklist
+    must-include:
+      - item: Details of the external lighting
+        level: must
+      - item: The proposed hours when the lighting would be switched on
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): from the Full planning checklist; the trigger is about development near a listed building or conservation area, not LBC applications."
+
+  - id: roof-plan-existing
+    action: replace
+    source-text: Existing and proposed roof plans
+    source-url: https://www.hounslow.gov.uk/downloads/file/11164/full-planning-major-or-minor-checklist
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook's excerpt mixed roof-plan, scale and EIA text; no trigger is given."
+
+  - id: roof-plan-proposed
+    action: replace
+    source-text: Existing and proposed roof plans
+    source-url: https://www.hounslow.gov.uk/downloads/file/11164/full-planning-major-or-minor-checklist
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook's excerpt mixed roof-plan, scale and EIA text; no trigger is given."
+
+  - id: sci
+    action: replace
+    required-if:
+      ref: major-development
+    source-url: https://www.hounslow.gov.uk/downloads/file/11164/full-planning-major-or-minor-checklist
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the workbook's excerpt was the Details of materials
+      description. From the audit: the Statement of Community Engagement is a major-only item.
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: Boundary locations
+        level: must
+      - item: Location of existing structures on the site (including sheds, outbuildings and extensions)
+        level: must
+      - item: Location of landscaping features and fences
+        level: must
+      - item: Location of car parking, cycle parking and waste storage areas
+        level: must
+      - item: Location of utility manholes
+        level: must
+    notes: "The council's block plan text: required for all planning applications, showing these items where relevant."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: loss-of-use
+            value: true
+            description: The proposal involves the loss of retail floorspace in a town centre location.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 2500
+            description: 2,500 sqm or more of retail or other main town centre uses in an edge-of-centre or out-of-centre location.
+    source-text: >-
+      If the proposal involves the loss of retail floorspace in a town centre location or the location
+      of 2,500sqm of retail or other main town centre uses in an edge-of-centre or out-of-centre
+      location then a retail impact assessment will be required.
+    confidence: medium
+    notes: "The full sentence was in the workbook's ecological row. The location test (edge or out of centre) has no field."
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    notes: >-
+      Required for all applications that generate significant additional traffic and/or parking
+      requirements, or seek to reduce existing parking provision, except individual dwellings
+      (council's wording); no threshold is given.
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    notes: >-
+      Required for all applications that generate significant additional traffic and/or parking
+      requirements, or seek to reduce existing parking provision, except individual dwellings
+      (council's wording); no threshold is given.
+
+unmapped:
+  - local-name: Health Impact Assessment
+    source-text: "From the audit: a major-only item in the Full planning checklist (the workbook's trigger was the Details of materials text)"
+    source-url: https://www.hounslow.gov.uk/downloads/file/11164/full-planning-major-or-minor-checklist
+    suggested-id: health-impact-assessment
+  - local-name: Road Safety Audit
+    source-text: "From the audit: a major-only item in the Full planning checklist"
+    source-url: https://www.hounslow.gov.uk/downloads/file/11164/full-planning-major-or-minor-checklist
+    suggested-id: road-safety-audit
+  - local-name: Cover Letter
+    source-text: "Cover Letter Where a Planning Statement is not submitted, a Cover Letter must be submitted which, at a minimum, includes a list of the drawing numbers and accompanying documents."
+    source-url: https://www.hounslow.gov.uk/downloads/file/11164/full-planning-major-or-minor-checklist
+    suggested-id: cover-letter
+
+low-confidence:
+  - id: "*"
+    note: >-
+      Audit (wrong_document, missing_requirement): only the Full planning (major or minor) checklist
+      was read; Hounslow publishes a checklist for each application type ('Validation checklist
+      v.8'), and the version in force could not be confirmed.
+  - id: air-quality-assessment
+    note: "Audit (wrong_trigger): the workbook's excerpt is a cut-off fragment with no usable trigger."
+  - id: cil-form
+    note: "Audit (other): the excerpt is a general sentence about CIL Regulations 122 and 123 and gives no trigger."

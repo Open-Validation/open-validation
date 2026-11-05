@@ -1,0 +1,437 @@
+# Corrections for Eastleigh Borough Council, from inputs/audit/eastleigh-borough-council.json.
+# The audit compared the workbook with the Local List for Validation of Planning Applications,
+# February 2026 (cover date; the item tables are still footed February 2024). The workbook put
+# almost everything under Full planning with cut-off or cross-wired triggers, and took its
+# Householder rows from an old generic drawing guide. Item numbers below are the list's own.
+local-authority: EAT
+
+submission-standards:
+  - item: All plans accurately drawn to a conventional metric scale such as 1:50 or 1:100, with a scale bar
+    level: must
+  - item: No disclaimers such as 'do not scale' on plans and drawings (except perspective drawings or artists' impressions)
+    level: must
+  - item: Proposed elevations shown with the corresponding existing elevations, both at the same metric scale
+    level: must
+  - item: The revision number clearly stated on any drawing amended during the application
+    level: must
+
+drop:
+  - id: site-plan
+    reason: "wrong_trigger: Householder row from the generic validation-criteria guidance; the excerpt is a diagram label"
+  - id: roof-plan-existing
+    reason: "wrong_trigger: Householder row from the generic validation-criteria guidance; the excerpt is diagram labels"
+  - id: roof-plan-proposed
+    reason: "wrong_trigger: as above"
+  - id: floor-plan-existing
+    sheets: [Householder]
+    reason: "wrong_trigger: Householder row from the generic validation-criteria guidance; the excerpt is diagram labels"
+  - id: floor-plan-proposed
+    sheets: [Householder]
+    reason: "wrong_trigger: as above"
+  - id: elevation-existing
+    sheets: [Householder]
+    reason: "wrong_trigger: as above"
+  - id: elevation-proposed
+    sheets: [Householder]
+    reason: "wrong_trigger: as above"
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is the tree item 46 text; the local list has no schedule-of-works item"
+
+drop-unmapped:
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_trigger: the Householder row quotes parking standards and the Full planning row is cut off (re-added below with item 30's trigger)"
+  - local-name: Advertisement drawings / illumination details
+    reason: "other: Section 2 guidance ('colour(s) of illumination (if applicable)'), not a requirement"
+  - local-name: Validation checklist form (completed)
+    reason: "other: this is the HBIC Biodiversity Checklist (item 6), re-added below under its own name"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: the excerpt is the town-centre sequential test (item 36), re-added below"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: the excerpt is Employment and Skills Plan text (re-added below with the council's heads of terms wording)"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: the excerpt repeats the foul drainage text (re-added below with item 41's trigger)"
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "wrong_trigger: the excerpt stops before its conditions (re-added below)"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: the excerpt stops before its conditions (re-added below)"
+  - local-name: Structural Survey
+    reason: "wrong_app_type: item 40 is not specific to prior approval (re-added below)"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: The proposal creates 10 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: The site is 0.5 hectares or more and capable of 10 or more dwellings.
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted a policy citation. From the audit: 10+ dwellings, or a 0.5ha site capable of 10+."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees or hedgerows will be removed or affected by the development, above or below ground, including offsite.
+    confidence: medium
+    notes: "Item 46 applies to all application types, including Householder (audit missing_requirement)."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline]
+        - discretionary
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement, wrong_app_type): item 7 Ecological Surveys and
+      Assessment names Householder, Full and Outline applications. The audit doesn't give the
+      conditions within those types, so they are shown as officer discretion.
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      application-type:
+        in: [full, outline]
+    source-text: >-
+      Required for the following types of applications: Full planning applications; Outline
+      planning applications ... Excludes householder applications.
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): item 8 BNG Strategy. The workbook quoted 'features of geodiversity and soils interest'."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: Schedule 1 development, or Schedule 2 development likely to have significant environmental effects.
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook used the Health Impact Assessment trigger; item 12 covers Schedule 1, or Schedule 2 likely to have significant effects."
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    confidence: medium
+    notes: "The excerpt is cut off after 'educational accommodation and'; the height/storey limb is the national definition of a relevant building."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (Flood Zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (Flood Zone 1).
+        - site:
+            in: [flood-risk-zone, critical-drainage-area]
+            description: The site is in Flood Zone 2 or 3, or in a critical drainage area.
+        - discretionary
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt stopped at 'is required for:'. From the audit:
+      1ha+ in Flood Zone 1 or a critical drainage area, all new development in Flood Zones 2/3,
+      and other cases (shown as officer discretion).
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, conservation-area]
+            description: The proposal affects a listed building, or the site is in or next to a Conservation Area.
+    source-text: >-
+      Heritage Statement (for Historical, Archaeological features and Scheduled Ancient Monuments)
+      A heritage statement is required if the proposal: Affects a listed building;
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement): item 18 also applies to householder and other applications
+      affecting a listed building or a site in or adjacent to a Conservation Area. The excerpt is
+      cut off, so further cases (archaeology, scheduled monuments) may apply.
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: Development on land where contamination is known or suspected to exist.
+    source-text: Land Contamination Assessment Development on land where contamination is known or suspected to exist.
+
+  - id: photos
+    action: replace
+    required-if:
+      application-type:
+        in: [hh, full, outline]
+    source-text: >-
+      Required for the following types of applications: Householder applications, Full planning
+      applications, Outline planning applications
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): item 6 Biodiversity Checklist and Photographs. The
+      workbook's photos row was item 31 Photomontages / 3D visuals (now unmapped).
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      condition:
+        field: loss-of-use
+        value: true
+        description: The development involves the loss of existing open space (including playing fields).
+    source-text: Open Space Assessment Required for any development which involves the loss of existing open space (including playing fields).
+
+  - id: sci
+    action: replace
+    required-if:
+      ref: major-development
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted a policy citation; the list says all major applications."
+
+  - id: section-proposed
+    action: update
+    must-include:
+      - item: Finished floor levels
+        level: should
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre
+            value: true
+            description: The site is outside existing town centres.
+        - any:
+            - condition:
+                field: floorspace-non-residential
+                operator: ">="
+                value: 350
+                description: 350 square metres or more of retail floorspace.
+            - condition:
+                field: floorspace-non-residential
+                operator: ">"
+                value: 2500
+                description: Over 2,500 square metres of leisure floorspace.
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): item 37 Retail and Leisure Impact Assessment, 350sqm+
+      retail or over 2,500sqm leisure outside centres. The workbook's row was the item 36
+      sequential test (now unmapped).
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    notes: "Required for development likely to have significant transport implications, or deviating from adopted parking standards (council's wording)."
+
+  - id: viability-assessment
+    action: replace
+    required-if: discretionary
+    source-text: "… policy requirement, a Viability Assessment will be required."
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt ran into item 3 (Agricultural statement); the start of the trigger is cut off."
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: The site is in or near an Air Quality Management Area.
+        - discretionary
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 4, development that could harm air quality, especially in or near AQMAs."
+
+  - id: construction-management-plan
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 10 Draft CEMP / Construction Traffic Management Plan, all major development plus works affecting watercourses, habitats or adjoining sites."
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: The proposal includes floodlighting or external lighting.
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 22, any floodlighting or external lighting."
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The development provides new dwellings.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 500
+            description: Non-residential development above 500 square metres of floor space measured externally.
+    source-text: >-
+      All developments involving the provision of new dwellings. All non-residential developments
+      above 500sqm of floor space measured externally
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement): item 42 Sustainability Report."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [pa-ecomms-network]
+        - condition:
+            field: telecommunications-equipment
+            value: true
+            description: The application is for a mast or antenna.
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement, wrong_app_type): item 43 Telecommunications Supplementary Information, mast/antenna applications including Part 16 prior approval."
+
+unmapped:
+  - local-name: Parking Provision Details
+    source-text: "From the audit: item 30, additional need for parking or loss of parking (Householder included)"
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    suggested-id: parking-plan
+  - local-name: Hampshire Biodiversity Information Centre (HBIC) Biodiversity Checklist
+    source-text: "The relevant Hampshire Biodiversity Information Centre (HBIC) checklist must be completed and submitted with every application."
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    suggested-id: biodiversity-checklist
+  - local-name: Photomontages and / or 3D visuals
+    source-text: "Photomontages and / or 3D visuals For all Major developments."
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    suggested-id: computer-visualisations
+  - local-name: Town Centre Uses - Sequential Test
+    source-text: "Sequential Test Applications for retail, leisure or office development or other town centre uses, of over 350sqm that will be situated outside of existing centres."
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    suggested-id: sequential-test
+  - local-name: Planning obligations - Draft Heads of Terms
+    source-text: "Draft heads of terms will be required along with the ownership and contact details necessary for the planning obligation(s) to be progressed."
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    suggested-id: planning-obligations-heads-of-terms
+  - local-name: Sustainable Drainage Systems (SuDS)
+    source-text: "All new residential and commercial development (excluding residential extensions and changes of use)"
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    suggested-id: drainage-strategy
+  - local-name: Marketing Report
+    source-text: "From the audit: loss of Class E, community or leisure uses in Eastleigh town or district centres, non-boat uses at River Hamble boatyards/marinas, or loss of employment use. The council: 'The Marketing Report should provide details of marketing efforts made to let or sell the property in its current use, covering a period of at least 6 months.'"
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    suggested-id: marketing-evidence
+  - local-name: Odour Assessment
+    source-text: "From the audit: food-preparation uses and odorous industrial/commercial uses. The council: 'An odour assessment for cooking / kitchens should follow the approach given in the EMAQ guide, Control of Odour and Noise from Commercial Kitchen Exhaust Systems 2018.'"
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    suggested-id: ventilation-extraction-details
+  - local-name: Structural Survey
+    source-text: "For development proposals that could affect the stability of, or involve the substantial demolition of a listed building, locally listed building, heritage asset..."
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    suggested-id: structural-survey
+  - local-name: Volume Calculations (Old Bursledon Special Policy Area)
+    source-text: "All residential extensions or replacement dwellings in the Old Bursledon Special Policy Area"
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    suggested-id: volume-calculations
+  - local-name: Access standards for new dwellings
+    source-text: "From the audit: item 1, any proposal creating new dwellings (Policy DM29)"
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    suggested-id: accessible-housing-statement
+  - local-name: Agricultural Development and Diversification Statement
+    source-text: "Agricultural Development and Diversification Statement Proposals for new buildings for agricultural purposes or farm diversification."
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    suggested-id: agricultural-statement
+  - local-name: Bird Hazard Assessment / Management Plan
+    source-text: "From the audit: item 9, where needed to limit bird attraction affecting Southampton Airport"
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    suggested-id: bird-hazard-assessment
+  - local-name: Gypsies, Travellers and Travelling Showpeople supporting statement
+    source-text: "From the audit: item 16, new pitches/plots"
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    suggested-id: gypsy-traveller-statement
+  - local-name: Open Space Plan
+    source-text: "From the audit: item 29, all major residential development"
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    suggested-id: open-space-plan
+  - local-name: Public Art Statement
+    source-text: "From the audit: item 34, majors identified in the Planning Obligations SPD"
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    suggested-id: public-art-statement
+  - local-name: Site Survey
+    source-text: "From the audit: item 38, all new dwellings and all majors; less than 12 months old"
+    source-url: https://www.eastleigh.gov.uk/media/16280/1375261-local-validation-list-2026.pdf
+    suggested-id: topographical-survey
+
+low-confidence:
+  - id: landscaping-plan
+    note: "Audit (wrong_trigger): the excerpt stops at 'Required for applications whereby:' and the audit doesn't give the conditions. Item 20 accepts indicative landscaping plans for Outline."
+  - id: transport-assessment
+    note: "Audit (wrong_trigger): the excerpt is the parking item 30 text; the Transport Assessment trigger needs re-reading in the list."
+  - id: noise-assessment
+    note: "Audit (wrong_trigger): the excerpt starts with an NDSS URL and gives no trigger; re-read the Noise item in the list."
+
+new-fields:
+  - field: out-of-centre
+    kind: boolean
+    label: Outside a town centre
+    description: The site is outside an existing town, district or local centre.
+  - field: telecommunications-equipment
+    kind: boolean
+    label: Telecommunications mast or antenna
+    description: The proposal includes a telecommunications mast, antenna or base station.

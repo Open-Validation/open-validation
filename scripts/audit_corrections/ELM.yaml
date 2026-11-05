@@ -1,0 +1,168 @@
+# Corrections for Elmbridge Borough Council, from the audit of Elmbridge.
+# Grokbot captured nothing: it wrongly called the interactive checklist unreadable. The audit read
+# 3 of the 20 per-type pages of the checklist (revised 6 January 2025). Everything below comes from
+# the audit; items marked "From the audit" use its paraphrase, not the council's exact words.
+# Grok could not verify most findings, so they stand until someone checks the checklist by hand.
+local-authority: ELM
+
+requirements:
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees could influence or be affected by the development, especially on or next to sites with Tree Preservation Orders or in Conservation Areas.
+    source-text: >-
+      Required where trees could influence or be affected by the development … Tree Preservation
+      Orders and/or in Conservation Areas
+    source-url: https://emaps.elmbridge.gov.uk/ebc_planning_noftr.aspx?requesttype=parseTemplate&template=PlanningValidCheckListStart.tmplt
+    must-include:
+      - item: Tree survey to BS5837:2012
+        level: must
+      - item: Arboricultural Impact Assessment (AIA)
+        level: must
+      - item: Tree Protection Plan
+        level: must
+      - item: Arboricultural Method Statement (AMS)
+        level: must
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): "Arboricultural Information" covers a tree survey, AIA,
+      Tree Protection Plan and AMS to BS5837:2012. Not verified by Grok.
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [full]
+            - condition:
+                field: floorspace-non-residential
+                operator: ">"
+                value: 0
+                description: The application is a full, non-domestic application.
+        - condition:
+            field: roof-works
+            value: true
+            description: Domestic works that disturb the roof or roof structure, including loft conversions.
+        - application-type:
+            in: [lbc, outline, reserved-matters, s73, ldc-prospective-use]
+        - site:
+            in: [conservation-area, listed-building]
+            description: The application is in a conservation area or affects a listed building.
+        - site:
+            in: [priority-habitat]
+            description: Priority Habitat is a constraint on the site.
+    source-url: https://emaps.elmbridge.gov.uk/ebc_planning_noftr.aspx?requesttype=parseTemplate&template=PlanningValidCheckListStart.tmplt
+    must-include:
+      - item: Protected species survey where protected species are likely to be present
+        level: must
+        required-if: discretionary
+      - item: Surveys no more than 18 months old
+        level: must
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): "Biodiversity/Ecological Assessment" is required for full
+      non-domestic applications; domestic works disturbing the roof or roof structure, including loft
+      conversions; works within a church curtilage; conservation area and listed building
+      applications; LDCs for proposed use; outline and reserved matters; applications to vary or
+      remove a condition; and sites where Priority Habitat is a constraint. Works within a church
+      curtilage have no field and are not in the rule. Read from the High Hedge page; not verified
+      by Grok.
+
+  - id: site-plan
+    action: add
+    source-url: https://emaps.elmbridge.gov.uk/ebc_planning_noftr.aspx?requesttype=parseTemplate&template=PlanningValidCheckListStart.tmplt
+    must-include:
+      - item: Drawn to a metric scale
+        level: must
+      - item: Buildings and trees to be retained or removed
+        level: must
+      - item: Car and cycle parking
+        level: must
+      - item: Accesses and turning areas
+        level: must
+      - item: Visibility splays
+        level: must
+      - item: No 'do not scale' or 'approximate' annotations
+        level: must
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): local site plan requirements, for all applications
+      except adverts on an existing building. Not verified by Grok.
+
+  - id: elevation-existing
+    action: add
+    source-text: Elevations are required for all applications except those listed below as exceptions
+    source-url: https://emaps.elmbridge.gov.uk/ebc_planning_noftr.aspx?requesttype=parseTemplate&template=PlanningValidCheckListStart.tmplt
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): the exceptions are change of use without external
+      alterations, and vehicle crossovers.
+
+  - id: elevation-proposed
+    action: add
+    source-text: Elevations are required for all applications except those listed below as exceptions
+    source-url: https://emaps.elmbridge.gov.uk/ebc_planning_noftr.aspx?requesttype=parseTemplate&template=PlanningValidCheckListStart.tmplt
+    must-include:
+      - item: Height to the lowest part of the sign, and its projection
+        level: must
+        required-if:
+          application-type:
+            in: [advertising]
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): the exceptions are change of use without external
+      alterations, and vehicle crossovers. The advert item is the audit's summary.
+
+  - id: section-existing
+    action: add
+    required-if:
+      condition:
+        field: level-changes
+        value: true
+        description: The site slopes, neighbouring land is at a different level, or levels are to be changed.
+    source-url: https://emaps.elmbridge.gov.uk/ebc_planning_noftr.aspx?requesttype=parseTemplate&template=PlanningValidCheckListStart.tmplt
+    confidence: medium
+    notes: "From the audit (missing_requirement): sections where there is a sloping site, neighbouring land at a different level, or proposed level changes."
+
+  - id: section-proposed
+    action: add
+    required-if:
+      condition:
+        field: level-changes
+        value: true
+        description: The site slopes, neighbouring land is at a different level, or levels are to be changed.
+    source-url: https://emaps.elmbridge.gov.uk/ebc_planning_noftr.aspx?requesttype=parseTemplate&template=PlanningValidCheckListStart.tmplt
+    confidence: medium
+    notes: "From the audit (missing_requirement): sections where there is a sloping site, neighbouring land at a different level, or proposed level changes."
+
+unmapped:
+  - local-name: Design Code Checklist
+    source-text: "Design Code Checklist (Local) - Required for applications submitted on or after 6 January 2025"
+    source-url: https://emaps.elmbridge.gov.uk/ebc_planning_noftr.aspx?requesttype=parseTemplate&template=PlanningValidCheckListStart.tmplt
+    suggested-id: design-code-checklist
+  - local-name: Reserved matters - local requirements from the Full planning checklist
+    source-text: "Local requirements from the Full planning checklist ... if information was reserved by condition or not fully provided at the outline stage"
+    source-url: https://emaps.elmbridge.gov.uk/ebc_planning_noftr.aspx?requesttype=parseTemplate&template=PlanningValidCheckListStart.tmplt
+    suggested-id: ""
+  - local-name: 3D visualisations
+    source-text: "From the audit: the January 2025 update encourages 3D visualisations for 10+ dwellings or 4+ storeys"
+    source-url: https://emaps.elmbridge.gov.uk/ebc_planning_noftr.aspx?requesttype=parseTemplate&template=PlanningValidCheckListStart.tmplt
+    suggested-id: computer-visualisations
+
+new-fields:
+  - field: roof-works
+    kind: boolean
+    label: Roof works
+    description: The proposal alters or disturbs a roof or the roof structure (for example roof extensions, dormers, loft conversions or raised roofs).
+  - field: priority-habitat
+    kind: designation
+    label: Priority habitat
+    description: Site contains or adjoins a priority habitat (Natural England Priority Habitats Inventory).
+  - field: level-changes
+    kind: boolean
+    label: Sloping site or level changes
+    description: The site slopes, neighbouring land is at a different level, or ground levels are to be changed.

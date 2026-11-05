@@ -1,0 +1,97 @@
+# Corrections for Test Valley Borough Council, from the audit.
+# The audit could not fetch the live source (contents_checked: false), so this file only fixes
+# what the workbook's own excerpts show: swapped triggers, a duplicate checklist row, fragment
+# triggers, and clear triggers that the workbook left unstructured.
+local-authority: TES
+
+drop-unmapped:
+  - local-name: Foul Sewage / Utilities Statement
+    reason: "wrong_trigger: the excerpt is the Flood Risk Assessment trigger; re-added below with the heading only"
+  - local-name: Self-build / custom build information
+    reason: "wrong_trigger / not_a_requirement: the excerpt is the EIA text plus a broken link to CIL self-build relief guidance"
+  - local-name: Validation checklist form (completed)
+    reason: "duplicate: repeats the Biodiversity Checklist sentence; the real local form (PAR checklist) is added below"
+
+requirements:
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees on the site or on adjacent land (including street trees) that could influence or be affected by the development.
+    source-text: >-
+      Tree survey/ Arboricultural implications Where there are trees within the application site or
+      on land adjacent to it that could influence or be affected by the development (including
+      street trees), information will be required on which trees are to be retained and on the means
+      of protecting these trees during construction works.
+    must-include:
+      - item: Which trees are to be retained
+        level: must
+      - item: How the retained trees will be protected during construction works
+        level: must
+    notes: "Audit (wrong_app_type): this applies to any application where trees are affected, not only Full planning."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (Flood Zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (Flood Zone 1).
+        - site:
+            in: [flood-risk-zone]
+            description: New development in Flood Zone 2 or 3.
+    source-text: >-
+      A Flood Risk Assessment (FRA) will be required for development proposals of 1 hectare or
+      greater in Flood Zone 1 and for all proposals for new development located in Flood Zones 2 and
+      3 as designated by the Environment Agency.
+    notes: "Audit (wrong_app_type): this applies to all proposals in Flood Zones 2 and 3, not only Full planning."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    source-text: >-
+      Environmental statement The Town and Country Planning (Environmental Impact Assessment)
+      Regulations (SI 011/1824), set out the circumstances in which an Environmental Impact
+      Assessment (EIA) is required.
+    notes: >-
+      Audit (other, Amended): a national statutory requirement under the EIA Regulations, not a local
+      one. 'SI 011/1824' is the council's own wording (SI 2011/1824).
+
+  - id: affordable-housing-statement
+    action: update
+    policy: Test Valley Borough Revised Local Plan 2016 policy COM7
+
+unmapped:
+  - local-name: Foul sewage and utilities assessment
+    source-text: "Foul sewage and utilities assessment"
+    source-url: https://www.testvalley.gov.uk/assets/attach/2331/Descriptions-List-2017.pdf
+    suggested-id: foul-sewage-utilities-statement
+  - local-name: Planning Application Requirements (PAR) Checklist
+    source-text: >-
+      Completion of the Planning Application Requirements (PAR) Checklist form allows for applicants
+      to explain the extent of information being submitted.
+    source-url: https://www.testvalley.gov.uk/assets/attach/2331/Descriptions-List-2017.pdf
+    suggested-id: validation-checklist
+
+low-confidence:
+  - id: design-and-access-statement
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('concept in a Design and Access Statement, if required.') with no trigger."
+  - id: planning-statement
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('statement or planning statement.') with no trigger."
+  - id: cil-form
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('of the CIL Regulations 2010 (as amended).') with no trigger."
+  - id: heritage-statement
+    note: "Audit (wrong_trigger): the excerpt says only that the detail 'will vary'; the trigger wasn't captured."

@@ -1,0 +1,206 @@
+# Corrections for London Borough of Hillingdon, from the Hillingdon audit.
+# The audit could not read the council's checklist (fetch budget ran out; contents_checked is
+# false). Search results suggest the current list is the "Local Planning Validation Checklist
+# February 2024". These corrections rest on the audit's inspection of the workbook's own
+# extract: rows that took text from the wrong checklist section are dropped, and only triggers
+# stated in the excerpts are structured. Every file stays at confidence: low.
+local-authority: HIL
+
+drop:
+  - id: cil-form
+    sheets: [Householder]
+    reason: "wrong_app_type: text from the prior approval sections of the checklist"
+  - id: telecommunications-report
+    reason: "wrong_app_type: the ICNIRP/consultation items are from the telecoms prior approval section, not Householder or change of use"
+  - id: site-plan
+    reason: "wrong_app_type: national block plan item from the telecoms prior approval section"
+  - id: floor-plan-existing
+    reason: "wrong_app_type: national items from the telecoms prior approval section"
+  - id: floor-plan-proposed
+    reason: "wrong_app_type: national items from the telecoms prior approval section"
+  - id: elevation-existing
+    reason: "wrong_app_type: national items from the telecoms prior approval section"
+  - id: elevation-proposed
+    reason: "wrong_app_type: national items from the telecoms prior approval section"
+  - id: planning-statement
+    sheets: [Full planning]
+    reason: "duplicate: the excerpt is the Permission in Principle national requirement, repeated under Full planning"
+  - id: schedule-of-works
+    reason: "other: mapped to construction/demolition method statement text (now construction-management-plan)"
+  - id: waste-management-plan
+    reason: "other: mapped to noise assessment text about glass collection"
+  - id: design-and-access-statement
+    reason: "wrong_trigger: the excerpt is from another item's definition and states no local requirement"
+  - id: transport-assessment
+    reason: "duplicate: the excerpt is the travel plan text (kept in travel-plan)"
+  - id: sustainability-statement
+    reason: "the excerpt is the major-development energy strategy (moved to energy-statement)"
+
+drop-unmapped:
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "other: mapped to the retail impact assessment trigger (now in town-centre-impact-assessment)"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "other: mapped to noise assessment text about plant"
+  - local-name: Structural Survey
+    reason: "duplicate: same Basement Impact Assessment text as the Ground investigation row"
+
+requirements:
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      application-type:
+        in: [consent-under-tpo, notice-trees-in-con-area]
+    source-text: "Local Requirement ❏ Tree Survey - when felling"
+    source-url: https://www.hillingdon.gov.uk/media/5135/Validation-checklist-June-2020/pdf/g3PUBLICATION_Validation_Checklist_June_2020.pdf?m=1613489637773
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): this is a local requirement of the tree works section, not Permission
+      in Principle or Full planning. Only needed when felling.
+
+  - id: photos
+    action: replace
+    required-if:
+      application-type:
+        in: [consent-under-tpo, notice-trees-in-con-area]
+    source-text: "Local Requirement ❏ Tree Survey - when felling ❏ Photographs"
+    source-url: https://www.hillingdon.gov.uk/media/5135/Validation-checklist-June-2020/pdf/g3PUBLICATION_Validation_Checklist_June_2020.pdf?m=1613489637773
+    confidence: low
+    notes: "Audit (wrong_app_type): a local requirement of the tree works section, not Permission in Principle or Full planning."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [critical-drainage-area]
+            description: There are identified drainage problems or a high risk of surface water or sewer flooding.
+        - discretionary
+    source-text: >-
+      An FRA will also be required where the proposed development or change of use to a more
+      vulnerable class may be subject to other sources of flooding, or where there are identified
+      drainage problems or high risk of surface water or sewer flooding.
+    source-url: https://www.hillingdon.gov.uk/media/5135/Validation-checklist-June-2020/pdf/g3PUBLICATION_Validation_Checklist_June_2020.pdf?m=1613489637773
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): this is the general FRA definition, not a prior approval requirement.
+      "Also" implies other triggers (presumably flood zones) that the excerpt doesn't give; other
+      sources of flooding are shown as officer discretion.
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: loss-of-use
+            value: true
+            description: The proposal involves the loss of retail floorspace in a town centre location.
+        - all:
+            - condition:
+                field: out-of-centre-town-centre-use
+                value: true
+                description: An out of centre or edge of centre proposal.
+            - any:
+                - condition:
+                    field: floorspace-non-residential
+                    operator: ">"
+                    value: 200
+                    description: Exceeding 200 square metres of gross retail floorspace.
+                - condition:
+                    field: floorspace-non-residential
+                    operator: ">"
+                    value: 1000
+                    description: Exceeding 1,000 square metres of other main town centre uses.
+    source-text: >-
+      Retail/office assessment If the proposal involves the loss of retail floorspace in a town
+      centre location or development proposals in out of centre and edge of centre locations which
+      exceed 200 sqm of gross retail floorspace of 1,000sqm of other main town centre uses then a
+      retail impact assessment will be required.
+    source-url: https://www.hillingdon.gov.uk/media/5135/Validation-checklist-June-2020/pdf/g3PUBLICATION_Validation_Checklist_June_2020.pdf?m=1613489637773
+    confidence: low
+    notes: "Audit (other, wrong_trigger): the full trigger was filed under 'Marketing / vacancy evidence'; the workbook's own row began mid-sentence."
+
+  - id: construction-management-plan
+    action: add
+    required-if: discretionary
+    source-text: >-
+      site impacts method statement will be managed during the demolition/construction phase
+      (particularly on homes, other sensitive uses and biodiversity), including traffic
+      management, dust, noise, vibration and stability.
+    source-url: https://www.hillingdon.gov.uk/media/5135/Validation-checklist-June-2020/pdf/g3PUBLICATION_Validation_Checklist_June_2020.pdf?m=1613489637773
+    must-include:
+      - item: How impacts will be managed during demolition/construction, including traffic management, dust, noise, vibration and stability
+        level: must
+    confidence: low
+    notes: "Audit (other): this text was mapped to 'Schedule of works (listed building)'. No trigger was captured."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-text: Energy Strategy All major developments will be required to provide an energy strategy.
+    source-url: https://www.hillingdon.gov.uk/media/5135/Validation-checklist-June-2020/pdf/g3PUBLICATION_Validation_Checklist_June_2020.pdf?m=1613489637773
+    confidence: low
+    notes: "The workbook filed this under the Sustainability Statement."
+
+  - id: viability-assessment
+    action: add
+    required-if: discretionary
+    source-text: >-
+      Financial Viability Assessment A full un-redacted viability assessment should be provided at
+      the time of submission.
+    source-url: https://www.hillingdon.gov.uk/media/5135/Validation-checklist-June-2020/pdf/g3PUBLICATION_Validation_Checklist_June_2020.pdf?m=1613489637773
+    must-include:
+      - item: A full un-redacted viability assessment, provided at the time of submission
+        level: should
+      - item: A redacted copy if the report contains sensitive information
+        level: should
+    confidence: low
+    notes: "Audit (not_a_requirement): this is a real requirement that the workbook filed under 'Submission rules' with no trigger."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      site:
+        in: [air-quality-management-area]
+        description: Certain developments in the Air Quality Management Area and Focus areas.
+    notes: "The council's text: 'required for certain developments in the air quality management area and Focus areas'. Which developments isn't captured."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [local-wildlife-site]
+            description: The proposal could impact on Local Wildlife Sites or Green Links.
+        - discretionary
+    notes: "The council's text: applications that could impact on rare, protected, invasive or notable species or habitats and/or on Local Wildlife Sites or Green Links. Species and habitats are shown as officer discretion."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    notes: "The council's text: all developments which generate significant amounts of movement."
+
+low-confidence:
+  - id: landscaping-plan
+    note: "Audit (wrong_trigger): the excerpt is only 'the proposed landscaping scheme.' and states no trigger."
+  - id: lighting-assessment
+    note: "Audit (wrong_trigger): the excerpt begins mid-sentence ('watercourse where external lighting...') and the full trigger isn't captured."
+  - id: "*"
+    note: >-
+      Audit (missing_requirement, amended): the checklist has a section with 'Local Requirement'
+      boxes for Outline, Reserved matters, LBC, adverts, LDC, discharge of conditions, NMA and tree
+      works, but the audit could not list their items because the list couldn't be fetched.
+
+new-fields:
+  - field: out-of-centre-town-centre-use
+    kind: boolean
+    label: Main town centre use outside a centre
+    description: A main town centre use proposed in an edge-of-centre or out-of-centre location.

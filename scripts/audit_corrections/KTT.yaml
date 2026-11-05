@@ -1,0 +1,684 @@
+# Corrections for Royal Borough of Kingston upon Thames, from the council's audit.
+# The audit compared the workbook with the Validation Local List (February 2024, adopted
+# 1 May 2024) and the separate Householder Local List. Many workbook triggers came from
+# neighbouring entries; items marked "From the audit" use the audit's paraphrase.
+local-authority: KTT
+
+submission-standards:
+  - item: All plans and drawings accurately drawn to a conventional metric scale (such as 1:1250, 1:500, 1:200, 1:100) and true to the stated scale
+    level: must
+  - item: A scale bar that refers to the paper size (for example 1:100 on A3); no 'not to scale' or 'do not scale' disclaimers, except on perspective drawings or images
+    level: must
+  - item: Key dimensions annotated on floor plans, site plans, elevations and section / level plans
+    level: must
+  - item: Plans fully annotated (for example boundary fences labelled) with distances from boundaries
+    level: must
+  - item: All plans include a north arrow
+    level: must
+  - item: All plans on the same paper size
+    level: should
+  - item: Each drawing in a separate PDF, titled accordingly with its drawing number; not one combined PDF
+    level: should
+  - item: Title box on each drawing with the address and proposal, drawing title, date, scale and drawing number, with revisions clearly identified
+    level: should
+  - item: Drawings attached as PDF files (other documents may be .jpg, .doc or .xls)
+    level: must
+  - item: Maximum 5MB per attachment and 25MB per application
+    level: must
+
+drop:
+  - id: waste-management-plan
+    sheets: [Householder]
+    reason: "wrong_app_type: reuses the basement CEMP trigger; the Householder list has no waste storage requirement"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: matches no requirement in the list"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "not_a_requirement: a glossary of designations from the Biodiversity Checklist"
+  - local-name: Validation checklist form (completed)
+    reason: "wrong_trigger: the Full planning row is Biodiversity Checklist purpose text; re-added below with the council's wording"
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "not_a_requirement: the Full planning row is purpose text; re-added below with the council's wording"
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "wrong_app_type: advisory only on the Householder list; the Full planning wording is re-added below"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: the excerpt is Archaeological Assessment text; re-added below"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: excerpt cut off; re-added below"
+  - local-name: Structural Survey
+    reason: "wrong_trigger: excerpt cut off; re-added below"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: excerpt has no trigger; re-added below with the trigger from the council tab"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: The proposal is for residential development.
+        - discretionary
+    source-text: >-
+      Affordable Housing Statement All major applications for residential development And / or
+      (This can be included within the Planning Statement) In other cases where the proposal
+      includes affordable housing
+    must-include:
+      - item: A schedule of all units proposed, including tenure and percentage split, bedrooms and bedspaces, size, storeys, habitable rooms and accessibility standard
+        level: must
+    confidence: medium
+    notes: "'In other cases where the proposal includes affordable housing' is shown as officer discretion."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      ref: major-development
+    confidence: medium
+    notes: "The council's list: AQA and Air Quality Neutral Assessment for all major applications."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - site:
+                in: [archaeological-priority-area]
+                description: The site is in an Archaeological Priority Area.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 0.5
+            description: The site is greater than 0.5 hectares.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 0.5
+            description: The site is greater than 0.5 hectares.
+    source-text: >-
+      Archaeological Assessment All major applications in any Archaeological Priority Area (APA),
+      and all sites that are greater than 0.5ha whether in an APA or not.
+    confidence: medium
+
+  - id: bng-metric
+    action: update
+    required-if:
+      ref: major-development
+    source-text: Biodiversity Gain Plan All major applications
+    confidence: medium
+
+  - id: site-plan
+    action: update
+    required-if:
+      always: true
+    source-text: "Existing Site Plan All applications A plan at a scale of either 1:200 or 1:500 accurately showing:"
+    must-include:
+      - item: Scale of 1:200 or 1:500
+        level: must
+    confidence: medium
+
+  - id: cil-form
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal includes new build development (including residential extensions and annexes).
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 100
+            description: Over 100 square metres (internal) of new floorspace.
+    confidence: medium
+
+  - id: construction-management-plan
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - condition:
+            field: basement
+            value: true
+            description: The householder proposal includes a basement or subterranean development.
+    source-text: >-
+      Construction Management Plan (including site waste management plan) (CEMP) All Householder
+      applications that include any basement and / or subterranean development
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Householder_Local_List__2__0.pdf
+    confidence: low
+    notes: >-
+      Only the Householder list's trigger was captured; the main list's trigger for other
+      applications is not in the workbook excerpt.
+
+  - id: daylight-sunlight-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: The major application is residential.
+        - discretionary
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted Biodiversity Checklist text. From the audit:
+      proposals likely to affect light to adjoining land, and all major residential. On the
+      Householder list it is needed if the 45/25-degree tests fail.
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - all:
+            - site:
+                in: [conservation-area, world-heritage-site]
+                description: The site is in a conservation area or World Heritage Site.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: The proposal creates one or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: The proposal creates 100 square metres or more of floorspace.
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted drawing guidance. From the audit: majors, 1+
+      dwellings or 100 sqm+ in a conservation area or World Heritage Site, and listed building consent.
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt ('normally only necessary for a small proportion') was guidance, not a trigger."
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal changes ground levels or is next to changing ground levels.
+    source-text: >-
+      Site Levels and Sections (Existing and Proposed) All applications that involve a change in
+      the ground levels or where development is proposed next to changing ground levels These
+      should be drawn at a scale of 1:50 or 1:100 and include the following: Details of floor
+      levels, building height and relationship to site boundaries
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: should
+      - item: Floor levels, building height and relationship to site boundaries
+        level: must
+    confidence: medium
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal changes ground levels or is next to changing ground levels.
+    source-text: >-
+      Site Levels and Sections (Existing and Proposed) All applications that involve a change in
+      the ground levels or where development is proposed next to changing ground levels These
+      should be drawn at a scale of 1:50 or 1:100 and include the following: Details of floor
+      levels, building height and relationship to site boundaries
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: should
+      - item: Floor levels, building height and relationship to site boundaries
+        level: must
+    confidence: medium
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      always: true
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    must-include:
+      - item: Gateway One fire statement on the Secretary of State's form
+        level: must
+        required-if:
+          all:
+            - any:
+                - condition:
+                    field: building-height
+                    operator: ">="
+                    value: 18
+                    description: A building is 18 metres or more tall.
+                - condition:
+                    field: storey-count
+                    operator: ">="
+                    value: 7
+                    description: A building has 7 or more storeys.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+        source-text: >-
+          Fire statements must be submitted on a form published by the Secretary of State (or a
+          form to similar effect) and contain the particulars specified or referred to in the form
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted form contents. From the audit: a London Plan
+      fire statement for all applications (also on the Householder list), and a Gateway One
+      statement for buildings of 18m+ or 7+ storeys with 2+ dwellings.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in flood zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (flood zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (flood zone 1).
+        - site:
+            in: [critical-drainage-area]
+            description: The site is at risk of surface water flooding or in a Critical Drainage Area.
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was cut off. From the audit: 1ha+ in flood
+      zone 1, all of flood zones 2/3, and surface water flood risk. Householders in these areas
+      complete a Flood Risk Assessment Form (Householder list).
+
+  - id: floor-plan-existing
+    action: update
+    required-if:
+      always: true
+    source-text: >-
+      Floor Plans (Existing and Proposed) All applications These should be drawn at a scale of
+      1:50 or 1:100 and include the following: Annotations to show key dimensions including
+      distance from boundaries, depth and width of extension etc.
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: should
+      - item: Key dimensions annotated, including distance from boundaries and depth and width of any extension
+        level: must
+    confidence: medium
+
+  - id: floor-plan-proposed
+    action: update
+    required-if:
+      always: true
+    source-text: >-
+      Floor Plans (Existing and Proposed) All applications These should be drawn at a scale of
+      1:50 or 1:100 and include the following: Annotations to show key dimensions including
+      distance from boundaries, depth and width of extension etc.
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: should
+      - item: Key dimensions annotated, including distance from boundaries and depth and width of any extension
+        level: must
+    confidence: medium
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building]
+            description: The proposal affects a designated or non-designated heritage asset.
+        - all:
+            - site:
+                in: [archaeological-priority-area]
+                description: The site is in an Archaeological Priority Area.
+            - condition:
+                field: ground-disturbance
+                value: true
+                description: The proposal involves ground disturbance.
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    must-include:
+      - item: Schedule of works
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement, wrong_app_type): proposals affecting designated or
+      non-designated heritage assets or ground disturbance in an APA, with a schedule of works for
+      listed buildings. Also on the Householder list.
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: The site is contaminated or a previous industrial site.
+        - ref: major-development
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): contaminated or previous industrial sites, majors, and
+      sites adjoining public open space (no rule is set for the last).
+
+  - id: landscaping-plan
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    must-include:
+      - item: A 5-year management plan
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): Landscaping Scheme with a 5-year management plan for major applications."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: The proposal includes lighting likely to be visible off site, particularly flood lighting.
+    source-text: >-
+      Lighting assessment All applications that include lighting … likely to be visible off site
+      (i.e. light spill), particularly proposals involving flood lighting.
+    confidence: medium
+
+  - id: photos
+    action: replace
+    required-if:
+      always: true
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    must-include:
+      - item: Photographs are time stamped
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted 'Certificate CGI Visualisations authorising body.'
+      From the audit: Time Stamped Photographs for all applications (also on the Householder list).
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      ref: major-development
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted Affordable Housing Statement text. From the audit: all major applications."
+
+  - id: recreation-facilities-assessment
+    action: replace
+    required-if:
+      condition:
+        field: loss-of-open-space
+        value: true
+        description: The proposal would result in the loss of open space.
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the S106 heads-of-terms list. From the audit: Open Space Assessment where open space is lost."
+
+  - id: schedule-of-works
+    action: replace
+    required-if:
+      application-type:
+        in: [lbc]
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted tree method statement text. From the audit: a schedule of works for listed buildings, within the Heritage Statement."
+
+  - id: sci
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-text: Statement of Community Involvement All major applications and sensitive schemes where significant public interest is likely.
+    confidence: medium
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      ref: major-development
+    confidence: medium
+    notes: "From the audit (wrong_app_type): the Energy statement is for all major applications."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre
+            value: true
+            description: The site is out of centre.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 2500
+            description: 2,500 square metres or more of retail or town centre floorspace.
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook missed the 2,500 sqm out-of-centre threshold; the exact wording needs checking in the list."
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted guidance links. From the audit: a Transport
+      Assessment for majors and significant transport impacts; a Transport Statement for schools,
+      nurseries, hospitals, places of worship and 100 sqm+ Class E.
+
+  - id: travel-plan
+    action: replace
+    required-if:
+      ref: major-development
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted guidance links. From the audit: a Travel Plan for all major applications."
+
+  - id: viability-assessment
+    action: replace
+    required-if:
+      all:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The major application is residential.
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted Affordable Housing Statement text. From the audit:
+      major residential schemes with under 35% affordable housing (50% on public land); the
+      affordable percentage is not in the rule.
+
+  - id: waste-management-plan
+    action: update
+    required-if:
+      ref: major-development
+    source-text: >-
+      Waste Management, Storage and Collection Strategy All major applications The following
+      information shall be submitted: Details of the arrangements and/or space for the storage and
+      collection of recycling and refuse on site.
+    must-include:
+      - item: Arrangements and/or space for the storage and collection of recycling and refuse on site
+        level: must
+    confidence: medium
+
+  - id: water-impact-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal includes new residential development.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 0
+            description: The proposal includes new commercial floorspace.
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Water Consumption Statement for new residential and all new commercial development."
+
+unmapped:
+  - local-name: Completed Checklist
+    source-text: "Completed Checklist All Applications A completed Checklist must be provided, see Section 3 of this document."
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    suggested-id: validation-checklist
+  - local-name: Biodiversity Checklist
+    source-text: "Biodiversity Checklist All applications A completed Biodiversity Checklist is required for all applications."
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    suggested-id: biodiversity-checklist
+  - local-name: Streetscene Elevations - Proposed
+    source-text: "Streetscene Elevations - Proposed If neighbouring properties and developments are not depicted accurately this could result in your application being made invalid or any subsequent planning permission being unimplementable."
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    suggested-id: street-scene-elevation
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    source-text: "From the audit: all major applications"
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    suggested-id: heads-of-terms
+  - local-name: Health Impact Assessment
+    source-text: "From the audit: rapid HIA for all major applications; full HIA if referable to the GLA"
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Structural Survey
+    source-text: "From the audit: significant works to existing historic buildings, including basements"
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    suggested-id: structural-survey
+  - local-name: Drainage Strategy and SuDS Report
+    source-text: "Drainage Strategy and Sustainable Urban Drainage Systems (SuDS) Report All major applications and all sites within a critical drainage area"
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    suggested-id: drainage-strategy
+  - local-name: BREEAM Pre-Assessment Report
+    source-text: "BREEAM PreAssessment Report or BREEAM Interim (Design Stage) All applications for non-residential development comprising over 500m² including conversions, refurbishments, extensions and changes of use"
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    suggested-id: sustainability-statement
+  - local-name: Design Codes, Development Specification and Parameter Plans
+    source-text: "Design Codes - All outline major applications"
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    suggested-id: design-code
+  - local-name: Reserved Matters Confirmation Statement
+    source-text: "Reserved Matters Confirmation Statement - All reserved matters applications"
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    suggested-id: ""
+  - local-name: S96A schedule of changes
+    source-text: "From the audit: non-material amendments need a schedule of changes plus revised drawings highlighting the changes"
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    suggested-id: ""
+  - local-name: Circular Economy Statement
+    source-text: "From the audit: applications referable to the GLA"
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    suggested-id: circular-economy-statement
+  - local-name: Delivery and Servicing Plan
+    source-text: "From the audit: major applications"
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    suggested-id: delivery-servicing-plan
+  - local-name: Digital 3D Modelling
+    source-text: "From the audit: major applications"
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    suggested-id: ""
+  - local-name: Retrofit-first statement
+    source-text: "From the audit: major applications involving demolition"
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    suggested-id: ""
+  - local-name: Foul Sewage and Utilities Assessment
+    source-text: "From the audit: new units or changes to utility infrastructure"
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    suggested-id: foul-sewage-assessment
+  - local-name: Loss of Community Facilities Assessment
+    source-text: "From the audit: listed; no trigger given"
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    suggested-id: ""
+  - local-name: Materials and Architectural Details
+    source-text: "From the audit: major applications"
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    suggested-id: ""
+  - local-name: Public Art Strategy
+    source-text: "From the audit: major applications"
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    suggested-id: ""
+  - local-name: Parking Beat / Stress Survey
+    source-text: "From the audit: where no parking is proposed outside a CPZ"
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    suggested-id: parking-survey
+  - local-name: Sequential Test
+    source-text: "From the audit: town centre uses in edge or out of centre locations"
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    suggested-id: sequential-test
+  - local-name: Schedule of Accommodation
+    source-text: "From the audit: new residential development, including student and shared housing"
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    suggested-id: accommodation-schedule
+  - local-name: Urban Greening Factor Statement
+    source-text: "From the audit: major applications"
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    suggested-id: urban-greening-factor
+  - local-name: Wind Impact Assessment
+    source-text: "From the audit: buildings of 7+ storeys or well above the prevailing height"
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    suggested-id: microclimate-assessment
+  - local-name: Window / door sections
+    source-text: "From the audit: sections at 1:10 or 1:20 where windows or doors are changed"
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    suggested-id: section-proposed
+  - local-name: Renewable energy sections
+    source-text: "From the audit: solar panels and air source heat pumps"
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+    suggested-id: section-proposed
+  - local-name: 45-degree plans and 25-degree elevation
+    source-text: "From the audit: 45-degree plans for extensions and outbuildings; 25-degree elevation for extensions of 2+ storeys"
+    source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Householder_Local_List__2__0.pdf
+    suggested-id: ""
+
+low-confidence:
+  - id: arboriculturist-report
+    note: "Audit (duplicate): the excerpt is the tree method statement sentence, shared with the old schedule-of-works row; the trigger was not captured."
+  - id: noise-assessment
+    note: "The workbook's excerpt is purpose text; the list's trigger was not captured."
+
+new-fields:
+  - field: change-in-ground-levels
+    kind: boolean
+    label: Change in ground levels
+    description: The proposal changes ground levels, or is proposed next to changing ground levels.
+  - field: loss-of-open-space
+    kind: boolean
+    label: Loss of open space
+    description: The proposal would result in the loss of open space or recreational land.
+  - field: out-of-centre
+    kind: boolean
+    label: Edge or out of centre
+    description: A town centre use is proposed in an edge-of-centre or out-of-centre location.

@@ -1,0 +1,213 @@
+# Corrections for Guildford Borough Council, from inputs/audit/guildford-borough-council.json.
+# The audit couldn't load any Guildford page (contents_checked: false); its findings come from
+# comparing the workbook's rows with the tab items Grokbot captured from each application-type
+# page. The hub is 'The Local Validation List' (article 22693), which the build already uses.
+local-authority: GRT
+
+submission-standards:
+  - item: All plans show key dimensions of all new works
+    level: must
+  - item: A scale bar which refers to the paper size, for example 1:100 on A3
+    level: must
+
+drop:
+  - id: arboriculturist-report
+    sheets: [Works to trees]
+    reason: "not_a_requirement: the tree page lists an arboriculturist's report as optional ('we may be more likely to accept your application if you include')"
+  - id: photos
+    sheets: [Works to trees]
+    reason: "not_a_requirement: annotated photographs are optional on the tree page"
+
+requirements:
+  - id: floor-plan-existing
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [hh]
+        - all:
+            - application-type:
+                in: [full]
+            - condition:
+                field: involves-change-of-use
+                value: true
+                description: Full planning permission for a change of use only.
+    source-text: >-
+      You must submit drawings and information which describe the project, including: existing and
+      proposed elevations existing and proposed floor plans roof plans (if needed) All plans need to
+      show key dimensions of all new works.
+    source-url: https://www.guildford.gov.uk/article/22710/Planning-permission-for-works-or-extension-to-a-dwelling
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook filed the householder page's items under Full planning.
+      The change-of-use page (article 22699) also asks for existing and proposed floor plans.
+
+  - id: floor-plan-proposed
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [hh]
+        - all:
+            - application-type:
+                in: [full]
+            - condition:
+                field: involves-change-of-use
+                value: true
+                description: Full planning permission for a change of use only.
+    source-text: >-
+      You must submit drawings and information which describe the project, including: existing and
+      proposed elevations existing and proposed floor plans roof plans (if needed) All plans need to
+      show key dimensions of all new works.
+    source-url: https://www.guildford.gov.uk/article/22710/Planning-permission-for-works-or-extension-to-a-dwelling
+    must-include:
+      - item: Position of any external extractor flues or air conditioning units (on the floor or roof plans)
+        level: must
+        required-if:
+          condition:
+            field: plant-equipment
+            value: true
+            description: The proposal includes external extractor flues or air conditioning units.
+        source-text: "If you propose any external extractor flues or air conditioning units, you will need to show the position of the flue/units on the floor or roof plans and elevations."
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook filed the householder page's items under Full planning.
+      The change-of-use page (article 22699) also asks for existing and proposed floor plans and
+      for flue/unit positions (its 'Ventilation and extraction statement' item).
+
+  - id: elevation-existing
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [hh, advertising]
+        - all:
+            - application-type:
+                in: [full]
+            - condition:
+                field: involves-change-of-use
+                value: true
+                description: Full planning permission for a change of use only.
+    source-text: >-
+      You must submit drawings and information which describe the project, including: existing and
+      proposed elevations existing and proposed floor plans roof plans (if needed) All plans need to
+      show key dimensions of all new works.
+    source-url: https://www.guildford.gov.uk/article/22710/Planning-permission-for-works-or-extension-to-a-dwelling
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, missing_requirement): householder items were filed under Full planning;
+      the change-of-use page and the advertisement page also ask for existing and proposed elevations.
+
+  - id: elevation-proposed
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [hh, advertising]
+        - all:
+            - application-type:
+                in: [full]
+            - condition:
+                field: involves-change-of-use
+                value: true
+                description: Full planning permission for a change of use only.
+    source-text: >-
+      You must submit drawings and information which describe the project, including: existing and
+      proposed elevations existing and proposed floor plans roof plans (if needed) All plans need to
+      show key dimensions of all new works.
+    source-url: https://www.guildford.gov.uk/article/22710/Planning-permission-for-works-or-extension-to-a-dwelling
+    must-include:
+      - item: Size, siting, materials, extent of projection and lighting details of the advertisement(s)
+        level: must
+        required-if:
+          application-type:
+            in: [advertising]
+        source-text: "size siting materials extension of projection lighting details existing and proposed elevations All plans need to show key dimensions of the new advertisement(s)."
+      - item: Position of any external extractor flues or air conditioning units
+        level: must
+        required-if:
+          condition:
+            field: plant-equipment
+            value: true
+            description: The proposal includes external extractor flues or air conditioning units.
+        source-text: "If you propose any external extractor flues or air conditioning units, you will need to show the position of the flue/units on the floor or roof plans and elevations."
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, missing_requirement): householder items were filed under Full planning;
+      the change-of-use page and the advertisement page (article 22697) also ask for elevations.
+
+  - id: roof-plan-existing
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - discretionary
+    source-text: "existing and proposed floor plans roof plans (if needed) All plans need to show key dimensions of all new works."
+    source-url: https://www.guildford.gov.uk/article/22710/Planning-permission-for-works-or-extension-to-a-dwelling
+    confidence: medium
+    notes: "Audit (wrong_app_type): this is the householder page's 'roof plans (if needed)', not a Full planning item."
+
+  - id: roof-plan-proposed
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - discretionary
+    source-text: "existing and proposed floor plans roof plans (if needed) All plans need to show key dimensions of all new works."
+    source-url: https://www.guildford.gov.uk/article/22710/Planning-permission-for-works-or-extension-to-a-dwelling
+    confidence: medium
+    notes: "Audit (wrong_app_type): this is the householder page's 'roof plans (if needed)', not a Full planning item."
+
+  - id: section-existing
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: Full planning permission for a change of use only.
+    source-text: >-
+      You must submit drawings and information which describe the project, including: existing and
+      proposed elevations existing and proposed floor plans existing and proposed site sections
+      finished floor and site levels All plans need to show key dimensions of all new works.
+    source-url: https://www.guildford.gov.uk/article/22699/Full-planning-permission-change-of-use-only
+    confidence: medium
+    notes: "Audit (missing_requirement): the change-of-use page's site sections weren't in any workbook row."
+
+  - id: section-proposed
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: Full planning permission for a change of use only.
+    source-text: >-
+      You must submit drawings and information which describe the project, including: existing and
+      proposed elevations existing and proposed floor plans existing and proposed site sections
+      finished floor and site levels All plans need to show key dimensions of all new works.
+    source-url: https://www.guildford.gov.uk/article/22699/Full-planning-permission-change-of-use-only
+    must-include:
+      - item: Finished floor and site levels
+        level: must
+    confidence: medium
+    notes: "Audit (missing_requirement): the change-of-use page's site sections and levels weren't in any workbook row."
+
+unmapped:
+  - local-name: Details of replacement trees
+    source-text: "details of replacement trees (this is only a requirement if you want to cut trees down)"
+    source-url: https://www.guildford.gov.uk/article/22714/Works-to-trees-under-a-Tree-Preservation-Order
+    suggested-id: replacement-tree-details
+
+low-confidence:
+  - id: "*"
+    note: >-
+      Audit (other): the extraction is partial (17 pages read, 8 items captured). Listed building
+      consent, demolition in a conservation area, lawful development certificate and s73 pages
+      weren't extracted, the list date wasn't captured, and nothing could be checked live.

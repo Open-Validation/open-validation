@@ -1,0 +1,401 @@
+# Corrections for Dartford Borough Council, from the council's audit.
+# The audit checked the current list (July 2026, in use from 1 July 2026). Table 2 of the list has
+# 42 local requirements; Grokbot captured about 10. The table describes kinds of development, not
+# application types. Items marked "From the audit" use the audit's paraphrase of Table 2; where
+# the audit names a requirement but gives no trigger, it is added without one at low confidence.
+local-authority: DAR
+
+submission-standards:
+  - item: A scale bar on all drawings that are to scale
+    level: must
+
+drop:
+  - id: section-existing
+    reason: "wrong_trigger: the excerpt 'where final ground levels are unclear.' belongs to Street Scene Drawings"
+  - id: section-proposed
+    reason: "wrong_trigger: as above; the levels requirement is a Topographical Survey (unmapped below)"
+
+drop-unmapped:
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "wrong_trigger: garbled run of three table rows; replaced by the Residential Space Standards Statement below"
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_trigger: mixes two table columns; replaced by the Parking Management Strategy below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 15
+            description: Residential development of 15 or more dwellings in the urban area.
+        - all:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 10
+                description: Ten or more dwellings.
+            - site:
+                in: [green-belt]
+                description: Located south of the A2 and/or within the Green Belt.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: Any residential development of 0.5ha or more in size.
+        - discretionary
+    policy: Dartford Local Plan Policy M7
+    source-text: >-
+      Affordable Housing Statement Adopted Dartford Local Plan Policy M7 Residential development of
+      15 or more dwellings in the urban area; ten or more dwellings located south of the A2 and/or
+      within the Green Belt; any residential development of 0.5ha or more in size or; any site
+      proposed and justified in principle on the basis of delivering dwellings that are all rented
+      affordable housing meeting priority local requirements.
+    confidence: medium
+    notes: >-
+      "South of the A2" can't be expressed as a designation, so 10+ dwellings there is only caught
+      through the Green Belt branch. Sites justified as all rented affordable housing are shown as
+      officer discretion.
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [air-quality-management-area]
+            description: The site is in or next to an Air Quality Management Area.
+        - discretionary
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): major, polluting or traffic-generating development, in
+      or next to an AQMA. How these conditions combine needs checking in Table 2.
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Trees or hedgerows are affected by the proposal.
+        - site:
+            in: [ancient-woodland]
+            description: The site is within 30m of ancient woodland or veteran trees.
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Tree Survey and Arboricultural Implications Report where
+      trees or hedgerows are affected, or within 30m of ancient woodland or veteran trees. It can
+      apply to householder schemes.
+
+  - id: archaeological-assessment
+    action: add
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    confidence: low
+    notes: "From the audit (missing_requirement): an Archaeological Desktop Assessment is listed (it can apply to householder schemes), but the audit gives no trigger."
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [site-of-special-scientific-interest, special-protection-area]
+            description: >-
+              The site is in or within 200m of a SSSI, or in a Special Protection Area or Special
+              Area of Conservation.
+        - discretionary
+    policy: Dartford Local Plan Policy M14
+    source-text: >-
+      Biodiversity/Ecology Survey and … Report … Major developments1; non-major developments in a
+      site of Special … Scientific Interest (SSSI) and/or within a 200m buffer; in a Special
+      Protection Area (SPA); in Special Area of Conservation (SAC) or any other relevant or sensitive
+      locations or where protected species are likely to be found.
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    confidence: medium
+    notes: >-
+      From the council tab (Policy-driven requirements). "Other relevant or sensitive locations" and
+      likely protected species are shown as officer discretion.
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The application is not exempt from the statutory biodiversity gain condition.
+    policy: Dartford Local Plan Policy M14
+    source-text: >-
+      Applications that are not exempt from the requirement for a biodiversity gain condition under
+      Schedule 7A
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    must-include:
+      - item: Baseline and post-completion biodiversity calculations (indicative if outline)
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook placed it under Outline only because the text says
+      'indicative if outline'; it applies to every application not exempt from the biodiversity gain
+      condition, except where Statutory Biodiversity Credits are proposed.
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    confidence: medium
+    notes: "From the audit (missing_requirement): major development."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    confidence: medium
+    notes: "From the audit (missing_requirement): major development."
+
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare (Flood Zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare (Flood Zone 1).
+        - site:
+            in: [critical-drainage-area]
+            description: The site is in a critical drainage area.
+        - discretionary
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Flood Zones 2/3, sites over 1ha in Zone 1, near water
+      features (shown as officer discretion), critical drainage areas. It can apply to householder
+      schemes in Flood Zones 2/3.
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [conservation-area, listed-building-setting, scheduled-monument]
+            description: The site is in a Conservation Area, or the proposal affects the setting of a Listed Building or Scheduled Monument.
+    source-text: >-
+      Applications in Conservation Areas or affecting the setting of a Listed Building or Scheduled
+      Monument; Listed Building Consent
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    confidence: medium
+    notes: "Audit (missing_requirement): Householder and Listed building consent were recorded as having no local requirements."
+
+  - id: land-contamination-assessment
+    action: add
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    confidence: low
+    notes: "From the audit (missing_requirement): a Land Contamination Assessment is listed, but the audit gives no trigger."
+
+  - id: lighting-assessment
+    action: add
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    confidence: low
+    notes: "From the audit (missing_requirement): a Lighting Assessment is listed, but the audit gives no trigger."
+
+  - id: noise-assessment
+    action: add
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    confidence: low
+    notes: "From the audit (missing_requirement): a Noise and/or Vibration Impact Assessment is listed, but the audit gives no trigger."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    confidence: medium
+    notes: "From the audit (missing_requirement): major development, including a case for very special circumstances in the Green Belt."
+
+  - id: recreation-facilities-assessment
+    action: add
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    confidence: low
+    notes: "From the audit (missing_requirement): an Open Space Assessment is listed, but the audit gives no trigger."
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: Net gains in main town centre uses outside the network of retail centres.
+    policy: Dartford Local Plan Policy M18
+    source-text: >-
+      … main town centre uses outside of the network of Retail centres must also be accompanied by a
+      full retail impact assessment.
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    must-include:
+      - item: Sequential test
+        level: must
+      - item: Full retail impact assessment
+        level: must
+        required-if:
+          condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 280
+            description: 280sqm or more of main town centre floorspace.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt dropped the threshold. From the audit: a sequential test for
+      net gains in main town centre uses outside centres, and a full impact assessment at 280 sqm or
+      more. Bluewater has its own item (unmapped).
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    policy: Dartford Local Plan Policies M15 and M16
+    source-text: >-
+      A Transport Statement is required for smaller developments which are likely … to generate
+      vehicle movements which may have a significant impact on the local road network or surrounding
+      area.
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt gives only the smaller-development line; a Transport Assessment is usually required for major schemes."
+
+  - id: travel-plan
+    action: add
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    confidence: low
+    notes: "From the audit (missing_requirement): a Travel Plan and Active Travel Statement is listed, but the audit gives no trigger."
+
+  - id: viability-assessment
+    action: add
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Financial Viability Assessment for major schemes not meeting planning obligations."
+
+  - id: waste-management-plan
+    action: add
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    confidence: low
+    notes: "From the audit (missing_requirement): Refuse and Recycling Storage is listed, but the audit gives no trigger."
+
+unmapped:
+  - local-name: Residential Space Standards Statement
+    source-text: All schemes creating new dwellings
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    suggested-id: space-standards-statement
+  - local-name: Water Efficiency Statement
+    source-text: All schemes creating new dwellings
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    suggested-id: water-efficiency-statement
+  - local-name: Habitat Regulations Screening / Appropriate Assessment
+    source-text: >-
+      All residential development within 6km of North Kent SPAs and Ramsar sites; residential over
+      15 dwellings within 6-10km
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    suggested-id: habitats-regulations-assessment
+  - local-name: Parking Management Strategy
+    source-text: "From the audit: well-served sites proposing reduced parking"
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    suggested-id: parking-plan
+  - local-name: Topographical Survey / Levels
+    source-text: "From the audit: sites with differing, undulating or sloping ground (can apply to householder schemes)"
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    suggested-id: topographical-survey
+  - local-name: Structural Survey and Rebuilding Method Statement
+    source-text: "From the audit: Listed Building Consent and demolition of listed buildings"
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    suggested-id: structural-survey
+  - local-name: Circular Economy Statement
+    source-text: "From the audit: major development (Kent Minerals and Waste Local Plan policy CSW3)"
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    suggested-id: circular-economy-statement
+  - local-name: Draft Biodiversity Net Gain Plan
+    source-text: "From the audit: listed in Table 2; no trigger given"
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    suggested-id: biodiversity-gain-plan
+  - local-name: Economic Statement
+    source-text: "From the audit: major development, or loss of employment"
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    suggested-id: employment-statement
+  - local-name: Foul Sewage and Surface Water Drainage Strategy
+    source-text: "From the audit: listed in Table 2; no trigger given"
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    suggested-id: foul-sewage-assessment
+  - local-name: Gassing Landfill Site Assessment
+    source-text: "From the audit: within 50m of a landfill site"
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    suggested-id: landfill-gas-assessment
+  - local-name: Landscape and Views Impact Assessment
+    source-text: "From the audit: Green Belt openness, views, high buildings"
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Minerals Assessment
+    source-text: "From the audit: sites in Mineral Safeguarding Areas"
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    suggested-id: minerals-assessment
+  - local-name: Noise Insulation Details
+    source-text: "From the audit: an HMO adjoining a single-family dwelling"
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    suggested-id: noise-insulation-details
+  - local-name: Sustainable Drainage Strategy
+    source-text: "From the audit: major development, Source Protection Zones, increased hard surfacing"
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    suggested-id: drainage-strategy
+  - local-name: Bluewater Retail or Leisure Impact Assessment
+    source-text: "From the audit: over 2,500 sqm"
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    suggested-id: town-centre-impact-assessment
+  - local-name: Utilities Statement
+    source-text: "From the audit: major development"
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    suggested-id: utilities-statement
+  - local-name: Ventilation/Extraction Statement
+    source-text: "From the audit: restaurants, cafes, takeaways"
+    source-url: https://www.dartford.gov.uk/downloads/file/2857/local-list-of-validation-requirements-for-planning-applications
+    suggested-id: ventilation-extraction-statement
+
+new-fields:
+  - field: biodiversity-gain-condition
+    kind: boolean
+    label: Subject to the biodiversity gain condition
+    description: >-
+      The development is subject to the statutory biodiversity gain condition (Schedule 7A, Town and
+      Country Planning Act 1990), i.e. it is not exempt.
+  - field: ancient-woodland
+    kind: designation
+    label: Ancient woodland or veteran trees nearby
+    description: Site is in or near ancient woodland or veteran trees (dataset ancient-woodland).
+  - field: scheduled-monument
+    kind: designation
+    label: Scheduled monument
+    description: Site is, contains or affects the setting of a scheduled monument (dataset scheduled-monument).
+  - field: out-of-centre-town-centre-use
+    kind: boolean
+    label: Main town centre use outside a centre
+    description: >-
+      The proposal is for a main town centre use (retail, leisure, offices and similar) at an
+      edge-of-centre or out-of-centre location, outside a defined town centre or primary shopping area.

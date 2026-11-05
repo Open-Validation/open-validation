@@ -1,0 +1,249 @@
+# Corrections for Oxford City Council, from the audit of Oxford.
+# The audit could not read the live list (web budgets used up). Grokbot linked file/1092 but also
+# read a same-titled, higher-numbered download (file/1658) that may supersede it. The list is set
+# out in numbered sections by application type, which Grokbot did not map: most rows were put
+# under Full planning, and many triggers are merged table cells. This file drops the clearly
+# wrong rows and structures the triggers the excerpts state plainly.
+local-authority: OXO
+
+submission-standards:
+  - item: Plans and drawings indicate the plan number, the paper size and a linear scale bar with measurements (e.g. 0m-5m)
+    level: should
+
+drop-unmapped:
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: quotes block-plan contents, notices and the fee (block-plan items now under site-plan)"
+  - local-name: Landscape and Visual Impact Assessment
+    reason: "wrong_trigger: quotes BS5837 tree text"
+  - local-name: Odour / Dust / Vibration assessment
+    reason: "wrong_trigger: a fragment of column headers ('Necessary for Validation Arboricultural Impact Assessment Dust Assessment.')"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "wrong_trigger: fragment ('gardens or amenity space.')"
+  - local-name: Water efficiency / water usage statement
+    reason: "wrong_trigger: quotes the national 125 litres per person per day standard, not a local requirement"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: 'can provide pre application advice on air quality.'"
+  - local-name: Structural Survey
+    reason: "wrong_trigger: merged table cells ('Structural Survey Required All applications.'); no usable trigger"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: A residential site with capacity for 10 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.25
+            description: A residential site of 0.25 hectares or more.
+        - all:
+            - condition:
+                field: housing-type
+                value: student
+                description: Student accommodation.
+            - condition:
+                field: bedroom-count
+                operator: ">="
+                value: 25
+                description: The student accommodation includes 25 or more bedrooms.
+    confidence: medium
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: >-
+          Development within 15 metres of the stem of any tree on or next to the site with a stem
+          diameter of 150mm or more at 1.5 metres above ground level.
+    source-text: >-
+      For any proposals involving development within 15metres of the stem of any tree(s) within the
+      application site or adjacent to it, that have a stem diameter of 150millimetres or more
+      measured at 1.5 metres above ground level
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt began with merged column headers."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [archaeological-priority-area]
+            description: The site is within the City Centre Archaeological Area.
+        - discretionary
+    confidence: medium
+    notes: "Also on allocated sites where identified, or elsewhere where archaeological deposits and features are suspected (shown as officer discretion)."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    confidence: medium
+    notes: "Major developments on greenfield sites or brownfield sites that have become vegetated (council's wording); there is no field for the site test."
+
+  - id: cil-form
+    action: replace
+    source-url: https://www.oxford.gov.uk/downloads/file/1092/list-of-national-and-local-planning-application-requirements
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook's excerpt was the tree-survey trigger from a merged table cell; the CIL form's trigger is not known."
+
+  - id: daylight-sunlight-assessment
+    action: replace
+    source-url: https://www.oxford.gov.uk/downloads/file/1092/list-of-national-and-local-planning-application-requirements
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook's excerpt was the tree-survey trigger from a merged table cell; the trigger is not known."
+
+  - id: design-and-access-statement
+    action: update
+    policy: Oxford Local Plan 2036 Appendix 6.1
+    must-include:
+      - item: Complies with the requirements in Appendix 6.1 of the Oxford Local Plan 2036
+        level: must
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is Schedule 1 EIA development, or Schedule 2 development likely to have significant effects on the environment.
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: Contamination is known or suspected.
+        - discretionary
+    source-text: >-
+      Land Contamination assessment Where contamination is known or suspected or the proposed use
+      would be particularly sensitive, the applicant should provide an appropriate contamination
+      assessment with the application to determine whether the proposed development can proceed.
+    confidence: medium
+    notes: "A particularly sensitive proposed use has no field, so it is shown as officer discretion."
+
+  - id: lighting-assessment
+    action: replace
+    source-url: https://www.oxford.gov.uk/downloads/file/1092/list-of-national-and-local-planning-application-requirements
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): this item comes before the heading '10 - APPLICATION FOR A LAWFUL
+      DEVELOPMENT CERTIFICATE', so it belongs to section 9 of the list, not LDCs. Section 9's
+      application type and the trigger are not known.
+
+  - id: photos
+    action: replace
+    required-if: discretionary
+    source-text: Photographs/Photomontages - Where this would help support the application.
+    source-url: https://www.oxford.gov.uk/downloads/file/1092/list-of-national-and-local-planning-application-requirements
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): this item comes before the heading '2 - APPLICATION FOR FULL PLANNING
+      PERMISSION', so it belongs to section 1 (presumably Householder), not Full planning.
+
+  - id: planning-statement
+    action: replace
+    source-url: https://www.oxford.gov.uk/downloads/file/1092/list-of-national-and-local-planning-application-requirements
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): this item comes before the heading '10 - APPLICATION FOR A LAWFUL
+      DEVELOPMENT CERTIFICATE', so it belongs to section 9 of the list, not LDCs. Section 9's
+      application type and the trigger are not known.
+
+  - id: roof-plan-existing
+    action: replace
+    source-text: Plans – Existing and Proposed Roof Plans
+    source-url: https://www.oxford.gov.uk/downloads/file/1092/list-of-national-and-local-planning-application-requirements
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): this item comes before the heading '2 - APPLICATION FOR FULL PLANNING
+      PERMISSION', so it belongs to section 1 (presumably Householder), not Full planning.
+
+  - id: roof-plan-proposed
+    action: replace
+    source-text: Plans – Existing and Proposed Roof Plans
+    source-url: https://www.oxford.gov.uk/downloads/file/1092/list-of-national-and-local-planning-application-requirements
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): this item comes before the heading '2 - APPLICATION FOR FULL PLANNING
+      PERMISSION', so it belongs to section 1 (presumably Householder), not Full planning.
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: Block plan at 1:100 or 1:200 scale
+        level: must
+      - item: The proposed development in relation to the site boundaries and other existing buildings on the site
+        level: must
+      - item: All buildings, roads and footpaths on land adjoining the site, including access arrangements
+        level: must
+        required-if: discretionary
+      - item: All public rights of way crossing or adjoining the site
+        level: must
+        required-if: discretionary
+      - item: The position of all trees on the site and on adjacent land
+        level: must
+        required-if: discretionary
+      - item: The extent and type of hard surfacing
+        level: must
+        required-if: discretionary
+      - item: Boundary treatment, including walls or fencing, where proposed
+        level: must
+        required-if: discretionary
+    notes: >-
+      Items marked as officer discretion are needed "unless these would NOT influence or be affected
+      by the proposed development" (council's wording). The end of the list was in the workbook's
+      highways row.
+
+  - id: telecommunications-report
+    action: replace
+    source-text: Telecommunications Development Statement
+    source-url: https://www.oxford.gov.uk/downloads/file/1092/list-of-national-and-local-planning-application-requirements
+    confidence: low
+    notes: "Audit (wrong_app_type, wrong_trigger): a telecoms requirement placed under Full planning, with a merged-cell trigger ('N/A All applications.')."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    policy: Oxford Local Plan 2036 Policy H2
+    notes: "Where an applicant wishes to show a site is not viable at the level of affordable housing required by Policy H2 (council's wording)."
+
+  - id: waste-management-plan
+    action: update
+    must-include:
+      - item: The volume and type of material to be removed and/or excavated
+        level: must
+      - item: Opportunities for the reuse and recovery of materials
+        level: must
+      - item: How off-site disposal of waste will be minimised and managed
+        level: must
+
+low-confidence:
+  - id: "*"
+    note: >-
+      Audit (wrong_app_type): the list is in numbered sections by application type, which the
+      workbook did not map; Grokbot also read a same-titled, higher-numbered file (file/1658) that
+      may supersede the linked file/1092. Neither could be checked.
+  - id: air-quality-assessment
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('... for developments involving significant demolition.')."
+  - id: flood-risk-assessment
+    note: "Audit (wrong_trigger): the excerpt is a URL fragment and gives no flood-zone trigger."
+  - id: noise-assessment
+    note: "Audit (wrong_trigger): merged table cells ('Archaeological Interest Acoustic report All applications.'); 'Required for all major applications' may belong to the Noise Impact Assessment or to the Health Impact Assessment."
+  - id: sustainability-statement
+    note: "Audit (wrong_trigger): the excerpt is background prose with no trigger."
+
+new-fields:
+  - field: bedroom-count
+    kind: number
+    label: Bedrooms
+    description: Number of bedrooms proposed (for example in student accommodation or a house in multiple occupation).

@@ -1,0 +1,592 @@
+# Corrections for East Hampshire District Council, from the audit.
+# The audit read the council's May 2024 list (contents_checked: true). The workbook treated the
+# combined planning + listed building checklist (04) as LBC-only, matched app types by keyword,
+# and filled Outline from the Reserved Matters checklist; this file undoes that and structures the
+# triggers the list states. Part of the district is in the South Downs National Park, which has
+# its own list.
+local-authority: EHA
+
+submission-standards:
+  - item: Any plan from or based on Ordnance Survey data annotated with the licence number (no more than 1 year old), or marked as surveyed
+    level: must
+  - item: Scale bar and paper size when printed clearly marked on all plans
+    level: must
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: in the source this is part of the Structural Survey information, not a listed building schedule"
+  - id: site-plan
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: the Additional Plans block-plan item applies to householder and larger home prior notifications, not change of use"
+  - id: section-existing
+    sheets: [Outline]
+    reason: "wrong_app_type: from the Reserved Matters checklist (media/4784)"
+  - id: section-proposed
+    sheets: [Outline]
+    reason: "wrong_app_type: from the Reserved Matters checklist (media/4784)"
+  - id: roof-plan-existing
+    sheets: [Outline]
+    reason: "wrong_app_type: from the Reserved Matters checklist (media/4784); roof plans are not outline requirements"
+  - id: roof-plan-proposed
+    sheets: [Outline]
+    reason: "wrong_app_type: from the Reserved Matters checklist (media/4784); roof plans are not outline requirements"
+  - id: affordable-housing-statement
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: planning-only item from the combined planning + LBC checklist"
+  - id: travel-plan
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: planning-only item from the combined planning + LBC checklist"
+
+drop-unmapped:
+  - local-name: Gypsy & Traveller information
+    reason: "wrong_app_type / not_a_requirement: checklist scope text telling householders to use the householder checklist"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_trigger / wrong_app_type: truncated rows and a householder row that is biodiversity checklist text; re-added once below"
+  - local-name: Advertisement drawings / illumination details
+    reason: "not_a_requirement: a fragment ('hours of illumination.')"
+  - local-name: Structural Survey
+    reason: "missing_requirement: the triggers were missing or empty; re-added below with the source's triggers"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: mixes the Odour Assessment and Ventilation/extraction items; re-added separately below"
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "wrong_app_type: the outline row is from the Reserved Matters checklist; re-added once below"
+  - local-name: Self-build / custom build information
+    reason: "wrong_app_type: the prior approval row is wrong; re-added once below"
+
+requirements:
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [tree-preservation-zone]
+            description: New building work within 15 metres of a tree subject to a tree preservation order, on the site or on adjoining land.
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - condition:
+                field: trees-on-or-near-site
+                value: true
+                description: The development is within 15m of, or involves the loss of, trees in the conservation area.
+    source-text: >-
+      Tree survey/ arboricultural implications An arboricultural impact appraisal (AIA) is required
+      for any new building work (including construction of access drive, patios and the laying of
+      drains/services) that comes within 15 metres of: A tree the subject of a tree preservation
+      order, either within the application site or on adjoining land or…
+    source-url: https://www.easthants.gov.uk/media/4745/download?inline
+    confidence: medium
+    notes: >-
+      The excerpt is cut off; the householder checklist adds 'or involves the loss of trees which
+      are covered by a tree preservation order or are within a conservation area'. The workbook also
+      put it under Works to trees by keyword.
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      application-type:
+        in: [full, outline]
+    source-text: >-
+      Biodiversity net gain Applications for planning permission (except householder applications)
+      are required to demonstrate 10% biodiversity net gain.
+    source-url: https://www.easthants.gov.uk/planning-services/making-planning-application/local-planning-application-requirements
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook put BNG under householder (excluded by its own text),
+      advertisement consent (keyword 'press advertisement') and listed building consent (planning
+      item from the combined checklist). Exempt cases still apply.
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: Proposed block plans include neighbouring properties
+        level: should
+      - item: Existing and proposed block plans include any existing outbuildings
+        level: should
+
+  - id: cil-form
+    action: replace
+    required-if:
+      condition:
+        field: floorspace
+        operator: ">"
+        value: 100
+        description: The net additional floor space is over 100 sqm (gross internal area).
+    source-text: >-
+      CIL Forms If the net additional floor space is over 100sqm (gross internal area) complete:
+      Additional Information and CIL Form 2: Assumption of Liability
+    source-url: https://www.easthants.gov.uk/media/4748/download?inline
+    must-include:
+      - item: CIL Form 1 Additional Information
+        level: must
+      - item: CIL Form 2 Assumption of Liability
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): the LBC row came from the combined planning + LBC checklist; CIL is a planning item."
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 10
+            description: New development of dwellings, greater than 10 units.
+        - site:
+            in: [contaminated-land]
+            description: Contamination is known or suspected to exist on the site.
+        - all:
+            - application-type:
+                in: [full, outline, reserved-matters]
+            - site:
+                in: [near-landfill-site]
+                description: Within 250 metres of an existing or former landfill site listed by the Environment Agency (excluding householder applications).
+    source-text: >-
+      Land Contamination Assessment When required i) Any new development of dwellings, greater than
+      10 units ii) Any site where contamination is known/suspected to exist iii) Excluding
+      householder application, any site within 250 metres of an existing or former landfill site
+      listed by the Environment Agency.
+    source-url: https://www.easthants.gov.uk/media/4745/download?inline
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): not a householder item, not for standalone listed building consent,
+      and EHDC is not the minerals and waste authority. The application types on the landfill case
+      are our reading of 'excluding householder application'.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: All development proposals (including extensions) in Flood Zones 2 and 3.
+        - all:
+            - application-type:
+                in: [s73]
+            - discretionary
+    source-text: >-
+      Flood Risk Assessment All development proposals (including extensions), in Flood Zones 2 and 3
+      … Flood Risk Assessment Where the condition relates to a flooding issue, including levels
+    source-url: https://www.easthants.gov.uk/media/4751/download?inline
+    must-include:
+      - item: The risks of all forms of flooding to and from the development, identified and assessed
+        level: should
+      - item: How these flood risks will be managed, taking climate change into account
+        level: should
+    confidence: medium
+    notes: "For s73 applications, only where the condition relates to a flooding issue. The workbook's other rows had no trigger."
+
+  - id: floor-plan-existing
+    action: update
+    must-include:
+      - item: Scale of 1:100 or 1:50
+        level: must
+
+  - id: floor-plan-proposed
+    action: update
+    must-include:
+      - item: Scale of 1:100 or 1:50
+        level: must
+
+  - id: elevation-existing
+    action: update
+    must-include:
+      - item: Scale of 1:100 or 1:50
+        level: must
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: Scale of 1:100 or 1:50
+        level: must
+      - item: Measurements (width, depth, ridge height, eaves) of the proposal
+        level: must
+        required-if:
+          application-type:
+            in: [hh]
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [listed-building, listed-building-setting, locally-listed-building, archaeological-priority-area]
+            description: The application could affect the significance (including the setting) of a known heritage asset, or is in an area of archaeological potential.
+        - all:
+            - ref: major-development
+            - site:
+                in: [conservation-area]
+                description: Major development in or immediately adjacent to a conservation area.
+        - all:
+            - application-type:
+                in: [hh]
+            - site:
+                in: [conservation-area]
+                description: Householder applications in a conservation area.
+    source-text: >-
+      Heritage statement When required Where an application has the potential to affect the
+      significance (including the setting) of affects a known heritage asset or is in an area of
+      archaeological potential and for major developments in or immediately adjacent to a
+      conservation area … Heritage Statement All applications in a conservation area
+    source-url: https://www.easthants.gov.uk/media/4745/download?inline
+    confidence: medium
+    notes: "The householder case is from the householder checklist (media/4748). The workbook's outline and LBC excerpts ran on into the contamination item."
+
+  - id: affordable-housing-statement
+    action: update
+    must-include:
+      - item: Details of any Registered Providers acting as partners in the development
+        level: should
+    notes: "For s73 applications, only where the condition relates to the provision of affordable housing."
+
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 100
+            description: Development of 100 or more dwellings.
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 10000
+            description: 10,000 square metres or more of new floorspace.
+        - condition:
+            field: parking-spaces
+            operator: ">"
+            value: 300
+            description: Over 300 new parking spaces.
+        - discretionary
+    source-url: https://www.easthants.gov.uk/media/4745/download?inline
+    confidence: medium
+    notes: >-
+      From the audit (wrong_trigger): 100+ dwellings, 10,000 m2 new floorspace, B2 1,000 m2+ or over
+      300 new parking spaces (the B2 case is shown as officer discretion); for s73, where the
+      condition relates to emissions to air. The workbook's excerpts were cut off at 'When required
+      i.', and the LBC row was a planning item.
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - ref: major-development
+    source-text: >-
+      A Design and Access Statement must accompany applications for both outline and full planning
+      permission for: Major development: 10 or more dwellings or creation in excess of 1000 sq m of
+      non-residential floor space
+    source-url: https://www.easthants.gov.uk/media/4745/download?inline
+    confidence: medium
+    notes: >-
+      The excerpt is cut off after the first case; the national rules for a Design and Access
+      Statement still apply. The reserved matters, lawful development and s73 rows were only form
+      boilerplate ('if required').
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [special-protection-area, site-of-special-scientific-interest, local-wildlife-site]
+            description: Likely to adversely impact an internationally, nationally or locally designated nature conservation site (SAC, SPA, SSSI, LNR, SINC).
+        - discretionary
+    source-text: >-
+      Ecological Assessment A Preliminary Ecological Appraisal, Ecological Impact Assessment and/or
+      Species specific surveys will be required for: Any application likely to adversely impact an
+      internationally, nationally or locally designated nature conservation site e.g. … Any
+      application where a Protected Species Survey is required following Natural England’s
+      protected species flowchart.
+    source-url: https://www.easthants.gov.uk/media/9002/download?inline
+    confidence: medium
+    notes: "The council's list is cut off; protected species cases (Natural England's flowchart) are shown as officer discretion."
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      condition:
+        field: new-build
+        value: true
+        description: Additional floorspace (not just a change of use) for residential or overnight accommodation, commercial, industrial or storage and distribution use.
+    source-text: >-
+      Sustainability Checklist When required i) Any application for additional floorspace (i.e.
+      aside from change of use) for residential use or overnight accommodation (Use Classes C1-C4).
+      ii) Any application for additional floorspace (i.e. aside from change of use) for commercial
+      use (Use Class E). iii) Any application for additional floorspace (i.e. aside from change of
+      use) for industrial or storage & distribution use (Use Classes B2 & B8). iv) Any application
+      for additional floorspace (i.e. aside…
+    source-url: https://www.easthants.gov.uk/media/4745/download?inline
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, duplicate): the workbook had this twice (Energy/Sustainability and
+      Sustainability checklist) and put it under change of use prior approval, which its own text
+      excludes. The list of uses is cut off after iii).
+
+  - id: energy-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [s73]
+        - discretionary
+    source-text: Energy Statement Where the condition relates to the energy requirements of the development
+    source-url: https://www.easthants.gov.uk/media/4787/download?inline
+    confidence: medium
+    notes: "From the s73 checklist; the workbook had filed it under the Sustainability Checklist."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment (refer to the EIA regulations).
+
+  - id: section-existing
+    action: update
+    must-include:
+      - item: Site sections with finished floor and site levels, at a scale of 1:50 or 1:100
+        level: must
+
+  - id: section-proposed
+    action: update
+    must-include:
+      - item: Site sections with finished floor and site levels, at a scale of 1:50 or 1:100
+        level: must
+
+  - id: roof-plan-existing
+    action: update
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: must
+
+  - id: roof-plan-proposed
+    action: update
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: must
+
+  - id: landscaping-plan
+    action: replace
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [full]
+            - ref: major-development
+        - all:
+            - application-type:
+                in: [reserved-matters]
+            - ref: major-development
+            - site:
+                in: [conservation-area]
+                description: Within a conservation area.
+    source-text: >-
+      Landscaping Details When required All major developments (full planning permission only). …
+      Landscaping details All major applications within a conservation area.
+    source-url: https://www.easthants.gov.uk/media/4745/download?inline
+    confidence: medium
+    notes: "Audit (wrong_app_type): full planning only in the main list; the outline row came from the Reserved Matters checklist."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      site:
+        in: [open-space]
+        description: The development involves the loss of playing fields or major sporting facilities.
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      ref: major-development
+    source-text: >-
+      Planning Statement When required All major developments Information required The planning
+      statement should provide a balanced justification for the proposed development and include an
+      assessment of how the proposed development relates to relevant national and local planning
+      policies.
+    source-url: https://www.easthants.gov.uk/media/4745/download?inline
+    must-include:
+      - item: A balanced justification for the proposed development
+        level: should
+      - item: An assessment of how the proposed development relates to relevant national and local planning policies
+        level: should
+    confidence: medium
+    notes: "Audit (wrong_app_type): the source states the trigger (all major developments); the reserved matters, LDC and s73 rows were form boilerplate."
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: Main town centre uses (NPPF) not in an existing centre and not in accordance with an up-to-date Local Plan.
+    source-text: >-
+      Applications for main town centre uses as defined in the NPPF that are not in an existing
+      centre and are not in accordance with an up-to-date Local Plan
+    source-url: https://www.easthants.gov.uk/media/9002/download?inline
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook put this under Works to trees by keyword. The council's list continues ('ii.') but was cut off."
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [pa-ecomms-network]
+        - condition:
+            field: telecommunications-development
+            value: true
+            description: A telecommunications application.
+    source-text: >-
+      Telecommunications Development Statement When required All telecommunications applications
+      Information required Details of the area of search, details of any consultation undertaken,
+      details of the proposed structure and technical justification for the proposed development.
+    must-include:
+      - item: Details of the area of search
+        level: must
+      - item: Details of any consultation undertaken
+        level: must
+      - item: Details of the proposed structure
+        level: must
+      - item: Technical justification for the proposed development
+        level: must
+    confidence: medium
+    notes: "Audit (missing_requirement): 'All telecommunications applications', not only Full planning."
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 50
+            description: Residential development above 50 units.
+        - condition:
+            field: retail-floorspace
+            operator: ">"
+            value: 1000
+            description: Retail uses above 1,000 m2.
+        - discretionary
+    source-text: >-
+      Transport Assessment When required Any proposal that would lead to significant transport
+      implications as set out in guidance produced by Hampshire County Council, i.e. development
+      above the following thresholds: i) Residential development: 50 units ii) B2 and E(g) uses:
+      2,500m2 iii) B8 uses: 5,000m2 iv) Retail uses: 1,000m2 v) Education uses: 2,500m2 vi) Health
+      uses: 2,500m2 vii) Care establishments: 500m2 or 5 bedrooms viii) Leisure, stadia or ice rinks:
+      All (1,500 seats) ix) Leisure, other: 1,…
+    source-url: https://www.easthants.gov.uk/media/4745/download?inline
+    confidence: medium
+    notes: >-
+      Thresholds from the Hampshire County Council guidance; the other use-class thresholds (B2/E(g),
+      B8, education, health, care, leisure) are shown as officer discretion. Not a standalone LBC
+      item.
+
+  - id: viability-assessment
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      Viability Assessment When required Any applications where the proposal does not provide
+      planning policy requirements for affordable housing and infrastructure.
+    source-url: https://www.easthants.gov.uk/media/4745/download?inline
+    confidence: medium
+    notes: "Audit (wrong_app_type): a planning item; the LBC row came from the combined planning + LBC checklist."
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      condition:
+        field: new-build
+        value: true
+        description: New residential, retail, commercial or agricultural development.
+    source-text: Refuse disposal details All applications for new residential, retail, commercial or agricultural development
+    source-url: https://www.easthants.gov.uk/media/4784/download?inline
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpts were Odour Assessment and Parking text."
+
+unmapped:
+  - local-name: Habitats Regulations Assessment (HRA)
+    source-text: >-
+      An HRA is required for any new residential units proposed within: 5km of a Special Protection
+      Area (SPA), Special Area of Conservation (SAC) and/or Ramsar … 5.6 km of the Solent SPA
+    source-url: https://www.easthants.gov.uk/media/4745/download?inline
+    suggested-id: habitats-regulations-assessment
+  - local-name: Structural Survey
+    source-text: >-
+      Applications for listed building consent where the proposed works have implications for the
+      structural integrity of the building … conversion of rural buildings outside a settlement
+      boundary … A structural survey may also be required in support of an application if the
+      proposal involves substantial demolition.
+    source-url: https://www.easthants.gov.uk/media/4745/download?inline
+    suggested-id: structural-survey
+  - local-name: Odour Assessment
+    source-text: >-
+      Odour Assessment When required Development likely to generate odours (e.g. sewage works,
+      intensive animal rearing, processing of animal remains, solid waste management, composting and
+      some industrial processes)
+    source-url: https://www.easthants.gov.uk/media/4745/download?inline
+    suggested-id: odour-assessment
+  - local-name: Ventilation / extraction statement
+    source-text: >-
+      Ventilation/ extraction Statement Use classes A3, A4 and A5 and where there is any proposal
+      involving mechanical ventilation or extraction.
+    source-url: https://www.easthants.gov.uk/media/4784/download?inline
+    suggested-id: ventilation-extraction-details
+  - local-name: Street scene
+    source-text: Street scene Where the development would be within 3m of a boundary.
+    source-url: https://www.easthants.gov.uk/media/4784/download?inline
+    suggested-id: street-scene-elevations
+  - local-name: Self-build / custom build information
+    source-text: >-
+      If you intend to apply for Self-Build Exemption (including new dwellings and extensions over
+      100sqm), Charitable Relief or Social Housing Relief, you will need to compete and submit the
+      relevant form from the Planning Portal
+    source-url: https://www.easthants.gov.uk/media/4745/download?inline
+    suggested-id: ""
+  - local-name: Accommodation Schedule
+    source-text: All major residential applications, except applications for outline planning permission.
+    source-url: https://www.easthants.gov.uk/media/4745/download?inline
+    suggested-id: accommodation-schedule
+  - local-name: Annexe Accommodation Statement
+    source-text: Applications for planning permission to provide ancillary self-contained accommodation for an existing dwelling.
+    source-url: https://www.easthants.gov.uk/media/4751/download?inline
+    suggested-id: annexe-statement
+
+low-confidence:
+  - id: lighting-assessment
+    note: "Audit (wrong_trigger): the excerpts stop at 'All applications for: i.' and give no threshold."
+  - id: noise-assessment
+    note: "Audit (wrong_trigger): the excerpts stop at 'When required i.' and give no threshold."
+  - id: travel-plan
+    note: "Audit (wrong_trigger): the excerpts stop at 'All planning applications for: i.' and give no threshold."
+  - id: affordable-housing-statement
+    note: "Audit (wrong_trigger): the main trigger is cut off at 'When required i.'."
+
+new-fields:
+  - field: near-landfill-site
+    kind: designation
+    label: Near a landfill site
+    description: Site is within the council's buffer distance (often 250m) of an existing or former landfill site.
+  - field: parking-spaces
+    kind: number
+    label: New parking spaces
+    description: Number of new parking spaces proposed.
+  - field: open-space
+    kind: designation
+    label: Open space or playing fields
+    description: Site is existing open space, playing fields or sports and recreational land or buildings.
+  - field: out-of-centre-town-centre-use
+    kind: boolean
+    label: Main town centre use outside a centre
+    description: The proposal is for a main town centre use (as defined in the NPPF) on a site outside a designated town centre.
+  - field: telecommunications-development
+    kind: boolean
+    label: Telecommunications development
+    description: The proposal is for telecommunications equipment such as a mast or antenna.
+  - field: retail-floorspace
+    kind: number
+    label: Retail floorspace (sqm)
+    description: Gross new or additional retail floorspace proposed, in square metres.

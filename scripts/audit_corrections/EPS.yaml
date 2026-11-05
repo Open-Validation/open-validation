@@ -1,0 +1,580 @@
+# Corrections for Epsom and Ewell Borough Council, from
+# inputs/audit/epsom-and-ewell-borough-council.json. The audit compared the workbook with the July
+# 2024 list (adopted 11 July 2024; the build takes the date from the audit). Many workbook rows came
+# from the superseded April 2015 list or took the trigger of the next row in the table. Items marked
+# "From the audit" use the audit's paraphrase.
+# Not actionable here (audit wrong_app_type / missing_requirement): the 2024 list is split by
+# application type, and its Outline / Reserved matters and Permission in Principle matrices, and the
+# LBC and advertisement tables, were not captured; they need reading in full.
+local-authority: EPS
+
+submission-standards:
+  - item: Plans contain a metric scale bar; plans marked "do not scale", "approximate" or similar will not be accepted
+    level: must
+  - item: "PDF files named consistently: plan type, plan number, revision number (e.g. 'Location Plan 0001 Rev A')"
+    level: should
+  - item: Revised or amended plans carry a new revision number
+    level: should
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: the Full planning row quoted the Arboricultural Method Statement; replaced below from the heritage plans text"
+  - id: sci
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: the excerpt mentions a change of use to a large HMO; it is not a prior approval item"
+  - id: telecommunications-report
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: as above"
+
+drop-unmapped:
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_app_type / outdated_link: a 2015 paragraph listing application types; re-added below as Draft Legal Agreement"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "wrong_trigger / outdated_link: the excerpt is 2015 Air Quality text"
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "wrong_trigger: the 'no older than 12 months' note; the 2024 list has no marketing-report item"
+  - local-name: Gypsy & Traveller information
+    reason: "wrong_trigger: a fragment of the Needs Assessment / Retail rows; Needs Assessment re-added below"
+  - local-name: Landscape and Visual Impact Assessment
+    reason: "outdated_link: a 2015 cross-reference fragment, not a requirement"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "duplicate: the same 2015 text as the daylight/sunlight row"
+  - local-name: Drainage Strategy / SuDS
+    reason: "duplicate: the Foul Drainage Assessment text, kept under Foul Sewage / Utilities Statement"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: this is the Noise, Odour and Vibration Assessment text, now in noise-assessment"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "part of the Flood Risk Assessment contents; now a must-include item there"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: a site plan contents fragment"
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_trigger: merged with the Refuse and Recycling Plan; both re-added below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: A net increase of 10 or more dwellings.
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook had the viability text. The 2024 list says \"net increase of 10 more dwellings\"."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Works are likely to affect mature trees on or adjacent to the site.
+    source-text: For major development and where works are likely to affect mature trees
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    must-include:
+      - item: Prepared by a qualified arboriculturist, in accordance with British Standard 5837:2012
+        level: must
+      - item: Tree Protection Plan showing finalised layout proposals, tree retention and landscape protection measures
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook had the D&AS trigger. The must-include items are the
+      council's wording, found in the workbook's landscaping row.
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [site-of-special-scientific-interest]
+            description: The site is on, within or adjacent to a SSSI.
+        - discretionary
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    must-include:
+      - item: A Phase II Emergence/Re-entry Survey during the active survey season (May - September), where the Phase 1 Bat Survey finds roosting potential that the works would disturb
+        level: must
+        source-text: >-
+          If the Phase I Survey identifies potential roosting potential and the proposed works would
+          result in disturbance of these areas of the building, a Phase II Emergence/Re-entry
+          Survey(s) must be undertaken during the active survey season (May - September).
+      - item: Surveys no older than 12 months at the time of submission
+        level: should
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook had the 'no older than 12 months' note. From the audit:
+      a PEA for major development and all development where priority habitat is affected; for
+      householders, sites on/within/adjacent to a SSSI, priority habitat, or bat or great crested newt
+      triggers (shown as officer discretion).
+
+  - id: bng-metric
+    action: update
+    required-if:
+      application-type:
+        in: [full, outline, pip]
+    confidence: medium
+    notes: "From the audit (wrong_app_type): BNG is 'All development, except for householders', so it applies to outline and PiP as well."
+
+  - id: cil-form
+    action: replace
+    required-if:
+      application-type:
+        in: [hh, full, outline]
+    source-text: >-
+      CIL Assumption of Liability Form (Form 2) Where there is >100m2 of additional floor space in the
+      proposal CIL liable development must be accompanied by a CIL Assumption of Liability Form.
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    must-include:
+      - item: CIL Form 1 (Additional Information)
+        level: must
+      - item: CIL Form 2 (Assumption of Liability)
+        level: must
+        required-if:
+          condition:
+            field: floorspace
+            operator: ">"
+            value: 100
+            description: More than 100 square metres of additional floorspace.
+    confidence: medium
+    notes: "From the audit (missing_requirement): CIL Form 1 for all applications, CIL Form 2 for over 100 sqm of additional floorspace."
+
+  - id: construction-management-plan
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Construction Management Plan for majors."
+
+  - id: daylight-sunlight-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+        - all:
+            - application-type:
+                in: [hh]
+            - condition:
+                field: upper-floor-extension
+                value: true
+                description: There is an above ground floor extension.
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, outdated_link): the Full row had noise text and the Householder row was
+      from the 2015 list. From the audit: majors or potential adverse impact on nearby properties; for
+      householders, "where there is an above ground floor extension".
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - all:
+            - condition:
+                field: floorspace
+                operator: ">"
+                value: 100
+                description: The total floorspace being created is over 100 square metres.
+            - site:
+                in: [conservation-area]
+                description: The site is within a conservation area.
+    source-text: >-
+      Design and Access Statement … When required Where the total floorspace being created is >100m2
+      and the site is within a conservation area
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): also required for all listed building consent applications. The national rules still apply."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    confidence: medium
+    notes: "From the audit (wrong_trigger): an Energy Statement for majors."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The proposal falls under Schedule 2 of the EIA Regulations and needs an EIA.
+    confidence: medium
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: storey-count
+            operator: ">"
+            value: 7
+            description: The building is over 7 storeys.
+        - condition:
+            field: building-height
+            operator: ">"
+            value: 18
+            description: The building is over 18 metres.
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the national form; the local item is 'Fire Risk Assessment - buildings >7 storeys/18m'."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [flood-risk-zone, critical-drainage-area]
+            description: The site is in Flood Zone 2 or 3 or a Critical Drainage Area.
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    must-include:
+      - item: Shows that the Sequential and Exception Tests of the NPPF have been met
+        level: must
+      - item: Details of safe egress from the site in case of flooding
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, outdated_link): the Full row had the Parking and Access Plan trigger and
+      the prior approval row was from the 2015 list. From the audit: majors, Flood Zones 2/3 or a
+      Critical Drainage Area (for householders, ground-floor development there). The must-include
+      items are the council's wording ("Sequential and Exception Test of NPPF have been met and
+      include details of safe egress from the site in case of flooding").
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, locally-listed-building, conservation-area]
+            description: Works to a listed or locally listed building, or in a conservation area.
+    source-text: "Heritage Statement: signage or lighting affixed to a listed building, locally listed building, or within a conservation area"
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook had the bat survey text. From the audit: works to listed or
+      locally listed buildings or in a conservation area; all LBC applications ("Heritage Statement:
+      all applications"); for adverts, the wording above.
+
+  - id: land-contamination-assessment
+    action: add
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Contaminated Land Assessment is in the Householder and Full planning tables, but the audit gives no trigger."
+
+  - id: noise-assessment
+    action: add
+    required-if: discretionary
+    source-text: >-
+      Where there is potential odour (e.g., from commercial kitchens) or vibration (e.g., from railway
+      corridors) impacts, the scope of the assessment should be expanded to include these matters …
+      The Assessment must be prepared by a suitably qualified person and member of the Institute of
+      Acoustics or Association of Noise Consultants.
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    must-include:
+      - item: Prepared by a suitably qualified person who is a member of the Institute of Acoustics or Association of Noise Consultants
+        level: must
+      - item: Odour and vibration impacts, where there is potential for them
+        level: should
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a Noise, Odour and Vibration Assessment is in the 2024
+      Full planning table; the workbook only had it as 'Ventilation'. Its trigger appears cut off in
+      the workbook ("noise and or vibration such as in town centres, major roadways or railway
+      corridors"), so it is shown as officer discretion.
+
+  - id: photos
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook excerpt was a jumble of headings. From the audit: a
+      Photomontage for major and larger minor schemes ('larger minor' shown as officer discretion),
+      optional for adverts. The council's item is a photomontage rather than site photographs.
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: upper-floor-extension
+        value: true
+        description: The proposal alters above-ground floors.
+    confidence: low
+    notes: "From the audit (missing_requirement): Householder roof plan for alterations to above-ground floors. The Full planning trigger was merged with the next row."
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: upper-floor-extension
+        value: true
+        description: The proposal alters above-ground floors.
+    confidence: low
+    notes: "From the audit (missing_requirement): Householder roof plan for alterations to above-ground floors. The Full planning trigger was merged with the next row."
+
+  - id: schedule-of-works
+    action: add
+    required-if:
+      application-type:
+        in: [lbc]
+    source-text: >-
+      Accompanying plans should include heritage specific plans including: Schedule of works and
+      detailed drawings showing the location, extent, and character of items, such as ceilings,
+      partitions, fixtures and fittings, service runs and external additions (vents and pipework)
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    must-include:
+      - item: Detailed drawings showing the location, extent and character of items such as ceilings, partitions, fixtures and fittings, service runs and external additions (vents and pipework)
+        level: should
+    confidence: low
+    notes: "The text was in the workbook's 'Structural Survey' row; the audit says LBC needs detailed plans and specialist reports 'relative to the proposed alterations'. The LBC placement is inferred."
+
+  - id: sci
+    action: update
+    required-if: discretionary
+    source-text: >-
+      Statement of Community Involvement When required Where there are sensitive issues, usually
+      identified through the pre application process including telecommunications masts
+    confidence: medium
+    notes: "The excerpt ran on into the HMO licence, draft legal agreement and telecoms rows."
+
+  - id: section-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: basement
+            value: true
+            description: The proposal includes a basement.
+        - discretionary
+    must-include:
+      - item: Foundations, existing site levels and neighbouring buildings, with levels related to a fixed datum point
+        level: must
+    confidence: low
+    notes: "From the audit (missing_requirement): Householder sections for loft conversions, basements and significant slopes (the first and last shown as officer discretion). The must-include item is the council's wording from the Full planning table."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: basement
+            value: true
+            description: The proposal includes a basement.
+        - discretionary
+    must-include:
+      - item: Foundations, existing site levels and neighbouring buildings, with levels related to a fixed datum point
+        level: must
+    confidence: low
+    notes: "From the audit (missing_requirement): Householder sections for loft conversions, basements and significant slopes (the first and last shown as officer discretion). The must-include item is the council's wording from the Full planning table."
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: Based on an up-to-date map showing the subject building, any outbuildings and trees on the site, and buildings and trees on adjoining sites
+        level: must
+      - item: A metric scale bar at 1:200 or 1:500 and a north point
+        level: must
+    confidence: medium
+    notes: "Council's wording: \"Site or Block plan All applications\"."
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      application-type:
+        in: [full]
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    policy: Core Strategy CS1; DMPD DM10
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook cited EcoHomes / Code for Sustainable Homes. From the audit:
+      a Sustainability Statement for all non-major development (majors give an Energy Statement); the
+      rule can't express 'non-major', so this shows all full applications.
+
+  - id: telecommunications-report
+    action: replace
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: The application is for telecommunications development.
+    source-text: All telecommunications applications
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    must-include:
+      - item: ICNIRP declaration
+        level: must
+      - item: Alternative Sites Statement
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt ran into the HMO licence and draft legal agreement text. From the audit: ICNIRP declaration and Alternative Sites Statement for all telecoms applications."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      condition:
+        field: out-of-town-centre
+        value: true
+        description: Retail or leisure development in an edge or out of town centre location.
+    source-text: Retail Impact Statement When required … For retail and leisure development in edge or out of town centre locations
+    confidence: medium
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-text: A Transport Statement would be required for smaller schemes and a Transport Assessment is required for larger minor and major schemes.
+    confidence: medium
+
+  - id: travel-plan
+    action: add
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Travel Plan is in the Full planning table, but the audit gives no trigger."
+
+  - id: viability-assessment
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      Where the Affordable Housing Statement indicates that the delivery of policy compliant
+      affordable housing cannot be delivered, a Viability Assessment must explain why the full
+      affordable contributions cannot be met.
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook had the 'no older than 12 months' note; this text was in its affordable housing row."
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 0
+            description: The proposal creates additional floorspace.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates one or more dwellings.
+    source-text: >-
+      Refuse and Recycling Plan For all applications comprising of additional floorspace, and/or
+      dwellings If not shown on the Site Plan, an additional plan, drawn to scale, must be subm…
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement): the Refuse and Recycling Plan was merged into the workbook's parking row."
+
+unmapped:
+  - local-name: Draft Legal Agreement
+    source-text: "Optional, but usually on major developments, where transport initiatives are required or where affordable housing is delivered"
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    suggested-id: planning-obligations-heads-of-terms
+  - local-name: Parking and Access Plan
+    source-text: "Parking and Access Plan … Required where amendments are proposed to access or parking arrangements, where there is a loss of onsite car parking or there is an increase in the number of bedrooms"
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    suggested-id: parking-plan
+  - local-name: Arboricultural Method Statement
+    source-text: "Arboricultural Method Statement Where one is not included in the Arboricultural Impact Assessment, but the Arboricultural Impact Assessment concludes that one is required"
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    suggested-id: arboricultural-method-statement
+  - local-name: Green Belt Statement
+    source-text: "Green Belt Statement - Any extension to a building or any new outbuilding (or extension to it) within the Green Belt"
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    suggested-id: green-belt-assessment
+  - local-name: Detailed Specifications (plant)
+    source-text: "Detailed Specifications - For applications including AC units, heat pumps, commercial exhaust, or other similar facilities"
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    suggested-id: plant-specification
+  - local-name: Survey Plan and Accommodation Schedule
+    source-text: "From the audit: major and larger minor schemes"
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    suggested-id: accommodation-schedule
+  - local-name: Stage 1 Road Safety Audit
+    source-text: "From the audit: larger majors altering the public highway"
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    suggested-id: road-safety-audit
+  - local-name: Delivery Management Plan
+    source-text: "From the audit: major commercial development"
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    suggested-id: delivery-servicing-plan
+  - local-name: Car Park Management Plan
+    source-text: "From the audit: majors and larger residential schemes"
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    suggested-id: parking-management-plan
+  - local-name: Public Rights of Way Statement
+    source-text: "From the audit: listed in the Full planning table (no trigger given)"
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    suggested-id: public-rights-of-way-statement
+  - local-name: Operational Management Plan
+    source-text: "From the audit: schools, day care and care homes"
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    suggested-id: operational-management-plan
+  - local-name: Glare Assessment
+    source-text: "From the audit: large solar or large glazing"
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    suggested-id: glare-assessment
+  - local-name: Hydrogeological Report
+    source-text: "From the audit: listed in the Full planning table (no trigger given)"
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    suggested-id: hydrogeological-report
+  - local-name: Confirmation from Utilities Provider
+    source-text: "From the audit: major development"
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    suggested-id: utilities-statement
+  - local-name: Needs Assessment
+    source-text: "From the audit: student or care homes, and traveller pitches"
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    suggested-id: needs-assessment
+  - local-name: Disabled Access Statement and Plan
+    source-text: "From the audit: new buildings and major development"
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    suggested-id: access-statement
+  - local-name: Landscape Management Plan
+    source-text: "From the audit: major development"
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    suggested-id: landscape-management-plan
+  - local-name: HMO licence
+    source-text: "Optional, but for applications comprising a change of use to a large HMO (>6 occupants)"
+    source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+    suggested-id: hmo-licence
+
+low-confidence:
+  - id: planning-statement
+    note: "Audit (wrong_trigger): the excerpt is merged with the streetscene row and gives no trigger."
+  - id: landscaping-plan
+    note: "Audit (wrong_trigger): the excerpt is the Arboricultural Impact Assessment contents (now in arboriculturist-report); the landscaping trigger needs re-reading."
+  - id: floor-plan-existing
+    note: "The Full planning excerpt is roof plan wording; from the audit, Householder floor plans are for extensions or alterations."
+  - id: floor-plan-proposed
+    note: "The Full planning excerpt is roof plan wording; from the audit, Householder floor plans are for extensions or alterations."
+  - id: elevation-existing
+    note: "The Full planning excerpt is roof plan wording; from the audit, elevations are for extensions and boundary treatments."
+  - id: elevation-proposed
+    note: "The Full planning excerpt is roof plan wording; from the audit, elevations are for extensions and boundary treatments."
+
+new-fields:
+  - field: upper-floor-extension
+    kind: boolean
+    label: Extension above ground floor
+    description: The proposal extends or alters a building above ground-floor level.
+  - field: telecommunications-development
+    kind: boolean
+    label: Telecommunications equipment
+    description: The proposal is for telecommunications masts, antennas or related equipment.
+  - field: out-of-town-centre
+    kind: boolean
+    label: Edge or out of town centre
+    description: The proposal is for main town centre uses (retail, leisure, office) in an edge-of-centre or out-of-centre location.

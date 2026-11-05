@@ -1,0 +1,375 @@
+# Corrections for Buckinghamshire Council, from the Buckinghamshire audit.
+# The audit compared the workbook with the council's Local Validation List web page
+# ("Supporting information"), in force for applications received from 1 April 2020.
+# Items from the separate "Additional supporting documents" page are advisory ("these documents
+# are not required for validation"), so they are dropped. Thresholds for affordable housing and
+# town centre uses still differ by former district area (Aylesbury Vale, Chiltern/South Bucks,
+# Wycombe). Items marked "From the audit" use the audit's paraphrase, not the council's words.
+local-authority: BUC
+
+drop:
+  - id: daylight-sunlight-assessment
+    reason: "not_a_requirement: from the advisory 'Additional supporting documents' page (not required for validation)"
+  - id: sustainability-statement
+    reason: "not_a_requirement: advisory 'Additional supporting documents' page"
+  - id: noise-assessment
+    reason: "not_a_requirement: advisory 'Additional supporting documents' page"
+  - id: recreation-facilities-assessment
+    reason: "not_a_requirement: advisory 'Additional supporting documents' page"
+  - id: sci
+    reason: "not_a_requirement: advisory 'Additional supporting documents' page; excerpt also cut off"
+  - id: floor-plan-existing
+    reason: "not_a_requirement: advisory internal elevations text"
+  - id: floor-plan-proposed
+    reason: "not_a_requirement: advisory internal elevations text"
+  - id: elevation-existing
+    reason: "not_a_requirement: advisory internal elevations text"
+  - id: elevation-proposed
+    reason: "not_a_requirement: advisory internal elevations text"
+  - id: schedule-of-works
+    reason: "not_a_requirement: advisory page; duplicate of the internal elevations text"
+  - id: lighting-assessment
+    reason: "not_a_requirement / wrong_app_type: advisory, and only placed under LBC because 'listed buildings' appears in the text"
+  - id: section-existing
+    reason: "wrong_trigger: minerals restoration and aftercare text"
+  - id: section-proposed
+    reason: "wrong_trigger: minerals restoration and aftercare text"
+  - id: landscaping-plan
+    reason: "wrong_trigger: minerals restoration text; the landscape strategy is on the advisory 'Additional supporting documents' page"
+
+drop-unmapped:
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_app_type / not_a_requirement: foul drainage text that excludes householder extensions, from the advisory page"
+  - local-name: Foul Sewage / Utilities Statement
+    reason: "wrong_app_type / duplicate: same foul drainage text, advisory"
+  - local-name: Crime prevention / Secured by Design statement
+    reason: "not_a_requirement: advisory 'Additional supporting documents' page"
+  - local-name: Parking provision / Parking plan
+    reason: "not_a_requirement: advisory 'Additional supporting documents' page"
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "not_a_requirement: advisory 'Additional supporting documents' page"
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "wrong_trigger: cut-off fragment; replaced by Agricultural statement below"
+  - local-name: Agricultural Land Classification / Soils
+    reason: "duplicate: same cut-off fragment as the agricultural appraisal row"
+  - local-name: Employment / Economic Statement
+    reason: "duplicate: fragment of the Evidence of marketing statement entry"
+  - local-name: Ground investigation / Geotechnical / Basement Impact Assessment
+    reason: "wrong_trigger: this is the minerals hydrological assessment (dewatering); replaced below"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: rationale only; replaced below with the trigger"
+  - local-name: Minerals / Waste specific statements (county matters)
+    reason: "wrong_app_type: the mineral assessment applies to non-mineral development; re-added below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 11
+            description: Aylesbury Vale area - 11 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.3
+            description: Aylesbury Vale area - a site of 0.3 hectares or more.
+        - all:
+            - site:
+                in: [area-of-outstanding-natural-beauty]
+                description: Chiltern/South Bucks area - in the Chilterns AONB.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 5
+                description: Chiltern/South Bucks area - 5 or more homes in the AONB.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: Chiltern/South Bucks and Wycombe areas - 10 or more homes.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: Chiltern/South Bucks area - a site of 0.5 hectares or more.
+        - condition:
+            field: housing-floorspace
+            operator: ">"
+            value: 1000
+            description: Wycombe area - more than 1,000 square metres.
+    source-text: required for applications meeting affordable housing thresholds
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted the rationale. The thresholds depend on the former
+      district area (AV 11+ dwellings or 0.3ha+; Chiltern/South Bucks 5+ homes in the AONB, 10+
+      homes or 0.5ha+; Wycombe 10+ dwellings or more than 1,000 sq m). The rule lists every area's
+      threshold, so check which area the site is in. Applies to outline schemes too.
+
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: The site is in an Air Quality Management Area (householder applications excluded).
+        - all:
+            - ref: major-development
+            - condition:
+                field: eia-development
+                value: true
+                description: The major application requires an EIA.
+        - application-type:
+            in: [mineral-app, mineral-extraction, waste-dev]
+        - discretionary
+    source-text: require an EIA all minerals and waste applications
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): all proposals in an AQMA (excluding householders), majors in
+      settlements with an AQMA, majors requiring EIA, and all minerals and waste applications. The
+      source text above is the air quality bullet text the workbook filed under Environmental
+      Statement. Majors in a settlement with an AQMA are shown as officer discretion.
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if: discretionary
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    confidence: medium
+    notes: "Audit (wrong_trigger): an ecology report is needed when the council's Ecology & Trees checklist says one is needed. The checklist applies to all application types."
+
+  - id: arboriculturist-report
+    action: add
+    required-if: discretionary
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    confidence: medium
+    notes: "From the audit (missing_requirement): a trees report is needed when the Ecology & Trees checklist says one is needed."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - ref: major-development
+    source-text: "required for... all listed building consent applications"
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): required for all listed building consent applications, which the
+      workbook missed. The council notes this is a national requirement, so the national rules
+      (including major development) also apply.
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The proposal is Schedule 1 development, or Schedule 2 development likely to have significant environmental effects.
+    source-text: It is required for all proposals defined under Schedule 1 of the 2017 regulations
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook took the air quality bullets as the EIA trigger; not every minerals or waste application needs an EIA."
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 2
+            description: The building contains 2 or more dwellings.
+    confidence: medium
+    notes: "The council's text: needed 'for schemes involving a relevant high-rise residential building' (a national requirement)."
+
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare in Flood Zone 1.
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    confidence: medium
+    notes: "From the audit (missing_requirement): Flood Zone 2 or 3, or over 1ha in Flood Zone 1. Applies to householder schemes too."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      site:
+        in: [listed-building, conservation-area, locally-listed-building, world-heritage-site]
+        description: The application site contains designated or non-designated heritage assets.
+    source-text: required for applications that contain designated or non-designated heritage assets
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): the workbook quoted the rationale. Applies to all application types, including householder and listed building consent."
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      ref: major-development
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    confidence: medium
+    notes: "Audit (wrong_trigger): required for all major applications; the workbook quoted the rationale."
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 2000
+            description: Aylesbury Vale area - retail or leisure over 2,000 square metres.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 1000
+            description: Chiltern/South Bucks and Wycombe areas - retail or leisure over 1,000 square metres.
+        - discretionary
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): retail/leisure over AV 2,000 sq m; Chiltern/South Bucks
+      1,000 sq m; Wycombe 1,000/500/250 sq m or all, depending on location (shown as officer
+      discretion). The workbook's excerpt is the sequential test text (now unmapped).
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 50
+            description: 50 or more C3 dwellings (Transport Statement at 50-80, Transport Assessment at 80+).
+        - discretionary
+    source-text: They are required for applications that meet Buckinghamshire Highways DM's guideline thresholds .
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    confidence: medium
+    notes: "Audit (wrong_trigger): Highways DM thresholds, C3 50-80 dwellings (statement) / 80+ (assessment). Other uses follow the Highways DM guidance (shown as officer discretion)."
+
+  - id: travel-plan
+    action: replace
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 80
+        description: 80 or more C3 units.
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    confidence: medium
+    notes: "Audit (wrong_trigger): a travel plan applies at C3 80+ units; the workbook quoted the rationale."
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      application-type:
+        in: [full, outline, reserved-matters]
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    confidence: low
+    notes: "From the audit (missing_requirement): a Waste and recycling strategy for all minor and major applications (not householder). The application types are an approximation of 'minor and major'."
+
+  - id: water-impact-assessment
+    action: add
+    required-if:
+      site:
+        in: [source-protection-zone]
+        description: The site is in a groundwater Source Protection Zone or a Drinking Water Safeguard Zone.
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    confidence: medium
+    notes: "From the audit (missing_requirement): Water environment assessment in Source Protection Zones and Drinking Water Safeguard Zones."
+
+unmapped:
+  - local-name: Agricultural statement
+    source-text: "all agricultural applications, and proposals involving an agricultural holding"
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    suggested-id: agricultural-statement
+  - local-name: Hydrological and hydrogeological assessment
+    source-text: "needed for applications for minerals and waste development where dewatering is proposed"
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    suggested-id: hydrogeological-assessment
+  - local-name: Sequential Test (flood risk)
+    source-text: "From the audit: Flood Zones 2/3, for new dwellings or non-residential schemes over 250 sq m"
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    suggested-id: flood-sequential-test
+  - local-name: Sequential test (main town centre uses)
+    source-text: "It is required for proposals for 'main town centre uses' uses (below) that are outside of a designated town centre or primary shopping area, unless the main town centre uses are proposed in accordance with the up-to-date Development Plan."
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    suggested-id: retail-sequential-test
+  - local-name: Mineral assessment
+    source-text: "Proposals in a Mineral Safeguarding Area are needed for: 10 or more dwellings or 0.5ha or more in size (within in an urban area) 2 or more dwellings (outside of an urban area) Why you need a mineral assessment This is a local requirement and is needed to prevent the unnecessary sterilisation of minerals as a result of non-mineral development."
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    suggested-id: mineral-assessment
+  - local-name: SuDS statement
+    source-text: "From the audit: all majors, minors of 3+ dwellings, or sites at medium/high surface water flood risk or containing an ordinary watercourse"
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    suggested-id: drainage-strategy
+  - local-name: Community needs assessment
+    source-text: "From the audit: loss of a community facility"
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    suggested-id: community-needs-assessment
+  - local-name: Equestrian statement
+    source-text: "From the audit: all equestrian applications"
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    suggested-id: equestrian-statement
+  - local-name: New dwellings schedule
+    source-text: "From the audit: any new dwellings"
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    suggested-id: accommodation-schedule
+  - local-name: Structural or building condition survey
+    source-text: "From the audit: substantial demolition or renovation, e.g. barn conversions in Green Belt or AONB"
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    suggested-id: structural-survey
+  - local-name: Tree canopy calculator
+    source-text: "From the audit: sites of 0.5ha+ outside a designated town centre, Wycombe area only"
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    suggested-id: tree-canopy-calculator
+  - local-name: Borehole or trial pit analysis
+    source-text: "From the audit: all mineral extraction"
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    suggested-id: borehole-analysis
+  - local-name: Geodiversity assessment
+    source-text: "From the audit: sites with designated or notable geological features"
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    suggested-id: geodiversity-assessment
+  - local-name: Details of storage, treatment or disposal of waste
+    source-text: "From the audit: new or extended landfill, hazardous waste, incineration"
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    suggested-id: waste-disposal-details
+  - local-name: Restoration strategy and aftercare
+    source-text: "From the audit: minerals and waste development involving any ground disturbance"
+    source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
+    suggested-id: restoration-aftercare-scheme
+
+new-fields:
+  - field: source-protection-zone
+    kind: designation
+    label: Source Protection Zone
+    description: Site is in an Environment Agency groundwater Source Protection Zone or a Drinking Water Safeguard Zone.

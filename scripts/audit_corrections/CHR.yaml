@@ -1,0 +1,307 @@
+# Corrections for Cherwell District Council, from the audit.
+# The council's PDFs block automated fetching (contents_checked: false), so this file rests on the
+# workbook's own excerpts and the council page. It fixes the list date, the mis-mapped application
+# types (prior approval, s73, dropped kerb) and the mislabelled rows, and structures clear triggers.
+local-authority: CHR
+
+validation-list:
+  url: https://www.cherwell.gov.uk/download/downloads/id/15909/validation-guidance.pdf
+  date: 2026-03
+  date-basis: >-
+    audit: planning page says the requirements 'were updated in March 2024, reviewed in March 2026
+    and remain in place until 31 March 2028' (Local Validation List approved 21 March 2024)
+
+submission-standards:
+  - item: Plans drawn to scale, with the scale shown on the drawing; drawings marked 'Do not Scale' or similar will not be accepted
+    level: must
+  - item: All drawings and plans on the same paper size (all A3 or all A4), with the original paper size shown on the drawings
+    level: must
+  - item: A unique drawing reference on each drawing
+    level: must
+  - item: No individual file larger than 10MB
+    level: must
+  - item: All plans submitted as separate single-page PDF files; multipage PDF files will not be accepted
+    level: must
+  - item: No signatures or personal information in documents or plans that would need redacting
+    level: should
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is a sentence about test method statements (contamination/percolation), not a listed building schedule"
+
+drop-unmapped:
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_trigger: the excerpt is the external lighting section (6.19) running into 6.20 Noise"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: the excerpt is the noise impact assessment trigger"
+  - local-name: Biodiversity / Swift bricks / bird & bat boxes
+    reason: "wrong_trigger: a fragment of the biodiversity checklist ('features which may be a bat roost'), not a requirement"
+
+requirements:
+  - id: site-plan
+    action: update
+    required-if:
+      application-type:
+        in: [hh, full, outline, reserved-matters, lbc, advertising, change-of-use, approval-condition, s73, consent-under-tpo, notice-trees-in-con-area]
+    notes: >-
+      Audit (wrong_app_type): the 'prior approval' rows came from the full-planning Change of Use
+      form, not the Part 3 Prior Approval form, and the Removal/Variation/Discharge of Condition form
+      covers s73 too.
+
+  - id: floor-plan-existing
+    action: update
+    required-if:
+      application-type:
+        in: [hh, full, outline, reserved-matters, lbc, change-of-use, approval-condition, s73]
+    notes: >-
+      Audit (wrong_app_type): the 'prior approval' rows came from the full-planning Change of Use
+      form, and the Removal/Variation/Discharge of Condition form covers s73 too. The advertisement
+      form lists elevations but not floor plans.
+
+  - id: floor-plan-proposed
+    action: update
+    required-if:
+      application-type:
+        in: [hh, full, outline, reserved-matters, lbc, change-of-use, approval-condition, s73]
+    notes: >-
+      Audit (wrong_app_type): the 'prior approval' rows came from the full-planning Change of Use
+      form, and the Removal/Variation/Discharge of Condition form covers s73 too. The advertisement
+      form lists elevations but not floor plans.
+
+  - id: elevation-existing
+    action: update
+    required-if:
+      application-type:
+        in: [hh, full, outline, reserved-matters, lbc, advertising, change-of-use, approval-condition, s73]
+    must-include:
+      - item: An identified measurable scale of 1:100 or 1:50, with a scale bar
+        level: must
+      - item: Each elevation clearly marked with its direction (for example North elevation)
+        level: must
+      - item: All elevations shown in full unless otherwise agreed
+        level: must
+    notes: "Audit (wrong_app_type): as for the floor plans. The must-include items are the council's drawing standards (6.8.1)."
+
+  - id: elevation-proposed
+    action: update
+    required-if:
+      application-type:
+        in: [hh, full, outline, reserved-matters, lbc, advertising, change-of-use, approval-condition, s73]
+    must-include:
+      - item: An identified measurable scale of 1:100 or 1:50, with a scale bar
+        level: must
+      - item: Each elevation clearly marked with its direction (for example North elevation)
+        level: must
+      - item: All elevations shown in full unless otherwise agreed
+        level: must
+      - item: Proposed building materials, style and finish, with window, door and rainwater goods details
+        level: must
+    notes: "Audit (wrong_app_type): as for the floor plans. The must-include items are the council's drawing standards (6.8.1)."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [full, outline]
+            - ref: major-development
+        - application-type:
+            in: [lbc]
+        - all:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: One or more new dwellings.
+            - site:
+                in: [conservation-area]
+                description: In a conservation area.
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 100
+            description: A building or buildings with a floor space of 100 square metres or more.
+    source-text: >-
+      6.4 Design and Access Statement (DAS) 6.4.1 A concise and site-specific report accompanying
+      applications for planning permission and listed building is required in the following cases: -
+      all major development proposals (both full and outline applications) all listed building
+      consent proposals one or more new dwellings in a Conservation Area a building or buildings with
+      a floor space of 100 square metres or more.
+    source-url: https://www.cherwell.gov.uk/download/downloads/id/15909/validation-guidance.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger, not_a_requirement): most rows only repeated the forms' 'if required'
+      boilerplate, and a DAS is never required for a lawful development certificate. The excerpt is
+      cut off mid-list, so the 100 sqm case may also be limited to conservation areas (as in the
+      national rules).
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [tree-preservation-zone]
+            description: There are protected trees on or adjacent to the site which would be impacted by the development.
+        - discretionary
+    source-text: >-
+      6.28 Tree Survey, Report and Protection When do I need this document? If there are protected
+      trees on or adjacent to the site, which would be impacted by the development;
+    source-url: https://www.cherwell.gov.uk/download/downloads/id/15909/validation-guidance.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): the householder row came from the dropped kerb checklist and its
+      excerpt was table headers. The council's list of cases is cut off after the first, so the rest
+      is shown as officer discretion.
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: external-lighting
+            value: true
+            description: The proposal includes external lighting.
+        - condition:
+            field: illuminated
+            value: true
+            description: The advertisement is illuminated.
+    source-text: >-
+      Details of external lighting are required to ensure that external lights do not cause nuisance
+      to nearby residences, create undue levels of light pollution, or damage the habitats of
+      protected species, such as bats.
+    must-include:
+      - item: Luminance levels, security sensors, timers and switches
+        level: must
+      - item: Details of any mitigation to reduce the impact of the lighting
+        level: must
+    notes: "The must-include items are from the 6.19 text that the workbook filed as 'Advertisement drawings / illumination details'."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [site-of-special-scientific-interest, special-protection-area, local-wildlife-site]
+            description: The site is on or adjacent to, or may impact, a designated wildlife site (SAC, SPA, SSSI, County Wildlife Site, LNR, Special Verge).
+        - condition:
+            field: demolition
+            value: true
+            description: Demolition proposals, including small-scale householder extension and refurbishment schemes, where bats are known to be in the area.
+        - discretionary
+    source-text: >-
+      in particular protected species such as bats – a survey is generally considered necessary for
+      demolition proposals, including small-scale householder extension and refurbishment schemes
+      where bats are known to be in the area; … Is it on or adjacent to a designated wildlife site?
+      (LNR, SSSI, SAC, SPA etc.)
+    source-url: https://www.cherwell.gov.uk/download/downloads/id/15879/validation-guidance-appx-1---biodiversity-checklist.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the Full planning, advertisement and tree works rows were fragments or
+      form headers. Built from the householder excerpt and the biodiversity checklist questions.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is listed in Schedule 1 of the EIA Regulations 2017.
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: 18m or more in height.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: Two or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: Educational accommodation.
+    must-include:
+      - item: Submitted on a form published by the Secretary of State (or a form to similar effect)
+        level: must
+
+  - id: flood-risk-assessment
+    action: update
+    must-include:
+      - item: A surface water drainage strategy
+        level: should
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: New industrial, commercial or entertainment premises close to residential properties.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: New residential property near transportation, industrial or commercial noise sources (or near entertainment premises).
+        - condition:
+            field: plant-equipment
+            value: true
+            description: New extraction or ventilation equipment, or air conditioning units.
+    source-text: >-
+      6.20 Noise Impact Assessment When is this required? New industrial or commercial premises close
+      to residential properties New residential property near to transportation, industrial or
+      commercial noise sources New entertainment premises near to residential properties, and vice
+      versa New extraction or ventilation equipment Air conditioning units
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    notes: "Needed when a proposal has significant transport implications (council's wording)."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    notes: "Needed if you are not proposing to meet the minimum policy requirements (council's wording)."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      application-type:
+        in: [lbc, consent-under-tpo, notice-trees-in-con-area]
+    confidence: low
+    notes: >-
+      Audit (missing_requirement): the Heritage Impact Assessment appears in the checklist forms but
+      was captured only under Works to trees, and listed building consent had no heritage statement
+      row. The trigger wasn't captured.
+
+  - id: affordable-housing-statement
+    action: add
+    source-url: https://www.cherwell.gov.uk/download/downloads/id/15878/validation-checklist-matrix.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): an Affordable Housing Statement row is in the crib-sheet matrix; its trigger wasn't captured."
+
+unmapped:
+  - local-name: Parking and Servicing provision
+    source-text: Parking and Servicing provision
+    source-url: https://www.cherwell.gov.uk/download/downloads/id/15895/householder-dropped-kerb-validation-checklist-form.pdf
+    suggested-id: parking-plan
+
+low-confidence:
+  - id: air-quality-assessment
+    note: "The excerpt is garbled matrix text ('Essential Requirement Potential Requirement'); the trigger wasn't captured."
+  - id: flood-risk-assessment
+    note: "Audit (wrong_trigger): the excerpt gives no flood zone or site area threshold."
+  - id: "*"
+    note: "Audit (wrong_app_type): the council's matrix separates minor residential (<10), major residential (10-49), 50+ units and non-residential <1ha / >1ha; those distinctions are lost here."

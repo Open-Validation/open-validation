@@ -1,0 +1,448 @@
+# Corrections for Dover District Council, from the audit.
+# Dover's only published list is the July 2014 document, amended April 2015. The audit read it
+# (contents_checked: true) and warns that it is badly out of date (no BNG, pre-2024 Local Plan,
+# Code for Sustainable Homes), so the council's actual practice will differ.
+local-authority: DOV
+
+validation-list:
+  url: https://www.dover.gov.uk/Planning/Planning-Applications/PDF/Validation-Requirements.pdf
+  date: 2015-04
+  date-basis: "audit: 'Adopted July 2014'; 'Amended under new legislation April 2015'"
+
+submission-standards:
+  - item: Do not submit drawings that have to be printed at A0
+    level: must
+  - item: Maximum single attachment file size of 5MB
+    level: must
+  - item: All drawings attached as PDF files; other acceptable file types for non-drawings are .jpg, .doc and .xls
+    level: must
+  - item: All plans include a scale bar, the scale and the paper size
+    level: must
+
+drop-unmapped:
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: 'Drainage details that will achieve Building Regulations Approval' is not the Note 17 trigger, which is on the Foul Sewage / Utilities row"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: the excerpt is the Acoustic Report text, now in noise-assessment"
+  - local-name: Highways / access details (visibility splays)
+    reason: "duplicate: Note 24 Parking and Access Arrangements; re-added once below"
+  - local-name: Cycle parking details
+    reason: "duplicate: Note 24 Parking and Access Arrangements; re-added once below"
+  - local-name: Parking provision / Parking plan
+    reason: "duplicate: Note 24 Parking and Access Arrangements; re-added once below"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advice about seeking pre-application advice"
+
+requirements:
+  - id: site-plan
+    action: update
+    required-if:
+      always: true
+    source-text: >-
+      Note 3 Block Plan All applications should include a block plan at a scale of either 1:200
+      (Householder Application) or 1:500 (Other Applications).
+    must-include:
+      - item: Scale of 1:200 for householder applications, or 1:500 for other applications
+        level: must
+    notes: "The council asks for a block plan with all applications, not only householder ones."
+
+  - id: affordable-housing-statement
+    action: replace
+    required-if: discretionary
+    source-text: All applications that generate the need for Affordable Housing
+    source-url: https://www.dover.gov.uk/Planning/Planning-Applications/PDF/Validation-Requirements.pdf
+    policy: Core Strategy Policy DM5
+    must-include:
+      - item: A Site Proforma setting out the financial contribution required, if affordable housing is not to be provided on site
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's 'Any application must provide...' overstated the trigger;
+      Note 11 says 'All applications that generate the need for Affordable Housing'. The Site
+      Proforma item is from the workbook's excerpt. Policy DM5 is named in the viability entry.
+
+  - id: air-quality-assessment
+    action: update
+    required-if: discretionary
+    notes: >-
+      Needed for proposals that could cause significant air pollution affecting a designated Air
+      Quality Management Area (council's wording); no threshold is given.
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees and/or hedgerows on the site, or on adjacent land, that could influence or be affected by the development.
+    source-text: >-
+      Tree Survey/ and or hedgerow survey Where there are trees and/or hedgerows within the
+      application site, or on land adjacent to it that could influence or be affected by the
+      development
+    source-url: https://www.dover.gov.uk/Planning/Planning-Applications/PDF/Validation-Requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): the workbook's excerpt mixed column headers; this applies to householder applications too."
+
+  - id: cil-form
+    action: replace
+    source-url: https://www.dover.gov.uk/Planning/Planning-Applications/PDF/Validation-Requirements.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was the Note 26 Planning Statement text. The
+      CIL trigger itself was not given.
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      condition:
+        field: sensitive-end-use
+        value: true
+        description: New development with a sensitive end use (e.g. residential, nurseries, schools).
+    must-include:
+      - item: A minimum of a Preliminary Risk Assessment (PRA), regardless of the history of the site
+        level: must
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      application-type:
+        in: [lbc]
+    source-text: All applications for Listed Building Consent will require a D&A Statement
+    source-url: https://www.dover.gov.uk/Planning/Planning-Applications/PDF/Validation-Requirements.pdf
+    confidence: medium
+    notes: >-
+      Audit (not_a_requirement, missing_requirement): the workbook's excerpt was guidance about
+      another document. Note 8 requires a DAS for all listed building consent applications; the
+      national rules for a Design and Access Statement still apply.
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    source-url: https://www.dover.gov.uk/Planning/Planning-Applications/PDF/Validation-Requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was garbled table text."
+
+  - id: section-existing
+    action: replace
+    required-if:
+      condition:
+        field: ground-level-change
+        operator: ">"
+        value: 0
+        description: The proposal involves a change in ground levels.
+    source-text: Where a proposal involves a change in ground levels
+    source-url: https://www.dover.gov.uk/Planning/Planning-Applications/PDF/Validation-Requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was garbled table text; Note 6 gives this trigger."
+
+  - id: section-proposed
+    action: replace
+    required-if:
+      condition:
+        field: ground-level-change
+        operator: ">"
+        value: 0
+        description: The proposal involves a change in ground levels.
+    source-text: Where a proposal involves a change in ground levels
+    source-url: https://www.dover.gov.uk/Planning/Planning-Applications/PDF/Validation-Requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was garbled table text; Note 6 gives this trigger."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is one hectare or more (Flood Zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is one hectare or more (Flood Zone 1).
+        - site:
+            in: [flood-risk-zone]
+            description: New development in Flood Zone 2 or 3.
+    notes: >-
+      The council excepts minor domestic extensions or works in Flood Zones 2 and 3 where no new
+      dwelling and no new bedroom space is created. Audit: this applies to householder applications
+      too.
+
+  - id: elevation-existing
+    action: update
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: must
+      - item: All relevant external sides of the proposal shown
+        level: must
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: must
+      - item: All relevant external sides of the proposal shown
+        level: must
+      - item: The proposed building materials and the manufacturer, where known
+        level: should
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building]
+            description: The proposal has an impact on a heritage asset or its setting.
+    source-text: >-
+      Note 18 Heritage Statement/Archaeological Survey All applications which have an impact on a
+      heritage asset, or its setting must include a ‘Heritage Statement’.
+    source-url: https://www.dover.gov.uk/Planning/Planning-Applications/PDF/Validation-Requirements.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement, wrong_app_type): required for all listed building consent applications, and householder works affecting heritage assets."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: The proposal includes floodlighting, particularly for sports grounds, near homes, in open countryside (especially AONB) or in sensitive buildings.
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The proposal is likely to generate noise above current background levels (including places of entertainment).
+        - condition:
+            field: plant-equipment
+            value: true
+            description: The proposal includes external plant and equipment.
+        - discretionary
+    source-text: >-
+      Proposals likely to generate noise in excess of current background levels … Applications for
+      residential and commercial developments including places of entertainment and all
+      applications where external plant and equipment is proposed should be submitted with a noise
+      survey and report prepared by a competent acoustician who shall be a member of the Institute
+      of Acoustics or the Association of Noise Consultants.
+    source-url: https://www.dover.gov.uk/Planning/Planning-Applications/PDF/Validation-Requirements.pdf
+    must-include:
+      - item: Prepared by a competent acoustician who is a member of the Institute of Acoustics or the Association of Noise Consultants
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's noise row quoted only the acoustician sentence, and the
+      Acoustic Report text was on its ventilation row. Residential and commercial developments in
+      general are shown as officer discretion.
+
+  - id: photos
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [listed-building, conservation-area, area-of-outstanding-natural-beauty]
+            description: Works involving the demolition of, or affecting, a listed building; affecting a conservation area; or affecting the AONB.
+        - condition:
+            field: parking-change
+            value: true
+            description: The development affects parking provision.
+    source-text: >-
+      Photographs and Photomontages Validation Requirement Major Development Proposals and/or works
+      involving the demolition of a listed building; affecting a conservation area or listed
+      building; development affecting AONB or development affecting parking provision.
+    source-url: https://www.dover.gov.uk/Planning/Planning-Applications/PDF/Validation-Requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): not only listed building consent; this covers major development, conservation areas, AONB and parking changes."
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      application-type:
+        in: [full, outline, reserved-matters, s73]
+    source-text: All development (excluding householder)
+    source-url: https://www.dover.gov.uk/Planning/Planning-Applications/PDF/Validation-Requirements.pdf
+    must-include:
+      - item: The context and the need for the proposed development
+        level: should
+      - item: An assessment of how it accords with relevant national, regional and local planning policies
+        level: should
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): Note 26 trigger is 'All development (excluding householder)'; the
+      application types shown are our reading of that. The contents are from the council's Note 26
+      guidance.
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: An application for a main town centre use located outside a designated town centre.
+    notes: "The council's text cites NPPF 2012 paragraphs 24-27."
+
+  - id: sci
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    notes: "Normally only for major development, or other applications of importance to the local community (council's wording)."
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-text: >-
+      Transport Statement/Assessment/Travel Plan The Council must consider the impact of proposals on
+      travel patterns and the incorporation of sustainable transport measures should be regarded as
+      essential for all major developments.
+    source-url: https://www.dover.gov.uk/Planning/Planning-Applications/PDF/Validation-Requirements.pdf
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook's excerpt was a fragment. The council's text ties it to major developments; smaller cases are shown as officer discretion."
+
+  - id: travel-plan
+    action: update
+    required-if:
+      ref: major-development
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    policy: Policy DM5 and the SPD
+    must-include:
+      - item: The reasons why it would not be financially viable to provide the full quota/payment for affordable housing
+        level: must
+    notes: "Needed where the full affordable housing quota or payment sought by Policy DM5 is not offered."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      A) Biodiversity & Protected Species Applications that involve the change of
+      use/modification/demolition (including in part) of the following buildings must provide a
+      protected species survey, assessment and mitigation report, unless an exception applies.
+    source-url: https://www.dover.gov.uk/Planning/Planning-Applications/PDF/Validation-Requirements.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): this was placed under prior approval only; it covers planning
+      applications that change, modify or demolish certain buildings (the list of buildings isn't in
+      the excerpt). It should also appear under Full and Outline.
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - any:
+            - all:
+                - condition:
+                    field: new-build
+                    value: true
+                    description: New-build dwellings.
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: One or more new-build dwellings.
+            - all:
+                - condition:
+                    field: new-build
+                    value: true
+                    description: New-build non-residential floorspace.
+                - condition:
+                    field: floorspace-non-residential
+                    operator: ">="
+                    value: 100
+                    description: 100 square metres or more of non-residential floorspace.
+    source-text: All applications (full and outline) of 1 (new build) dwelling or more
+    source-url: https://www.dover.gov.uk/Planning/Planning-Applications/PDF/Validation-Requirements.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): Note 29 Code for Sustainable Homes/BREEAM Pre-Assessment
+      Statement, for 1+ new-build dwellings and non-residential new build of 100 sqm or more. The
+      Code for Sustainable Homes was withdrawn in 2015, so this is outdated.
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if:
+      site:
+        in: [open-space]
+        description: Development on open space.
+    source-text: All development on open spaces
+    source-url: https://www.dover.gov.uk/Planning/Planning-Applications/PDF/Validation-Requirements.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Note 23 Open Space Assessment."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Mast and antenna development by a mobile phone network operator.
+    source-text: Any planning application for mast and antenna development by a mobile phone network operator
+    source-url: https://www.dover.gov.uk/Planning/Planning-Applications/PDF/Validation-Requirements.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Note 30 Telecommunications Statement."
+
+unmapped:
+  - local-name: Parking and Access Arrangements
+    source-text: >-
+      Parking and Access Arrangements All applications will be required to provide details of
+      existing and proposed parking provision, including cycle parking, and to justify the level of
+      provision.
+    source-url: https://www.dover.gov.uk/Planning/Planning-Applications/PDF/Validation-Requirements.pdf
+    suggested-id: parking-plan
+  - local-name: Landscape Character Assessment
+    source-text: Development that would result in harm to the character of the landscape
+    source-url: https://www.dover.gov.uk/Planning/Planning-Applications/PDF/Validation-Requirements.pdf
+    suggested-id: landscape-visual-impact-assessment
+
+low-confidence:
+  - id: archaeological-assessment
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('include an archaeological desk top assessment and a field evaluation report.'); the trigger wasn't captured."
+  - id: floor-plan-existing
+    note: "The workbook's excerpt is the Note 4 elevations text; no separate floor plan requirement was captured."
+  - id: floor-plan-proposed
+    note: "The workbook's excerpt is the Note 4 elevations text; no separate floor plan requirement was captured."
+
+new-fields:
+  - field: sensitive-end-use
+    kind: boolean
+    label: Sensitive end use
+    description: The proposal is for a sensitive end use such as housing, schools or nurseries (for example on or near contaminated land).
+  - field: ground-level-change
+    kind: number
+    label: Change in ground levels (m)
+    description: The largest proposed change to existing ground levels, in metres (0 if none).
+  - field: parking-change
+    kind: boolean
+    label: Changes parking provision
+    description: The proposal increases, reduces or alters parking provision.
+  - field: out-of-centre-town-centre-use
+    kind: boolean
+    label: Main town centre use outside a centre
+    description: The proposal is for a main town centre use (as defined in the NPPF) on a site outside a designated town centre.
+  - field: open-space
+    kind: designation
+    label: Open space or playing fields
+    description: Site is existing open space, playing fields or sports and recreational land or buildings.
+  - field: telecommunications-development
+    kind: boolean
+    label: Telecommunications development
+    description: The proposal is for telecommunications equipment such as a mast or antenna.

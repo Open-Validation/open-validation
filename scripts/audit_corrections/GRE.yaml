@@ -1,0 +1,534 @@
+# Corrections for Royal Borough of Greenwich, from the council's audit.
+# The audit compared the workbook with the Local Validation Requirements List 2025 (June 2025;
+# the build already takes that date). About 15 local requirements were missing, many triggers
+# were blank ('When Required') or taken from the neighbouring item, and the per-type checklists
+# (adverts, LDC, LBC, S96a/S73, householder) were largely missed. Items marked 'From the audit'
+# use the audit's summary of the list, not the council's exact words. The prior notification
+# (larger home extension), window replacement and shopfront checklists are not captured.
+local-authority: GRE
+
+submission-standards:
+  - item: Plans and elevations at a scale of 1:50 or 1:100 with a scale bar (1:200 may be acceptable for major applications)
+    level: must
+  - item: All drawings and documents logged with the drawing number, plan name and description when submitted
+    level: should
+  - item: Maximum file size 10MB per attachment; larger documents split into parts and labelled
+    level: must
+
+drop-unmapped:
+  - local-name: Structural Survey
+    reason: "wrong_trigger: the excerpt is Basement Impact Assessment structural method statement text; re-added below"
+  - local-name: Employment / Economic Statement
+    reason: "wrong_trigger: the excerpt is Digital Massing Model file-format text; re-added below as Digital Massing Model"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: the excerpt is Foul Sewage and Utilities text; both re-added below"
+  - local-name: Cycle parking details
+    reason: "duplicate: same fragment as 'Parking provision / Parking plan'"
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_trigger: fragment; re-added below as Parking Design and Management Plan"
+  - local-name: Lawful development evidence (statutory declarations etc.)
+    reason: "wrong_trigger: misstates the LDC requirement; re-added below"
+
+requirements:
+  - id: schedule-of-works
+    action: replace
+    required-if:
+      application-type:
+        in: [lbc]
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): the workbook quoted Basement Impact Assessment text under Full planning. From the audit: the LBC checklist requires a schedule of works and method statement."
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      application-type:
+        in: [full, outline, reserved-matters]
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted Energy Statement text. From the audit: most
+      applications except householder, flats, adverts, prior approvals, LDCs and discharge of
+      conditions. The types listed are the main ones that remain; check others against the list.
+
+  - id: sci
+    action: replace
+    required-if:
+      ref: major-development
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted Sustainable Design and Construction text. From the audit: major developments."
+
+  - id: recreation-facilities-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: The major development is residential.
+        - discretionary
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted Air Quality Neutral text. From the audit: a Play Space Strategy for major residential development and where communal play space is provided (shown as officer discretion)."
+
+  - id: landscaping-plan
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: New dwellings with gardens.
+        - site:
+            in: [conservation-area]
+            description: Works to front gardens in a conservation area.
+        - site:
+            in: [listed-building]
+            description: Works to the garden of a listed building.
+        - discretionary
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted a contaminated land British Standard. From the audit: majors, new open or play space (shown as officer discretion), new dwellings with gardens, front gardens in conservation areas and listed building gardens."
+
+  - id: daylight-sunlight-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt was only a heading. From the audit: majors, tall buildings, backland/infill schemes and adverse impact on neighbours (the last three shown as officer discretion)."
+
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt was only a heading. From the audit: all majors, minors with significant impact or exposure, plus traffic and combustion triggers (shown as officer discretion)."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (in Flood Zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (in Flood Zone 1).
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3 (householder extensions included).
+        - site:
+            in: [critical-drainage-area]
+            description: The site is in an area at risk of surface water, sewer or groundwater flooding.
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt was only 'When required'. From the audit: 1ha+ in Flood Zone 1; all of Flood Zones 2/3 including householder extensions; surface water, sewer or groundwater flood areas."
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 50
+            description: Major residential development of 50 or more units.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: Major commercial development.
+        - discretionary
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt was only a heading. From the audit: major residential of 50+ units, major commercial, and schools, hospitals and similar uses (shown as officer discretion)."
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      ref: major-development
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt was only a heading. From the audit: Waste Management Strategy for all major residential and commercial development."
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 2500
+            description: 2,500 sqm or more.
+        - condition:
+            field: main-town-centre-use-out-of-centre
+            value: true
+            description: The proposal is out of centre.
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt was only a heading. From the audit: Retail Statement, with an impact assessment for out-of-centre schemes of 2,500 sqm+."
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: The proposal creates 10 or more homes.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: The residential site is 0.5 hectares or more.
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): 10+ homes or 0.5ha+."
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [site-of-special-scientific-interest, local-wildlife-site]
+            description: New buildings, extensions or changes of use near a designated site.
+        - discretionary
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Biodiversity and Ecology Report for majors, and new buildings/extensions/changes of use near designated sites or with habitat potential (the latter shown as officer discretion)."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - any:
+                - condition:
+                    field: building-height
+                    operator: ">="
+                    value: 18
+                    description: A building is 18 metres or more tall.
+                - condition:
+                    field: storey-count
+                    operator: ">="
+                    value: 7
+                    description: A building has 7 or more storeys.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 2
+                    description: The building contains 2 or more dwellings.
+                - condition:
+                    field: educational-accommodation
+                    value: true
+                    description: The building is an education building.
+    source-text: "Fire Statement (Major applications)"
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement): besides the Fire Statement for majors, non-major schemes with
+      2+ dwellings or education buildings that are 18m+ or 7+ storeys need a Fire Statement,
+      Planning Fire Safety Strategy or Reasonable Exception Statement. The householder checklist
+      also asks for a fire statement for minors.
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [conservation-area, world-heritage-site]
+                description: The site is in a conservation area or World Heritage Site.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: One or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: 100 sqm or more of floorspace.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt was cut off and left out the conservation area / World Heritage Site trigger (one or more dwellings or 100 sqm+ floorspace)."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [world-heritage-site, conservation-area, listed-building, scheduled-monument, park-and-garden]
+            description: The application involves a designated heritage asset (Maritime Greenwich WHS, conservation areas, listed buildings, scheduled monuments, registered parks and gardens).
+    notes: "The excerpt names designated heritage assets and is cut off; the audit says householder applications also need a heritage impact assessment where relevant."
+
+  - id: cil-form
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: A change of use from non-residential to residential.
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 100
+            description: 100 sqm or more net additional floorspace.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: Any new dwelling.
+    source-text: >-
+      CIL – Additional Information Requirement Form and Local floor space information form When
+      required - all applications proposing: a change of use from non-residential to residential
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): filed under prior approval, but it applies to planning applications generally. From the audit: non-residential to residential change of use, 100 sqm+ net GIA or any new dwelling (the excerpt is cut off)."
+
+  - id: section-existing
+    action: update
+    required-if:
+      application-type:
+        in: [change-of-use]
+    confidence: low
+    notes: "Audit (wrong_app_type): filed under prior approval but it applies to change-of-use planning applications. The excerpt is really about floor plans showing the extent of the use."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      application-type:
+        in: [change-of-use]
+    confidence: low
+    notes: "Audit (wrong_app_type): filed under prior approval but it applies to change-of-use planning applications. The excerpt is really about floor plans showing the extent of the use."
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      ref: major-development
+    confidence: low
+    notes: "Audit (duplicate, wrong_app_type): the excerpt is shared with the Planning Statement row; the audit says the Energy Statement/Strategy is for major development."
+
+  - id: photos
+    action: update
+    must-include:
+      - item: >-
+          Dated, numbered photographs cross-referenced to the drawings, showing where the works are
+          proposed (inside and out) and the building's relationship to its surroundings
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+        source-text: >-
+          Photographs dated and numbered cross-referenced to the drawings showing the areas of the
+          listed building where the works/alterations are proposed (internally and externally) and
+          the relationship of the building to the surrounding area.
+    notes: "The LBC photographs item was filed in the tab under submission rules."
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: Internal elevations at 1:10 or 1:20, and detail drawings at 1:5
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+    notes: "From the audit (wrong_app_type): the LBC checklist asks for internal elevations at 1:10/1:20 and detail drawings at 1:5."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      all:
+        - site:
+            in: [archaeological-priority-area]
+            description: The site is in an Area of High Archaeological Potential.
+        - condition:
+            field: ground-disturbance
+            value: true
+            description: Groundworks are proposed.
+
+  - id: site-plan
+    action: update
+    required-if:
+      condition:
+        field: new-build
+        value: true
+        description: An existing building's footprint is enlarged or a new building is constructed.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is listed in Schedule 1, or in Schedule 2 and likely to have significant environmental effects.
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: External lighting is proposed (for example in new public realm).
+    notes: "The excerpt is cut off after the first case ('the provision of public realm where external lighting is proposed')."
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: plant-equipment
+            value: true
+            description: The proposal includes plant or machinery.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The proposal includes noise generating sources or activities.
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Masts and/or antennae by mobile phone network operators.
+
+unmapped:
+  - local-name: Structural engineer's report (listed building consent)
+    source-text: "From the audit: the LBC checklist requires a structural engineer's report"
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    suggested-id: structural-survey
+  - local-name: Fire safety and sound proofing strategies, manufacturer specifications (listed building consent)
+    source-text: "From the audit: listed in the LBC checklist"
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    suggested-id: ""
+  - local-name: Digital Massing Model
+    source-text: "From the audit: major developments"
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    suggested-id: digital-3d-model
+  - local-name: Sustainable Drainage (SuDS)
+    source-text: "From the audit: majors, and sites over 0.25ha in surface water risk areas"
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    suggested-id: drainage-strategy
+  - local-name: Foul Sewage and Utilities Assessment
+    source-text: "All major developments involving connections to utilities"
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    suggested-id: foul-sewage-utilities-statement
+  - local-name: Parking Design and Management Plan
+    source-text: "From the audit: any scheme providing car parking"
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    suggested-id: parking-plan
+  - local-name: Air Quality Neutral Assessment
+    source-text: >-
+      An Air Quality Neutral Assessment is also required for developments that are:10 units or
+      more or 1000 square meters or more of floor space to demonstrate compliance with Policy SI 1
+      of the London Plan.
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    suggested-id: air-quality-neutral-assessment
+  - local-name: Air Quality Positive Statement
+    source-text: "From the audit: GLA-referable schemes (e.g. 150+ homes, 15,000 sqm+)"
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    suggested-id: air-quality-positive-statement
+  - local-name: Accommodation Schedule
+    source-text: "From the audit: major residential development"
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    suggested-id: housing-standards-statement
+  - local-name: Basement Impact Assessment
+    source-text: "From the audit: new or enlarged basements adjoining residential property"
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    suggested-id: basement-impact-assessment
+  - local-name: BREEAM Pre-Assessment
+    source-text: "From the audit: major and all non-residential development including extensions and change of use, and major domestic refurbishment"
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    suggested-id: breeam-pre-assessment
+  - local-name: Circular Economy Statement
+    source-text: "From the audit: GLA-referable majors"
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    suggested-id: circular-economy-statement
+  - local-name: Designing Out Crime Statement
+    source-text: "From the audit: majors and ATMs"
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    suggested-id: crime-prevention-statement
+  - local-name: Delivery and Servicing Management Plan
+    source-text: "From the audit: majors and schemes generating significant deliveries"
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    suggested-id: delivery-servicing-plan
+  - local-name: Green Infrastructure Assessment including Urban Greening Factor
+    source-text: "From the audit: major developments"
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    suggested-id: urban-greening-factor
+  - local-name: Materials Schedule
+    source-text: "From the audit: majors, new buildings, listed building consent and conservation areas"
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    suggested-id: materials-schedule
+  - local-name: Views Analysis (LVMF)
+    source-text: "From the audit: sites in Landmark Viewing Corridors or the backdrop of identified views"
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    suggested-id: views-analysis
+  - local-name: Evidence of lawfulness (certificates of lawfulness)
+    source-text: "Required: ... evidence that the existing use or development is lawful"
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    suggested-id: lawful-development-evidence
+  - local-name: S96a / S73 amendment documents
+    source-text: >-
+      Supporting statement or cover letter summarising the changes Copies of the approved plans
+      from the relevant original permission for information (to scale) A composite document
+      containing marked-up versions of the approved plans (at A3 or A4 size and not necessarily to
+      scale) to visually show each proposed amendment against the relevant existing and consented
+      part of development, for information and comparison purposes.
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    suggested-id: amendment-documents
+  - local-name: Advertisement drawings
+    source-text: "From the audit: existing elevations or a photo, 1:20 advert drawings, and 1:20 sections showing fixing, projection and illumination details"
+    source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+    suggested-id: advertisement-drawings
+
+low-confidence:
+  - id: construction-management-plan
+    note: "Audit (wrong_trigger): the excerpt is the Daylight/Sunlight heading; the audit gives no trigger for the plan."
+  - id: travel-plan
+    note: "Audit (wrong_trigger): the excerpt is only a heading ('Travel Plan When Required'); no trigger captured."
+  - id: viability-assessment
+    note: "Audit (wrong_trigger): the excerpt is only a heading ('Viability Assessment When Required'); no trigger captured."
+
+new-fields:
+  - field: scheduled-monument
+    kind: designation
+    label: Scheduled monument
+    description: Site is in, contains or is near a scheduled monument (dataset scheduled-monument).
+  - field: park-and-garden
+    kind: designation
+    label: Registered park and garden
+    description: Site is in or near a registered historic park and garden (dataset park-and-garden).
+  - field: main-town-centre-use-out-of-centre
+    kind: boolean
+    label: Town centre use outside a centre
+    description: The proposal is for a main town centre use in an edge-of-centre or out-of-centre location.
+  - field: telecommunications-development
+    kind: boolean
+    label: Telecommunications development
+    description: The proposal is for telecommunications development, such as a mast or antennae.

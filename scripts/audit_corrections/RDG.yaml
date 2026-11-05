@@ -1,0 +1,578 @@
+# Corrections for Reading Borough Council, from the audit.
+# The audit read the November 2021 edition and the February 2024 BNG addendum (contents_checked:
+# true). Part 2 of the list has a table per application type and Part 3 describes each item;
+# the workbook ignored most of Part 2 and misfiled several rows, which this file corrects.
+local-authority: RDG
+
+validation-list:
+  url: https://images.reading.gov.uk/2021/12/Validation-Checklist-2021-Final-Version-02.12.21.pdf
+  date: 2021-11
+  date-basis: "audit: title 'VALIDATION REQUIREMENTS FOR PLANNING APPLICATIONS November 2021 Edition'; amended by the Validation Checklist Addendum BNG, February 2024"
+
+submission-standards:
+  - item: Plans marked 'do not scale' or with similar disclaimers will not be accepted
+    level: must
+  - item: Plans drawn to a recognised metric scale (e.g. 1:50, 1:100) with an accurate scale bar to allow digital scaling
+    level: must
+  - item: Plans labelled with a title, drawing number, revision number and date
+    level: must
+  - item: Each plan a single layered PDF with the correct orientation
+    level: must
+
+drop:
+  - id: bng-metric
+    sheets: [Householder]
+    reason: "wrong_app_type: the excerpt itself says 'except householder applications'"
+  - id: schedule-of-works
+    reason: "not_a_requirement: the prior approval row is the tree survey trigger"
+  - id: photos
+    reason: "not_a_requirement: the Full planning row is the Certificate of Lawfulness evidence row; photos are re-added below from the audit"
+
+drop-unmapped:
+  - local-name: Foul Sewage / Utilities Statement
+    reason: "wrong_app_type: the householder row contradicts its own text; re-added once below"
+  - local-name: Character / Conservation area appraisal reference
+    reason: "duplicate: Heritage Statement guidance, now in heritage-statement's must-include"
+  - local-name: Cycle parking details
+    reason: "missing_requirement: a fragment of item 25; re-added once below"
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_app_type: item 25 text from the Major table, misfiled under Discharge of conditions; re-added once below"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: the excerpt is the BNG addendum's contents page; re-added below with the right text"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: the excerpt is the s106 Heads of Terms sentence; re-added below"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: the excerpt is the town-centre sequential test, not the flood test; re-added below under the right name"
+  - local-name: Validation checklist form (completed)
+    reason: "not_a_requirement: advisory ('it helps officers to check and validate the application more quickly')"
+  - local-name: Tall buildings / Wind microclimate assessment
+    reason: "wrong_app_type: Major table item misfiled under Discharge of conditions; re-added below"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_app_type: Major table item misfiled under Discharge of conditions; re-added below"
+
+requirements:
+  - id: bng-metric
+    action: update
+    source-url: https://images.reading.gov.uk/2024/02/Validation-Checklist-Addendum-BNG-February-2024.pdf
+    notes: >-
+      Audit (other): the 2021 text ('DEFRA 3 Metric or its successor') is superseded by the February
+      2024 BNG addendum for statutory biodiversity gain. Not required for householder applications.
+
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates new dwellings.
+        - condition:
+            field: housing-floorspace
+            operator: ">"
+            value: 0
+            description: The proposal creates additional residential floorspace.
+    source-url: https://images.reading.gov.uk/2021/12/Validation-Checklist-2021-Final-Version-02.12.21.pdf
+    confidence: medium
+    notes: >-
+      From the audit (wrong_trigger): new dwellings or additional residential floorspace, excluding
+      HMOs and conversions. The workbook's excerpt ('include an affordable housing statement.') had
+      no trigger.
+
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: Sensitive or intensifying uses in an Air Quality Management Area.
+        - discretionary
+    source-url: https://images.reading.gov.uk/2021/12/Validation-Checklist-2021-Final-Version-02.12.21.pdf
+    confidence: medium
+    notes: >-
+      From the audit (wrong_trigger): sensitive or intensifying uses in or affecting an AQMA. The
+      workbook's excerpt was the EIA Scoping Opinion sentence. Sites outside but affecting an AQMA
+      are shown as officer discretion.
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      all:
+        - site:
+            in: [archaeological-priority-area]
+            description: The site is in an Area of Archaeological Potential on the adopted Local Plan Proposals Map.
+        - condition:
+            field: ground-disturbance
+            value: true
+            description: The proposal involves the disturbance of ground.
+
+  - id: site-plan
+    action: update
+    source-text: >-
+      Site block plan The plan should be based on an up to date survey and show the proposal in
+      relation to site boundaries, other buildings and trees on or adjacent to the site and drawn to
+      a metric scale of 1:200 or 1:500 with a north point shown.
+    source-url: https://images.reading.gov.uk/2021/12/Validation-Checklist-2021-Final-Version-02.12.21.pdf
+    must-include:
+      - item: Based on an up to date survey
+        level: should
+      - item: The proposal shown in relation to site boundaries, other buildings and trees on or adjacent to the site
+        level: should
+      - item: Metric scale of 1:200 or 1:500
+        level: should
+      - item: North point
+        level: should
+
+  - id: cil-form
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 100
+            description: The proposal increases floor area by 100 sqm or more.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates new dwellings.
+    source-url: https://images.reading.gov.uk/2021/12/Validation-Checklist-2021-Final-Version-02.12.21.pdf
+    confidence: medium
+    notes: >-
+      From the audit (wrong_app_type): the CIL form is listed for householder applications with a
+      floor area increase of 100 sqm or more, for reserved matters, for lawful development
+      certificates (new dwellings or 100 sqm+) and for s73 applications where dwellings or
+      floorspace change.
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      any:
+        - all:
+            - site:
+                in: [contaminated-land]
+                description: Contamination is known or suspected on or near the site.
+            - condition:
+                field: ground-disturbance
+                value: true
+                description: Ground-works are proposed.
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: There is a vulnerable or sensitive end user.
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: storey-count
+            operator: ">"
+            value: 4
+            description: Buildings exceeding four storeys where adjoining other developed land or public open spaces.
+        - discretionary
+    notes: "The council's list of cases is cut off after the first. From the audit: householder applications need it where neighbouring light is affected."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [site-of-special-scientific-interest, local-wildlife-site]
+            description: The site is in or near a wildlife site or an area of high ecological value.
+        - condition:
+            field: demolition
+            value: true
+            description: The proposal involves demolition (bat surveys).
+        - condition:
+            field: roof-alteration
+            value: true
+            description: The proposal involves roof works (bat surveys).
+        - discretionary
+    source-url: https://images.reading.gov.uk/2021/12/Validation-Checklist-2021-Final-Version-02.12.21.pdf
+    confidence: medium
+    notes: >-
+      From the audit (wrong_trigger): all major applications, protected species, priority habitats or
+      wildlife sites, and bat surveys for demolition or roof works; householder applications near
+      high-value ecological areas or with roof works. Protected species and priority habitats are
+      shown as officer discretion. The workbook's excerpt was the BNG addendum's contents page.
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      always: true
+    source-text: >-
+      Sustainability Statement When Required All development will need to demonstrate how it has
+      been designed to incorporate measures to adapt to climate change in accordance with policies
+      CC2, CC3, CC4, CC5, EN18 and H5 of the Reading Borough Local Plan (2019)
+    source-url: https://images.reading.gov.uk/2021/12/Validation-Checklist-2021-Final-Version-02.12.21.pdf
+    policy: Reading Borough Local Plan (2019) policies CC2, CC3, CC4, CC5, EN18 and H5
+    confidence: medium
+    notes: "The workbook limited this to Full planning; the council says all development."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-text: a more formal Energy Statement is required for all major development (see item 7 above).
+    source-url: https://images.reading.gov.uk/2021/12/Validation-Checklist-2021-Final-Version-02.12.21.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): item 7 Energy Efficiency Statement is Major-only."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+
+  - id: section-existing
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: sloping-site
+            value: true
+            description: The site is sloping.
+        - condition:
+            field: ground-level-change
+            operator: ">"
+            value: 0
+            description: Ground levels outside the extension would be modified.
+    source-text: >-
+      particularly in the case of sloping sites it will be necessary to show how proposals relate to
+      existing ground levels or where ground levels outside the extension would be modified.
+    source-url: https://images.reading.gov.uk/2021/12/Validation-Checklist-2021-Final-Version-02.12.21.pdf
+    confidence: medium
+    notes: "The council's text, which the workbook split between its sections and floor plan rows."
+
+  - id: section-proposed
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: sloping-site
+            value: true
+            description: The site is sloping.
+        - condition:
+            field: ground-level-change
+            operator: ">"
+            value: 0
+            description: Ground levels outside the extension would be modified.
+    source-text: >-
+      particularly in the case of sloping sites it will be necessary to show how proposals relate to
+      existing ground levels or where ground levels outside the extension would be modified.
+    source-url: https://images.reading.gov.uk/2021/12/Validation-Checklist-2021-Final-Version-02.12.21.pdf
+    confidence: medium
+    notes: "The council's text, which the workbook split between its sections and floor plan rows."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (Flood Zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (Flood Zone 1).
+        - site:
+            in: [flood-risk-zone]
+            description: New development, including household or small commercial extensions, in Flood Zone 2, 3a or 3b.
+
+  - id: floor-plan-existing
+    action: update
+    source-text: Full (not part) Floor plans – existing (where relevant) and proposed at a metric scale of 1:50 or 1:100.
+    must-include:
+      - item: Full (not part) floor plans at a metric scale of 1:50 or 1:100
+        level: must
+
+  - id: floor-plan-proposed
+    action: update
+    source-text: Full (not part) Floor plans – existing (where relevant) and proposed at a metric scale of 1:50 or 1:100.
+    must-include:
+      - item: Full (not part) floor plans at a metric scale of 1:50 or 1:100
+        level: must
+
+  - id: elevation-existing
+    action: update
+    source-text: Full (not part) elevations – all existing and proposed to be shown at a metric scale of 1:50 or 1:100
+    must-include:
+      - item: Full (not part) elevations, all shown, at a metric scale of 1:50 or 1:100
+        level: must
+
+  - id: elevation-proposed
+    action: update
+    source-text: Full (not part) elevations – all existing and proposed to be shown at a metric scale of 1:50 or 1:100
+    must-include:
+      - item: Full (not part) elevations, all shown, at a metric scale of 1:50 or 1:100
+        level: must
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, locally-listed-building, conservation-area]
+            description: The application affects a heritage asset or its setting, or is in a conservation area.
+    source-text: >-
+      Heritage Statements When Required Any application which affects a ‘heritage asset’ or its
+      setting or for development proposals in conservation areas.
+    source-url: https://images.reading.gov.uk/2021/12/Validation-Checklist-2021-Final-Version-02.12.21.pdf
+    must-include:
+      - item: The history, character and significance of the building, site or area concerned (the heritage asset)
+        level: must
+      - item: The extent and nature of the proposed development
+        level: must
+      - item: The impact of the development on the heritage asset
+        level: must
+      - item: The justification for the works, and any mitigation proposed
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): listed building consent and householder applications need it too. The
+      contents are from the council's guidance, which the workbook filed as 'Character / Conservation
+      area appraisal reference' ('it is expected that these documents will contain sufficient
+      detail...').
+
+  - id: landscaping-plan
+    action: update
+    required-if: discretionary
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): item 13 Landscape Principles, for major and minor schemes
+      with external space. The workbook's excerpt ('different to landscaping plans).') was a
+      fragment.
+
+  - id: recreation-facilities-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [open-space]
+            description: Within or adjoining open space.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: Residential development of 10 or more dwellings.
+    source-url: https://images.reading.gov.uk/2021/12/Validation-Checklist-2021-Final-Version-02.12.21.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 17 Open Space Statement. The workbook captured the heading only."
+
+  - id: photos
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [advertising]
+        - site:
+            in: [conservation-area, listed-building, listed-building-setting]
+            description: The advertisement is in or near a conservation area or listed building.
+    source-url: https://images.reading.gov.uk/2021/12/Validation-Checklist-2021-Final-Version-02.12.21.pdf
+    confidence: medium
+    notes: "From the audit (wrong_app_type): photos or photomontages for advertisements in or near conservation areas and listed buildings."
+
+  - id: planning-statement
+    action: update
+    must-include:
+      - item: An explanation of the change being sought
+        level: must
+        required-if:
+          application-type:
+            in: [s73]
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt ('either within a Planning Statement or in a
+      covering letter.') is a fragment. From the audit: s73 applications need a planning statement
+      explaining the change.
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      condition:
+        field: town-centre-use-floorspace
+        operator: ">"
+        value: 1000
+        description: Over 1,000 sq m (gross) of new or additional main town centre use floorspace.
+    policy: Reading Borough Local Plan policy RL5
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-text: >-
+      Transport Assessments, Transport Statements & Travel Plans When Required All Major Applications
+      and larger Minor and Other applications that will have an impact by increasing transport demand
+      will be required to provide a transport assessment to measure those impacts and propose
+      measures to mitigate them.
+    source-url: https://images.reading.gov.uk/2021/12/Validation-Checklist-2021-Final-Version-02.12.21.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was the EIA Scoping Opinion sentence; the right text was on the Travel Plan row."
+
+  - id: travel-plan
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - condition:
+                field: external-lighting
+                value: true
+                description: External lighting would be provided or made necessary by the development.
+            - any:
+                - site:
+                    in: [listed-building, listed-building-setting, conservation-area, local-wildlife-site]
+                    description: In the vicinity of a listed building, a conservation area or a local wildlife site.
+                - discretionary
+        - all:
+            - application-type:
+                in: [advertising]
+            - condition:
+                field: illuminated
+                value: true
+                description: The advertisement is illuminated.
+    source-text: >-
+      External Lighting Details When Required All proposals involving the provision of publicly
+      accessible developments, in the vicinity of residential property, a Listed Building or a
+      Conservation Area, Local Wildlife Site, green link or watercourse where external lighting would
+      be provided or made necessary by the development
+    source-url: https://images.reading.gov.uk/2021/12/Validation-Checklist-2021-Final-Version-02.12.21.pdf
+    must-include:
+      - item: Hours of operation
+        level: should
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): item 9 applies to any application type, not only listed building
+      consent; illuminated adverts need lighting details too. Publicly accessible developments and
+      sites near homes, green links or watercourses are shown as officer discretion.
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees within the site or adjacent to it, including street trees (householder works within 15m of a tree).
+    source-text: >-
+      Tree Surveys/ Arboricultural Impact Assessment & Arboricultural Method Statements When Required
+      Tree survey information will be required on all development sites, apart from change of use,
+      where there are trees within the site or adjacent to it, including street trees.
+    source-url: https://images.reading.gov.uk/2021/12/Validation-Checklist-2021-Final-Version-02.12.21.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook filed this under prior approval only, although the text says 'apart from change of use'. Householder works within 15m of a tree need it too."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Noisy development near sensitive uses.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Sensitive uses near noise sources.
+        - condition:
+            field: plant-equipment
+            value: true
+            description: Commercial extraction or cooling units near sensitive uses.
+        - discretionary
+    source-url: https://images.reading.gov.uk/2021/12/Validation-Checklist-2021-Final-Version-02.12.21.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): item 16 Noise & Vibration Impact Assessment; mixed-use
+      schemes are shown as officer discretion. The prior approval table also asks for an acoustic
+      assessment for offices within 50m of noisy premises.
+
+unmapped:
+  - local-name: Utilities Statement
+    source-text: >-
+      Utilities Statements When required Statements will be required to accompany all Major
+      (including Outline) applications for housing development or business, industrial, storage,
+      retail or leisure floorspace, or developments for other uses which are of a similar scale; and
+      for other non-householder developments on sites containing significant tree cover or within an
+      area of Archaeological Potential.
+    source-url: https://images.reading.gov.uk/2021/12/Validation-Checklist-2021-Final-Version-02.12.21.pdf
+    suggested-id: foul-sewage-utilities-statement
+  - local-name: Vehicle (car/cycle) parking and servicing including waste
+    source-text: "From the audit: item 25, all non-householder applications, and householder applications where parking is lost or altered"
+    source-url: https://images.reading.gov.uk/2021/12/Validation-Checklist-2021-Final-Version-02.12.21.pdf
+    suggested-id: parking-plan
+  - local-name: Heads of Terms proposal - s106 legal agreements
+    source-text: >-
+      SPDs or pre-application discussions indicate that there will be a requirement to secure by a
+      legal agreement either works of financial contributions to mitigate the impact of a
+      development.
+    source-url: https://images.reading.gov.uk/2021/12/Validation-Checklist-2021-Final-Version-02.12.21.pdf
+    suggested-id: heads-of-terms
+  - local-name: Sequential test (main town centre uses)
+    source-text: >-
+      The requirement for a Sequential Test applies to all applications for main town centre uses as
+      defined in the NPPF (no minimum threshold applies)
+    source-url: https://images.reading.gov.uk/2021/12/Validation-Checklist-2021-Final-Version-02.12.21.pdf
+    suggested-id: sequential-test
+  - local-name: Wind and Microclimate Assessment
+    source-text: Wind and Microclimate Assessment Buildings greater than 8 storeys, or developments likely to impact upon by existing tall buildings
+    source-url: https://images.reading.gov.uk/2021/12/Validation-Checklist-2021-Final-Version-02.12.21.pdf
+    suggested-id: wind-microclimate-assessment
+  - local-name: Vent/Flue & ventilation details
+    source-text: Vent/Flue & ventilation details All applications where mechanical ventilation is proposed
+    source-url: https://images.reading.gov.uk/2021/12/Validation-Checklist-2021-Final-Version-02.12.21.pdf
+    suggested-id: ventilation-extraction-details
+  - local-name: Materials details
+    source-text: "From the audit: item 15, major, minor and householder development visible from the public realm, and listed building consent"
+    source-url: https://images.reading.gov.uk/2021/12/Validation-Checklist-2021-Final-Version-02.12.21.pdf
+    suggested-id: materials-details
+  - local-name: Evidence for certificates of lawfulness
+    source-text: Photographs – current and historic Statements from tenants /owners.
+    source-url: https://images.reading.gov.uk/2021/12/Validation-Checklist-2021-Final-Version-02.12.21.pdf
+    suggested-id: lawful-development-evidence
+
+new-fields:
+  - field: sensitive-end-use
+    kind: boolean
+    label: Sensitive end use
+    description: The proposal is for a sensitive end use such as housing, schools or nurseries (for example on or near contaminated land).
+  - field: ground-level-change
+    kind: number
+    label: Change in ground levels (m)
+    description: The largest proposed change to existing ground levels, in metres (0 if none).
+  - field: sloping-site
+    kind: boolean
+    label: Sloping site
+    description: The site or plot is on a steep incline or decline.
+  - field: roof-alteration
+    kind: boolean
+    label: Roof alterations
+    description: The proposal creates or alters a roof (including dormers and works within roof slopes).
+  - field: open-space
+    kind: designation
+    label: Open space or playing fields
+    description: Site is existing open space, playing fields or sports and recreational land or buildings.
+  - field: town-centre-use-floorspace
+    kind: number
+    label: Main town centre use floorspace (sqm)
+    description: Gross new or additional floorspace for main town centre uses (as defined in the NPPF), in square metres.

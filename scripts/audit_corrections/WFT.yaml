@@ -1,0 +1,725 @@
+# Corrections for London Borough of Waltham Forest, from the Waltham Forest audit.
+# The audit compared the workbook with the council's 2025 Full National & Local Validation
+# Checklist (and the six V1-2025 type checklists), which the council enforces from 1 January
+# 2026. Some workbook rows came from the superseded 2023 list. Because most requirements were
+# spread across several sheets with fragmentary or mislabelled excerpts, most are replaced with
+# one clean rule from the best verbatim excerpt. Items marked "From the audit" use the audit's
+# paraphrase, not the council's words.
+local-authority: WFT
+
+validation-list:
+  url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+  date: 2025
+  date-basis: "audit: PDF title 'Local validation requirements for planning applications 2025'; the council page says it applies (invalidation) from 1 January 2026"
+
+submission-standards:
+  - item: Each drawing has a title and drawing number, with the revision number as necessary
+    level: must
+  - item: Drawings state the print (paper) size and the scale at that print size (e.g. 1:50 at A3 or 1:100 at A3)
+    level: must
+  - item: A scale bar of 5 metres highlighting each metre
+    level: must
+  - item: The wording "do not scale" must not be used
+    level: must
+  - item: Individual documents and plans must not exceed 10Mb in size
+    level: must
+
+drop:
+  - id: schedule-of-works
+    reason: "other: the excerpts are the Construction and Demolition Method Statement / Demolition Method Statement (now construction-management-plan)"
+
+drop-unmapped:
+  - local-name: Cycle parking details
+    reason: "site plan content (now a site-plan must-include item), not a separate requirement"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement / duplicate: site plan content plus fee text, repeated in every type"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: fragment shared with the FRA row; re-added below with the Surface Water Drainage Assessment trigger"
+  - local-name: Ground investigation / Geotechnical / Basement Impact Assessment
+    reason: "wrong_trigger: some rows carry archaeology or biodiversity text; re-added below"
+  - local-name: Crime prevention / Secured by Design statement
+    reason: "wrong_trigger: the Full planning row is Design and Access Statement content; re-added below"
+  - local-name: Gypsy & Traveller information
+    reason: "other: this is the Purpose Built Student Housing Demand Study; re-added below"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_trigger: fragment; re-added below with the Epping Forest SAC trigger"
+  - local-name: Odour / Dust / Vibration assessment
+    reason: "wrong_trigger / duplicate: Noise and Vibration text (now noise-assessment) and a duplicate of the Ventilation row"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "other: this is the retail Sequential Test and Impact Assessment (now town-centre-impact-assessment)"
+  - local-name: Tall buildings / Wind microclimate assessment
+    reason: "wrong_trigger: the Outline row is Marketing Strategy text; re-added below"
+  - local-name: Advertisement drawings / illumination details
+    reason: "other: a Lighting Assessment fragment (Outline) and the statutory definition of an advertisement"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "other: Viability Appraisal content"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: encouragement text"
+
+requirements:
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [air-quality-management-area]
+            description: Proposals introducing residential (or other sensitive) uses within areas of particularly significant air quality, including AQMAs.
+        - discretionary
+    source-text: >-
+      Air Quality Impact Assessment All major development, unless there is clear evidence that
+      transport and building emissions will be less than the existing use; … Proposals introducing
+      residential use (or other sensitive uses) within areas of particularly significant air
+      quality, including Air Quality Management Areas (AQMAs) and other applications likely to have
+      impact…
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    confidence: medium
+    notes: "Built from the Outline and LBC checklist excerpts; the Full planning excerpt was a fragment. Other applications likely to have an impact are shown as officer discretion."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees within the site, or on adjacent land, that would influence or be affected by the development (including street trees).
+    source-text: >-
+      Tree Survey/Arboricultural implications All applications where there are trees within the
+      application site, or on land adjacent to trees that would influence or be affected by the
+      development (including street trees).
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Householder-%20Applications%20Checklist-V1-2025.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the Full planning excerpt was only 'line with BS5837 62.'. Applies to all application types."
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - site:
+                in: [archaeological-priority-area]
+                description: The site is in a Tier 1 Archaeological Priority Area.
+            - condition:
+                field: ground-disturbance
+                value: true
+                description: The proposal involves groundworks.
+        - all:
+            - site:
+                in: [archaeological-priority-area]
+                description: The site is in a Tier 2 Archaeological Priority Area.
+            - ref: major-development
+    source-text: >-
+      All proposals involving groundworks within Tier 1 Archaeological Priority Areas, all Major
+      applications in Tier 2 Archaeological Priority Areas An assessment of potential
+      archaeological heritage must be provided.
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): this trigger was in the workbook's Basement Impact Assessment row; the archaeology rows carried basement and biodiversity text. The rule can't tell Tier 1 from Tier 2."
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      application-type:
+        in: [full, outline]
+    source-text: Biodiversity Net Gain All major and minor applications (unless exemption is applied for)
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    confidence: medium
+    notes: "The application types approximate 'major and minor applications' (not householder)."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [local-wildlife-site]
+            description: The site is within or adjacent to a Site of Importance for Nature Conservation.
+        - discretionary
+    source-text: >-
+      Biodiversity Report Proposals on sites within or adjacent to a Site of Importance for Nature
+      Conservation, or which may have impacts on biodiversity or protected species.
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Listed%20Building%20Consent%20Application%20Validation%20Checklist-V1-2025.pdf
+    confidence: medium
+    notes: "The trigger was in the workbook's LBC archaeology row; the other excerpts were fragments or from the 2023 list. Impacts on biodiversity or protected species are shown as officer discretion."
+
+  - id: cil-form
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 100
+            description: New buildings or extensions creating 100 square metres or more of gross internal floorspace.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates one or more dwellings (even where below 100 square metres).
+    source-text: >-
+      CIL – Additional Information Requirement Form Proposals including new buildings or extensions
+      which involve the creation of 100 square metres or more of gross internal floorspace, or
+      involve the creation of one or more dwellings (even where this is below 100 square metres)
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    confidence: medium
+    notes: "The council says all applications except Advertisement consent and Submission of details pursuant to planning permission."
+
+  - id: construction-management-plan
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: New residential development.
+        - discretionary
+    source-text: >-
+      Construction and Demolition Method Statement All major applications All applications for new
+      residential development Other Applications Details must be included of how on-site impacts
+      will be managed during the demolition/construction phase (particularly on homes, other
+      sensitive uses and biodiversity), including traffic management, dust, noise, vibration and
+      stability.
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    must-include:
+      - item: How on-site impacts will be managed during demolition/construction, including traffic management, dust, noise, vibration and stability
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (other): the workbook mislabelled this as 'Schedule of works (listed building)'. Other
+      applications "likely to have a significant impact on traffic congestion or pedestrian safety"
+      (householder checklist) are shown as officer discretion.
+
+  - id: daylight-sunlight-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-text: >-
+      Daylight/Sunlight Assessment All Major Applications … Required if the proposal is likely to
+      have an adverse … effect upon levels of light to adjoining sensitive land uses.
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    must-include:
+      - item: Conforms to the methodology in the most recently published BRE guidance 'Site layout planning for daylight and sunlight'
+        level: must
+    confidence: medium
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is within a conservation area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: One or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: Floorspace created is 100 square metres or more.
+        - all:
+            - application-type:
+                in: [advertising]
+            - site:
+                in: [conservation-area, listed-building]
+                description: Adverts in conservation areas or on listed buildings.
+    source-text: >-
+      Design and Access Statement Major developments Listed building consent Applications for one
+      or more dwellings or a building or buildings where the floorspace created is 100sq.m or more
+      within a conservation area A Design and Access Statement must be proportionate to the scale of
+      the development. … Design and access statements are required for adverts in conservation
+      areas and for Listed Buildings.
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    confidence: medium
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: New minor residential development of 1 or more units.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 100
+            description: New minor non-residential development greater than 100 square metres.
+    source-text: >-
+      Energy Statement – Major applications All Major applications Energy Statements must outline
+      what measures will be taken to comply with Policy S12 of the London Plan reflecting the
+      Mayor’s ambition for a net zero carbon London, and where possible deliver this through onsite
+      solutions rather than offsetting contributions.
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    confidence: medium
+    notes: >-
+      The workbook filed the major Energy Statement under the Sustainability Statement. From the
+      audit (missing_requirement): an Energy Statement – Minor is also required for new minor
+      residential of 1+ units or new minor non-residential over 100 sq m.
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: New minor residential development of 1 or more units.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 100
+            description: New minor non-residential development greater than 100 square metres.
+    source-text: For all new Minor residential development of 1 or more units or all new Minor non-residential development greater than 100 sq.m.
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement): Sustainability Statement – Minor. The workbook's excerpt was the major Energy Statement (now energy-statement)."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development (or the original development, for s73/s96a amendments) is EIA development.
+    source-text: >-
+      The Town and Country Planning (Environmental Impact Assessment) Regulations (SI 2017/571), as
+      amended, set out the circumstances in which an Environmental Impact Assessment (EIA) is
+      required.
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): also required for s73/s96a amendments to original EIA development."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      application-type:
+        in: [hh, full, outline, reserved-matters]
+    source-text: >-
+      Fire Statement/Planning Fire Safety Strategy/Reasonable Exception statement All Major
+      applications Householders & Nonmajor development All major development proposals must be
+      submitted with a Fire Statement, which is an independent fire strategy, produced by a third
+      party suitably qualified assessor.
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    must-include:
+      - item: An independent Fire Statement (fire strategy) produced by a suitably qualified third-party assessor
+        level: must
+        required-if:
+          ref: major-development
+      - item: A Planning Fire Safety Strategy or Reasonable Exception Statement
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook gave only the national 18m / 7-storey Fire Statement
+      trigger. The 2025 list (London Plan D12) also needs a Planning Fire Safety Strategy or
+      Reasonable Exception Statement for householder and non-major development. The national Fire
+      Statement form still applies to relevant buildings (18m+ or 7+ storeys with 2+ dwellings or
+      educational accommodation). The application types approximate "all major, householder and
+      non-major development".
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3.
+        - site:
+            in: [critical-drainage-area]
+            description: The site is in a critical drainage area.
+        - all:
+            - condition:
+                field: basement
+                value: true
+                description: The proposal includes a basement.
+            - discretionary
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpts were fragments. From the audit: Flood Zones 2/3, critical drainage areas, and basements in groundwater flood risk areas (shown as basement plus officer discretion)."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [conservation-area, listed-building, listed-building-setting, locally-listed-building, archaeological-priority-area, scheduled-monument]
+            description: The application is within or affects a conservation area, listed or locally listed building, area of special character, archaeological remains or Scheduled Ancient Monument.
+    source-text: >-
+      Heritage Statement All applications within or affecting conservation areas, listed buildings,
+      locally listed buildings, archaeological remains and Scheduled Ancient Monuments
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the Householder excerpt gave no trigger and the Full/Outline excerpts were Design and Access Statement text. The audit adds areas of special character."
+
+  - id: landscaping-plan
+    action: replace
+    required-if:
+      ref: major-development
+    source-text: Landscaping scheme Major developments
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    confidence: medium
+    notes: "From the Outline and LBC checklists. The Householder row's excerpt repeated the heritage trigger wording."
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: The proposal involves external lighting or floodlighting where the site is publicly accessible (e.g. commercial, education, sports or public realm) or in other listed circumstances.
+    source-text: >-
+      Lighting Assessment All development proposals involving external lighting or floodlighting,
+      where the site: Is publicly accessible (e.g. commercial, education, sports, or public realm)
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    must-include:
+      - item: A lighting layout plan showing fitting locations, optic orientation and lux levels (in Lighting Reality file format)
+        level: must
+    confidence: medium
+    notes: "The list of site circumstances is cut off in the source. The must-include item was filed under the workbook's 'Submission rules'."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: New buildings where environmental noise is high.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The development is likely to generate noise.
+    source-text: >-
+      Noise and Vibration Assessment will be required where environmental noise is high or where a
+      new buildings; development is likely to generate noise.
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement): the Noise and Vibration Assessment had no row of its own; it was folded into 'Odour / Dust / Vibration'."
+
+  - id: photos
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [conservation-area, listed-building, listed-building-setting, locally-listed-building]
+            description: Development affecting a heritage asset or its setting.
+        - condition:
+            field: demolition
+            value: true
+            description: Demolition of an existing building.
+    source-text: >-
+      Photographs and CGIs All major applications Development affecting a heritage asset or its
+      setting; demolition of an existing building
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    confidence: medium
+    notes: "For advertisement and lawful development certificate applications photographs are only 'desirable'."
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      application-type:
+        in: [full, s73, non-material-amendment]
+    source-text: >-
+      Planning Statement Minor applications for full planning permission A short-written
+      description and explanation of the proposal including a justification of the scheme against
+      key planning policies and why any other submission documents are not appropriate in the
+      particular circumstances.
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    must-include:
+      - item: A short written description and explanation of the proposal, with a justification against key planning policies
+        level: must
+      - item: Why any other submission documents are not appropriate in the particular circumstances
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): also required for variation or removal of conditions and amendments
+      (s73 and s96a). The council's wording names minor full applications; 'full' here also covers
+      majors, which the rule can't exclude. The Change of use row was marketing assessment text.
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: Major residential development.
+        - discretionary
+    must-include:
+      - item: Details of existing open space in the vicinity of the site
+        level: must
+    confidence: medium
+    notes: "The council's text: development on open spaces or play, sports and recreation facilities; major residential developments; creation of public open space. Cases other than major residential are shown as officer discretion."
+
+  - id: sci
+    action: replace
+    required-if:
+      ref: major-development
+    source-text: Statement of Community Engagement All major applications
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    must-include:
+      - item: How the views of the local community have been sought and taken into account in the formulation of the proposals
+        level: must
+    confidence: medium
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: Cycle parking arrangements, annotated with the number of cycle stands
+        level: must
+        source-text: show cycle parking arrangements (including annotation stating the number of cycle stands)
+    notes: "The workbook's site plan excerpts are fragments ('A Site Plan showing'). The cycle parking item was a separate workbook row."
+
+  - id: telecommunications-report
+    action: replace
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Mast and antenna development by Electronic Communications Code Operators and mobile phone network operators.
+    source-text: >-
+      Telecommunications Development Planning applications for mast and antenna development by
+      Electronic Communications Code Operators and mobile phone network operators in England
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    confidence: medium
+    notes: "The Full planning excerpt was a fragment ('Radiation Protection (ICNIRP). 27(a).')."
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: New or extended edge or out-of-centre Class A uses, entertainment or leisure development.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 200
+            description: Over 200 square metres gross floorspace.
+    source-text: >-
+      Sequential Test and Impact Assessment Proposals for new, or extension to, existing edge or
+      out-of-centre Class A uses, entertainment or leisure development in excess of 200 sq.m gross
+      floorspace must submit a sequential test and an impact assessment
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    confidence: medium
+    notes: "Audit (other): the trigger was in rows mislabelled 'Sequential / Exception Test (flood)'; the town centre rows held marketing assessment text."
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: Residential development of 10 or more units (Transport Statement for 10-50 units; Transport Assessment over 50).
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 1000
+            description: Commercial development (including retail) over 1,000 square metres.
+        - discretionary
+    source-text: >-
+      Transport Assessment (see also … Transport Statement) Major Applications for over 50
+      residential units … Applications for commercial development (including retail) of over 1000
+      sqm … Applications proposing residential development of 10-50 units
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger, missing_requirement): also schools, nurseries, hospitals and places of worship (shown as officer discretion). The Transport Statement (10-50 units) had no row."
+
+  - id: travel-plan
+    action: replace
+    required-if:
+      ref: major-development
+    source-text: Travel Plan All major planning applications
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    confidence: medium
+
+  - id: viability-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: Major development that includes residential units.
+        - discretionary
+    source-text: >-
+      Viability Appraisal (see Marketing Assessment) All major developments that include
+      residential units Any other major development where the deliverability of the scheme as
+      designed needs to be understood Any development proposing a reduction in existing housing
+      numbers on the site Any application proposing the loss of a public house (including a change
+      of use) Any application proposing the demolition of o…
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): a planning-application requirement, not a prior approval one. The other listed cases (reduction in housing numbers, loss of a pub, demolition…) are shown as officer discretion."
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more units.
+        - discretionary
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Affordable Housing Appraisal for 10+ units, or sites with potential for 10+ (shown as officer discretion)."
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      all:
+        - ref: major-development
+        - any:
+            - condition:
+                field: demolition
+                value: true
+                description: Demolition is necessary.
+            - condition:
+                field: earthworks
+                value: true
+                description: Excavation and/or substantial site clearance is necessary.
+    source-text: >-
+      Site Waste Management Plan Major developments where demolition, (see also Delivery and
+      Servicing … Plan) excavation and/or substantial site clearance is necessary
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    confidence: medium
+    notes: "The Householder and Full planning excerpts were refuse storage and servicing fragments."
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: The site is on or adjacent to potentially contaminated land.
+        - discretionary
+    source-text: >-
+      Land Contamination Assessment Any application on or adjacent to potentially contaminated land
+      Any application for a particularly sensitive use such as a nursery, school or housing likely
+      to be used by families with children.
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the Full planning excerpt was a fragment. Particularly sensitive uses are shown as officer discretion."
+
+unmapped:
+  - local-name: Surface Water Drainage Assessment
+    source-text: "Surface Water Drainage Assessment Development proposals for all buildings / non permeable hard surfacing / extensions."
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    suggested-id: drainage-strategy
+  - local-name: Basement Impact Assessment
+    source-text: "Basement Impact Assessment All applications which include the construction, extension, or deepening of a basement or subterranean structure (including basements beneath dwellings, outbuildings, or commercial units)"
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Householder-%20Applications%20Checklist-V1-2025.pdf
+    suggested-id: basement-impact-assessment
+  - local-name: Crime Prevention/Safer Places report
+    source-text: "Crime Prevention/Safer Places report Major developments that propose areas of public realm and/or publicly accessible open space"
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    suggested-id: crime-prevention-statement
+  - local-name: Purpose Built Student Housing Demand Study
+    source-text: "Purpose Built Student Housing demand Study Requirement All applications for purpose-built student accommodation"
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    suggested-id: student-housing-demand-study
+  - local-name: Project Level Habitats Regulations Assessment (Epping Forest SAC)
+    source-text: "From the audit: new dwellings (1+ units), HMOs, student, care, caravan or gypsy/traveller residential anywhere in the borough, because the 'whole borough within the 6.2km Epping Forest SAC zone'; extra requirements within 400m"
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    suggested-id: habitats-regulations-assessment
+  - local-name: Microclimate impact assessment
+    source-text: "Microclimate impact assessment All applications for new buildings or extensions over 30m in height In accordance with Policy D8 of the London Plan a Microclimate impact assessment is required if proposal is likely to have an adverse effect upon microclimate, in particular wind."
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    suggested-id: microclimate-assessment
+  - local-name: Tall Building Assessment
+    source-text: "Development of 10 or more storeys outside of the sites identified in Fig 14.1 of the Local Plan"
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    suggested-id: tall-building-assessment
+  - local-name: Urban Greening Factor
+    source-text: "All major development (excluding B2/B8 commercial uses)"
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    suggested-id: urban-greening-factor
+  - local-name: Marketing assessment (loss of town centre uses)
+    source-text: "of existing town centre uses within Neighbourhood Centres and Local Retail Parades An independent assessment must be provided to demonstrate that there is no viable potential for the continuation of commensurate floorspace of the existing use(s)."
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    suggested-id: marketing-evidence
+  - local-name: Accommodation Schedule
+    source-text: "From the audit: proposals providing residential units, care homes, caravan and traveller plots"
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    suggested-id: accommodation-schedule
+  - local-name: Materials (details of)
+    source-text: "From the audit: all developments involving building work"
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    suggested-id: materials-details
+  - local-name: Shopfronts in Conservation Areas or Listed Buildings
+    source-text: "From the audit: listed in the 2025 list (item 45) without a captured trigger"
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    suggested-id: shopfront-details
+  - local-name: Parking Management Plan
+    source-text: "From the audit: all majors, residential over 5 units in a CPZ, on-site parking"
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    suggested-id: parking-management-plan
+  - local-name: Circular Economy Statement
+    source-text: "From the audit: GLA referable applications"
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    suggested-id: circular-economy-statement
+  - local-name: Outline Construction Logistics Plan
+    source-text: "From the audit: all majors, smaller schemes with significant construction impact, sites on classified roads"
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    suggested-id: construction-logistics-plan
+  - local-name: Delivery and Servicing Plan
+    source-text: "Delivery & Servicing Plan All Major applications Any application for Class E (a), (b) and (c) (including change of use) over 100sq.m"
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    suggested-id: delivery-servicing-plan
+  - local-name: District Heating Assessment
+    source-text: "From the audit: major development or over 100 sq m within 200m of a heat network"
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    suggested-id: district-heating-assessment
+  - local-name: Large Scale Shared Living Management Plan
+    source-text: "From the audit: more than 50 bed-spaces"
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    suggested-id: shared-living-management-plan
+  - local-name: Overheating Assessment
+    source-text: "Overheating Assessment All Major Developments A dynamic overheating assessment in line with Chartered Institute of Building Services Engineers (CIBSE)"
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    suggested-id: overheating-assessment
+  - local-name: Demolition Method Statement
+    source-text: "From the audit: demolition in conservation areas, of listed or locally listed buildings, or in AQMAs; the list also says 'All applications for Prior Approval relating to the Method of Demolition'"
+    source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+    suggested-id: demolition-method-statement
+
+new-fields:
+  - field: telecommunications-development
+    kind: boolean
+    label: Telecommunications equipment
+    description: The proposal is for telecommunications equipment such as masts or base stations.
+  - field: out-of-centre-town-centre-use
+    kind: boolean
+    label: Main town centre use outside a centre
+    description: A main town centre use proposed in an edge-of-centre or out-of-centre location.
+  - field: scheduled-monument
+    kind: designation
+    label: Scheduled monument
+    description: Site contains or affects a scheduled monument or its setting (dataset scheduled-monument).

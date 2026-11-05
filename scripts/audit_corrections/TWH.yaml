@@ -1,0 +1,352 @@
+# Corrections for London Borough of Tower Hamlets, from the council's audit.
+# Tower Hamlets' local list is a web page with seven type-specific checklists and 48 requirement
+# pages. The audit could not parse the Full/Outline .docx, so it checked the workbook against the
+# requirement pages and the Householder checklist (Sept 2020, V5). Grokbot downloaded but never
+# mapped the Certificate of Lawfulness and tree works checklists, so 'Lawful development cert'
+# and 'Works to trees' still show no local requirements; those need a manual read.
+local-authority: TWH
+
+validation-list:
+  date: 2025-03
+  date-basis: >-
+    audit (claude_response): the Full/Outline checklist is headed 'Full & Outline Planning
+    Applications Checklist March 2025'; the type checklists are V5, September 2020
+
+submission-standards:
+  - item: A linear scale bar on each drawing
+    level: must
+
+drop:
+  - id: schedule-of-works
+    reason: >-
+      not a separate requirement: the excerpt is a sentence from inside the Heritage Impact
+      Statement guidance (now a must-include item there); it was also filed under Advertisement
+      consent (wrong_app_type)
+  - id: planning-statement
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: 'major change of use applications' are planning applications, not prior approvals"
+  - id: photos
+    sheets: [Full planning]
+    reason: "The Full planning row is 'CGI Visualisations' for major development, not photographs; listed as unmapped below"
+
+drop-unmapped:
+  - local-name: Tall buildings / Wind microclimate assessment
+    reason: "wrong_trigger: the excerpt 'lighting and tall buildings.' is from the Lighting Assessment; re-added below"
+  - local-name: Cycle parking details
+    reason: "wrong_trigger: the excerpt is the Drainage/SuDS trigger"
+  - local-name: Highways / access details (visibility splays)
+    reason: "duplicate: the same Parking and Access Details item as 'Parking provision / Parking plan'"
+  - local-name: Advertisement drawings / illumination details
+    reason: "not_a_requirement: the excerpt is the statutory definition of an advertisement"
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "mislabelled: the item is a Biodiversity Survey and Report (now in biodiversity-survey-report)"
+
+requirements:
+  - id: heritage-statement
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [listed-building, listed-building-setting, locally-listed-building]
+            description: The development affects locally or statutorily listed buildings, including their setting.
+        - site:
+            in: [conservation-area]
+            description: The development is in, or affects the setting of, a conservation area.
+        - all:
+            - site:
+                in: [archaeological-priority-area]
+                description: The site is in an Area of Archaeological Potential.
+            - condition:
+                field: ground-disturbance
+                value: true
+                description: The development disturbs the ground.
+    source-text: >-
+      Heritage Impact Statement ... Required where the development affects locally or
+      statutorily listed buildings (including their setting); where the development is in, or
+      affects the setting of, a conservation area; where the development involves the disturbance
+      of ground within an Area of Archaeological Potential.
+    source-url: https://www.towerhamlets.gov.uk/Documents/Planning-and-building-control/Development-control/Application-processing/Householder-V5-Sept-2020.pdf
+    must-include:
+      - item: A schedule of works to the listed building(s)
+        level: should
+        required-if:
+          site:
+            in: [listed-building]
+            description: The works affect a listed building.
+        source-text: "For listed buildings, the assessment should include a schedule of works to the listed building(s)"
+      - item: An analysis of the significance, history and character of the building or structure, and of its setting
+        level: should
+        required-if:
+          site:
+            in: [listed-building]
+            description: The works affect a listed building.
+        source-text: >-
+          For listed buildings, the assessment should include a schedule of works to the listed
+          building(s), an analysis of the significance of, history and character of the building /
+          structure and an analysis of its setting.
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement): the Heritage Impact Statement was not captured for Householder
+      or Full planning; Grokbot had only a 'Schedule of works' row lifted from inside its guidance.
+      The council also has a separate Heritage Impact Statement requirement page.
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [tree-preservation-zone, conservation-area]
+            description: The works affect trees on or off the site protected by a TPO or conservation area legislation.
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: The works affect other sizeable trees not covered by a TPO or in a conservation area.
+    source-text: >-
+      Tree Survey/ Arboricultural Statement Where the application involves works that affect any
+      trees on or off the site that are protected by Tree Preservation Order (TPO) or Conservation
+      Area legislation. … Also where the application would affect other sizeable trees that are
+      not covered by a TPO or in a Conservation Area.
+    source-url: https://www.towerhamlets.gov.uk/Documents/Planning-and-building-control/Development-control/Application-processing/Householder-V5-Sept-2020.pdf
+    must-include:
+      - item: A survey of the trees (to BS5837:2012)
+        level: must
+      - item: An arboricultural implications assessment
+        level: must
+      - item: A list of trees to be retained or removed, and any other tree surgery works
+        level: must
+      - item: A method statement showing how the trees will be physically protected during the works
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the householder trigger left out the 'other sizeable trees' case. The
+      must-include items are the council's wording from the Full/Outline checklist ('to include a
+      survey of the trees, an arboricultural implications assessment, a concise list of trees which
+      are desired to be retained/removed any other tree surgery works and a method statement').
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: external-lighting
+            value: true
+            description: >-
+              External or flood lighting would be provided or made necessary, including for
+              publicly accessible development near homes, a listed building, a conservation area
+              or public open space.
+        - discretionary
+    source-text: >-
+      Lighting Assessment Required for all applications where the proposal involves the provision
+      of publicly accessible developments, in the vicinity of residential property, a listed
+      building or a conservation area, public open space, where external lighting would be
+      provided or made necessary by the development, provision of flood lighting and tall
+      buildings.
+    source-url: https://www.towerhamlets.gov.uk/Documents/Planning-and-building-control/Development-control/Application-processing/Full-Outline-Planning.docx
+    confidence: medium
+    notes: "Audit (wrong_app_type): filed only under Listed building consent because the text mentions a listed building; it is a planning-application requirement. Tall buildings are shown as officer discretion."
+
+  - id: planning-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+    notes: "'A supporting planning statement will be required for all major development, major change of use applications or listed building applications' (council's wording)."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [local-wildlife-site]
+            description: The site is within or next to a site of importance for nature conservation (SINC).
+        - discretionary
+    notes: "Other applications likely to have an impact on wildlife and biodiversity (householder included) are shown as officer discretion. The householder row was mislabelled 'Biodiversity Checklist'."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    notes: "Audit (wrong_trigger): the excerpt 'within an EIA (if an EIA is required).' is a fragment; the council has a separate Environmental Impact Assessment page."
+
+  - id: travel-plan
+    action: add
+    source-url: https://www.towerhamlets.gov.uk/lgnl/planning_and_building_control/planning_applications/Making_a_planning_application/Local_validation_list/what_to_submit_with_your_planning_application.aspx
+    confidence: low
+    notes: "From the audit (missing_requirement): a Travel Plan page is on the local list, but its trigger was not verified."
+
+  - id: cil-form
+    action: update
+    notes: >-
+      Audit (wrong_trigger): the householder checklist requires the CIL form for 'All
+      applications, with the exceptions of Advertisement consent and Submission of details
+      pursuant to planning permission' (council's wording); the application types here are only
+      where Grokbot found it.
+
+  - id: site-plan
+    action: update
+    source-text: "Site Plan A site plan to a stated metric scale, showing: - The direction of North;"
+    notes: "Audit (wrong_trigger): the householder excerpt had leftover Advertisement Regulations text; removed."
+
+  - id: photos
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: demolition
+            value: true
+            description: The proposal involves demolition.
+        - site:
+            in: [conservation-area, listed-building]
+            description: Development affecting a conservation area or listed building.
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+    notes: "'Required on all applications where the proposal is likely to have an adverse effect upon levels of light to adjoining sensitive land uses' (council's wording)."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      all:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Environment Agency Flood Zone 2 or 3.
+        - any:
+            - condition:
+                field: new-build
+                value: true
+                description: The proposal includes new build.
+            - condition:
+                field: basement
+                value: true
+                description: The proposal includes a basement extension.
+            - condition:
+                field: residential-extension
+                value: true
+                description: The proposal includes a ground floor extension.
+    notes: "From the Full/Outline and Householder checklists: Flood Zone 2 or 3, for new builds and basement or ground floor extensions."
+
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      ref: major-development
+
+  - id: construction-management-plan
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: basement
+            value: true
+            description: Minor works including basement developments.
+        - discretionary
+    notes: "Applications obstructing a public highway are shown as officer discretion."
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      ref: major-development
+
+  - id: fire-statement
+    action: update
+    required-if:
+      ref: major-development
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      ref: major-development
+
+  - id: sci
+    action: update
+    required-if:
+      ref: major-development
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: plant-equipment
+            value: true
+            description: Noise generating equipment.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: A noise generating use.
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 2500
+            description: Retail and leisure development over 2,500 sqm gross floor space.
+        - discretionary
+    notes: "Smaller developments likely to have a significant impact on smaller centres are shown as officer discretion."
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - condition:
+            field: telecommunications-development
+            value: true
+            description: Telecommunications and mobile phone masts.
+
+  - id: bng-metric
+    action: update
+    must-include:
+      - item: BNG metric in Excel form
+        level: must
+      - item: BNG plan(s) in both PDF and GIS Shapefile format, to the relevant version of UKHab
+        level: must
+        source-text: "Plan(s) referred to in the list above should be submitted in both PDF and GIS Shapefile format, to the relevant version of UKHab methodology."
+      - item: Completed LBTH BNG checklist
+        level: should
+        source-text: "LBTH BNG Checklist should be submitted providing the details on the BNG submission details as outlined above."
+
+unmapped:
+  - local-name: Wind Impact Assessment
+    source-text: >-
+      Required for development of a building of 10 storeys or more ... any free standing buildings
+      that significantly exceed the prevailing building heights in the immediate area.
+    source-url: https://www.towerhamlets.gov.uk/lgnl/planning_and_building_control/planning_applications/Making_a_planning_application/Local_validation_list/what_to_submit_with_your_planning_application.aspx
+    suggested-id: wind-microclimate-assessment
+  - local-name: Digital 3D Modelling
+    source-text: >-
+      Digital 3D Modelling will be required for major development ... applications considered to
+      have a significant impact on the townscape for medium to large scale projects.
+    source-url: https://www.towerhamlets.gov.uk/lgnl/planning_and_building_control/planning_applications/Making_a_planning_application/Local_validation_list/what_to_submit_with_your_planning_application.aspx
+    suggested-id: digital-3d-model
+  - local-name: CGI Visualisations
+    source-text: "CGI Visualisations Required for major development."
+    source-url: https://www.towerhamlets.gov.uk/Documents/Planning-and-building-control/Development-control/Application-processing/Full-Outline-Planning.docx
+    suggested-id: computer-visualisations
+  - local-name: Parameter Plans, Development Specification, Equalisation Statement, Statement of Reasons, Supporting Evidence for Existing Uses, telecoms prior approval statement, Works to Trees (TPO and conservation area)
+    source-text: "From the audit: requirement pages on the local validation list; triggers not verified"
+    source-url: https://www.towerhamlets.gov.uk/lgnl/planning_and_building_control/planning_applications/Making_a_planning_application/Local_validation_list/what_to_submit_with_your_planning_application.aspx
+    suggested-id: ""
+
+low-confidence:
+  - id: transport-assessment
+    note: "Audit (wrong_trigger): the excerpt 'support of Transport Statements, depending on the parking stress in the area.' is a fragment; the council has separate Transport Assessment and Transport Statement pages."
+  - id: waste-management-plan
+    note: "Audit (wrong_trigger): the excerpt 'developments require a waste management strategy...' is cut off and gives no trigger."
+
+new-fields:
+  - field: telecommunications-development
+    kind: boolean
+    label: Telecommunications development
+    description: The proposal is for telecommunications development, such as a mast or antennae.

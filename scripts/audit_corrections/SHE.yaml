@@ -1,0 +1,343 @@
+# Corrections for Folkestone and Hythe Council, from the audit.
+# The workbook captured nothing: its link (file 4238) is only the summary checklist. The
+# requirements are in the companion Householder (file 4239) and Non-householder (file 4240)
+# documents, '2020 reviewed 2023'. The audit could not text-read those DOCX files and compared
+# against the 2020 adopted PDFs instead (contents_checked: false), so everything below is the
+# audit's summary of the 2020 lists, not the council's exact words.
+local-authority: SHE
+
+validation-list:
+  url: https://www.folkestone-hythe.gov.uk/downloads/file/4238/checklist-for-planning-validation-2020-reviewed-2023
+  date: 2023
+  date-basis: "audit: documents titled 'Checklist for planning validation 2020 reviewed 2023'; underlying list 'ADOPTED VERSION 16 JANUARY 2020'"
+
+requirements:
+  - id: site-plan
+    action: add
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4240
+    confidence: low
+    notes: "From the audit (missing_requirement): a block plan is required for all applications in both the householder and non-householder lists."
+
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: Development in Flood Zone 2 or 3 (for householder applications, ground-floor development).
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: Over 1 hectare in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: Over 1 hectare in Flood Zone 1.
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4240
+    confidence: low
+    notes: "From the audit (missing_requirement): householder, ground-floor development in Flood Zones 2/3; non-householder, Flood Zones 2/3 or over 1 ha in Flood Zone 1."
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      site:
+        in: [listed-building, scheduled-monument, locally-listed-building, conservation-area]
+        description: A listed or curtilage-listed building, a scheduled monument, a Local List building, or a conservation area.
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4240
+    confidence: low
+    notes: "From the audit (missing_requirement): householder, listed or curtilage-listed building or scheduled monument; non-householder, listed buildings, Local List and conservation areas."
+
+  - id: section-existing
+    action: add
+    required-if:
+      condition:
+        field: ground-level-change
+        operator: ">"
+        value: 0.3
+        description: A level change of over 0.3 m, or a raised platform such as decking.
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4239
+    confidence: low
+    notes: "From the audit (missing_requirement): a levels survey for householder works with a level change over 0.3 m or a raised platform such as decking; the non-householder list asks for levels/cross sections (no trigger given)."
+
+  - id: section-proposed
+    action: add
+    required-if:
+      condition:
+        field: ground-level-change
+        operator: ">"
+        value: 0.3
+        description: A level change of over 0.3 m, or a raised platform such as decking.
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4239
+    confidence: low
+    notes: "From the audit (missing_requirement): a levels survey for householder works with a level change over 0.3 m or a raised platform such as decking; the non-householder list asks for levels/cross sections (no trigger given)."
+
+  - id: air-quality-assessment
+    action: add
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4240
+    confidence: low
+    notes: "From the audit (missing_requirement): listed in the non-householder list; the audit gives no trigger."
+
+  - id: archaeological-assessment
+    action: add
+    required-if:
+      all:
+        - site:
+            in: [archaeological-priority-area]
+            description: The site is in an Area of Archaeological Potential.
+        - condition:
+            field: ground-disturbance
+            value: true
+            description: The proposal involves groundworks.
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4240
+    confidence: low
+    notes: "From the audit (missing_requirement): an archaeological desk assessment for groundworks in an Area of Archaeological Potential."
+
+  - id: cil-form
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: New dwellings.
+        - condition:
+            field: retail-floorspace
+            operator: ">"
+            value: 280
+            description: Retail over 280 sqm net (all retail in Folkestone).
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4240
+    confidence: low
+    notes: "From the audit (missing_requirement): CIL additional information form for new dwellings, or retail over 280 sqm net (all retail in Folkestone)."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      all:
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: A sensitive use is proposed.
+        - site:
+            in: [contaminated-land]
+            description: The site is on or near contaminated land.
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4240
+    confidence: low
+    notes: "From the audit (missing_requirement): a contaminated land desk study for sensitive uses on or near contaminated land."
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if: discretionary
+    policy: Policy HB8
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4240
+    confidence: low
+    notes: "From the audit (missing_requirement): where the proposal fails the BRE 45/25-degree tests (Policy HB8)."
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [special-protection-area, site-of-special-scientific-interest, local-wildlife-site]
+            description: Near a SAC, SPA, Ramsar site, SSSI or Local Wildlife Site.
+        - discretionary
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4240
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a Preliminary Ecological Appraisal where the site has
+      meadow, scrub or hedgerow, or buildings with bat potential, or is near a SAC/SPA/Ramsar/SSSI/LWS;
+      protected species surveys are also listed. Habitat and bat cases are shown as officer
+      discretion.
+
+  - id: landscaping-plan
+    action: add
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4240
+    confidence: low
+    notes: "From the audit (missing_requirement): a landscape strategy for all non-householder applications except change of use with no land."
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: external-lighting
+            value: true
+            description: Floodlighting or manege lighting.
+        - all:
+            - ref: major-development
+            - any:
+                - site:
+                    in: [area-of-outstanding-natural-beauty]
+                    description: In the AONB.
+                - discretionary
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4240
+    confidence: low
+    notes: "From the audit (missing_requirement): floodlighting, manege lighting, or majors in the countryside or AONB (countryside is shown as officer discretion)."
+
+  - id: noise-assessment
+    action: add
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4240
+    confidence: low
+    notes: "From the audit (missing_requirement): listed in the non-householder list; the audit gives no trigger."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4240
+    must-include:
+      - item: Open space provision
+        level: must
+        required-if:
+          condition:
+            field: dwelling-count
+            operator: ">="
+            value: 20
+            description: 20 or more dwellings.
+      - item: Play space provision
+        level: must
+        required-if:
+          condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more dwellings.
+      - item: Affordable housing
+        level: must
+        required-if:
+          condition:
+            field: dwelling-count
+            operator: ">"
+            value: 10
+            description: Over 10 dwellings.
+      - item: Health impact
+        level: must
+        required-if:
+          condition:
+            field: dwelling-count
+            operator: ">"
+            value: 100
+            description: Over 100 dwellings.
+    confidence: low
+    notes: "From the audit (missing_requirement): all majors and departures (departures shown as officer discretion), including open space at 20+ dwellings, play space at 10+, affordable housing over 10 and health impact over 100 dwellings."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Outside a town centre.
+        - condition:
+            field: retail-floorspace
+            operator: ">"
+            value: 2500
+            description: Over 2,500 sqm of retail floorspace.
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4240
+    confidence: low
+    notes: "From the audit (missing_requirement): a retail impact assessment for over 2,500 sqm outside centres."
+
+  - id: sci
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 50
+        description: 50 or more dwellings.
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4240
+    confidence: low
+    notes: "From the audit (missing_requirement): Statement of Community Involvement for 50+ dwellings."
+
+  - id: transport-assessment
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4240
+    confidence: low
+    notes: "From the audit (missing_requirement): a transport statement for majors."
+
+  - id: travel-plan
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4240
+    confidence: low
+    notes: "From the audit (missing_requirement): a Travel Plan for majors."
+
+  - id: arboriculturist-report
+    action: add
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4240
+    confidence: low
+    notes: "From the audit (missing_requirement): a tree survey is listed; the audit gives no trigger."
+
+  - id: viability-assessment
+    action: add
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4240
+    confidence: low
+    notes: "From the audit (missing_requirement): a viability assessment is listed; the audit gives no trigger."
+
+unmapped:
+  - local-name: Extraction details
+    source-text: "From the audit: A3/A4/A5 uses"
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4240
+    suggested-id: ventilation-extraction-details
+  - local-name: Draft heads of terms
+    source-text: "From the audit: majors with planning obligations"
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4240
+    suggested-id: heads-of-terms
+  - local-name: Ecological management plan
+    source-text: "From the audit: listed in the non-householder list, no trigger given"
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4240
+    suggested-id: ecological-management-plan
+  - local-name: Economic statement
+    source-text: "From the audit: majors with job creation or loss, or loss of tourist facilities"
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4240
+    suggested-id: employment-statement
+  - local-name: Landscape and Visual Impact Assessment (LVIA)
+    source-text: "From the audit: 200+ dwellings or 4 ha, 10,000 sqm or 2 ha, or majors in the AONB"
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4240
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Sequential test
+    source-text: "From the audit: listed in the non-householder list, no trigger given"
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4240
+    suggested-id: sequential-test
+  - local-name: Soil stability report
+    source-text: "From the audit: landslip areas D and E"
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4240
+    suggested-id: land-stability-report
+  - local-name: Structural survey
+    source-text: "From the audit: conversion of rural buildings"
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4240
+    suggested-id: structural-survey
+  - local-name: SuDS strategy
+    source-text: "From the audit: 10+ dwellings or equivalent"
+    source-url: https://www.folkestone-hythe.gov.uk/downloads/file/4240
+    suggested-id: drainage-strategy
+
+new-fields:
+  - field: scheduled-monument
+    kind: designation
+    label: Scheduled monument
+    description: Site is, contains or affects a scheduled monument (dataset scheduled-monument).
+  - field: ground-level-change
+    kind: number
+    label: Change in ground levels (m)
+    description: The largest proposed change to existing ground levels, in metres (0 if none).
+  - field: retail-floorspace
+    kind: number
+    label: Retail floorspace (sqm)
+    description: Gross new or additional retail floorspace proposed, in square metres.
+  - field: sensitive-end-use
+    kind: boolean
+    label: Sensitive end use
+    description: The proposal is for a sensitive end use such as housing, schools or nurseries (for example on or near contaminated land).
+  - field: out-of-centre-town-centre-use
+    kind: boolean
+    label: Main town centre use outside a centre
+    description: The proposal is for a main town centre use (as defined in the NPPF) on a site outside a designated town centre.

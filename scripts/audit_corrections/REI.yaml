@@ -1,0 +1,565 @@
+# Corrections for Reigate and Banstead Borough Council, from inputs/audit/reigate-and-banstead-borough-council.json.
+# The council's list is a set of five checklists (Householder 6903, Full 6904, Outline 6901,
+# Certificate of Lawfulness 6902, Tree works 7443), still live but undated; the content points
+# to about 2021. Many workbook excerpts came from the neighbouring cell of the PDF table, so
+# several triggers below are rebuilt from the audit. Items marked "From the audit" use the
+# audit's paraphrase of the checklists, not the council's exact words.
+local-authority: REI
+
+validation-list:
+  url: https://www.reigate-banstead.gov.uk/downloads/download/2253/local_validation_lists
+  date: 2021
+  date-basis: "audit: no date stated; content c.2021 (fire statements 'From 1st August 2021', Climate Change SPD 'scheduled for adoption by the Council in Autumn 2021'); the workbook's 2024-06-01 was PDF metadata"
+
+submission-standards:
+  - item: Drawings contain a scale bar and a drawing number
+    level: should
+
+drop:
+  - id: schedule-of-works
+    reason: "not_a_requirement: the excerpt is BS5837 tree protection text; none of the checklists has a listed building schedule of works row"
+
+drop-unmapped:
+  - local-name: Validation checklist form (completed)
+    reason: "not_a_requirement: the checklists' introductory boilerplate"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: a fragment of the location/block plan drawing guidance"
+  - local-name: Foul Sewage / Utilities Statement
+    reason: "not_a_requirement: a fragment of guidance text ('water and foul water.')"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "not_a_requirement: a fragment of guidance text ('by an appropriate assessment.')"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "duplicate: repeats the Flood Risk Assessment row"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "duplicate: part of the Daylight/sunlight assessment row"
+  - local-name: Employment / Economic Statement
+    reason: "duplicate: the same loss of employment/retail/community use row as Marketing (re-added below)"
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "wrong_trigger: the excerpt is content only; re-added below with the trigger from the same row"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger / not_a_requirement: the Householder row is FRA guidance and the Outline row carries the FRA trigger; re-added below with the Full checklist trigger"
+  - local-name: Structural Survey
+    reason: "wrong_trigger: the excerpt runs into Transport Assessment text; re-added below with the real trigger"
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "wrong_trigger: the excerpts run into the CIL, copyright and ecology rows; re-added below"
+  - local-name: Cycle parking details
+    reason: "wrong_trigger: carries the noise trigger; the parking strategy is re-added below"
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_trigger: carries the noise trigger; the parking strategy is re-added below"
+
+requirements:
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: The works are likely to affect trees on or adjacent to the application site.
+    source-text: "Tree survey / arboricultural assessment Required where works are likely to affect trees either on or adjacent to the application site."
+    source-url: https://www.reigate-banstead.gov.uk/download/downloads/id/6901/outline_validation_checklist.pdf
+    must-include:
+      - item: Tree protection plan and method statement, as set out in the current BS5837 'Trees in relation to construction – Recommendations'
+        level: should
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the Householder row carried the heritage trigger and the Full row a
+      BS5837 reference; the real trigger is the Outline wording above. The tree works checklist
+      row (a BS 5837 fragment) is not kept. The must-include item came from rows the workbook
+      mislabelled 'Schedule of works'.
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: All buildings, roads and footpaths on land adjoining the site, including access arrangements
+        level: must
+      - item: All public rights of way crossing or adjoining the site
+        level: must
+      - item: The position of all trees on the site and adjacent land
+        level: must
+      - item: The extent and type of any hard surfacing
+        level: must
+      - item: The type and height of boundary treatment (e.g. walls, fences)
+        level: must
+      - item: A scale bar
+        level: must
+    confidence: medium
+    notes: "Block plan contents from the Full and CLP checklists (the workbook had them as tab items). On the Householder checklist a block plan is not needed 'If there is no change to the building footprint.'"
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - ref: major-development
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: The proposal consists of one or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: A building or buildings with a floor area of 100 square metres or more.
+    source-text: >-
+      Design and Access Statement Required for applications for listed building consent, applications
+      for major developme nt, or proposals on sites located within a conservatio n area where a) the
+      proposal consists of one or more dwellings or b) a building/s with a floor area of 100 square
+      metres or more.
+    source-url: https://www.reigate-banstead.gov.uk/download/downloads/id/6904/full_validation_checklist.pdf
+    must-include:
+      - item: The design principles and concepts applied to the proposed development
+        level: should
+      - item: How issues relating to access to the development have been dealt with
+        level: should
+    confidence: medium
+    notes: "The Householder checklist: 'Required where a site is located in a conservation area and the floorspace created is 100 square metres or more.' Audit (other): the Full checklist's DAS row covers listed building consent."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      condition:
+        field: protected-species
+        value: true
+        description: Protected species may be affected.
+    source-text: "Ecology surveys/reports – Required where protected species may be affected."
+    source-url: https://www.reigate-banstead.gov.uk/download/downloads/id/6903/householder_validation_checklist.pdf
+    must-include:
+      - item: Preliminary Roost Assessment
+        level: must
+        required-if:
+          condition:
+            field: demolition
+            value: true
+            description: The demolition of buildings in areas where bat activity has been identified.
+        source-text: "The demolition of buildings in areas where bat activity has been identified will require a Preliminary Roost Assessment."
+    confidence: medium
+    notes: "The Full row's 'sites exceeding 0.4ha' belongs to the archaeology trigger (audit: wrong_trigger). The Outline checklist adds: 'Depending on the results of the initial survey, further protected species surveys may be required.'"
+
+  - id: section-existing
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [full]
+        - condition:
+            field: site-level-change
+            operator: ">"
+            value: 0
+            description: Alterations are being made to ground levels.
+        - condition:
+            field: sloping-site
+            value: true
+            description: The site is sloping.
+        - condition:
+            field: basement
+            value: true
+            description: Works are proposed below ground level.
+    confidence: medium
+    notes: "Householder: 'Required where alterations are being made to ground levels or on sloping sites or proposed works below ground level.' Full: 'Required'. Outline and CLP: 'may also be required'."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [full]
+        - condition:
+            field: site-level-change
+            operator: ">"
+            value: 0
+            description: Alterations are being made to ground levels.
+        - condition:
+            field: sloping-site
+            value: true
+            description: The site is sloping.
+        - condition:
+            field: basement
+            value: true
+            description: Works are proposed below ground level.
+    must-include:
+      - item: Finished floor and site levels
+        level: must
+    confidence: medium
+    notes: "Householder: 'Required where alterations are being made to ground levels or on sloping sites or proposed works below ground level.' Full: 'Required'. Outline and CLP: 'may also be required'."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: New development in flood zone 2 or 3, except where the works do not relate to the ground floor.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (flood zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (flood zone 1).
+    must-include:
+      - item: Sequential test and exception test, where relevant
+        level: must
+      - item: Identify and assess the risks of all forms of flooding to and from the development
+        level: must
+      - item: How these flood risks will be managed, taking climate change into account
+        level: must
+    confidence: medium
+    notes: "'Required for all proposals for new development in Flood Zones 2 and 3, except where works do not relate to the ground floor and for development in sites of 1 hectare or greater in Flood Zone [1].'"
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      site:
+        in: [listed-building, conservation-area, locally-listed-building, listed-building-setting]
+        description: Works to a listed building, a building within a conservation area or another heritage asset, or its setting.
+    source-text: "CS Policy CS3 DMP Policy NHE5 Heritage Statement Required for works to a listed building, a building within a conservation area or other heritage asset."
+    source-url: https://www.reigate-banstead.gov.uk/download/downloads/id/6901/outline_validation_checklist.pdf
+    policy: CS Policy CS3, DMP Policy NHE5
+    confidence: medium
+    notes: "Audit (wrong_trigger): the Full row carried the drainage trigger (10+ dwellings / 1000sqm / surface water flooding). The audit adds the setting of heritage assets."
+
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 11
+            description: Developments of 11 dwellings or more.
+    source-text: "developments of 11 dwellings or more"
+    source-url: https://www.reigate-banstead.gov.uk/download/downloads/id/6904/full_validation_checklist.pdf
+    policy: CS Policy CS15, DMP Policy DES6
+    must-include:
+      - item: How the proposal meets Development Management Plan policy DES6 and the affordable housing SPD
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was garbled with SPD URL fragments."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "'Where an application fails to comply with the Council’s affordable housing policies a viability assessment will be required.' Viability assessments are independently audited at the applicant's cost."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - site:
+            in: [air-quality-management-area]
+            description: The site is in an Air Quality Management Area.
+    must-include:
+      - item: The potential impacts of the development on local air quality
+        level: must
+      - item: Proposed mitigation measures, where necessary
+        level: should
+    confidence: low
+    notes: "The trigger is the checklist's cell 'ALL MAJORS HAS TO BE IN AQMA ZONE', which the audit says was merged with the archaeology row; check the reading. The Outline checklist advises discussing the need with environmental health first."
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - condition:
+                field: ground-disturbance
+                value: true
+                description: Groundworks are proposed.
+            - site:
+                in: [scheduled-monument, archaeological-priority-area]
+                description: Within a Scheduled Monument or an area of Archaeological Importance or High Archaeological Potential.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 0.4
+            description: All other sites exceeding 0.4ha.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 0.4
+            description: All other sites exceeding 0.4ha.
+    source-text: >-
+      Archaeological Assessment/HER Search … Required for all applications where groundwork s are
+      proposed within a Scheduled Monument or areas of Archaeologi cal Importance or High Archaeologi
+      cal Potential, or all other … sites exceeding 0.4ha
+    source-url: https://www.reigate-banstead.gov.uk/download/downloads/id/6904/full_validation_checklist.pdf
+    must-include:
+      - item: Previous nearby finds recorded in the historic environment record
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the Air Quality and Archaeology rows shared one merged excerpt, which dropped the archaeology 0.4ha threshold (it surfaced in the ecology row)."
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "'Required if proposal is likely to have an adverse effect upon levels of light to adjoining sensitive land uses', including gardens and amenity space. The separate 'Sunlight to gardens' row was a duplicate."
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: Developments of 10 or more dwellings.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: 1000 square metres or more of non-residential floorspace.
+    source-text: "Carbon Reduction Statement and Sustainability Checklist Required for developments of 10 or more dwellings or 1000sqm of nonresidential floorspace"
+    policy: DMP Policy CCF1
+    confidence: medium
+    notes: "Audit (duplicate): the workbook's two sustainability rows are the same 'Carbon Reduction Statement and Sustainability Checklist' row; the Outline row also ran into bat roost text."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    source-url: https://www.reigate-banstead.gov.uk/download/downloads/id/6904/full_validation_checklist.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the Full excerpt ('area of 100 square metres or more') and the Outline excerpt are Design and Access Statement text."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: storey-count
+            operator: ">"
+            value: 7
+            description: Over 7 storeys.
+        - condition:
+            field: building-height
+            operator: ">"
+            value: 18
+            description: Over 18m high.
+    source-text: "Fire Statement … Required for all applications for proposals over 7 storeys or 18m high"
+    source-url: https://www.reigate-banstead.gov.uk/download/downloads/id/6901/outline_validation_checklist.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the Full row had no threshold and the Outline row was mixed with the daylight trigger."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: The scheme proposes external floodlighting.
+    must-include:
+      - item: Beam orientation
+        level: must
+      - item: Lighting spill
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt ('lighting scheme with beam orientation and lighting spill') had no trigger; the real one is schemes proposing external floodlighting."
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The development is likely to give rise to excess noise or vibration.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: The development is likely to suffer from excess noise or vibration, including new residential within the Gatwick noise contours.
+    source-text: "Required where proposed development is likely to give rise to or suffer from excess noise / vibration."
+    source-url: https://www.reigate-banstead.gov.uk/download/downloads/id/6904/full_validation_checklist.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt ('a full noise impact assessment.') had no trigger; the trigger text was misfiled under the parking rows. The audit adds new residential in the Gatwick noise contours."
+
+  - id: planning-statement
+    action: update
+    must-include:
+      - item: A full explanation of the proposal, including any relevant background or site history
+        level: should
+    notes: "The checklists give the content but not a trigger."
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: An edge- or out-of-centre proposal.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 150
+            description: Exceeding 150 square metres of comparison retail floorspace (other thresholds apply to other uses).
+    source-url: https://www.reigate-banstead.gov.uk/download/downloads/id/6904/full_validation_checklist.pdf
+    must-include:
+      - item: The impact of the proposal on existing, committed and planned public and private investment in a centre or centres in the catchment area
+        level: must
+      - item: The impact on town centre vitality and viability, including local consumer choice and trade in the town centre and the wider retail catchment
+        level: must
+    confidence: low
+    notes: "Audit (wrong_trigger): the Full row carried 'Required for all new residential' (the recycling/waste trigger). From the audit: edge- or out-of-centre proposals above floorspace thresholds, e.g. 'exceeding 150sqm for comparison retail'; the other thresholds weren't given."
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: Alterations are being made to a roof or a new roof is proposed.
+    must-include:
+      - item: A scale bar
+        level: should
+    notes: "Householder: 'Required where alterations are being made to a roof or a new roof proposed These drawings should: Contain a scale bar'."
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: Alterations are being made to a roof or a new roof is proposed.
+    must-include:
+      - item: A scale bar
+        level: should
+    notes: "Householder: 'Required where alterations are being made to a roof or a new roof proposed These drawings should: Contain a scale bar'."
+
+  - id: travel-plan
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more dwellings.
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 1000
+            description: 1,000 square metres or more of floorspace.
+        - discretionary
+    confidence: medium
+    notes: "Audit (wrong_trigger): 'A travel plan may also be required by the Local Highway Authority' (shown as officer discretion) omits the 10+ dwellings / 1,000 sqm threshold."
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: All new residential development.
+    source-text: "Recycling/waste strategy – all new residential development"
+    source-url: https://www.reigate-banstead.gov.uk/download/downloads/id/6904/full_validation_checklist.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement): a Recycling / waste strategy on the Full and Outline checklists."
+
+unmapped:
+  - local-name: Drainage Statement (Surrey County Council SuDS Pro-Forma)
+    source-text: >-
+      Drainage Statement including completed Surrey County Council SuDS Pro-Forma … Required for
+      developments of 10 or more dwellings or 1000sqm on commercial and in all areas subject to local
+      surface water flooding.
+    source-url: https://www.reigate-banstead.gov.uk/download/downloads/id/6904/full_validation_checklist.pdf
+    suggested-id: drainage-strategy
+  - local-name: Marketing information (loss of employment, retail or community use)
+    source-text: >-
+      Marketing requirements … Required where a loss of employmen t land, retail floorspace or
+      community use is proposed (as defined by policies RET2, RET3, RET4, EMP4, INF 2 of the Reigate
+      and Banstead DMP) … Marketing information, must be in accordance with the requirements of Annexe
+      3 of the Reigate and Banstead DMP.
+    source-url: https://www.reigate-banstead.gov.uk/download/downloads/id/6904/full_validation_checklist.pdf
+    suggested-id: marketing-evidence
+  - local-name: Structural survey
+    source-text: >-
+      A structural survey should be carried out by a structural engineer or a suitably qualified
+      person … From the audit: required where the proposal "involves demolition of over 50% of the
+      building"
+    source-url: https://www.reigate-banstead.gov.uk/download/downloads/id/6904/full_validation_checklist.pdf
+    suggested-id: structural-survey
+  - local-name: Street scene drawings
+    source-text: "Street scene drawings Required where there is a change in ridge height"
+    source-url: https://www.reigate-banstead.gov.uk/download/downloads/id/6903/householder_validation_checklist.pdf
+    suggested-id: street-scene-elevations
+  - local-name: Green belt calculations
+    source-text: >-
+      From the audit: Householder checklist 'required for development within the green belt'; Full
+      checklist for new development in the green belt proposing new floorspace
+    source-url: https://www.reigate-banstead.gov.uk/download/downloads/id/6903/householder_validation_checklist.pdf
+    suggested-id: green-belt-calculations
+  - local-name: Parking strategy including cycle parking
+    source-text: "From the audit: Full (and Outline) checklists, required for all, with below-standard parking to be justified"
+    source-url: https://www.reigate-banstead.gov.uk/download/downloads/id/6904/full_validation_checklist.pdf
+    suggested-id: parking-plan
+  - local-name: Parking and access arrangements (householder)
+    source-text: "Parking and access arrangements – required where revised access or parking arrangements are proposed"
+    source-url: https://www.reigate-banstead.gov.uk/download/downloads/id/6903/householder_validation_checklist.pdf
+    suggested-id: highways-access-details
+  - local-name: Permission from copyright holder
+    source-text: "From the audit: Householder and Full, where drawings or statements subject to copyright are submitted"
+    source-url: https://www.reigate-banstead.gov.uk/download/downloads/id/6904/full_validation_checklist.pdf
+    suggested-id: copyright-permission
+
+low-confidence:
+  - id: cil-form
+    note: "Audit (wrong_trigger): the Householder excerpt is mixed with street scene and ecology text, and the Outline excerpt with the DAS trigger."
+  - id: land-contamination-assessment
+    note: "Audit (wrong_trigger): the Full excerpt mixes in LVIA and heritage text; neither excerpt gives a trigger."
+  - id: landscaping-plan
+    note: "Audit (wrong_trigger): the excerpt is mixed with the marketing and LVIA text; the reading 'AONB and AGLV and all developments of more than 10 dwellings or 1000sq or commercial' needs checking."
+  - id: transport-assessment
+    note: "The excerpt covers only 'other developments which are likely to generate significant amount of vehicle movement'; the main thresholds weren't captured."
+
+new-fields:
+  - field: protected-species
+    kind: boolean
+    label: Protected or priority species affected
+    description: The proposal is likely to affect protected or priority species or their habitats.
+  - field: sloping-site
+    kind: boolean
+    label: Sloping site
+    description: The site slopes noticeably, so levels and sections are needed to understand the proposal.
+  - field: site-level-change
+    kind: number
+    label: Change in site levels (mm)
+    description: The largest change to existing ground levels proposed, in millimetres.
+  - field: scheduled-monument
+    kind: designation
+    label: Scheduled monument
+    description: Site contains, or is in the setting of, a scheduled monument.
+  - field: roof-alteration
+    kind: boolean
+    label: Roof alteration or new roof
+    description: The proposal changes the shape of an existing roof or adds a new roof.
+  - field: out-of-centre-town-centre-use
+    kind: boolean
+    label: Main town centre use outside a centre
+    description: >-
+      The proposal is for a main town centre use (retail, leisure, offices and similar) at an
+      edge-of-centre or out-of-centre location, outside a defined town centre or primary shopping area.

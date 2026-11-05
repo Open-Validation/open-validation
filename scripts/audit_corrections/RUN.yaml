@@ -1,0 +1,598 @@
+# Corrections for Runnymede Borough Council, from the council's audit.
+# The audit read the council's Appendix F 'Validation of Planning Applications' (July 2020, for
+# non-householder applications) and the separate Householder Validation Checklist (first
+# published May 2021, republished December 2024). Many workbook triggers were fragments that
+# lost their thresholds; items marked "From the audit" use the audit's paraphrase.
+local-authority: RUN
+
+submission-standards:
+  - item: Plans state their scale and include a scale bar and/or annotated measurements so they can be scaled electronically
+    level: must
+  - item: Plans drawn to an identified standard metric scale, with a title and/or drawing number
+    level: should
+  - item: Plans submitted in PDF format with a scale bar
+    level: should
+  - item: A schedule of submitted drawing references and titles
+    level: should
+
+drop:
+  - id: schedule-of-works
+    reason: "other: mislabelled; the excerpt is arboricultural method statement text (item 23)"
+
+drop-unmapped:
+  - local-name: Crime prevention / Secured by Design statement
+    reason: "wrong_trigger: runs into the Lighting Assessment text; re-added below"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "duplicate: part of item 34 Sunlight and Daylight Assessment (daylight-sunlight-assessment)"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: the excerpt is from the FRA section; item 18 is re-added below"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_trigger: omits the core 400m-5km trigger; re-added below"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: a fragment with no requirement in it"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: a fragment ('a bespoke section 106 agreement.')"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: a fragment about pre-application discussions"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "other: mislabelled; it is the town-centre sequential test (item 28), re-added below under that name"
+  - local-name: Advertisement drawings / illumination details
+    reason: "duplicate: a fragment of item 37 Lighting Assessment (lighting-assessment)"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: 10 or more net additional dwellings.
+    must-include:
+      - item: Draft Heads of Terms in the Planning Statement or, where possible, an agreed final draft S106 agreement to secure the affordable housing
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt lost the threshold; from the audit, 10 or more net additional units."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: The site is within 70m of, or next to, an Air Quality Management Area.
+        - discretionary
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt lost the trigger; from the audit, within 70m of or next to an AQMA, or proposals affecting air quality (shown as officer discretion)."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: There are trees on or adjacent to the site that could be affected.
+        - site:
+            in: [tree-preservation-zone]
+            description: Trees protected by a TPO could be affected.
+    source-url: https://www.runnymede.gov.uk/downloads/file/711/plannning-validation
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted a generic 'to ensure consistency' sentence. From the
+      audit: trees on or adjacent to the site that could be affected; the householder checklist
+      asks for a Tree Survey / Arboricultural Statement for works that could affect trees within or
+      outside the site, or a TPO.
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 0.4
+            description: The site is in excess of 0.4 hectares.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 0.4
+            description: The site is in excess of 0.4 hectares.
+        - site:
+            in: [archaeological-priority-area]
+            description: The site is within an Area of High Archaeological Potential (Runnymede Local Plan 2030).
+    source-text: >-
+      Archaeology and Scheduled Monuments – Heritage Statement/Archaeological Assessment For sites in
+      excess of 0.4ha and sites within Areas of High Archaeological Potential as defined in the
+      Runnymede Local Plan 2030, an archaeological assessment will be required
+    confidence: medium
+    notes: "Also on the householder checklist (Heritage statement and Archaeology study) for Areas of High Archaeological Potential."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: >-
+      Required where protected species are known to be present, and normally where bats, owls,
+      breeding birds, dormice, badgers, reptiles or amphibians may be present (the list of site
+      types is cut off in the workbook); shown as officer discretion.
+
+  - id: construction-management-plan
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.runnymede.gov.uk/downloads/file/711/plannning-validation
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 20.2 Construction Transport Management Plan for major development."
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+    source-text: >-
+      Sunlight and Daylight Assessment This will be required for major applications where there is a
+      potential adverse impact upon the current levels of sunlight/daylight enjoyed by adjoining
+      properties or building(s), including associated gardens or amenity space or for any
+      application for development that may themselves be adversely affected by adjoining sites or
+      where one part of the proposed development may be impacted upon by another part of the development.
+    confidence: medium
+    notes: "Both limbs depend on a judgement of impact, so the rule is officer discretion."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - all:
+            - site:
+                in: [conservation-area, world-heritage-site]
+                description: Any part of the development is in a designated area such as a conservation area.
+            - condition:
+                field: floorspace
+                operator: ">"
+                value: 100
+                description: Over 100 square metres of floorspace.
+    source-text: >-
+      Design and Access Statement A Design and Access Statement (DAS) must accompany applications
+      where: a) The proposed development is major development; b) Where any part of the development
+      is in a designated area (e.g.…
+    source-url: https://www.runnymede.gov.uk/downloads/file/711/plannning-validation
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, missing_requirement): item 6(c) also requires it for listed building
+      consent, and the householder checklist for over 100 sqm in a conservation area. Limb (b) is
+      cut off in the workbook; the 100 sqm threshold is from the householder checklist.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: Schedule 1 projects and some Schedule 2 projects under the EIA Regulations 2017.
+    confidence: medium
+
+  - id: elevation-existing
+    action: update
+    must-include:
+      - item: Scale of 1:50 or 1:100, with written dimensions
+        level: must
+      - item: Blank elevations included
+        level: must
+    confidence: medium
+    notes: "Contents from the householder checklist ('Existing and proposed elevations scaled at 1:50 or 1:100 and with written dimensions') and Appendix F ('Blank elevations must also be included')."
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: Scale of 1:50 or 1:100, with written dimensions
+        level: must
+      - item: Blank elevations included
+        level: must
+    confidence: medium
+    notes: "Contents from the householder checklist ('Existing and proposed elevations scaled at 1:50 or 1:100 and with written dimensions') and Appendix F ('Blank elevations must also be included')."
+
+  - id: floor-plan-existing
+    action: update
+    source-text: Existing and proposed floor plans scaled at 1:50 or 1:100 and with written dimensions
+    must-include:
+      - item: Scale of 1:50 or 1:100, with written dimensions
+        level: must
+    confidence: medium
+
+  - id: floor-plan-proposed
+    action: update
+    source-text: Existing and proposed floor plans scaled at 1:50 or 1:100 and with written dimensions
+    must-include:
+      - item: Scale of 1:50 or 1:100, with written dimensions
+        level: must
+    confidence: medium
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in flood zone 2 or 3, or on land surrounded by higher risk flood zones (a dry island).
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (flood zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (flood zone 1).
+    source-text: >-
+      Flood Risk Assessment A Flood Risk Assessment (FRA) will be required for new developments in
+      Flood Zones 2 and 3, and for development proposals on sites of 1 hectare or greater in Flood
+      Zone 1 or otherwise if located on land surrounded by higher risk flood zones (known as a dry island).
+    source-url: https://www.runnymede.gov.uk/downloads/file/711/plannning-validation
+    must-include:
+      - item: Householder Flood Risk Assessment template
+        level: must
+        required-if:
+          application-type:
+            in: [hh]
+        source-text: "Flood Risk Assessment – householder template … Planning applications located within flood zones 2 and 3"
+    confidence: medium
+    notes: "Audit (wrong_trigger): the householder row quoted the web page ('a simple Flood Risk Assessment may be required'); the checklist trigger is flood zones 2 and 3."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: Contamination is known or suspected.
+        - discretionary
+    source-url: https://www.runnymede.gov.uk/downloads/file/711/plannning-validation
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 29, contamination known or suspected, or a vulnerable use (shown as officer discretion)."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, locally-listed-building, conservation-area]
+            description: The proposal affects a listed or locally listed building or a conservation area.
+    source-text: >-
+      Conservation Areas/Listed Buildings – Heritage Statement In accordance with the NPPF, a
+      description of the significance of any heritage asset affected and any contribution made by
+      their setting is required to be provided.
+    source-url: https://www.runnymede.gov.uk/downloads/file/711/plannning-validation
+    must-include:
+      - item: The significance of any heritage asset affected, and any contribution made by its setting
+        level: must
+    confidence: medium
+    notes: "Audit (missing_requirement): the householder checklist also asks for it for listed or locally listed buildings and conservation areas."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: external-lighting
+            value: true
+            description: Floodlighting, or external lighting on buildings, in car parks, in streets within new development or on open land.
+        - condition:
+            field: illuminated
+            value: true
+            description: An illuminated advertisement.
+    source-text: >-
+      Lighting Assessment Technical lighting details will be required for floodlighting, external
+      lighting attached to buildings, located in car parks or in streets within new development, or
+      within open land, and with all illuminated advertisement applications.
+    confidence: medium
+
+  - id: planning-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-text: >-
+      Applications/Cover letters/Supporting Planning Statement Where planning applications comprise
+      a series of supporting documents, in particular for major schemes, applicants are requested to
+      provide a summary of the development and the submission contents in a supporting covering
+      letter, including a schedule of drawings and documents.
+    must-include:
+      - item: A summary of the development and the submission contents
+        level: should
+      - item: A schedule of drawings and documents
+        level: should
+    confidence: medium
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if:
+      condition:
+        field: loss-of-open-space
+        value: true
+        description: The proposal would result in the loss of open space.
+    source-url: https://www.runnymede.gov.uk/downloads/file/711/plannning-validation
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 26 Open Space Statement, for loss of open space."
+
+  - id: roof-plan-existing
+    action: update
+    must-include:
+      - item: Scale of 1:50 or 1:100, with written dimensions
+        level: must
+    confidence: medium
+
+  - id: roof-plan-proposed
+    action: update
+    must-include:
+      - item: Scale of 1:50 or 1:100, with written dimensions
+        level: must
+    confidence: medium
+
+  - id: section-existing
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [green-belt]
+            description: The property is in the Green Belt.
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: Existing ground levels are to be altered, or the site is sloping or has variations in ground levels.
+    source-url: https://www.runnymede.gov.uk/downloads/file/713/householder-validation-checklist
+    must-include:
+      - item: Cross sections at 1:50 or 1:100 showing head height under the roof
+        level: must
+        required-if:
+          application-type:
+            in: [hh]
+      - item: Existing and proposed levels
+        level: must
+        required-if:
+          condition:
+            field: change-in-ground-levels
+            value: true
+            description: Existing ground levels are to be altered, or the site is sloping.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the householder checklist requires cross sections for 'Planning
+      applications for properties within the Green Belt'; Appendix F items 11 (levels) and 12
+      (Green Belt cross-sections) cover other applications.
+
+  - id: section-proposed
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [green-belt]
+            description: The property is in the Green Belt.
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: Existing ground levels are to be altered, or the site is sloping or has variations in ground levels.
+    source-url: https://www.runnymede.gov.uk/downloads/file/713/householder-validation-checklist
+    must-include:
+      - item: Cross sections at 1:50 or 1:100 showing head height under the roof
+        level: must
+        required-if:
+          application-type:
+            in: [hh]
+      - item: Existing and proposed levels
+        level: must
+        required-if:
+          condition:
+            field: change-in-ground-levels
+            value: true
+            description: Existing ground levels are to be altered, or the site is sloping.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the householder checklist requires cross sections for 'Planning
+      applications for properties within the Green Belt'; Appendix F items 11 (levels) and 12
+      (Green Belt cross-sections) cover other applications.
+
+  - id: site-plan
+    action: update
+    source-text: >-
+      Site/ Block Plan showing up to date site and neighbouring houses and specific site features
+      including different land levels, with written dimensions
+    must-include:
+      - item: The up-to-date site and neighbouring houses
+        level: must
+      - item: Specific site features, including different land levels
+        level: must
+      - item: Written dimensions
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the householder excerpt had fee-schedule and Planning Portal text spliced in; the Full planning excerpt is location-plan text."
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 1000
+            description: 1,000 square metres or more of net additional floorspace.
+    must-include:
+      - item: How the energy hierarchy has been applied (be lean, be clean, be green)
+        level: must
+      - item: 10% of energy from renewable or low carbon sources
+        level: must
+        required-if:
+          condition:
+            field: floorspace
+            operator: ">="
+            value: 1000
+            description: 1,000 square metres or more of net additional floorspace.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt lost the thresholds; from the audit, major development, and 1,000 sqm+ net additional floorspace must meet 10% from renewables/low carbon."
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre
+            value: true
+            description: Outside Addlestone, Chertsey and Egham town centres.
+        - any:
+            - condition:
+                field: floorspace-non-residential
+                operator: ">"
+                value: 500
+                description: Retail floorspace over 500 square metres.
+            - condition:
+                field: floorspace-non-residential
+                operator: ">"
+                value: 2500
+                description: Other main town centre uses over 2,500 square metres.
+    source-url: https://www.runnymede.gov.uk/downloads/file/711/plannning-validation
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted generic NPPF text. From the audit: item 27, retail
+      over 500 sqm or other main town centre uses over 2,500 sqm outside the three town centres. The
+      rule cannot tell retail from other uses, so check the use.
+
+  - id: transport-assessment
+    action: replace
+    required-if: discretionary
+    source-url: https://www.runnymede.gov.uk/downloads/file/711/plannning-validation
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted a generic 'to ensure consistency' sentence. From the audit: where traffic or pedestrian movements are created."
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "'All developments giving rise to significant amounts of transport movement'; no threshold, so officer discretion."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    must-include:
+      - item: Produced by a suitably qualified expert
+        level: must
+    confidence: medium
+    notes: "Where applicants challenge the Council's requirement for infrastructure or other planning obligations."
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.runnymede.gov.uk/downloads/file/711/plannning-validation
+    confidence: low
+    notes: "From the audit (missing_requirement): item 42 Site Waste Management Plan, recommended (not required) for major applications."
+
+  - id: water-impact-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: eia-development
+            value: true
+            description: EIA development.
+        - condition:
+            field: basement
+            value: true
+            description: A basement where the water table is high.
+    source-url: https://www.runnymede.gov.uk/downloads/file/711/plannning-validation
+    confidence: low
+    notes: "From the audit (missing_requirement): item 33 Groundwater / water quality assessment, for EIA development and basements where the water table is high."
+
+unmapped:
+  - local-name: Crime Considerations
+    source-text: "From the audit: item 36, crime addressed in the DAS where a DAS is required; a separate statement for uses linked to anti-social behaviour such as wine bars and night clubs"
+    source-url: https://www.runnymede.gov.uk/downloads/file/711/plannning-validation
+    suggested-id: crime-prevention-statement
+  - local-name: Sustainable Drainage Statement
+    source-text: "From the audit: item 18, all major applications; recommended for non-major ones, excluding changes of use and householder development"
+    source-url: https://www.runnymede.gov.uk/downloads/file/711/plannning-validation
+    suggested-id: drainage-strategy
+  - local-name: Thames Basin Heaths SPA Unilateral Undertaking (SANGS and SAMM)
+    source-text: "A completed Unilateral Undertaking which provides for SANGS and SAMM will be required prior to the validation of the application and a template is available on the Councils website."
+    source-url: https://www.runnymede.gov.uk/downloads/file/711/plannning-validation
+    suggested-id: habitats-regulations-assessment
+  - local-name: Thames Basin Heaths SPA Appropriate Assessment (50+ dwellings, 5-7km)
+    source-text: "For residential schemes of 50 new dwellings and above, located between 5km and 7km from the SPA and Appropriate Assessment may be required to determine likely impact and requirements for mitigation"
+    source-url: https://www.runnymede.gov.uk/downloads/file/711/plannning-validation
+    suggested-id: habitats-regulations-assessment
+  - local-name: Sequential test (town centre uses)
+    source-text: "must apply a sequential test to planning applications for main town centre uses which are neither in an existing centre nor in accordance with an up-to-date plan."
+    source-url: https://www.runnymede.gov.uk/downloads/file/711/plannning-validation
+    suggested-id: sequential-test
+  - local-name: Topographical survey
+    source-text: "Existing Topographical Survey and Existing and proposed levels 11.1 A topographical survey of the existing site is required to be submitted where the existing ground levels are proposed to be altered or the site is sloping and/or has variations in ground levels."
+    source-url: https://www.runnymede.gov.uk/downloads/file/711/plannning-validation
+    suggested-id: topographical-survey
+  - local-name: Street scene / street views
+    source-text: "Planning applications which involve raising the eaves and/or ridge and can be viewed from the street"
+    source-url: https://www.runnymede.gov.uk/downloads/file/713/householder-validation-checklist
+    suggested-id: street-scene-elevation
+  - local-name: Green Belt information
+    source-text: "From the audit: items 12.1-12.3, extensions, replacement and new buildings (original building details, floorspace and cross-sections); infilling/redevelopment statement on footprint, floorspace and hardstanding"
+    source-url: https://www.runnymede.gov.uk/downloads/file/711/plannning-validation
+    suggested-id: green-belt-statement
+  - local-name: Green and Blue Infrastructure Checklist
+    source-text: "From the audit: item 19, all development (proportionate for householder)"
+    source-url: https://www.runnymede.gov.uk/downloads/file/711/plannning-validation
+    suggested-id: ""
+  - local-name: Utilities Framework
+    source-text: "From the audit: item 35, more than 50 dwellings"
+    source-url: https://www.runnymede.gov.uk/downloads/file/711/plannning-validation
+    suggested-id: ""
+  - local-name: Microclimate Assessment
+    source-text: "From the audit: item 43, tall buildings over 25m"
+    source-url: https://www.runnymede.gov.uk/downloads/file/711/plannning-validation
+    suggested-id: microclimate-assessment
+  - local-name: Wind turbines information
+    source-text: "From the audit: item 44, turbines 11m or higher or with a rotor over 2m (MOD letter, noise and air traffic information)"
+    source-url: https://www.runnymede.gov.uk/downloads/file/711/plannning-validation
+    suggested-id: ""
+  - local-name: Certificate of Lawfulness evidence
+    source-text: "From the audit: item 41, full supporting evidence for a Certificate of Lawfulness"
+    source-url: https://www.runnymede.gov.uk/downloads/file/711/plannning-validation
+    suggested-id: lawful-development-evidence
+  - local-name: Works to Trees (TPOs and Conservation Areas)
+    source-text: "From the audit: item 45, site plan showing tree positions, details of and reasons for the works, replanting details for felling"
+    source-url: https://www.runnymede.gov.uk/downloads/file/711/plannning-validation
+    suggested-id: ""
+  - local-name: Justification for demolition in a conservation area
+    source-text: "From the audit: item 24, a justification statement for demolition in a conservation area"
+    source-url: https://www.runnymede.gov.uk/downloads/file/711/plannning-validation
+    suggested-id: ""
+  - local-name: Prior approval information
+    source-text: "From the audit: item 13, plans and technical evidence (noise, flood, structural or contamination reports) depending on the procedure"
+    source-url: https://www.runnymede.gov.uk/downloads/file/711/plannning-validation
+    suggested-id: ""
+
+low-confidence:
+  - id: bng-metric
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('…may need to be submitted. 23.'); Appendix F (2020) predates statutory BNG."
+  - id: telecommunications-report
+    note: "Audit (wrong_trigger, wrong_app_type): the excerpt is a fragment; item 40 is for mast/antenna applications by operators, often prior approval."
+  - id: noise-assessment
+    note: "The excerpt ('Such developments must be supported by a Noise Impact Assessment') lost the description of which developments."
+  - id: cil-form
+    note: "Audit (wrong_trigger): the householder excerpt has fee-schedule and Planning Portal text spliced in; no clear trigger was captured."
+
+new-fields:
+  - field: change-in-ground-levels
+    kind: boolean
+    label: Change in ground levels
+    description: The proposal changes ground levels, or is proposed next to changing ground levels.
+  - field: loss-of-open-space
+    kind: boolean
+    label: Loss of open space
+    description: The proposal would result in the loss of open space or recreational land.
+  - field: out-of-centre
+    kind: boolean
+    label: Edge or out of centre
+    description: A town centre use is proposed in an edge-of-centre or out-of-centre location.

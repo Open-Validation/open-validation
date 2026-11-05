@@ -1,0 +1,536 @@
+# Corrections for Maidstone Borough Council, from the council's audit.
+# Maidstone and Swale share one joint validation list (Part A and B items apply to both unless
+# marked "Maidstone only" or "Swale only"); keep this file consistent with SWL.yaml.
+# The audit read Maidstone's validation checklist page (Local list A1-A17, B1-B26). Many workbook
+# rows came from superseded joint PDFs, and several triggers are content text or fragments.
+local-authority: MAI
+
+validation-list:
+  url: https://maidstone.gov.uk/home/primary-services/planning-and-building/planning/apply-for-planning-permission/validation-checklist
+  date: 2026-01-26
+  date-basis: >-
+    audit: page text 'Published: 26 January 2026'. Disputed (Open): Grok reads 'Published: October
+    2026' on the same page; needs a manual check.
+
+submission-standards:
+  - item: All planning applications require scale bars; plans produced to a recognised scale with a scale bar
+    level: must
+  - item: Drawings accurately titled, with drawing numbers (and, where relevant, a revision number identifying the change and date), a scale and scale bars
+    level: should
+  - item: Plans to be determined must not be labelled preliminary, illustrative, draft, for information only or do not scale (unless 'do not scale' is followed by 'for planning purposes only')
+    level: should
+  - item: Plans and documents not submitted in booklet format
+    level: must
+  - item: Preferred plan size A1
+    level: should
+  - item: Plans submitted as JPG, JPEG, TIF, TIFF or PDF files
+    level: must
+  - item: Files no larger than 10 MB
+    level: should
+
+drop:
+  - id: bng-metric
+    sheets: [Householder]
+    reason: "wrong_app_type: the excerpt itself says '(excluding householder applications)'"
+  - id: environmental-statement
+    reason: "wrong_trigger: a fragment of general reasoning text, not a requirement"
+  - id: floor-plan-existing
+    reason: "duplicate: the excerpt is the street scene elevations text (kept as the Street scene item)"
+  - id: floor-plan-proposed
+    reason: "duplicate: as above"
+  - id: elevation-existing
+    reason: "duplicate: as above"
+  - id: elevation-proposed
+    reason: "duplicate: as above"
+  - id: photos
+    reason: "wrong_trigger: the excerpt is the Heritage Statement's contents (photographs are a must-include there)"
+  - id: roof-plan-existing
+    reason: "not_a_requirement: from the general planning-application guide, not the validation list"
+  - id: roof-plan-proposed
+    reason: "not_a_requirement: as above"
+  - id: schedule-of-works
+    reason: "wrong_trigger: tree method statement text; the list has no listed-building schedule of works item"
+
+drop-unmapped:
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: a fragment of the FRA entry, not a standalone requirement"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_trigger: mapped to A6 ecology text; the real item (A8 Shadow HRA) is added below"
+  - local-name: Nutrient Neutrality statement / calculator
+    reason: "wrong_trigger: a fragment; part of A8 Shadow HRA, added below"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: from the general planning-application guide, not the validation list"
+  - local-name: Minerals / Waste specific statements (county matters)
+    reason: "wrong_trigger: one row is garbled, the other is A12 waste minimisation (now waste-management-plan); B11 Minerals is re-added below"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "duplicate: part of the FRA entry (now a must-include of flood-risk-assessment)"
+  - local-name: Structural Survey
+    reason: "outdated_link: the Full planning row is the superseded wording; the current B7 wording is re-added below"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "wrong_trigger: a fragment of B20 Private open space, re-added below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: Housing or mixed use of 10 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: A site of 0.5 hectares or more.
+    source-text: Housing or mixed-use of 10 or more dwellings, or a site of 0.5 ha or more
+    source-url: https://maidstone.gov.uk/home/primary-services/planning-and-building/planning/apply-for-planning-permission/validation-checklist
+    must-include:
+      - item: The total number of all residential units
+        level: should
+    confidence: medium
+    notes: "Audit (wrong_trigger): A9, Maidstone only. The workbook quoted the contents text ('A typical Affordable Housing statement should include…')."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: A significant proposal in, or significantly increasing traffic through, an Air Quality Management Area.
+        - discretionary
+    source-text: >-
+      B1 Air Quality Assessment (AQA) Open proposals that are likely to generate high levels of air
+      pollution, such as significant industrial developments significant proposals that are
+      located in any Air Quality Management Area (AQMA) proposals that would result in a
+      significant increase in traffic passing through any AQMA development that may result in the
+      exceedance of air quality standards within currently undesignated areas
+    confidence: medium
+    notes: "'Significant' proposals and other polluting development have no threshold, so they are shown as officer discretion."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: >-
+          Trees or hedges will be removed or substantially pruned, retained trees or hedges could be
+          affected, or construction is within 30m of ancient woodland or a veteran tree.
+    confidence: medium
+    notes: "A7 applies to all applications, including householder (audit: wrong_app_type)."
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      site:
+        in: [archaeological-priority-area]
+        description: The site is in an area of archaeological importance.
+    source-url: https://maidstone.gov.uk/home/primary-services/planning-and-building/planning/apply-for-planning-permission/validation-checklist
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted a fragment. From the audit: B25 archaeological information for areas of archaeological importance, including householder works."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - discretionary
+        - site:
+            in: [site-of-special-scientific-interest, special-protection-area, special-area-of-conservation]
+            description: The site is in a SSSI (or within a 200m buffer), a Special Protection Area or a Special Area of Conservation.
+    source-text: >-
+      A6 Ecological and protected species survey Open If the development is: likely to affect
+      statutorily protected species in a site of Special Scientific Interest (SSSI) and within a
+      200m buffer in a Special Protection Area (SPA) in Special Area of Conservation (SAC)
+    confidence: medium
+    notes: "'Likely to affect statutorily protected species' is shown as officer discretion. A6 applies to all applications, including householder."
+
+  - id: bng-metric
+    action: update
+    confidence: low
+    notes: >-
+      A13: 'where a Biodiversity Gain Plan would be required or where exemption is being argued
+      (excluding householder applications)'. No rule is set for when a Gain Plan is required.
+
+  - id: cil-form
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 100
+            description: New buildings or extensions of 100 square metres (GIA) or more.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates one or more dwellings.
+    source-url: https://maidstone.gov.uk/home/primary-services/planning-and-building/planning/apply-for-planning-permission/validation-checklist
+    confidence: medium
+    notes: "Audit (wrong_trigger): A11, Maidstone only. The workbook quoted floor-plan text. From the audit: new buildings, extensions (100 sqm GIA) or dwellings that may be CIL liable."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal erects a new building.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: The proposal converts a building.
+    source-url: https://maidstone.gov.uk/home/primary-services/planning-and-building/planning/apply-for-planning-permission/validation-checklist
+    confidence: medium
+    notes: "From the audit (missing_requirement): B5 Renewable energy assessment for the erection or conversion of a building (10% on-site renewable/low carbon)."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in flood zone 2, 3 or 3b.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (flood zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (flood zone 1).
+        - site:
+            in: [critical-drainage-area]
+            description: The site is in a critical drainage area or an area of increased future flood risk in the SFRA.
+    source-text: >-
+      Information required site-specific FRA; a sequential assessment (to allow the LPA to do a
+      sequential test) should be provided for relevant development (as defined in the NPPF and NPPG
+      on flooding in flood zones 2 and 3) and; if required, an exception test the FRA and
+      sequential assessment exception test will only be acceptable if they have been updated within
+      the 12 months before planning application submission
+    source-url: https://maidstone.gov.uk/home/primary-services/planning-and-building/planning/apply-for-planning-permission/validation-checklist
+    must-include:
+      - item: A sequential assessment, for relevant development in flood zones 2 and 3
+        level: should
+        required-if:
+          site:
+            in: [flood-risk-zone]
+            description: The site is in flood zone 2 or 3.
+      - item: An exception test, if required
+        level: must
+      - item: FRA, sequential assessment and exception test updated within the 12 months before submission
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the information-required text. From the audit: FZ2/3/3b, FZ1 1 ha+, critical drainage areas, or SFRA future-risk areas (A5, also householder)."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [conservation-area, listed-building, scheduled-monument]
+            description: The proposal will affect a conservation area, a listed building or a scheduled monument.
+    source-text: The heritage statement as a minimum should include photographs and an impact assessment.
+    source-url: https://maidstone.gov.uk/home/primary-services/planning-and-building/planning/apply-for-planning-permission/validation-checklist
+    must-include:
+      - item: Photographs
+        level: should
+      - item: An impact assessment
+        level: should
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted contents only. From the audit: A4, conservation area, listed building or scheduled monument, including householder and listed building consent."
+
+  - id: land-contamination-assessment
+    action: update
+    confidence: low
+    notes: >-
+      Audit (other, Open): the audit says the page cites 'Section 15 of the National Planning
+      Policy Framework (2023)', not the NPPF 2026 wording in the excerpt; Grok says the excerpt is
+      right. Needs a manual check. No trigger was captured.
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: >-
+              Proposals that generate high levels of noise, such as noisy sports, or commercial,
+              industrial or warehousing development using noisy machinery, vehicles or refrigeration plant.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: New housing or other noise-sensitive uses next to roads, railways or noisy commercial uses.
+    source-text: >-
+      B3 Noise impact assessment Open proposals that generate high levels of noise such as noisy
+      sports; commercial, industrial or manufacturing/warehousing developments using noisy machinery
+      or vehicles, refrigeration plant and equipment, or; new housing or other noise-sensitive uses
+      adjacent to sources of noise, including roads, railways and noisy commercial uses
+    must-include:
+      - item: Noise assessment prepared by a suitably qualified person
+        level: must
+    confidence: medium
+
+  - id: section-existing
+    action: add
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal changes land levels or is on sloping land.
+    source-url: https://maidstone.gov.uk/home/primary-services/planning-and-building/planning/apply-for-planning-permission/validation-checklist
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): A14 Site levels and sections, for changes in land level or sloping land (also householder)."
+
+  - id: section-proposed
+    action: add
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal changes land levels or is on sloping land.
+    source-url: https://maidstone.gov.uk/home/primary-services/planning-and-building/planning/apply-for-planning-permission/validation-checklist
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): A14 Site levels and sections, for changes in land level or sloping land (also householder)."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 2500
+            description: Over 2,500 square metres (within the Maidstone Urban Area).
+        - all:
+            - condition:
+                field: outside-urban-area
+                value: true
+                description: The site is outside the Maidstone Urban Area.
+            - condition:
+                field: floorspace-non-residential
+                operator: ">"
+                value: 400
+                description: Over 400 square metres.
+    source-text: >-
+      B6 Retail and town centre uses impact assessment Open proposals over 2,500sqm within the
+      Maidstone Urban Area proposals over 400sqm outside the Maidstone Urban Area Information
+      required Retail Impact Assessment, including sequential test.
+    must-include:
+      - item: Sequential test
+        level: must
+    confidence: medium
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more dwellings.
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 1000
+            description: 1,000 square metres or more of floorspace.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.25
+            description: A site of 0.25 hectares or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 0.25
+            description: A site of 0.25 hectares or more.
+    source-text: >-
+      B8 Transport assessment and draft travel plan Open residential developments of 40 dwellings or
+      more or developments (including non-residential) with a gross floor space of 2,500sqm or more
+    source-url: https://maidstone.gov.uk/home/primary-services/planning-and-building/planning/apply-for-planning-permission/validation-checklist
+    must-include:
+      - item: A full Transport Assessment (rather than a Transport Statement)
+        level: must
+        required-if:
+          any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 40
+                description: 40 or more dwellings.
+            - condition:
+                field: floorspace
+                operator: ">="
+                value: 2500
+                description: 2,500 square metres or more gross floorspace.
+    confidence: medium
+    notes: >-
+      B8 Transport Assessment for 40+ dwellings or 2,500 sqm+; B9 Transport Statement (from the
+      audit, missing_requirement) for 10-39 dwellings, 1,000-2,499 sqm or 0.25 ha+.
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    source-text: if the transport assessment recommends a draft travel plan as mitigation, one should also be submitted
+    confidence: medium
+    notes: "B8: needed where the Transport Assessment recommends one."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted contents only. From the audit: B15, where viability is used to justify a departure from policy."
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: Residential development of 10 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: Residential development on a site of 0.5 ha or more (if the number of dwellings is unknown).
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 1000
+            description: Development of floorspace of 1,000 square metres or more (including change of use).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Development on a site of 1 hectare or more.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: Development on a site of 1 hectare or more.
+        - discretionary
+    source-text: >-
+      A12 Waste minimisation and recycling assessment report Open residential development of 10 or
+      more dwellings residential development on a site area of 0.5 ha or more (if the number of
+      dwellings is unknown development of floorspace of 1,000sqm or more development on sites of 1
+      ha or more change of use of 1,000sqm or more larger Houses of Multiple Occupancy (HMO) over 6
+      persons
+    source-url: https://maidstone.gov.uk/home/primary-services/planning-and-building/planning/apply-for-planning-permission/validation-checklist
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): A12, Maidstone only; it is a planning application item, not a prior
+      approval or county matter. Larger HMOs (over 6 persons) have no field, so they are shown as
+      officer discretion.
+
+  - id: water-impact-assessment
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 1
+        description: All new dwellings.
+    source-url: https://maidstone.gov.uk/home/primary-services/planning-and-building/planning/apply-for-planning-permission/validation-checklist
+    confidence: low
+    notes: "From the audit (missing_requirement): B24 higher water efficiency ('110 litres per person per day') for all new dwellings."
+
+unmapped:
+  - local-name: Shadow habitat regulation assessment (nutrient neutrality)
+    source-text: "If the development results “in a net increase in population served by a wastewater system” – see the Natural England advice letter (March 2022) on the council website and falls within the catchment of the River Stour, then the applicant will be expected to show how they will achieve nutrient neutrality as part of their application."
+    source-url: https://maidstone.gov.uk/home/primary-services/planning-and-building/planning/apply-for-planning-permission/validation-checklist
+    suggested-id: habitats-regulations-assessment
+  - local-name: Minerals assessment
+    source-text: "Site in a Minerals Safeguarding Area, unless exempt"
+    source-url: https://maidstone.gov.uk/home/primary-services/planning-and-building/planning/apply-for-planning-permission/validation-checklist
+    suggested-id: minerals-assessment
+  - local-name: Structural survey or statement
+    source-text: "B7 Structural survey or statement Open conversions of buildings in the countryside where applicant is relying on the building being structurally sound proposed works to a listed building that involve demolition or affect the structural integrity of the building (this includes works to remove, or reinforce elements of an existing listed building)"
+    source-url: https://maidstone.gov.uk/home/primary-services/planning-and-building/planning/apply-for-planning-permission/validation-checklist
+    suggested-id: structural-survey
+  - local-name: Private open space standards plan
+    source-text: "From the audit: B20, Maidstone only, all new dwellings"
+    source-url: https://maidstone.gov.uk/home/primary-services/planning-and-building/planning/apply-for-planning-permission/validation-checklist
+    suggested-id: ""
+  - local-name: Internal space standards plans
+    source-text: "FOR MAIDSTONE ONLY Applications should demonstrate that the internal space standards are met, this could be through annotated/scaled/dimensioned drawings or tables which show room size standards are met."
+    source-url: https://docs.maidstone.gov.uk/planning/planning-applications/Validation-checklist-combined-councils.pdf
+    suggested-id: ""
+  - local-name: Stationing mobile unit or chattel
+    source-text: "From the audit: A10, semi-permanent static caravans or structures"
+    source-url: https://maidstone.gov.uk/home/primary-services/planning-and-building/planning/apply-for-planning-permission/validation-checklist
+    suggested-id: ""
+  - local-name: Parking stress survey (HMOs)
+    source-text: "From the audit: A16, HMOs without one off-street space per new bedroom"
+    source-url: https://maidstone.gov.uk/home/primary-services/planning-and-building/planning/apply-for-planning-permission/validation-checklist
+    suggested-id: parking-survey
+  - local-name: Parking stress survey (residential)
+    source-text: "From the audit: A17, residential conversions or new build in a designated settlement not meeting KCC parking standards"
+    source-url: https://maidstone.gov.uk/home/primary-services/planning-and-building/planning/apply-for-planning-permission/validation-checklist
+    suggested-id: parking-survey
+  - local-name: Public art
+    source-text: "From the audit: B12, net 50+ dwellings or 2,000 sqm+ commercial"
+    source-url: https://maidstone.gov.uk/home/primary-services/planning-and-building/planning/apply-for-planning-permission/validation-checklist
+    suggested-id: ""
+  - local-name: Active transport statement
+    source-text: "From the audit: B13, 10+ dwellings or 0.5 ha, 1,000 sqm+, sites of 1 ha+, change of use of 1,000 sqm+"
+    source-url: https://maidstone.gov.uk/home/primary-services/planning-and-building/planning/apply-for-planning-permission/validation-checklist
+    suggested-id: ""
+  - local-name: Statement of social value
+    source-text: "From the audit: B14, 20+ units or commercial over 500 sqm"
+    source-url: https://maidstone.gov.uk/home/primary-services/planning-and-building/planning/apply-for-planning-permission/validation-checklist
+    suggested-id: ""
+  - local-name: Housing intensification planning statement
+    source-text: "From the audit: B16, HMOs over 6 occupants, or a single dwelling converted to 2+ flats"
+    source-url: https://maidstone.gov.uk/home/primary-services/planning-and-building/planning/apply-for-planning-permission/validation-checklist
+    suggested-id: ""
+  - local-name: Drawings for offsite highway works
+    source-text: "From the audit: B18, listed; no trigger given"
+    source-url: https://maidstone.gov.uk/home/primary-services/planning-and-building/planning/apply-for-planning-permission/validation-checklist
+    suggested-id: ""
+  - local-name: Biodiversity enhancement plan
+    source-text: "B19 Biodiversity enhancement plan - Any application where there is an increase in building footprint"
+    source-url: https://maidstone.gov.uk/home/primary-services/planning-and-building/planning/apply-for-planning-permission/validation-checklist
+    suggested-id: ""
+  - local-name: M4(3) wheelchair user dwellings
+    source-text: "From the audit: B23, at least 15% of affordable units"
+    source-url: https://maidstone.gov.uk/home/primary-services/planning-and-building/planning/apply-for-planning-permission/validation-checklist
+    suggested-id: ""
+  - local-name: Maidstone Building for Life 12
+    source-text: "From the audit: B26, 10+ dwellings or 0.5 ha+"
+    source-url: https://maidstone.gov.uk/home/primary-services/planning-and-building/planning/apply-for-planning-permission/validation-checklist
+    suggested-id: ""
+
+new-fields:
+  - field: change-in-ground-levels
+    kind: boolean
+    label: Change in ground levels
+    description: The proposal changes ground levels, or is proposed next to changing ground levels.
+  - field: special-area-of-conservation
+    kind: designation
+    label: Special Area of Conservation
+    description: Site is in or near a Special Area of Conservation (dataset special-area-of-conservation).
+  - field: scheduled-monument
+    kind: designation
+    label: Scheduled monument
+    description: The proposal affects a scheduled monument (dataset scheduled-monument).
+  - field: outside-urban-area
+    kind: boolean
+    label: Outside the main urban area
+    description: The site is outside the main urban area or settlement boundary defined in the local plan.

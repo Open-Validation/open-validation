@@ -1,0 +1,593 @@
+# Corrections for London Borough of Lambeth, from inputs/audit/london-borough-of-lambeth.json.
+# Grokbot's link is the current list: 'Revised Local Information Requirements (the Local List)
+# 2024', issued December 2024 (84 numbered LIRs). Grokbot captured about 40 of them, mostly with
+# garbled triggers, and filed many under Full planning. Many LIRs depend on the works, not the
+# application type, so they also apply to householder schemes. Items marked "From the audit" use
+# the audit's paraphrase of the list.
+local-authority: LBH
+
+validation-list:
+  date: 2024-12
+  date-basis: "audit: document text 'issued in December 2024' (Revised Local Information Requirements 2024)"
+
+submission-standards:
+  - item: Drawings drawn to metric scale and including a linear scale bar
+    level: must
+
+drop-unmapped:
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_trigger: a cut-off fragment ('and their luminance (lux levels).'); illuminated adverts are now in lighting-assessment"
+  - local-name: Crime prevention / Secured by Design statement
+    reason: "wrong_trigger: the excerpt is Student Housing Management Plan content (LIR 71)"
+  - local-name: Electric vehicle charging details
+    reason: "wrong_trigger: the excerpt is the telecoms ICNIRP declaration (LIR 26), now in telecommunications-report"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "wrong_trigger: reuses the Playspace / Open Space trigger (LIR 12)"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: the excerpt is listed-building floor-plan text, now in floor-plan-proposed"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "part of the Flood Risk Assessment (now a must-include item there)"
+  - local-name: Lawful development evidence (statutory declarations etc.)
+    reason: "wrong_app_type: filed under Full planning; re-added below for lawful development certificates"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: A major residential application of 10 or more C3 residential units.
+        - all:
+            - ref: major-development
+            - condition:
+                field: housing-type
+                value: specialist
+                description: The major application includes specialist accommodation.
+    source-text: >-
+      Affordable Housing Statement All Major residential applications (of 10 or more C3 residential
+      units), and all major applications which include specialist accommodation
+    source-url: https://www.lambeth.gov.uk/sites/default/files/2025-12/Local_Information_Requirements_2024.pdf
+    confidence: medium
+    notes: "The workbook's excerpt interleaved two table columns; the trigger above is the 'Application type' column."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      ref: major-development
+    confidence: medium
+    notes: "\"Major development proposals must be submitted with a full Air Quality Assessment.\""
+
+  - id: arboriculturist-report
+    action: update
+    must-include:
+      - item: Complies with BS 5837:2012 'Trees in Relation to Design, Demolition and Construction' (or any updated equivalent)
+        level: must
+    notes: >-
+      The workbook guessed Full planning ('INFERRED'). From the audit (missing_requirement): LIR 78
+      Tree Survey also applies to householder schemes; the audit does not quote its trigger.
+
+  - id: bng-metric
+    action: update
+    must-include:
+      - item: A BNG Plan based on calculations made with the current statutory Biodiversity Metric
+        level: must
+    notes: >-
+      "Required for all applications, unless the development type is [exempt]" (the excerpt is
+      cut off); no application type is given because it applies to all applications.
+
+  - id: site-plan
+    action: replace
+    required-if:
+      always: true
+    source-text: >-
+      Site Layout Plan and All Applications Site Location Plan (drawn to metric scale, showing the
+      direction of North and drawings must include a linear scale bar).
+    source-url: https://www.lambeth.gov.uk/sites/default/files/2025-12/Local_Information_Requirements_2024.pdf
+    must-include:
+      - item: An identified standard metric scale (typically 1:100, 1:200 or 1:500 for larger developments)
+        level: must
+        source-text: >-
+          Site Layout plans should be provided at an identified standard metric scale (typically
+          1:100, 1:200 or 1:500 (for larger developments).
+      - item: The direction of North
+        level: must
+      - item: A linear scale bar
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted a telecoms mast site-plan fragment. LIR 1 Site
+      Layout Plan applies to all applications, including householder.
+
+  - id: cil-form
+    action: replace
+    required-if:
+      always: true
+    source-url: https://www.lambeth.gov.uk/sites/default/files/2025-12/Local_Information_Requirements_2024.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement): LIR 7 CIL Form 1 applies to 'All applications', householder included. The workbook quoted the table of contents."
+
+  - id: construction-management-plan
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: basement
+            value: true
+            description: Basement development likely to cause nuisance or disturbance to residential amenity.
+        - discretionary
+    confidence: medium
+    notes: >-
+      All Major development and other minor developments, including basement developments, that are
+      likely to cause nuisance or disturbance to residential amenity (the excerpt interleaves table
+      columns; minor developments are shown as officer discretion).
+
+  - id: daylight-sunlight-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The application is for new residential development.
+        - discretionary
+    source-text: All applications for new residential development and/or where development has potential to cause adverse impacts
+    source-url: https://www.lambeth.gov.uk/sites/default/files/2025-12/Local_Information_Requirements_2024.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was a fragment. LIR 22 also applies to householder
+      schemes with potential adverse impact on neighbours (shown as officer discretion).
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [conservation-area, world-heritage-site]
+            description: The scheme is in a designated area.
+    must-include:
+      - item: Details of external materials, the reasons for their selection, their durability and anticipated lifespan
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): LIR 6 DAS applies to major development, designated-area schemes and listed building consent."
+
+  - id: biodiversity-survey-report
+    action: update
+    must-include:
+      - item: Carried out by a suitably qualified ecologist
+        level: must
+      - item: At least an Ecological Impact Assessment (EcIA) for most applications
+        level: should
+    notes: "The workbook guessed Full planning ('INFERRED'); the excerpt gives contents but no trigger."
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      ref: major-development
+    confidence: medium
+    notes: >-
+      The excerpt is LIR 'Energy Strategy (Including Overheating Assessment)' for all Major
+      development applications.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development falls within Schedule 1 or 2 of the EIA Regulations 2017.
+    confidence: medium
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The development is in Flood Zone 2, 3a or 3b.
+        - discretionary
+    source-text: All development proposals in Flood Zone 2
+    source-url: https://www.lambeth.gov.uk/sites/default/files/2025-12/Local_Information_Requirements_2024.pdf
+    must-include:
+      - item: A sequential test, for sites at high or medium risk of surface water flooding or in Flood Zones 2, 3a and 3b
+        level: must
+        source-text: >-
+          Sequential testing will be required for sites in high and/or medium risk of flooding from
+          surface water (as per the Environment Agency's surface water flood maps) or for all
+          developments within Flood Zones 2, 3a and 3b in accordance with Annex 5 of the Lambeth
+          Local Plan.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): LIR 34 applies to all development in Flood Zone 2, plus Zones 3a/3b and
+      certain Zone 1 sites (shown as officer discretion). It also applies to householder schemes.
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: external-lighting
+            value: true
+            description: >-
+              External lighting for a publicly accessible development, or external lighting or
+              floodlighting near a residential property, Listed Building, Conservation Area or area
+              of biodiversity value (SINC, SSSI, LNR).
+        - condition:
+            field: illuminated
+            value: true
+            description: The application is for an illuminated advertisement.
+    source-text: >-
+      Lighting Assessment Required in support of proposals for external lighting in connection with
+      a publicly accessible development or proposals that include external lighting or
+      floodlighting, which is in the vicinity of a residential property, Listed Building,
+      Conservation Area or areas of biodiversity value such as SINC, SSSI or LNR.
+    source-url: https://www.lambeth.gov.uk/sites/default/files/2025-12/Local_Information_Requirements_2024.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): not LBC-specific; LIR 47 also covers 'all illuminated advertisements'."
+
+  - id: noise-assessment
+    action: update
+    must-include:
+      - item: Meets the standards in BS 4142:2014 'Methods for rating and assessing industrial and commercial sound'
+        level: must
+    notes: "The workbook guessed Full planning ('INFERRED'); the excerpt gives contents but no trigger."
+
+  - id: roof-plan-existing
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: The application involves new building work.
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Alterations (including demolition) to the existing roof form.
+    source-text: >-
+      Existing and proposed Roof plans drawn to metric scale and must include a linear scale bar.
+      All applications involving new building work or alterations (including demolition) to the
+      existing roof form.
+    source-url: https://www.lambeth.gov.uk/sites/default/files/2025-12/Local_Information_Requirements_2024.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt interleaved two columns; reassembled here. Applies to householder schemes too."
+
+  - id: roof-plan-proposed
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: The application involves new building work.
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Alterations (including demolition) to the existing roof form.
+    source-text: >-
+      Existing and proposed Roof plans drawn to metric scale and must include a linear scale bar.
+      All applications involving new building work or alterations (including demolition) to the
+      existing roof form.
+    source-url: https://www.lambeth.gov.uk/sites/default/files/2025-12/Local_Information_Requirements_2024.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt interleaved two columns; reassembled here. Applies to householder schemes too."
+
+  - id: elevation-existing
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: building-works
+            value: true
+            description: The application involves new building work or alterations to buildings.
+        - application-type:
+            in: [advertising]
+    source-text: >-
+      Existing and proposed elevations drawn to metric scale and must include a linear scale bar All
+      applications involving new building work, alterations to buildings or display of
+      advertisements.
+    source-url: https://www.lambeth.gov.uk/sites/default/files/2025-12/Local_Information_Requirements_2024.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement): LIR 2 applies to all applications involving building work, including householder; the workbook had it under adverts only."
+
+  - id: elevation-proposed
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: building-works
+            value: true
+            description: The application involves new building work or alterations to buildings.
+        - application-type:
+            in: [advertising]
+    source-text: >-
+      Existing and proposed elevations drawn to metric scale and must include a linear scale bar All
+      applications involving new building work, alterations to buildings or display of
+      advertisements.
+    source-url: https://www.lambeth.gov.uk/sites/default/files/2025-12/Local_Information_Requirements_2024.pdf
+    must-include:
+      - item: All elevations of the proposed development
+        level: should
+      - item: Annotated to indicate materials, style and finish of windows and doors and other external details
+        level: should
+        source-text: >-
+          Drawings should show all elevations of the proposed development and should be sufficiently
+          detailed and annotated to indicate materials, style and finish of windows and doors and
+          other external details.
+    confidence: medium
+    notes: "Audit (missing_requirement): LIR 2 applies to all applications involving building work, including householder; the workbook had it under adverts only."
+
+  - id: section-existing
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: building-works
+            value: true
+            description: The application involves new building work or alterations to buildings.
+        - application-type:
+            in: [advertising]
+    source-text: >-
+      Existing and proposed cross section drawings, drawn to metric scale and must include a linear
+      scale bar … involving new building work, alterations to buildings or display of advertisements.
+    source-url: https://www.lambeth.gov.uk/sites/default/files/2025-12/Local_Information_Requirements_2024.pdf
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook's excerpt scrambled two columns; reassembled here, so check the exact trigger for LIR 4."
+
+  - id: section-proposed
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: building-works
+            value: true
+            description: The application involves new building work or alterations to buildings.
+        - application-type:
+            in: [advertising]
+    source-text: >-
+      Existing and proposed cross section drawings, drawn to metric scale and must include a linear
+      scale bar … involving new building work, alterations to buildings or display of advertisements.
+    source-url: https://www.lambeth.gov.uk/sites/default/files/2025-12/Local_Information_Requirements_2024.pdf
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook's excerpt scrambled two columns; reassembled here, so check the exact trigger for LIR 4."
+
+  - id: floor-plan-existing
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: building-works
+            value: true
+            description: The application involves building work.
+        - application-type:
+            in: [lbc]
+    source-url: https://www.lambeth.gov.uk/sites/default/files/2025-12/Local_Information_Requirements_2024.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement / wrong_app_type): LIR 3 floor plans apply to all
+      applications involving building work (including householder) and to listed building consent.
+      The workbook had them under adverts only.
+
+  - id: floor-plan-proposed
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: building-works
+            value: true
+            description: The application involves building work.
+        - application-type:
+            in: [lbc]
+    source-url: https://www.lambeth.gov.uk/sites/default/files/2025-12/Local_Information_Requirements_2024.pdf
+    must-include:
+      - item: Service runs and ventilation and extractions, and all new walls, doors, windows and plasterwork, clearly shown
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+        source-text: >-
+          runs and ventilation and extractions etc. must be clearly shown, including all new walls,
+          doors, windows, and plasterwork.
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement / wrong_app_type): LIR 3 floor plans apply to all
+      applications involving building work (including householder) and to listed building consent.
+      The must-include item is listed-building floor-plan text that the workbook had filed under
+      Ventilation / Extraction (its start is cut off).
+
+  - id: telecommunications-report
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [pa-ecomms-network]
+        - condition:
+            field: telecommunications-development
+            value: true
+            description: The application is from an Electronic Communications Code Operator for telecommunications equipment.
+    source-url: https://www.lambeth.gov.uk/sites/default/files/2025-12/Local_Information_Requirements_2024.pdf
+    must-include:
+      - item: >-
+          A site plan with dimensions of the siting of the mast and equipment, to show potential
+          impacts on pedestrians, cyclists, vehicles and street furniture such as lamp standards or
+          electric vehicle charging points
+        level: must
+        source-text: >-
+          a site plan with dimensions of the siting of the mast and equipment to demonstrate
+          potential … impacts on pedestrians, cyclists, vehicles and street furniture such as lamp
+          standards or electric vehicle charging points
+      - item: A signed declaration that the equipment and installation fully comply with the ICNIRP radio frequency public exposure guidelines
+        level: must
+        source-text: >-
+          Applicants must provide a signed declaration that the equipment and installation has been
+          designed in full compliance with the requirements of the radio frequency public exposure
+          guidelines of the International Commission on Non-Ionizing Radiation Protection (ICNIRP).
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type / wrong_trigger): LIR 26 Electronic Communications Code Operators
+      supplementary information belongs with telecoms applications, not Full planning. The ICNIRP
+      text was filed under 'Electric vehicle charging details'.
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "All applications that exceed the Travel Plan thresholds in the TfL guidance (thresholds not in the list itself)."
+
+  - id: viability-assessment
+    action: replace
+    required-if: discretionary
+    source-url: https://www.lambeth.gov.uk/sites/default/files/2025-12/Local_Information_Requirements_2024.pdf
+    must-include:
+      - item: A full un-redacted viability assessment
+        level: must
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted the fast-track exemption ('no Financial Viability
+      Assessment (FVA) will be required for conventional C3 proposals') rather than LIR 81's trigger.
+      A garbled tab fragment says applicants not meeting the affordable housing fast-track
+      requirements "will be required to submit a full un-redacted viability assessment with the
+      application". Check LIR 81 for the exact trigger.
+
+  - id: photos
+    action: update
+    must-include:
+      - item: All exteriors and interiors affected by the proposed works
+        level: should
+      - item: Close-ups of any features (doors, fireplaces, windows) to be altered or removed, room by room
+        level: should
+    confidence: medium
+
+  - id: archaeological-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [scheduled-monument]
+            description: The site is on or near a Scheduled Ancient Monument.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.4
+            description: The site is 0.4 hectares or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 0.4
+            description: The site is 0.4 hectares or more.
+        - all:
+            - site:
+                in: [archaeological-priority-area]
+                description: The site is in an Archaeological Priority Area.
+            - condition:
+                field: ground-disturbance
+                value: true
+                description: The proposal involves ground works or excavation.
+    source-url: https://www.lambeth.gov.uk/sites/default/files/2025-12/Local_Information_Requirements_2024.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): LIR 13, on or near a Scheduled Ancient Monument, sites of 0.4ha+, ground works in Archaeological Priority Areas (householder included)."
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [world-heritage-site]
+            description: The site is in or affects the setting of a World Heritage Site.
+        - discretionary
+    source-url: https://www.lambeth.gov.uk/sites/default/files/2025-12/Local_Information_Requirements_2024.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): LIR 37 Heritage Impact Assessment (World Heritage Sites
+      and their settings) and LIR 69 Statement of Heritage Significance, whose trigger the audit
+      does not give (shown as officer discretion).
+
+  - id: transport-assessment
+    action: add
+    source-url: https://www.lambeth.gov.uk/sites/default/files/2025-12/Local_Information_Requirements_2024.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): LIR 76 Transport Assessment/Statement is listed, but the audit gives no trigger."
+
+unmapped:
+  - local-name: Evidence for lawful development certificates (LIR 31)
+    source-text: >-
+      limited to statutory declarations, council tax or business rates records, electoral records,
+      service bills, tenancy … agreements, and dated photos.
+    source-url: https://www.lambeth.gov.uk/sites/default/files/2025-12/Local_Information_Requirements_2024.pdf
+    suggested-id: lawful-development-evidence
+  - local-name: Basement Impact Assessment (LIR 14)
+    source-text: "All applications for basement development (whether new build…"
+    source-url: https://www.lambeth.gov.uk/sites/default/files/2025-12/Local_Information_Requirements_2024.pdf
+    suggested-id: basement-impact-assessment
+  - local-name: Methods and Materials Specification (LIR 52)
+    source-text: "all applications that include operational development"
+    source-url: https://www.lambeth.gov.uk/sites/default/files/2025-12/Local_Information_Requirements_2024.pdf
+    suggested-id: materials-specification
+  - local-name: Dropped Kerb Highways Approval Letter (LIR 25)
+    source-text: "From the audit: a new vehicular crossover to a disabled parking space"
+    source-url: https://www.lambeth.gov.uk/sites/default/files/2025-12/Local_Information_Requirements_2024.pdf
+    suggested-id: highways-approval
+  - local-name: Demolition Method Statement (LIR 23)
+    source-text: "From the audit: demolition in conservation areas, of listed or locally listed buildings or in AQMAs, and Prior Approval applications for the method of demolition"
+    source-url: https://www.lambeth.gov.uk/sites/default/files/2025-12/Local_Information_Requirements_2024.pdf
+    suggested-id: demolition-method-statement
+  - local-name: BREEAM Pre-Assessment (LIR 17)
+    source-text: "From the audit: new non-residential major development, and conversions over 500 sqm"
+    source-url: https://www.lambeth.gov.uk/sites/default/files/2025-12/Local_Information_Requirements_2024.pdf
+    suggested-id: breeam-pre-assessment
+  - local-name: Circular Economy Statement (LIR 19)
+    source-text: "From the audit: GLA referable applications"
+    source-url: https://www.lambeth.gov.uk/sites/default/files/2025-12/Local_Information_Requirements_2024.pdf
+    suggested-id: circular-economy-statement
+  - local-name: Navigational / Riverside Risk Assessment (LIR 53)
+    source-text: "From the audit: sites in the Port of London Authority area"
+    source-url: https://www.lambeth.gov.uk/sites/default/files/2025-12/Local_Information_Requirements_2024.pdf
+    suggested-id: navigational-risk-assessment
+  - local-name: Other LIRs listed without triggers
+    source-text: >-
+      From the audit: LIR 10 Workspace Strategy/Management Plan; 18 Build to Rent Statement; 20
+      Community Use Management Plan; 30 Evening economy/food and drink management plan; 35 Foul
+      Water and Water Supply Capacity Assessment; 38 Hostel and HMO Statement; 40 Housing Quality
+      Statement; 42 Industrial Intensification and Co-location Statement; 43 Infrastructure
+      Assessment; 46 Large-scale Purpose-built Shared Living Management Plan; 49 Loss of Existing
+      Housing and Estate Redevelopment Statement; 55 Parking Design and Management Plan; 62 Public
+      Realm Statement; 64 Safety, Security and Emergency Strategy; 65 Servicing and Delivery Plan;
+      66-68 Social Infrastructure Impact Assessment / Management Plan / Statement; 71 Student
+      Housing Statement and Management Plan; 79 Urban Greening Factor Assessment; 80 Ventilation or
+      Extraction Statement; 82 Visitor Accommodation Impact Assessment; 83 Visitor Management Plan;
+      84 Whole Life Cycle Carbon Assessment
+    source-url: https://www.lambeth.gov.uk/sites/default/files/2025-12/Local_Information_Requirements_2024.pdf
+    suggested-id: ""
+
+low-confidence:
+  - id: fire-statement
+    note: >-
+      Audit (wrong_trigger): the excerpt merges the high-rise trigger (cut off) with 'All
+      applications for minor developments should be accompanied by a Fire Statement that meets the
+      requirements of Part A of Policy D12 of the London Plan (2021)'. The full trigger needs
+      checking in the list.
+
+new-fields:
+  - field: roof-alteration
+    kind: boolean
+    label: Roof alteration or new roof
+    description: The proposal changes the shape of an existing roof or adds a new roof.
+  - field: scheduled-monument
+    kind: designation
+    label: Scheduled monument
+    description: Site contains or affects a scheduled monument or its setting (dataset scheduled-monument).
+  - field: telecommunications-development
+    kind: boolean
+    label: Telecommunications development
+    description: The proposal is for telecommunications equipment (masts, antennas, cabinets and similar).
+  - field: building-works
+    kind: boolean
+    label: Involves building works
+    description: The proposal involves building works (new buildings, extensions or alterations), including works for a change of use.

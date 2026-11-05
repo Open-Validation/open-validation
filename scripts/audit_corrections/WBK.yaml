@@ -1,0 +1,299 @@
+# Corrections for West Berkshire Council, from the council's audit.
+# The audit could not fetch the Local List of Documents (January 2025) PDF (contents_checked:
+# false), so these corrections rest on Grokbot's own excerpts and the errors the audit found in
+# them. Where an excerpt states clearly when the document is needed, the trigger is structured.
+# The audit also notes that the Local Plan Review 2023-2041 was adopted on 10 June 2025, after
+# this list, so its policy references may be out of date.
+local-authority: WBK
+
+submission-standards:
+  - item: All plans and drawings to scale and fitting onto A4 or A3 paper
+    level: should
+  - item: Each plan has a unique reference number and title; revised plans show a revision number and date
+    level: should
+  - item: Plans drawn to an appropriate metric scale, with the scale specified, a scale bar and dimensions
+    level: must
+  - item: Electronic plans and drawings submitted as PDF documents
+    level: should
+
+drop:
+  - id: section-existing
+    sheets: [Householder]
+    reason: "wrong_app_type: the excerpt says it 'applies to non-householder applications only'"
+  - id: section-proposed
+    sheets: [Householder]
+    reason: "wrong_app_type: as above"
+  - id: bng-metric
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: the excerpt says permitted development is exempt from BNG; re-added below for planning applications"
+  - id: sustainability-statement
+    reason: "The item is an Energy Statement; moved to energy-statement below, with Full planning added (wrong_app_type)"
+  - id: sci
+    reason: "not_a_requirement: the list only encourages a Statement of Community Involvement"
+
+drop-unmapped:
+  - local-name: Nutrient Neutrality statement / calculator
+    reason: "wrong_app_type: filed under Householder, which the text excludes; re-added below without the run-on heading"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: several checklist bullets run together; re-added below"
+  - local-name: Foul Sewage / Utilities Statement
+    reason: "wrong_trigger and wrong_app_type: this is the SuDS trigger, and it was also put under prior approval; re-added below"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: fragment 'of the SUDS design.'; the real trigger is re-added below"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: the excerpt is the retail sequential test, not the flood sequential test"
+  - local-name: Odour / Dust / Vibration assessment
+    reason: "wrong_trigger: the excerpt is noise and vibration assessment text (part of the noise assessment)"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advisory text"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "not_a_requirement: advisory text"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_trigger: a heading fragment"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "duplicate: a fragment of the daylight/sunlight assessment trigger"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 5
+        description: The proposal creates five or more dwellings.
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      site:
+        in: [archaeological-priority-area]
+        description: The site includes, or may include, a heritage asset of archaeological interest.
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: The site is on or next to land that may be contaminated by an existing or previous use.
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 and/or 3 (including householder, minor development and changes of use).
+        - discretionary
+    notes: >-
+      The excerpt is cut off after the first case (Flood Zones 2 and 3); the other cases in the
+      list are shown as officer discretion. It applies to all application types, householder
+      included.
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: The proposal includes external or free-standing lighting (for example in dark sky areas in the open countryside).
+    notes: "The excerpt is cut off after the first case ('in dark sky areas within the open countryside')."
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The proposal may generate significant noise, alone or with other development.
+        - discretionary
+    notes: "Proposals within a noise sensitive area are shown as officer discretion."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - condition:
+            field: main-town-centre-use-out-of-centre
+            value: true
+            description: Main town centre uses neither in an existing centre nor in accordance with an up-to-date plan.
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Mast and antenna development by mobile phone network operators.
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is EIA development.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees on the site or on adjoining properties (within falling distance).
+    source-text: >-
+      Tree survey/arboricultural impact assessment – all applications with trees on site and on
+      adjoining properties (within falling distance)
+    notes: "The workbook's excerpt ran several checklist bullets together; trimmed to this item."
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: The area or areas where access points to the development will be situated, even if access has been reserved
+        level: must
+        source-text: >-
+          You must also indicate on the Site/Block Plan(s) the area or areas where access points to
+          the development will be situated, even if access has been reserved.
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      application-type:
+        in: [full, outline]
+    source-text: >-
+      The Environment Act 2021 (legislation.gov.uk) sets a 10% Biodiversity Net Gain (BNG) as a
+      minimum requirement in planning except for the following types of developments: permitted
+      development under the Town and Country Planning (General Permitted Development) Order 2015
+      (as amended);
+    source-url: https://www.westberks.gov.uk/media/35216/Local-List-of-Documents/pdf/Local_List_Doc_09.18.pdf?m=638041068525170000
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): the workbook put BNG only under prior approval, which the text
+      exempts. The statutory requirement applies to planning applications (Full, Outline) unless
+      exempt; the list of exemptions continues past the excerpt.
+
+  - id: energy-statement
+    action: add
+    required-if:
+      application-type:
+        in: [full, outline, reserved-matters, technical-details-consent]
+    source-text: >-
+      Energy Statement When it's required For all planning applications* for new residential,
+      mixed use, non-residential (including retail, commercial, industrial, warehousing, community
+      or leisure) buildings and uses. *For the avoidance of doubt 'planning applications' includes
+      full, outline, reserved matters applications and also for technical details consent.
+    source-url: https://www.westberks.gov.uk/media/35216/Local-List-of-Documents/pdf/Local_List_Doc_09.18.pdf?m=638041068525170000
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): the workbook had it under Outline and Reserved matters only, and
+      mapped it to sustainability-statement. It covers new residential, mixed use and
+      non-residential buildings and uses.
+
+unmapped:
+  - local-name: Water Quality Nutrient Neutrality Statement
+    source-text: >-
+      Water Quality Nutrient Neutrality Statement- all applications within Lambourn and Solent
+      catchment areas that result in additional overnight accommodation (but not householder)
+    source-url: https://www.westberks.gov.uk/media/35216/Local-List-of-Documents/pdf/Local_List_Doc_09.18.pdf?m=638041068525170000
+    suggested-id: nutrient-neutrality-statement
+  - local-name: Ventilation/extraction statement
+    source-text: "Ventilation/extraction statement- all applications with ventilation extraction equipment"
+    source-url: https://www.westberks.gov.uk/media/35216/Local-List-of-Documents/pdf/Local_List_Doc_09.18.pdf?m=638041068525170000
+    suggested-id: ventilation-extraction-details
+  - local-name: Surface Water Drainage Strategy and SuDS
+    source-text: >-
+      A Surface Water Drainage Strategy (including provision of SuDS) for i) all major
+      applications, both full and outline; ii) for all minor applications, again both full and
+      outline, where there is a material increase in impermeable area (>100sq.m), which may
+      increase risk of flooding downstream; iii) all change of use applications to a more
+      vulnerable use, e.g, residential
+    source-url: https://www.westberks.gov.uk/media/35216/Local-List-of-Documents/pdf/Local_List_Doc_09.18.pdf?m=638041068525170000
+    suggested-id: drainage-strategy
+
+low-confidence:
+  - id: photos
+    note: "Audit (wrong_trigger): the excerpt is ecologist-competence text from the ecology report entry, not a photographs trigger."
+  - id: planning-statement
+    note: "Audit (wrong_trigger): the excerpt 'in the Planning Statement.' is a fragment, not a trigger."
+  - id: recreation-facilities-assessment
+    note: "Audit (wrong_trigger): the excerpt 'applications affecting playing fields.' is a truncated fragment."
+  - id: construction-management-plan
+    note: "Audit (wrong_trigger): the excerpt is a fragment that does not say when the plan is needed."
+  - id: heritage-statement
+    note: >-
+      Audit (missing_requirement): a heritage significance statement appears only under listed
+      building consent, but the list treats it as constraint-driven for other types too; the
+      trigger could not be confirmed because the PDF was blocked.
+  - id: "*"
+    note: >-
+      Audit (other, Amended): the list has its own checklists for advertisement consent, s73,
+      discharge of conditions, non-material amendments and works to trees, which Grokbot missed
+      (marked '(none)'); their requirements are not captured here.
+
+new-fields:
+  - field: telecommunications-development
+    kind: boolean
+    label: Telecommunications development
+    description: The proposal is for telecommunications development, such as a mast or antennae.
+  - field: main-town-centre-use-out-of-centre
+    kind: boolean
+    label: Town centre use outside a centre
+    description: The proposal is for a main town centre use in an edge-of-centre or out-of-centre location.

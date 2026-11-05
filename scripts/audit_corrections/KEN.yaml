@@ -1,0 +1,406 @@
+# Corrections for Kent County Council, from the council's audit.
+# KCC is a county planning authority. Its 'Guidance and validation requirements for county council
+# Regulation 3 applications' (adopted March 2025) covers only KCC's own Regulation 3 development;
+# a companion note covers minerals and waste (county matter) applications. Grokbot put the Reg 3
+# requirements under Full planning, so they are moved to reg-3 here. Most of the minerals and
+# waste list was missed (listed as unmapped below). The Reg 3 note also has Part B information
+# for details pursuant, s73 and non-material amendment applications, which Grokbot did not capture.
+# Community engagement (section 12) is encouraged, not mandatory, so it is not added.
+local-authority: KEN
+
+submission-standards:
+  - item: Each file below 10 MB
+    level: must
+  - item: Documents in an unlocked format (not secured with a password)
+    level: must
+  - item: Drawings at an appropriate, identified scale with a scale bar
+    level: must
+  - item: Plans show a north point (except elevations)
+    level: must
+  - item: Each drawing has a unique title and drawing reference number, with date and correct revision number
+    level: must
+  - item: At least one paper copy, in addition to the electronic version, for applications accompanied by an Environmental Impact Assessment
+    level: must
+  - item: Sensitive personal or special category data in a separate document, clearly marked as confidential and not cross-referenced in public documents
+    level: should
+
+drop:
+  - id: waste-management-plan
+    reason: "wrong_app_type / not_a_requirement: advice to contact the Environment Agency about a waste permit"
+
+drop-unmapped:
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "not_a_requirement: made from the Agricultural Land Classification text; duplicates that row"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: the archaeology trigger sentence"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: location plan drawing content ('A BLUE line must be drawn...')"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: the tail of the Air Quality Assessment trigger"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "duplicate: the Daylight/Sunlight Assessment text"
+  - local-name: Ground investigation / Geotechnical / Basement Impact Assessment
+    reason: "wrong_trigger: a SuDS infiltration sentence"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: a BNG section 106 sentence"
+  - local-name: Cycle parking details
+    reason: "duplicate: same parking-standards fragment as 'Parking provision / Parking plan'"
+  - local-name: Minerals / Waste specific statements (county matters)
+    reason: "wrong_trigger: the fragment 'nature conservation-based restoration schemes.'; the real items are listed below"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [reg-3]
+        - any:
+            - site:
+                in: [air-quality-management-area]
+                description: Development in or adjacent to an Air Quality Management Area.
+            - discretionary
+    notes: >-
+      Also for development generating significant air quality emissions or odours, and where
+      district Local Plan policies set thresholds (council's wording). Audit (wrong_app_type): Reg 3 note.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [reg-3]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: The development is likely to affect trees or hedgerows within or adjacent to the site, directly or indirectly.
+    notes: "Audit (wrong_app_type): Reg 3 note."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [reg-3]
+        - discretionary
+    notes: >-
+      Required when a Heritage Statement or pre-application discussion indicates a heritage asset
+      with archaeological interest is likely (council's wording). Audit (wrong_app_type): Reg 3 note.
+
+  - id: construction-management-plan
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [reg-3]
+        - any:
+            - ref: major-development
+            - discretionary
+    notes: "All major applications and any application proposing significant new built development (council's wording)."
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [reg-3]
+        - discretionary
+    must-include:
+      - item: Existing and expected levels of daylight, sunlight and overshadowing on neighbouring properties
+        level: must
+        source-text: "Details of existing and expected levels of daylight, sunlight and overshadowing on neighbouring properties;"
+    notes: "Where there is potential for adverse impacts on daylight/sunlight to adjoining properties, gardens or amenity space (council's wording)."
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [reg-3]
+        - any:
+            - ref: major-development
+            - all:
+                - site:
+                    in: [conservation-area, world-heritage-site]
+                    description: The site is in a conservation area or World Heritage Site.
+                - condition:
+                    field: floorspace
+                    operator: ">"
+                    value: 100
+                    description: The development creates more than 100 square metres of floorspace.
+    notes: >-
+      Audit (wrong_trigger): the excerpt is cut short at 'All major development applications'; the
+      source also requires a DAS for more than 100 m2 in a Conservation Area or World Heritage Site.
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [reg-3, mineral-app, waste-dev]
+        - any:
+            - ref: major-development
+            - site:
+                in: [special-protection-area, site-of-special-scientific-interest, local-wildlife-site]
+                description: The development could affect protected sites (SACs, SPAs, Ramsar sites, SSSIs, National Nature Reserves, Local Wildlife Sites, Local Nature Reserves).
+            - discretionary
+    notes: >-
+      Preliminary Ecological Assessment for all major development and any development with possible
+      biodiversity impacts (council's wording, minerals note; the Reg 3 note has the same
+      protected-sites text).
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [reg-3]
+        - condition:
+            field: eia-development
+            value: true
+            description: The development is of a type listed in the EIA Regulations 2017.
+    notes: "Audit (wrong_app_type): Reg 3 note."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [reg-3]
+        - site:
+            in: [flood-risk-zone]
+            description: Any development in flood zone 2 or 3, including minor development and change of use.
+    source-text: >-
+      8.1 Flood Risk Assessment (FRA) 8.1.1 A Flood Risk Assessment is required for any development:
+      in flood zone 2 or 3 including minor development and change of use;
+    source-url: https://www.kent.gov.uk/__data/assets/pdf_file/0015/204450/Guidance-and-validation-requirements-for-county-council-regulation-3-applications.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): KCC does not decide prior approvals; the text refers to planning applications under Reg 3."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [reg-3]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building]
+            description: The development may affect heritage assets, directly or indirectly.
+    notes: "Audit (wrong_app_type): Reg 3 note."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [reg-3]
+        - condition:
+            field: external-lighting
+            value: true
+            description: Significant external lighting, including temporary construction and security lighting, streetlighting and floodlighting of pitches or games areas.
+    notes: "Audit (wrong_app_type): Reg 3 note."
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [reg-3]
+        - any:
+            - condition:
+                field: noise-sensitive-use
+                value: true
+                description: The development is close to an existing major noise source (motorways, trunk roads, airports, industry).
+            - condition:
+                field: noise-generating-use
+                value: true
+                description: The development is likely to generate significant noise (e.g. outdoor sports facilities).
+    notes: "Audit (wrong_app_type): Reg 3 note."
+
+  - id: planning-statement
+    action: update
+    required-if:
+      application-type:
+        in: [reg-3]
+    notes: "Audit (wrong_app_type): Reg 3 note."
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [reg-3]
+        - ref: major-development
+        - site:
+            in: [contaminated-land, source-protection-zone]
+            description: The site is on known, suspected or potentially contaminated land, or over a Groundwater Source Protection Zone.
+    source-url: https://www.kent.gov.uk/__data/assets/pdf_file/0015/204450/Guidance-and-validation-requirements-for-county-council-regulation-3-applications.pdf
+    confidence: medium
+    notes: >-
+      From the audit (wrong_trigger): section 8.4, major applications on known, suspected or
+      potentially contaminated land, or over a Groundwater Source Protection Zone. The workbook used
+      the Flood Risk Assessment text. Whether 'major' also applies to the Source Protection Zone case
+      needs checking.
+
+  - id: landscaping-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [reg-3]
+        - any:
+            - ref: major-development
+            - discretionary
+    source-url: https://www.kent.gov.uk/__data/assets/pdf_file/0015/204450/Guidance-and-validation-requirements-for-county-council-regulation-3-applications.pdf
+    confidence: medium
+    notes: >-
+      From the audit (wrong_trigger): section 5.2, all major applications plus minor applications
+      needing landscape mitigation, compensation or restoration. The workbook quoted Details
+      Pursuant fee text.
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [reg-3]
+        - any:
+            - ref: major-development
+            - discretionary
+    source-url: https://www.kent.gov.uk/__data/assets/pdf_file/0015/204450/Guidance-and-validation-requirements-for-county-council-regulation-3-applications.pdf
+    confidence: medium
+    notes: >-
+      From the audit (wrong_trigger): section 11, Sustainable Design/Carbon Neutral Statement, for all
+      major applications and Local Plan thresholds. The workbook quoted a SuDS sentence.
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [reg-3]
+        - any:
+            - ref: major-development
+            - discretionary
+    source-text: >-
+      7.1 Transport Statement 7.1.1 Required for applications for small scale developments that would
+      impact upon traffic movements and minor school expansions. … 7.2 Transport Assessment 7.2.1
+      Required for applications for large school expansions, new schools and all major development
+      proposals.
+    source-url: https://www.kent.gov.uk/__data/assets/pdf_file/0015/204450/Guidance-and-validation-requirements-for-county-council-regulation-3-applications.pdf
+    confidence: medium
+    notes: >-
+      Covers both the Transport Statement (7.1) and Transport Assessment (7.2); the 7.2 text was in
+      the workbook's Travel Plan row. School expansions and new schools are shown as discretionary.
+
+  - id: travel-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [reg-3]
+        - discretionary
+    source-url: https://www.kent.gov.uk/__data/assets/pdf_file/0015/204450/Guidance-and-validation-requirements-for-county-council-regulation-3-applications.pdf
+    confidence: medium
+    notes: >-
+      From the audit (wrong_trigger): section 7.4, school development that increases pupil or staff
+      numbers, and non-school development generating significant movement. The workbook used the
+      Transport Assessment trigger.
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [reg-3]
+        - condition:
+            field: loss-of-use
+            value: true
+            description: A school-site proposal on part of a playing field or pitch.
+    source-url: https://www.kent.gov.uk/__data/assets/pdf_file/0015/204450/Guidance-and-validation-requirements-for-county-council-regulation-3-applications.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): section 10, Development on Playing Field statement for school-site proposals on part of a playing field or pitch."
+
+unmapped:
+  - local-name: Green Belt Statement
+    source-text: "From the audit: new built development, change of use or extended use in the Metropolitan Green Belt (Reg 3 note section 3; also in the minerals and waste note)"
+    source-url: https://www.kent.gov.uk/__data/assets/pdf_file/0015/204450/Guidance-and-validation-requirements-for-county-council-regulation-3-applications.pdf
+    suggested-id: green-belt-statement
+  - local-name: Tree Protection Plan
+    source-text: "From the audit: where existing trees or root protection areas would be affected (Reg 3 note 5.3)"
+    source-url: https://www.kent.gov.uk/__data/assets/pdf_file/0015/204450/Guidance-and-validation-requirements-for-county-council-regulation-3-applications.pdf
+    suggested-id: tree-protection-plan
+  - local-name: Public Rights of Way Statement
+    source-text: "From the audit: where a proposal could directly affect a public right of way (Reg 3 note 7.5)"
+    source-url: https://www.kent.gov.uk/__data/assets/pdf_file/0015/204450/Guidance-and-validation-requirements-for-county-council-regulation-3-applications.pdf
+    suggested-id: public-rights-of-way-statement
+  - local-name: Draft Biodiversity Gain Plan
+    source-text: "From the audit: over 1,000 m2, over 1 ha, or where significant gains are needed (Reg 3 note 4.2)"
+    source-url: https://www.kent.gov.uk/__data/assets/pdf_file/0015/204450/Guidance-and-validation-requirements-for-county-council-regulation-3-applications.pdf
+    suggested-id: biodiversity-gain-plan
+  - local-name: Waste Hierarchy Statement
+    source-text: "From the audit: minerals and waste note section 13 (no trigger given)"
+    source-url: https://www.kent.gov.uk/__data/assets/pdf_file/0003/205068/Guidance-and-validation-requirements-for-mineral-developments.pdf
+    suggested-id: waste-hierarchy-statement
+  - local-name: Circular Economy Statement
+    source-text: "From the audit: minerals and waste note section 14 (no trigger given)"
+    source-url: https://www.kent.gov.uk/__data/assets/pdf_file/0003/205068/Guidance-and-validation-requirements-for-mineral-developments.pdf
+    suggested-id: circular-economy-statement
+  - local-name: Mineral Safeguarding Report / Minerals Assessment
+    source-text: "From the audit: minerals and waste note section 20 (no trigger given)"
+    source-url: https://www.kent.gov.uk/__data/assets/pdf_file/0003/205068/Guidance-and-validation-requirements-for-mineral-developments.pdf
+    suggested-id: mineral-safeguarding-assessment
+  - local-name: Scheme of Working / Phasing / Landfill Statement
+    source-text: "From the audit: minerals and waste note (no trigger given)"
+    source-url: https://www.kent.gov.uk/__data/assets/pdf_file/0003/205068/Guidance-and-validation-requirements-for-mineral-developments.pdf
+    suggested-id: scheme-of-working
+  - local-name: Restoration and Aftercare Plan
+    source-text: "From the audit: minerals and waste note (no trigger given)"
+    source-url: https://www.kent.gov.uk/__data/assets/pdf_file/0003/205068/Guidance-and-validation-requirements-for-mineral-developments.pdf
+    suggested-id: restoration-aftercare-plan
+  - local-name: Glint and Glare Assessment
+    source-text: "From the audit: minerals and waste note (no trigger given)"
+    source-url: https://www.kent.gov.uk/__data/assets/pdf_file/0003/205068/Guidance-and-validation-requirements-for-mineral-developments.pdf
+    suggested-id: glint-glare-assessment
+  - local-name: Airport Safeguarding
+    source-text: "From the audit: minerals and waste note section 23 (no trigger given)"
+    source-url: https://www.kent.gov.uk/__data/assets/pdf_file/0003/205068/Guidance-and-validation-requirements-for-mineral-developments.pdf
+    suggested-id: airport-safeguarding
+  - local-name: Bioaerosols Risk Assessment
+    source-text: "From the audit: minerals and waste note (no trigger given)"
+    source-url: https://www.kent.gov.uk/__data/assets/pdf_file/0003/205068/Guidance-and-validation-requirements-for-mineral-developments.pdf
+    suggested-id: bioaerosols-risk-assessment
+  - local-name: Hydrological and Hydrogeological Assessment
+    source-text: "From the audit: minerals and waste note (no trigger given)"
+    source-url: https://www.kent.gov.uk/__data/assets/pdf_file/0003/205068/Guidance-and-validation-requirements-for-mineral-developments.pdf
+    suggested-id: hydrogeological-assessment
+  - local-name: Landscape and Ecological Management Plan
+    source-text: "From the audit: major schemes relying on long-term habitat management (minerals and waste note)"
+    source-url: https://www.kent.gov.uk/__data/assets/pdf_file/0003/205068/Guidance-and-validation-requirements-for-mineral-developments.pdf
+    suggested-id: landscape-ecological-management-plan
+  - local-name: Borehole / Trial Pit analysis
+    source-text: "From the audit: minerals and waste note (no trigger given)"
+    source-url: https://www.kent.gov.uk/__data/assets/pdf_file/0003/205068/Guidance-and-validation-requirements-for-mineral-developments.pdf
+    suggested-id: borehole-analysis
+  - local-name: Ancient Woodland / Veteran Trees
+    source-text: "From the audit: minerals and waste note (no trigger given)"
+    source-url: https://www.kent.gov.uk/__data/assets/pdf_file/0003/205068/Guidance-and-validation-requirements-for-mineral-developments.pdf
+    suggested-id: ancient-woodland-assessment
+
+low-confidence:
+  - id: bng-metric
+    note: >-
+      The excerpt is the national statutory BNG text. From the audit: the Reg 3 note (4.2) also asks
+      for a draft Biodiversity Gain Plan (listed as unmapped).
+  - id: photos
+    note: "Audit (wrong_trigger): the excerpt is BNG exemption text ('site photographs demonstrating the exemption should apply'), not a photographs trigger."
+  - id: section-existing
+    note: "Audit (wrong_trigger, wrong_app_type): the excerpt is a fragment from the minerals and waste note ('should include topographic surveys and cross-section drawings.')."
+  - id: section-proposed
+    note: "Audit (wrong_trigger, wrong_app_type): the excerpt is a fragment from the minerals and waste note ('should include topographic surveys and cross-section drawings.')."
+
+new-fields:
+  - field: source-protection-zone
+    kind: designation
+    label: Groundwater Source Protection Zone
+    description: Site is over an Environment Agency groundwater Source Protection Zone.

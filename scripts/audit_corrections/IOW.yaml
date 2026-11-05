@@ -1,0 +1,428 @@
+# Corrections for Isle of Wight Council, from inputs/audit/isle-of-wight-council.json.
+# The audit checked the current local list (start date 1 March 2025; the hosted file is
+# 'final_4', which may have been revised since). It is one general list for all application
+# types, but Grokbot filed every row under Outline, so every workbook file below either gets a
+# trigger from its own excerpt (with no application-type limit) or is replaced or dropped.
+local-authority: IOW
+
+submission-standards:
+  - item: Plans and drawings drawn to an identified metric scale, showing a scale bar or ruler; location and block plans show the direction of north
+    level: must
+  - item: The location plan is a standalone document, not included as an element of other plans
+    level: must
+
+drop:
+  - id: site-plan
+    reason: "not_a_requirement: 'location and block plans, must show the direction of north' is a drawing standard (now in submission-standards)"
+  - id: design-and-access-statement
+    reason: "not_a_requirement: a content fragment; the DAS is not a local list item"
+  - id: photos
+    reason: "not_a_requirement: 'Photographs of the trees are also useful' is advice inside the tree survey item (now in arboriculturist-report)"
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is Arboricultural Method Statement text (now in arboriculturist-report)"
+  - id: environmental-statement
+    reason: "wrong_trigger: the excerpt is the LVIA trigger; the list has no EIA item"
+
+drop-unmapped:
+  - local-name: Parking provision / Parking plan
+    reason: "not_a_requirement: a fragment ('a separate parking plan is provided.'); the source has no parking plan item"
+  - local-name: Landscape and Visual Impact Assessment
+    reason: "wrong_trigger: merged with the external lighting content; re-added below with its own trigger"
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "wrong_trigger: merged with the windows and doors details; split into two items below"
+  - local-name: Ground investigation / Geotechnical / Basement Impact Assessment
+    reason: "wrong_trigger: the excerpt is the Hydrogeological Risk Assessment; re-added below under that name, with the missing Ground Stability Assessment"
+  - local-name: Nutrient Neutrality statement / calculator
+    reason: "other: the trigger is split by table header text; re-added below with the audit's clean quote"
+
+requirements:
+  - id: arboriculturist-report
+    action: replace
+    source-text: >-
+      A tree survey that includes plans that identifies the position of the trees and schedule that
+      describes them (see part 4 of BS 5837).
+    source-url: https://www.iow.gov.uk/media/769/Local-validation-list-2025-final/pdf/Local_validaiton_list_2025_-_final_4.pdf?m=1787651665373
+    must-include:
+      - item: Plans identifying the position of the trees
+        level: must
+      - item: A schedule describing the trees (BS 5837 part 4)
+        level: must
+      - item: Arboricultural Method Statement showing how trees will be protected in relation to the finalised design
+        level: must
+        source-text: "Arboricultural Method Statement that demonstrates how trees will be protected in relation to the finalised design."
+      - item: Photographs of the trees
+        level: should
+        source-text: "Photographs of the trees are also useful."
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): the workbook filed it under Outline only; it applies across
+      application types. The excerpt is the content of the survey, and the trigger wasn't captured.
+      The method statement and photographs items came from rows the workbook mislabelled.
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [archaeological-priority-area]
+            description: The site includes, or has been identified as having potential to include, heritage assets with archaeological interest.
+        - discretionary
+    policy: Core Strategy Policy DM11
+    confidence: medium
+    notes: "Required for 'All applications where a site includes or has potential to include heritage assets with archaeological interest, or the site has been identified to have potential, or is of unknown potential.' Sites of unknown potential are shown as officer discretion."
+
+  - id: bng-metric
+    action: replace
+    source-text: >-
+      exempt from BNG (please see Biodiversity net gain: exempt developments – GOV.UK ( The plan must
+      be to scale (with North arrow).
+    source-url: https://www.iow.gov.uk/media/769/Local-validation-list-2025-final/pdf/Local_validaiton_list_2025_-_final_4.pdf?m=1787651665373
+    confidence: low
+    notes: "Audit (wrong_trigger): the excerpt is a fragment. The workbook filed it under Outline only; the statutory BNG exemptions apply instead."
+
+  - id: habitat-baseline
+    action: add
+    source-url: https://www.iow.gov.uk/media/769/Local-validation-list-2025-final/pdf/Local_validaiton_list_2025_-_final_4.pdf?m=1787651665373
+    confidence: medium
+    notes: "From the audit (missing_requirement): plans of existing on-site habitats within the red line, for major and smaller development unless exempt from BNG."
+
+  - id: construction-management-plan
+    action: update
+    required-if:
+      ref: major-development
+    policy: Core Strategy Policies SP5, DM2, DM12
+    confidence: medium
+    notes: "A Draft Construction Environmental Management Plan is 'Required for major developments.'"
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: >-
+              Contamination is known or suspected, the site is on the Council's contaminated sites
+              list, or the site is within 250m of landfill.
+        - discretionary
+    source-text: "Land Contamination Assessment NPPF Required for all applications where: Core Strategy Policy DM2"
+    source-url: https://www.iow.gov.uk/media/769/Local-validation-list-2025-final/pdf/Local_validaiton_list_2025_-_final_4.pdf?m=1787651665373
+    policy: Core Strategy Policy DM2
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt is cut off. From the audit: contamination known or suspected, sensitive end uses (shown as officer discretion), sites on the Council's contaminated sites list, and sites within 250m of landfill."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [site-of-special-scientific-interest, special-protection-area, local-wildlife-site]
+            description: The site is within or adjacent to a designated nature conservation site (including local designations).
+        - condition:
+            field: greenfield-site
+            value: true
+            description: The site is a greenfield site.
+        - condition:
+            field: protected-species
+            value: true
+            description: The proposal could affect protected habitats or species known to exist, or the site has the potential to support them.
+    policy: Core Strategy Policies SP5 and DM12
+    confidence: medium
+    notes: "Audit (wrong_app_type): applies to all application types, not only Outline."
+
+  - id: section-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: site-level-change
+            operator: ">"
+            value: 0
+            description: The proposal changes land levels.
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal includes new buildings.
+        - application-type:
+            in: [mineral-app]
+    confidence: medium
+    notes: "Audit (other): the trigger list ('Changes to land levels The winning and working of minerals New buildings') was merged with the scale-bar rule in the council tab."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: site-level-change
+            operator: ">"
+            value: 0
+            description: The proposal changes land levels.
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal includes new buildings.
+        - application-type:
+            in: [mineral-app]
+    must-include:
+      - item: Original and proposed ground levels, with AOD shown
+        level: must
+      - item: Scale bars on either side of sections at 5m intervals (1m intervals if excavations are below 5m)
+        level: must
+        source-text: "Plans must include scale bars on either side of sections at intervals of 5m (if excavations are below 5m then intervals should be 1m)."
+    confidence: medium
+    notes: "Audit (other): the trigger list ('Changes to land levels The winning and working of minerals New buildings') was merged with the scale-bar rule in the council tab."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (flood zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (flood zone 1).
+        - site:
+            in: [flood-risk-zone]
+            description: New development or a change of use in flood zone 2 or 3 (the Council's SFRA or the latest Environment Agency information).
+    policy: Core Strategy Policy DM14
+    must-include:
+      - item: Sequential and exception tests, as necessary
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): applies to all application types, not only Outline."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, conservation-area, locally-listed-building, scheduled-monument, park-and-garden, world-heritage-site]
+        description: The proposal (including demolition) affects, or could affect, designated or non-designated heritage assets, including their setting.
+    confidence: medium
+    notes: "Audit (wrong_app_type): 'All applications, including demolition which affect, or have the potential to affect designated or non-designated heritage assets, including their setting', including listed building consent and householder."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - condition:
+                field: external-lighting
+                value: true
+                description: The development results in additional external lighting or glazing.
+            - site:
+                in: [area-of-outstanding-natural-beauty]
+                description: The site is within the National Landscape (AONB).
+    policy: Core Strategy Policies SP5, DM2, DM11 & DM12
+    must-include:
+      - item: Details of proposed external lighting
+        level: must
+      - item: Details of the light output of the proposed lighting
+        level: must
+      - item: Lighting measures adopted to prevent light spillage or glare and to protect the character of the area and amenity of nearby properties and uses
+        level: must
+    confidence: medium
+    notes: "The must-include items were merged into the workbook's LVIA row (audit: wrong_trigger)."
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: roof-alteration
+            value: true
+            description: The proposal involves extensions to buildings' existing roofs.
+        - condition:
+            field: new-build
+            value: true
+            description: Roof details of proposed new buildings.
+    must-include:
+      - item: Scale 1:50 or 1:100
+        level: must
+    policy: Core Strategy Policy DM2
+    confidence: medium
+    notes: "Audit (wrong_app_type): 'Required for all planning applications involving extensions to buildings existing roofs', i.e. householder too."
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: roof-alteration
+            value: true
+            description: The proposal involves extensions to buildings' existing roofs.
+        - condition:
+            field: new-build
+            value: true
+            description: Roof details of proposed new buildings.
+    must-include:
+      - item: Scale 1:50 or 1:100
+        level: must
+    policy: Core Strategy Policy DM2
+    confidence: medium
+    notes: "Audit (wrong_app_type): 'Required for all planning applications involving extensions to buildings existing roofs', i.e. householder too."
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: The proposal involves the installation of telecommunications equipment.
+    confidence: medium
+    notes: "'Required for all planning applications involving the proposed installation of telecommunications equipment.' The excerpt has tree survey and hedgerow headings mixed in."
+
+  - id: transport-assessment
+    action: replace
+    required-if: discretionary
+    source-text: "Required for all applications where proposals would lead to significant transport implications"
+    source-url: https://www.iow.gov.uk/media/769/Local-validation-list-2025-final/pdf/Local_validaiton_list_2025_-_final_4.pdf?m=1787651665373
+    policy: Core Strategy Policy SP7
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted Retail Impact Assessment content. A Transport Assessment / Statement is to include travel plans as necessary."
+
+  - id: travel-plan
+    action: replace
+    required-if: discretionary
+    source-text: "Required for all applications where proposals would lead to significant transport implications"
+    source-url: https://www.iow.gov.uk/media/769/Local-validation-list-2025-final/pdf/Local_validaiton_list_2025_-_final_4.pdf?m=1787651665373
+    policy: Core Strategy Policy SP7
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted Retail Impact Assessment content. Travel plans are part of the Transport Assessment / Statement 'as necessary'."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      condition:
+        field: floorspace-non-residential
+        operator: ">"
+        value: 2500
+        description: The retail element exceeds 2,500 square metres.
+    source-text: "retail element exceeds 2,500 square metres"
+    source-url: https://www.iow.gov.uk/media/769/Local-validation-list-2025-final/pdf/Local_validaiton_list_2025_-_final_4.pdf?m=1787651665373
+    must-include:
+      - item: A sequential assessment
+        level: must
+      - item: The impact of the proposal on existing, committed and planned public and private investment in a centre or centres in the catchment area
+        level: must
+      - item: The impact on town centre vitality and viability, including local consumer choice and trade in the town centre and the wider retail catchment
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): Retail Impact Assessment with sequential assessment. The content items were in the workbook's Transport Assessment row."
+
+  - id: viability-assessment
+    action: replace
+    source-text: >-
+      open book viability assessment undertaken by a suitably qualified valuer/ surveyor and in
+      accordance with Royal Institution of Chartered Surveyors guidance should be provided, along with
+      an agreement to fund the Council’s costs for evaluating the submitted viability information.
+    source-url: https://www.iow.gov.uk/media/769/Local-validation-list-2025-final/pdf/Local_validaiton_list_2025_-_final_4.pdf?m=1787651665373
+    must-include:
+      - item: Open book, by a suitably qualified valuer or surveyor, in line with RICS guidance
+        level: should
+      - item: An agreement to fund the Council's costs of evaluating the viability information
+        level: should
+    confidence: low
+    notes: "The excerpt gives content but not the trigger. The workbook filed it under Outline only."
+
+unmapped:
+  - local-name: Landscape and Visual Impact Assessment
+    source-text: >-
+      Landscape and Visual Impact Assessment Core Strategy Policies SP5, DM2, DM11 & DM12 … Required
+      for developments listed within schedules 1 of 2 of the Town and Country Planning (Environmental
+      Impact Assessment) Regulations, and/ or that would be likely to have a significant impact on the
+      surrounding landscape, surrounding settlements or the character of the site.
+    source-url: https://www.iow.gov.uk/media/769/Local-validation-list-2025-final/pdf/Local_validaiton_list_2025_-_final_4.pdf?m=1787651665373
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Street scene plans
+    source-text: >-
+      Plans showing street scenes at a scale of 1:100 Core Strategy Policy DM2 … Required for planning
+      applications that propose new buildings that do not fall into the householder category of
+      development.
+    source-url: https://www.iow.gov.uk/media/769/Local-validation-list-2025-final/pdf/Local_validaiton_list_2025_-_final_4.pdf?m=1787651665373
+    suggested-id: street-scene-elevations
+  - local-name: Windows and doors details
+    source-text: >-
+      Details of the new or replacement windows & doors at a scale of 1:10 Sections of typical details
+      of windows and doors at a scale of 1:5 Details of the glazing (identifying clear/obscured/tinted,
+      etc) and the method of fixing (putty or beaded etc) and a specification of materials and
+      finishes. From the audit: these apply to heritage assets.
+    source-url: https://www.iow.gov.uk/media/769/Local-validation-list-2025-final/pdf/Local_validaiton_list_2025_-_final_4.pdf?m=1787651665373
+    suggested-id: joinery-details
+  - local-name: Hydrogeological Risk Assessment
+    source-text: >-
+      Hydrogeological Risk Assessment Core Strategy Policies SP5, SP9, DM12 & DM20 Required for
+      applications that propose the winning and working of minerals and proposals that may affect
+      groundwater quality and supplies.
+    source-url: https://www.iow.gov.uk/media/769/Local-validation-list-2025-final/pdf/Local_validaiton_list_2025_-_final_4.pdf?m=1787651665373
+    suggested-id: hydrogeological-risk-assessment
+  - local-name: Ground Stability / Behaviour Assessment
+    source-text: "Ground Stability / Behaviour Assessment - Applications for operational development located in an area of known ground instability"
+    source-url: https://www.iow.gov.uk/media/769/Local-validation-list-2025-final/pdf/Local_validaiton_list_2025_-_final_4.pdf?m=1787651665373
+    suggested-id: ground-stability-assessment
+  - local-name: Nitrates Mitigation Strategy Statement
+    source-text: "Required for all developments that would result in a net increase in dwellinghouses or tourism accommodation within the nitrate neutrality catchment area"
+    source-url: https://www.iow.gov.uk/media/769/Local-validation-list-2025-final/pdf/Local_validaiton_list_2025_-_final_4.pdf?m=1787651665373
+    suggested-id: nutrient-neutrality-statement
+  - local-name: Agricultural Land Assessment
+    source-text: "Agricultural Land Assessment - Required for all developments that would result in the loss of agricultural land"
+    source-url: https://www.iow.gov.uk/media/769/Local-validation-list-2025-final/pdf/Local_validaiton_list_2025_-_final_4.pdf?m=1787651665373
+    suggested-id: agricultural-land-classification
+  - local-name: Draft Habitat Management and Monitoring Plan (HMMP)
+    source-text: "Draft Habitat Management and Monitoring Plan (HMMP) - Required for any application that includes off-site habitat creation"
+    source-url: https://www.iow.gov.uk/media/769/Local-validation-list-2025-final/pdf/Local_validaiton_list_2025_-_final_4.pdf?m=1787651665373
+    suggested-id: habitat-management-monitoring-plan
+  - local-name: Phasing plan
+    source-text: "From the audit: all major development"
+    source-url: https://www.iow.gov.uk/media/769/Local-validation-list-2025-final/pdf/Local_validaiton_list_2025_-_final_4.pdf?m=1787651665373
+    suggested-id: phasing-plan
+  - local-name: Statement regarding planning contributions
+    source-text: "From the audit: all applications where development plan policies or SPDs require contributions"
+    source-url: https://www.iow.gov.uk/media/769/Local-validation-list-2025-final/pdf/Local_validaiton_list_2025_-_final_4.pdf?m=1787651665373
+    suggested-id: planning-obligations-heads-of-terms
+  - local-name: Draft unsigned legal agreement or undertaking to pay the Council's fees
+    source-text: "From the audit: a draft unsigned legal agreement (UU, Deed of Variation or s106) or undertaking to pay the Council's fees, where mitigation cannot be secured by condition"
+    source-url: https://www.iow.gov.uk/media/769/Local-validation-list-2025-final/pdf/Local_validaiton_list_2025_-_final_4.pdf?m=1787651665373
+    suggested-id: planning-obligations-heads-of-terms
+  - local-name: Hedgerow Removal Notice / Hedgerow Assessment
+    source-text: "From the audit: removal of protected hedgerows"
+    source-url: https://www.iow.gov.uk/media/769/Local-validation-list-2025-final/pdf/Local_validaiton_list_2025_-_final_4.pdf?m=1787651665373
+    suggested-id: hedgerow-assessment
+  - local-name: Plans showing layout, scale and access
+    source-text: "From the audit: outline applications where layout, scale or access are not reserved"
+    source-url: https://www.iow.gov.uk/media/769/Local-validation-list-2025-final/pdf/Local_validaiton_list_2025_-_final_4.pdf?m=1787651665373
+    suggested-id: parameter-plans
+
+new-fields:
+  - field: greenfield-site
+    kind: boolean
+    label: Greenfield site
+    description: The site is greenfield land (not previously developed).
+  - field: protected-species
+    kind: boolean
+    label: Protected or priority species affected
+    description: The proposal is likely to affect protected or priority species or their habitats.
+  - field: scheduled-monument
+    kind: designation
+    label: Scheduled monument
+    description: Site contains, or is in the setting of, a scheduled monument.
+  - field: park-and-garden
+    kind: designation
+    label: Registered park or garden
+    description: Site is in, or in the setting of, a registered historic park or garden (dataset park-and-garden).
+  - field: site-level-change
+    kind: number
+    label: Change in site levels (mm)
+    description: The largest change to existing ground levels proposed, in millimetres.
+  - field: roof-alteration
+    kind: boolean
+    label: Roof alteration or new roof
+    description: The proposal changes the shape of an existing roof or adds a new roof.
+  - field: telecommunications-development
+    kind: boolean
+    label: Telecommunications development
+    description: The proposal is for telecommunications equipment (masts, antennas, cabinets and similar).

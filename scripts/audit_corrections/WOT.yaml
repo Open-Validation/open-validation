@@ -1,0 +1,432 @@
+# Corrections for Worthing Borough Council, from the council's audit.
+# The audit read the Worthing-only 'Planning application validation requirements' PDF, in force
+# from 1 April 2026 (the build already takes that url and date). Grokbot never read the PDF: it
+# captured only Flood Risk and Heritage (with navigation-text triggers) and two listed building
+# rows from older joint Adur & Worthing web pages. Most items below come from the audit's summary
+# of the PDF ('From the audit'), not the council's exact words. The PDF has no application-type
+# matrix, so most items apply to any application type.
+local-authority: WOT
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_document: taken from older joint Adur & Worthing web text; the current Worthing PDF has no schedule of works item"
+
+drop-unmapped:
+  - local-name: Structural Survey
+    reason: "wrong_document: old web-page trigger; replaced below with the PDF's trigger"
+
+requirements:
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (in Flood Zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (in Flood Zone 1).
+        - site:
+            in: [flood-risk-zone]
+            description: All new development in Flood Zones 2 and 3.
+        - discretionary
+    source-text: "A site-specific Flood Risk Assessment must be submitted with planning applications for:"
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    policy: "PDF requirement No. 19"
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted navigation text from the web page. From the audit:
+      sites of 1 ha+ in Flood Zone 1, all new development in Flood Zones 2 and 3, and more
+      vulnerable uses at increased flood risk (shown as officer discretion). Applies to householder
+      schemes in Flood Zones 2/3 too.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [conservation-area]
+            description: Development in or adjoining a conservation area (except changes of use).
+        - site:
+            in: [scheduled-monument, park-and-garden]
+            description: The site is near a scheduled monument or a registered park and garden.
+        - site:
+            in: [archaeological-priority-area]
+            description: The site has known or suspected archaeology.
+        - site:
+            in: [listed-building, listed-building-setting, locally-listed-building]
+            description: The proposal may affect a heritage asset or its setting.
+    source-text: >-
+      Required for: All applications for Listed Building Consent. … A Heritage Statement is
+      required for all development proposals that may impact on the historic environment.
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    policy: "PDF requirement No. 22"
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted navigation text and filed it only under Full
+      planning. For listed building consent the PDF asks, as a minimum, for 'A site plan,
+      drawings, design and access statement and heritage statement' (council's wording).
+
+  - id: planning-statement
+    action: add
+    required-if:
+      always: true
+    source-text: "Required for all applications (proportionate and specific to the development)."
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement): in the PDF's general local requirements."
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      always: true
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Refuse and Recycling Provision, for all developments."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: The proposal is telecommunications development.
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Telecommunications Development, for all telecoms proposals."
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: The site is in or near an air quality management area.
+        - discretionary
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    policy: "PDF requirement No. 9"
+    confidence: medium
+    notes: "From the audit (missing_requirement): proposals that may significantly affect air quality, including in or near an AQMA."
+
+  - id: bng-metric
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: minor-development
+            value: true
+            description: The proposal is minor development.
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    policy: "PDF requirement No. 11"
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Biodiversity Net Gain for minor and major development,
+      except S73 applications where the original permission was not subject to BNG.
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [site-of-special-scientific-interest, local-wildlife-site]
+            description: The site is in or near a designated site or habitat.
+        - condition:
+            field: demolition
+            value: true
+            description: The proposal involves demolition.
+        - discretionary
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    policy: "PDF requirement No. 13"
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Ecological Appraisal for designated sites/habitats,
+      brownfield land, demolition or roof works, tree/scrub/hedgerow removal, watercourses, and
+      sites within 500 m of a pond. The cases with no field are shown as officer discretion.
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: Brownfield land, or within 250 m of a landfill site.
+        - discretionary
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    policy: "PDF requirement No. 14"
+    confidence: medium
+    notes: "From the audit (missing_requirement): brownfield sites, sites within 250 m of landfill, and sensitive end uses."
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: >-
+          The proposal includes significant external lighting that could affect amenity, the
+          countryside, the South Downs Dark Skies Reserve or heritage assets.
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): significant external lighting affecting amenity, countryside, the Dark Skies Reserve or heritage."
+
+  - id: noise-assessment
+    action: add
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Noise Impact Assessment is listed, but the audit gives no trigger."
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Daylight/Sunlight and Overshadowing for major schemes, and constrained smaller sites if requested."
+
+  - id: archaeological-assessment
+    action: add
+    required-if:
+      site:
+        in: [archaeological-priority-area]
+        description: The site has archaeological interest.
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Historic Environment Record desk-based assessment for sites with archaeological interest."
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Development near trees or hedges.
+        - site:
+            in: [tree-preservation-zone, conservation-area]
+            description: TPO trees, or trees in a conservation area.
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Tree Survey and Arboricultural Method Statement for development near trees/hedges, TPO trees and trees in conservation areas."
+
+  - id: landscaping-plan
+    action: add
+    required-if: discretionary
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): Landscape and Green Infrastructure details for all
+      Strategic Sites and any tree loss. There is no field for either, so it is shown as officer
+      discretion.
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: The proposal creates 10 or more dwellings.
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Affordable Housing Statement and viability, for 10+ dwellings."
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - condition:
+                field: new-build
+                value: true
+                description: The proposal includes new-build housing.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: The proposal creates one or more dwellings.
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Energy and Sustainability Statement for major development (10+ homes or 1,000+ m2) and all new-build housing."
+
+  - id: fire-statement
+    action: add
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A new building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A new building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): new buildings with 2+ dwellings or educational accommodation that are 18 m+ or 7+ storeys."
+
+  - id: sci
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: telecommunications-development
+            value: true
+            description: The proposal is telecommunications development.
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Statement of Community Involvement for all major and telecoms applications."
+
+  - id: transport-assessment
+    action: add
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): Transport Assessment / Transport Statement is listed, but the audit gives no trigger."
+
+  - id: travel-plan
+    action: add
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Travel Plan is listed, but the audit gives no trigger."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      condition:
+        field: main-town-centre-use-out-of-centre
+        value: true
+        description: A main town centre use outside an existing centre.
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Town Centre Uses Sequential Test for main town centre
+      uses out of centre; the Impact Assessment for leisure or office over 2,500 m2 or retail of
+      500 m2 or more.
+
+  - id: environmental-statement
+    action: add
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Environmental Statement for EIA development."
+
+unmapped:
+  - local-name: Additional Plans and Drawings
+    source-text: "From the audit: Additional Plans and Drawings - 'All planning applications.'"
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    suggested-id: ""
+  - local-name: Parking Provision
+    source-text: "From the audit: all full applications, with existing and proposed block plans at 1:200"
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    suggested-id: parking-plan
+  - local-name: Space Standards Matrix
+    source-text: "From the audit: all new dwellings including conversions; M4(2), and 3% M4(3) for affordable housing"
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    suggested-id: housing-standards-statement
+  - local-name: Self-build and Custom Build Statement
+    source-text: "From the audit: all self-build and custom-build dwellings"
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    suggested-id: self-build-statement
+  - local-name: Air Source Heat Pumps
+    source-text: "All proposals that involve the installation of an ASHP."
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    suggested-id: air-source-heat-pump-details
+  - local-name: Ventilation and Air Conditioning Statement
+    source-text: "From the audit: substantial ventilation or extraction, air source heat pumps and air conditioning plant"
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    suggested-id: ventilation-extraction-details
+  - local-name: South Downs National Park Statement
+    source-text: "From the audit: all applications adjacent to the National Park"
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    suggested-id: national-park-statement
+  - local-name: Sustainable Drainage Systems
+    source-text: "From the audit: sites over 1 ha or where the FRA requires it; a hydrogeological risk assessment in Source Protection Zone 1"
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    suggested-id: drainage-strategy
+  - local-name: Visual Impact Assessment
+    source-text: "From the audit: significant townscape or landscape impact; photomontages for heritage"
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Foul Sewerage Assessment
+    source-text: "From the audit: major development; new or changed foul systems"
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    suggested-id: foul-sewage-utilities-statement
+  - local-name: Health Impact Assessment and Screening
+    source-text: "From the audit: major development"
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Road Safety Audit
+    source-text: "From the audit: 20+ homes or 2,000+ m2 with highway changes"
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    suggested-id: road-safety-audit
+  - local-name: Planning Obligations / Heads of Terms
+    source-text: "From the audit: where a S106 agreement is likely"
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    suggested-id: planning-obligations-heads-of-terms
+  - local-name: Community Facilities Statement
+    source-text: "From the audit: loss of, or new, community facilities"
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    suggested-id: community-facilities-statement
+  - local-name: Economic Statement
+    source-text: "From the audit: net loss of employment floorspace or visitor facilities"
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    suggested-id: employment-statement
+  - local-name: Structural Survey
+    source-text: "From the audit: refurbishment or re-use of listed or historic buildings; refurbishment of non-designated heritage assets in conservation areas; substantial or total demolition of heritage assets"
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    suggested-id: structural-survey
+  - local-name: Advertisement details
+    source-text: "From the audit: details of each advertisement including lighting levels, and sections showing how adverts are fixed and illuminated (advertisement consent)"
+    source-url: https://www.adur-worthing.gov.uk/media/Media,173952,smxx.pdf
+    suggested-id: advertisement-drawings
+
+new-fields:
+  - field: scheduled-monument
+    kind: designation
+    label: Scheduled monument
+    description: Site is in, contains or is near a scheduled monument (dataset scheduled-monument).
+  - field: park-and-garden
+    kind: designation
+    label: Registered park and garden
+    description: Site is in or near a registered historic park and garden (dataset park-and-garden).
+  - field: minor-development
+    kind: boolean
+    label: Minor development
+    description: >-
+      The proposal is minor development: it creates dwellings or floorspace below the major
+      development thresholds (or falls within the council's own 'minor' size band).
+  - field: telecommunications-development
+    kind: boolean
+    label: Telecommunications development
+    description: The proposal is for telecommunications development, such as a mast or antennae.
+  - field: main-town-centre-use-out-of-centre
+    kind: boolean
+    label: Town centre use outside a centre
+    description: The proposal is for a main town centre use in an edge-of-centre or out-of-centre location.

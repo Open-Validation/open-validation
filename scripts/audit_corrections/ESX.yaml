@@ -1,0 +1,282 @@
+# Corrections for East Sussex County Council, from inputs/audit/east-sussex-county-council.json.
+# The April 2025 list is current, but the audit could not read the PDF (robots.txt), so its
+# contents were not checked. The audit's main finding: ESCC's list covers county matters
+# (minerals and waste applications and the County Council's own Regulation 3 development), but
+# Grokbot filed every item under 'Full planning' (INFERRED). The rows are moved to those types
+# below, and clear triggers in the excerpts are structured. Garbled rows stay low confidence.
+local-authority: ESX
+
+submission-standards:
+  - item: Hard-copy submissions must include the original plus three copies (four sets in total)
+    level: must
+
+drop-unmapped:
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: >-
+      wrong_trigger / duplicate: the excerpt is a Natural England Agricultural Land Classification
+      map URL run into air-quality text (the same excerpt as the ALC row); not a rural-worker item
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "duplicate: the excerpt reuses the E2 (EcIA) cell; replaced below with the council's Appropriate Assessment wording"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    notes: >-
+      Audit (wrong_app_type): ESCC's list covers minerals and waste and Regulation 3 applications,
+      not Full planning. Audit (wrong_trigger): the excerpt is table debris and gives no trigger.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Trees will be affected by the development.
+    source-text: >-
+      T3 – Tree Survey / Arboricultural Implications / Implications for Ancient Woodland An
+      arboricultural impact assessment will be required where trees will be affected by the
+      development.
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals and waste and Regulation 3."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    must-include:
+      - item: A statement indicating whether BNG is applicable, or if exempt
+        level: must
+    notes: >-
+      Audit (wrong_app_type): moved from Full planning to minerals and waste and Regulation 3. The
+      excerpt is cut off after the first item of the B1 list.
+
+  - id: site-plan
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals and waste and Regulation 3."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - all:
+                - condition:
+                    field: ground-disturbance
+                    value: true
+                    description: The proposal involves groundworks.
+                - site:
+                    in: [contaminated-land]
+                    description: Contamination is known or suspected on the land.
+            - discretionary
+    source-text: >-
+      L1 – Land Contamination Assessment NPPF paragraphs 196 All planning applications involving
+      groundworks on land where contamination is known or suspected, or where the proposed use
+      would be particularly vulnerable.
+    notes: >-
+      Audit (wrong_app_type): moved from Full planning to minerals and waste and Regulation 3.
+      'Where the proposed use would be particularly vulnerable' is shown as officer discretion.
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    notes: >-
+      Audit (wrong_app_type): moved from Full planning to minerals and waste and Regulation 3. The
+      excerpt's 'All minerals and waste planning applications' follows a policy reference
+      (NPPF 162-168, WMP24a) that may belong to a neighbouring item, so it is not used as the trigger.
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - site:
+                in: [special-protection-area, site-of-special-scientific-interest]
+                description: >-
+                  The development is within or adjacent to an internationally designated area (SAC,
+                  SPA or Ramsar site) or a nationally designated area (SSSI).
+            - discretionary
+    source-text: >-
+      E2 – Ecological Impact Assessment (EcIA) … Applications for development within or adjacent
+      to or that could have an impact upon an internationally designated area (SAC, SPA or Ramsar
+      site) or nationally designated area (SSSI)
+    notes: >-
+      Audit (wrong_app_type): moved from Full planning to minerals and waste and Regulation 3. 'Could
+      have an impact upon' a designated area is shown as officer discretion. The excerpt is cut off,
+      so there may be further triggers.
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    notes: >-
+      Audit (wrong_app_type): moved from Full planning to minerals and waste and Regulation 3. Audit
+      (wrong_trigger): the excerpt is a fragment ('show the carbon reduction expected from the proposal').
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: eia-development
+            value: true
+            description: The EIA Regulations require an Environmental Impact Assessment.
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals and waste and Regulation 3."
+
+  - id: section-existing
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals and waste and Regulation 3."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals and waste and Regulation 3."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals and waste and Regulation 3. The excerpt gives no trigger."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building, archaeological-priority-area]
+            description: The application could affect heritage assets, below or above ground level.
+    source-text: >-
+      H1 – Heritage Statement A Heritage Statement must be submitted for applications which could
+      affect heritage assets, both below and above ground level.
+    notes: >-
+      Audit (wrong_app_type): moved from Full planning to minerals and waste and Regulation 3. The
+      list of designations is our reading of 'heritage assets, both below and above ground level'.
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - discretionary
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals and waste and Regulation 3. 'A full landscape scheme may be required at validation stage.'"
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: external-lighting
+            value: true
+            description: The proposal involves new external lighting (for example in the vicinity of a residential property).
+    notes: >-
+      Audit (wrong_app_type): moved from Full planning to minerals and waste and Regulation 3. The
+      excerpt is the start of a list of cases ('in the vicinity of a residential property;'); the
+      rest is not in the workbook.
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - discretionary
+    source-text: >-
+      N1 – Noise Report A Noise Report should provide accurate and relevant information about the
+      existing noise environment, and the likely impact of the proposed development.
+    notes: >-
+      Audit (wrong_app_type): moved from Full planning to minerals and waste and Regulation 3. The
+      council tab also says it is needed for "development which is likely to result in increased
+      noise at an environmentally designated site, such as a Special Protection Area (SPA), as
+      advised by the PP&DM team", so it is shown as officer discretion.
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    must-include:
+      - item: Plans showing any existing or proposed open space or playing fields within or adjoining the site, including Rights of Way
+        level: must
+      - item: An independent assessment showing whether the land or buildings are surplus to local requirements
+        level: must
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals and waste and Regulation 3. The excerpt gives contents but no trigger."
+
+  - id: planning-statement
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    notes: >-
+      Audit (wrong_app_type): moved from Full planning to minerals and waste and Regulation 3. Audit
+      (wrong_trigger): the excerpt gives no trigger ('more detailed for larger or more complex proposals').
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals and waste and Regulation 3. The excerpt gives no trigger."
+
+  - id: travel-plan
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals and waste and Regulation 3. The excerpt is the Active Travel Plan contents and gives no trigger."
+
+  - id: design-and-access-statement
+    action: replace
+    source-text: >-
+      A Design and Access Statement A Design and Access Statement is a concise report which must
+      accompany certain applications for planning permission and for listed building consent.
+    source-url: https://www.eastsussex.gov.uk/media/ucifvhsh/local-validation-list-april-2025.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): the workbook put this under Listed building consent only because the
+      excerpt quotes the national definition. ESCC does not normally determine LBC; the national
+      rules for when a Design and Access Statement is needed apply.
+
+unmapped:
+  - local-name: Appropriate Assessment (Habitats Regulations)
+    source-text: >-
+      If it is considered that a proposal may have a “likely significant effect” on a SAC, SPA or
+      Ramsar site, an Appropriate Assessment will be required under the Conservation of Habitats
+      and Species Regulations 2017, as amended.
+    source-url: https://www.eastsussex.gov.uk/media/ucifvhsh/local-validation-list-april-2025.pdf
+    suggested-id: habitats-regulations-assessment
+
+low-confidence:
+  - id: "*"
+    note: >-
+      Audit (other): the audit could not read the PDF, so it could not tell whether other coded
+      items (A, B1, D1, E1, E2, H1, L1, N1, O1, S1, T1, T3, Active Travel Plan) were missed, and
+      the 'Types of application' column was not captured. The minerals and waste / Regulation 3
+      split per item needs checking.
