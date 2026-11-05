@@ -1,10 +1,11 @@
 """Stage C: build the map file docs/map/uk-lpa.geojson from the boundary download.
 
-Run:  python scripts/build_map.py [boundary-file.geojson ...]
+Run:  python scripts/build_map.py [boundary-file ...]
 
-With no arguments it uses every .geojson file in inputs/boundaries/.
-Download: ONS Open Geography Portal, "Local Planning Authorities (April 20XX)
-Boundaries UK BUC" (GeoJSON, WGS84 longitude/latitude). See README.md.
+With no arguments it uses every .gpkg and .geojson file in inputs/boundaries/.
+Download: ONS Open Geography Portal, "Local Planning Authorities (January 2026)
+Boundaries UK BUC" as GeoPackage (.gpkg, British National Grid) or GeoJSON
+(WGS84 longitude/latitude). See README.md.
 
 What it does:
   - keeps only three properties per area: code (our LPA code, found through the
@@ -19,13 +20,17 @@ Standard library only.
 
 import json
 import re
+import sqlite3
+import struct
 import sys
 from pathlib import Path
 
+from bng import to_wgs84
 from common import DATA, INPUTS, ROOT, read_csv
 
 OUT = ROOT / "docs" / "map" / "uk-lpa.geojson"
 TOLERANCE = 0.0008      # degrees (about 60-90 m); raise it if the file is too big
+TOLERANCE_M = 120       # the same in metres, for British National Grid files
 NATIONS = {"E": "England", "W": "Wales", "S": "Scotland", "N": "Northern Ireland"}
 
 
@@ -68,11 +73,14 @@ def simplify(points, tol):
 
 
 def ring(points):
-    """Simplify and round one ring; drop it if it collapses."""
-    if points and abs(points[0][0]) > 180:
-        raise SystemExit("The coordinates look like British National Grid (metres). "
-                         "Download the GeoJSON in WGS84 (longitude/latitude) instead.")
-    pts = [[round(x, 4), round(y, 4)] for x, y in simplify([tuple(p[:2]) for p in points], TOLERANCE)]
+    """Simplify and round one ring; drop it if it collapses. Rings in British National
+    Grid metres are simplified in metres first, then converted to longitude/latitude."""
+    pts = [tuple(p[:2]) for p in points]
+    if pts and abs(pts[0][0]) > 180:
+        pts = [to_wgs84(x, y) for x, y in simplify(pts, TOLERANCE_M)]
+    else:
+        pts = simplify(pts, TOLERANCE)
+    pts = [[round(x, 4), round(y, 4)] for x, y in pts]
     out = [p for i, p in enumerate(pts) if i == 0 or p != pts[i - 1]]
     if out and out[0] != out[-1]:
         out.append(out[0])
@@ -93,16 +101,72 @@ def geometry(geom):
         {"type": "MultiPolygon", "coordinates": kept}
 
 
+# ---------- reading a GeoPackage (an SQLite file) ----------
+
+def wkb_polygons(buf, pos=0):
+    """Read a WKB Polygon or MultiPolygon (2D, Z, M or ZM; only x and y are kept).
+    Returns (list of polygons, next position)."""
+    order = "<" if buf[pos] == 1 else ">"
+    code = struct.unpack_from(order + "I", buf, pos + 1)[0]
+    pos += 5
+    kind, flavour = code % 1000, code // 1000            # ISO WKB: 1000s = Z, 2000s = M, 3000s = ZM
+    dims = {0: 2, 1: 3, 2: 3, 3: 4}.get(flavour & 7, 2)
+    if code & 0x80000000 or code & 0x40000000:           # older EWKB flags for Z / M
+        kind = code & 0xFF
+        dims = 2 + bool(code & 0x80000000) + bool(code & 0x40000000)
+    if kind == 3:      # Polygon: rings of points
+        nrings = struct.unpack_from(order + "I", buf, pos)[0]; pos += 4
+        rings = []
+        for _ in range(nrings):
+            npts = struct.unpack_from(order + "I", buf, pos)[0]; pos += 4
+            pts = struct.unpack_from(order + "%dd" % (dims * npts), buf, pos); pos += 8 * dims * npts
+            rings.append([[pts[i], pts[i + 1]] for i in range(0, len(pts), dims)])
+        return [rings], pos
+    if kind == 6:      # MultiPolygon: several polygons
+        n = struct.unpack_from(order + "I", buf, pos)[0]; pos += 4
+        polys = []
+        for _ in range(n):
+            p, pos = wkb_polygons(buf, pos)
+            polys += p
+        return polys, pos
+    raise SystemExit(f"Unsupported geometry type {code} in the GeoPackage")
+
+
+def read_gpkg(path):
+    """Features from a GeoPackage as GeoJSON-like dicts (coordinates in the file's own system)."""
+    db = sqlite3.connect(str(path))
+    table, geom_col = db.execute("SELECT table_name, column_name FROM gpkg_geometry_columns").fetchone()
+    cols = [r[1] for r in db.execute(f"PRAGMA table_info('{table}')")]
+    features = []
+    for row in db.execute(f"SELECT * FROM '{table}'"):
+        rec = dict(zip(cols, row))
+        blob = rec.pop(geom_col)
+        if not blob:
+            continue
+        flags = blob[3]
+        envelope = {0: 0, 1: 32, 2: 48, 3: 48, 4: 64}[(flags >> 1) & 7]
+        polys, _ = wkb_polygons(blob, 8 + envelope)
+        geom = {"type": "MultiPolygon", "coordinates": polys}
+        features.append({"type": "Feature", "properties": rec, "geometry": geom})
+    return {"features": features}
+
+
 def main():
-    files = [Path(a) for a in sys.argv[1:]] or sorted((INPUTS / "boundaries").glob("*.geojson"))
+    folder = INPUTS / "boundaries"
+    files = [Path(a) for a in sys.argv[1:]] or sorted(list(folder.glob("*.gpkg")) + list(folder.glob("*.geojson")))
     if not files:
         raise SystemExit("No boundary file found. Put the ONS GeoJSON in inputs/boundaries/ (see README.md).")
     lpas = read_csv(DATA / "lpa.csv")
     by_ons = {r["ons-code"]: r for r in lpas if r["ons-code"]}
+    # ONS codes change when planning powers move (for example to a development corporation),
+    # so if a code isn't in data/lpa.csv, try the name instead and say so.
+    from build_lpas import normalise
+    by_name = {normalise(r["name"]): r for r in lpas}
+    by_name_matches = []
 
     features, seen = [], set()
     for f in files:
-        data = json.loads(Path(f).read_text(encoding="utf-8"))
+        data = read_gpkg(f) if str(f).endswith(".gpkg") else json.loads(Path(f).read_text(encoding="utf-8"))
         code_key, name_key = find_keys(data["features"][0]["properties"])
         print(f"Reading {f} ({len(data['features'])} areas, codes in '{code_key}')")
         for feat in data["features"]:
@@ -114,6 +178,13 @@ def main():
                 continue
             seen.add(ons)
             lpa = by_ons.get(ons)
+            if not lpa and ons.startswith("E"):
+                shape_name = re.sub(r"\s+LPA$", "", str(feat["properties"].get(name_key, "")))
+                lpa = by_name.get(normalise(shape_name))
+                if lpa and "development corporation" not in shape_name.lower():
+                    by_name_matches.append(f"{lpa['code']:7} {lpa['name']}: boundary code {ons}, ours {lpa['ons-code']}")
+                else:
+                    lpa = None
             features.append({"type": "Feature", "properties": {
                 "code": lpa["code"] if lpa else "",
                 "name": lpa["name"] if lpa else feat["properties"].get(name_key, ons),
@@ -126,6 +197,11 @@ def main():
     print(f"Wrote {OUT.relative_to(ROOT)}: {len(features)} areas, {size:.2f} MB"
           + ("  (over 2 MB: raise TOLERANCE)" if size > 2 else ""))
 
+    if by_name_matches:
+        print(f"\n{len(by_name_matches)} councils matched by name because their ONS code has changed "
+              "(update data/organisation.csv with python scripts/update_register.py when you can):")
+        for line in by_name_matches:
+            print("  " + line)
     drawn = {f["properties"]["code"] for f in features if f["properties"]["code"]}
     missing = [r for r in lpas if r["code"] not in drawn]
     print(f"\n{len(missing)} English councils have no shape (the explorer lists them under the map):")

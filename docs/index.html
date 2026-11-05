@@ -491,7 +491,7 @@ function loadBase() {
     res[3].forEach(function (r) { if (!r["end-date"]) (S.nationalTypes[r["planning-requirement"]] = S.nationalTypes[r["planning-requirement"]] || []).push(r["application-type"]); });
     res[4].forEach(function (r) { S.fields[r.field] = { label: r.label, kind: r.kind, description: r.description }; });
     S.defs = (res[5] && res[5].definition) || {};
-    S.geo = res[6];
+    S.geo = res[6] ? rewindForD3(res[6]) : null;
     // National requirement files that have their own rules
     return Promise.all(["site-plan", "application-form", "design-and-access-statement", "air-quality-assessment", "affordable-housing-statement"].map(function (id) {
       return fetchYAML(SPEC + "/" + id + ".yaml").then(function (d) { S.nationalFiles[id] = d; }).catch(function () {});
@@ -806,6 +806,17 @@ var PATTERN_DEFS = '<defs>' +
   '<pattern id="p-incorrect" width="6" height="5" patternUnits="userSpaceOnUse"><rect width="6" height="5" fill="#B388FF"/><rect width="6" height="1.4" fill="#0B1F3A" opacity=".55"/></pattern></defs>';
 var FILL = { "out": "#3A4A60", "incorrect": "#B388FF", "unverified": "#EF5350", "human-verified": "#FB8C00", "council-verified": "#43A047", "council-updated": "#AED581" };
 var mapZoom = null;
+// The map file follows the GeoJSON standard (outer rings anticlockwise). d3 wants the opposite
+// (outer rings clockwise), otherwise it fills everything *outside* each council. Flip them once.
+function rewindForD3(geo) {
+  function area(r) { var a = 0; for (var i = 0, j = r.length - 1; i < r.length; j = i++) a += (r[i][0] - r[j][0]) * (r[i][1] + r[j][1]); return a; } // > 0 means clockwise (x east, y north)
+  function fix(poly) { poly.forEach(function (ring, k) { var cw = area(ring) > 0; if ((k === 0) !== cw) ring.reverse(); }); }
+  geo.features.forEach(function (f) {
+    var g = f.geometry; if (!g) return;
+    if (g.type === "Polygon") fix(g.coordinates); else if (g.type === "MultiPolygon") g.coordinates.forEach(fix);
+  });
+  return geo;
+}
 function drawMap() {
   var svgEl = $("#map"), w = svgEl.clientWidth || 800, hgt = svgEl.clientHeight || 600;
   var svg = d3.select(svgEl).attr("viewBox", "0 0 " + w + " " + hgt);

@@ -151,6 +151,12 @@ To read MHCLG's spec locally: `git clone https://github.com/digital-land/plannin
   auto-extracted from council validation lists.
 - **Claude's audit** (`inputs/audit/*.json`, 328 files): each English council's entry checked against
   its live website on 4-5 November 2026, then reviewed by a second AI (Grok).
+- **Boundaries for the map**: ONS Open Geography Portal, *Local Planning Authorities (January 2026)
+  Boundaries UK BUC (V2)* (ultra-generalised, clipped to the coastline; national parks are their own
+  areas), saved as `inputs/boundaries/LPA_JAN_2026_UK_BUC_V2.gpkg`. Catalogue page:
+  https://www.data.gov.uk/dataset/3f445e45-d0b8-4f34-a3aa-8d04f3e69307/local-planning-authorities-january-2026-boundaries-uk-buc.
+  `python scripts/build_map.py` converts it to `docs/map/uk-lpa.geojson` (simplified, under 1 MB).
+  Contains OS data © Crown copyright and database right 2026; Open Government Licence v3.0.
 - **Council codes**: MHCLG's organisation register, saved in `data/organisation.csv` by
   `scripts/update_register.py` (from planning.data.gov.uk, or MHCLG's
   [organisation-collection](https://github.com/digital-land/organisation-collection) repo if that's
