@@ -1,0 +1,488 @@
+# Corrections for Norwich City Council, from inputs/audit/norwich-city-council.json.
+# The list is Norwich's 'validation requirements' (file 1558, last updated February 2024). It is
+# organised by application type, but Grokbot guessed most items under Full planning and took
+# several triggers from unrelated passages (demolition prior notification, energy statement,
+# transport table). Reserved matters, LBC, LDC, s73, NMA and discharge items come from the audit.
+local-authority: NOW
+
+submission-standards:
+  - item: Applications submitted either electronically or in hard copy, not a mix of the two
+    level: should
+  - item: "Acceptable file types: images in JPG, TIF, GIF, BMP or PNG; plans in PDF, TIF or PLT; text
+      documents in DOC, PDF, TXT or XLS"
+    level: must
+  - item: Individual file sizes 10Mb or less; no zipped or condensed files
+    level: must
+  - item: File names reflect the drawing/document reference number or title and paper size
+    level: should
+  - item: All plans and drawings show a scale bar, the paper size and the scale (e.g. 1:200 at A3)
+    level: must
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is the demolition prior notification text"
+  - id: heritage-statement
+    reason: "wrong_trigger: the excerpt is archaeology text (now in archaeological-assessment); heritage
+      assets are assessed in the Design and Access Statement"
+  - id: floor-plan-existing
+    reason: "wrong_trigger: the excerpt is energy statement content (now in energy-statement)"
+  - id: floor-plan-proposed
+    reason: "wrong_trigger: as above"
+  - id: elevation-existing
+    reason: "wrong_trigger: as above"
+  - id: elevation-proposed
+    reason: "wrong_trigger: as above"
+
+drop-unmapped:
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: the fragment 'of the sequential test.'"
+  - local-name: Water efficiency / water usage statement
+    reason: "the excerpt is the Energy, water and construction statement (now energy-statement)"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - discretionary
+        - all:
+            - site:
+                in: [air-quality-management-area]
+                description: The site is in or adjacent to an air quality management area.
+            - any:
+                - condition:
+                    field: traffic-movements-peak-hour
+                    operator: ">"
+                    value: 100
+                    description: More than 100 traffic movements an hour at peak times.
+                - condition:
+                    field: traffic-movements-daily
+                    operator: ">"
+                    value: 1000
+                    description: More than 1,000 movements over 24 hours.
+    confidence: medium
+    notes: "Officer discretion covers proposals giving rise to air-borne emissions including harmful
+      substances, smoke, grit and dust."
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [archaeological-priority-area]
+            description: The site is in the Area of Main Archaeological Interest and not
+              predominantly occupied by existing buildings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more.
+        - discretionary
+    source-text: >-
+      … identified in a heritage impact assessment as having, or having the potential to include,
+      heritage assets with archaeological interest which are not predominantly occupied by existing
+      buildings (where trial trenching is feasible on areas not covered by buildings i.e. car parks
+      this should take place and be covered by the evaluation); … A large area of the city is
+      covered by the Area of Main Archaeological Interest.
+    source-url: https://www.norwich.gov.uk/downloads/file/1558/validation_requirements
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the triggers are Area of Main Archaeological Interest sites not
+      predominantly built on, sites flagged at pre-application (officer discretion) and sites of
+      1ha+. The workbook filed part of this under Heritage Statement.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Operational development adjacent to existing trees, or felling or pruning of
+          trees.
+    confidence: medium
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [hh, lbc]
+            - condition:
+                field: roof-alteration
+                value: true
+                description: Conversion, removal or replacement of a roof (except a flat roof or one
+                  that already provides usable floorspace).
+        - all:
+            - application-type:
+                in: [hh]
+            - condition:
+                field: residential-extension
+                value: true
+                description: Extensions to the property.
+            - any:
+                - condition:
+                    field: near-watercourse
+                    value: true
+                    description: The property abuts or is adjacent to a watercourse.
+                - site:
+                    in: [local-wildlife-site, site-of-special-scientific-interest,
+                      ancient-woodland]
+                    description: The property abuts or is adjacent to a woodland or designated
+                      wildlife site.
+        - all:
+            - application-type:
+                in: [hh]
+            - discretionary
+    confidence: medium
+    notes: >-
+      Preliminary ecological appraisal. Officer discretion covers removal of trees or significant
+      vegetation. Audit (wrong_app_type): LBC needs a PEA for roof conversion or removal.
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the biodiversity gain condition.
+    confidence: medium
+
+  - id: cil-form
+    action: update
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [hh]
+            - condition:
+                field: floorspace
+                operator: ">="
+                value: 100
+                description: An increase in floor space of 100sqm or more.
+        - all:
+            - application-type:
+                in: [full]
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: One or more dwellings.
+                - condition:
+                    field: floorspace-non-residential
+                    operator: ">"
+                    value: 0
+                    description: Any increase in non-residential gross internal area.
+        - all:
+            - application-type:
+                in: [ldc]
+            - condition:
+                field: floorspace-non-residential
+                operator: ">"
+                value: 0
+                description: An increase in non-residential gross internal area.
+    confidence: medium
+    notes: "From the audit (missing_requirement, wrong_app_type): the full and LDC branches; reserved
+      matters also lists a CIL form, without a trigger."
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The development is within a conservation area.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: The development comprises 1 or more dwellings.
+    must-include:
+      - item: An assessment of heritage assets
+        level: must
+    confidence: low
+    notes: "The excerpt is cut off after 'comprising 1 or more dwe…', so any floorspace branch for
+      conservation areas is missing."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more dwellings.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: 1,000 sqm or more of non-residential floorspace.
+    source-text: >-
+      details of water efficiency measures to be incorporated within the proposals which in the
+      case of residential developments shall detail measures to meet code for sustainable homes
+      level 4 for water efficiency; b. details of how 10% of the sites expected energy requirements
+      will be provided by decentralised renewable or low carbon sources. … v. an assessment of
+      whether or not there is viable and practical scope for exceeding the minimum percentage of
+      10%. c. details of the proposed construction including details of how all practical and viable
+      steps have been taken to maximise opportunities for sustainable construction.
+    source-url: https://www.norwich.gov.uk/downloads/file/1558/validation_requirements
+    must-include:
+      - item: Water efficiency measures (residential to meet code for sustainable homes level 4 for
+          water efficiency)
+        level: must
+      - item: How 10% of the site's expected energy requirements will come from decentralised
+          renewable or low carbon sources, shown on the relevant plans
+        level: must
+      - item: Whether there is viable and practical scope for exceeding 10%
+        level: must
+      - item: Details of how all practical and viable steps have been taken to maximise sustainable
+          construction
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): the Energy, water and construction statement (10+
+      dwellings or 1,000 sqm+ non-residential); the workbook had it under water efficiency and floor
+      plans."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The proposal is EIA development.
+    confidence: medium
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: 18m or more in height.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains two or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    confidence: medium
+    notes: "Includes development of an existing relevant building or within its curtilage."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      site:
+        in: [flood-risk-zone]
+        description: The development is in flood zone 2 and/or flood zone 3.
+    confidence: low
+    notes: "The excerpt is the householder trigger; the full-application trigger isn't captured."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: There is a record of potentially polluting uses or potential for contamination
+          to be present.
+    source-text: >-
+      Land contamination desk top studies and intrusive investigations required as follows: o desk
+      top study – required for all operational development where there is a record of potentially
+      polluting uses or there is a potential for contamination to be present.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt began with '5 pitches' from the transport table."
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more dwellings.
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 1000
+            description: 1,000 sqm or more.
+    must-include:
+      - item: The layout of external areas and an outline of the landscape strategy, covering soft
+          and hard elements, with the treatment of different areas shown at least indicatively
+        level: must
+    confidence: low
+    notes: "From the audit (missing_requirement): a Landscape assessment and design statement for 10+
+      dwellings or 1,000 sqm+. The must-include item is the outline section's wording."
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise-sensitive uses close to noise-generating uses or the late night
+              activity zone.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Noise-generating development (uses, plant, machinery or equipment) close to
+              noise-sensitive uses.
+    confidence: medium
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      condition:
+        field: loss-of-open-space
+        value: true
+        description: Loss or reduction of publicly accessible recreational open space or urban
+          greenspace.
+    confidence: medium
+
+  - id: sci
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more dwellings.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: 1,000 sq.m or more gross non-residential floorspace.
+    confidence: medium
+
+  - id: site-plan
+    action: replace
+    source-text: >-
+      A site plan at an identified standard metric scale (usually to a scale 1:500 or 1:200)
+      including a north point, the proposed development (including any new boundary treatments or
+      hard surfacing) in relation to the site boundaries and other existing buildings on the site,
+      any affected public rights of way and the position of any existing trees on site.
+    source-url: https://www.norwich.gov.uk/downloads/file/1558/validation_requirements
+    must-include:
+      - item: Identified standard metric scale (usually 1:500 or 1:200) and a north point
+        level: must
+      - item: The proposed development, including new boundary treatments or hard surfacing, in
+          relation to the site boundaries and other existing buildings
+        level: must
+      - item: Any affected public rights of way and the position of any existing trees on site
+        level: must
+      - item: Proposed remediation and how the site is to be left following demolition
+        level: must
+        required-if:
+          application-type:
+            in: [pa-demo-building]
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook quoted the demolition prior notification text. The
+      contents are the council's drawing standard; the trigger isn't captured."
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Telecommunications development by a telecommunications code system operator.
+    confidence: medium
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: New main town centre uses outside centres.
+    must-include:
+      - item: Main town centre sequential assessment
+        level: must
+      - item: Retail/leisure impact assessment
+        level: must
+        required-if:
+          condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 1000
+            description: Over 1,000 sqm outside centres.
+    confidence: medium
+    notes: "From the audit (missing_requirement): the sequential assessment also applies to retail/leisure
+      extensions over 200 sqm."
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - discretionary
+    confidence: medium
+    notes: "Audit (wrong_app_type): the thresholds table (by use class, gross floor area) applies to full
+      applications including change of use, outline and reserved matters, not prior approvals."
+
+  - id: travel-plan
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - discretionary
+    confidence: medium
+    notes: "Audit (wrong_app_type): interim travel plans follow the same thresholds table as transport
+      statements; not prior approvals."
+
+unmapped:
+  - local-name: GIRAMS payment (unilateral undertaking)
+    source-text: "From the audit: any net increase in dwellings including student and tourist accommodation;
+      must be completed to validate"
+    source-url: https://www.norwich.gov.uk/downloads/file/1558/validation_requirements
+    suggested-id: habitat-mitigation-payment
+  - local-name: Competent person statement (BNG)
+    source-text: "From the audit: where the biodiversity gain condition applies"
+    source-url: https://www.norwich.gov.uk/downloads/file/1558/validation_requirements
+    suggested-id: biodiversity-gain-statement
+  - local-name: Deed of Variation
+    source-text: "From the audit: s73 applications where the original permission had an S106/UU"
+    source-url: https://www.norwich.gov.uk/downloads/file/1558/validation_requirements
+    suggested-id: deed-of-variation
+
+low-confidence:
+  - id: section-existing
+    note: "The excerpt is only 'Topographical information (this should include a topographical survey of
+      the site)'; the trigger isn't captured."
+  - id: section-proposed
+    note: "The excerpt is only 'Topographical information (this should include a topographical survey of
+      the site)'; the trigger isn't captured."
+
+new-fields:
+  - field: traffic-movements-peak-hour
+    kind: number
+    label: Peak-hour traffic movements
+    description: Traffic movements an hour the development is expected to generate at peak times.
+  - field: traffic-movements-daily
+    kind: number
+    label: Daily traffic movements
+    description: Traffic movements over 24 hours the development is expected to generate.

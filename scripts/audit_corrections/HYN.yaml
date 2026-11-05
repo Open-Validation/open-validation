@@ -1,0 +1,433 @@
+# Corrections for Hyndburn Borough Council, from the council's audit.
+# Grokbot linked a guidance page about personal data, not the list, and captured no requirements. The
+# current list is the 'Validation checklist for planning and other applications' (June 2025), with 47
+# local requirements (sections 15-61). Everything below comes from the audit's summary of that list
+# ("From the audit"); items whose trigger the audit does not give are added with confidence: low.
+local-authority: HYN
+submission-standards:
+- item: Maps show the appropriate OS or other provider's licence number
+  level: must
+- item: All drawings have a scale bar and show the paper size
+  level: must
+- item: The Agricultural Holdings section of the form completed in all cases
+  level: must
+requirements:
+- id: air-quality-assessment
+  action: add
+  required-if:
+    any:
+    - condition:
+        field: parking-spaces
+        operator: '>='
+        value: 100
+        description: 100 or more new parking spaces outside an AQMA.
+    - all:
+      - site:
+          in:
+          - air-quality-management-area
+          description: The site is inside an Air Quality Management Area.
+      - any:
+        - condition:
+            field: parking-spaces
+            operator: '>='
+            value: 50
+            description: 50 or more new parking spaces.
+        - condition:
+            field: dwelling-count
+            operator: '>='
+            value: 1
+            description: New dwellings.
+        - condition:
+            field: educational-accommodation
+            value: true
+            description: A school.
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  source-text: 50+ new parking spaces inside an AQMA
+  confidence: medium
+  notes: 'From the audit (missing_requirement): item 45. The ''20+ retail inside an AQMA'' clause is not
+    expressed.'
+- id: arboriculturist-report
+  action: add
+  required-if:
+    condition:
+      field: trees-on-or-near-site
+      value: true
+      description: Development affecting trees on or adjacent to the site.
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): tree survey.'
+- id: biodiversity-survey-report
+  action: add
+  required-if:
+    any:
+    - condition:
+        field: protected-species
+        value: true
+        description: Protected species such as bats or birds may be affected.
+    - condition:
+        field: roof-alteration
+        value: true
+        description: Roof works, householder included.
+    - discretionary
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): ecological, bat and bird surveys, including householder
+    roof works.'
+- id: bng-metric
+  action: add
+  required-if:
+    any:
+    - &id001
+      ref: major-development
+    - condition:
+        field: minor-development
+        value: true
+        description: Non-major development.
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): major development from 12 Feb 2024, non-major from 2 Apr
+    2024.'
+- id: flood-risk-assessment
+  action: add
+  required-if:
+    any:
+    - site:
+        in:
+        - flood-risk-zone
+        description: The site is in Flood Zone 2, 3 or 3b (householder included).
+    - condition:
+        field: site-area-residential
+        operator: '>='
+        value: 1
+        description: Flood Zone 1 sites of 1 hectare or more.
+    - condition:
+        field: site-area-non-residential
+        operator: '>='
+        value: 1
+        description: Flood Zone 1 sites of 1 hectare or more.
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): FZ2/3/3b; FZ1 at 1ha or more; householder in a flood zone.'
+- id: heritage-statement
+  action: add
+  required-if:
+    site:
+      in:
+      - listed-building
+      - listed-building-setting
+      - conservation-area
+      - park-and-garden
+      description: The proposal affects listed buildings, conservation areas or registered parks and gardens.
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  confidence: medium
+  notes: From the audit (missing_requirement).
+- id: land-contamination-assessment
+  action: add
+  required-if:
+    any:
+    - site:
+        in:
+        - contaminated-land
+        description: Known or suspected contamination.
+    - condition:
+        field: sensitive-end-use
+        value: true
+        description: A sensitive end use.
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  confidence: medium
+  notes: From the audit (missing_requirement).
+- id: landscaping-plan
+  action: add
+  required-if:
+    any:
+    - *id001
+    - discretionary
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): landscaping, including LVIA, for major and most full applications
+    (''most full'' shown as discretionary).'
+- id: lighting-assessment
+  action: add
+  required-if:
+    any:
+    - condition:
+        field: floodlighting
+        value: true
+        description: Floodlighting near homes.
+    - condition:
+        field: illuminated
+        value: true
+        description: Illuminated adverts.
+    - discretionary
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): floodlighting near homes, illuminated adverts, arenas/pitches
+    (shown as discretionary).'
+- id: photos
+  action: add
+  required-if:
+    any:
+    - condition:
+        field: demolition
+        value: true
+        description: Demolition.
+    - condition:
+        field: wind-turbine
+        value: true
+        description: Wind turbines.
+    - condition:
+        field: building-height
+        operator: '>'
+        value: 18
+        description: Buildings over 18 metres.
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): photographs/photomontages.'
+- id: planning-statement
+  action: add
+  required-if:
+    any:
+    - *id001
+    - condition:
+        field: departure-from-development-plan
+        value: true
+        description: A departure from the development plan.
+    - application-type:
+        in:
+        - advertising
+    - condition:
+        field: wind-turbine
+        value: true
+        description: Wind turbines.
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): all major; departures; adverts; turbines.'
+- id: sci
+  action: add
+  required-if:
+    any:
+    - all:
+      - *id001
+      - discretionary
+    - condition:
+        field: wind-turbine
+        value: true
+        description: Wind turbines (more than 2, or hub height over 15m).
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  confidence: low
+  notes: 'From the audit (missing_requirement): major development with significant public interest; wind
+    turbines over 2 or hub height over 15m (the count and height thresholds can''t be expressed).'
+- id: town-centre-impact-assessment
+  action: add
+  required-if:
+    condition:
+      field: out-of-centre-town-centre-use
+      value: true
+      description: Main town centre uses outside a centre.
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  policy: DM3
+  confidence: medium
+  notes: 'From the audit (missing_requirement): retail sequential and impact assessment; Policy DM3 sets
+    the thresholds, which the audit does not give.'
+- id: transport-assessment
+  action: add
+  required-if:
+    any:
+    - *id001
+    - discretionary
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): all major; sites near level crossings (shown as discretionary).'
+- id: travel-plan
+  action: add
+  required-if:
+    all:
+    - *id001
+    - condition:
+        field: floorspace-non-residential
+        operator: '>'
+        value: 0
+        description: Retail, employment, leisure or education development.
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): major retail, employment, leisure and education development.'
+- id: waste-management-plan
+  action: add
+  required-if:
+    any:
+    - condition:
+        field: dwelling-count
+        operator: '>='
+        value: 1
+        description: New dwellings.
+    - condition:
+        field: floorspace-non-residential
+        operator: '>'
+        value: 0
+        description: Retail, business or industrial development.
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): refuse and recycling for new dwellings, retail/business
+    and industrial development.'
+- id: telecommunications-report
+  action: add
+  required-if:
+    condition:
+      field: telecommunications-development
+      value: true
+      description: Telecommunications development.
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  confidence: low
+  notes: 'From the audit (missing_requirement): listed without a stated trigger.'
+- id: archaeological-assessment
+  action: add
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  confidence: low
+  notes: 'From the audit (missing_requirement): Archaeological assessment is in the June 2025 list; the
+    audit gives no trigger.'
+- id: noise-assessment
+  action: add
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  confidence: low
+  notes: 'From the audit (missing_requirement): Noise impact is in the June 2025 list; the audit gives
+    no trigger.'
+- id: affordable-housing-statement
+  action: add
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  confidence: low
+  notes: 'From the audit (missing_requirement): Affordable housing statement is in the June 2025 list;
+    the audit gives no trigger.'
+- id: daylight-sunlight-assessment
+  action: add
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  confidence: low
+  notes: 'From the audit (missing_requirement): Sunlight/daylight is in the June 2025 list; the audit
+    gives no trigger.'
+- id: viability-assessment
+  action: add
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  confidence: low
+  notes: 'From the audit (missing_requirement): Financial viability is in the June 2025 list; the audit
+    gives no trigger.'
+- id: site-plan
+  action: add
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  confidence: low
+  notes: 'From the audit (missing_requirement): Site plan (items 15-19) is in the June 2025 list; the
+    audit gives no trigger.'
+- id: floor-plan-existing
+  action: add
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  confidence: low
+  notes: 'From the audit (missing_requirement): Floor plans (items 15-19) is in the June 2025 list; the
+    audit gives no trigger.'
+- id: floor-plan-proposed
+  action: add
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  confidence: low
+  notes: 'From the audit (missing_requirement): Floor plans (items 15-19) is in the June 2025 list; the
+    audit gives no trigger.'
+- id: elevation-existing
+  action: add
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  confidence: low
+  notes: 'From the audit (missing_requirement): Elevations (items 15-19) is in the June 2025 list; the
+    audit gives no trigger.'
+- id: elevation-proposed
+  action: add
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  confidence: low
+  notes: 'From the audit (missing_requirement): Elevations (items 15-19) is in the June 2025 list; the
+    audit gives no trigger.'
+- id: section-existing
+  action: add
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  confidence: low
+  notes: 'From the audit (missing_requirement): Sections and site levels (items 15-19) is in the June
+    2025 list; the audit gives no trigger.'
+- id: section-proposed
+  action: add
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  confidence: low
+  notes: 'From the audit (missing_requirement): Sections and site levels (items 15-19) is in the June
+    2025 list; the audit gives no trigger.'
+unmapped:
+- local-name: Street scene elevations
+  source-text: 'From the audit: new buildings in prominent or sensitive locations, or infill plots'
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  suggested-id: street-scene-elevations
+- local-name: Shopfront details
+  source-text: 'From the audit: all new shopfronts'
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  suggested-id: shopfront-details
+- local-name: Listed building plans
+  source-text: 'From the audit: listed building consent with elevational changes'
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  suggested-id: ''
+- local-name: Structural survey
+  source-text: 'From the audit: barn/building conversions outside urban areas; land instability; demolition
+    prior notification'
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  suggested-id: structural-survey
+- local-name: Heads of terms
+  source-text: 'From the audit: major residential (public open space); major development (highways/transport/affordable
+    housing)'
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  suggested-id: heads-of-terms
+- local-name: Open space
+  source-text: 'From the audit: major residential development'
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  suggested-id: open-space-assessment
+- local-name: Parking, cycle and accessibility details
+  source-text: 'From the audit: new development, change of use, householder affecting parking'
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  suggested-id: parking-plan
+- local-name: Drainage strategy
+  source-text: 'From the audit: major development; Flood Zones 2/3'
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  suggested-id: drainage-strategy
+- local-name: Odour assessment
+  source-text: 'From the audit: A3/A5 uses'
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  suggested-id: odour-assessment
+- local-name: Flues and extraction
+  source-text: 'From the audit: cooked food, launderettes'
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  suggested-id: ventilation-extraction-details
+- local-name: Crime impact statement
+  source-text: 'From the audit: 25 or more dwellings'
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  suggested-id: crime-prevention-statement
+- local-name: Coal mining risk assessment
+  source-text: 'From the audit: EIA development; Development High Risk Area'
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  suggested-id: coal-mining-risk-assessment
+- local-name: Proof of marketing
+  source-text: 'From the audit: employment sites, community facilities, pubs'
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  suggested-id: marketing-evidence
+- local-name: Green belt assessment
+  source-text: 'From the audit: replacement buildings and extensions in the Green Belt'
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  suggested-id: green-belt-statement
+- local-name: Agricultural statement
+  source-text: 'From the audit: listed without a trigger'
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  suggested-id: ''
+- local-name: Demolition of buildings
+  source-text: 'From the audit: listed without a trigger'
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  suggested-id: ''
+- local-name: Self and custom build proforma
+  source-text: 'From the audit: listed without a trigger'
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  suggested-id: ''
+- local-name: Battery energy storage compliance statement
+  source-text: Battery Energy Storage Sites of 1 MWh or over
+  source-url: https://www.hyndburnbc.gov.uk/download/validation-checklists-for-planning-and-other-applications/?wpdmdl=64762&ind=1751959480949&refresh=ec4428f5&filename=Validation-Checklist-For-Planning-and-other-Applications.pdf
+  suggested-id: battery-storage-safety-statement
+new-fields:
+- field: wind-turbine
+  kind: boolean
+  label: Wind turbine
+  description: The proposal includes one or more wind turbines.

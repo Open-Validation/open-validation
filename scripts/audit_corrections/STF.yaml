@@ -1,0 +1,362 @@
+# Corrections for Staffordshire Moorlands District Council, from inputs/audit/ (audit).
+# Grokbot linked only the 'Apply for planning permission' page and captured none of the 29 local
+# items in the validation guidance PDF (adopted March 2016). Everything below is added from the
+# audit's summary of that list ('From the audit'), so no source-text is given. The list is stale:
+# it cites the 2011 EIA Regulations and revoked A3/A4/A5 use classes, and predates statutory BNG.
+local-authority: STF
+validation-list:
+  url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  date: 2016-03
+  date-basis: 'audit: PDF cover ''[Adopted March 2016]''; linked from the ''Apply for planning permission''
+    page as ''our local list validation guidance document'''
+requirements:
+- id: affordable-housing-statement
+  action: add
+  required-if:
+    any:
+    - condition:
+        field: site-area-residential
+        operator: '>'
+        value: 0.5
+        description: The site is over 0.5 hectares.
+    - condition:
+        field: dwelling-count
+        operator: '>='
+        value: 15
+        description: 15 or more dwellings (net).
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): site over 0.5ha or net 15+ dwellings.'
+- id: air-quality-assessment
+  action: add
+  required-if:
+    any:
+    - site:
+        in:
+        - air-quality-management-area
+        description: The site is within or adjacent to an Air Quality Management Area.
+    - discretionary
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): within/adjacent to an AQMA or could raise air quality
+    concerns (officer discretion).'
+- id: arboriculturist-report
+  action: add
+  required-if:
+    any:
+    - condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Semi-mature or mature trees on or next to the site.
+    - site:
+        in:
+        - tree-preservation-zone
+        - conservation-area
+        description: Trees protected by a TPO or in a conservation area.
+    - discretionary
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): Tree Survey/Arboricultural Statement for semi-mature/mature
+    trees on or next to the site, TPO or conservation-area trees, and protected hedgerows (officer discretion).'
+- id: biodiversity-survey-report
+  action: add
+  required-if:
+    any:
+    - &id001
+      ref: major-development
+    - condition:
+        field: protected-species
+        value: true
+        description: The development could affect wildlife.
+    - site:
+        in:
+        - site-of-special-scientific-interest
+        - special-area-of-conservation
+        - special-protection-area
+        - local-wildlife-site
+        description: The development could affect a designated site.
+    - condition:
+        field: eia-development
+        value: true
+        description: EIA development.
+    - discretionary
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): major development, conversion/demolition of redundant
+    buildings, impact on wildlife/designated sites, loss of more than 20ha of BMV land, minerals/waste
+    restoration, EIA development. The building, BMV land and restoration cases are shown as officer discretion.'
+- id: energy-statement
+  action: add
+  required-if:
+    any:
+    - condition:
+        field: dwelling-count
+        operator: '>='
+        value: 5
+        description: 5 or more dwellings.
+    - condition:
+        field: floorspace-non-residential
+        operator: '>='
+        value: 500
+        description: 500 square metres or more of non-residential floorspace.
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): Energy/Sustainability Statement for 5+ dwellings or 500
+    sq m+ non-residential.'
+- id: environmental-statement
+  action: add
+  required-if:
+    condition:
+      field: eia-development
+      value: true
+      description: EIA Schedule 1 or Schedule 2 development.
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): EIA Schedule 1/2 development (the list cites the 2011
+    EIA Regulations).'
+- id: flood-risk-assessment
+  action: add
+  required-if:
+    any:
+    - condition:
+        field: site-area-residential
+        operator: '>'
+        value: 1
+        description: The site is over 1 hectare (Flood Zone 1).
+    - condition:
+        field: site-area-non-residential
+        operator: '>'
+        value: 1
+        description: The site is over 1 hectare (Flood Zone 1).
+    - site:
+        in:
+        - flood-risk-zone
+        description: New buildings, changes of use or extended ground cover in Flood Zone 2 or 3.
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): over 1ha in Flood Zone 1; new buildings, changes of use
+    or extended ground cover in Flood Zones 2/3.'
+- id: heritage-statement
+  action: add
+  required-if:
+    site:
+      in:
+      - listed-building
+      - listed-building-setting
+      - conservation-area
+      - park-and-garden
+      - scheduled-monument
+      - archaeological-priority-area
+      description: The site is within or adjoins a listed building, conservation area, historic park or
+        garden, scheduled monument or area of archaeological interest.
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): site within or adjoining a listed building, conservation
+    area, historic park/garden, scheduled monument or archaeological interest.'
+- id: land-contamination-assessment
+  action: add
+  required-if:
+    site:
+      in:
+      - contaminated-land
+      description: Contamination is known or suspected on or near the site.
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  must-include:
+  - item: A screening report or Phase 1 assessment
+    level: must
+  confidence: medium
+  notes: 'From the audit (missing_requirement): contamination known/suspected or nearby.'
+- id: landscaping-plan
+  action: add
+  required-if: *id001
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): Landscaping Scheme for all major applications.'
+- id: lighting-assessment
+  action: add
+  required-if:
+    all:
+    - condition:
+        field: external-lighting
+        value: true
+        description: The proposal includes external lighting.
+    - any:
+      - site:
+          in:
+          - listed-building
+          - listed-building-setting
+          - conservation-area
+          description: Near a listed building or a conservation area.
+      - site:
+          in:
+          - rural-area
+          description: Near open countryside.
+      - discretionary
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): external lighting near housing, a listed building, a conservation
+    area or open countryside (''near housing'' is shown as officer discretion).'
+- id: noise-assessment
+  action: add
+  required-if:
+    any:
+    - condition:
+        field: noise-sensitive-use
+        value: true
+        description: Noise-sensitive development.
+    - condition:
+        field: noise-generating-use
+        value: true
+        description: Development that may cause noise.
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): noise-sensitive development or development that may cause
+    noise.'
+- id: recreation-facilities-assessment
+  action: add
+  required-if:
+    condition:
+      field: loss-of-open-space
+      value: true
+      description: Loss of open space, playing fields, recreation grounds or allotments.
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): Open Space Assessment for loss of open space, playing
+    fields, recreation grounds or allotments.'
+- id: sci
+  action: add
+  required-if:
+    any:
+    - condition:
+        field: dwelling-count
+        operator: '>='
+        value: 200
+        description: 200 or more dwellings.
+    - condition:
+        field: site-area-residential
+        operator: '>='
+        value: 4
+        description: 4 hectares or more of residential land.
+    - condition:
+        field: floorspace-non-residential
+        operator: '>='
+        value: 10000
+        description: 10,000 square metres or more of commercial floorspace.
+    - condition:
+        field: site-area-non-residential
+        operator: '>='
+        value: 2
+        description: 2 hectares or more of commercial land.
+    - discretionary
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): strategic major development: 200+ dwellings/4ha+ residential,
+    10,000 sq m+ commercial, 2ha+ commercial land, wind farms of 2+ turbines, turbines over 15m (the turbine
+    cases are shown as officer discretion).'
+- id: telecommunications-report
+  action: add
+  required-if:
+    condition:
+      field: telecommunications-development
+      value: true
+      description: A telecommunications mast that is not permitted development.
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): masts that are not permitted development.'
+- id: town-centre-impact-assessment
+  action: add
+  required-if:
+    all:
+    - condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: Retail or leisure development outside a town centre.
+    - condition:
+        field: town-centre-use-floorspace
+        operator: '>'
+        value: 2500
+        description: Over 2,500 square metres.
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): sequential/impact test for retail/leisure over 2,500 sq
+    m outside a town centre.'
+- id: transport-assessment
+  action: add
+  required-if:
+    all:
+    - *id001
+    - discretionary
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): Transport Assessment/Statement for major development with
+    significant transport implications.'
+- id: travel-plan
+  action: add
+  required-if:
+    any:
+    - condition:
+        field: floorspace-non-residential
+        operator: '>='
+        value: 2500
+        description: 2,500 square metres or more of non-residential floorspace.
+    - discretionary
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): significant trip generators, e.g. 2,500 sq m+ non-residential.'
+- id: waste-management-plan
+  action: add
+  required-if:
+    any:
+    - condition:
+        field: dwelling-count
+        operator: '>='
+        value: 10
+        description: 10 or more dwellings (refuse collection).
+    - discretionary
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  confidence: low
+  notes: 'From the audit (missing_requirement): Waste Management/Storage and Collection Plan for strategic
+    major development, 10+ dwellings (refuse collection) and most new development (officer discretion).'
+unmapped:
+- local-name: Agricultural Workers Dwelling information
+  source-text: 'From the audit: a new rural agricultural worker dwelling, or varying an agricultural occupancy
+    tie'
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  suggested-id: agricultural-workers-appraisal
+- local-name: Building for Life assessment
+  source-text: 'From the audit: all major housing'
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  suggested-id: building-for-healthy-life
+- local-name: Coal Mining Risk Assessment
+  source-text: 'From the audit: non-householder applications in Coal Mining high-risk areas'
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  suggested-id: coal-mining-risk-assessment
+- local-name: Loss of Employment information
+  source-text: 'From the audit: listed; trigger not given'
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  suggested-id: marketing-evidence
+- local-name: Parking information
+  source-text: 'From the audit: listed; trigger not given'
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  suggested-id: parking-plan
+- local-name: Planning Obligations / Draft Heads of Terms
+  source-text: 'From the audit: major development or where an obligation is needed'
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  suggested-id: heads-of-terms
+- local-name: Structural Survey
+  source-text: 'From the audit: rural building conversions; demolition of listed buildings or buildings
+    in conservation areas'
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  suggested-id: structural-survey
+- local-name: Sustainable Drainage (SuDS)
+  source-text: 'From the audit: more than 10 dwellings or equivalent'
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  suggested-id: drainage-strategy
+- local-name: Foul Sewage and Utilities Assessment
+  source-text: 'From the audit: all strategic applications'
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  suggested-id: utilities-statement
+- local-name: Ventilation and Extraction Statement
+  source-text: 'From the audit: A3/A4/A5 uses (revoked use classes) or extraction/air-conditioning equipment'
+  source-url: https://staffsmoorlands.gov.uk/media/271/Validation-guidance---National-and-local-list/pdf/Validation_guidance_-_National_and_local_lists_SMDC.pdf
+  suggested-id: ventilation-extraction-details
