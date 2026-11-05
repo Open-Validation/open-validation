@@ -16,7 +16,7 @@ from datetime import date
 from common import DATA, SPEC, load_yaml, read_csv, write_csv, write_yaml
 
 # The four statuses, from least to most trusted.
-STATUSES = ["ai-collated", "human-verified", "council-verified", "council-updated"]
+STATUSES = ["unverified", "human-verified", "council-verified", "council-updated"]
 NEEDS_EVIDENCE = {"council-verified", "council-updated"}
 
 # The cells of a requirement file and of a council's _lpa.yaml (FORMAT.md, "Review status").
@@ -84,16 +84,16 @@ def cell_hash(value):
 
 
 def lowest(statuses):
-    """The least trusted status in a list (ai-collated if the list is empty)."""
+    """The least trusted status in a list (unverified if the list is empty)."""
     statuses = list(statuses)
     if not statuses:
-        return "ai-collated"
+        return "unverified"
     return min(statuses, key=STATUSES.index)
 
 
 def cell_statuses(data, filename):
     """{cell: status} for every non-empty cell of a file. A cell with no mark,
-    or whose hash no longer matches its value, counts as ai-collated."""
+    or whose hash no longer matches its value, counts as unverified."""
     marks = data.get("field-status") or {}
     out = {}
     for cell in cells_for(filename):
@@ -102,7 +102,7 @@ def cell_statuses(data, filename):
             continue
         mark = marks.get(cell) or {}
         ok = mark.get("status") in STATUSES and mark.get("hash") == cell_hash(value)
-        out[cell] = mark["status"] if ok else "ai-collated"
+        out[cell] = mark["status"] if ok else "unverified"
     return out
 
 
@@ -139,7 +139,7 @@ def mark_cell(data, filename, cell, status, by, when=None, evidence=""):
         return False
     marks = data.setdefault("field-status", {}) or {}
     data["field-status"] = marks
-    if status == "ai-collated":
+    if status == "unverified":
         marks.pop(cell, None)  # back to the default: no entry
         return True
     entry = {"status": status, "by": by, "date": str(when or date.today().isoformat())}
@@ -182,7 +182,7 @@ def coverage(lpa_data, requirement_count):
 def recompute_council(code, reset_stale=True, report=None):
     """Recompute every file's review-status and the council's roll-up.
     If reset_stale, marks whose hash no longer matches are removed (the cell
-    drops back to ai-collated) and listed in report. Returns the council status."""
+    drops back to unverified) and listed in report. Returns the council status."""
     lpa_path, reqs = folder_files(code)
     all_statuses = []
     for path in reqs + [lpa_path]:
@@ -192,7 +192,7 @@ def recompute_council(code, reset_stale=True, report=None):
             for cell in stale_marks(data, name):
                 data["field-status"].pop(cell, None)
                 if report is not None:
-                    report.append(f"{code}/{path.name}: '{cell}' changed after it was marked, so it is back to ai-collated")
+                    report.append(f"{code}/{path.name}: '{cell}' changed after it was marked, so it is back to unverified")
         statuses = cell_statuses(data, name)
         all_statuses += statuses.values()
         if path != lpa_path:
@@ -231,7 +231,7 @@ def lpa_csv_row(code, base):
         "list-date": str(vl.get("date") or ""),
         "list-status": vl.get("status") or "",
         "coverage": coverage(lpa, len(reqs)),
-        "review-status": lpa.get("review-status", "ai-collated"),
+        "review-status": lpa.get("review-status", "unverified"),
         "audit-status": audit.get("status", "not-audited"),
         "issues-open": "" if audit.get("issues-open") is None else str(audit.get("issues-open")),
         "joint-list": "yes" if partners else "",

@@ -26,6 +26,16 @@ Working branch: `ccr-f743743a-pji9c0` (the session's designated branch, used ins
   - [ ] Checkpoint 4: screenshots
 - [ ] **E. Finish** (final check summary here, PR ready for review)
 
+## Decisions that change BUILD_PROMPT.md
+
+`BUILD_PROMPT.md` is kept exactly as it was given. Where a later decision changes it, follow this list:
+
+- The baseline review status is **`unverified`**, not `ai-collated` (same meaning and colour, red).
+  It is used everywhere: FORMAT.md, scripts, data, and the explorer (CSS variable `--status-unverified`).
+- National parks use short codes (BROADS, DNPA, ENPA, LDNPA, NFNPA, NYMNPA, NNPA, PDNPA, SDNPA, YDNPA).
+- The council register lives in `data/organisation.csv` (refreshed by `scripts/update_register.py`), not `inputs/`.
+- Working branch is `ccr-f743743a-pji9c0`, not `build`.
+
 ## Notes for whoever picks this up
 
 - Inputs are in `inputs/`; never edit them.

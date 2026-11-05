@@ -7,11 +7,11 @@ Examples:
   python scripts/set_status.py SHR council-verified --by "Jake White" --evidence https://github.com/.../issues/12
   python scripts/set_status.py --recompute
       changes no marks on purpose: resets any cell edited since it was marked
-      back to ai-collated (and lists them), then recomputes every file, every
+      back to unverified (and lists them), then recomputes every file, every
       council, coverage and data/lpa.csv
 
-Statuses: ai-collated, human-verified, council-verified, council-updated.
-The two council statuses need --evidence. Marking a cell 'ai-collated' removes its mark.
+Statuses: unverified, human-verified, council-verified, council-updated.
+The two council statuses need --evidence. Marking a cell 'unverified' removes its mark.
 """
 
 import argparse
@@ -27,7 +27,7 @@ def recompute_all():
         review.recompute_council(folder.name, reset_stale=True, report=report)
     review.sync_lpa_csv()
     if report:
-        print("These cells changed after they were marked, so they are back to ai-collated:")
+        print("These cells changed after they were marked, so they are back to unverified:")
         for line in report:
             print("  -", line)
     else:

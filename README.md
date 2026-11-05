@@ -8,8 +8,8 @@ open data. A validation list says which documents a council needs before it will
 ("validate") a planning application. Every council publishes its own, in its own format. This repo
 puts all 328 English councils' lists into one consistent format that computers can read.
 
-> **Caveat.** Everything here starts as `ai-collated`: it was built by AI from Grokbot's workbook
-> and Claude's audit, and nobody has checked it against the council's own list yet. **Always check
+> **Caveat.** Everything here starts as `unverified`: most of it was collected by AI from Grokbot's
+> workbook and Claude's audit, and nobody has checked it against the council's own list yet. **Always check
 > the council's current validation list before you submit an application.**
 
 ## How it relates to MHCLG's data specification
@@ -65,14 +65,14 @@ link), and every cell has one of four statuses. The explorer tints each cell in 
 
 | Status | Colour | Meaning |
 |---|---|---|
-| `ai-collated` | red | Built by AI. Nobody has checked it yet. Every cell starts here. |
+| `unverified` | red | Nobody has checked it against the council's list yet. Every cell starts here. |
 | `human-verified` | orange | A person compared it with the council's current list and it matches. |
 | `council-verified` | dark green | Someone at the council confirmed it is correct. |
 | `council-updated` | light green | The council changed it itself, so the council now maintains it. |
 
 A council is shown in the lowest status of any of its cells, and grey ("Not covered yet") until we
 have its requirements. A mark remembers a fingerprint of the value it was given to; if the value is
-edited later, the cell drops back to `ai-collated`.
+edited later, the cell drops back to `unverified`.
 
 ### How cells are marked
 

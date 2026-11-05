@@ -42,7 +42,7 @@ must-include:                             # ours: what the document must contain
     source-text: "show the access layout and visibility splay"
 confidence: high                          # ours: high | medium | low
 notes: ""                                 # ours, optional: anything else
-review-status: ai-collated                # ours, worked out by scripts: see "Review status"
+review-status: unverified                 # ours, worked out by scripts: see "Review status"
 field-status: {}                          # ours, written by scripts: one status per cell
 ```
 
@@ -99,7 +99,7 @@ least to most trusted. The explorer shows each cell tinted in its status colour.
 
 | value | colour | meaning |
 |---|---|---|
-| `ai-collated` | red | Built by AI from Grokbot's workbook, Claude's audit or the ingest skill. Nobody has checked it against the council's list yet. Every cell starts here. |
+| `unverified` | red | Nobody has checked it against the council's list yet. Most cells were collected by AI (from Grokbot's workbook, Claude's audit or the ingest skill). Every cell starts here. |
 | `human-verified` | orange | A person compared the cell with the council's current list and it matches. |
 | `council-verified` | dark green | Someone at the council confirmed the cell is correct. |
 | `council-updated` | light green | The council has changed the cell itself (for example through a pull request or the "I work for this council" form), so the council now maintains it. |
@@ -130,13 +130,13 @@ field-status:
     hash: 9b04d7aa
 ```
 
-- A cell with no entry is `ai-collated`. An empty cell (for example no policy given) has no
+- A cell with no entry is `unverified`. An empty cell (for example no policy given) has no
   status and doesn't count.
 - `council-verified` and `council-updated` need `evidence`: a link to the issue or PR, or a
   short note of the email.
 - `hash` is the first 8 characters of the SHA-1 of the cell's value written as JSON
   (`json.dumps(value, sort_keys=True, ensure_ascii=False)`). If the value changes after it
-  was marked, the hash stops matching and the cell drops back to `ai-collated`, so a mark can
+  was marked, the hash stops matching and the cell drops back to `unverified`, so a mark can
   never outlive an edit.
 - **Roll-up:** a file's `review-status` is the lowest status among its non-empty cells. A
   council's `review-status` (in `_lpa.yaml`, in `lpa.csv` and on the map) is the lowest

@@ -147,7 +147,7 @@ def build(councils, matches, wb):
             "name": m["register-name"],
             "region": c.get("Region") or "",
             "type": c.get("Type") or "",
-            "review-status": old.get("review-status", "ai-collated"),
+            "review-status": old.get("review-status", "unverified"),
             # Stage B may replace the list with the audit's current one; keep it if so.
             "validation-list": old_list or {
                 "url": link_url(c.get("Validation list URL")),
