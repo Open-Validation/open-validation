@@ -117,9 +117,13 @@ body.patterns .badge.st-incorrect, body.patterns td.tint.st-incorrect { backgrou
 
 /* ===== Cards and results ===== */
 .card { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 14px 16px; margin-bottom: 12px; }
-.council-panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px 20px; }
-.council-panel h2 { grid-column: 1 / -1; margin: 0; }
-.kv dt { color: var(--text-muted); font-size: 12px; } .kv dd { margin: 0 0 6px; }
+.council-panel h2 { margin: 0 0 8px; }
+.council-panel .kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 14px; margin: 0 0 8px; }
+.kv dt { color: var(--text-muted); font-size: 13px; padding-top: 1px; } .kv dd { margin: 0; }
+.council-panel details.std summary { cursor: pointer; font-weight: 600; }
+.council-panel details.std ul { margin: 4px 0 0; padding-left: 18px; }
+.council-panel .actions { margin: 10px 0 0; }
+@media (max-width: 600px) { .council-panel h2 { font-size: 19px; } .card { padding: 12px 14px; } }
 .warn { color: var(--check); }
 .result { border-left: 4px solid var(--line-soft); position: relative; }
 .result.required { border-left: 4px solid var(--accent); }
@@ -1054,16 +1058,19 @@ function capital(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
 function councilPanel(council) {
   var y = council.lpa, vl = y["validation-list"] || {}, audit = y.audit || {}, r = S.lpaByCode[S.lpa], status = mapStatus(S.lpa, "England");
   var old = vl.date && String(vl.date) < new Date(Date.now() - 730 * 864e5).toISOString().slice(0, 10);
-  var std = (y["submission-standards"] || []).map(function (s) { return "<li>" + esc(s.item) + (s.level === "should" ? ' <span class="muted">(advised)</span>' : "") + "</li>"; }).join("");
+  var stds = y["submission-standards"] || [];
+  var std = stds.map(function (s) { return "<li>" + esc(s.item) + (s.level === "should" ? ' <span class="muted">(advised)</span>' : "") + "</li>"; }).join("");
+  var partners = (y["joint-list"] || {}).partners || [];
+  var issues = audit["issues-open"] == null ? "" : ", " + audit["issues-open"] + " issue" + (audit["issues-open"] === 1 ? "" : "s") + " found";
+  // Compact: one short row each for the list and the audit; standards fold away on small screens
   return '<section class="card council-panel" aria-label="Council"><h2>' + esc(r.name) + ' <span class="mono muted" style="font-size:14px">' + esc(S.lpa) + "</span> " + badge(status) + "</h2>" +
-    '<dl class="kv"><dt>Validation list</dt><dd>' + (vl.url ? '<a href="' + esc(vl.url) + '" target="_blank" rel="noopener">Open the council\'s list</a>' : "Not found") + "</dd>" +
-    "<dt>List date</dt><dd" + (old ? ' class="warn"' : "") + ">" + esc(vl.date || "unknown") + (old ? " - more than 2 years old (NPPF expects a review every 2 years)" : "") + "</dd>" +
-    "<dt>List status</dt><dd>" + esc(vl.status || "") + "</dd></dl>" +
-    '<dl class="kv"><dt>Audit</dt><dd>' + esc(audit.status || "not-audited") + (audit["contents-checked"] === false ? " (the audit couldn't read the list)" : "") + "</dd>" +
-    "<dt>Issues found by the audit</dt><dd>" + esc(audit["issues-open"] == null ? "-" : audit["issues-open"]) + "</dd>" +
-    ((y["joint-list"] || {}).partners ? "<dt>Shares its list with</dt><dd>" + (y["joint-list"].partners || []).map(function (p) { return '<button class="linkish btn small" data-select="' + esc(p) + '">' + esc((S.lpaByCode[p] || {}).name || p) + "</button>"; }).join(" ") + "</dd>" : "") + "</dl>" +
-    '<div><strong>Submission standards</strong>' + (std ? '<ul style="margin:4px 0;padding-left:18px">' + std + "</ul>" : '<p class="muted" style="margin:4px 0">None recorded.</p>') +
-    '<p style="margin:6px 0 0"><button class="btn small" id="officer">I work for this council</button></p></div></section>';
+    '<dl class="kv"><dt>List</dt><dd>' + (vl.url ? '<a href="' + esc(vl.url) + '" target="_blank" rel="noopener">Open the council\'s list</a>' : "Not found") +
+    (vl.date ? " · " + '<span' + (old ? ' class="warn" title="More than 2 years old: the NPPF expects a review every 2 years"' : "") + ">" + esc(vl.date) + (old ? " ⚠ over 2 years old" : "") + "</span>" : "") +
+    (vl.status && vl.status !== "outdated" ? ' · <span class="muted">' + esc(vl.status) + "</span>" : "") + "</dd>" +
+    "<dt>Audit</dt><dd>" + esc(audit.status || "not-audited") + esc(issues) + (audit["contents-checked"] === false ? ' <span class="muted">(couldn\'t read the list)</span>' : "") + "</dd>" +
+    (partners.length ? "<dt>Shared list</dt><dd>" + partners.map(function (p) { return '<button class="linkish btn small" data-select="' + esc(p) + '">' + esc((S.lpaByCode[p] || {}).name || p) + "</button>"; }).join(" ") + "</dd>" : "") + "</dl>" +
+    (stds.length ? '<details class="std"' + (window.innerWidth > 600 ? " open" : "") + "><summary>Submission standards (" + stds.length + ")</summary><ul>" + std + "</ul></details>" : '<p class="muted" style="margin:0">No submission standards recorded.</p>') +
+    '<p class="actions"><button class="btn small" id="officer">I work for this council</button></p></section>';
 }
 
 // ======================================================================
