@@ -1,27 +1,90 @@
 reference: travel-plan
 local-authority: FAR
 required-if:
-  all:
-  - application-type:
+  any:
+  - all:
+    - application-type:
+        in:
+        - full
+        - outline
+    - ref: major-development
+    - any:
+      - condition:
+          field: dwelling-count
+          operator: '>='
+          value: 100
+          description: 'Residential: 100 units.'
+      - condition:
+          field: office-floorspace
+          operator: '>='
+          value: 2500
+          description: 'Commercial B1: 2,500 sq m.'
+      - condition:
+          field: industrial-floorspace
+          operator: '>='
+          value: 2500
+          description: 'Commercial B2: 2,500 sq m.'
+      - condition:
+          field: warehousing-floorspace
+          operator: '>='
+          value: 5000
+          description: 'Commercial B8: 5,000 sq m.'
+      - condition:
+          field: retail-floorspace
+          operator: '>='
+          value: 1000
+          description: 'Retail: 1,000 sq m.'
+      - condition:
+          field: floorspace-non-residential
+          operator: '>='
+          value: 2500
+          description: 'Education or health establishments: 2,500 sq m.'
+      - condition:
+          field: floorspace-non-residential
+          operator: '>='
+          value: 500
+          description: 'Care establishments: 500 sq m (or 5 bedrooms).'
+      - condition:
+          field: bedroom-count
+          operator: '>='
+          value: 5
+          description: 'Care establishments: 5 bedrooms.'
+      - condition:
+          field: floorspace-non-residential
+          operator: '>='
+          value: 1000
+          description: 'Leisure (general): 1,000 sq m.'
+      - condition:
+          field: floorspace-non-residential
+          operator: '>='
+          value: 500
+          description: 'Miscellaneous commercial: 500 sq m.'
+      - discretionary
+  - site:
       in:
-      - full
-      - outline
-  - ref: major-development
-  - any:
-    - condition:
-        field: dwelling-count
-        operator: '>='
-        value: 100
-        description: Residential development of 100 units or more.
-    - discretionary
+      - strategic-allocation
+      description: The site is within the Welborne Plan policy boundary.
 source-url: https://www.fareham.gov.uk/planning/applications_and_advice/localrequireddocs.aspx
-source-text: 'Travel Plan Required for the following types of *major applications: Full planning applications
-  Outline planning applications Where: The development has significant transport implications, subject
-  to following thresholds ( National Planning Policy Framework ):'
-confidence: low
-notes: 'Audit (wrong_trigger): the excerpt stops before the thresholds table. From the audit: residential
-  100 units; B1/B2 2,500 sqm; B8 5,000 sqm; retail 1,000 sqm; care 500 sqm or 5 bedrooms, and others.
-  The non-residential thresholds depend on the use class, so they are shown as officer discretion. The
-  non-residential thresholds from the list''s table are not encoded; check them against the list.'
+policy: National Planning Policy Framework
+source-text: 'The development has significant transport implications, subject to following thresholds
+  (National Planning Policy Framework ): Land use Threshold Residential 100 units Commercial B1 and B2
+  2500sqm Commercial B8 5000sqm Retail 1000sqm Education 2500sqm Health Establishments 2500sqm Care Establishments
+  500sqm or 5 bedroom Leisure: General 1000sqm Leisure: Stadia, ice rinks All (1500 seats) Miscellaneous
+  Commercial 500sqm ... Planning application(s) for all or part of Welborne.'
+must-include:
+- item: 'For Welborne: an area wide Framework Travel Plan agreed between the council, Highway Authority
+    and developers, showing how modal shares by walking, cycling and public transport will be achieved'
+  level: must
+  required-if:
+    site:
+      in:
+      - strategic-allocation
+      description: The site is within the Welborne Plan policy boundary.
+confidence: medium
+notes: 'From the council''s list (adopted 28 March 2025), page 1 (single web page), Local Information
+  Requirements table, row ''Travel Plan''. Thresholds are read as ''at or above''. The floorspace-non-residential
+  rows each apply only to the use named. ''Leisure: Stadia, ice rinks — All (1500 seats)'' has no field,
+  so it is shown as discretionary. Initially a Framework Travel Plan may be accepted. Also the Welborne
+  ''Framework Travel Plan'' row (all Welborne applications).'
 review-status: unverified
 field-status: {}
