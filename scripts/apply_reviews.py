@@ -9,6 +9,7 @@ Each file in reviews/pending/ is a list of marks like this:
     cell: required-if
     status: human-verified
     by: Jake White
+    github: Open-Validation  # replaced by the account that opened the pull request (see below)
     date: 2026-11-06
     evidence: ""             # needed for the two council statuses
     note: ""                 # needed for 'incorrect': what's wrong
@@ -16,11 +17,17 @@ Each file in reviews/pending/ is a list of marks like this:
       url: https://...
       date: 2022-05-01
 
+In GitHub Actions the workflow passes --github-user with the account that opened
+the pull request, and that account is recorded on every mark (whatever the file
+says), so a mark can't claim to be from someone else. When you apply marks by hand
+from a 'cell-marks' issue, pass --github-user <the issue author>.
+
 All marks in all pending files are checked first. If any is wrong, nothing is
 changed and you get a clear message. Otherwise they're applied, each file is
 moved to reviews/applied/, every status is recomputed and a summary printed.
 """
 
+import argparse
 import shutil
 import sys
 
@@ -58,6 +65,10 @@ def check_mark(m, where):
 
 
 def main():
+    p = argparse.ArgumentParser(description="Apply cell marks waiting in reviews/pending/.")
+    p.add_argument("--github-user", default="",
+                   help="the GitHub account that submitted the marks (recorded on every mark)")
+    a = p.parse_args()
     files = sorted(PENDING.glob("*.yaml"))
     if not files:
         print("Nothing to apply: reviews/pending/ has no .yaml files.")
@@ -78,8 +89,8 @@ def main():
         batches.append((f, marks))
     if problems:
         print("Nothing was changed, because of these problems:")
-        for p in problems:
-            print("  -", p)
+        for msg in problems:
+            print("  -", msg)
         sys.exit(1)
 
     councils, count = set(), 0
@@ -89,7 +100,12 @@ def main():
             data = load_yaml(path)
             review.mark_cell(data, m["file"], m["cell"], m["status"], m["by"],
                              when=m["date"], evidence=m.get("evidence") or "", note=m.get("note") or "",
-                             checked_against=m.get("checked-against"))
+                             checked_against=m.get("checked-against"),
+                             github=a.github_user or m.get("github") or "")
+            claimed = str(m.get("github") or "").lstrip("@")
+            if a.github_user and claimed and claimed.lower() != a.github_user.lstrip("@").lower():
+                print(f"  note: a mark said github '{claimed}', but it was submitted by "
+                      f"'{a.github_user}', so '{a.github_user}' was recorded")
             write_yaml(path, data)
             councils.add(m["lpa"])
             count += 1

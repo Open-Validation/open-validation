@@ -1,0 +1,140 @@
+# Corrections for Ashford Borough Council, from inputs/audit/ashford-borough-council.json.
+# The audit could not fetch Ashford's list (shared web budget exhausted), so contents_checked is
+# false: these corrections only restructure what the workbook's own excerpts say, following the
+# audit's reading of them. Nothing here was checked against the live list.
+local-authority: ASF
+
+drop:
+  - id: schedule-of-works
+    reason: "duplicate: the excerpt is the Heritage Statement entry (it 'should include a schedule of works'), not a separate requirement"
+  - id: site-plan
+    reason: "other: mislabelled; the excerpt is the HOU18 dwelling-mix list and block plan (now an unmapped item), not a general block plan requirement"
+
+drop-unmapped:
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "wrong_trigger: four requirements with different thresholds merged into one string; split into separate unmapped items below"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_app_type: the excerpt has no trigger; replaced below with the LV10 Stodmarsh trigger from the council tab"
+
+requirements:
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, hh]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: >-
+              Works are proposed to any trees as part of the proposals, including protected trees
+              (TPO or a tree in a conservation area).
+    source-text: >-
+      LV17 Tree survey and/or associated Arboricultural Impact Assessment Where works are required
+      to a protected tree (TPO or tree in Conservation Area), and where works are proposed to any
+      trees as part of the proposals.
+    source-url: https://www.ashford.gov.uk/publications/validation-checklist/?pid=13415
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook placed this under Works to trees, but it is the planning
+      application requirement for proposals that involve works to trees; it belongs under Full,
+      Outline and Householder.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt is a fragment ('whether an Environmental Statement is required.'); an Environmental Statement is needed for EIA development."
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt is a generic definition with no threshold ('where more impact is likely and mitigation measures are probably needed'), so it is shown as officer discretion."
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt is a generic definition with no threshold ('when long term management strategies are required to deal with significant transport impacts'), so it is shown as officer discretion."
+
+  - id: heritage-statement
+    action: update
+    must-include:
+      - item: A schedule of works to the heritage asset(s)
+        level: should
+      - item: An analysis of the significance of the archaeology, history and character of the building or structure
+        level: should
+      - item: The principles of and justification for the proposed works
+        level: should
+      - item: The impact on the special character of the heritage asset, its setting and the setting of adjacent heritage assets
+        level: should
+    confidence: low
+    notes: >-
+      The workbook's excerpt lists what the statement 'should include' but gives no trigger, and the
+      application type was guessed. The duplicate 'Schedule of works' row (same excerpt) was dropped.
+
+  - id: proposed-habitat-plan
+    action: add
+    source-text: >-
+      A scaled plan(s) (UKHAB V2.0 preferred, with north arrow) showing the location and extent of
+      post-development on-site habitat; as well as the location and extent of pre-development and
+      post-development off-site habitat (if applicable), included in the biodiversity metric
+      calculation.
+    source-url: https://www.ashford.gov.uk/publications/validation-checklist/?pid=13415
+    must-include:
+      - item: Drawn to scale, with a north arrow
+        level: must
+      - item: UKHAB V2.0 habitat classification
+        level: should
+      - item: Location and extent of post-development on-site habitat
+        level: must
+      - item: Location and extent of pre-development and post-development off-site habitat, if any
+        level: must
+    confidence: low
+    notes: >-
+      Audit (missing_requirement): Biodiversity Net Gain information appears only in the council tab
+      and had no requirement row. The workbook gives no trigger (the statutory BNG exemptions
+      presumably apply), and the audit could not check the live list.
+
+unmapped:
+  - local-name: Dwelling mix (HOU18)
+    source-text: >-
+      Dwelling mix - Major residential schemes of 10 or more dwellings … A detailed list and block
+      plan must be provided to show the amount and location of dwelling types and sizes in
+      accordance with Policy HOU18.
+    source-url: https://www.ashford.gov.uk/publications/validation-checklist/?pid=13415
+    suggested-id: housing-mix-statement
+  - local-name: External open space
+    source-text: "External open space – All new dwellings"
+    source-url: https://www.ashford.gov.uk/publications/validation-checklist/?pid=13415
+    suggested-id: amenity-space-assessment
+  - local-name: Residential space standards compliance checklist (LV14)
+    source-text: "LV14 Residential Space Standards Compliance Checklis t … Residential space standard – All new dwellings"
+    source-url: https://www.ashford.gov.uk/publications/validation-checklist/?pid=13415
+    suggested-id: residential-space-standards
+  - local-name: Accessibility standards
+    source-text: "Accessibility Standards – Schemes of 5 or more new build dwellings"
+    source-url: https://www.ashford.gov.uk/publications/validation-checklist/?pid=13415
+    suggested-id: accessibility-statement
+  - local-name: Stodmarsh Mitigation Strategy (LV10)
+    source-text: >-
+      LV10 Stodmarsh Mitigation S trategy All applications for new housing and overnight
+      accommodation within the Stour Catchment Area or that will discharge into identified
+      Wastewater Treatment Works … Submission of Mitigation Strategy / Appropriate Assessment must
+      include: Quantify the nutrient loading associated with the proposed development in line with
+      the latest Natural England methodology.
+    source-url: https://www.ashford.gov.uk/publications/validation-checklist/?pid=13415
+    suggested-id: nutrient-neutrality-statement
+
+low-confidence:
+  - id: air-quality-assessment
+    note: "Audit (wrong_trigger): the excerpt ('exceeded and Air Quality Assessment must be provided as set out in policy ENV12.') has lost its threshold; re-read the council's list."
+  - id: biodiversity-survey-report
+    note: "Audit (wrong_trigger): the excerpt describes report content only, not when a survey is needed."
+  - id: "*"
+    note: "Audit (missing_requirement): the LV codes run to at least LV18 but only about 14 items were captured, so other local requirements are probably missing."

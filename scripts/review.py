@@ -140,7 +140,8 @@ def council_list(code):
     return out
 
 
-def mark_cell(data, filename, cell, status, by, when=None, evidence="", note="", checked_against=None):
+def mark_cell(data, filename, cell, status, by, when=None, evidence="", note="", checked_against=None,
+              github=""):
     """Write a mark for one cell into data['field-status'] (in memory).
     Returns False (and changes nothing) if the cell is empty."""
     if cell not in cells_for(filename):
@@ -159,7 +160,10 @@ def mark_cell(data, filename, cell, status, by, when=None, evidence="", note="",
     if status == "unverified":
         marks.pop(cell, None)  # back to the default: no entry
         return True
-    entry = {"status": status, "by": by, "date": str(when or date.today().isoformat())}
+    entry = {"status": status, "by": by}
+    if github:
+        entry["github"] = github.lstrip("@")  # the GitHub account that made the mark
+    entry["date"] = str(when or date.today().isoformat())
     if evidence:
         entry["evidence"] = evidence
     if note:

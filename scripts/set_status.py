@@ -1,7 +1,7 @@
 """Mark cells as checked, from the command line.
 
 Examples:
-  python scripts/set_status.py SHR human-verified --by "Jake White"
+  python scripts/set_status.py SHR human-verified --by "Jake White" --github Open-Validation
       marks every non-empty cell in every SHR file (including _lpa.yaml)
   python scripts/set_status.py SHR human-verified --by "Jake White" --files site-plan,_lpa --cells required-if,source-text
   python scripts/set_status.py SHR council-verified --by "Jake White" --evidence https://github.com/.../issues/12
@@ -38,7 +38,7 @@ def recompute_all():
     print(f"Recomputed review-status and coverage for {len(lpa_folders())} councils and updated data/lpa.csv.")
 
 
-def mark(code, status, by, files, cells, evidence, note="", against=None):
+def mark(code, status, by, files, cells, evidence, note="", against=None, github=""):
     folder = SPEC / code
     if not (folder / "_lpa.yaml").exists():
         sys.exit(f"There is no council folder called {code}.")
@@ -65,7 +65,7 @@ def mark(code, status, by, files, cells, evidence, note="", against=None):
         done = []
         for cell in targets:
             if review.mark_cell(data, path.stem, cell, status, by, evidence=evidence, note=note,
-                                checked_against=against):
+                                checked_against=against, github=github):
                 done.append(cell)
         if done:
             write_yaml(path, data)
@@ -81,6 +81,7 @@ def main():
     p.add_argument("code", nargs="?", help="council code, e.g. SHR")
     p.add_argument("status", nargs="?", help="the status to give the cells")
     p.add_argument("--by", help="who checked them (your name)")
+    p.add_argument("--github", default="", help="your GitHub username (recorded with the mark)")
     p.add_argument("--files", help="comma-separated file names without .yaml (use _lpa for _lpa.yaml)")
     p.add_argument("--cells", help="comma-separated cell names (default: every non-empty cell)")
     p.add_argument("--evidence", default="", help="link or note; needed for the council statuses")
@@ -102,7 +103,7 @@ def main():
         against = {"url": a.checked_against}
         if a.list_date:
             against["date"] = a.list_date
-    mark(a.code, a.status, a.by, split(a.files), split(a.cells), a.evidence, a.note, against)
+    mark(a.code, a.status, a.by, split(a.files), split(a.cells), a.evidence, a.note, against, a.github)
 
 
 if __name__ == "__main__":

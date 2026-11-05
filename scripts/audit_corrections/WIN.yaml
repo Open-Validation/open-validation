@@ -1,0 +1,269 @@
+# Corrections for Winchester City Council, from inputs/audit/winchester-city-council.json.
+# Grokbot's PDF is the current 'Quick Checklist' (approved 6 March 2023), the companion to the
+# detailed 'Local Validation List in detail by Document Type' (DOCX), which the audit could not
+# read. The only workbook row is table debris. The audit read the quick checklist, but its columns
+# are flattened, so which application types each item applies to is not certain: no types are
+# given below unless the audit names them. Conditions in quotes are the checklist's own words.
+local-authority: WIN
+
+drop-unmapped:
+  - local-name: Gypsy & Traveller information
+    reason: >-
+      not_a_requirement / wrong_app_type: a fragment of the Major development threshold table
+      ('Gypsy/traveller site - 10+ pitches') run together with column headers and the
+      Application Forms / Ownership certificate / Fees cell
+
+requirements:
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees are affected by the proposal.
+    source-text: Where trees affected
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Tree Survey/Report where trees are affected, listed for
+      Householder applications in the quick checklist. The checklist's columns are flattened, so the
+      application types it covers need checking.
+
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      site:
+        in: [flood-risk-zone]
+        description: The site is in a relevant flood zone.
+    source-text: If in relevant flood zone
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Flood Risk Assessment if in a relevant flood zone."
+
+  - id: archaeological-assessment
+    action: add
+    required-if:
+      site:
+        in: [archaeological-priority-area]
+        description: The site is in an area of recognised archaeology.
+    source-text: Where in area of recognised archaeology
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Archaeological Assessment where in an area of recognised archaeology."
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, conservation-area, locally-listed-building]
+        description: A heritage asset is affected by the proposal.
+    source-text: Where Heritage Asset affected
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Heritage Statement where a heritage asset is affected.
+      The list of designations is our reading of 'heritage asset'.
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if: discretionary
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Ecology report / Biodiversity checklist, 'subject to
+      checklist' - whether a report is needed depends on the answers to Winchester's Biodiversity
+      Checklist (see unmapped).
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: The proposal is a sensitive noise receptor.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The proposal is a noise generator.
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Noise/Vibration Assessment where a sensitive noise receptor or generator."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: The site has known contamination.
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Land Contamination Report where there is known contamination."
+
+  - id: cil-form
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates new residential units.
+        - condition:
+            field: residential-extension
+            value: true
+            description: The proposal is an extension.
+    source-text: For new residential or extensions
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): CIL Additional Information Form for new residential or extensions."
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 1
+        description: The proposal is residential (creates new dwellings).
+    source-text: For new residential
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): Affordable Housing Statement for residential Full/Outline
+      applications. The audit gives no dwelling threshold; check the detailed list.
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      condition:
+        field: out-of-centre-retail
+        value: true
+        description: Retail development more than 500m outside Winchester town centre.
+    source-text: For retail where >500m outside Winch
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Retail Impact Assessment for retail more than 500m outside Winchester town centre."
+
+  - id: air-quality-assessment
+    action: add
+    required-if: discretionary
+    source-text: Within 1km of Winch
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): Air Quality Assessment within 1km of Winchester. The
+      checklist text is cut off ('Within 1km of Winch'), so the exact area (town or AQMA) is unclear
+      and the trigger is shown as discretionary.
+
+  - id: sci
+    action: add
+    required-if:
+      all:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal is residential.
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Statement of Community Involvement for major residential applications."
+
+  - id: viability-assessment
+    action: add
+    required-if:
+      all:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal is residential.
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): 'Statement of Community Involvement and Viability (major
+      residential)'. Whether viability is needed for every major residential scheme or only where
+      policy is not met needs checking in the detailed list.
+
+  - id: landscaping-plan
+    action: add
+    required-if: discretionary
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): LVIA and Landscape Plan where there is a sensitive landscape impact."
+
+  - id: sustainability-statement
+    action: add
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Sustainability / Climate Change Statement is listed, but the audit gives no trigger."
+
+  - id: waste-management-plan
+    action: add
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Waste Management Strategy is listed, but the audit gives no trigger."
+
+  - id: bng-metric
+    action: add
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): Biodiversity Net Gain information is listed, but the audit gives no trigger."
+
+unmapped:
+  - local-name: Biodiversity Checklist (Householder / Other applications)
+    source-text: "From the audit: completing and submitting Winchester's Biodiversity Checklist (Biochk-Householder / Biochk-Full) is mandatory for relevant applications"
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    suggested-id: biodiversity-checklist
+  - local-name: Parking and access information
+    source-text: "From the audit: transport information where parking or access is affected (Householder)"
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    suggested-id: parking-plan
+  - local-name: Local Employment and Skills Plan
+    source-text: "If Major"
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    suggested-id: employment-statement
+  - local-name: Nutrient Neutrality calculations
+    source-text: "From the audit: new residential or overnight accommodation (Habitats Regulations 2017 regs 75-79)"
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    suggested-id: nutrient-neutrality-assessment
+  - local-name: Solent Recreation Mitigation
+    source-text: "For new residential"
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    suggested-id: recreation-mitigation
+  - local-name: Structural Survey and Conversion Method Statement
+    source-text: "From the audit: residential conversions"
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    suggested-id: structural-survey
+  - local-name: Marketing Strategy
+    source-text: "Where loss of employment or service"
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    suggested-id: marketing-evidence
+  - local-name: Masterplan
+    source-text: "From the audit: if part of a large site"
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    suggested-id: masterplan
+  - local-name: Agricultural Appraisal
+    source-text: "From the audit: listed in the quick checklist; no trigger given"
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    suggested-id: agricultural-appraisal
+  - local-name: Landscape and Visual Impact Assessment (LVIA)
+    source-text: "From the audit: where there is a sensitive landscape impact"
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Drainage Strategy / Foul Drainage form
+    source-text: "From the audit: listed in the quick checklist; no trigger given"
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    suggested-id: drainage-strategy
+  - local-name: Planning Obligation Heads of Terms
+    source-text: "From the audit: listed in the quick checklist; no trigger given"
+    source-url: https://www.winchester.gov.uk/assets/attach/34580/Local-Validation-List-requirements-by-application-type.pdf
+    suggested-id: heads-of-terms
+
+new-fields:
+  - field: out-of-centre-retail
+    kind: boolean
+    label: Out-of-centre retail
+    description: The proposal includes retail or other main town centre uses outside a defined town centre (councils may set a distance).

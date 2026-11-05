@@ -121,6 +121,7 @@ field-status:
   required-if:
     status: human-verified
     by: Jake White
+    github: Open-Validation         # the GitHub account that made the mark
     date: 2026-11-06
     checked-against:                # the council list it was compared with
       url: https://next.shropshire.gov.uk/media/xsnj0cye/validation-checklist-2022.pdf
@@ -147,6 +148,9 @@ field-status:
   status and doesn't count.
 - `council-verified` and `council-updated` need `evidence`: a link to the issue or PR, or a
   short note of the email.
+- Every mark records `by` (a name) and `date`, and `github` (the GitHub account) when it was
+  made through review mode or with `--github`. For review mode, the account is taken from the
+  pull request itself, not from what the submitted file says.
 - `human-verified` and `incorrect` record `checked-against`: the link (and date) of the council
   list the cell was compared with. Scripts fill it in from the council's current list in
   `_lpa.yaml` unless you give another one. If the council later publishes a new list, you can
