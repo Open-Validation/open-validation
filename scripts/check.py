@@ -162,6 +162,8 @@ def check_marks(data, where, filename):
         if review.is_empty(value) or mark.get("hash") != review.cell_hash(value):
             problem(f"{where}: '{cell}' changed after it was marked (hash doesn't match). "
                     f"Run: python scripts/set_status.py --recompute")
+    if filename == "_lpa":
+        return  # a council's review-status is the roll-up of its whole folder, checked in main()
     expected = review.file_status(data, filename)
     if data.get("review-status") != expected:
         problem(f"{where}: review-status is '{data.get('review-status')}' but its cells say '{expected}'. "
