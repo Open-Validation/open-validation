@@ -95,6 +95,14 @@ emails the repo owner.
   Without a GitHub token, Submit opens an issue instead; save its YAML into `reviews/pending/` and
   run `python scripts/apply_reviews.py`.
 
+### Publishing the explorer (GitHub Pages)
+
+Use a computer's web browser (the GitHub phone app has no repository settings): open
+https://github.com/Open-Validation/open-validation/settings/pages and, under **Build and deployment**,
+set the **Source** drop-down to **GitHub Actions**. The `pages` workflow then publishes the site each time
+`main` changes. If you prefer **Deploy from a branch**, choose `main` and `/ (root)`; the empty
+`.nojekyll` file stops GitHub skipping files whose names start with `_` (such as `_lpa.yaml`).
+
 ### Merge rules for review mode
 
 Marks submitted from the explorer arrive as a pull request. The `apply-reviews` workflow applies
