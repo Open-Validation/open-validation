@@ -31,10 +31,15 @@ Working branch: `ccr-f743743a-pji9c0` (the session's designated branch, used ins
   - Open questions for the user (defaults kept): GLA row is really OPDC; some local
     design-and-access-statement rules repeat the national major-development branch;
     Central Lincolnshire: one audit says 2026 lists adopted 24 Aug 2026, two say 2024 still in force.
-- [ ] **C. Map data** (blocked: ONS boundary download needs the user; see README)
-   (`build_map.py`, `docs/map/uk-lpa.geojson`)
-- [ ] **D. Explorer tool** (`docs/index.html`; done so far: `evaluate.test.html` 26/26, `STYLE.md`, issue forms)
-  - [ ] Checkpoint 4: screenshots
+- [x] **C. Map data**: ONS LPA January 2026 BUC (V2) GeoPackage in `inputs/boundaries/`;
+  `build_map.py` (+ `bng.py` for British National Grid) -> `docs/map/uk-lpa.geojson` (0.94 MB, 382 areas).
+  8 councils matched by name because their ONS codes changed after new development corporations
+  (update the register when planning.data.gov.uk is reachable). No shape: 21 county councils + GLA.
+- [ ] **D. Explorer tool** (`docs/index.html`): map, councils, results, table, browse, review mode,
+  feedback issues, copy checklist, URL hash state, SRI + CSP; `evaluate.test.html` 26/26;
+  phone width checked (no sideways scroll). Auto-merge rules in `apply-reviews.yml`.
+  - [ ] Checkpoint 4: screenshots shown (example marks made on a throwaway branch, then deleted)
+  - Not built yet: council officer registration flow (officers use the "I work for this council" form for now)
 - [ ] **E. Finish** (final check summary here, PR ready for review)
 
 ## Decisions that change BUILD_PROMPT.md
