@@ -1,0 +1,617 @@
+# Corrections for Kirklees Council, from the audit of Kirklees.
+# The workbook link is the current Kirklees Planning Validation Requirements, effective 24 May 2024
+# (page headers still say 'with effect from 6th February 2023'). Merged PDF table columns put many
+# items under the wrong application types (Coal Mining and Drainage under Householder, Fire Statement
+# under LBC and prior approval, S106 under the 'other application types' list, Ventilation under
+# tree works, Lighting under minerals). Table 4 applies to all applications, outline included.
+# Items marked "From the audit" use the audit's paraphrase, not the council's exact words.
+local-authority: KIR
+
+drop:
+  - id: fire-statement
+    sheets: [Listed building consent, Change of use - prior approval]
+    reason: "wrong_app_type: a merged column of exclusions read as inclusions"
+  - id: photos
+    reason: "not_a_requirement: a note about materials samples"
+
+drop-unmapped:
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_app_type: the source excludes householders; re-added below with Community Facilities"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_app_type: the source excludes householders; re-added below"
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "wrong_trigger: merges two items; both re-added below"
+  - local-name: Crime prevention / Secured by Design statement
+    reason: "wrong_trigger: garbled; re-added below with the audit's trigger"
+  - local-name: Design Code / Masterplan / Parameter plans
+    reason: "not_a_requirement: affordable housing text (now affordable-housing-statement)"
+  - local-name: Ground investigation / Geotechnical / Basement Impact Assessment
+    reason: "not_a_requirement: a bullet within the Drainage Strategy content"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: truncated; re-added below"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "not_a_requirement: a list of guidance documents"
+  - local-name: Minerals / Waste specific statements (county matters)
+    reason: "not_a_requirement: Climate Change Statement content (now sustainability-statement)"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: the introduction's list of aims"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_app_type: a merged column of exclusions read as inclusions"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_app_type: the excerpt is only Table 5's list of other application types"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_app_type: placed under works to trees; re-added below with its own trigger"
+
+requirements:
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [site-of-special-scientific-interest, local-wildlife-site, priority-habitat]
+            description: There may be impacts on designated sites, priority habitat, or sites within or
+              adjacent to Local Wildlife Sites and/or the Wildlife Habitat Network.
+        - condition:
+            field: protected-species
+            value: true
+            description: There may be impacts on protected species.
+    source-text: >-
+      there may be impacts on designated sites, priority habitat, protected species or sites within
+      or adjacent to Local Wildlife Sites and/or the Wildlife Habitat Network.
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    must-include:
+      - item: Surveys and reports in accordance with BS 42020:2013
+        level: must
+    confidence: medium
+    notes: "Applies to Householder too: the householder checklist refers to the 'Planning Constraints
+      Biodiversity' layer on Kompass. The trigger wording was in a tab item."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      site:
+        in: [flood-risk-zone]
+        description: The development is in flood zone 2 or 3 (including minor development and change of
+          use).
+    confidence: medium
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [conservation-area, listed-building, park-and-garden, scheduled-monument,
+              locally-listed-building]
+            description: The proposal affects a conservation area, listed building, registered park,
+              scheduled monument or non-designated heritage asset.
+    source-text: Applications affecting a scheduled monument
+    source-url: https://www.kirklees.gov.uk/beta/planning-applications/pdf/householder-applications-checklist.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): the workbook's trigger was truncated; the requirement
+      covers conservation areas, listed buildings, registered parks and non-designated assets, and LBC."
+
+  - id: roof-plan-existing
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal involves the construction of new buildings.
+        - condition:
+            field: residential-extension
+            value: true
+            description: A householder extension to an existing dwelling.
+    source-text: Roof Plans ALL applications involving the construction of new buildings and ALL
+      householder applications for extensions to existing dwellings.
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    confidence: medium
+
+  - id: roof-plan-proposed
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal involves the construction of new buildings.
+        - condition:
+            field: residential-extension
+            value: true
+            description: A householder extension to an existing dwelling.
+    source-text: Roof Plans ALL applications involving the construction of new buildings and ALL
+      householder applications for extensions to existing dwellings.
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    confidence: medium
+
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: Development within or adjacent to an Air Quality Management Area.
+        - condition:
+            field: biomass-or-chp
+            value: true
+            description: The proposal includes a biomass boiler.
+        - discretionary
+    source-text: Air Quality Impact Assessment (AQIA) (including Monetary Damage Cost Assessments)
+      Development that is within or adjacent to an Air Quality Management Area (AQMA)
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt ran into agricultural building text. Other triggers (sites
+      within 20m of roads with 10,000+ AADT, car parks of 100+/50+ spaces, 200+ HGV movements a
+      day) are shown as officer discretion because the audit doesn't say how they split.
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the general biodiversity gain condition.
+    confidence: medium
+
+  - id: daylight-sunlight-assessment
+    action: replace
+    required-if: discretionary
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): residential schemes likely to receive low daylight or cause significant
+      overshadowing. The workbook quoted only a guidance title."
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 10
+            description: More than 10 dwellings.
+        - discretionary
+    source-text: >-
+      developments where a masterplanned approach is applicable to multiple sites) KLP Policy LP11
+      Information setting out the proposed quantity of affordable housing provision.
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    policy: KLP LP11
+    must-include:
+      - item: The proposed quantity of affordable housing provision
+        level: must
+    confidence: medium
+    notes: "Audit (missing_requirement, not_a_requirement): more than 10 dwellings, or smaller masterplanned
+      sites (officer discretion). The wording was in the workbook's 'Design Code' row."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The application requires an EIA under the 2017 Regulations.
+    confidence: medium
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      always: true
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    must-include:
+      - item: Renewable energy
+        level: should
+      - item: Waste minimisation
+        level: should
+      - item: Water management, including climate adaptation and resilience
+        level: should
+      - item: Sustainable sourcing of materials
+        level: should
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Climate Change Statement for all applications,
+      including householder, proportionate to scale. The contents are from the workbook's
+      'Minerals / Waste' row ("renewable energy, waste minimisation, water management (including
+      climate adaptation and resilience) and sustainable sourcing of materials").
+
+  - id: recreation-facilities-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [open-space]
+            description: Development of open space or playing fields.
+        - condition:
+            field: loss-of-open-space
+            value: true
+            description: Loss of Urban Green Space.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 11
+            description: 11 or more dwellings.
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted noise text."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Retail, leisure or office development not located within a defined centre.
+        - any:
+            - condition:
+                field: town-centre-use-floorspace
+                operator: ">"
+                value: 500
+                description: Floorspace greater than 500 square metres gross.
+            - all:
+                - condition:
+                    field: town-centre-use-floorspace
+                    operator: ">"
+                    value: 200
+                    description: Floorspace greater than 200 square metres gross.
+                - discretionary
+    policy: KLP LP13
+    confidence: medium
+    notes: >-
+      Also over 300m2 within 800 metres of a Town or District Centre, and (from the audit) over
+      200m2 within 800 metres of a Local Centre. Distance to a centre has no field, so these are
+      shown as officer discretion.
+
+  - id: sci
+    action: replace
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): major applications where pre-application community consultation took
+      place. The workbook quoted the wind turbines item."
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    confidence: medium
+    notes: "A Transport Statement for any major development with less than significant transport
+      implications; a Transport Assessment where they are significant."
+
+  - id: travel-plan
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 50
+            description: 50 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 0.5
+            description: A residential site of more than 0.5 hectares.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 1000
+            description: More than 1,000 square metres of non-residential floorspace.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: A non-residential site of more than 1 hectare.
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt stopped at 'Required for the following: i.'"
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: demolition
+            value: true
+            description: Demolition (non-householder).
+        - condition:
+            field: earthworks
+            value: true
+            description: Excavation (non-householder).
+        - discretionary
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a Site Waste Management Plan for non-householder
+      demolition or excavation, major residential and commercial schemes, flats, bars and takeaways
+      (officer discretion). The rule can't express 'non-householder'. The workbook's row quoted
+      elevation drawing guidance.
+
+  - id: elevation-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal includes new buildings.
+        - condition:
+            field: external-alterations
+            value: true
+            description: The proposal alters the exterior of an existing building.
+    confidence: medium
+
+  - id: elevation-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal includes new buildings.
+        - condition:
+            field: external-alterations
+            value: true
+            description: The proposal alters the exterior of an existing building.
+    must-include:
+      - item: All existing and proposed elevations, including blank elevations (unless completely
+          obscured)
+        level: must
+      - item: Matching the relevant existing and proposed floor plans
+        level: must
+      - item: Each elevation labelled (e.g. north, west) or a north point indicated
+        level: must
+    confidence: medium
+
+  - id: floor-plan-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal includes new buildings.
+        - condition:
+            field: footprint-increase
+            value: true
+            description: The proposal includes an extension.
+        - condition:
+            field: upper-floor-extension
+            value: true
+            description: The proposal includes an extension above ground floor.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: The proposal includes a change of use.
+    confidence: medium
+
+  - id: floor-plan-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal includes new buildings.
+        - condition:
+            field: footprint-increase
+            value: true
+            description: The proposal includes an extension.
+        - condition:
+            field: upper-floor-extension
+            value: true
+            description: The proposal includes an extension above ground floor.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: The proposal includes a change of use.
+    confidence: medium
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [tree-preservation-zone]
+            description: Trees protected by a Tree Preservation Order within or adjacent to the site.
+        - all:
+            - site:
+                in: [conservation-area]
+                description: Trees with Conservation Area status.
+            - condition:
+                field: trees-on-or-near-site
+                value: true
+                description: Trees within the site or on adjacent land that could influence or be
+                  affected by the development.
+    source-text: >-
+      Where there are trees, protected by either Tree Preservation Order or Conservation Area
+      status, within the application site, or on land adjacent to it that could influence or be
+      affected by the development.
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): this is for development proposals, not works to trees applications."
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: external-lighting
+            value: true
+            description: Exterior lighting likely to affect amenity, dark landscapes or nature,
+              including car parks.
+        - condition:
+            field: floodlighting
+            value: true
+            description: Lighting of sports pitches.
+        - condition:
+            field: illuminated
+            value: true
+            description: Illuminated advertisements.
+        - all:
+            - ref: major-development
+            - condition:
+                field: new-build
+                value: true
+                description: Major new buildings.
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): Kirklees is a unitary authority; the workbook put this under minerals
+      and waste because of merged columns."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: A sensitive end use.
+        - site:
+            in: [contaminated-land]
+            description: The site has a past industrial use.
+        - site:
+            in: [near-landfill-site]
+            description: Landfill within 250m.
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Phase 1 for sensitive end uses, past industrial use, or
+      landfill within 250m."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    must-include:
+      - item: A summary, where the submitted documents exceed 100 pages
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): Planning Statement and Summary for all majors."
+
+  - id: water-impact-assessment
+    action: add
+    required-if: discretionary
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Water Quality / Water Framework Directive Assessment
+      for works that modify or affect a water body, and a Water Bodies Assessment for water bodies of
+      500-25,000m3, mill ponds and private water supplies. No field covers these.
+
+unmapped:
+  - local-name: Coal Mining Risk Assessment
+    source-text: "All non-householder applications within the 'Development High Risk Areas' as defined by
+      the Coal Authority, unless on the 'exemption list'"
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    suggested-id: coal-mining-risk-assessment
+  - local-name: "Community Facilities and Services: Evidence / Statement to justify loss"
+    source-text: "All applications where the proposal involves the loss of land or premises presently or
+      last in community use."
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    suggested-id: community-facilities-statement
+  - local-name: Drainage details
+    source-text: "not requiring a Drainage Strategy (such as applications for less than 5 dwellings),
+      details of the proposed drainage solution are still required (excluding householder
+      applications)."
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    suggested-id: drainage-strategy
+  - local-name: Drainage Strategy (Surface Water)
+    source-text: "From the audit: all majors, 5+ dwellings, commercial schemes of 500m2 or more, and
+      non-householder applications in flood zone 2/3, a 1-in-100 surface water flood area, or with a
+      watercourse or culvert"
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    suggested-id: drainage-strategy
+  - local-name: Agricultural / Forestry Building Justification Statement
+    source-text: "All applications for new agricultural or forestry buildings in the Green Belt."
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    suggested-id: agricultural-statement
+  - local-name: Rural workers' dwelling statement
+    source-text: "From the audit: a separate item from the agricultural/forestry building justification
+      (trigger not captured)"
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    suggested-id: rural-worker-statement
+  - local-name: Crime Prevention Statement
+    source-text: "From the audit: all majors, external cash machines, hotels, schools, health and community
+      buildings over 150m2, late-night uses, car parks over 50 spaces and critical infrastructure"
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    suggested-id: crime-prevention-statement
+  - local-name: Health Impact Assessment (Rapid HIA)
+    source-text: "From the audit: any major application of 50 dwellings and above, or majors over 1,000m2 in
+      wards with poor health indicators or among the five most deprived wards (KLP Policy LP47)"
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Ventilation and/or Extraction Details
+    source-text: "From the audit: Use Class E(b) food uses, pubs, drinking establishments and other uses
+      needing extraction"
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    suggested-id: ventilation-extraction-details
+  - local-name: Landfill Statement
+    source-text: "From the audit: listed in Table 4 (trigger not given)"
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    suggested-id: landfill-statement
+  - local-name: Main Town Centre Uses Sequential Test
+    source-text: "From the audit: town centre uses outside defined centres (offices excluded)"
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    suggested-id: sequential-test
+  - local-name: Priority Employment Areas Statement
+    source-text: "From the audit: change of use of employment sites in Priority Employment Areas"
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    suggested-id: employment-statement
+  - local-name: Schedule of Residential Accommodation
+    source-text: "From the audit: all new residential, including conversions"
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    suggested-id: accommodation-schedule
+  - local-name: Wind Microclimate Assessment
+    source-text: "From the audit: where the scale of development could affect wind conditions outside the
+      building"
+    source-url:
+      https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
+    suggested-id: wind-microclimate-assessment
+
+low-confidence:
+  - id: noise-assessment
+    note: "Audit (wrong_trigger): the excerpt ('should be carried out by a suitably competent person') is
+      not a trigger."
+  - id: viability-assessment
+    note: "The workbook's excerpt is a fragment ('required for a Viability Assessment.'); no trigger
+      captured."
+  - id: site-plan
+    note: "The workbook's excerpt is the location plan text, not the block plan entry."

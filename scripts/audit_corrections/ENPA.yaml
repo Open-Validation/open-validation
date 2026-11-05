@@ -1,0 +1,223 @@
+# Corrections for Exmoor National Park Authority, from the authority's audit.
+# The audit could not fetch the list (contents_checked: false); the file name 'Local-List-October-26'
+# suggests the October 2026 Requirements for the Submission of Planning and Other Applications is
+# the newest, but that is unconfirmed. These corrections rest on Grokbot's excerpts and the errors
+# the audit found in them: householder work is covered by several local items, and many excerpts are
+# 'Background' paragraphs rather than the 'Requirements' text. Where an excerpt states clearly when
+# the document is needed, the trigger is structured.
+local-authority: ENPA
+
+validation-list:
+  date: 2026-10
+  date-basis: "file name 'Local-List-October-26'; the audit could not open the document to confirm it, and
+    the earlier 2026-10-01 was PDF metadata"
+
+submission-standards:
+  - item: Key written dimensions and/or a scale bar on the plans
+    level: must
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "wrong_document: the excerpt is the Landscape Appraisal requirement; re-added below"
+  - local-name: Structural Survey
+    reason: "wrong_document: a sub-bullet of the listed building Heritage Statement content (kept in
+      schedule-of-works)"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "not_a_requirement: M4(2) is 'encouraged', not a validation requirement"
+  - local-name: Drainage Strategy / SuDS
+    reason: "duplicate: the same sewage-capacity background text as the Foul Sewage row"
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "wrong_trigger: runs into the next section's background; re-added below trimmed"
+
+requirements:
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [conservation-area]
+                description: Development within a Conservation Area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: The provision of one or more dwellinghouses.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: A building or buildings where the floorspace created is 100sqm or more.
+    source-text: >-
+      A Design and Access Statement must be submitted for the following types of planning application:
+      1) Development categorised as "major"; (usually 10 or more houses or where the floorspace exceeds
+      1,000sqm) etc1. 2) Development within a Conservation Area where the applications is for i) ii)
+      the provision of one or more dwellinghouse, or the provision of a building or buildings where the
+      floorspace created is 100sqm or more.
+    notes: "From the audit (missing_requirement): the statutory triggers also cover listed building consent
+      and outline; the list's text for that wasn't captured."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: New development in Flood Zones 2 and 3.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: Development of 1 hectare or greater in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Development of 1 hectare or greater in Flood Zone 1.
+
+  - id: floor-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: building-works
+        value: true
+        description: New development, or existing buildings altered by the proposed development.
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: must
+
+  - id: floor-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: building-works
+        value: true
+        description: New development, or existing buildings altered by the proposed development.
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: must
+      - item: The previous plans and the proposed plans, with the proposed changes annotated
+        level: must
+        required-if:
+          application-type:
+            in: [s73, non-material-amendment]
+        source-text: The previous plans and the proposed plans will need to be submitted with the
+          proposed changes annotated.
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: The previous plans and the proposed plans, with the proposed changes annotated
+        level: must
+        required-if:
+          application-type:
+            in: [s73, non-material-amendment]
+        source-text: The previous plans and the proposed plans will need to be submitted with the
+          proposed changes annotated.
+    notes: "Audit (wrong_app_type): the annotated-changes rule applies to amendment-type applications."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area]
+            description: Development affecting a heritage asset or its setting, including the character
+              or appearance of a listed building, its setting, or a conservation area.
+    notes: "Audit (wrong_app_type): applies to any development affecting a heritage asset or its setting,
+      including householder, full and demolition in a conservation area, not just outline and LBC."
+
+  - id: planning-statement
+    action: update
+    required-if:
+      always: true
+    source-text: A planning statement is required with the initial submission of an application.
+    notes: "Applies to householder applications too (audit, wrong_app_type)."
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 1
+        description: Development proposing residential use.
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: must
+      - item: Materials, flues and other details clearly identified
+        level: must
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 1
+        description: Development proposing residential use.
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: must
+      - item: Materials, flues and other details clearly identified
+        level: must
+
+  - id: schedule-of-works
+    action: update
+    required-if:
+      application-type:
+        in: [lbc]
+    notes: "Part of the listed building Heritage Statement content, which may also need a structural survey."
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: A sloping site, or ground levels outside the extension would be modified.
+    notes: "Applies to householder extensions too (audit, wrong_app_type)."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: A sloping site, or ground levels outside the extension would be modified.
+    notes: "Applies to householder extensions too (audit, wrong_app_type)."
+
+unmapped:
+  - local-name: Landscape Appraisal
+    source-text: >-
+      as a minimum, a landscape appraisal must set out in a clear and rational manner, any effects of
+      the proposal on the landscape and views, and proposed mitigation.
+    source-url:
+      https://www.exmoor-nationalpark.gov.uk/__data/assets/pdf_file/0025/195631/Local-List-October-26.pdf
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Agricultural / rural workers' appraisal
+    source-text: >-
+      the agricultural justification or functional requirement for the new building, track or other
+      development proposal.
+    source-url:
+      https://www.exmoor-nationalpark.gov.uk/__data/assets/pdf_file/0025/195631/Local-List-October-26.pdf
+    suggested-id: agricultural-appraisal
+
+low-confidence:
+  - id: arboriculturist-report
+    note: "Audit (wrong_trigger): the excerpt is a 'Background' paragraph; the list's requirement text wasn't
+      captured. It applies to householder work too."
+  - id: biodiversity-survey-report
+    note: "Audit (wrong_trigger): the excerpt is a BNG fragment; the Ecological Impact Assessment trigger
+      wasn't captured. It applies to householder work too."
+  - id: lighting-assessment
+    note: "Audit (wrong_trigger): the excerpt quotes policy CE-S2, not the submission trigger."
+  - id: photos
+    note: "Audit (wrong_trigger): the excerpt runs into '8.11 Planning Statement'; the trigger wasn't
+      captured. It applies to householder work too."
+  - id: bng-metric
+    note: "The excerpt is policy guidance, not a trigger."
