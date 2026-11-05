@@ -9,8 +9,9 @@ Working branch: `ccr-f743743a-pji9c0` (the session's designated branch, used ins
 
 - [x] **A. Skeleton, reference data, council folders and checks**
   - MHCLG spec read at commit `a3519413aa2a550471ae08af986e80b861c7c2d5` (clone into `vendor/mhclg-spec`)
-  - Council codes from MHCLG's organisation register (GitHub copy in `inputs/organisation/`,
-    because files.planning.data.gov.uk is blocked from the build machine)
+  - Council codes from MHCLG's organisation register, saved in `data/organisation.csv` by
+    `scripts/update_register.py` (tries planning.data.gov.uk, falls back to MHCLG's GitHub;
+    planning.data.gov.uk is blocked from the build machine). Monthly check: `.github/workflows/register.yml`
   - 328 English councils matched (`scripts/lpa_match.csv`: 326 exact, 2 by normalised name)
   - 328 folders with `_lpa.yaml`, `data/lpa.csv`, `FORMAT.md`, `review.py`, `set_status.py`,
     `apply_reviews.py`, `check.py`, workflows, README

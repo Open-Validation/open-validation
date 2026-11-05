@@ -13,6 +13,6 @@ Some inputs carry their own terms:
   `data/national-planning-requirement.csv` and the national files in
   `specification/planning-requirement/*.yaml` come from MHCLG's planning application data
   specification (Open Government Licence v3.0).
-- `inputs/organisation/` comes from MHCLG's organisation register (Open Government Licence v3.0).
+- `data/organisation.csv` comes from MHCLG's organisation register (Open Government Licence v3.0).
 - Boundary data in `docs/map/` and `inputs/boundaries/` contains OS data © Crown copyright and
   database right (Open Government Licence v3.0).

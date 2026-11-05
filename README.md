@@ -46,9 +46,10 @@ The rules for writing the files are in **[FORMAT.md](FORMAT.md)**.
 | `data/local-planning-requirement.csv` | Flat index: council × requirement × application type |
 | `data/unmapped-requirement.csv` | Local items with no MHCLG id yet |
 | `data/new-field.csv` | Fields and values we introduced |
+| `data/organisation.csv` | Our copy of MHCLG's register of planning authorities (codes, names, ONS codes) |
 | `data/planning-requirement.csv` etc. | Copied unchanged from MHCLG |
 | `scripts/` | Short Python scripts (see below) |
-| `inputs/` | Grokbot's workbook, Claude's audit files, MHCLG's organisation register, boundaries. Never edited. |
+| `inputs/` | Grokbot's workbook, Claude's audit files, boundary files. Never edited. |
 | `reviews/pending/`, `reviews/applied/` | Cell marks waiting to be applied, and those already applied |
 | `docs/` | The explorer tool (`docs/index.html`) and the map |
 
@@ -116,6 +117,7 @@ Install once: `pip install -r requirements.txt`. Then, from the repo root:
 | `python scripts/check.py` | Checks everything and prints a summary (also runs on every push) |
 | `python scripts/set_status.py ...` | Marks cells; `--recompute` refreshes every status |
 | `python scripts/apply_reviews.py` | Applies marks waiting in `reviews/pending/` |
+| `python scripts/update_register.py` | Checks MHCLG's register of planning authorities for new, abolished or renamed councils and updates `data/organisation.csv` (runs monthly as a check) |
 | `python scripts/build_lpas.py` | Matches workbook councils to MHCLG codes; creates folders, `_lpa.yaml`, `lpa.csv` |
 | `python scripts/build_from_workbook.py` | Builds requirement files from the workbook + audit |
 | `python scripts/build_map.py` | Builds `docs/map/uk-lpa.geojson` from the boundary files |
@@ -131,7 +133,10 @@ To read MHCLG's spec locally: `git clone https://github.com/digital-land/plannin
   auto-extracted from council validation lists.
 - **Claude's audit** (`inputs/audit/*.json`, 328 files): each English council's entry checked against
   its live website on 4-5 November 2026, then reviewed by a second AI (Grok).
-- **Council codes**: MHCLG's organisation register (`inputs/organisation/SOURCE.md`).
+- **Council codes**: MHCLG's organisation register, saved in `data/organisation.csv` by
+  `scripts/update_register.py` (from planning.data.gov.uk, or MHCLG's
+  [organisation-collection](https://github.com/digital-land/organisation-collection) repo if that's
+  unreachable). A GitHub Action checks it monthly and fails if a change affects our councils.
 
 ## Out of scope for now
 

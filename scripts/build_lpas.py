@@ -5,8 +5,9 @@ Run:  python scripts/build_lpas.py            (match names, then build folders)
 
 What it does, step by step:
   1. Reads the workbook sheet 'Councils reference' (England rows only).
-  2. Matches each council name to MHCLG's organisation register
-     (inputs/organisation/*.csv) and writes scripts/lpa_match.csv.
+  2. Matches each council name to our copy of MHCLG's register of planning
+     authorities (data/organisation.csv; check it's up to date first with
+     python scripts/update_register.py) and writes scripts/lpa_match.csv.
      Rows you edit by hand and mark match-method 'manual' are kept as they are.
      Anything it can't match confidently is printed and the script stops.
   3. Creates specification/planning-requirement/<CODE>/_lpa.yaml for every council
@@ -23,7 +24,7 @@ from datetime import date
 
 import openpyxl
 
-from common import DATA, INPUTS, SCRIPTS, SPEC, WORKBOOK, link_url, load_yaml, read_csv, \
+from common import DATA, SCRIPTS, SPEC, WORKBOOK, link_url, load_yaml, read_csv, \
     sheet_rows, write_csv, write_yaml
 
 MATCH_FILE = SCRIPTS / "lpa_match.csv"
@@ -44,47 +45,15 @@ def normalise(name):
     return re.sub(r"\s+", " ", n).strip()
 
 
-# MHCLG's codes for national parks and development corporations are Wikidata
-# ids (e.g. Q72617988), which aren't readable as folder names. We use the
-# authorities' own short names instead. The Wikidata id is kept in the
-# 'organisation' column of scripts/lpa_match.csv, so the data can still be
-# matched back to MHCLG's register.
-SHORT_CODES = {
-    "Q4972284": "BROADS",    # Broads Authority
-    "Q5225646": "DNPA",      # Dartmoor National Park Authority
-    "Q72617784": "ENPA",     # Exmoor National Park Authority
-    "Q27159704": "LDNPA",    # Lake District National Park Authority
-    "Q72617158": "NFNPA",    # New Forest National Park Authority
-    "Q72617669": "NYMNPA",   # North York Moors National Park Authority
-    "Q72617890": "NNPA",     # Northumberland National Park Authority
-    "Q72617988": "PDNPA",    # Peak District National Park Authority
-    "Q20198711": "SDNPA",    # South Downs National Park Authority
-    "Q27178932": "YDNPA",    # Yorkshire Dales National Park Authority
-    "Q20648596": "OPDC",     # Old Oak and Park Royal Development Corporation
-    "Q6670544": "LLDC",      # London Legacy Development Corporation
-    "Q72463795": "EDC",      # Ebbsfleet Development Corporation
-}
-
-
 def register():
-    """Current English LPAs from MHCLG's register: list of dicts with code, ons, name, org."""
+    """Current English planning authorities from our copy of MHCLG's register
+    (data/organisation.csv, refreshed by scripts/update_register.py)."""
+    path = DATA / "organisation.csv"
+    if not path.exists():
+        sys.exit("data/organisation.csv is missing. Run: python scripts/update_register.py")
     today = date.today().isoformat()
-    rows = []
-    org = INPUTS / "organisation"
-    for r in read_csv(org / "local-authority.csv"):
-        if r["end-date"] and r["end-date"] <= today:
-            continue  # abolished council
-        rows.append({"code": r["reference"], "ons": r["local-planning-authority"],
-                     "name": r["name"], "org": r["organisation"]})
-    for file, prefix in (("national-park-authority.csv", "national-park-authority"),
-                         ("development-corporation.csv", "development-corporation")):
-        for r in read_csv(org / file):
-            if r["end-date"] or not r["local-planning-authority"]:
-                continue
-            rows.append({"code": SHORT_CODES.get(r["reference"], r["reference"]),
-                         "ons": r["local-planning-authority"],
-                         "name": r["name"], "org": f"{prefix}:{r['reference']}"})
-    return rows
+    return [{"code": r["code"], "ons": r["ons-code"], "name": r["name"], "org": r["organisation"]}
+            for r in read_csv(path) if not (r["end-date"] and r["end-date"] <= today)]
 
 
 def england_councils():
@@ -116,7 +85,8 @@ def match(councils):
             elif len(cands) > 1:
                 problems.append(f"{name}: several possible matches: " + ", ".join(x["name"] for x in cands))
         if not hit:
-            problems.append(f"{name}: no match in MHCLG's register")
+            problems.append(f"{name}: no current match in MHCLG's register (if it used to match, it may "
+                            f"have been abolished or renamed: look it up in data/organisation.csv)")
             rows.append({"workbook-name": name, "match-method": "UNMATCHED"})
             continue
         rows.append({"workbook-name": name, "code": hit["code"], "ons-code": hit["ons"],
