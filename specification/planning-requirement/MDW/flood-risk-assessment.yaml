@@ -1,36 +1,52 @@
 reference: flood-risk-assessment
 local-authority: MDW
 required-if:
-  any:
-  - site:
+  all:
+  - application-type:
       in:
-      - flood-risk-zone
-      description: In flood zone 2 or 3, including minor development and change of use.
-  - condition:
-      field: site-area-residential
-      operator: '>'
-      value: 1
-      description: More than 1 hectare in flood zone 1.
-  - condition:
-      field: site-area-non-residential
-      operator: '>'
-      value: 1
-      description: More than 1 hectare in flood zone 1.
-  - site:
-      in:
-      - critical-drainage-area
-      description: In an area within flood zone 1 which has critical drainage problems.
-  - discretionary
+      - full
+      - outline
+      - reserved-matters
+      - s73
+      - approval-condition
+  - any:
+    - site:
+        in:
+        - flood-risk-zone
+        description: In flood zone 2 or 3, including minor development and change of use.
+    - any:
+      - condition:
+          field: site-area-residential
+          operator: '>'
+          value: 1
+          description: More than 1 hectare in flood zone 1.
+      - condition:
+          field: site-area-non-residential
+          operator: '>'
+          value: 1
+          description: More than 1 hectare in flood zone 1.
+    - all:
+      - condition:
+          field: involves-change-of-use
+          value: true
+          description: Less than 1 ha in flood zone 1, including a change of use to a more vulnerable
+            class (e.g. commercial to residential).
+      - discretionary
+    - site:
+        in:
+        - critical-drainage-area
+        description: In flood zone 1 with critical drainage problems as notified by the Environment Agency.
 source-url: https://www.medway.gov.uk/download/downloads/id/7949/planning_permission_validation_checklist.docx
-source-text: 22) Flood Risk Assessment / Drainage Strategy When required? In flood zone 2 or 3 including
-  minor development and change of use, more than 1 hectare (ha) in flood zone 1; less than 1 ha in flood
-  zone 1, including a change of use in development type to a more vulnerable class (for example from commercial
-  to residential), where the site could be affected by sources of flooding other than rivers and the sea
-  (for example surface water drains, reservoirs); in an area within flood zone 1 which ha…
-confidence: low
-notes: 'Audit (wrong_app_type, duplicate): placed under prior approval only because the text says ''change
-  of use''; it applies to all applications. The workbook also split it into a separate Drainage Strategy
-  row. Small sites at risk from other sources of flooding are shown as officer discretion. The audit couldn''t
-  read this council''s list, so its contents weren''t checked.'
+source-text: In flood zone 2 or 3 including minor development and change of use, more than 1 hectare (ha)
+  in flood zone 1; less than 1 ha in flood zone 1, including a change of use in development type to a
+  more vulnerable class (for example from commercial to residential), where the site could be affected
+  by sources of flooding other than rivers and the sea (for example surface water drains, reservoirs);
+  in an area within flood zone 1 which has critical drainage problems as notified by the Environment Agency
+must-include:
+- item: Meets the criteria in the Environment Agency Flood Risk Standing Advice (FRSA)
+  level: must
+confidence: medium
+notes: From the council's list (published April 2025), page 13, item 22. 'Where the site could be affected
+  by sources of flooding other than rivers and the sea' is shown as discretionary.
 review-status: unverified
 field-status: {}
