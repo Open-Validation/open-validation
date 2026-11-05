@@ -1,0 +1,239 @@
+# Corrections for Swindon Borough Council, from the audit of Swindon.
+# Swindon publishes its validation requirements only as seven undated web checklist pages
+# ('Checklists for planning applications'); the workbook's link is the Non-householder page (/5).
+# The workbook captured almost none of the 'Supporting documents (where applicable)' list, which the
+# audit summarises with triggers; those items are added below from the audit's paraphrase (no verbatim
+# wording was available). The audit says the same list applies to the planning permission + LBC,
+# outline and reserved matters checklists, so no application type is set where the trigger is
+# site- or proposal-based.
+local-authority: SWD
+
+submission-standards:
+  - item: Plans and drawings show a North point, give the paper size (for example A1, A3) and have a scale
+      bar indicating a minimum of 0-10 metres
+    level: must
+
+requirements:
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees on or adjacent to the site are affected.
+    source-url: https://www.swindon.gov.uk/info/20268/planning_applications/493/checklists_for_planning_applications/5
+    confidence: medium
+    notes: "From the audit (missing_requirement): Tree Survey/Arboricultural Statement."
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      site:
+        in: [archaeological-priority-area]
+        description: Archaeology is affected.
+    source-url: https://www.swindon.gov.uk/info/20268/planning_applications/493/checklists_for_planning_applications/5
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook placed it under Listed building consent from explanatory text
+      on the Heritage statements page. From the audit: a supporting document for planning applications if
+      archaeology is affected."
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      condition:
+        field: protected-species
+        value: true
+        description: Wildlife or biodiversity is affected.
+    source-url: https://www.swindon.gov.uk/info/20268/planning_applications/493/checklists_for_planning_applications/5
+    must-include:
+      - item: A Defra Biodiversity Metric
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): Ecological Impact Assessment plus Defra Biodiversity Metric,
+      if wildlife or biodiversity is affected."
+
+  - id: cil-form
+    action: add
+    required-if:
+      condition:
+        field: floorspace
+        operator: ">"
+        value: 0
+        description: Any floorspace creation, including residential extensions, new dwellings of any size and
+          conversions of disused buildings.
+    source-url: https://www.swindon.gov.uk/info/20268/planning_applications/493/checklists_for_planning_applications/5
+    confidence: medium
+    notes: "From the audit (missing_requirement): the CIL Additional Information form is on both the
+      non-householder and householder checklists."
+
+  - id: design-and-access-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: One or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: 100 square metres or more of floorspace.
+    source-url: https://www.swindon.gov.uk/info/20268/planning_applications/493/checklists_for_planning_applications/5
+    confidence: medium
+    notes: "From the audit (missing_requirement): all major, and in a conservation area 1+ dwellings or 100
+      sqm+."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Statement under the EIA Regulations.
+    source-url: https://www.swindon.gov.uk/info/20268/planning_applications/493/checklists_for_planning_applications/5
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook placed it under Listed building consent from explanatory text
+      on the Heritage statements page."
+
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: All development in Flood Zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more.
+    source-url: https://www.swindon.gov.uk/info/20268/planning_applications/493/checklists_for_planning_applications/5
+    confidence: medium
+    notes: "From the audit (missing_requirement)."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, archaeological-priority-area,
+              locally-listed-building, scheduled-monument, park-and-garden]
+            description: The proposal has the potential to impact on a heritage asset, such as a listed
+              building, conservation area or archaeological features.
+    source-text: Where a development proposal has the potential to impact on a heritage asset, such as a
+      listed building, conservation area or archaeological features, a Heritage Statement should be
+      submitted with the planning application.
+    source-url: https://www.swindon.gov.uk/info/20268/planning_applications/493/checklists_for_planning_applications/7
+    confidence: medium
+    notes: "The audit says it is also on the non-householder checklist (heritage assets affected) and, as a
+      Heritage Impact Assessment, on the householder checklist where the dwelling is listed."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: Known or suspected contamination.
+    source-url: https://www.swindon.gov.uk/info/20268/planning_applications/493/checklists_for_planning_applications/5
+    confidence: medium
+    notes: "From the audit (missing_requirement)."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: The proposal affects noise-sensitive properties.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The proposal involves significant noise generation.
+    source-url: https://www.swindon.gov.uk/info/20268/planning_applications/493/checklists_for_planning_applications/5
+    confidence: medium
+    notes: "From the audit (missing_requirement)."
+
+  - id: sci
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.swindon.gov.uk/info/20268/planning_applications/493/checklists_for_planning_applications/5
+    confidence: medium
+    notes: "From the audit (missing_requirement): Community Involvement Statement for all major development."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - condition:
+                field: retail-floorspace
+                operator: ">"
+                value: 0
+                description: Retail development.
+        - discretionary
+    source-url: https://www.swindon.gov.uk/info/20268/planning_applications/493/checklists_for_planning_applications/5
+    confidence: low
+    notes: "From the audit (missing_requirement): Retail Impact Assessment for all major retail, and a Town
+      Centre Uses Impact Assessment for town centre uses (no threshold given, so officer discretion)."
+
+  - id: transport-assessment
+    action: add
+    required-if: discretionary
+    source-url: https://www.swindon.gov.uk/info/20268/planning_applications/493/checklists_for_planning_applications/5
+    confidence: medium
+    notes: "From the audit (missing_requirement): where there are significant transport implications."
+
+unmapped:
+  - local-name: Habitats Regulation Assessment
+    source-text: "From the audit: per council guidance"
+    source-url: https://www.swindon.gov.uk/info/20268/planning_applications/493/checklists_for_planning_applications/5
+    suggested-id: habitats-regulations-assessment
+  - local-name: Infrastructure Requirements Statement
+    source-text: "From the audit: all major; residential 11-14 units on sites over 0.5 ha; 6-10 units in the
+      AONB on sites over 0.5 ha"
+    source-url: https://www.swindon.gov.uk/info/20268/planning_applications/493/checklists_for_planning_applications/5
+    suggested-id: infrastructure-statement
+  - local-name: Structural Survey
+    source-text: "From the audit: substantial demolition or excavation"
+    source-url: https://www.swindon.gov.uk/info/20268/planning_applications/493/checklists_for_planning_applications/5
+    suggested-id: structural-survey
+  - local-name: Listed dwelling drawings (householder)
+    source-text: "From the audit: where the dwelling is listed, floor plans showing historic features,
+      elevations with materials and finishes, detailed drawings of affected features at 1:20 or 1:50, and a
+      structural survey where relevant"
+    source-url: https://www.swindon.gov.uk/info/20268/planning_applications/493/checklists_for_planning_applications/3
+    suggested-id: listed-building-drawings
+  - local-name: Removal or variation of conditions statement
+    source-text: "From the audit: a statement of reasons, and a Deed of Variation where the original
+      permission had S106 obligations"
+    source-url: https://www.swindon.gov.uk/info/20268/planning_applications/493/checklists_for_planning_applications/5
+    suggested-id: s73-statement
+  - local-name: Works to trees (TPO) information
+    source-text: "From the audit: a specification of works, a statement of reasons, an arboriculturist's report
+      for health or safety reasons, and a structural engineer's plus arboriculturist's report for alleged
+      subsidence"
+    source-url: https://www.swindon.gov.uk/info/20268/planning_applications/493/checklists_for_planning_applications/5
+    suggested-id: tree-works-information
+  - local-name: Hedgerow removal information
+    source-text: "From the audit: ecological assessment, woody-species tree survey, landscape and heritage
+      assessment"
+    source-url: https://www.swindon.gov.uk/info/20268/planning_applications/493/checklists_for_planning_applications/5
+    suggested-id: hedgerow-removal-information

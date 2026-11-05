@@ -1,0 +1,495 @@
+# Corrections for Westmorland and Furness Council, from inputs/audit/westmorland-and-furness-council.json.
+# The current list is 'Local Planning Validation Requirements - Updated January 2026' (61 named
+# requirements), with a separate Minerals & Waste list (accessible August 2025). Grokbot mixed in
+# the superseded July 2023 checklist (with Barrow / Eden / South Lakeland legacy text) and placed
+# Minerals & Waste items under general application types. Many excerpts come from neighbouring
+# table rows. Below: rows quoting the wrong item are dropped or replaced, clear January 2026
+# triggers are structured, and about 17 missing items are listed as unmapped.
+local-authority: WFUA
+
+validation-list:
+  date: 2026-01
+  date-basis: "audit: title and link text 'Local Planning Validation Requirements - Updated January 2026' (the URL folder says 2025-12)"
+
+submission-standards:
+  - item: All plans submitted in PDF format
+    level: must
+  - item: Clear, descriptive file names (for example 'Proposed Elevations – Drawing 102A.pdf'), not
+      just a drawing number
+    level: should
+  - item: Plans annotated clearly (existing/proposed, front/rear or north/south)
+    level: should
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: 'an arboricultural method statement will be required.'; the list has no such item"
+  - id: floor-plan-existing
+    reason: "wrong_trigger: the excerpt is Aerodrome / Accessible Homes text"
+  - id: floor-plan-proposed
+    reason: "wrong_trigger: as above"
+  - id: elevation-existing
+    reason: "wrong_trigger: as above"
+  - id: elevation-proposed
+    reason: "wrong_trigger: as above"
+  - id: site-plan
+    reason: "wrong_trigger: the excerpt is Street Scene text"
+  - id: section-existing
+    reason: "wrong_trigger / wrong_document: tree survey schedule text from the superseded 2023 checklist"
+  - id: section-proposed
+    reason: "wrong_trigger / wrong_document: as above"
+  - id: bng-metric
+    reason: "wrong_trigger / wrong_app_type: climate change / energy minerals text from the Minerals & Waste list"
+  - id: design-and-access-statement
+    reason: "wrong_document: from the superseded July 2023 checklist; the national rules apply"
+  - id: lighting-assessment
+    sheets: [Discharge of conditions]
+    reason: "wrong_app_type: Minerals & Waste list text, not a discharge of conditions item"
+  - id: arboriculturist-report
+    sheets: [Householder]
+    reason: "wrong_document: from the superseded July 2023 checklist, running into Barrow transport-form text"
+
+drop-unmapped:
+  - local-name: Agricultural Land Classification / Soils
+    reason: "wrong_trigger / wrong_app_type: Minerals & Waste Policy DC21 heading with no trigger ('regarding the site.')"
+  - local-name: Minerals / Waste specific statements (county matters)
+    reason: "wrong_trigger: climate change policy heading from the Minerals & Waste list"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: 'expectations on pre-application discussions.'"
+  - local-name: Drainage Strategy / SuDS
+    reason: "duplicate: the same foul-drainage form text as Foul Sewage / Utilities Statement"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "duplicate: the same NNAMS text as the Nutrient Neutrality row; re-added below as one item"
+  - local-name: Nutrient Neutrality statement / calculator
+    reason: "duplicate / fragment; re-added below with the trigger"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: Affordable Housing Statement text"
+  - local-name: Water efficiency / water usage statement
+    reason: "wrong_trigger: a fragment of the climate change item with no trigger"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    must-include:
+      - item: A financial viability report / appraisal where the affordable housing provision is below
+          the policy requirement
+        level: must
+    notes: "The trigger isn't captured; the excerpt is the viability sentence."
+
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: parking-spaces
+            operator: ">="
+            value: 50
+            description: The development provides 50 or more new parking spaces.
+        - all:
+            - site:
+                in: [air-quality-management-area]
+                description: The site is in an Air Quality Management Area.
+            - condition:
+                field: parking-spaces
+                operator: ">"
+                value: 25
+                description: More than 25 new parking spaces.
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 80
+            description: Residential development of over 80 units.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: Residential development on a site over 1.0 hectare.
+    source-text: >-
+      a full air quality assessment in order to predict the impact of the development on air quality
+      and health: if the development provides 50 or more new parking spaces or more than 25 in an
+      AQMA (Air Quality Management Area)
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
+    confidence: medium
+    notes: "The residential branch (over 80 units or 1.0ha) is from the audit (item 36). Applies to all types,
+      not only Full planning."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [archaeological-priority-area]
+            description: The site includes or affects heritage assets with archaeological interest.
+        - discretionary
+    notes: "'May be necessary' for designated or non-designated assets with archaeological interest, so officer
+      discretion covers the non-designated case."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      or Tree (Arboricultural) Survey providing the Hedgerow Survey methodology … meets the criteria
+      for determining ‘Important’ hedgerows.
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_document, wrong_trigger): the householder row came from the superseded 2023
+      checklist ('A tree survey may be needed for … Householder … Full'), and the full row is
+      Hedgerow Assessment text. The January 2026 tree survey trigger isn't captured.
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - condition:
+                field: greenfield-site
+                value: true
+                description: Greenfield development (typically agricultural or amenity land).
+            - condition:
+                field: protected-species
+                value: true
+                description: The development could affect rare, protected or notable species or
+                  habitats.
+        - site:
+            in: [site-of-special-scientific-interest, special-protection-area,
+              special-area-of-conservation, local-wildlife-site]
+            description: >-
+              Development within or adjacent to an SSSI, SPA, Ramsar Site, SAC, Site of Biological or
+              Geological Importance, National Nature Reserve, County Wildlife Site or RIGS.
+    source-text: >-
+      … is required for all major applications and for greenfield development (typically
+      agricultural or amenity land) that could directly or indirectly affect rare, protected, or
+      notable species or habitats … Development within or adjacent to a Site of Special Scientific
+      Interest (SSSI), Special Protection Area (SPA), Ramsar Site, Special Area of Conservation
+      (SAC), Site of Biological or Geological Importance, National Nature Reserve, County Wildlife
+      Site, or Regionally Important Geological/Geomorphological Site (RIGS)
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
+    must-include:
+      - item: For proposals removing trees, scrub or hedgerows or altering watercourses, the species
+          present, potential impacts on them and proposed mitigation
+        level: must
+        source-text: >-
+          Any proposal involving the removal of trees, scrub, or hedgerows, or altering
+          watercourses, must include details of species present, potential impacts on those
+          species, and proposed mitigation measures.
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): some small householder proposals in designated sites need it too.
+      The designated-site wording is from the council tab (January 2026 list).
+
+  - id: cil-form
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 100
+            description: Development (including domestic extensions) near or over 100 square metres.
+        - discretionary
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger, other): the excerpt ran into Construction Management Plan text. From the
+      audit: the CIL form applies to the SLDC (South Lakeland) legacy area only, including
+      householder extensions near or over 100 sqm. The legacy-area limit can't be expressed.
+
+  - id: construction-management-plan
+    action: update
+    required-if:
+      ref: major-development
+    notes: >-
+      From the audit: the CEMP is for major development (10+ units, 1,000 sqm+). The list also has a
+      separate Construction Management Plan for construction or demolition (audit item 14), not
+      captured.
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+    notes: "'Will only be requested where the Local Planning Authority consider it relevant, necessary, and
+      material.'"
+
+  - id: energy-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-text: Energy Statement An Energy Statement will be required for all major applications,
+      although we would encourage all applicants to consider how they can make their developments
+      more energy efficient.
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
+    confidence: medium
+    notes: "Grokbot had filed this under sustainability-statement."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook quoted paper-copies / Planning Statement text; the EIA Regulations'
+      own test is used."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      site:
+        in: [flood-risk-zone]
+        description: All development within Flood Zones 2 and 3.
+    source-text: assessment and sequential test for all development within Flood Zones 2 & 3, there
+      will be some proposals that will have no flood risk implications (e.g.
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
+    confidence: low
+    notes: >-
+      The workbook's Flood Risk row was form-link text; this wording was in its 'Sequential test' row
+      and is cut off. The list notes some proposals have no flood risk implications. Applies to all
+      types, not only Full planning.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, scheduled-monument,
+              park-and-garden]
+            description: The application is within the curtilage or setting of a listed building, in
+              or affecting the setting of a conservation area, or affects a scheduled ancient
+              monument or registered park or garden.
+    source-text: >-
+      A Heritage Statement of Significance and Impact will be required for the following:
+      applications for listed building consent applications within the curtilage of a listed
+      building, and those that affect its setting applications in a conservation area and those
+      that affect its setting applications affecting a scheduled ancient monument and those that
+      affect its setting applications affecting a registered park or garden of special historic
+      interest and those that affect its setting a…
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2023-09/Local%20Validation%20Checklist%20final%20July2023%20Table%202.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_document): this full wording is from the superseded 2023 checklist; the January
+      2026 list has the same heading ('A Heritage Statement of Significance and Impact will be
+      required for the following:') but its list wasn't captured. Applies to householder proposals
+      affecting heritage assets too (audit).
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: The land is known or suspected to be contaminated, or the site is close to such
+          land and ground works are proposed.
+    notes: "Applies to all types (the January 2026 list) and to minerals and waste development (August 2025 list)."
+
+  - id: landscaping-plan
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - all:
+            - application-type:
+                in: [mineral-app, waste-dev]
+            - discretionary
+    source-text: Outline applications need indicative information...
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
+    must-include:
+      - item: Indicative landscape information
+        level: must
+        required-if:
+          application-type:
+            in: [outline]
+      - item: Full landscape details
+        level: must
+        required-if:
+          application-type:
+            in: [reserved-matters]
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): Landscape and Planting Schemes need indicative detail for outline and
+      full detail for reserved matters; the workbook's excerpt was from the Minerals & Waste list
+      ('Where landscape planting/screening is integral … a detailed landscape strategy will also be
+      required'). The full trigger isn't captured.
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      condition:
+        field: floodlighting
+        value: true
+        description: Floodlighting in the vicinity of residential property, a listed building or a
+          conservation area, ecologically sensitive areas or watercourses.
+    source-text: >-
+      External Lighting Assessment All proposals, including equestrian related development,
+      involving floodlighting in the vicinity of residential property, a listed building or a
+      conservation … area, ecologically sensitive areas or watercourses
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): not listed building consent; the trigger only mentions floodlighting near
+      a listed building."
+
+  - id: photos
+    action: update
+    required-if: discretionary
+    notes: "For wind turbines and certain major applications (2023 checklist wording); photographs can't substitute
+      for metric scaled drawings."
+
+  - id: planning-statement
+    action: update
+    required-if:
+      ref: major-development
+    notes: "From the audit (wrong_app_type): the Planning Statement is for major applications."
+
+  - id: recreation-facilities-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: loss-of-open-space
+            value: true
+            description: The proposal would result in the loss of open space.
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt had no trigger. From the audit: Open Space Assessment for major
+      applications or loss of open space (item 39)."
+
+  - id: sci
+    action: update
+    required-if: discretionary
+    notes: "'When the development is judged by the case officer to be locally significant.'"
+
+  - id: sustainability-statement
+    action: replace
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
+    must-include:
+      - item: BREEAM 'very good' for development over 1,000 sqm
+        level: must
+        required-if:
+          condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 1000
+            description: Over 1,000 square metres of commercial floorspace.
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): Climate Change Statement, for new homes, commercial and
+      infrastructure, with BREEAM 'very good' over 1,000 sqm; the Appendix 1 climate measures apply
+      to the SLDC legacy area only. The workbook's row was the Energy Statement (now
+      energy-statement). The trigger can't be expressed, so none is given.
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Applications for masts.
+    notes: "Audit (wrong_document): this row is from the superseded 2023 checklist."
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    notes: "'Where a Transport Assessment or Transport Statement is required, the GTP should be submitted alongside
+      it' (wording found in the Transport Assessment row)."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    notes: "Where the affordable housing provision is below the policy requirement."
+
+  - id: waste-management-plan
+    action: replace
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
+    confidence: low
+    notes: "Audit (wrong_trigger): the excerpt is Affordable Housing text; the Waste Management Statement's
+      trigger isn't captured."
+
+unmapped:
+  - local-name: Nutrient Neutrality Assessment and Mitigation Statement (NNAMS) and Shadow HRA
+    source-text: "Required for all applications within the Catchment Areas of the River Eden Special Area of
+      Conservation (SAC) & notified sections of the River Kent SAC that would result in: … additional overnight
+      stays (including new dwellings, new camping, glamping or caravan pitches …"
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
+    suggested-id: nutrient-neutrality-statement
+  - local-name: Biomass Boiler Statement
+    source-text: "All developments including the installation of new biomass boilers must complete a biomass
+      questionnaire"
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
+    suggested-id: ""
+  - local-name: Master-planned caravan site improvements (Arnside & Silverdale)
+    source-text: "This applies to South Lakeland District Council legacy area only Development within existing
+      caravan sites inside the Arnside and Silverdale Area of Outstanding Natural Beauty (AONB) Proposed development
+      should be submitted as master-planned improvements for the whole site and should be accompanied by metric
+      scaled plans that illustrate this master plan approach."
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2023-09/Local%20Validation%20Checklist%20final%20July2023%20Table%202.pdf
+    suggested-id: masterplan
+  - local-name: Aerodrome Safeguarding Statement
+    source-text: "From the audit: Walney Airport / Glassonby airfield areas only"
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
+    suggested-id: aerodrome-safeguarding-statement
+  - local-name: Agricultural Buildings Appraisal
+    source-text: "From the audit: new agricultural buildings (also removal of agricultural occupancy conditions)"
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
+    suggested-id: agricultural-statement
+  - local-name: Amendment Statement
+    source-text: "From the audit: amended plans submitted during the application"
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
+    suggested-id: amendment-documents
+  - local-name: Annexe Accommodation Justification Statement
+    source-text: "From the audit: separate annexes"
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
+    suggested-id: ""
+  - local-name: Construction Management Plan
+    source-text: "From the audit: construction or demolition (separate from the CEMP)"
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
+    suggested-id: construction-management-plan
+  - local-name: Delivery and Servicing Plan
+    source-text: "From the audit: commercial/residential servicing, including outline or hybrid applications"
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
+    suggested-id: delivery-servicing-plan
+  - local-name: Hedgerow Assessments
+    source-text: "Applies to full, outline, reserved matters, and condition-variation applications (From the
+      audit: hedges covered by the Hedgerow Regulations)"
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
+    suggested-id: ""
+  - local-name: Materials Schedule
+    source-text: "From the audit: listed building, major and conservation area applications (with 1:1 to 1:20
+      window plans for listed buildings)"
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
+    suggested-id: materials-schedule
+  - local-name: Private Water Supply Assessment
+    source-text: "From the audit: more demand on a private water supply, including some domestic extensions"
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
+    suggested-id: ""
+  - local-name: Public Art Strategy
+    source-text: "From the audit: over 20 units or over 1,000 sqm commercial (Barrow)"
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
+    suggested-id: public-art-statement
+  - local-name: Residential Management Plan
+    source-text: "From the audit: HMOs, student or contractor accommodation"
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
+    suggested-id: management-plan
+  - local-name: Retention of Community Facilities
+    source-text: "From the audit: loss of a community facility, with 9 months' marketing"
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
+    suggested-id: community-facilities-statement
+  - local-name: Transport Form
+    source-text: "From the audit: listed in the January 2026 list; no trigger given"
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
+    suggested-id: ""
+  - local-name: Utilities Survey
+    source-text: "From the audit: listed in the January 2026 list; no trigger given"
+    source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
+    suggested-id: utilities-statement
+
+low-confidence:
+  - id: noise-assessment
+    note: "Audit (wrong_trigger): the excerpt is cut off before the trigger ('should accompany applications
+      for: whether the')."
+  - id: transport-assessment
+    note: "The excerpt is about the Green Travel Plan and gives no Transport Assessment threshold; re-read the
+      list."
