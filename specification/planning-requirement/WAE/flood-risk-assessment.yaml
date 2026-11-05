@@ -1,21 +1,78 @@
 reference: flood-risk-assessment
 local-authority: WAE
 required-if:
-  application-type:
-    in:
-    - hh
-    - full
-    - outline
-    - reserved-matters
-source-url: https://www.waverley.gov.uk/Portals/0/Documents/services/planning-and-building/planning-applications-and-enforcement/planning%20applications/VALIDATION%20LISTS/VALIDATION%20V12.pdf?ver=f9cL_Os5GI27yFS5oBr2lg%3d%3d
-source-text: Flood Risk Assessment (FRA) Reserved Matters X Outline consent X Full Application X X – Possibly
-  required dependent on the proposal Householder Vary/remove Condition X Prior Approval X Listed Building
-  Consent Tree works X Certificate of Lawfulness Section 192 (proposed) X Certificate of Lawfulness Section
-  191 (existing) * X Discharge of Condition Legend Demolition in Conservation area You can select an item
-  below to jump to the section within the document for further information. 1.
-confidence: low
-notes: 'Rows from Listed building consent, Lawful development cert, Change of use - prior approval, Discharge
-  of conditions were dropped after the audit. Audit (wrong_trigger): the excerpt is a run of X-matrix
-  column headers and gives no trigger; re-read the FRA item in V12.'
+  all:
+  - application-type:
+      in:
+      - hh
+      - full
+      - outline
+      - reserved-matters
+      - approval-condition
+  - any:
+    - site:
+        in:
+        - flood-risk-zone
+        description: In flood zone 2 or 3, including minor development and change of use.
+    - any:
+      - condition:
+          field: site-area-residential
+          operator: '>'
+          value: 1
+          description: Site more than 1 hectare.
+      - condition:
+          field: site-area-non-residential
+          operator: '>'
+          value: 1
+          description: Site more than 1 hectare.
+    - all:
+      - condition:
+          field: involves-change-of-use
+          value: true
+          description: A change of use to a more vulnerable class (for example from commercial to residential).
+      - any:
+        - site:
+            in:
+            - surface-water-flood-risk
+            description: Could be affected by surface water flooding.
+        - discretionary
+source-url: https://www.waverley.gov.uk/portals/0/documents/services/planning-and-building/planning-applications-and-enforcement/planning%20applications/validation%20lists/validation%20v12.pdf
+source-text: 'A site-specific flood risk assessment (FRA) is required if the site is: In flood zones 2
+  or 3 including minor development and change of use. For Householder or minor commercial development
+  complete our proforma; Any site more than 1 hectare; Sites less than 1 hectare but for a change of use
+  in development type to a more vulnerable class (for example from commercial to residential), where they
+  could be affected by other sources of flooding such as surface water.'
+must-include:
+- item: 'Householder or minor commercial development in flood zone 2 or 3: the council''s proforma (Flood
+    Risk Zones 2 and 3 matrix) completed'
+  level: must
+  required-if:
+    all:
+    - site:
+        in:
+        - flood-risk-zone
+        description: In flood zone 2 or 3.
+    - any:
+      - application-type:
+          in:
+          - hh
+      - condition:
+          field: minor-development
+          value: true
+          description: Minor commercial development.
+- item: Evidence that the Sequential Test and, where necessary, the Exception Test have been applied in
+    choosing the site for the development type
+  level: should
+- item: Takes into account different types of flooding, e.g. fluvial, surface water and groundwater
+  level: should
+- item: The risk of flooding from the proposed development as well as to the site
+  level: should
+- item: The effect of climate change
+  level: should
+confidence: medium
+notes: From the council's list (approved November 2022, last updated July 2023), pages 4 and 13. Item
+  6, marked National. 'Other sources of flooding such as surface water' goes beyond the surface water
+  map, so that part also shows as discretionary. Application types follow the list's 'Requirement by Application
+  Type' matrix, which marks each type 'Mandatory' or 'Possibly required dependent on the proposal'.
 review-status: unverified
 field-status: {}
