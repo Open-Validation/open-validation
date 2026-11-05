@@ -1,12 +1,135 @@
 reference: flood-risk-assessment
 local-authority: WEA
-source-url: https://wealdengov-b994c1bb48cf487f1616-endpoint.azureedge.net/blobwealdengov-staging/UploadedFiles/Wealden-District-Council-Validation-Requirements-October-2025.pdf
-source-text: 'Lighting. 36 Validation requirement Flood Risk Assessment (FRA) See Appendix D for Table
-  and Basic Flood Risk Assessment Template Justification including policy driver Types of application/development
-  that require this information to be submitted Guidance on what information is required NPPF: Section
-  14 (Meeting the challenge of climate change, flooding and coastal change).'
-confidence: low
-notes: The workbook guessed the application type ('INFERRED'), so no type is given. The excerpt is only
-  headers (see Appendix D); the audit says it applies to householder applications too.
+required-if:
+  any:
+  - site:
+      in:
+      - flood-risk-zone
+      description: Development in Flood Zones 2 or 3 (including minor development and change of use).
+  - condition:
+      field: site-area-residential
+      operator: '>'
+      value: 1
+      description: Sites of more than 1ha in Flood Zone 1.
+  - condition:
+      field: site-area-non-residential
+      operator: '>'
+      value: 1
+      description: Sites of more than 1ha in Flood Zone 1.
+  - site:
+      in:
+      - critical-drainage-area
+      description: Building or engineering works on land with critical drainage problems (as classified
+        by the Environment Agency).
+  - condition:
+      field: near-watercourse
+      value: true
+      description: Within 20m of a watercourse (HIGH RISK in the Appendix D table).
+  - discretionary
+source-url: https://wealdengov-b994c1bb48cf487f1616-endpoint.azureedge.net/blobwealdengov-staging/UploadedFiles/Wealden-District-Council-Validation-Requirements-October-2025-1-1.pdf
+policy: Core Strategy Local Plan 2013 Spatial Planning Objective SPO10; Wealden Strategic Flood Risk Assessment
+  2022
+source-text: 'The submission of a FRA will be required where development proposals consist of the following:
+  Development on sites in Flood Zones 2 or 3 (including minor development and change of use); Development
+  on sites of more than 1ha in Flood Zone 1; Development on sites of less than 1ha in Flood Zone 1, including
+  a change of use to a more vulnerable class (for example commercial to residential), where they could
+  be affected by sources of flooding other than from rivers and the sea (for example, surface water drains
+  and reservoirs); Building/engineering works on land with critical drainage problems (as classified by
+  the Environment Agency); and Engineering operations that involve raising the level of land or significantly
+  increasing surface water run-off to non-mains sewer systems such as watercourses and soakaways.'
+must-include:
+- item: 'Flood risk to both property and people: the risks of all forms of flooding to and from the development
+    and how they will be managed, taking climate change into account'
+  level: should
+- item: Opportunities to reduce the probability and consequences of flooding, including the design of
+    surface water management systems such as SuDS
+  level: should
+- item: Safe access to and from the development in areas at risk of flooding
+  level: should
+- item: 'Flood Risk Sequential Test evidence: that a sequential approach to site selection has been taken,
+    assessing alternative sites less susceptible to flooding and why they are not appropriate'
+  level: must
+  required-if:
+    site:
+      in:
+      - flood-risk-zone
+      description: Development within Flood Zones 2 and 3.
+  source-text: The submission of a Flood Risk Sequential Test will be required for development within
+    Flood Zones 2 and 3.
+- item: 'Flood Risk Exception Test evidence: wider sustainability benefits that outweigh the flood risk,
+    and that the development will be safe for its lifetime without increasing flood risk elsewhere'
+  level: must
+  required-if:
+    all:
+    - site:
+        in:
+        - flood-risk-zone
+        description: Flood Zones 2 and 3.
+    - discretionary
+  source-text: A Flood Risk Exception Test will only be required for development within Flood Zones 2
+    and 3 where the Sequential Test alone cannot deliver acceptable sites.
+- item: 'HIGH RISK householder and change of use applications (and minor full applications in Flood Zones
+    2 and 3 and/or within 20m of a watercourse): the Basic Flood Risk Assessment template (Appendix D),
+    choosing mitigation Option A or B'
+  level: must
+  required-if:
+    all:
+    - any:
+      - site:
+          in:
+          - flood-risk-zone
+          description: Within a flood zone.
+      - condition:
+          field: near-watercourse
+          value: true
+          description: Within 20m of a watercourse.
+    - any:
+      - application-type:
+          in:
+          - hh
+      - condition:
+          field: involves-change-of-use
+          value: true
+          description: Change of use with no operational development.
+  source-text: This template is to be used in conjunction with all HIGH RISK Householder planning applications
+    or Minor Full applications within Flood Zones 2 & 3 and/or within 20 metres of a watercourse
+- item: 'Basic FRA Option B: supporting evidence including a plan showing finished floor levels based
+    on Ordnance Datum'
+  level: must
+  required-if: discretionary
+- item: 'Small scale minor, minor and major development at HIGH RISK: a site-specific Flood Risk Assessment'
+  level: must
+  required-if:
+    all:
+    - any:
+      - site:
+          in:
+          - flood-risk-zone
+          description: Within a flood zone.
+      - condition:
+          field: near-watercourse
+          value: true
+          description: Within 20m of a watercourse.
+    - any:
+      - condition:
+          field: dwelling-count
+          operator: '>='
+          value: 1
+          description: One or more dwellings.
+      - condition:
+          field: floorspace-non-residential
+          operator: '>'
+          value: 0
+          description: Non-residential development.
+confidence: medium
+notes: 'From the council''s list (published October 2025), local list (Flood Risk Assessment, Sequential
+  and Exception Test) and Appendix D, page 37-38, 93-94. The list''s Sequential Test and Exception Test
+  evidence are separate rows, shown here as items. Sites under 1ha in Flood Zone 1 at risk from other
+  sources, and engineering operations that raise land levels or significantly increase run-off, are shown
+  as the council''s discretion. Appendix D: HIGH RISK means within a flood zone and/or within 20m of a
+  watercourse; the Exception Test applies only where the Sequential Test alone cannot deliver acceptable
+  sites. The local list applies only to applications for planning permission and listed building consent
+  (not to non-material amendments, approval of conditions, advertisement consent, lawful development certificates,
+  prior approvals or TPO works), page 16.'
 review-status: unverified
 field-status: {}
