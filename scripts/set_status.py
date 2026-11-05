@@ -5,13 +5,14 @@ Examples:
       marks every non-empty cell in every SHR file (including _lpa.yaml)
   python scripts/set_status.py SHR human-verified --by "Jake White" --files site-plan,_lpa --cells required-if,source-text
   python scripts/set_status.py SHR council-verified --by "Jake White" --evidence https://github.com/.../issues/12
+  python scripts/set_status.py SHR incorrect --by "Jake White" --files site-plan --cells required-if --note "Now needed for all householder applications"
   python scripts/set_status.py --recompute
       changes no marks on purpose: resets any cell edited since it was marked
       back to unverified (and lists them), then recomputes every file, every
       council, coverage and data/lpa.csv
 
-Statuses: unverified, human-verified, council-verified, council-updated.
-The two council statuses need --evidence. Marking a cell 'unverified' removes its mark.
+Statuses: incorrect, unverified, human-verified, council-verified, council-updated.
+The two council statuses need --evidence; 'incorrect' needs --note (what's wrong). Marking a cell 'unverified' removes its mark.
 """
 
 import argparse
@@ -35,12 +36,14 @@ def recompute_all():
     print(f"Recomputed review-status and coverage for {len(lpa_folders())} councils and updated data/lpa.csv.")
 
 
-def mark(code, status, by, files, cells, evidence):
+def mark(code, status, by, files, cells, evidence, note=""):
     folder = SPEC / code
     if not (folder / "_lpa.yaml").exists():
         sys.exit(f"There is no council folder called {code}.")
     if status in review.NEEDS_EVIDENCE and not evidence:
         sys.exit(f"'{status}' needs --evidence (a link to the issue or PR, or a short note of the email).")
+    if status in review.NEEDS_NOTE and not note:
+        sys.exit(f"'{status}' needs --note saying what's wrong (or what the council's list actually says).")
     if status not in review.STATUSES:
         sys.exit(f"'{status}' isn't a status. Use one of: {', '.join(review.STATUSES)}")
 
@@ -59,7 +62,7 @@ def mark(code, status, by, files, cells, evidence):
         targets = [c for c in (cells or names) if c in names]
         done = []
         for cell in targets:
-            if review.mark_cell(data, path.stem, cell, status, by, evidence=evidence):
+            if review.mark_cell(data, path.stem, cell, status, by, evidence=evidence, note=note):
                 done.append(cell)
         if done:
             write_yaml(path, data)
@@ -78,6 +81,7 @@ def main():
     p.add_argument("--files", help="comma-separated file names without .yaml (use _lpa for _lpa.yaml)")
     p.add_argument("--cells", help="comma-separated cell names (default: every non-empty cell)")
     p.add_argument("--evidence", default="", help="link or note; needed for the council statuses")
+    p.add_argument("--note", default="", help="what's wrong; needed for 'incorrect'")
     p.add_argument("--recompute", action="store_true", help="only recompute statuses (see above)")
     a = p.parse_args()
 
@@ -87,7 +91,7 @@ def main():
     if not (a.code and a.status and a.by):
         p.error("give a council code, a status and --by (or use --recompute)")
     split = lambda s: [x.strip().removesuffix(".yaml") for x in s.split(",") if x.strip()] if s else None
-    mark(a.code, a.status, a.by, split(a.files), split(a.cells), a.evidence)
+    mark(a.code, a.status, a.by, split(a.files), split(a.cells), a.evidence, a.note)
 
 
 if __name__ == "__main__":

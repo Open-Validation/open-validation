@@ -58,13 +58,14 @@ Councils use MHCLG's three-letter codes. For national parks MHCLG's code is a Wi
 `ENPA`, `LDNPA`, `NFNPA`, `NYMNPA`, `NNPA`, `PDNPA`, `SDNPA`, `YDNPA`. The Wikidata id is kept in
 `scripts/lpa_match.csv` (column `organisation`) so the data can be matched back to MHCLG's register.
 
-## The four review statuses
+## The five review statuses
 
 Every piece of data is a **cell** (for example the trigger of one requirement, or a council's list
-link), and every cell has one of four statuses. The explorer tints each cell in its colour.
+link), and every cell has one of five statuses. The explorer tints each cell in its colour.
 
 | Status | Colour | Meaning |
 |---|---|---|
+| `incorrect` | purple | Someone checked it and found it wrong. A note says what's wrong. |
 | `unverified` | red | Nobody has checked it against the council's list yet. Every cell starts here. |
 | `human-verified` | orange | A person compared it with the council's current list and it matches. |
 | `council-verified` | dark green | Someone at the council confirmed it is correct. |
@@ -72,13 +73,15 @@ link), and every cell has one of four statuses. The explorer tints each cell in 
 
 A council is shown in the lowest status of any of its cells, and grey ("Not covered yet") until we
 have its requirements. A mark remembers a fingerprint of the value it was given to; if the value is
-edited later, the cell drops back to `unverified`.
+edited later, the cell drops back to `unverified`. Fixing an `incorrect` cell clears its flag the
+same way. Whenever a new `incorrect` flag lands on `main`, a GitHub Action opens an issue that
+emails the repo owner.
 
 ### How cells are marked
 
 - **Command line:** `python scripts/set_status.py SHR human-verified --by "Your Name"` (add
   `--files site-plan,_lpa` and `--cells required-if,source-text` to narrow it; the two council
-  statuses also need `--evidence <link>`).
+  statuses also need `--evidence <link>`, and `incorrect` needs `--note "what's wrong"`).
 - **Explorer review mode:** switch on "Review", tap cells, choose a status and press Submit. That
   opens a pull request adding a file to `reviews/pending/`; a GitHub Action applies the marks to the
   pull request so you can see exactly which cells change, and they go live when it's merged.
@@ -117,6 +120,7 @@ Install once: `pip install -r requirements.txt`. Then, from the repo root:
 | `python scripts/check.py` | Checks everything and prints a summary (also runs on every push) |
 | `python scripts/set_status.py ...` | Marks cells; `--recompute` refreshes every status |
 | `python scripts/apply_reviews.py` | Applies marks waiting in `reviews/pending/` |
+| `python scripts/new_incorrect_flags.py <commit>` | Lists cells newly flagged `incorrect` since a commit (used for the email alert) |
 | `python scripts/update_register.py` | Checks MHCLG's register of planning authorities for new, abolished or renamed councils and updates `data/organisation.csv` (runs monthly; opens an issue if anything changed) |
 | `python scripts/build_lpas.py` | Matches workbook councils to MHCLG codes; creates folders, `_lpa.yaml`, `lpa.csv` |
 | `python scripts/build_from_workbook.py` | Builds requirement files from the workbook + audit |

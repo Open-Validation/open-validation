@@ -153,6 +153,8 @@ def check_marks(data, where, filename):
             problem(f"{where}: the mark on '{cell}' needs both 'by' and 'date'")
         if mark.get("status") in review.NEEDS_EVIDENCE and not mark.get("evidence"):
             problem(f"{where}: '{cell}' is marked {mark.get('status')} but has no 'evidence'")
+        if mark.get("status") in review.NEEDS_NOTE and not mark.get("note"):
+            problem(f"{where}: '{cell}' is marked incorrect but has no 'note' saying what's wrong")
         value = review.cell_value(data, cell)
         if review.is_empty(value) or mark.get("hash") != review.cell_hash(value):
             problem(f"{where}: '{cell}' changed after it was marked (hash doesn't match). "

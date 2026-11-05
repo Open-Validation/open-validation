@@ -1,0 +1,44 @@
+# Whenever something lands on main, look for cells newly flagged 'incorrect'
+# (however they got there). If there are any, open an issue labelled
+# 'incorrect-flag' that mentions the repo owner, so GitHub sends an email.
+name: incorrect-alert
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+  issues: write
+jobs:
+  alert:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history, so we can compare with the previous commit
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+
+      - name: Look for new 'incorrect' flags
+        run: python scripts/new_incorrect_flags.py "${{ github.event.before }}" --report flags.md
+
+      - name: Open an issue so the owner gets an email
+        if: hashFiles('flags.md') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMIT_URL: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
+        run: |
+          {
+            echo "@${{ github.repository_owner }} someone has flagged data as incorrect."
+            echo
+            cat flags.md
+            echo
+            echo "**What to do:** check each cell against the council's list. Fix the value (the flag"
+            echo "then clears itself and the cell goes back to unverified), or if the flag is wrong, run"
+            echo "\`python scripts/set_status.py <CODE> unverified --by <you> --files <file> --cells <cell>\`."
+            echo
+            echo "Change: $COMMIT_URL"
+          } > issue.md
+          gh label create incorrect-flag --color B388FF --description "Data flagged as incorrect" --force
+          gh issue create --title "Data flagged as incorrect ($(date +%Y-%m-%d))" --label incorrect-flag --body-file issue.md

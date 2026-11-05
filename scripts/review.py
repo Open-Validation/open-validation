@@ -15,9 +15,11 @@ from datetime import date
 
 from common import DATA, SPEC, load_yaml, read_csv, write_csv, write_yaml
 
-# The four statuses, from least to most trusted.
-STATUSES = ["unverified", "human-verified", "council-verified", "council-updated"]
+# The five statuses, from least to most trusted. 'incorrect' means someone
+# checked the cell and found it wrong; it sits below 'unverified'.
+STATUSES = ["incorrect", "unverified", "human-verified", "council-verified", "council-updated"]
 NEEDS_EVIDENCE = {"council-verified", "council-updated"}
+NEEDS_NOTE = {"incorrect"}  # say what's wrong, or what the council's list actually says
 
 # The cells of a requirement file and of a council's _lpa.yaml (FORMAT.md, "Review status").
 REQUIREMENT_CELLS = ["requirement", "application-type", "required-if", "must-include",
@@ -125,7 +127,7 @@ def file_status(data, filename):
     return lowest(cell_statuses(data, filename).values())
 
 
-def mark_cell(data, filename, cell, status, by, when=None, evidence=""):
+def mark_cell(data, filename, cell, status, by, when=None, evidence="", note=""):
     """Write a mark for one cell into data['field-status'] (in memory).
     Returns False (and changes nothing) if the cell is empty."""
     if cell not in cells_for(filename):
@@ -134,6 +136,8 @@ def mark_cell(data, filename, cell, status, by, when=None, evidence=""):
         raise ValueError(f"'{status}' is not a status. Use one of: {', '.join(STATUSES)}")
     if status in NEEDS_EVIDENCE and not evidence:
         raise ValueError(f"'{status}' needs evidence (a link to the issue or PR, or a note of the email)")
+    if status in NEEDS_NOTE and not note:
+        raise ValueError(f"'{status}' needs a note saying what's wrong")
     value = cell_value(data, cell)
     if is_empty(value):
         return False
@@ -145,6 +149,8 @@ def mark_cell(data, filename, cell, status, by, when=None, evidence=""):
     entry = {"status": status, "by": by, "date": str(when or date.today().isoformat())}
     if evidence:
         entry["evidence"] = evidence
+    if note:
+        entry["note"] = note
     entry["hash"] = cell_hash(value)
     marks[cell] = entry
     return True

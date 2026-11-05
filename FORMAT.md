@@ -94,11 +94,12 @@ submission-standards:
 
 #### Review status (cell by cell)
 
-Every piece of data we collected is a **cell**, and every cell has one of four statuses, from
+Every piece of data we collected is a **cell**, and every cell has one of five statuses, from
 least to most trusted. The explorer shows each cell tinted in its status colour.
 
 | value | colour | meaning |
 |---|---|---|
+| `incorrect` | purple | Someone checked the cell against the council's list and found it wrong. A `note` says what's wrong. It is the lowest status, so the council shows purple on the map until it's fixed. |
 | `unverified` | red | Nobody has checked it against the council's list yet. Most cells were collected by AI (from Grokbot's workbook, Claude's audit or the ingest skill). Every cell starts here. |
 | `human-verified` | orange | A person compared the cell with the council's current list and it matches. |
 | `council-verified` | dark green | Someone at the council confirmed the cell is correct. |
@@ -128,12 +129,22 @@ field-status:
     date: 2026-11-06
     evidence: https://github.com/<owner>/open-validation/issues/12
     hash: 9b04d7aa
+  policy:
+    status: incorrect
+    by: Jake White
+    date: 2026-11-06
+    note: The council's 2026 list cites policy DP4, not MD2
+    hash: 51c0e8b2
 ```
 
 - A cell with no entry is `unverified`. An empty cell (for example no policy given) has no
   status and doesn't count.
 - `council-verified` and `council-updated` need `evidence`: a link to the issue or PR, or a
   short note of the email.
+- `incorrect` needs a `note`: what's wrong, or what the council's list actually says. When
+  someone fixes the value, the hash stops matching and the flag clears itself, so the cell goes
+  back to `unverified` (fixed, but not yet checked). Every new `incorrect` flag that lands on
+  `main` opens a GitHub issue that emails the maintainer.
 - `hash` is the first 8 characters of the SHA-1 of the cell's value written as JSON
   (`json.dumps(value, sort_keys=True, ensure_ascii=False)`). If the value changes after it
   was marked, the hash stops matching and the cell drops back to `unverified`, so a mark can
@@ -141,7 +152,7 @@ field-status:
 - **Roll-up:** a file's `review-status` is the lowest status among its non-empty cells. A
   council's `review-status` (in `_lpa.yaml`, in `lpa.csv` and on the map) is the lowest
   among all non-empty cells in its folder, so one unchecked cell keeps the whole council at
-  that level.
+  that level, and one `incorrect` cell shows the council as incorrect.
 - **Coverage:** a council is `not-covered` (grey on the map, whatever its status) until we
   have its requirements: that is, until its folder has at least one requirement file, or its
   `validation-list.status` is `national-only` (we know it has no local list). Otherwise it
