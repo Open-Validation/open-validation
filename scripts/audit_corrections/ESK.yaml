@@ -1,0 +1,447 @@
+# Corrections for East Suffolk Council, from the audit of East Suffolk.
+# The Local Validation List was adopted by Strategic Planning Committee on 8 April 2024 and took
+# effect on 1 May 2024 (amended 10 July 2025 for the ownership certificate text only). It sits
+# alongside per-application-type Local Validation Guidance chapters; Grokbot's headline link was one
+# of those chapters. The build takes the list URL and date from the audit. Many workbook excerpts
+# are fragments or carry neighbouring items' text. Section numbers (2.x) are the list's.
+# Items marked "From the audit" use the audit's paraphrase, not the council's exact words.
+local-authority: ESK
+
+submission-standards:
+  - item: Drawings have a unique drawing number which also indicates any revisions (e.g. 1234 Revision
+      B)
+    level: must
+  - item: Plans drawn to scale; a photograph of a plan is not acceptable
+    level: must
+  - item: Product specifications supplied as a PDF or copy of the page, not as a web address
+    level: must
+  - item: Applications comply with the council's Artificial Intelligence Policy, including declaring any
+      use of AI in submitted materials
+    level: must
+
+drop:
+  - id: archaeological-assessment
+    sheets: [Householder, Change of use - prior approval]
+    reason: "wrong_app_type: the excerpt itself excludes householder works and changes of use with no
+      physical works"
+  - id: viability-assessment
+    sheets: [Advertisement consent, Non-material amendment, Change of use - prior approval]
+    reason: "wrong_app_type: no basis in the source ('form of Viability Assessments.')"
+  - id: biodiversity-survey-report
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: a generic list of constraints"
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is the Arboricultural Method Statement (now a must-include of
+      arboriculturist-report)"
+  - id: photos
+    reason: "wrong_trigger: fragment ('scale, not photographed.') of the rule that plans must be to scale"
+  - id: section-existing
+    sheets: [Full planning]
+    reason: "wrong_trigger: the excerpt is noise impact text (now in noise-assessment)"
+  - id: section-proposed
+    sheets: [Full planning]
+    reason: "wrong_trigger: the excerpt is noise impact text (now in noise-assessment)"
+  - id: roof-plan-existing
+    sheets: [Change of use - prior approval]
+    reason: "wrong_trigger: conversion specification and marketing text"
+  - id: roof-plan-proposed
+    sheets: [Change of use - prior approval]
+    reason: "wrong_trigger: conversion specification and marketing text"
+  - id: arboriculturist-report
+    sheets: [Works to trees]
+    reason: "not_a_requirement: advice to contact the arboricultural officers"
+  - id: land-contamination-assessment
+    sheets: [Discharge of conditions]
+    reason: "not_a_requirement: text about who should carry out surveys"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "wrong_app_type: advice, not a requirement"
+  - local-name: Electric vehicle charging details
+    reason: "wrong_app_type: the s73 row quotes listed building text; the Full row is re-added below"
+  - local-name: Cycle parking details
+    reason: "wrong_trigger: fragment ('space for cycle parking. 2.34.4.')"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "duplicate: fragment of the Daylight/Sunlight Assessment trigger"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: navigation text; re-added below"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [air-quality-management-area]
+                description: The site is close to an Air Quality Management Area.
+            - discretionary
+    confidence: medium
+    notes: "Minor applications need one where they generate a considerable number of traffic movements
+      close to an AQMA (officer discretion)."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees on or overhanging the site that could be impacted by the
+          development.
+    must-include:
+      - item: An Arboricultural Method Statement (tree protection measures, schedules of tree work and
+          long-term maintenance proposals)
+        level: should
+        source-text: An Arboricultural Method Statement should also be provided that sets out the
+          information regarding the measures to be taken to protect the trees shown to be retained on
+          the submitted drawings, schedules of any necessary tree work, and proposals for long-term
+          maintenance.
+    confidence: medium
+    notes: "Audit (wrong_app_type): 2.6 applies wherever there are trees, including Householder."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the biodiversity gain condition.
+    confidence: medium
+
+  - id: construction-management-plan
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Larger sites, sites with potential access issues or a tight relationship with neighbouring
+      dwellings, or larger schemes where construction impacts may need to be controlled."
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Where the building's size, mass, form or location is likely to affect daylight or sunlight to
+      neighbours' habitable rooms or rear amenity areas."
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      all:
+        - site:
+            in: [conservation-area]
+            description: The site is in a Conservation Area.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates one or more dwellings.
+    source-text: For the creation of one of more dwellings in a Conservation Area, a Design and Access
+      Statement is also required.
+    confidence: medium
+    notes: "The local rule; the national requirements for a Design and Access Statement still apply."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: Adverse impact on a protected species or UK Priority species.
+        - site:
+            in: [priority-habitat, site-of-special-scientific-interest, local-wildlife-site,
+              special-area-of-conservation, special-protection-area]
+            description: UK Priority habitat, or within or affecting a designated site.
+    confidence: medium
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: An Environmental Impact Assessment is required.
+    confidence: medium
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      site:
+        in: [flood-risk-zone]
+        description: The site is in an area at risk of flooding.
+    confidence: medium
+    notes: "Audit (wrong_app_type): 2.32 applies by location, including Householder (e.g. converting an
+      outbuilding into sleeping accommodation in a flood risk area)."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building]
+            description: The building is a heritage asset or within the setting of one.
+    confidence: medium
+    notes: "Audit (wrong_app_type): 2.40 applies by location, including Householder."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: The proposal requires external lighting, including security and flood lighting.
+    confidence: medium
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: plant-equipment
+            value: true
+            description: Pumping or other mechanical equipment close to a neighbouring dwelling or
+              flats.
+        - discretionary
+    source-text: >-
+      … the pumping or other mechanical equipment would be located less than 2m from a boundary if
+      that boundary is within another dwelling, Or it is attached to or within 1m of a building
+      containing flats/apartments, the application will need to include a Noise Impact Assessment
+      or Acoustic report
+    confidence: medium
+    notes: "The wording was in the workbook's site levels row. Other cases are shown as officer
+      discretion."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [open-space]
+            description: Development on open space, in public or private ownership.
+        - condition:
+            field: loss-of-open-space
+            value: true
+            description: The proposal would result in the loss of open space.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 5
+            description: A residential development of 5 or more dwellings.
+        - discretionary
+    confidence: medium
+    notes: "The creation of open space is shown as officer discretion."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: A town centre use on an edge of centre or out of centre site.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 350
+            description: Greater than 350 square metres.
+    policy: WLP8.18
+    confidence: low
+    notes: "The excerpt gives the threshold for one former district's Local Plan area only; the other
+      area's threshold was not captured."
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: Works are proposed to the roof.
+    confidence: medium
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: Works are proposed to the roof.
+    confidence: medium
+
+  - id: sci
+    action: replace
+    required-if:
+      ref: major-development
+    source-text: Required for all Major developments
+    source-url:
+      https://www.eastsuffolk.gov.uk/assets/Planning/Planning-Applications/Local-Validation-List/ESC-Local-Validation-List.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): 2.14 Community Consultation Statement. The workbook's excerpt was a
+      run-on of navigation text."
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "'All applications where the proposed development is likely to generate significant traffic
+      movements and have significant transport implications'."
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "'All applications where the proposed development is likely to generate significant traffic
+      movements and have significant transport implications'."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Where viability is cited, the proposal provides less than the policy requirements, converts
+      holiday lets to unrestricted dwellings, or seeks a non-compliant use on viability grounds."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: There is reason to believe contamination could be an issue.
+    confidence: medium
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Telecommunications development.
+    source-url:
+      https://www.eastsuffolk.gov.uk/assets/Planning/Planning-Applications/Local-Validation-List/ESC-Local-Validation-List.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): 2.66 Telecommunications Report; the trigger is assumed
+      from the item's name."
+
+  - id: coastal-change-assessment
+    action: add
+    required-if:
+      site:
+        in: [coastal-erosion-zone]
+        description: Development in a Coastal Change Management Area, or within 30m landward of it.
+    source-text: Development in a Coastal Change Management Area, or within or 30m landward of it
+    source-url:
+      https://www.eastsuffolk.gov.uk/assets/Planning/Planning-Applications/Local-Validation-List/ESC-Local-Validation-List.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement): 2.13 Coastal Erosion Vulnerability Assessment."
+
+unmapped:
+  - local-name: Electric vehicle charging details
+    source-text: "for recharging electric vehicles must include: - Details of the position/location of the
+      outlets/upstands in relation to the parking space they are to serve on the Proposed Block
+      Plan/Site Layout Plans, Details of the proposed height above ground level"
+    source-url: https://www.eastsuffolk.gov.uk/sites/default/files/2025-12/Local%20Validation%20Guidance%20Chapter%206.pdf
+    suggested-id: ""
+  - local-name: Draft Heads of Terms
+    source-text: "Applications will not be made invalid because they lack Draft Heads of Terms, however you
+      are strongly advised to submit them with the following applications as this will speed up the
+      process. All applications for more than 10 dwellings Recreational disturbance Avoidance
+      Mitigation Strategy (RAMS) When advised of the need through Pre-application advice"
+    source-url:
+      https://www.eastsuffolk.gov.uk/assets/Planning/Planning-Applications/Local-Validation-List/ESC-Local-Validation-List.pdf
+    suggested-id: heads-of-terms
+  - local-name: Habitats Regulation Assessment (HRA) and RAMS tariff form/payment
+    source-text: "Propose 1 or more net new dwellings, or liable development (including holiday lets),
+      within 13km RAMS Zone of Influence of the Suffolk Coast Habitat Sites consisting of: o Special Areas
+      of Conservation (SAC) o Special Protection Areas (SPA) o Ramsar Sites"
+    source-url:
+      https://www.eastsuffolk.gov.uk/assets/Planning/Planning-Applications/Local-Validation-List/ESC-Local-Validation-List.pdf
+    suggested-id: habitats-regulations-assessment
+  - local-name: Building Heights / Number of Storeys Plan
+    source-text: "The plan should be a copy of the proposed site layout/block plan(s) annotated clearly to
+      show the number of storeys within each building (or part of building if there is variation within
+      a block/building)."
+    source-url:
+      https://www.eastsuffolk.gov.uk/assets/Planning/Planning-Applications/Local-Validation-List/ESC-Local-Validation-List.pdf
+    suggested-id: ""
+  - local-name: Agricultural Diversification Statement
+    source-text: "From the audit: 2.2, farm or rural diversification (recommended)"
+    source-url:
+      https://www.eastsuffolk.gov.uk/assets/Planning/Planning-Applications/Local-Validation-List/ESC-Local-Validation-List.pdf
+    suggested-id: ""
+  - local-name: Amendments / Changes Statement
+    source-text: "From the audit: 2.4, s73, non-material amendments, and reserved matters on live schemes"
+    source-url:
+      https://www.eastsuffolk.gov.uk/assets/Planning/Planning-Applications/Local-Validation-List/ESC-Local-Validation-List.pdf
+    suggested-id: amendment-documents
+  - local-name: Dust Assessment
+    source-text: "From the audit: 2.26 (no trigger given)"
+    source-url:
+      https://www.eastsuffolk.gov.uk/assets/Planning/Planning-Applications/Local-Validation-List/ESC-Local-Validation-List.pdf
+    suggested-id: dust-assessment
+  - local-name: Dwelling Sizes and Tenure Plan
+    source-text: "From the audit: 2.27, residential schemes of more than two dwellings"
+    source-url:
+      https://www.eastsuffolk.gov.uk/assets/Planning/Planning-Applications/Local-Validation-List/ESC-Local-Validation-List.pdf
+    suggested-id: accommodation-schedule
+  - local-name: Geodiversity Survey
+    source-text: "From the audit: 2.36 (no trigger given)"
+    source-url:
+      https://www.eastsuffolk.gov.uk/assets/Planning/Planning-Applications/Local-Validation-List/ESC-Local-Validation-List.pdf
+    suggested-id: ""
+  - local-name: Glint and Glare Assessment
+    source-text: "From the audit: 2.37 (no trigger given)"
+    source-url:
+      https://www.eastsuffolk.gov.uk/assets/Planning/Planning-Applications/Local-Validation-List/ESC-Local-Validation-List.pdf
+    suggested-id: ""
+  - local-name: Hydrographical / Bathymetric Survey
+    source-text: "From the audit: 2.42, works below high tide level"
+    source-url:
+      https://www.eastsuffolk.gov.uk/assets/Planning/Planning-Applications/Local-Validation-List/ESC-Local-Validation-List.pdf
+    suggested-id: ""
+  - local-name: Isometric Drawings / Virtual 3D Modelling
+    source-text: "From the audit: 2.43 (no trigger given)"
+    source-url:
+      https://www.eastsuffolk.gov.uk/assets/Planning/Planning-Applications/Local-Validation-List/ESC-Local-Validation-List.pdf
+    suggested-id: 3d-model
+  - local-name: Joinery and Window Details
+    source-text: "From the audit: 2.44 (no trigger given)"
+    source-url:
+      https://www.eastsuffolk.gov.uk/assets/Planning/Planning-Applications/Local-Validation-List/ESC-Local-Validation-List.pdf
+    suggested-id: joinery-details
+  - local-name: Public Rights of Way
+    source-text: "From the audit: 2.56 (no trigger given)"
+    source-url:
+      https://www.eastsuffolk.gov.uk/assets/Planning/Planning-Applications/Local-Validation-List/ESC-Local-Validation-List.pdf
+    suggested-id: public-rights-of-way-statement
+  - local-name: Sustainable Construction Statement
+    source-text: "From the audit: 2.65 (no trigger given)"
+    source-url:
+      https://www.eastsuffolk.gov.uk/assets/Planning/Planning-Applications/Local-Validation-List/ESC-Local-Validation-List.pdf
+    suggested-id: sustainability-statement
+  - local-name: Topographical Survey
+    source-text: "From the audit: 2.67, significant changes in levels"
+    source-url:
+      https://www.eastsuffolk.gov.uk/assets/Planning/Planning-Applications/Local-Validation-List/ESC-Local-Validation-List.pdf
+    suggested-id: topographical-survey
+  - local-name: Biomass Boiler Form
+    source-text: "From the audit: 2.10, new or replacement biomass boilers"
+    source-url:
+      https://www.eastsuffolk.gov.uk/assets/Planning/Planning-Applications/Local-Validation-List/ESC-Local-Validation-List.pdf
+    suggested-id: ""
+  - local-name: Conversion Specification
+    source-text: "From the audit: 2.19 (appears only as a fragment in the prior approval roof plan / structural
+      survey text)"
+    source-url:
+      https://www.eastsuffolk.gov.uk/assets/Planning/Planning-Applications/Local-Validation-List/ESC-Local-Validation-List.pdf
+    suggested-id: ""
+
+low-confidence:
+  - id: affordable-housing-statement
+    note: "Audit (wrong_trigger): fragment ('by and Affordable Housing Statement.'); no trigger captured."
+  - id: planning-statement
+    note: "The workbook's excerpt is a fragment about where to put personal reasoning; no trigger captured."
+  - id: section-existing
+    note: "The remaining excerpts are fragments (cross sections for floor-to-ceiling heights, accurate
+      survey); the audit says a Topographical Survey (2.67) covers significant level changes."
+  - id: section-proposed
+    note: "The remaining excerpts are fragments; see the Topographical Survey (2.67)."
