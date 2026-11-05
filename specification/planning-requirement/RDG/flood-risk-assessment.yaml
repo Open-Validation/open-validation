@@ -1,28 +1,58 @@
 reference: flood-risk-assessment
 local-authority: RDG
 required-if:
-  any:
-  - condition:
-      field: site-area-residential
-      operator: '>='
-      value: 1
-      description: The site is 1 hectare or more (Flood Zone 1).
-  - condition:
-      field: site-area-non-residential
-      operator: '>='
-      value: 1
-      description: The site is 1 hectare or more (Flood Zone 1).
-  - site:
+  all:
+  - application-type:
       in:
-      - flood-risk-zone
-      description: New development, including household or small commercial extensions, in Flood Zone
-        2, 3a or 3b.
+      - hh
+      - full
+      - outline
+  - any:
+    - condition:
+        field: site-area-residential
+        operator: '>='
+        value: 1
+        description: Site of 1 hectare or more (Flood Zone 1).
+    - condition:
+        field: site-area-non-residential
+        operator: '>='
+        value: 1
+        description: Site of 1 hectare or more (Flood Zone 1).
+    - all:
+      - site:
+          in:
+          - flood-risk-zone
+          description: In Flood Zone 2, 3a or 3b.
+      - condition:
+          field: building-works
+          value: true
+          description: New development, including householder or small commercial extensions (under 250
+            sq m).
 source-url: https://images.reading.gov.uk/2021/12/Validation-Checklist-2021-Final-Version-02.12.21.pdf
-source-text: Flood Risk Assessment When required A Flood Risk Assessment (FRA) will be required for development
-  proposals of 1 hectare or greater area in Flood Zone 1 and for all proposals for new development, including
-  household or small commercial extensions (under 250 sq.m), in Flood Zones 2, 3a and 3b as designated
-  by the Environment Agency.
-confidence: low
-notes: The workbook guessed the application type ('INFERRED'), so no type is given.
+policy: NPPF; Reading Borough Local Plan 2019 policies EN18
+source-text: A Flood Risk Assessment (FRA) will be required for development proposals of 1 hectare or
+  greater area in Flood Zone 1 and for all proposals for new development, including household or small
+  commercial extensions (under 250 sq.m), in Flood Zones 2, 3a and 3b as designated by the Environment
+  Agency.
+must-include:
+- item: Risks of all forms of flooding to and from the development, and how they will be managed, taking
+    climate change into account
+  level: should
+- item: Sequential and exception tests
+  level: should
+  required-if:
+    all:
+    - ref: major-development
+    - site:
+        in:
+        - flood-risk-zone
+        description: In Flood Zone 2 or 3.
+- item: Opportunities for sustainable drainage systems
+  level: should
+- item: Safe access to and from the development in areas at risk of flooding
+  level: should
+confidence: medium
+notes: From the council's list (published November 2021), Part 2 tables and Part 3 item 10, page 7, 10,
+  26.
 review-status: unverified
 field-status: {}
