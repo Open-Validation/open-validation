@@ -1,0 +1,324 @@
+# Corrections for Fenland District Council, from inputs/audit/fenland-district-council.json.
+# The workbook relies on Fenland's old per-application-type PF validation PDFs (PF01-PF11, about
+# 2023); the linked PF04 no longer loads. Fenland consulted on a single consolidated Local
+# Validation List in autumn 2024 and moved to adopt it, but the audit could not fetch it, so the
+# contents were not checked (every file stays low confidence). Grokbot copied the combined PF forms'
+# items across many application types (adverts, demolition, LBC), so where an excerpt gives a clear
+# trigger the requirement is rebuilt from that trigger without the copied types.
+local-authority: FEN
+
+validation-list:
+  url: https://fenland.gov.uk/media/19597/PF04-Planning-permission/pdf/PF04_Planning_permission.pdf?m=638142996903870000
+  date: 2023
+  date-basis: "audit: the PF PDFs' URL timestamps correspond to early 2023 (the 2024-07 date was PDF
+    metadata); they have since been replaced by a consolidated list consulted on in Sep-Oct 2024"
+
+submission-standards:
+  - item: "'Do not scale' quoted on plans will not be accepted"
+    level: must
+
+requirements:
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 50
+            description: Development of more than 50 dwellings.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 1000
+            description: Development of more than 1,000 sq metres of commercial floor space.
+    source-text: >-
+      Air Quality Impact Assessments Required for all developments that will generate significant
+      amounts of vehicle movements i.e. development of more than 50 dwellings or 1,000 sq metres of
+      commercial floor space
+    source-url: https://fenland.gov.uk/media/19597/PF04-Planning-permission/pdf/PF04_Planning_permission.pdf?m=638142996903870000
+    policy: NPPF 2021 para 186
+    confidence: medium
+    notes: "The workbook copied this item onto LBC, advert and demolition sheets from the combined PF forms."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      all:
+        - site:
+            in: [tree-preservation-zone, conservation-area]
+            description: Trees subject to tree preservation orders or within a conservation area.
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Any part of a tree, including canopy and root protection area, is within 10 metres
+              of the proposed development.
+    source-text: >-
+      Tree Report/Arboricultural Implications Trees subject to tree preservation orders or within a
+      conservation area: A tree report is required for trees or any part of a tree including canopy
+      and root protection area within 10 metres of the proposed development
+    source-url: https://fenland.gov.uk/media/19597/PF04-Planning-permission/pdf/PF04_Planning_permission.pdf?m=638142996903870000
+    confidence: medium
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      Biodiversity Checklist/Report Completion of the checklist is required FOR ALL applications with
+      an accompanying ecology report if required as indicated on the checklist; the report to be
+      undertaken by a qualified Ecologist.
+    source-url: https://fenland.gov.uk/media/19597/PF04-Planning-permission/pdf/PF04_Planning_permission.pdf?m=638142996903870000
+    confidence: medium
+    notes: "Needed where the Biodiversity Checklist indicates it (the checklist itself is an unmapped item)."
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the statutory biodiversity gain condition.
+    source-text: >-
+      Biodiversity Net Gain o Completed questions on application form o Completed BNG Supporting
+      statement … o Completed statutory metric calculation. o Plan as detailed on the statement.
+    source-url: https://fenland.gov.uk/media/15133/PF05-Validation-requirements/pdf/PF05_Outline_PP_with_some_matters_reserved.pdf?m=638258833268800000
+    must-include:
+      - item: Completed BNG questions on the application form
+        level: must
+      - item: Completed BNG Supporting Statement
+        level: must
+      - item: Completed statutory metric calculation
+        level: must
+      - item: Plan as detailed on the statement
+        level: must
+    confidence: low
+    notes: "The excerpt gives no trigger; the statutory biodiversity gain condition is assumed."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - condition:
+                field: floorspace
+                operator: ">="
+                value: 100
+                description: The proposal creates 100 sqm or more.
+        - application-type:
+            in: [lbc]
+    source-text: >-
+      Design and access statement for: o Applications in a conservation area if creating 100sqm or
+      more o Listed building applications
+    source-url: https://fenland.gov.uk/media/19596/PF03-Householder-and-LB/pdf/PF03_Householder_and_LB.pdf?m=638142996901070000
+    confidence: medium
+    notes: "From the householder and listed building checklists; the full planning checklist's DAS rule was
+      not captured."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: Two or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: Educational accommodation.
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: 18m or more in height.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: 7 or more storeys.
+    source-text: >-
+      Fire Statements: Required for two or more dwellings or educational accommodation and meet the
+      height condition: 18m or more in height, or 7 or more storeys
+    source-url: https://fenland.gov.uk/media/19597/PF04-Planning-permission/pdf/PF04_Planning_permission.pdf?m=638142996903870000
+    confidence: medium
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      site:
+        in: [flood-risk-zone]
+        description: Required where indicated on the Environment Agency flood risk matrix.
+    source-text: >-
+      Flood risk assessment Required where indicated on the Environment Agency flood risk matrix, as
+      indicated on the application form.
+    source-url: https://fenland.gov.uk/media/19597/PF04-Planning-permission/pdf/PF04_Planning_permission.pdf?m=638142996903870000
+    policy: Fenland Local Plan 2014 LP14
+    confidence: low
+    notes: "The list points to the Environment Agency flood risk matrix rather than stating a trigger; flood
+      zones are used as the nearest rule."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, conservation-area, scheduled-monument]
+        description: The application affects a listed building, conservation area or scheduled ancient
+          monument, or the setting of one.
+    source-text: >-
+      Heritage Statement Required for applications where it affects a heritage asset or the setting of
+      one being: Listed Buildings or affecting the setting of listed buildings, conservation areas or
+      the setting of a conservation area, scheduled ancient monuments or the setting of a scheduled
+      ancient monument.
+    source-url: https://fenland.gov.uk/media/19597/PF04-Planning-permission/pdf/PF04_Planning_permission.pdf?m=638142996903870000
+    confidence: medium
+
+  - id: photos
+    action: update
+    must-include:
+      - item: The whole building and its setting and/or the particular section of the building affected
+          by the proposals
+        level: must
+      - item: Photographs cross-referenced with the floor plans and elevations
+        level: should
+
+  - id: roof-plan-existing
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      An existing roof plan may be required for complex roof structures and might be asked for during
+      the determination of the application.
+    source-url: https://fenland.gov.uk/media/19594/PF01-Householder/pdf/PF01_Householder.pdf?m=638142996894870000
+    confidence: medium
+
+  - id: roof-plan-proposed
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: roof-alteration
+            value: true
+            description: The proposal changes roof forms.
+        - condition:
+            field: residential-extension
+            value: true
+            description: The proposal involves extensions.
+    source-text: >-
+      Proposed roof plans for all applications involving extensions and/or changes to roof forms (e.g.
+      at a scale of 1:50 or 1:100)
+    source-url: https://fenland.gov.uk/media/19594/PF01-Householder/pdf/PF01_Householder.pdf?m=638142996894870000
+    confidence: medium
+    notes: "From the householder checklist; 'extensions' is read as extensions to a house."
+
+  - id: schedule-of-works
+    action: replace
+    required-if:
+      application-type:
+        in: [lbc]
+    source-text: >-
+      Schedule of Works: A schedule of works should show clearly what changes are proposed in each
+      room affecting the layout, or any feature, including method of undertaking repairs
+    source-url: https://fenland.gov.uk/media/19601/PF08-Planning-permission-and-LB/pdf/PF08_Planning_permission_and_LB.pdf?m=638142996921100000
+    must-include:
+      - item: The changes proposed in each room affecting the layout or any feature
+        level: should
+      - item: The method of undertaking repairs
+        level: should
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook also placed it under Householder; it applies only to listed
+      building works."
+
+  - id: section-existing
+    action: replace
+    required-if:
+      all:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: Residential development.
+    source-text: >-
+      Existing and proposed site sections, finished floor levels and site levels (e.g. at a scale of
+      1:50 of 1:100) for Major residential applications
+    source-url: https://fenland.gov.uk/media/19602/PF09-Planning-permission-and-advert-consent/pdf/PF09_Validation_requirements.pdf?m=638321982418970000
+    confidence: medium
+    notes: "The workbook placed this under Advertisement consent (from the combined planning and advert form)."
+
+  - id: section-proposed
+    action: replace
+    required-if:
+      all:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: Residential development.
+    source-text: >-
+      Existing and proposed site sections, finished floor levels and site levels (e.g. at a scale of
+      1:50 of 1:100) for Major residential applications
+    source-url: https://fenland.gov.uk/media/19602/PF09-Planning-permission-and-advert-consent/pdf/PF09_Validation_requirements.pdf?m=638321982418970000
+    must-include:
+      - item: Finished floor levels and site levels
+        level: must
+    confidence: medium
+    notes: "The workbook placed this under Advertisement consent (from the combined planning and advert form)."
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: Existing and proposed site plans (e.g. at a scale of 1:100 or 1:200)
+        level: must
+      - item: The access, the proposal, all site boundaries and the position of all surrounding buildings
+        level: must
+
+  - id: telecommunications-report
+    action: replace
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Mast and antenna development.
+    source-text: >-
+      Telecommunications Development – supplementary information Required for all applications for
+      mast and antenna development in accordance with the Code of Practice on Mobile Network
+      Development 2016.
+    source-url: https://fenland.gov.uk/media/19597/PF04-Planning-permission/pdf/PF04_Planning_permission.pdf?m=638142996903870000
+    confidence: medium
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: The development is outside of town centres.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 500
+            description: More than 500 sq metres.
+    source-text: >-
+      Retail Impact Assessments Required for developments of more than 500 sq metres outside of town
+      centres
+    source-url: https://fenland.gov.uk/media/19597/PF04-Planning-permission/pdf/PF04_Planning_permission.pdf?m=638142996903870000
+    policy: Fenland Local Plan 2014 LP6; NPPF 2021 para 90
+    confidence: medium
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    notes: "Audit (wrong_trigger): the list only says 'Please visit the website below for when a travel plan
+      is required'."
+
+low-confidence:
+  - id: "*"
+    note: "Audit (outdated_link): from Fenland's old per-type PF validation lists, since replaced by a
+      consolidated Local Validation List (consulted on Sep-Oct 2024) that could not be checked."

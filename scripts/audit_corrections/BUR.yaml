@@ -1,0 +1,427 @@
+# Corrections for Bury Metropolitan Borough Council, from inputs/audit/bury-metropolitan-borough-council.json.
+# The workbook links the current 'Local criteria all developments validation checklist' ('Bury
+# Council Checklist Criteria March 2026', approved by Planning Control Committee on 24 March 2026;
+# the build reads that date). It has 32 numbered local criteria, items 26-32 merged in from the
+# Places for Everyone checklist. The type-specific checklists (householder, advertisement,
+# telecoms prior approval, waste, wind turbines) are still dated 19 March 2024. Rows from the
+# waste checklist (Grokbot's 'Minerals & waste' sheet: mineral-app, waste-dev) are kept; rules
+# replaced below keep a branch for them. Items without the council's own words use the audit's
+# paraphrase ("From the audit").
+local-authority: BUR
+
+drop:
+  - id: site-plan
+    sheets: [Change of use - prior approval, Full planning]
+    reason: "wrong_app_type/wrong_trigger: the change-of-use row is from the telecoms prior approval checklist; the Full row quotes the Appendix 1 drainage layout list"
+  - id: landscaping-plan
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: from the telecoms prior approval checklist, which does not apply to change of use"
+  - id: bng-metric
+    sheets: [Outline]
+    reason: "wrong_document: March 2024 committee report narrative"
+  - id: recreation-facilities-assessment
+    reason: "wrong_document: March 2024 committee report narrative; the amenity space item is re-added below as unmapped"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: checklist questions and S106 Heads of Terms text"
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_trigger: the fragment 'intensity of illumination.' from External Lighting"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "misnamed: this is item 5 Amenity Space/Recreational Provision; re-added below"
+  - local-name: Character / Conservation area appraisal reference
+    reason: "duplicate: part of the Heritage Statement item (item 6)"
+
+requirements:
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 25
+            description: 25 or more dwellings.
+        - discretionary
+    source-url: https://www.bury.gov.uk/asset-library/local-criteria-all-developments-validation-checklist.pdf
+    must-include:
+      - item: Vacant Building Credit evidence, where it is claimed
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 3, 25 or more dwellings, or wherever affordable housing is provided (shown as officer discretion)."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [mineral-app, waste-dev]
+        - site:
+            in: [air-quality-management-area]
+            description: The development is in or affects an Air Quality Management Area.
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 9 is AQMA-related; the waste checklist row is kept."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Development within 2m of a tree canopy, or trees within or adjoining the site.
+    must-include:
+      - item: The positions of all trees of 75mm stem diameter at 1.5 metres within the site and
+          adjoining or overhanging the site boundaries
+        level: must
+      - item: The canopy spread of such trees
+        level: must
+      - item: All shrub masses and hedges, and other relevant features such as banks, slopes, walls
+          and fences
+        level: must
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): item 14 asks for a tree survey on householder
+      development within 2m of a tree canopy. The trigger for other applications is not given.
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: storey-count
+            operator: ">="
+            value: 4
+            description: New buildings of 4 or more storeys adjoining developed land.
+        - discretionary
+    source-url: https://www.bury.gov.uk/asset-library/local-criteria-all-developments-validation-checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 4, new buildings of 4+ storeys adjoining developed land, or sites subject to significant shading (officer discretion)."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, mineral-app, waste-dev]
+        - ref: major-development
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The development is in a conservation area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: One or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">"
+                    value: 100
+                    description: Over 100 square metres of floorspace.
+    source-text: A design and access statement will be required in all cases.
+    source-url: https://www.bury.gov.uk/asset-library/local-criteria-all-developments-validation-checklist.pdf
+    must-include:
+      - item: Appropriate photographs
+        level: should
+        source-text: Any Design and Access Statement or Conservation Area Appraisal should be accompanied by appropriate photographs.
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the Householder and Reserved matters rows were a heritage-section
+      fragment. Item 1 requires a DAS for major development, listed building consent and
+      conservation area development of one or more dwellings or over 100m2; the waste checklist
+      ("in all cases", quoted) applies to waste applications.
+
+  - id: elevation-proposed
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, advertising]
+    must-include:
+      - item: Scaled drawings (not less than 1:100) showing size, siting, materials, colour, height
+          above ground and projection of the advertisement
+        level: must
+        required-if:
+          application-type:
+            in: [advertising]
+      - item: The method and colours of illumination
+        level: must
+        required-if:
+          all:
+            - application-type:
+                in: [advertising]
+            - condition:
+                field: illuminated
+                value: true
+                description: The advertisement is illuminated.
+    confidence: low
+    notes: "From the audit (missing_requirement): the advertisement consent checklist (19 March 2024), which Grokbot did not read."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - application-type:
+                in: [full, outline, reserved-matters]
+            - condition:
+                field: new-build
+                value: true
+                description: New buildings (householder excluded).
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: Change of use applications.
+    source-url: https://www.bury.gov.uk/asset-library/local-criteria-all-developments-validation-checklist.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): item 26 Carbon and Energy Statement, for all major
+      developments, all new buildings excluding householder, and change of use applications.
+      'Not householder' is shown as full, outline and reserved matters applications.
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is EIA development.
+    source-url: https://www.bury.gov.uk/asset-library/local-criteria-all-developments-validation-checklist.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the Full row quoted the Health Impact Assessment trigger (now under unmapped)."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [mineral-app, waste-dev]
+        - site:
+            in: [flood-risk-zone]
+            description: Flood Zone 2 or 3, including minor development and change of use.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: A site over 1 hectare in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: A site over 1 hectare in Flood Zone 1.
+        - site:
+            in: [critical-drainage-area]
+            description: The site is in a critical drainage area.
+        - discretionary
+    source-text: "11 Flood Risk Assessments - A flood risk assessment will be required in all cases."
+    source-url: https://www.bury.gov.uk/asset-library/local-criteria-all-developments-validation-checklist.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): from the audit (item 11(a)), Flood Zones 2/3 including minor
+      development and change of use, sites over 1ha in Flood Zone 1, certain Flood Zone 1 changes
+      to more vulnerable uses (officer discretion), and critical drainage areas. The quoted text is
+      the waste checklist's.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [conservation-area, listed-building, listed-building-setting, scheduled-monument,
+              locally-listed-building]
+            description: The development is in or affects a conservation area, the setting of a
+              listed building or scheduled monument, or a non-designated heritage asset.
+    source-text: >-
+      Heritage Statements/ Listed Building Character Assessment/Conservation Area Appraisal/Non
+      Designated Heritage Assets In line with Paragraph 200 of the National Planning Policy
+      Framework applicants are required to describe the significance of any heritage assets
+      affected, including any contribution made by their setting.
+    source-url: https://www.bury.gov.uk/asset-library/local-criteria-all-developments-validation-checklist.pdf
+    must-include:
+      - item: The significance of any heritage assets affected, including any contribution made by
+          their setting
+        level: must
+    confidence: medium
+    notes: "Audit (missing_requirement): item 6 also applies to full applications, not only LBC and householder."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [mineral-app, waste-dev]
+        - condition:
+            field: external-lighting
+            value: true
+            description: External lighting is proposed.
+    must-include:
+      - item: The proposed hours when the lighting would be switched on
+        level: must
+    confidence: medium
+
+  - id: photos
+    action: update
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [mineral-app, waste-dev]
+            - condition:
+                field: demolition
+                value: true
+                description: The proposal involves demolition of an existing building.
+        - site:
+            in: [conservation-area, listed-building]
+            description: Development affecting a conservation area or listed building.
+    confidence: medium
+    notes: "Any Design and Access Statement or Conservation Area Appraisal should be accompanied by appropriate photographs (item 6)."
+
+  - id: planning-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [mineral-app, waste-dev]
+        - ref: major-development
+        - condition:
+            field: departure-from-development-plan
+            value: true
+            description: Development not in accordance with the development plan.
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 1 Supporting Planning Policy Statement, all major development and development not in accordance with the development plan."
+
+  - id: sci
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Required where proposals are likely to generate significant public interest."
+
+  - id: telecommunications-report
+    action: replace
+    required-if:
+      application-type:
+        in: [pa-ecomms-network]
+    source-text: ICNIRP certificate
+    source-url: https://www.bury.gov.uk/asset-library/prior-approval-telecommunications-equipment-march-2024.pdf
+    must-include:
+      - item: ICNIRP certificate
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): from the Prior Approval for Telecommunications Equipment checklist, not change of use."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: retail-floorspace
+            operator: ">"
+            value: 2500
+            description: Retail over 2,500m2 gross.
+        - discretionary
+    source-url: https://www.bury.gov.uk/asset-library/local-criteria-all-developments-validation-checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 10 Retail Impact Assessment, retail over 2,500m2 gross or a significant change in retail floorspace (officer discretion)."
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [mineral-app, waste-dev]
+        - discretionary
+    must-include:
+      - item: The impact on Holcroft Moss (Places for Everyone Policy JP-C8)
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 32 asks Transport Assessments to consider the impact on Holcroft Moss."
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: New dwellings.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 0
+            description: New business, retail, food, pub, industrial or leisure uses.
+    source-url: https://www.bury.gov.uk/asset-library/local-criteria-all-developments-validation-checklist.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): item 17 Refuse Disposal Details. The workbook's only
+      row was waste-licence process text from the waste checklist.
+
+unmapped:
+  - local-name: Amenity Space / Recreational Provision
+    source-text: >-
+      All applications involving new residential development will be required to show amenity
+      space to be associated with the development or justify under provision. (From the audit:
+      item 5, 10 units over 1,000m2 or 11+ dwellings)
+    source-url: https://www.bury.gov.uk/asset-library/local-criteria-all-developments-validation-checklist.pdf
+    suggested-id: open-space-assessment
+  - local-name: Health Impact Assessment
+    source-text: >-
+      New developments that provide new or improved health facilities. Proposals which, due to
+      their location, nature or proximity to sensitive locations, are likely to have a notable
+      impact on health and wellbeing. (From the audit: item 30, also EIA-screened development)
+    source-url: https://www.bury.gov.uk/asset-library/local-criteria-all-developments-validation-checklist.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Heat and Energy Statement
+    source-text: >-
+      Threshold: Residential developments of 10 dwellings or more in Heat and Energy Network
+      Opportunity Areas New industrial development in Heat and Energy Network Opportunity Areas.
+    source-url: https://www.bury.gov.uk/asset-library/local-criteria-all-developments-validation-checklist.pdf
+    suggested-id: heat-network-statement
+  - local-name: Parking and Servicing Details
+    source-text: "From the audit: item 8, all non-householder applications"
+    source-url: https://www.bury.gov.uk/asset-library/local-criteria-all-developments-validation-checklist.pdf
+    suggested-id: parking-plan
+  - local-name: Crime Impact Statement
+    source-text: >-
+      From the audit: item 22, all major development; 10+ residential units; student accommodation
+      of 6+ units; supported housing; 500m2+ office/industrial/retail/leisure; hotels; licensed
+      premises; car parks
+    source-url: https://www.bury.gov.uk/asset-library/local-criteria-all-developments-validation-checklist.pdf
+    suggested-id: crime-prevention-statement
+  - local-name: Coal Mining Report
+    source-text: "From the audit: item 24, development breaking ground in Coal Authority high-risk areas"
+    source-url: https://www.bury.gov.uk/asset-library/local-criteria-all-developments-validation-checklist.pdf
+    suggested-id: coal-mining-risk-assessment
+  - local-name: TV Impact Assessment
+    source-text: "From the audit: item 25, new buildings of 4+ storeys adjoining developed residential land"
+    source-url: https://www.bury.gov.uk/asset-library/local-criteria-all-developments-validation-checklist.pdf
+    suggested-id: tv-reception-assessment
+  - local-name: Nationally Described Space Standards table
+    source-text: "From the audit: item 28, all new dwellings"
+    source-url: https://www.bury.gov.uk/asset-library/local-criteria-all-developments-validation-checklist.pdf
+    suggested-id: space-standards-statement
+  - local-name: Density Statement
+    source-text: "From the audit: item 29, all new dwellings"
+    source-url: https://www.bury.gov.uk/asset-library/local-criteria-all-developments-validation-checklist.pdf
+    suggested-id: density-statement
+  - local-name: Digital Connectivity Statement
+    source-text: "From the audit: item 31, all new buildings and all change of use applications, minor and major"
+    source-url: https://www.bury.gov.uk/asset-library/local-criteria-all-developments-validation-checklist.pdf
+    suggested-id: digital-connectivity-statement
+  - local-name: Driver distraction assessment (LED advertisement hoardings)
+    source-text: "From the audit: advertisement consent checklist, LED advertisement hoardings"
+    source-url: https://www.bury.gov.uk/asset-library/advertisement-consent-applications-validation-checklist-march-2024.pdf
+    suggested-id: ""
+  - local-name: Outline drainage information
+    source-text: "From the audit: Appendix 1, an outline drainage assessment and indicative drainage strategy for outline applications"
+    source-url: https://www.bury.gov.uk/asset-library/local-criteria-all-developments-validation-checklist.pdf
+    suggested-id: drainage-strategy
+
+low-confidence:
+  - id: noise-assessment
+    note: "Audit (wrong_trigger): the Full row is from the wind turbine checklist (noise and shadow flicker); the general noise trigger is not given."
+  - id: land-contamination-assessment
+    note: "The excerpts are content text. The list says a PRA, site investigation and remediation strategy may be needed depending on site and end use, but not for householder applications."

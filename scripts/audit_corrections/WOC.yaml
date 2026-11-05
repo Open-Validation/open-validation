@@ -1,0 +1,427 @@
+# Corrections for Worcester City Council, from inputs/audit/worcester-city-council.json.
+# The list is the 'Local Validation Document - November 2022', still the current list (the build
+# takes the url and date from the audit). It predates statutory BNG and still cites NPPF 2021 and
+# GPDO 'part 24' (now Part 16). Grokbot filed nearly everything under Full planning although the
+# document has a Figure 7 matrix by application type; the audit doesn't reproduce that matrix, so
+# the guessed types are removed and each item's own 'When required' text is used as the trigger.
+# Items marked "From the audit" use the audit's paraphrase, not the council's exact words.
+local-authority: WOC
+
+submission-standards:
+  - item: All drawings include a scale bar and key dimensions
+    level: must
+  - item: Drawings that include location plans or site plans have a north point
+    level: must
+  - item: Plans and drawings must not contain the phrase 'Do not scale'
+    level: must
+  - item: Plans and drawings dated, with the original paper size shown
+    level: must
+  - item: Maximum single file size 10 MB; maximum 25 MB for all documents together
+    level: must
+  - item: PDF is the recommended file format
+    level: should
+  - item: Photographs in PDF format and no larger than 15 cm x 10 cm
+    level: must
+
+drop:
+  - id: bng-metric
+    reason: >-
+      wrong_trigger: 2022 appendix guidance ('when net biodiversity gain becomes a legal
+      requirement'), not a trigger; statutory BNG is governed nationally
+  - id: site-plan
+    reason: "other: a national requirement; the excerpt is a fragment"
+  - id: floor-plan-existing
+    reason: "other: a national requirement; the excerpt is about elevations"
+  - id: floor-plan-proposed
+    reason: "other: a national requirement; the excerpt is about elevations"
+  - id: fire-statement
+    reason: "other: the national (Gateway One) requirement, not a local list item"
+  - id: sustainability-statement
+    reason: "wrong_trigger: the excerpt is the Energy Statement (now energy-statement)"
+  - id: sci
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: the list means major change of use planning applications, not prior approval"
+  - id: waste-management-plan
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: the list means change of use planning applications, not prior approval"
+
+drop-unmapped:
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "duplicate: no such item in the list; it reuses the Agricultural Land Assessment excerpt"
+  - local-name: Agricultural Land Classification / Soils
+    reason: "wrong_trigger: commentary, not the trigger; re-added below"
+  - local-name: Employment / Economic Statement
+    reason: "wrong_trigger: cut off at 'When required'; re-added below"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: this is the Odour Impact Assessment; both items are re-added below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if: discretionary
+    policy: "SWDP15"
+    confidence: medium
+    notes: "Where a development plan policy requires affordable housing, or a contribution in lieu, on the site."
+
+  - id: air-quality-assessment
+    action: update
+    required-if: discretionary
+    policy: "SWDP31"
+    confidence: medium
+    notes: "'Application proposals that impact upon air quality or are potential pollutants.'"
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees or hedges on or adjacent to the site could be affected (including
+          householder schemes).
+    must-include:
+      - item: How the tree constraints on and adjacent to the site have been incorporated into the
+          design
+        level: should
+      - item: How the trees are to be retained without damage during construction and future
+          occupancy
+        level: should
+    confidence: medium
+    notes: "Audit (wrong_app_type): the list's Tree Survey section explicitly includes householder schemes."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      site:
+        in: [archaeological-priority-area, scheduled-monument]
+        description: The development affects an archaeologically sensitive area (including a
+          Scheduled Ancient Monument or non-designated sites of archaeological interest).
+    policy: "SWDP6, SWDP24"
+    confidence: medium
+
+  - id: cil-form
+    action: update
+    required-if: discretionary
+    confidence: low
+    notes: "For all applications that are CIL liable (see the CIL Charging Schedule); 'CIL liable' can't be expressed as a rule."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: new-build
+            value: true
+            description: The application proposes new buildings.
+        - site:
+            in: [contaminated-land]
+            description: The site is or has been used for purposes that may lead to ground
+              contamination.
+    policy: "SWDP31"
+    confidence: medium
+    notes: "The excerpt is cut off after the first case ('… ground contamination …; or'); there may be further cases."
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+    policy: "SWDP21"
+    confidence: medium
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if: discretionary
+    must-include:
+      - item: Potential development impacts likely to harm designated sites, priority habitats,
+          other biodiversity and geological features, and protected/notable species and their
+          habitats identified by the survey
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): ecology surveys are expressly required for outline applications too,
+      and Appendix 1 sets bat survey triggers for householder applications on specified buildings
+      and features. No single trigger was captured.
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 100
+            description: New development over 100 square metres gross.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: One or more dwellings.
+    policy: "SWDP27"
+    source-text: >-
+      Energy Statement Policy Drivers South Worcestershire Development Plan 2016 – Policy SWDP27
+      National Planning Policy Framework When required With planning applications for new
+      development over 100 sq. metres gross, or one or more dwellings.
+    source-url: https://www.worcester.gov.uk/component/fileman/?view=file&routed=1&name=Local%20Validation%20Document%20-%20Nov%202022%20Final%20version.pdf&folder=PDF%20Documents%2FPlanning%2FPlanning%20Advice&container=fileman-files
+    confidence: medium
+    notes: "The workbook mapped this to sustainability-statement."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: Schedule 1, or some Schedule 2, development under the 2017 EIA Regulations.
+    confidence: medium
+    notes: "All applications over 0.5 ha are screened by the Local Planning Authority."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      site:
+        in: [flood-risk-zone]
+        description: All development in Flood Zones 2 and 3, including minor development.
+    policy: "SWDP28"
+    confidence: medium
+    notes: "Audit (wrong_app_type): applies to householder and minor development in Flood Zones 2/3. Only the first case was captured."
+
+  - id: elevation-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: external-alterations
+            value: true
+            description: Extensions or external alterations.
+        - condition:
+            field: new-build
+            value: true
+            description: New buildings.
+    must-include:
+      - item: A scale of 1:50 or 1:100
+        level: must
+    source-text: "and proposed elevations at a scale of 1:50 or 1:100 Required for any extensions, external alterations, or new buildings."
+    confidence: medium
+
+  - id: elevation-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: external-alterations
+            value: true
+            description: Extensions or external alterations.
+        - condition:
+            field: new-build
+            value: true
+            description: New buildings.
+    must-include:
+      - item: A scale of 1:50 or 1:100
+        level: must
+    source-text: "and proposed elevations at a scale of 1:50 or 1:100 Required for any extensions, external alterations, or new buildings."
+    confidence: medium
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, conservation-area, locally-listed-building, scheduled-monument]
+        description: The application affects a heritage asset or its setting.
+    must-include:
+      - item: A Historic Environment Record search
+        level: must
+      - item: Identification and description of all heritage assets that may be affected, with an
+          assessment of their significance
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): applies to any application affecting a heritage asset or its setting, including householder and listed building consent."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: Artificial external lighting that may materially alter light levels outside
+          the site (the list gives further cases, cut off in the excerpt).
+    policy: "SWDP21, SWDP25"
+    confidence: medium
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      condition:
+        field: noise-generating-use
+        value: true
+        description: New development that may create additional noise where noise-sensitive
+          development already exists.
+    policy: "SWDP31"
+    confidence: medium
+    notes: "Only the first case was captured ('… already exists; and')."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      condition:
+        field: loss-of-open-space
+        value: true
+        description: The development would result in the loss of recreational land or buildings.
+    policy: "SWDP38"
+    confidence: medium
+
+  - id: planning-statement
+    action: update
+    required-if:
+      ref: major-development
+    confidence: low
+    notes: >-
+      The audit says the list's Figure 7 matrix assigns it to major applications; the text itself
+      says a Planning Statement 'can be submitted with any planning application'.
+
+  - id: sci
+    action: update
+    required-if:
+      ref: major-development
+    must-include:
+      - item: How the applicant has complied with the pre-application consultation requirements of
+          the council's Statement of Community Involvement (paras 5.9-5.11)
+        level: must
+      - item: How the views of the local community have been sought and considered
+        level: must
+    confidence: medium
+    notes: "For all major and major change of use applications."
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    policy: "SWDP4, SWDP21"
+    confidence: medium
+    notes: "Thresholds are set by the Worcestershire LTP4 Streetscape Design Guide, not in the list."
+
+  - id: travel-plan
+    action: replace
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 50
+        description: Residential schemes of 50 or more dwellings.
+    source-text: "mandatory for residential schemes of 50+ dwellings"
+    source-url: https://www.worcester.gov.uk/component/fileman/?view=file&routed=1&name=Local%20Validation%20Document%20-%20Nov%202022%20Final%20version.pdf&folder=PDF%20Documents%2FPlanning%2FPlanning%20Advice&container=fileman-files
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted only a PPG citation. Schemes under 50 dwellings need a Welcome Pack."
+
+  - id: viability-assessment
+    action: replace
+    required-if: discretionary
+    source-url: https://www.worcester.gov.uk/component/fileman/?view=file&routed=1&name=Local%20Validation%20Document%20-%20Nov%202022%20Final%20version.pdf&folder=PDF%20Documents%2FPlanning%2FPlanning%20Advice&container=fileman-files
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted the EIA text. From the audit: needed where the
+      applicant says full policy requirements would make the scheme unviable.
+
+  - id: waste-management-plan
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: New dwellings, including apartment schemes.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: A change of use.
+        - condition:
+            field: retail-floorspace
+            operator: ">"
+            value: 0
+            description: Retail development.
+        - discretionary
+    policy: "SWDP33"
+    must-include:
+      - item: Individual waste bins accommodated within the curtilage of each property, not stored on
+          the highway
+        level: should
+        required-if:
+          condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: Residential units.
+    confidence: medium
+    notes: "Refuse storage and collection details. Industrial development is shown as officer discretion."
+
+  - id: telecommunications-report
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: telecommunications-development
+            value: true
+            description: Telecommunications development.
+        - application-type:
+            in: [pa-ecomms-network]
+    policy: "SWDP26"
+    source-text: >-
+      Telecommunications Development – supplementary information … When required All applications
+      proposing telecommunications development, including applications for prior approval under
+      part 24 of the Town and Country Planning (General Permitted Development) Order).
+    source-url: https://www.worcester.gov.uk/component/fileman/?view=file&routed=1&name=Local%20Validation%20Document%20-%20Nov%202022%20Final%20version.pdf&folder=PDF%20Documents%2FPlanning%2FPlanning%20Advice&container=fileman-files
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook filed this under change-of-use prior approval. GPDO 'part 24' is now Part 16."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: Main town centre uses outside designated centres.
+    source-url: https://www.worcester.gov.uk/component/fileman/?view=file&routed=1&name=Local%20Validation%20Document%20-%20Nov%202022%20Final%20version.pdf&folder=PDF%20Documents%2FPlanning%2FPlanning%20Advice&container=fileman-files
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Retail and Centres Impact Assessment for main town
+      centre uses outside designated centres; retail/leisure over 1,000 sq m net out of centre.
+
+unmapped:
+  - local-name: Agricultural Land Assessment
+    source-text: "From the audit: large greenfield solar farms, or loss of over 5 ha of agricultural land or 2 ha of best and most versatile land"
+    source-url: https://www.worcester.gov.uk/component/fileman/?view=file&routed=1&name=Local%20Validation%20Document%20-%20Nov%202022%20Final%20version.pdf&folder=PDF%20Documents%2FPlanning%2FPlanning%20Advice&container=fileman-files
+    suggested-id: agricultural-land-assessment
+  - local-name: Economic Statement
+    source-text: "From the audit: employment-generating development, 1,000 sq m+ commercial floorspace, change of use from employment (SWDP8, SWDP9, SWDP12)"
+    source-url: https://www.worcester.gov.uk/component/fileman/?view=file&routed=1&name=Local%20Validation%20Document%20-%20Nov%202022%20Final%20version.pdf&folder=PDF%20Documents%2FPlanning%2FPlanning%20Advice&container=fileman-files
+    suggested-id: employment-statement
+  - local-name: Odour Impact Assessment
+    source-text: >-
+      Odour Impact Assessments will be required to be provided with planning applications proposing
+      the installation of new commercial kitchens.
+    source-url: https://www.worcester.gov.uk/component/fileman/?view=file&routed=1&name=Local%20Validation%20Document%20-%20Nov%202022%20Final%20version.pdf&folder=PDF%20Documents%2FPlanning%2FPlanning%20Advice&container=fileman-files
+    suggested-id: odour-assessment
+  - local-name: Ventilation/Extraction Statement
+    source-text: "From the audit: new restaurants, hot food takeaways and pubs/bars serving hot food next to residential property"
+    source-url: https://www.worcester.gov.uk/component/fileman/?view=file&routed=1&name=Local%20Validation%20Document%20-%20Nov%202022%20Final%20version.pdf&folder=PDF%20Documents%2FPlanning%2FPlanning%20Advice&container=fileman-files
+    suggested-id: ventilation-extraction-statement
+  - local-name: Glint and Glare Assessment
+    source-text: "From the audit: proposals with large expanses of glass"
+    source-url: https://www.worcester.gov.uk/component/fileman/?view=file&routed=1&name=Local%20Validation%20Document%20-%20Nov%202022%20Final%20version.pdf&folder=PDF%20Documents%2FPlanning%2FPlanning%20Advice&container=fileman-files
+    suggested-id: glint-and-glare-assessment
+  - local-name: Employment Site Assessment
+    source-text: >-
+      From the audit: loss of B2/B8 floorspace of 1,000 sq m+ in urban areas, or loss of rural
+      B2/B8/tourism/leisure uses, with 12 months' marketing evidence
+    source-url: https://www.worcester.gov.uk/component/fileman/?view=file&routed=1&name=Local%20Validation%20Document%20-%20Nov%202022%20Final%20version.pdf&folder=PDF%20Documents%2FPlanning%2FPlanning%20Advice&container=fileman-files
+    suggested-id: marketing-evidence
+  - local-name: Water Management Statement
+    source-text: "From the audit: all applications draining waste or surface water; housing also needs water consumption information"
+    source-url: https://www.worcester.gov.uk/component/fileman/?view=file&routed=1&name=Local%20Validation%20Document%20-%20Nov%202022%20Final%20version.pdf&folder=PDF%20Documents%2FPlanning%2FPlanning%20Advice&container=fileman-files
+    suggested-id: drainage-strategy
+
+low-confidence:
+  - id: photos
+    note: "Audit (wrong_trigger): the workbook's excerpt is the Transport Assessment heading text; the list's trigger for photographs wasn't captured."
+  - id: schedule-of-works
+    note: >-
+      Audit (wrong_app_type): the excerpt ('a full schedule of works (with plans) … to carry out the
+      proposed conversion') was filed under Full planning by inference; the audit places it with
+      listed building / conservation area consents (Figure 7), without a trigger.

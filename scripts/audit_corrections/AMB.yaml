@@ -1,0 +1,235 @@
+# Corrections for Amber Valley Borough Council, from the council's audit.
+# The only list found is the April 2012 validation list, built on saved 2006 Local Plan policies; the
+# council website no longer links it, so it may not be in force. The audit read it (26 information
+# items). Most items set triggers by impact or location ('All applications where...'), so the
+# workbook's 'INFERRED' Full planning placement is replaced with structured triggers where clear.
+local-authority: AMB
+
+drop:
+  - id: cil-form
+    reason: "not_a_requirement: not a source item; a fragment of the Viability item's policy-driver column"
+
+drop-unmapped:
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_app_type: placed under prior approval, which the trigger excludes; re-added below"
+  - local-name: Lawful development evidence (statutory declarations etc.)
+    reason: "wrong_app_type: belongs to lawful development certificates, not Full planning; re-added below"
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "duplicate: Loss of Employment Statement heading run into light-pollution text; re-added below"
+  - local-name: Employment / Economic Statement
+    reason: "duplicate: same text as the Marketing row; the two employment items are re-added below"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: a fragment of the FRA content list"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: a fragment without the thresholds; re-added below"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if: discretionary
+    notes: "Needed where the proposal could significantly harm air quality or would be exposed to poor air
+      quality; there is no field for that."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: The proposal is likely to result in the loss of, or damage to, existing trees or
+              hedgerows.
+        - site:
+            in: [tree-preservation-zone]
+            description: The site is affected by a Tree Preservation Order.
+    source-text: >-
+      Tree Survey / Arboricultural Report NPPF All applications where the proposals are likely to result in
+      the loss of or potential damage to existing trees or hedgerows or on sites affected by Tree
+      Preservation Orders.
+    source-url: https://info.ambervalley.gov.uk/docarc/docviewer.aspx?docGuid=e517c87aff3c4a37a58c135887d836f1
+    confidence: medium
+    notes: "Audit (wrong_app_type): a planning application item, not a works-to-trees requirement; it applies
+      to householder and full applications too."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is EIA development (Schedule 1 or 2).
+    notes: "Audit (wrong_trigger): the excerpt describes the contents, not the Schedule 1/2 thresholds."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: Operational development of 1 hectare or more in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Operational development of 1 hectare or more in Flood Zone 1.
+        - site:
+            in: [flood-risk-zone]
+            description: Operational development in Flood Zone 2 or 3 (except householder and non-residential
+              extensions under 250 square metres).
+        - condition:
+            field: near-watercourse
+            value: true
+            description: Culverting or control of flow of any river or stream.
+    source-text: >-
+      … and non residential extensions with a footprint of less than 250 square metres, and - Culverting
+      or control flow of any river or stream – all operational development.
+    source-url: https://info.ambervalley.gov.uk/docarc/docviewer.aspx?docGuid=e517c87aff3c4a37a58c135887d836f1
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt was mostly table headers. From the audit: Flood Zone 1 1 ha or
+      more; Flood Zones 2/3 all operational development except householder and non-residential extensions
+      under 250 sqm; culverting. The exceptions can't be expressed in the rule."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+          scheduled-monument, park-and-garden, world-heritage-site]
+        description: The development is likely to have an impact on a heritage asset or its setting.
+    notes: "Audit (wrong_app_type): 'All applications', householder, LBC and demolition in a conservation area
+      included."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: Sites with previous or historic uses that may cause contamination.
+    source-url: https://info.ambervalley.gov.uk/docarc/docviewer.aspx?docGuid=e517c87aff3c4a37a58c135887d836f1
+    confidence: medium
+    notes: "From the audit (missing_requirement)."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: The proposal is likely to result in a material increase in light pollution of the area.
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The proposal is likely to materially increase noise pollution in the area.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: The development would be next to existing sources of noise pollution.
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      condition:
+        field: loss-of-open-space
+        value: true
+        description: The proposal involves the loss of existing playing fields, parks or informal open space.
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://info.ambervalley.gov.uk/docarc/docviewer.aspx?docGuid=e517c87aff3c4a37a58c135887d836f1
+    confidence: medium
+    notes: "From the audit (missing_requirement): Sustainability / Climate Change Statement for all major
+      development."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 2500
+            description: Retail or leisure development over 2,500 sq m gross.
+        - all:
+            - condition:
+                field: out-of-centre-town-centre-use
+                value: true
+                description: Retail or leisure development outside a centre.
+            - condition:
+                field: town-centre-use-floorspace
+                operator: ">"
+                value: 200
+                description: Extensions over 200 sq m.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt was cut off. From the audit: 'over 2,500 sq m gross ...
+      including extensions over 200 sq m' outside centres."
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    notes: "All applications likely to have significant transport implications."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    notes: "Where it is not intended to enter into planning obligations at the level in the relevant saved
+      local plan policies."
+
+unmapped:
+  - local-name: Coal Mining Risk Assessment
+    source-text: "Coal Mining Risk Assessment NPPF All full and outline (some and all matters reserved)
+      applications, except change of use proposals."
+    source-url: https://info.ambervalley.gov.uk/docarc/docviewer.aspx?docGuid=e517c87aff3c4a37a58c135887d836f1
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Lawful Development Certificate Supporting Information
+    source-text: "A sworn affidavit(s) or statutory declaration(s) provides a stronger form of evidence that the
+      existing use or development has been present/operational for in excess of the necessary timescales."
+    source-url: https://info.ambervalley.gov.uk/docarc/docviewer.aspx?docGuid=e517c87aff3c4a37a58c135887d836f1
+    suggested-id: lawful-development-evidence
+  - local-name: Loss of Employment Statement
+    source-text: "From the audit: allocated employment sites proposed for non-B1/B2/B8 uses"
+    source-url: https://info.ambervalley.gov.uk/docarc/docviewer.aspx?docGuid=e517c87aff3c4a37a58c135887d836f1
+    suggested-id: employment-land-assessment
+  - local-name: Employment and Tourism Statement
+    source-text: "From the audit: countryside conversions"
+    source-url: https://info.ambervalley.gov.uk/docarc/docviewer.aspx?docGuid=e517c87aff3c4a37a58c135887d836f1
+    suggested-id: employment-statement
+  - local-name: Planning Obligations information
+    source-text: "From the audit: affordable housing 15+ dwellings, open space and education 10+ dwellings,
+      healthcare 5+ dwellings"
+    source-url: https://info.ambervalley.gov.uk/docarc/docviewer.aspx?docGuid=e517c87aff3c4a37a58c135887d836f1
+    suggested-id: heads-of-terms
+  - local-name: Building for Life Assessment
+    source-text: "From the audit: residential development of 50 or more dwellings"
+    source-url: https://info.ambervalley.gov.uk/docarc/docviewer.aspx?docGuid=e517c87aff3c4a37a58c135887d836f1
+    suggested-id: ""
+  - local-name: Rural Exceptions Site Statement
+    source-text: "From the audit: affordable housing of 1 or more dwellings outside the settlement built
+      framework"
+    source-url: https://info.ambervalley.gov.uk/docarc/docviewer.aspx?docGuid=e517c87aff3c4a37a58c135887d836f1
+    suggested-id: ""
+  - local-name: Ventilation / Extraction Statement
+    source-text: "From the audit: installation of ventilation or extraction equipment"
+    source-url: https://info.ambervalley.gov.uk/docarc/docviewer.aspx?docGuid=e517c87aff3c4a37a58c135887d836f1
+    suggested-id: ventilation-extraction-details
+  - local-name: Very Special Circumstances Case
+    source-text: "From the audit: inappropriate development in the Green Belt"
+    source-url: https://info.ambervalley.gov.uk/docarc/docviewer.aspx?docGuid=e517c87aff3c4a37a58c135887d836f1
+    suggested-id: green-belt-statement
+  - local-name: Other Plans
+    source-text: "From the audit: all applications for operational development"
+    source-url: https://info.ambervalley.gov.uk/docarc/docviewer.aspx?docGuid=e517c87aff3c4a37a58c135887d836f1
+    suggested-id: ""
+
+low-confidence:
+  - id: "*"
+    note: "Audit (other, Amended): the April 2012 list cites superseded policies and is no longer linked from
+      the council website, so it may not be in force."

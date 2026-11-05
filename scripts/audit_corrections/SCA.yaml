@@ -1,0 +1,646 @@
+# Corrections for South Cambridgeshire District Council, from
+# inputs/audit/south-cambridgeshire-district-council.json.
+# South Cambridgeshire's requirements are a set of checklist web pages, one per application type,
+# on the Greater Cambridge Shared Planning (GCSP) hub. Grokbot read the Full planning and
+# Householder pages only; the 'INFERRED' flag on Full rows is unnecessary (audit, wrong_app_type),
+# so those rows are scoped to full here. The audit says the Outline checklist has about 35 local
+# items, the same as Full, and the LBC checklist asks for a heritage statement and detailed
+# drawings; the other pages were not read, so their items are not added.
+# Note (audit, other, Confirmed): GCSP consulted on a new single joint Local Validation Checklist
+# for Cambridge City and South Cambridgeshire (closed 28 July 2026); it is not yet in force and
+# may soon replace these pages.
+local-authority: SCA
+
+validation-list:
+  date: 2026-01-28
+  date-basis: "audit: Full planning checklist page last reviewed 28 January 2026 (next review 30 April 2027); no adoption date is published. Householder page reviewed 9 January 2026, Outline and LBC 9 June 2026"
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_app_type: the excerpt is Arboricultural Method Statement text; neither checklist has a listed building schedule of works"
+  - id: flood-risk-assessment
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: from the Full planning checklist; the Prior Approvals checklist was not read"
+
+drop-unmapped:
+  - local-name: Character / Conservation area appraisal reference
+    reason: "not_a_requirement: a fragment of the Heritage statement reference list joined to the next item"
+  - local-name: Odour / Dust / Vibration assessment
+    reason: "duplicate: the Noise/vibration assessment (now in noise-assessment)"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "duplicate: guidance inside the Flood risk assessment item (now its must-include)"
+  - local-name: Cycle parking details
+    reason: "wrong_trigger: the excerpt is the Planning obligations item, which is already listed"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: foul drainage text; the surface water drainage strategy is re-added below"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "wrong_trigger: Housing statement text; re-added below"
+  - local-name: Self-build / custom build information
+    reason: "wrong_trigger: Housing statement text; re-added below"
+
+requirements:
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: >-
+              Demolition, building or engineering operations (including excavation of foundations,
+              changes in level and service/utility runs) may affect trees on site or on adjoining
+              land.
+    must-include:
+      - item: An Arboriculture Method Statement in accordance with BS 5837, detailing the methods
+          needed to protect retained trees
+        level: must
+        source-text: >-
+          Applicants will need to submit an Arboriculture Method Statement in accordance with BS
+          5837 detailing all the methodologies required to successfully protect retained trees.
+    confidence: medium
+    notes: "The Method Statement text was in the workbook's schedule-of-works rows (audit, wrong_app_type)."
+
+  - id: site-plan
+    action: update
+    required-if:
+      application-type:
+        in: [hh, full]
+    must-include:
+      - item: An existing site plan
+        level: must
+        required-if:
+          any:
+            - condition:
+                field: demolition
+                value: true
+                description: The development involves the demolition of existing structures.
+            - condition:
+                field: trees-on-or-near-site
+                value: true
+                description: There are trees on site that may be affected.
+      - item: North point, and a scale bar or metric measurements, at a recognised scale (1:100, 1:200
+          or 1:500)
+        level: should
+    confidence: medium
+    notes: "The excerpt is the existing site plan trigger ('One may be required if ...')."
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [conservation-area, world-heritage-site]
+                description: The site is in a designated area (World Heritage Site or conservation area).
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: One or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: A building or buildings with floorspace of 100 square metres or more.
+    confidence: medium
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      application-type:
+        in: [hh, full]
+    must-include:
+      - item: Climate change mitigation, including carbon reduction
+        level: should
+      - item: Water management
+        level: should
+      - item: Site waste management
+        level: should
+      - item: Use of materials
+        level: should
+      - item: Other issues, including biodiversity and ecology; land, water, noise and air pollution;
+          transport, mobility and access; health and wellbeing; and culture, heritage and the quality
+          of built form
+        level: should
+    confidence: medium
+    notes: "'For all sizes of development'. The must-include items are from the checklist ('A sustainability statement and checklist should outline the approach to ...')."
+
+  - id: section-existing
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full]
+        - any:
+            - condition:
+                field: change-in-ground-levels
+                value: true
+                description: The site, or the site and surrounding land, are at variable levels.
+            - condition:
+                field: roof-alteration
+                value: true
+                description: The proposal involves a roof extension or roof-lights.
+            - discretionary
+    confidence: medium
+    notes: "'It may be required where ...'; installation of windows is shown as officer discretion."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full]
+        - any:
+            - condition:
+                field: change-in-ground-levels
+                value: true
+                description: The site, or the site and surrounding land, are at variable levels.
+            - condition:
+                field: roof-alteration
+                value: true
+                description: The proposal involves a roof extension or roof-lights.
+            - discretionary
+    confidence: medium
+    notes: "'It may be required where ...'; installation of windows is shown as officer discretion."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: Flood zone 2 or 3, including minor development and change of use.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: More than 1 hectare in flood zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: More than 1 hectare in flood zone 1.
+        - site:
+            in: [surface-water-flood-risk]
+            description: >-
+              Less than 1 hectare in flood zone 1 (including a change to a more vulnerable use) where
+              it could be affected by other sources of flooding such as surface water.
+    must-include:
+      - item: Evidence that the Sequential Test and, where necessary, the Exception Test have been
+          applied in selecting the site
+        level: should
+      - item: Different types of flooding (for example fluvial, surface water and groundwater)
+        level: should
+      - item: The risk of flooding arising from the development as well as to the site
+        level: should
+      - item: The effect of climate change
+        level: should
+    confidence: medium
+    notes: "The must-include items were in the workbook's separate Sequential / Exception Test rows (audit, duplicate)."
+
+  - id: elevation-existing
+    action: update
+    required-if:
+      application-type:
+        in: [hh, full]
+    must-include:
+      - item: The complete building from all sides affected by the proposal; partial drawings are not
+          acceptable
+        level: must
+      - item: An appropriate scale, usually 1:100, with a scale bar or metric measurements
+        level: should
+    confidence: medium
+    notes: "'It is always required' (Full planning checklist)."
+
+  - id: elevation-proposed
+    action: update
+    required-if:
+      application-type:
+        in: [hh, full]
+    must-include:
+      - item: The proposal against the existing building from all sides
+        level: must
+      - item: An appropriate scale, usually 1:100, with a scale bar or metric measurements
+        level: should
+    confidence: medium
+    notes: "'It is always required' (Full planning checklist)."
+
+  - id: floor-plan-existing
+    action: update
+    required-if:
+      application-type:
+        in: [hh, full]
+    must-include:
+      - item: The full existing floor layout, at an appropriate scale (usually 1:100) with a scale bar
+          or metric measurements
+        level: should
+    confidence: low
+    notes: "The workbook's excerpt is elevation text; the floor plan trigger was not captured."
+
+  - id: floor-plan-proposed
+    action: update
+    required-if:
+      application-type:
+        in: [hh, full]
+    confidence: low
+    notes: "The workbook's excerpt is elevation text; the floor plan trigger was not captured."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+              scheduled-monument, park-and-garden]
+            description: Development affecting a heritage asset.
+    confidence: medium
+    notes: "Audit (missing_requirement): the LBC checklist also requires a heritage statement."
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full]
+        - any:
+            - condition:
+                field: noise-generating-use
+                value: true
+                description: The development would generate noise or vibration that may harm existing or planned uses.
+            - discretionary
+    source-url: https://www.greatercambridgeplanning.org/the-planning-application-process-and-advice/planning-application-validation-checklists/full-planning-permission
+    source-text: >-
+      Noise / Vibration Generation Where a proposed new development would generate noise or
+      vibration including delivery and servicing and vehicle movements / traffic changes on local
+      roads which may have a negative impact on existing or planned uses (in particular noise
+      sensitive uses such as residential, hospitals, nursing homes, schools).
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, duplicate): the workbook's noise row was a list of references and the
+      trigger was in its 'Odour / Dust / Vibration' row. Traffic changes are shown as officer
+      discretion. The householder page notes it is 'Not normally required but may be for heat
+      [pumps]'.
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      application-type:
+        in: [hh, full]
+    must-include:
+      - item: The shape of the roof, at an appropriate scale (usually 1:50 or 1:100), with correct
+          overall dimensions in metric
+        level: should
+      - item: Details such as the material, vents and their location
+        level: should
+    confidence: low
+    notes: "The excerpt gives the contents; the trigger was not captured."
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      application-type:
+        in: [hh, full]
+    must-include:
+      - item: The shape of the roof, at an appropriate scale (usually 1:50 or 1:100), with correct
+          overall dimensions in metric
+        level: should
+      - item: Details such as the material, vents and their location
+        level: should
+    confidence: low
+    notes: "The excerpt gives the contents; the trigger was not captured."
+
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: Major development of 10 dwellings or more.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: Residential development of 0.5 hectares or more.
+        - discretionary
+    source-url: https://www.greatercambridgeplanning.org/the-planning-application-process-and-advice/planning-application-validation-checklists/full-planning-permission
+    source-text: Housing statement - affordable housing - For all major developments of 10 dwellings or more
+    confidence: medium
+    notes: "Audit (wrong_trigger): from the audit, also 0.5 ha and rural exception sites (shown as officer discretion)."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - discretionary
+    confidence: medium
+    notes: "'If air quality is likely to be a significant issue'. The audit says the Outline checklist also lists it."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the biodiversity gain condition.
+    confidence: medium
+    notes: "The checklist's text refers to major development sites; statutory BNG now also covers non-exempt small sites."
+
+  - id: construction-management-plan
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - any:
+            - ref: major-development
+            - discretionary
+    confidence: medium
+    notes: "Major developments, or developments likely to cause noise, smells, dust, visual or other adverse effects during construction."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: Development on or adjacent to land where contamination is known or suspected.
+    confidence: medium
+
+  - id: daylight-sunlight-assessment
+    action: replace
+    required-if: discretionary
+    source-url: https://www.greatercambridgeplanning.org/the-planning-application-process-and-advice/planning-application-validation-checklists/full-planning-permission
+    confidence: medium
+    notes: "Audit (wrong_trigger, duplicate): the workbook used the Design masterplan text. From the audit: buildings that would overshadow neighbouring buildings or open spaces."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: Schedule 1 development, or Schedule 2 development judged to give rise to significant environmental effects.
+    confidence: medium
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A height of 18 metres or more.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: 7 or more storeys.
+    confidence: medium
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    confidence: medium
+    notes: "Major development, and where the development is likely to affect the local or wider landscape or townscape."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: external-lighting
+            value: true
+            description: External lighting is proposed.
+    must-include:
+      - item: Details of external lighting, including building, security, floodlighting,
+          street/courtyard columns and bollards
+        level: must
+      - item: An artificial lighting assessment of the impact on sensitive residential premises on and
+          off site
+        level: must
+        required-if:
+          ref: major-development
+    confidence: medium
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: New residential development (conversions or new build).
+        - discretionary
+    confidence: medium
+    notes: "Residential development 'which will need to make provision for new open space'."
+
+  - id: planning-statement
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: Material changes of use.
+        - ref: major-development
+        - condition:
+            field: departure-from-development-plan
+            value: true
+            description: Proposals that do not accord with the adopted development plan.
+        - site:
+            in: [green-belt]
+            description: Proposals in the Green Belt.
+        - discretionary
+    confidence: medium
+    notes: "Proposals needing a sequential assessment of alternative sites are shown as officer discretion."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: retail-floorspace
+            operator: ">"
+            value: 500
+            description: A retail unit over 500 m2 (gross) in a Rural Centre or village centre.
+        - all:
+            - condition:
+                field: out-of-centre-town-centre-use
+                value: true
+                description: Outside such centres.
+            - condition:
+                field: retail-floorspace
+                operator: ">"
+                value: 250
+                description: A retail unit over 250 m2 (gross).
+    confidence: medium
+    notes: "Thresholds apply to the size of the resulting retail unit."
+
+  - id: sci
+    action: update
+    required-if:
+      ref: major-development
+    confidence: medium
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Telecommunications proposals.
+    must-include:
+      - item: The area of search
+        level: should
+      - item: Details of any consultation undertaken
+        level: should
+      - item: Details of the proposed structure
+        level: should
+      - item: Technical justification and information about the proposed development
+        level: should
+    confidence: medium
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 0
+            description: Commercial development.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: New residential units.
+    source-url: https://www.greatercambridgeplanning.org/the-planning-application-process-and-advice/planning-application-validation-checklists/full-planning-permission
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted BNG text. From the audit: the Waste design guide toolkit is needed for all commercial development and new residential units."
+
+  - id: transport-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 20
+            description: Residential development of 20 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: Residential development of 0.5 hectares or more.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: Other uses of 1,000 square metres or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Other uses on 1 hectare or more.
+    source-url: https://www.greatercambridgeplanning.org/the-planning-application-process-and-advice/planning-application-validation-checklists/full-planning-permission
+    source-text: Transport assessment or statement - Residential Developments at or above 20 dwellings or 0.5 hectares
+    confidence: medium
+    notes: "Audit (missing_requirement): other uses at 1,000 sq m or 1 ha."
+
+  - id: travel-plan
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 20
+            description: Residential development of 20 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: Residential development of 0.5 hectares or more.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: Other uses of 1,000 square metres or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Other uses on 1 hectare or more.
+    source-url: https://www.greatercambridgeplanning.org/the-planning-application-process-and-advice/planning-application-validation-checklists/full-planning-permission
+    confidence: medium
+    notes: "From the audit (missing_requirement): the same thresholds as the transport assessment."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.greatercambridgeplanning.org/the-planning-application-process-and-advice/planning-application-validation-checklists/full-planning-permission
+    confidence: medium
+    notes: "From the audit (missing_requirement, wrong_trigger): an Energy statement for all major new development, separate from the sustainability checklist."
+
+unmapped:
+  - local-name: Surface water drainage strategy
+    source-text: "From the audit: 'for all scales of development'"
+    source-url: https://www.greatercambridgeplanning.org/the-planning-application-process-and-advice/planning-application-validation-checklists/full-planning-permission
+    suggested-id: drainage-strategy
+  - local-name: Housing statement - space standards
+    source-text: >-
+      Housing statement - space standards When is it required? All residential proposals What is
+      required? Provide accurate room size data (including ceiling heights and room widths).
+    source-url: https://www.greatercambridgeplanning.org/the-planning-application-process-and-advice/planning-application-validation-checklists/full-planning-permission
+    suggested-id: space-standards-statement
+  - local-name: Housing statement - housing mix
+    source-text: "From the audit: housing mix for 10 or more homes"
+    source-url: https://www.greatercambridgeplanning.org/the-planning-application-process-and-advice/planning-application-validation-checklists/full-planning-permission
+    suggested-id: housing-mix-statement
+  - local-name: Traffic management plan
+    source-text: "Traffic management plan - Required for all non-householder development"
+    source-url: https://www.greatercambridgeplanning.org/the-planning-application-process-and-advice/planning-application-validation-checklists/full-planning-permission
+    suggested-id: construction-logistics-plan
+  - local-name: Marketing assessment / local needs
+    source-text: "From the audit: loss of facilities such as pubs, shops or businesses"
+    source-url: https://www.greatercambridgeplanning.org/the-planning-application-process-and-advice/planning-application-validation-checklists/full-planning-permission
+    suggested-id: marketing-evidence
+  - local-name: Broadband information
+    source-text: "From the audit: new residential, employment and commercial development"
+    source-url: https://www.greatercambridgeplanning.org/the-planning-application-process-and-advice/planning-application-validation-checklists/full-planning-permission
+    suggested-id: ""
+  - local-name: Community facilities
+    source-text: "Community facilities - For new developments of 200 homes or more"
+    source-url: https://www.greatercambridgeplanning.org/the-planning-application-process-and-advice/planning-application-validation-checklists/full-planning-permission
+    suggested-id: community-facilities-statement
+  - local-name: Detailed drawings - proposed (listed building consent)
+    source-text: "Detailed drawings - proposed - Required for all listed building consent applications"
+    source-url: https://www.greatercambridgeplanning.org/the-planning-application-process-and-advice/planning-application-validation-checklists
+    suggested-id: joinery-details
