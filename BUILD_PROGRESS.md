@@ -38,12 +38,56 @@ Working branch: `ccr-f743743a-pji9c0` (the session's designated branch, used ins
   `build_map.py` (+ `bng.py` for British National Grid) -> `docs/map/uk-lpa.geojson` (0.94 MB, 382 areas).
   8 councils matched by name because their ONS codes changed after new development corporations
   (update the register when planning.data.gov.uk is reachable). No shape: the 21 county councils.
-- [ ] **D. Explorer tool** (`docs/index.html`): map, councils, results, table, browse, review mode,
-  feedback issues, copy checklist, URL hash state, SRI + CSP; `evaluate.test.html` 26/26;
-  phone width checked (no sideways scroll). Auto-merge rules in `apply-reviews.yml`.
-  - [ ] Checkpoint 4: screenshots shown (example marks made on a throwaway branch, then deleted)
-  - Not built yet: council officer registration flow (officers use the "I work for this council" form for now)
-- [ ] **E. Finish** (final check summary here, PR ready for review)
+- [x] **D. Explorer tool** (`docs/index.html`): map, councils, results, table, browse files, review
+  mode, feedback issues, copy checklist, URL hash state, SRI + CSP; `evaluate.test.html` 26/26.
+  After checkpoint 4 (user feedback): compact council panel; several application types
+  (+ Add another type); site details in a Filter pop-up (most important questions first) with
+  answer chips and inline Yes/No questions on Check cards; an "Applies to" column and tags worked
+  out from each rule; notes for development corporations. Phone width checked.
+  - Not built yet: council officer registration (officers use the "I work for this council" form).
+- [x] **E. Finish**: final `check.py` below; pull request marked ready for review (not merged).
+
+## Final check (`python scripts/check.py`)
+
+```
+Summary
+  LPAs:                         328
+  LPAs with no requirement files: 16
+  Requirement files:            7971
+  Files by confidence:          low: 3698, medium: 4273
+  Councils by coverage:         covered: 316, not-covered: 12
+  Councils by review status:    unverified: 328
+  Files by review status:       unverified: 8299  (includes _lpa.yaml)
+  Cells by review status:       unverified: 32959
+  Audit:                        audited: 328
+  Lists more than 2 years old:  136 (NPPF expects review at least every 2 years)
+    ADU AMB ARU BAB BAI BBD BEN BEX BIR BOT BRA BRC BRM BRT BRX BUC CAN CBF CHE CHI CHL COL CON DBY DOV DUD EAS EDE EHA EPS ESK EXE FEN GAT GLS GOS GRA GRY HAA HAL HAV HER HIG HIL HIN HMF HNS HOR HRT HRW HRY HUN ISL KEC KHL KIR KTT LAC LAN LEE LEW LIF LIN LND LUT MAL MAN MAS MDB MSU NDE NEA NEC NET NEW NFK NGM NKE NLN NNPA NOW NSM NTY NUN NWA NWL NYMNPA NYUA OXO PEN POR PRE RCC RCH RDG REI ROC ROH RUG RUN SAL SAW SDNPA SGC SHE SHF SHO SHR SKP SND SOL SOS SOX SRY SST STF STS TAW TES THA THE TOB TOR UTT VAL WAE WAT WEW WGN WIN WLI WOC WOI WRT WSK WYR
+
+All checks passed.
+```
+
+## What's left
+
+- **Everything is `unverified`**: 32,959 cells wait for a person to check them against the
+  council's list (explorer review mode or `set_status.py`).
+- **Low confidence**: 3,698 of 7,971 requirement files. The audit couldn't read 70 councils' lists;
+  64 councils have only low-confidence files.
+- **Not covered (12)**: BAN, BNE, BRC, CAT, CHS, HAM, ISL, MOL, NLN, WAR, WLV, WSK (no local list
+  found, or the audit couldn't read it and the workbook had nothing).
+- **Unmapped**: 4,694 local items with no MHCLG id (`data/unmapped-requirement.csv`); the commonest are
+  drainage strategy (268), structural survey (227), ventilation/extraction (175), landscape and visual
+  impact (162), parking plan (158), heads of terms (146), health impact assessment (130). Candidates
+  to propose to MHCLG.
+- **No shape on the map**: the 21 county councils (shown as chips under the map). Six development
+  corporations are drawn with notes; only OPDC is covered.
+- **136 lists are more than 2 years old** (monthly `stale-lists` issue).
+- **Register out of date**: 8 councils matched to the January 2026 boundaries by name because their
+  ONS codes changed; run `update_register.py` where planning.data.gov.uk is reachable.
+- **Repo settings to switch on** after merging: Settings > Pages > Source: GitHub Actions;
+  Settings > General > Allow auto-merge; protect `main` (require `check`); repository secret
+  `REVIEW_BOT_TOKEN`.
+- **Open questions**: Central Lincolnshire (2026 lists adopted 24 Aug 2026, or 2024 still in force?);
+  some local design-and-access-statement rules repeat the national major-development branch.
 
 ## Decisions that change BUILD_PROMPT.md
 
