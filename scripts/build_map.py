@@ -13,7 +13,11 @@ What it does:
   - simplifies each outline (Douglas-Peucker) and rounds coordinates to 4
     decimal places, so the file stays under 2 MB
   - prints English councils in data/lpa.csv with no shape, and English shapes
-    with no code. County councils (minerals and waste) overlap districts, so
+    with no code.
+  - writes data/other-planning-authority.csv: each development corporation (a
+    separate planning authority inside or next to a council), whether we cover it,
+    and which councils it borders (worked out from shared boundary points). The
+    explorer shows these as notes ("applications here are decided by ..."). County councils (minerals and waste) overlap districts, so
     they are never drawn; the explorer lists them under the map instead.
 Standard library only.
 """
@@ -165,6 +169,7 @@ def main():
     by_name_matches = []
 
     features, seen = [], set()
+    corps, edges = [], {}   # development corporations, and boundary points of every English area
     for f in files:
         data = read_gpkg(f) if str(f).endswith(".gpkg") else json.loads(Path(f).read_text(encoding="utf-8"))
         code_key, name_key = find_keys(data["features"][0]["properties"])
@@ -173,6 +178,14 @@ def main():
             ons = feat["properties"][code_key]
             if ons in seen:
                 continue  # the same area in two files
+            if ons.startswith("E") and feat.get("geometry"):
+                raw = feat["geometry"]["coordinates"]
+                polys = [raw] if feat["geometry"]["type"] == "Polygon" else raw
+                # rounded raw points; two areas sharing several points share a border
+                edges[ons] = {(round(x, 5), round(y, 5)) for poly in polys for r in poly for x, y, *_ in r}
+                shape_name = re.sub(r"\s+LPA$", "", str(feat["properties"].get(name_key, "")))
+                if "development corporation" in shape_name.lower():
+                    corps.append((ons, shape_name))
             geom = geometry(feat["geometry"]) if feat.get("geometry") else None
             if not geom:
                 continue
@@ -196,6 +209,24 @@ def main():
     size = len(text.encode()) / 1e6
     print(f"Wrote {OUT.relative_to(ROOT)}: {len(features)} areas, {size:.2f} MB"
           + ("  (over 2 MB: raise TOLERANCE)" if size > 2 else ""))
+
+    # Which councils does each development corporation border?
+    ons_to_code = {r["ons-code"]: r["code"] for r in lpas if r["ons-code"]}
+    for line in by_name_matches:   # councils matched by name use the boundary file's code
+        code, rest = line.split(None, 1)
+        ons_to_code[rest.split("boundary code ")[1].split(",")[0]] = code
+    rows = []
+    for ons, name in sorted(corps, key=lambda c: c[1]):
+        near = sorted(((len(edges[ons] & pts), o) for o, pts in edges.items()
+                       if o != ons and len(edges[ons] & pts) >= 2), reverse=True)
+        borders = [ons_to_code[o] for n, o in near if o in ons_to_code]
+        rows.append({"name": name, "ons-code": ons, "code": ons_to_code.get(ons, ""),
+                     "borders": ";".join(borders)})
+    from common import write_csv
+    write_csv(DATA / "other-planning-authority.csv", rows, ["name", "ons-code", "code", "borders"])
+    print(f"\nWrote data/other-planning-authority.csv: {len(rows)} development corporations")
+    for r in rows:
+        print(f"  {r['name']}: {'covered as ' + r['code'] if r['code'] else 'not covered'}; borders {r['borders'] or '-'}")
 
     if by_name_matches:
         print(f"\n{len(by_name_matches)} councils matched by name because their ONS code has changed "

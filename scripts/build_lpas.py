@@ -146,7 +146,11 @@ def build(councils, matches, wb):
             "local-authority": code,
             "name": m["register-name"],
             "region": c.get("Region") or "",
-            "type": c.get("Type") or "",
+            # The register says what kind of body it is; the workbook's own label can be wrong
+            # (its "Greater London Authority" row is really the OPDC development corporation).
+            "type": ("Development corporation" if m["organisation"].startswith("development-corporation")
+                     else "National park authority" if m["organisation"].startswith("national-park-authority")
+                     else c.get("Type") or ""),
             "review-status": old.get("review-status", "unverified"),
             # Stage B may replace the list with the audit's current one; keep it if so.
             "validation-list": old_list or {

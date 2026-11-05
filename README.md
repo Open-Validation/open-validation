@@ -46,12 +46,19 @@ The rules for writing the files are in **[FORMAT.md](FORMAT.md)**.
 | `data/local-planning-requirement.csv` | Flat index: council × requirement × application type |
 | `data/unmapped-requirement.csv` | Local items with no MHCLG id yet |
 | `data/new-field.csv` | Fields and values we introduced |
+| `data/other-planning-authority.csv` | Development corporations: separate planning authorities inside or next to councils, and which councils they border (built by `build_map.py`; the explorer shows them as notes) |
 | `data/organisation.csv` | Our copy of MHCLG's register of planning authorities (codes, names, ONS codes) |
 | `data/planning-requirement.csv` etc. | Copied unchanged from MHCLG |
 | `scripts/` | Short Python scripts (see below) |
 | `inputs/` | Grokbot's workbook, Claude's audit files, boundary files. Never edited. |
 | `reviews/pending/`, `reviews/applied/` | Cell marks waiting to be applied, and those already applied |
 | `docs/` | The explorer tool (`docs/index.html`) and the map |
+
+**Development corporations** decide planning applications in their own areas instead of the
+council around them. Old Oak and Park Royal (`OPDC`, west London) has its own validation list, so it
+has its own folder. (Grokbot's workbook labelled it "Greater London Authority"; the GLA itself doesn't
+validate applications.) The others (Ebbsfleet, London Legacy, Oxford Street, Hartlepool and
+Middlesbrough) aren't covered yet; the explorer notes them on the map and on the neighbouring councils.
 
 Councils use MHCLG's three-letter codes. For national parks MHCLG's code is a Wikidata id
 (e.g. Peak District is `Q72617988`), so we use the parks' own short names instead: `BROADS`, `DNPA`,

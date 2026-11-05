@@ -28,13 +28,16 @@ Working branch: `ccr-f743743a-pji9c0` (the session's designated branch, used ins
   - Built one region per commit. Result: 328 councils, 7971 requirement files (4273 medium,
     3698 low), 316 covered, 12 not covered, 4694 unmapped local items; check.py passes.
   - Checkpoint 2 approved (user asked to do all remaining regions with 20 helpers).
-  - Open questions for the user (defaults kept): GLA row is really OPDC; some local
+  - Decided: the workbook's GLA row is OPDC; renamed to an `OPDC` folder (manual match in lpa_match.csv);
+    development corporations are shown as notes on the map and neighbouring councils
+    (`data/other-planning-authority.csv`).
+  - Open questions for the user (defaults kept): some local
     design-and-access-statement rules repeat the national major-development branch;
     Central Lincolnshire: one audit says 2026 lists adopted 24 Aug 2026, two say 2024 still in force.
 - [x] **C. Map data**: ONS LPA January 2026 BUC (V2) GeoPackage in `inputs/boundaries/`;
   `build_map.py` (+ `bng.py` for British National Grid) -> `docs/map/uk-lpa.geojson` (0.94 MB, 382 areas).
   8 councils matched by name because their ONS codes changed after new development corporations
-  (update the register when planning.data.gov.uk is reachable). No shape: 21 county councils + GLA.
+  (update the register when planning.data.gov.uk is reachable). No shape: the 21 county councils.
 - [ ] **D. Explorer tool** (`docs/index.html`): map, councils, results, table, browse, review mode,
   feedback issues, copy checklist, URL hash state, SRI + CSP; `evaluate.test.html` 26/26;
   phone width checked (no sideways scroll). Auto-merge rules in `apply-reviews.yml`.

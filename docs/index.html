@@ -486,8 +486,10 @@ function loadBase() {
     fetchCSV(ROOT + "/data/national-planning-requirement.csv"),
     fetchCSV(ROOT + "/data/new-field.csv"),
     fetchYAML(SPEC + "/definition/major-development.yaml").catch(function () { return {}; }),
-    fetch("map/uk-lpa.geojson").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
+    fetch("map/uk-lpa.geojson").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
+    fetchCSV(ROOT + "/data/other-planning-authority.csv").catch(function () { return []; })
   ]).then(function (res) {
+    S.corps = res[7];   // development corporations: separate planning authorities inside or next to councils
     S.lpas = res[0]; S.lpas.forEach(function (r) { S.lpaByCode[r.code] = r; });
     S.types = res[1].filter(function (t) { return !t["end-date"]; });
     S.types.forEach(function (t) { S.typeById[t.reference] = t; });
@@ -554,6 +556,10 @@ function loadCouncil(code) {
     });
   });
 }
+// Development corporations next to (or inside) a council, and the councils next to one
+function corpByName(name) { name = String(name || "").replace(/\s+LPA$/, ""); return (S.corps || []).find(function (c) { return c.name === name; }); }
+function corpsNear(code) { return (S.corps || []).filter(function (c) { return c.borders.split(";").indexOf(code) !== -1; }); }
+function councilNames(codes) { return codes.split(";").filter(Boolean).map(function (c) { return (S.lpaByCode[c] || {}).name || c; }); }
 function reqName(id) { return (S.reqs[id] && S.reqs[id].name) || tidy(id); }
 
 // ======================================================================
@@ -857,9 +863,14 @@ function drawMap() {
 function tipText(f) {
   var p = f.properties, s = mapStatus(p.code, p.nation);
   if (p.nation && p.nation !== "England") return "Not covered yet: outside England (MHCLG's data standard covers England only)";
+  var corp = corpByName(p.name);
+  if (!p.code && corp) return "Not covered yet. Planning applications here are decided by " + esc(corp.name) +
+    ", a separate planning authority" + (corp.borders ? " next to " + esc(councilNames(corp.borders).join(", ")) : "") + ", not the surrounding council.";
   var r = S.lpaByCode[p.code]; if (!r) return "Not covered yet";
   var files = S.councils[p.code] ? S.councils[p.code].files.length + " requirement files" : "";
+  var near = corpsNear(p.code);
   return (s === "out" ? "Not covered yet: we don't have its requirements yet" : "Status: " + STATUS_LABEL[s]) +
+    (near.length ? "<br>Next to: " + near.map(function (c) { return esc(c.name); }).join(", ") : "") +
     (r["list-date"] ? "<br>List date: " + esc(r["list-date"]) : "") + (files ? "<br>" + files : "");
 }
 
@@ -1055,6 +1066,19 @@ function cardHTML(it, cls, icon) {
     "</div></article>";
 }
 function capital(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+// "Next to" / "Borders" lines for development corporations (see data/other-planning-authority.csv)
+function corpRows() {
+  var self = (S.corps || []).find(function (c) { return c.code === S.lpa; });
+  var out = "";
+  if (self && self.borders) out += "<dt>Borders</dt><dd>" + self.borders.split(";").map(function (c) {
+    return '<button class="linkish btn small" data-select="' + esc(c) + '">' + esc((S.lpaByCode[c] || {}).name || c) + "</button>"; }).join(" ") +
+    ' <span class="muted">(applications in its area go to it, not these councils)</span></dd>';
+  corpsNear(S.lpa).forEach(function (c) {
+    out += "<dt>Next to</dt><dd>" + (c.code ? '<button class="linkish btn small" data-select="' + esc(c.code) + '">' + esc(c.name) + "</button>" : esc(c.name)) +
+      ' <span class="muted">decides planning applications in its own area' + (c.code ? "" : " (not covered here yet)") + "; check which authority your site is in.</span></dd>";
+  });
+  return out;
+}
 function councilPanel(council) {
   var y = council.lpa, vl = y["validation-list"] || {}, audit = y.audit || {}, r = S.lpaByCode[S.lpa], status = mapStatus(S.lpa, "England");
   var old = vl.date && String(vl.date) < new Date(Date.now() - 730 * 864e5).toISOString().slice(0, 10);
@@ -1068,6 +1092,7 @@ function councilPanel(council) {
     (vl.date ? " · " + '<span' + (old ? ' class="warn" title="More than 2 years old: the NPPF expects a review every 2 years"' : "") + ">" + esc(vl.date) + (old ? " ⚠ over 2 years old" : "") + "</span>" : "") +
     (vl.status && vl.status !== "outdated" ? ' · <span class="muted">' + esc(vl.status) + "</span>" : "") + "</dd>" +
     "<dt>Audit</dt><dd>" + esc(audit.status || "not-audited") + esc(issues) + (audit["contents-checked"] === false ? ' <span class="muted">(couldn\'t read the list)</span>' : "") + "</dd>" +
+    corpRows() +
     (partners.length ? "<dt>Shared list</dt><dd>" + partners.map(function (p) { return '<button class="linkish btn small" data-select="' + esc(p) + '">' + esc((S.lpaByCode[p] || {}).name || p) + "</button>"; }).join(" ") + "</dd>" : "") + "</dl>" +
     (stds.length ? '<details class="std"' + (window.innerWidth > 600 ? " open" : "") + "><summary>Submission standards (" + stds.length + ")</summary><ul>" + std + "</ul></details>" : '<p class="muted" style="margin:0">No submission standards recorded.</p>') +
     '<p class="actions"><button class="btn small" id="officer">I work for this council</button></p></section>';
