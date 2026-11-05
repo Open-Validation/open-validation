@@ -141,3 +141,16 @@ under the new everyday routine. Every file now has a trigger, the policy the cou
 council's own wording and what the document must show. Eight files were added: location plan, fire
 statement, habitat baseline, sustainable drainage strategy, and four tree-works documents. The
 unmapped items (data/unmapped-requirement.csv) now quote the list itself, not the audit.
+
+### 2026-11-05: 51 more councils rewritten from their own latest lists
+Helpers (one brief, see the PR) rewrote each council from the list on its own website, after
+confirming it was the newest one. Every quoted wording was checked automatically against the
+downloaded list. Lists over two years old are marked `outdated`. Done: MSS TAN WAE REI WEA SEV BNH
+(full checklist only) FAR POR STH GRT DAR GRA WND MRT WOT ADU HAS ROH CRY BRY MDW THA CAT SDNPA
+HAA DOV SHE BEX RUN SPE RUH WNM BRC WOK GRE SWK RIC HNS HIL RDG BAN EHA HAT ASF WIN TES EAT EPS
+ELM KTT. Fixes found in review: Tandridge housing thresholds (residential site area only),
+Spelthorne BNG (follows the statutory condition), Southwark gateway 1 (use AND height), and no
+YAML anchors (the writer and check.py now prevent them).
+
+Blocked by the councils' own bot checks or logins (need a manual download): HOR LEE MOL TUN TON
+MAI GOS NEW IOW WOI SUR SWL LBH ARU EAS STN CHI LEW WBK, plus BNH's other checklists.
