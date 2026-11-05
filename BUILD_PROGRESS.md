@@ -19,10 +19,22 @@ Working branch: `ccr-f743743a-pji9c0` (the session's designated branch, used ins
     instead of MHCLG's Wikidata ids (ids kept in lpa_match.csv `organisation`)
   - [x] Licence: MIT code + CC BY 4.0 data (confirmed); build_lpas.py kept as a separate script
 - [ ] **B. Fill in every council's requirements** (`build_from_workbook.py`)
-  - [ ] Checkpoint 2: SHR and CMD
-  - [ ] Checkpoint 3: one region, then all regions (one commit per region)
-- [ ] **C. Map data** (`build_map.py`, `docs/map/uk-lpa.geojson`)
-- [ ] **D. Explorer tool** (`docs/index.html`, `evaluate.test.html`, `STYLE.md`, issue forms)
+  - How it works: workbook rows -> requirement files; each council's audit (prose) is turned into
+    `scripts/audit_corrections/<CODE>.yaml` (format: that folder's README), which the build applies.
+    `python scripts/audit_extract.py <CODE>` prints everything needed to write one;
+    `build_from_workbook.py --lpa <CODE> --validate` checks it without writing anything.
+  - [x] Camden written by hand (the worked example)
+  - [x] London (34) and South East (72) corrections written (12 parallel helpers, brief in the
+    session scratchpad), synonym fields merged, built: 106 councils, 2669 files, check passes
+  - [ ] Checkpoint 2: Camden + London + South East (shown to the user; waiting for OK)
+  - [ ] Remaining regions: East Midlands, East of England, North East, North West,
+    South West, West Midlands, Yorkshire and the Humber (222 councils), same method
+  - Open questions for the user: GLA row is really OPDC (rename folder?); helpers added the
+    national major-development branch to some local design-and-access-statement rules;
+    requirements with no trigger show as "Check" in the explorer
+- [ ] **C. Map data** (blocked: ONS boundary download needs the user; see README)
+   (`build_map.py`, `docs/map/uk-lpa.geojson`)
+- [ ] **D. Explorer tool** (`docs/index.html`; done so far: `evaluate.test.html` 26/26, `STYLE.md`, issue forms)
   - [ ] Checkpoint 4: screenshots
 - [ ] **E. Finish** (final check summary here, PR ready for review)
 

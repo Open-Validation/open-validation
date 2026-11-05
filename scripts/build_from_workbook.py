@@ -395,6 +395,8 @@ def trigger_summary(rule):
         elif isinstance(x, list):
             for i in x:
                 walk(i)
+        elif x == "discretionary":
+            found.append("other cases at officer discretion")
     walk(rule)
     return "; ".join(dict.fromkeys(found)) or "application type only"
 
