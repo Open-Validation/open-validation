@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evaluator tests</title>
+<style>
+  :root { --bg:#0B1F3A; --surface:#112B4E; --text:#F2F6FB; --muted:#A8BEDB; --line:rgba(255,255,255,.6);
+          --ok:#AED581; --bad:#EF5350; }
+  body { background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, sans-serif; margin: 0; padding: 16px; }
+  h1 { font-weight: 600; margin: 0 0 8px; }
+  p { color: var(--muted); margin: 0 0 16px; }
+  table { border-collapse: collapse; width: 100%; }
+  td, th { border: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: var(--bg); }
+  td { background: var(--surface); }
+  .pass { color: var(--ok); font-weight: 600; }
+  .fail { color: var(--bad); font-weight: 600; }
+  code { font-family: ui-monospace, monospace; font-size: 13px; }
+</style>
+</head>
+<body>
+<h1>Evaluator tests</h1>
+<p>The rule evaluator used by the explorer (<code>docs/index.html</code>), with test cases. The code
+between the EVALUATOR markers must be identical in both files (<code>scripts/check.py</code> checks this).</p>
+<p id="summary"></p>
+<table><thead><tr><th>#</th><th>Test</th><th>Expected</th><th>Got</th><th>Result</th></tr></thead><tbody id="out"></tbody></table>
+
+<script>
+// ===== EVALUATOR START (keep identical to docs/index.html) =====
+// Three-valued rule evaluator for MHCLG-style required-if rules.
+// Returns true, false or "unknown".
+//   rule: a required-if value (object, "discretionary", or undefined)
+//   site: { field: value } from the site pills; booleans are true/false, numbers are numbers,
+//         designations are true/false; anything unset is missing
+//   appType: { id: "hh", parent: "", children: ["..."] } or null when no type is chosen
+//   definitions: { "major-development": { any: [...] } }
+var UNKNOWN = "unknown";
+
+function evalAll(items, site, appType, defs) {
+  var anyUnknown = false;
+  for (var i = 0; i < items.length; i++) {
+    var r = evaluate(items[i], site, appType, defs);
+    if (r === false) return false;
+    if (r === UNKNOWN) anyUnknown = true;
+  }
+  return anyUnknown ? UNKNOWN : true;
+}
+
+function evalAny(items, site, appType, defs) {
+  var anyUnknown = false;
+  for (var i = 0; i < items.length; i++) {
+    var r = evaluate(items[i], site, appType, defs);
+    if (r === true) return true;
+    if (r === UNKNOWN) anyUnknown = true;
+  }
+  return anyUnknown ? UNKNOWN : false;
+}
+
+function isSet(v) { return v !== undefined && v !== null && v !== ""; }
+
+function compare(actual, op, expected) {
+  if (typeof expected === "number" || (op && op !== "==")) {
+    var a = Number(actual), e = Number(expected);
+    if (isNaN(a) || isNaN(e)) return UNKNOWN;
+    switch (op || "==") {
+      case ">=": return a >= e;
+      case ">": return a > e;
+      case "<=": return a <= e;
+      case "<": return a < e;
+      default: return a === e;
+    }
+  }
+  if (typeof expected === "boolean") return Boolean(actual) === expected;
+  return String(actual) === String(expected);
+}
+
+function typeMatches(list, appType) {
+  if (!appType || !appType.id) return UNKNOWN;
+  // A chosen child also gets its parent's rules; a chosen parent includes its children.
+  var wanted = [appType.id].concat(appType.parent ? [appType.parent] : [], appType.children || []);
+  for (var i = 0; i < wanted.length; i++) if (list.indexOf(wanted[i]) !== -1) return true;
+  return false;
+}
+
+function evaluate(rule, site, appType, defs) {
+  if (rule === undefined || rule === null || rule === "discretionary") return UNKNOWN;
+  if (Array.isArray(rule)) return evalAll(rule, site, appType, defs);
+  if (typeof rule !== "object") { console.warn("Unrecognised rule", rule); return UNKNOWN; }
+  var parts = [];
+  for (var key in rule) {
+    if (!Object.prototype.hasOwnProperty.call(rule, key) || key === "description") continue;
+    var v = rule[key];
+    if (key === "all") parts.push(evalAll(v || [], site, appType, defs));
+    else if (key === "any") parts.push(evalAny(v || [], site, appType, defs));
+    else if (key === "always") parts.push(v === true ? true : UNKNOWN);
+    else if (key === "application-type") parts.push(typeMatches((v && v["in"]) || [], appType));
+    else if (key === "condition") {
+      var c = v || {};
+      parts.push(isSet(site[c.field]) ? compare(site[c.field], c.operator, c.value) : UNKNOWN);
+    } else if (key === "site") {
+      var list = (v && v["in"]) || [], allNo = list.length > 0, hit = false;
+      for (var i = 0; i < list.length; i++) {
+        if (site[list[i]] === true) hit = true;
+        if (site[list[i]] !== false) allNo = false;
+      }
+      parts.push(hit ? true : (allNo ? false : UNKNOWN));
+    } else if (key === "ref") {
+      if (v === "major-development" && isSet(site["major-development"])) parts.push(site["major-development"] === true);
+      else if (defs && defs[v]) parts.push(evaluate(defs[v], site, appType, defs));
+      else { console.warn("Unknown definition", v); parts.push(UNKNOWN); }
+    } else { console.warn("Unrecognised rule key", key); parts.push(UNKNOWN); }
+  }
+  return combineAll(parts);
+}
+
+// Three-valued AND over results that are already worked out.
+function combineAll(results) {
+  if (!results.length) return UNKNOWN;
+  if (results.indexOf(false) !== -1) return false;
+  return results.indexOf(UNKNOWN) !== -1 ? UNKNOWN : true;
+}
+// ===== EVALUATOR END =====
+
+// ---------- test cases ----------
+var MAJOR = { "major-development": { description: "Major development", any: [
+  { condition: { field: "dwelling-count", operator: ">=", value: 10 } },
+  { condition: { field: "site-area-residential", operator: ">=", value: 0.5 } },
+  { condition: { field: "site-area-non-residential", operator: ">=", value: 1 } },
+  { condition: { field: "floorspace-non-residential", operator: ">=", value: 1000 } } ] } };
+var HH = { id: "hh", parent: "", children: [] };
+var FULL = { id: "full", parent: "", children: [] };
+var PA_STOREY = { id: "pa-storey", parent: "prior-approval", children: [] };
+var PRIOR = { id: "prior-approval", parent: "", children: ["pa-storey", "pa-extension"] };
+var CAMDEN_AHS = { any: [
+  { all: [ { condition: { field: "dwelling-count", operator: ">=", value: 1 } },
+           { condition: { field: "housing-floorspace", operator: ">=", value: 100 } } ] },
+  { condition: { field: "housing-type", value: "student" } },
+  { condition: { field: "housing-type", value: "shared" } },
+  { condition: { field: "housing-type", value: "older-people" } } ] };
+var BLOCK_PLAN_ITEM = { item: "Visibility splays and access layout", level: "must",
+  "required-if": { condition: { field: "new-vehicle-access", value: true } } };
+
+var tests = [
+  ["always: true is required", { always: true }, {}, null, true],
+  ["discretionary is unknown", "discretionary", {}, HH, UNKNOWN],
+  ["no rule is unknown", undefined, {}, HH, UNKNOWN],
+  ["application type matches", { "application-type": { in: ["hh", "full"] } }, {}, HH, true],
+  ["application type doesn't match", { "application-type": { in: ["full"] } }, {}, HH, false],
+  ["no type chosen is unknown", { "application-type": { in: ["full"] } }, {}, null, UNKNOWN],
+  ["chosen child gets parent's rules", { "application-type": { in: ["prior-approval"] } }, {}, PA_STOREY, true],
+  ["chosen parent includes children", { "application-type": { in: ["pa-storey"] } }, {}, PRIOR, true],
+  ["condition >= true", { condition: { field: "dwelling-count", operator: ">=", value: 10 } }, { "dwelling-count": 12 }, FULL, true],
+  ["condition >= false", { condition: { field: "dwelling-count", operator: ">=", value: 10 } }, { "dwelling-count": 2 }, FULL, false],
+  ["condition unset is unknown", { condition: { field: "dwelling-count", operator: ">=", value: 10 } }, {}, FULL, UNKNOWN],
+  ["site: any designation yes", { site: { in: ["conservation-area", "world-heritage-site"] } }, { "conservation-area": true }, HH, true],
+  ["site: all designations no", { site: { in: ["conservation-area", "world-heritage-site"] } }, { "conservation-area": false, "world-heritage-site": false }, HH, false],
+  ["site: one no, one unknown", { site: { in: ["conservation-area", "world-heritage-site"] } }, { "conservation-area": false }, HH, UNKNOWN],
+  ["all: false wins over unknown", { all: [ { "application-type": { in: ["full"] } }, "discretionary" ] }, {}, HH, false],
+  ["any: true wins over unknown", { any: [ "discretionary", { always: true } ] }, {}, HH, true],
+  ["any: unknown if nothing true", { any: [ "discretionary", { "application-type": { in: ["full"] } } ] }, {}, HH, UNKNOWN],
+  ["ref major-development from numbers", { ref: "major-development" }, { "dwelling-count": 12 }, FULL, true],
+  ["ref major-development set by its pill", { ref: "major-development" }, { "major-development": false, "dwelling-count": 12 }, FULL, false],
+  ["Camden AHS: 2 homes, 150 m2", CAMDEN_AHS, { "dwelling-count": 2, "housing-floorspace": 150 }, FULL, true],
+  ["Camden AHS: 1 home, 80 m2, not special", CAMDEN_AHS, { "dwelling-count": 1, "housing-floorspace": 80, "housing-type": "general" }, FULL, false],
+  ["Camden AHS: student housing", CAMDEN_AHS, { "housing-type": "student" }, FULL, true],
+  ["Camden AHS: nothing set", CAMDEN_AHS, {}, FULL, UNKNOWN],
+  ["must-include item applies (new access)", BLOCK_PLAN_ITEM["required-if"], { "new-vehicle-access": true }, HH, true],
+  ["must-include item doesn't apply", BLOCK_PLAN_ITEM["required-if"], { "new-vehicle-access": false }, HH, false],
+  ["several keys in one object are ANDed", { "application-type": { in: ["hh"] }, site: { in: ["conservation-area"] } }, { "conservation-area": false }, HH, false],
+];
+
+var out = document.getElementById("out"), passed = 0;
+tests.forEach(function (t, i) {
+  var got = evaluate(t[1], t[2], t[3], MAJOR), ok = got === t[4];
+  if (ok) passed++;
+  var tr = document.createElement("tr");
+  [String(i + 1), t[0], String(t[4]), String(got)].forEach(function (s) {
+    var td = document.createElement("td"); td.textContent = s; tr.appendChild(td);
+  });
+  var res = document.createElement("td");
+  res.textContent = ok ? "pass" : "FAIL"; res.className = ok ? "pass" : "fail";
+  tr.appendChild(res); out.appendChild(tr);
+});
+document.getElementById("summary").textContent = passed + " of " + tests.length + " tests pass.";
+document.title = (passed === tests.length ? "PASS " : "FAIL ") + document.title;
+</script>
+</body>
+</html>

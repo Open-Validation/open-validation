@@ -1,0 +1,316 @@
+# Corrections for Wealden District Council, from inputs/audit/wealden-district-council.json.
+# The audit checked the current list, Version 4 (adopted October 2025; applies to applications
+# submitted on or after 1 October 2025). Grokbot mixed in the superseded February 2023 list
+# (Version 3), including all the drawing standards and submission rules, so no submission
+# standards are taken from it. Section 1.4: the local list does NOT apply to non-material
+# amendments, approval of conditions, advertisement consent, lawful development certificates,
+# prior approvals or TPO tree works; every other type (including householder, outline and
+# reserved matters) is covered. Many excerpts are only column headers; those files are flagged
+# low-confidence below. Items marked "From the audit" use the audit's paraphrase of the list.
+local-authority: WEA
+
+validation-list:
+  url: https://wealdengov-b994c1bb48cf487f1616-endpoint.azureedge.net/blobwealdengov-staging/UploadedFiles/Wealden-District-Council-Validation-Requirements-October-2025-1-1.pdf
+  date: 2025-10-01
+  date-basis: "audit: 'Version 4: Reviewed 4 January 2025, published October 2025'; applies to applications submitted on or after 1 October 2025"
+
+drop:
+  - id: photos
+    reason: "not_a_requirement: 'Although not a policy requirement, photographs can provide clarity'; the LBC row also comes from the superseded 2023 list"
+  - id: design-and-access-statement
+    sheets: [Full planning]
+    reason: "outdated_link: the Full planning row comes from the superseded February 2023 list"
+  - id: sustainability-statement
+    reason: "wrong_trigger: the excerpt is the Energy Statement (now energy-statement)"
+
+drop-unmapped:
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "not_a_requirement: the list says this local requirement was removed (Version 3, Feb 2023)"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advisory, and from the superseded 2023 list"
+  - local-name: Landscape and Visual Impact Assessment
+    reason: "duplicate: the excerpt is the Transport Assessment heading"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: the excerpt is an Air Quality Assessment fragment"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "duplicate: a fragment of the Daylight/Sunlight Assessment trigger"
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_trigger: this is Wealden's Ground Stability Assessment, not coal mining; re-added below"
+  - local-name: Agricultural Land Classification / Soils
+    reason: "wrong_trigger: this is the Soils Management Plan; re-added below"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: the excerpt is flood risk sequential/exception test header text; the Surface Water Drainage Strategy is re-added below"
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_app_type: re-added below with the trigger, which includes individual dwellings"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more net dwellings.
+        - all:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 5
+                description: 5 or more net dwellings.
+            - site:
+                in: [area-of-outstanding-natural-beauty]
+                description: Within an AONB.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: Sites of 0.5ha or more.
+    source-text: "10 or more net dwellings; 5 or more within an AONB; or sites of 0.5ha+"
+    source-url: https://wealdengov-b994c1bb48cf487f1616-endpoint.azureedge.net/blobwealdengov-staging/UploadedFiles/Wealden-District-Council-Validation-Requirements-October-2025-1-1.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the NPPF definition of affordable housing instead of the thresholds. It also applies to outline applications."
+
+  - id: sci
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 200
+            description: 200 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 4
+            description: Residential sites of 4ha or more.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 10000
+            description: Non-residential floorspace over 10,000 sq m.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 2
+            description: Non-residential sites of 2ha or more.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the thresholds are '200+ dwellings or 4ha+; non-residential >10,000 sq m or 2ha+' (audit quote)."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Main town centre uses on sites outside town centres.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 2500
+            description: Over 2,500 sq m.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt lacks the 2,500 sq m threshold; check whether the list says 'over' or '2,500 sq m or more'."
+
+  - id: energy-statement
+    action: add
+    source-text: "The submission of an Energy Statement will be required where development proposals consist of the following: Wealden Local Plan 1998: Saved Policy EN1."
+    source-url: https://wealdengov-b994c1bb48cf487f1616-endpoint.azureedge.net/blobwealdengov-staging/UploadedFiles/Wealden-District-Council-Validation-Requirements-October-2025-1-1.pdf
+    policy: Wealden Local Plan 1998 Saved Policy EN1
+    confidence: low
+    notes: "Audit (wrong_trigger): the excerpt stops at 'consist of the following:' and never lists the development types. The workbook mapped it to sustainability-statement. It also applies to outline applications."
+
+  - id: air-quality-assessment
+    action: update
+    required-if: discretionary
+    must-include:
+      - item: Emissions Mitigation Assessment
+        level: must
+    confidence: medium
+    notes: "'An Air Quality Assessment will be required when a proposal ... has the potential to cause significant levels of air pollution, odour or any potential air quality matters.' From the audit (missing_requirement): the Emissions Mitigation Assessment is part of the AQA."
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "'Required for all applications where the development is likely to have an adverse impact on the current levels of daylight/sunlight enjoyed by adjacent properties', including gardens and amenity space. The audit says it applies to householder applications too."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: >-
+          The development is likely to result in a material increase in light pollution or be visible
+          off site (e.g. light spill), particularly floodlighting and lighting in rural areas.
+    confidence: medium
+    notes: "The excerpt gives the trigger."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      condition:
+        field: protected-species
+        value: true
+        description: >-
+          The proposal is likely to affect bats (the list sets householder triggers by building age and
+          distance of 200m/400m to woodland or water).
+    confidence: low
+    notes: "The excerpt ('submission of a Bat Survey will be required where development proposals consist of the following:') is cut off. From the audit (missing_requirement): the Bat Survey is its own requirement with householder triggers by building age and 200m/400m distance to woodland/water; the exact thresholds weren't given."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    confidence: medium
+    notes: "The excerpt: 'EIA's are generally required for major projects such as infrastructure development, wind farms and large residential developments.'"
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Any proposed alteration to an existing roof (including rooflights or dormers).
+        - discretionary
+    confidence: medium
+    notes: "'Roof plans are required for any proposed alteration to an existing roof (including installation of rooflights or dormers), or for any new development proposing a complex or unusual roof structure' (shown as officer discretion)."
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Any proposed alteration to an existing roof (including rooflights or dormers).
+        - discretionary
+    confidence: medium
+    notes: "'Roof plans are required for any proposed alteration to an existing roof (including installation of rooflights or dormers), or for any new development proposing a complex or unusual roof structure' (shown as officer discretion)."
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: All sides of the proposal, including blank elevations
+        level: must
+    notes: "'All sides of the proposal must be shown, including blank elevations.'"
+
+  - id: archaeological-assessment
+    action: update
+    must-include:
+      - item: A Desk-Based Assessment and, where necessary, a field evaluation
+        level: must
+    confidence: low
+    notes: "The excerpt gives the contents but not the trigger. A Historic Environment Record (HER) Report is a separate item (unmapped)."
+
+  - id: bng-metric
+    action: update
+    must-include:
+      - item: The statutory biodiversity metric or small sites metric in editable Excel format, not PDF or screenshots
+        level: must
+        source-text: "The statutory biodiversity metric or the statutory small sites metric should be provided in an editable Excel format and not a PDF format or screenshots."
+    notes: "The excerpt is general BNG text. The format rule is from the October 2025 list (council tab)."
+
+unmapped:
+  - local-name: Ground Stability Assessment
+    source-text: "From the audit: significant level changes near properties, or known or suspected instability"
+    source-url: https://wealdengov-b994c1bb48cf487f1616-endpoint.azureedge.net/blobwealdengov-staging/UploadedFiles/Wealden-District-Council-Validation-Requirements-October-2025-1-1.pdf
+    suggested-id: ground-stability-assessment
+  - local-name: Soils Management Plan
+    source-text: >-
+      A soil management and handling strategy would also be required to demonstrate how a proposal will
+      undertake any soil operations. From the audit: topsoil/subsoil movement and engineering operations.
+    source-url: https://wealdengov-b994c1bb48cf487f1616-endpoint.azureedge.net/blobwealdengov-staging/UploadedFiles/Wealden-District-Council-Validation-Requirements-October-2025-1-1.pdf
+    suggested-id: soils-management-plan
+  - local-name: Surface Water Drainage Strategy
+    source-text: >-
+      From the audit: all sites, and every application that creates or changes foul or surface water
+      systems, including extensions and increased hardstanding. The council's wording: "In the
+      Pevensey Levels catchment, control runoff quality and volume... 1 in 100-year event plus 40%"
+    source-url: https://wealdengov-b994c1bb48cf487f1616-endpoint.azureedge.net/blobwealdengov-staging/UploadedFiles/Wealden-District-Council-Validation-Requirements-October-2025-1-1.pdf
+    suggested-id: drainage-strategy
+  - local-name: Parking & Access details
+    source-text: >-
+      any development altering existing parking or access arrangements, including at individual
+      dwellings … the current Parking Standards and parking space/ garage dimensions should be detailed
+      within the application (either on the plans or within supporting documentation).
+    source-url: https://wealdengov-b994c1bb48cf487f1616-endpoint.azureedge.net/blobwealdengov-staging/UploadedFiles/Wealden-District-Council-Validation-Requirements-October-2025-1-1.pdf
+    suggested-id: parking-plan
+  - local-name: Aerodrome Safeguarding Statement
+    source-text: "From the audit: wind turbines within 30km of an aerodrome, structures above safeguarding thresholds, bird-hazard and lighting risks"
+    source-url: https://wealdengov-b994c1bb48cf487f1616-endpoint.azureedge.net/blobwealdengov-staging/UploadedFiles/Wealden-District-Council-Validation-Requirements-October-2025-1-1.pdf
+    suggested-id: aerodrome-safeguarding-statement
+  - local-name: Equestrian Management Plan
+    source-text: "From the audit: equine or commercial horse use, manèges and their lighting, horse shelters"
+    source-url: https://wealdengov-b994c1bb48cf487f1616-endpoint.azureedge.net/blobwealdengov-staging/UploadedFiles/Wealden-District-Council-Validation-Requirements-October-2025-1-1.pdf
+    suggested-id: equestrian-management-plan
+  - local-name: Historic Environment Record (HER) Report
+    source-text: "From the audit: Archaeological Notification Areas where the East Sussex HER confirms it is needed"
+    source-url: https://wealdengov-b994c1bb48cf487f1616-endpoint.azureedge.net/blobwealdengov-staging/UploadedFiles/Wealden-District-Council-Validation-Requirements-October-2025-1-1.pdf
+    suggested-id: her-report
+  - local-name: Road Safety Audit (Stage 1 at validation)
+    source-text: "From the audit: major development with a new or intensified access, off-site highway works or new estate roads"
+    source-url: https://wealdengov-b994c1bb48cf487f1616-endpoint.azureedge.net/blobwealdengov-staging/UploadedFiles/Wealden-District-Council-Validation-Requirements-October-2025-1-1.pdf
+    suggested-id: road-safety-audit
+  - local-name: Refuse Vehicle Tracking Plan
+    source-text: "From the audit: new development and development affecting roads (12m / 26t vehicle, no reversing over 25m)"
+    source-url: https://wealdengov-b994c1bb48cf487f1616-endpoint.azureedge.net/blobwealdengov-staging/UploadedFiles/Wealden-District-Council-Validation-Requirements-October-2025-1-1.pdf
+    suggested-id: refuse-vehicle-tracking
+  - local-name: Playing Field / Sports Provision Assessment
+    source-text: "From the audit: development on or affecting a playing field, or creating a sports facility"
+    source-url: https://wealdengov-b994c1bb48cf487f1616-endpoint.azureedge.net/blobwealdengov-staging/UploadedFiles/Wealden-District-Council-Validation-Requirements-October-2025-1-1.pdf
+    suggested-id: playing-field-assessment
+
+low-confidence:
+  - id: arboriculturist-report
+    note: "Audit (wrong_trigger): the excerpt is only a column header and policy reference; no trigger."
+  - id: land-contamination-assessment
+    note: "Audit (wrong_trigger): the excerpt is only a column header and policy reference; no trigger."
+  - id: heritage-statement
+    note: "Audit (wrong_trigger): the excerpt is only a column header and policy reference; no trigger."
+  - id: noise-assessment
+    note: "Audit (wrong_trigger): the excerpt is only a column header and policy reference; no trigger."
+  - id: recreation-facilities-assessment
+    note: "Audit (wrong_trigger): the Open Space Assessment excerpt is only a column header and policy reference; no trigger."
+  - id: transport-assessment
+    note: "Audit (wrong_trigger): the excerpt is only a column header and policy reference; no trigger."
+  - id: telecommunications-report
+    note: "Audit (wrong_trigger): the excerpt is only a column header and policy reference; no trigger."
+  - id: landscaping-plan
+    note: "Audit (wrong_trigger): the excerpt is only a column header and policy reference; no trigger."
+  - id: viability-assessment
+    note: "Audit (wrong_trigger): the excerpt is only a column header; no trigger."
+  - id: planning-statement
+    note: "The excerpt is only a column header and policy reference; no trigger."
+  - id: travel-plan
+    note: "Audit (wrong_trigger): the excerpt is a garbled Planning Obligations trigger list (Ashdown Forest 7km text from the 2023 list)."
+  - id: waste-management-plan
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('arising and refuse collection/')."
+  - id: flood-risk-assessment
+    note: "The excerpt is only headers (see Appendix D); the audit says it applies to householder applications too."
+  - id: cil-form
+    note: "The excerpt gives no trigger ('only residential and retail developments are liable to pay CIL'); the audit says CIL forms apply to householder extensions too."
+
+new-fields:
+  - field: protected-species
+    kind: boolean
+    label: Protected or priority species affected
+    description: The proposal is likely to affect protected or priority species or their habitats.
+  - field: roof-alteration
+    kind: boolean
+    label: Roof alteration or new roof
+    description: The proposal changes the shape of an existing roof or adds a new roof.
+  - field: out-of-centre-town-centre-use
+    kind: boolean
+    label: Main town centre use outside a centre
+    description: >-
+      The proposal is for a main town centre use (retail, leisure, offices and similar) at an
+      edge-of-centre or out-of-centre location, outside a defined town centre or primary shopping area.

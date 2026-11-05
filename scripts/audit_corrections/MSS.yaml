@@ -1,0 +1,641 @@
+# Corrections for Mid Sussex District Council, from inputs/audit/mid-sussex-district-council.json.
+# The link is the current Validation Criteria (Local List), last reviewed September 2026. The
+# audit's main finding: Grokbot read the combined 'Full + advert', 'Full + conservation area' and
+# 'Full + LBC' checklists (Forms 6, 7, 8), so full-planning items were filed under Advertisement
+# consent, Demolition in conservation area and Listed building consent. Those rows are dropped
+# below and the local list's own triggers are used. Items marked "From the audit" use the audit's
+# paraphrase of the list.
+local-authority: MSS
+
+submission-standards:
+  - item: All submitted plans to a standard, identified metric scale so they can be measured
+    level: should
+
+drop:
+  - id: affordable-housing-statement
+    sheets: [Listed building consent, Advertisement consent, Demolition in cons area]
+    reason: "wrong_app_type: full-planning item taken from the combined Form 6/7/8 checklists"
+  - id: air-quality-assessment
+    sheets: [Listed building consent, Advertisement consent, Demolition in cons area]
+    reason: "wrong_app_type: the local list excludes Householder, Advertisement, Tree and Listed Building applications"
+  - id: bng-metric
+    sheets: [Listed building consent, Advertisement consent, Demolition in cons area]
+    reason: "wrong_app_type: full-planning item taken from the combined Form 6/7/8 checklists"
+  - id: environmental-statement
+    sheets: [Listed building consent, Advertisement consent, Demolition in cons area]
+    reason: "wrong_app_type: full-planning item taken from the combined Form 6/7/8 checklists"
+  - id: fire-statement
+    sheets: [Listed building consent, Advertisement consent, Demolition in cons area]
+    reason: "wrong_app_type: full-planning item taken from the combined Form 6/7/8 checklists"
+  - id: land-contamination-assessment
+    sheets: [Listed building consent, Advertisement consent]
+    reason: "wrong_app_type: full-planning item taken from the combined Form 6/7 checklists"
+  - id: noise-assessment
+    sheets: [Listed building consent, Advertisement consent]
+    reason: "wrong_app_type: full-planning item taken from the combined Form 6/7 checklists"
+  - id: recreation-facilities-assessment
+    sheets: [Listed building consent, Advertisement consent, Demolition in cons area]
+    reason: "wrong_app_type: full-planning item taken from the combined Form 6/7/8 checklists"
+  - id: sci
+    sheets: [Listed building consent, Advertisement consent, Demolition in cons area]
+    reason: "wrong_app_type: full-planning item taken from the combined Form 6/7/8 checklists"
+  - id: sustainability-statement
+    sheets: [Householder, Listed building consent, Advertisement consent]
+    reason: "wrong_app_type: the list exempts householder and listed building consent applications"
+  - id: telecommunications-report
+    sheets: [Listed building consent, Advertisement consent, Demolition in cons area]
+    reason: "wrong_app_type: full-planning item taken from the combined Form 6/7/8 checklists"
+  - id: town-centre-impact-assessment
+    sheets: [Listed building consent, Advertisement consent, Demolition in cons area]
+    reason: "wrong_app_type: full-planning item taken from the combined Form 6/7/8 checklists"
+  - id: transport-assessment
+    sheets: [Listed building consent, Advertisement consent, Demolition in cons area]
+    reason: "wrong_app_type: full-planning item taken from the combined Form 6/7/8 checklists"
+  - id: travel-plan
+    sheets: [Listed building consent, Advertisement consent, Demolition in cons area]
+    reason: "wrong_app_type: full-planning item taken from the combined Form 6/7/8 checklists"
+  - id: viability-assessment
+    sheets: [Listed building consent, Advertisement consent, Demolition in cons area]
+    reason: "wrong_app_type: full-planning item taken from the combined Form 6/7/8 checklists"
+  - id: planning-statement
+    sheets: [Householder, Lawful development cert]
+    reason: "wrong_app_type: householder applications are exempt; the LDC row is boilerplate"
+  - id: lighting-assessment
+    sheets: [Householder, Listed building consent, Demolition in cons area]
+    reason: "wrong_app_type: 'other than householder'; LBC and conservation-area rows come from the combined checklists"
+  - id: photos
+    sheets: [Listed building consent, Demolition in cons area, Full planning]
+    reason: "wrong_app_type: LBC/conservation-area rows are site-condition photographs from the combined Form 7/8 checklists; the Full planning row is from the advert-only Form 12 checklist"
+  - id: landscaping-plan
+    sheets: [Full planning]
+    reason: "wrong_app_type: the Full planning row comes from the Form 9 outline checklist (it remains under Outline)"
+  - id: archaeological-assessment
+    reason: "duplicate: the 'Heritage and Archaeology Statement' is one item with the Heritage Statement (the LDC row used the LBC heritage trigger); folded into heritage-statement"
+  - id: waste-management-plan
+    reason: "the excerpt is block plan content ('Bin storage clearly detailed (when relevant)'), now a site-plan must-include item"
+
+drop-unmapped:
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_trigger: the excerpt is the 2021 Fire Statement legislative note; replaced by the Ashdown Forest item below"
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_app_type: lighting-assessment content filed under Full planning; now must-include items there"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: a fragment ('treatments) and SUDS features will be required.')"
+  - local-name: Water Neutrality Statement
+    reason: "other: from the 2024 checklists, not in the September 2026 list; re-added once below with a note"
+  - local-name: Self-build / custom build information
+    reason: "wrong_app_type: filed under LBC, advert and conservation-area sheets from the combined checklists; re-added once below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters, change-of-use]
+        - discretionary
+    policy: Mid Sussex District Plan 2014-2031 Policy DP31
+    confidence: medium
+    notes: "\"Required when the proposed residential development is above the relevant threshold as set out in Policy DP31\" (the threshold is not in the list)."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters, change-of-use]
+        - any:
+            - site:
+                in: [air-quality-management-area]
+                description: The site is within, or in relevant proximity to, an Air Quality Management Area.
+            - ref: major-development
+            - discretionary
+    source-text: >-
+      applications an Air Quality Assessment may be required for: All applications within, or in
+      relevant proximity, to an Air Quality Management Area.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook omitted the major-development and B8 triggers ("B8
+      storage and distribution use class with a floorspace of 500m2 or more", shown as officer
+      discretion). Not required for Householder, Advertisement, Tree and Listed Building applications.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: There are trees within 15m of the development, or within or adjacent to the site that could be affected.
+        - application-type:
+            in: [consent-under-tpo, notice-trees-in-con-area]
+    must-include:
+      - item: Detail as required by BS 5837 (2012)
+        level: should
+    confidence: medium
+    notes: "From the audit (missing_requirement): the Tree Report trigger (trees within 15m or trees to be removed) also applies to tree applications."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, demolition-con-area]
+        - site:
+            in: [listed-building-setting, scheduled-monument, park-and-garden, archaeological-priority-area]
+            description: >-
+              The application affects the setting of a listed building, or the site is in or next to a
+              scheduled monument, registered park or garden, or Archaeological Notification Area.
+    source-text: >-
+      Heritage Statement and Archaeological Assessment When is this required? A Heritage Statement
+      will be required for: All applications for listed building consent. … Applications affecting
+      the setting of a Listed Building
+    source-url: https://www.midsussex.gov.uk/media/3zpdrohh/validation-criteria-local-list.pdf
+    must-include:
+      - item: An Archaeological Desk-Based Assessment
+        level: must
+        required-if:
+          site:
+            in: [archaeological-priority-area]
+            description: The site is in or next to an Archaeological Notification Area.
+        source-text: commission an Archaeological Desk-Based Assessment and submit the results.
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement): the workbook applied it only to LBC. From the audit: also
+      demolition in conservation areas, sites in or next to scheduled monuments, registered parks
+      and gardens or Archaeological Notification Areas, and householder works affecting the setting
+      of a listed building.
+
+  - id: bng-metric
+    action: update
+    required-if:
+      application-type:
+        in: [full, outline]
+    must-include:
+      - item: The statutory biodiversity metric or small sites metric in editable Excel format (not PDF or screenshots)
+        level: should
+        source-text: >-
+          The statutory biodiversity metric or the statutory small sites metric should be provided in
+          an editable Excel format and not a PDF format or screenshots.
+    confidence: medium
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: The land may be affected by contamination (e.g. fuel filling stations, gas works, landfills, industrial sites, barn conversions).
+    confidence: medium
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [conservation-area]
+            description: The development is within a Conservation Area.
+    source-text: >-
+      Design and Access Statement – All major developments and Listed Building applications. …
+      Design and Access Statement - required for all development within a Conservation Area.
+    source-url: https://www.midsussex.gov.uk/media/3zpdrohh/validation-criteria-local-list.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook mixed rows from the advert-only and combined checklists; these are the list's triggers (the Conservation Area one is from the Householder checklist)."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: Protected species or species of conservation concern within or adjacent to the site may be affected.
+        - site:
+            in: [site-of-special-scientific-interest, special-protection-area, local-wildlife-site]
+            description: Designated nature conservation sites within or adjacent to the site may be affected.
+        - discretionary
+    source-text: >-
+      An Ecological Impact Assessment Report is required for a proposed development on which there
+      is a reasonable likelihood that the features listed below that are within or adjacent to the
+      application site, may be affected: Protected species Species of conservation concern including
+      those listed as Species of Principal Importance in England under Section 41 of the Natural
+      Environment and Rural Communities (NERC) Act 2006 Designated nature conservation sites…
+    confidence: medium
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - all:
+            - application-type:
+                in: [change-of-use]
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: A residential change of use.
+    source-text: >-
+      A Sustainability Statement is required for all applications with the exceptions of:
+      Householder planning applications, Non-residential change of use applications Listed building
+      consent applications.
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook placed it under Householder and prior approval although those are exempt."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: An EIA is required under the EIA Regulations 2017.
+    confidence: medium
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A relevant building 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A relevant building with 7 or more storeys.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 2
+            description: The building is multi-occupied residential (2 or more dwellings).
+    source-text: >-
+      Fire Statement Form When is this required? Full planning applications for development that
+      includes a “relevant building” or is within the curtilage of a relevant building.
+    confidence: medium
+    notes: "The council's page describes relevant buildings as 'multi-occupied residential buildings of 18m or more in height, or 7 or more storeys'."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The development is in Flood Zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: A site of 1 hectare or more in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: A site of 1 hectare or more in Flood Zone 1.
+        - discretionary
+    source-text: >-
+      A Flood Risk Assessment (FRA) will be required for all developments (including minor
+      development and changes of use) proposed: in Flood Zones 2 or 3 or see flood map for planning
+      within Flood Zone 3b within Flood Zone 1 with a site area of 1 hectare or more within ‘Flood
+      Zones plus Climate Change’, showing it is at increased risk of flooding from rivers or sea in
+      future – see flood map for planning with Flood Zone 1 and the flood map for planning shows it
+      is at risk of flooding from surface wate…
+    source-url: https://www.midsussex.gov.uk/media/3zpdrohh/validation-criteria-local-list.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the Householder row read only 'Act 2006 Flood Risk Assessment'. Sites at
+      future (climate change) or surface water flood risk are shown as officer discretion.
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [full, outline, reserved-matters, change-of-use]
+            - condition:
+                field: external-lighting
+                value: true
+                description: The application provides or alters floodlighting, or includes external lighting.
+        - condition:
+            field: illuminated
+            value: true
+            description: Illuminated advertisements are proposed.
+    source-text: >-
+      A lighting assessment will be required for applications for the provision or alteration of
+      floodlighting, or any other planning applications other than householder that include
+      external lighting. … Lighting Assessment (where illuminated advertisements are proposed)
+    must-include:
+      - item: Confirmation of the means of illumination (external/internal, static/intermittent) and level of illumination
+        level: must
+        required-if:
+          condition:
+            field: illuminated
+            value: true
+            description: Illuminated advertisements are proposed.
+      - item: Colour(s) of illumination, if applicable
+        level: must
+        required-if:
+          condition:
+            field: illuminated
+            value: true
+            description: Illuminated advertisements are proposed.
+      - item: A schedule of the proposed equipment, including proposed heights of fixings and details of any shielding
+        level: must
+        source-text: a schedule of the proposed equipment in the design, including proposed heights of fixings and details of any shielding.
+    confidence: medium
+    notes: "Audit (wrong_app_type): not for householder applications; the advert-only checklist adds the illuminated-advert trigger."
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Development that raises issues of disturbance by noise to the occupants of nearby buildings.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise-sensitive development sited close to existing sources of noise.
+    confidence: medium
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      condition:
+        field: existing-open-space
+        value: true
+        description: Development on school playing fields or public areas, e.g. parks.
+    confidence: medium
+
+  - id: planning-statement
+    action: update
+    required-if:
+      application-type:
+        in: [full, outline, reserved-matters, change-of-use, lbc, advertising, demolition-con-area]
+    source-text: >-
+      A planning statement is required for all applications except those for trees, householders,
+      and minor alterations to commercial premises.
+    confidence: medium
+    notes: "Audit (wrong_app_type): householder and tree applications are exempt; minor alterations to commercial premises are also exempt."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Main town centre uses outside town centres, not in accordance with an up-to-date Local Plan.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 500
+            description: More than 500 square metres gross of main town centre floorspace.
+    must-include:
+      - item: A sequential test
+        level: must
+    confidence: medium
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: Dormer extensions or roof alterations that cannot be adequately described with elevations and floor plans.
+    confidence: medium
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: Dormer extensions or roof alterations that cannot be adequately described with elevations and floor plans.
+    must-include:
+      - item: Clear labelling of the direction of the roof slopes and the position of any roof lights or dormers
+        level: should
+      - item: Recommended scale 1:50 or 1:100
+        level: should
+    confidence: medium
+
+  - id: sci
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 50
+            description: Residential development of 50 units or more.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: A residential site of 0.5 hectares or more when the number of units is unknown.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: Commercial development of 1,000 square metres or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: A commercial site of 1 hectare or more.
+    source-text: >-
+      Statement of Community Involvement When is this required? A Statement of Community involvement
+      is required for applications that include: Residential development of 50 units or more or a
+      site area of 0.5 hectares (5000m2) or more when the numbers of units areunknown Commercial
+      development of 1,000m2 or more or a site area of 1 hectare (10,000m2) or more.
+    confidence: medium
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Mast and antenna development by mobile phone network operators.
+    confidence: medium
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 50
+            description: Residential development of 50 or more units (Transport Statement 50-80; Transport Assessment 80+).
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1500
+            description: E(g) floorspace of 1,500 square metres or more (Transport Statement 1,500-2,500; Transport Assessment over 2,500).
+    source-text: >-
+      Transport Assessment and Transport Statement – A transport assessment is required for
+      residential development of 80 or more units.
+    confidence: medium
+    notes: "Audit (wrong_trigger): from the audit, TA for more than 80 dwellings or more than 2,500 sqm E(g); TS for 50-80 dwellings or 1,500-2,500 sqm."
+
+  - id: travel-plan
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 50
+            description: Sites where a Transport Statement or Transport Assessment is required (50+ dwellings).
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1500
+            description: Sites where a Transport Statement or Transport Assessment is required (1,500+ sqm E(g)).
+    source-text: >-
+      As a rule, a Travel Plan Statement is required for sites where a Transport Statement is
+      required, and full Travel Plan is required for sites where a Transport Assessment is required.
+    confidence: medium
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    source-text: >-
+      Viability Assessment - for those applications which are non-policy compliant in respect of
+      financial contributions to the provision of infrastructure and/or affordable housing.
+    confidence: medium
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: Bin storage clearly detailed (when relevant)
+        level: must
+        source-text: Bin storage clearly detailed (when relevant) o This will be required for all development.
+      - item: Recommended scale 1:500 (householder checklist allows 1:200 or 1:500)
+        level: should
+
+  - id: section-existing
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Floor and Site Levels Plans and sections – \"only when a change in level is proposed eg on a sloping site\" (shown as officer discretion)."
+
+  - id: section-proposed
+    action: update
+    required-if: discretionary
+    must-include:
+      - item: Existing and proposed site sections and finished floor levels at 1:50 or 1:100
+        level: must
+    confidence: medium
+    notes: "Floor and Site Levels Plans and sections – \"only when a change in level is proposed eg on a sloping site\" (shown as officer discretion)."
+
+  - id: elevation-existing
+    action: update
+    must-include:
+      - item: Each side of the existing building that will be altered, as it stands before the works
+        level: must
+      - item: Where the building adjoins a neighbouring structure, enough of the neighbouring property to show the arrangement
+        level: must
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: Front, rear, side and opposite side elevations, including blank elevations, at 1:50 or 1:100
+        level: must
+        source-text: >-
+          Elevation Plans (requirements even for blank elevations) Existing and proposed front, rear,
+          side and opposite side elevation (at scale 1:50/1:100)
+
+  - id: floor-plan-proposed
+    action: update
+    must-include:
+      - item: All floors, at 1:50 or 1:100
+        level: must
+      - item: The dimensions and proposed use of each room, and the position and dimensions of windows, doors and walls
+        level: must
+        required-if:
+          application-type:
+            in: [change-of-use, prior-approval]
+        source-text: >-
+          Floor Plans which are drawn to an identified scale (1:50/1:100) Indicating the dimensions
+          and proposed use of each room, the position and dimensions of windows, doors and walls
+
+unmapped:
+  - local-name: Ashdown Forest SAMM / SANG (Planning Obligation Instruction Form)
+    source-text: >-
+      Applications for the creation of additional residential units or annexes within the 7km buffer
+      zone surrounding the Ashdown Forest. Applications for Holiday Lets within 7km of the Ashdown Forest
+    source-url: https://www.midsussex.gov.uk/media/3zpdrohh/validation-criteria-local-list.pdf
+    suggested-id: habitats-regulations-assessment
+  - local-name: Road Safety Audit and Designers Response
+    source-text: "A Stage 1 RSA (preliminary design) is required for all residential developments of 20 units or greater"
+    source-url: https://www.midsussex.gov.uk/media/3zpdrohh/validation-criteria-local-list.pdf
+    suggested-id: road-safety-audit
+  - local-name: Mineral Infrastructure Statement
+    source-text: "Required for all development that falls within 250 metres of minerals infrastructure"
+    source-url: https://www.midsussex.gov.uk/media/3zpdrohh/validation-criteria-local-list.pdf
+    suggested-id: minerals-assessment
+  - local-name: Waste Infrastructure Statement
+    source-text: "From the audit: development within a Waste Consultation Area"
+    source-url: https://www.midsussex.gov.uk/media/3zpdrohh/validation-criteria-local-list.pdf
+    suggested-id: waste-infrastructure-statement
+  - local-name: Historic Environment Record search
+    source-text: "From the audit: 10+ residential units and other thresholds"
+    source-url: https://www.midsussex.gov.uk/media/3zpdrohh/validation-criteria-local-list.pdf
+    suggested-id: historic-environment-record-search
+  - local-name: Water Neutrality Statement (status unconfirmed)
+    source-text: "Water Neutrality A small area on the west side of the Parishes of Bolney and Twineham is within the Sussex North Water Resource Zone."
+    source-url: https://www.midsussex.gov.uk/media/jfpfrpxi/form-5_planningapplicationchecklist_full.pdf
+    suggested-id: water-neutrality-statement
+  - local-name: Self/Custom Build Statement
+    source-text: "A Self/Custom Build Statement if you are claiming an exemption based on the development being self/custom build"
+    source-url: https://www.midsussex.gov.uk/media/jfpfrpxi/form-5_planningapplicationchecklist_full.pdf
+    suggested-id: self-build-statement
+
+low-confidence:
+  - id: cil-form
+    note: "Audit (wrong_trigger): the workbook's excerpt is a fragment ('of the Community Infrastructure Levy Regulations 2010.'); the trigger needs checking."
+  - id: photos
+    note: "The advert row (details of the advertisements and their locations) is from the advert-only checklist; the site-condition photographs are an ecology/BNG item. Check which application types each applies to."
+
+new-fields:
+  - field: roof-alteration
+    kind: boolean
+    label: Roof alteration or new roof
+    description: The proposal changes the shape of an existing roof or adds a new roof.
+  - field: scheduled-monument
+    kind: designation
+    label: Scheduled monument
+    description: Site contains or affects a scheduled monument or its setting (dataset scheduled-monument).
+  - field: park-and-garden
+    kind: designation
+    label: Registered park and garden
+    description: Site is in, or in the setting of, a registered historic park or garden (dataset park-and-garden).
+  - field: protected-species
+    kind: boolean
+    label: Protected species
+    description: The proposal is likely to affect protected or priority species or their habitats.
+  - field: existing-open-space
+    kind: boolean
+    label: Existing open space
+    description: The site includes existing public open space, playing fields or sports facilities.
+  - field: telecommunications-development
+    kind: boolean
+    label: Telecommunications development
+    description: The proposal is for telecommunications equipment (masts, antennas, cabinets and similar).
+  - field: out-of-centre-town-centre-use
+    kind: boolean
+    label: Main town centre use outside a centre
+    description: >-
+      The proposal is for a main town centre use (retail, leisure, offices and similar) at an
+      edge-of-centre or out-of-centre location, outside a defined town centre or primary shopping area.
