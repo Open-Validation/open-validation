@@ -84,6 +84,9 @@ dialog.filter[open] { display: flex; flex-direction: column; }
 .inlineq { display: inline-flex; align-items: center; gap: 4px; margin-right: 8px; }
 .inlineq .seg button { padding: 2px 10px; }
 .typetags { font-size: 12px; color: var(--text-muted); }
+.tag { display: inline-block; border: 1px solid var(--line-soft); border-radius: 999px; padding: 0 8px; font-size: 12px; line-height: 1.6; color: var(--text); background: transparent; margin: 1px 0; white-space: nowrap; }
+button.tag { cursor: pointer; } button.tag:hover { border-color: var(--accent); }
+.tags { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0 2px; }
 
 /* ===== Tabs ===== */
 .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); overflow-x: auto; }
@@ -464,6 +467,37 @@ function describe(rule) {
 // "The site is in…." -> "the site is in…" (keeps acronyms such as "SSSI" as they are)
 function lower(t) { t = String(t).trim().replace(/\.$/, ""); return /^[A-Z][a-z]/.test(t) ? t.charAt(0).toLowerCase() + t.slice(1) : t; }
 function typeName(id) { var t = S.typeById[id]; return t ? t.name.replace(/ planning application$| base type$/i, "") : id; }
+
+// "Applies to" tags, worked out from a rule (never stored separately, so they can't drift):
+// [{ key, text }] e.g. Listed building, Green Belt, Major development, New homes ≥ 10
+var OP_SIGN = { ">=": "≥", ">": ">", "<=": "≤", "<": "<", "==": "=" };
+function appliesTo(rule) {
+  var tags = [], seen = {};
+  function add(key, text) { if (!seen[key + text]) { seen[key + text] = 1; tags.push({ key: key, text: text }); } }
+  (function walk(x) {
+    if (x === "discretionary") return add("discretionary", "Council's discretion");
+    if (Array.isArray(x)) return x.forEach(walk);
+    if (!x || typeof x !== "object") return;
+    if (x.always === true) add("always", "All applications");
+    if (x.ref === "major-development") add("major-development", "Major development");
+    if (x.site && x.site["in"]) x.site["in"].forEach(function (f) { add(f, fieldLabel(f)); });
+    if (x.condition && x.condition.field) {
+      var c = x.condition, label = fieldLabel(c.field);
+      if (c.value === true && !c.operator) add(c.field, label);
+      else if (c.value === false && !c.operator) add(c.field, "Not: " + label);
+      else if (typeof c.value === "number" || c.operator) add(c.field, label + " " + (OP_SIGN[c.operator] || "=") + " " + c.value);
+      else add(c.field, label + ": " + tidy(c.value));
+    }
+    Object.keys(x).forEach(function (k) { if (k !== "condition" && k !== "site" && k !== "application-type") walk(x[k]); });
+  })(rule);
+  return tags;
+}
+function tagsHTML(rule, clickable) {
+  var t = appliesTo(rule);
+  if (rule === undefined) return '<span class="muted">see wording</span>';
+  if (!t.length) return '<span class="tag">Any site</span>';
+  return t.map(function (x) { return clickable ? '<button type="button" class="tag" data-tag="' + esc(x.key) + '" title="Show only requirements that depend on this">' + esc(x.text) + "</button>" : '<span class="tag">' + esc(x.text) + "</span>"; }).join(" ");
+}
 
 // Every field a rule mentions: { field: count }
 function ruleFields(rule, acc) {
@@ -982,18 +1016,23 @@ function loadAllLpaYaml(codes, panel) {
 // Table tab (one row per requirement file of the chosen council)
 // ======================================================================
 function renderTable(panel, council) {
-  var cols = [["requirement", "Requirement"], ["application-type", "Application types"], ["required-if", "When required"], ["must-include", "Must show"],
+  var cols = [["requirement", "Requirement"], ["application-type", "Application types"], ["applies", "Applies to"], ["required-if", "When required"], ["must-include", "Must show"],
     ["policy", "Policy"], ["source-text", "Council's wording"], ["source-url", "Source"]];
   var rows = filtered(council.files).map(function (f) {
     var d = f.data, types = cellValue(d, "application-type");
     return { code: S.lpa, file: f.id, d: d, status: rowStatus(d, S.lpa, f.id, REQ_CELLS), cells: {
       requirement: reqName(f.id), "application-type": types.length ? types.map(typeName).join(", ") : (d["required-if"] ? "" : ""),
+      applies: appliesTo(d["required-if"]).map(function (t) { return t.text; }).join(", "),
       "required-if": d["required-if"] ? describe(d["required-if"]) : "", "must-include": (d["must-include"] || []).map(function (m) { return m.item; }).join("; "),
       policy: d.policy || "", "source-text": d["source-text"] || "", "source-url": d["source-url"] || "" } };
-  }).filter(function (r) { return !S.statusFilter || REQ_CELLS.some(function (c) { return !isEmpty(cellValue(r.d, c)) && cellStatus(r.d, r.code, r.file, c).status === S.statusFilter; }); });
+  }).filter(function (r) { return !S.statusFilter || REQ_CELLS.some(function (c) { return !isEmpty(cellValue(r.d, c)) && cellStatus(r.d, r.code, r.file, c).status === S.statusFilter; }); })
+    .filter(function (r) { return !S.tagFilter || appliesTo(r.d["required-if"]).some(function (t) { return t.key === S.tagFilter; }); });
   var counts = {}; council.files.forEach(function (f) { REQ_CELLS.forEach(function (c) { if (!isEmpty(cellValue(f.data, c))) { var s = cellStatus(f.data, S.lpa, f.id, c).status; counts[s] = (counts[s] || 0) + 1; } }); });
-  var html = '<div class="toolbar"><div><h2 style="margin:0">' + esc(S.lpaByCode[S.lpa].name) + '</h2><p class="muted" style="margin:4px 0 0">' + council.files.length + " requirement files. Every cell is tinted by its review status" + (S.review ? "; tap a cell to mark it." : ".") + "</p></div>" + statusFilterHTML() + "</div>" + countsHTML(counts);
+  var html = '<div class="toolbar"><div><h2 style="margin:0">' + esc(S.lpaByCode[S.lpa].name) + '</h2><p class="muted" style="margin:4px 0 0">' + council.files.length + " requirement files. Every cell is tinted by its review status" + (S.review ? "; tap a cell to mark it." : ".") + "</p></div>" + statusFilterHTML() + "</div>" + countsHTML(counts) +
+    (S.tagFilter ? '<p class="filterbar">Showing requirements that apply to: <span class="chip-ans">' + esc(fieldLabel(S.tagFilter === "always" ? "All applications" : S.tagFilter === "discretionary" ? "Council's discretion" : S.tagFilter)) +
+      '<button type="button" id="clearTag" aria-label="Show all requirements">✕</button></span></p>' : "");
   html += tableHTML(cols, sortRows(rows, "table", cols), function (row, key) {
+    if (key === "applies") return "<td>" + tagsHTML(row.d["required-if"], true) + "</td>";   // worked out from the rule, so not a cell of its own
     if (key === "requirement") return cellTD(row.d, row.code, row.file, key, badge(row.status) + "<br><strong>" + esc(row.cells.requirement) + '</strong> <span class="mono muted">' + esc(row.file) + "</span>");
     if (key === "source-url") return cellTD(row.d, row.code, row.file, key, row.cells[key] ? '<a href="' + esc(row.cells[key]) + '" target="_blank" rel="noopener">Council list</a>' : "");
     if (key === "source-text") { var t = row.cells[key]; var first = t.split("\n")[0]; return cellTD(row.d, row.code, row.file, key, t ? (t.length > 120 || t.indexOf("\n") !== -1 ? "<details><summary>" + esc(first.slice(0, 120)) + "…</summary>" + esc(t) + "</details>" : esc(t)) : "", "wide"); }
@@ -1002,6 +1041,8 @@ function renderTable(panel, council) {
   }, "table");
   panel.innerHTML = html;
   bindTable(panel, "table", function () { renderTable(panel, council); });
+  panel.querySelectorAll("button[data-tag]").forEach(function (b) { b.addEventListener("click", function (e) { e.stopPropagation(); S.tagFilter = b.dataset.tag; renderTable(panel, council); }); });
+  var ct = $("#clearTag"); if (ct) ct.addEventListener("click", function () { S.tagFilter = ""; renderTable(panel, council); });
 }
 function rowStatus(d, code, file, cells) {
   var order = STATUSES, low = "council-updated", any = false;
@@ -1122,6 +1163,7 @@ function cardHTML(it, cls, icon) {
   return '<article class="card result ' + cls + '"><header><div class="title">' + icon + "<h3>" + esc(reqName(it.id)) + '</h3></div><div class="meta" style="margin:0">' +
     (it.local ? '<span class="badge local">Local</span>' : "") + (it.national ? '<span class="badge national">National</span>' : "") +
     (it.local ? badge(status) + ' <span class="badge plain">Confidence: ' + esc(d.confidence || "?") + "</span>" : "") + "</div></header>" +
+    (it.local ? '<div class="tags"><span class="typetags">Applies to:</span> ' + tagsHTML(it.rule, false) + "</div>" : "") +
     (S.chosen.length > 1 && it.forTypes && it.forTypes.length ? '<p class="typetags">For: ' + it.forTypes.map(function (t) { return esc(typeName(t)); }).join(", ") + "</p>" : "") +
     '<p class="trigger">' + trig.map(esc).join("<br>") + "</p>" +
     (it.why ? '<p class="warn">' + esc(it.why) + "</p>" : "") +
