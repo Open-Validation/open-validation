@@ -1,36 +1,95 @@
 reference: fire-statement
 local-authority: BRY
 required-if:
-  all:
-  - application-type:
-      in:
-      - full
-  - any:
-    - condition:
-        field: building-height
-        operator: '>='
-        value: 18
-        description: A building is 18 metres or more tall.
-    - condition:
-        field: storey-count
-        operator: '>='
-        value: 7
-        description: A building has 7 or more storeys.
-  - any:
-    - condition:
-        field: dwelling-count
-        operator: '>='
-        value: 2
-        description: The building contains 2 or more dwellings.
-    - condition:
-        field: educational-accommodation
-        value: true
-        description: The building contains educational accommodation.
+  any:
+  - all:
+    - application-type:
+        in:
+        - full
+    - any:
+      - condition:
+          field: dwelling-count
+          operator: '>='
+          value: 2
+          description: Two or more dwellings.
+      - condition:
+          field: educational-accommodation
+          value: true
+          description: Educational accommodation.
+    - any:
+      - condition:
+          field: building-height
+          operator: '>='
+          value: 18
+          description: 18 metres or more in height.
+      - condition:
+          field: storey-count
+          operator: '>='
+          value: 7
+          description: 7 or more storeys.
+  - ref: major-development
+  - condition:
+      field: dwelling-count
+      operator: '>='
+      value: 1
+      description: Creation of new dwellings (including conversions).
+  - condition:
+      field: floorspace-non-residential
+      operator: '>'
+      value: 0
+      description: Commercial developments.
+  - condition:
+      field: involves-change-of-use
+      value: true
+      description: Change of use.
 source-url: https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
-source-text: 'Planning Gateway One Fire Statement When Required Applications for Full planning permission
-  which involve: provision of one or more relevant buildings, or'
+policy: Article 9A, Town and Country Planning (Development Management Procedure) (England) Order 2015;
+  London Plan 2021 policy D12
+source-text: 'Applications for Full planning permission which involve: provision of one or more relevant
+  buildings, or development of an existing relevant building or development within the curtilage of a
+  relevant building. ... All applications for Major Development Creation of new dwellings (including conversions)
+  Commercial developments Change of use'
+must-include:
+- item: 'For a relevant building (two or more dwellings or educational accommodation, and 18 m or more
+    or 7 or more storeys): a Planning Gateway One fire statement on the standard form from GOV.UK'
+  level: must
+  required-if:
+    all:
+    - application-type:
+        in:
+        - full
+    - any:
+      - condition:
+          field: dwelling-count
+          operator: '>='
+          value: 2
+          description: Two or more dwellings.
+      - condition:
+          field: educational-accommodation
+          value: true
+          description: Educational accommodation.
+    - any:
+      - condition:
+          field: building-height
+          operator: '>='
+          value: 18
+          description: 18 metres or more in height.
+      - condition:
+          field: storey-count
+          operator: '>='
+          value: 7
+          description: 7 or more storeys.
+- item: 'For major development: an independent fire strategy produced by a third-party, suitably qualified
+    assessor (London Plan Policy D12B)'
+  level: must
+  required-if:
+    ref: major-development
+- item: 'For non-major applications: a fire statement showing London Plan Policy D12 has been considered
+    in the design and layout'
+  level: should
 confidence: medium
-notes: The excerpt is cut off at 'relevant buildings'; the rule uses the national definition of a relevant
-  building. The separate London Plan Fire Statement is listed under unmapped.
+notes: 'From the council''s list (published January 2025), page 18, 30 (Part 1: Planning Gateway One Fire
+  Statement; Part 2: Fire Statement (London Plan)). The Gateway One statement is not needed for outline
+  or section 73 applications, or for some changes of use of or near a relevant building.'
 review-status: unverified
 field-status: {}
