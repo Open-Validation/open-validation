@@ -1,13 +1,94 @@
 reference: flood-risk-assessment
 local-authority: WNM
 required-if:
-  site:
-    in:
-    - flood-risk-zone
-    description: The site is in Flood Zone 2 or 3.
+  any:
+  - condition:
+      field: site-area-residential
+      operator: '>'
+      value: 1
+      description: Sites exceeding 1 hectare.
+  - condition:
+      field: site-area-non-residential
+      operator: '>'
+      value: 1
+      description: Sites exceeding 1 hectare.
+  - site:
+      in:
+      - flood-risk-zone
+      description: All proposals in Flood Zone 2 or 3, including minor development and change of use.
+  - site:
+      in:
+      - surface-water-flood-risk
+      description: Sites at medium or high risk from other sources of flooding.
+  - all:
+    - application-type:
+        in:
+        - cho-agri-to-dwh
+        - cho-commercial-to-dwh
+        - cho-commercial-to-mixed
+        - cho-sui-to-dwh
+        - cho-agri-to-flexcom
+        - cho-agri-to-school
+        - cho-comm-to-school
+        - cho-amusements-to-dwh
+    - discretionary
 source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+policy: National Planning Policy Framework (NPPF); Borough Local Plan (BLP) Policy NR1
+source-text: 'Required for: Sites exceeding 1 hectare. All proposals in Flood Zone 2 or 3, including minor
+  development and change of use (as defined by the Environment Agency). Sites at medium or high risk from
+  other sources of flooding. ... Require the necessary plans and documentation to support the submission,
+  as relevant. The list includes, amongst other things, Flood Risk Assessment, Transport Assessment, Noise
+  Assessment, Land Contamination Assessment.'
+must-include:
+- item: 'Householder: follows the Environment Agency''s up-to-date Standing Advice for Minor Extensions'
+  level: must
+  required-if:
+    application-type:
+      in:
+      - hh
+  source-text: If your property lies within Flood Zone 2 (medium risk) or 3 (high risk) then a Flood Risk
+    Assessment will be required. You will need to follow the Environment Agency's up-to-date Standing
+    Advice for Minor Extensions.
+- item: 'Sequential Test: that there are no alternative sites for the development outside Flood Zones
+    2 and 3, or at areas of lower risk of surface water flooding; area of search agreed with the council
+    before submission, as part of a pre-application submission'
+  level: must
+  required-if:
+    all:
+    - any:
+      - site:
+          in:
+          - flood-risk-zone
+          description: Fluvial Flood Zones 2 and 3.
+      - site:
+          in:
+          - surface-water-flood-risk
+          description: Areas of moderate or high surface water flooding, in specified circumstances.
+    - discretionary
+  source-text: 'Required for all development in fluvial Flood Zones 2 and 3, and areas of Surface Water
+    Flooding (moderate and high) in specified circumstances within the Flood risk and Coastal Change Planning
+    Policy Guidance unless: The development is classified as minor development for flood risk by the Environment
+    Agency. The development involves a change of use (unless the proposed development is a caravan, camping
+    chalet, mobile home or park home site). A Sequential Test has already been completed as part of the
+    Local Authority''s Strategic Flood Risk Assessment, or Local Plan.'
+- item: 'Exception Test (highly vulnerable development in Flood Zone 2, essential infrastructure in Flood
+    Zone 3a or 3b, more vulnerable development in Flood Zone 3a): wider sustainability benefits that outweigh
+    flood risk, and that the development will be safe for its lifetime without increasing flood risk elsewhere'
+  level: must
+  required-if:
+    site:
+      in:
+      - flood-risk-zone
+      description: Highly vulnerable development in Flood Zone 2, essential infrastructure in Flood Zone
+        3a or 3b, or more vulnerable development in Flood Zone 3a.
+  source-text: 'The Exception Test is required for development that is: Highly vulnerable in Flood Zone
+    2. Essential infrastructure in Flood Zone 3a or 3b. More vulnerable development in Flood Zone 3a.'
 confidence: medium
-notes: 'Audit (wrong_trigger): the workbook quoted the Site Levels trigger (now in section-proposed).
-  The FRA is in the national requirements table, with Flood Zone triggers.'
+notes: From the council's list (adopted 5 February 2026), National Validation Requirements and householder
+  guide, page 9-10, 37, 41. 'Other sources of flooding' is shown with the surface water flood risk designation.
+  The list's separate 'Flood Risk Sequential Test and Exception Test' row is shown here as items; the
+  Sequential Test exemptions (minor development, most changes of use, a test already done in the SFRA
+  or Local Plan) and 'in specified circumstances' are why it shows as discretionary. For Part 3 prior
+  approvals (changes of use) the list asks for this 'as relevant' (page 41), shown as the council's discretion.
 review-status: unverified
 field-status: {}
