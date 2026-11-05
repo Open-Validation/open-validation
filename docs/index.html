@@ -751,9 +751,11 @@ function renderTypeRows() {
   $("#addType").hidden = !S.chosen.length || S.addingType;
   S.addingType = false;
 }
-function selectCouncil(code) {
+// Choosing a council on the map (or under it) opens its Table; the search box opens Results
+function selectCouncil(code, tab) {
   S.lpa = code || ""; $("#councilList").hidden = true;
-  if (S.lpa && (S.tab === "map" || S.tab === "councils" || !S.tab)) S.tab = "results";
+  if (tab) S.tab = tab;
+  else if (S.lpa && (S.tab === "map" || S.tab === "councils" || !S.tab)) S.tab = "results";
   writeHash(); render();
 }
 
@@ -900,7 +902,7 @@ function renderMap(panel) {
   panel.querySelectorAll(".legend button[data-status]").forEach(function (b) { b.addEventListener("click", function () { S.highlight = S.highlight === b.dataset.status ? "" : b.dataset.status; renderMap(panel); }); });
   $("#patternsToggle").addEventListener("change", function (e) { S.patterns = e.target.checked; document.body.classList.toggle("patterns", S.patterns); renderMap(panel); });
   $("#listView").addEventListener("click", function () { S.tab = "councils"; writeHash(); render(); });
-  panel.querySelectorAll(".chip").forEach(function (c) { c.addEventListener("click", function () { selectCouncil(c.dataset.code); }); });
+  panel.querySelectorAll(".chip").forEach(function (c) { c.addEventListener("click", function () { selectCouncil(c.dataset.code, "table"); }); });
   if (!S.geo) { $("#map").outerHTML = '<div class="empty">' + SVG_BOARD + "<p>The map isn't built yet (docs/map/uk-lpa.geojson). Use the Councils tab or the search box.</p></div>"; return; }
   drawMap();
 }
@@ -940,9 +942,9 @@ function drawMap() {
     .on("mouseleave", function () { tip.hidden = true; })
     .on("click", function (e, f) {
       if (!f.properties.code) { tip.innerHTML = "<strong>" + esc(f.properties.name) + "</strong><br>" + tipText(f); tip.hidden = false; tip.style.left = e.clientX + "px"; tip.style.top = (e.clientY + window.scrollY) + "px"; return; }
-      tip.hidden = true; selectCouncil(f.properties.code);
+      tip.hidden = true; selectCouncil(f.properties.code, "table");
     })
-    .on("keydown", function (e, f) { if ((e.key === "Enter" || e.key === " ") && f.properties.code) { e.preventDefault(); selectCouncil(f.properties.code); } });
+    .on("keydown", function (e, f) { if ((e.key === "Enter" || e.key === " ") && f.properties.code) { e.preventDefault(); selectCouncil(f.properties.code, "table"); } });
   mapZoom = d3.zoom().scaleExtent([1, 60]).translateExtent([[-w, -hgt], [2 * w, 2 * hgt]]).on("zoom", function (e) { g.attr("transform", e.transform); });
   svg.call(mapZoom);
   $("#zoomIn").onclick = function () { svg.transition().duration(250).call(mapZoom.scaleBy, 1.8); };
@@ -1162,7 +1164,7 @@ function cardHTML(it, cls, icon) {
   var conf = S.confirmed[S.lpa] && S.confirmed[S.lpa][it.id];
   return '<article class="card result ' + cls + '"><header><div class="title">' + icon + "<h3>" + esc(reqName(it.id)) + '</h3></div><div class="meta" style="margin:0">' +
     (it.local ? '<span class="badge local">Local</span>' : "") + (it.national ? '<span class="badge national">National</span>' : "") +
-    (it.local ? badge(status) + ' <span class="badge plain">Confidence: ' + esc(d.confidence || "?") + "</span>" : "") + "</div></header>" +
+    (it.local ? badge(status) : "") + "</div></header>" +
     (it.local ? '<div class="tags"><span class="typetags">Applies to:</span> ' + tagsHTML(it.rule, false) + "</div>" : "") +
     (S.chosen.length > 1 && it.forTypes && it.forTypes.length ? '<p class="typetags">For: ' + it.forTypes.map(function (t) { return esc(typeName(t)); }).join(", ") + "</p>" : "") +
     '<p class="trigger">' + trig.map(esc).join("<br>") + "</p>" +
