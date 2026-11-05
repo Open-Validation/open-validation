@@ -1,0 +1,222 @@
+# Corrections for Manchester City Council, from inputs/audit/ (Manchester audit).
+# The audit could not fetch the list (contents_checked: false), so this file is kept light: it
+# drops rows the audit shows are misfiled or duplicated and structures triggers the workbook's own
+# excerpts state clearly. Grokbot's list is the Jan 2020 revision of Manchester's checklist for
+# full, outline, reserved matters and s73 applications; whether a newer list exists is unchecked.
+local-authority: MAN
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_app_type: the Full row is listed-building window text and the LBC row is demolition
+      text; replaced below"
+  - id: site-plan
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: the excerpt is the demolition requirements from the full/outline checklist
+      (see unmapped)"
+  - id: biodiversity-survey-report
+    sheets: [Change of use - prior approval]
+    reason: "wrong_trigger / wrong_app_type: the excerpt is about EIA screening for prior notification of
+      demolition"
+  - id: land-contamination-assessment
+    sheets: [Minerals & waste (county)]
+    reason: "wrong_app_type: Manchester has no county minerals tier; replaced below"
+
+drop-unmapped:
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "duplicate: part of the Affordable Housing Statement text"
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_trigger: illumination text running into the Local Labour Agreement item (both
+      re-added below)"
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "wrong_trigger: the excerpt is the demolition-justification criteria"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: the excerpt is acoustic text; re-added below with the ventilation wording"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 15
+        description: The scheme is for 15 or more dwellings.
+    policy: Core Strategy Policy H8
+    must-include:
+      - item: How the proposals contribute to the housing mix in the city
+        level: must
+      - item: The number of proposed units that fall within the Council's definition of affordable
+          housing
+        level: must
+      - item: The type of housing proposed (social rent, shared ownership etc)
+        level: must
+      - item: Where no affordable housing is proposed, a full un-redacted viability assessment, and
+          why the proposal meets any other policy exception
+        level: must
+    confidence: medium
+    notes: "'On schemes for 15 or more dwellings (Core Strategy Policy H8) a statement will be required'."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: Schedule 1 or Schedule 2 development where an EIA is required.
+    confidence: medium
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: demolition
+            value: true
+            description: The proposal involves demolition.
+        - site:
+            in: [listed-building, conservation-area, archaeological-priority-area,
+              locally-listed-building]
+            description: The demolition affects a designated heritage asset (listed buildings,
+              buildings in conservation areas, buildings or structures of archaeological interest)
+              or a non-designated heritage asset.
+    source-text: >-
+      For demolition which affects Designated Heritage Assets (Listed Buildings, Buildings within
+      Conservation Areas and buildings or structures of Archaeological interest) and Non Designated
+      Heritage Assets (some proposals affecting the setting of a Conservation Area –your application
+      will need to include a comprehensive Heritage Statement for the demolition that takes its lead
+      from the requirements of The National Planning Policy Framework (NPPF), in particular Section 16.
+    confidence: medium
+    notes: >-
+      This is the demolition item of the full/outline checklist. Other heritage triggers (for example
+      for listed building consent) were not extracted.
+
+  - id: land-contamination-assessment
+    action: replace
+    source-text: >-
+      Land Contamination Under the requirements of paragraphs 178 -179 of the National Planning
+      Policy Framework, a site investigation survey of ground contamination or landfill gas migration
+      will be required.
+    source-url:
+      https://www.manchester.gov.uk/download/downloads/id/26141/full_outline_reserve_matters_and_removal_or_variation_of_condition.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): the workbook filed this general full/outline item under minerals and
+      waste. The excerpt gives no trigger.
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: The proposal involves illumination.
+    source-text: >-
+      proposals involve illumination, you will need to provide details of the nature and location of
+      the lighting, and show how any impacts, including glare, are to be mitigated. (Core Strategy
+      Policy DM1)
+    source-url:
+      https://www.manchester.gov.uk/download/downloads/id/26141/full_outline_reserve_matters_and_removal_or_variation_of_condition.pdf
+    policy: Core Strategy Policy DM1
+    must-include:
+      - item: The nature and location of the lighting
+        level: must
+      - item: How any impacts, including glare, are to be mitigated
+        level: must
+    confidence: low
+    notes: "The workbook had this text on its advertisement row; the start of the trigger is cut off."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      condition:
+        field: loss-of-open-space
+        value: true
+        description: Playing fields or open space on the site will be relocated or lost.
+    confidence: medium
+
+  - id: schedule-of-works
+    action: replace
+    required-if:
+      application-type:
+        in: [lbc]
+    source-text: >-
+      insulation, including a schedule of works for the retention, repair and refurbishment of the
+      existing windows.
+    source-url: https://www.manchester.gov.uk/download/downloads/id/26142/listed_building.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): this is the listed building checklist's item, which the workbook put
+      under Full planning. The excerpt is a fragment about window works.
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      condition:
+        field: town-centre-use-floorspace
+        operator: ">"
+        value: 0
+        description: The development is for a main town centre use (NPPF Section 7).
+    confidence: medium
+    notes: "'If the development is for a main town centre use … a statement will be required to justify
+      the provision of this use in the location proposed.'"
+
+  - id: viability-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 15
+            description: The scheme is for 15 or more dwellings.
+        - discretionary
+    must-include:
+      - item: Full and un-redacted
+        level: must
+    confidence: low
+    notes: >-
+      Audit (duplicate): part of the Affordable Housing Statement item; a viability assessment is
+      needed where no affordable housing is proposed on a scheme of 15 or more dwellings.
+
+unmapped:
+  - local-name: Local Labour / Local Employment Agreement
+    source-text: "Local Labour Agreement Details of a Local Employment Agreement which should contain a
+      commitment to work with the Work and Skills Team to ensure that employment opportunities
+      resulting from this development are made available to Manchester residents …"
+    source-url:
+      https://www.manchester.gov.uk/download/downloads/id/26141/full_outline_reserve_matters_and_removal_or_variation_of_condition.pdf
+    suggested-id: employment-statement
+  - local-name: Ventilation / Extraction details (odour)
+    source-text: "Ventilation, Extraction and odour For the avoidance of doubt all equipment associated
+      with extraction should be located internally within the building; …"
+    source-url:
+      https://www.manchester.gov.uk/download/downloads/id/26141/full_outline_reserve_matters_and_removal_or_variation_of_condition.pdf
+    suggested-id: ventilation-extraction-details
+  - local-name: Demolition information (site plan, method statement, management plan)
+    source-text: "A scaled site plan clearly indicating the structures proposed to be demolished. A
+      method statement for the proposed demolition works. A demolition management plan"
+    source-url:
+      https://www.manchester.gov.uk/download/downloads/id/26141/full_outline_reserve_matters_and_removal_or_variation_of_condition.pdf
+    suggested-id: demolition-statement
+
+low-confidence:
+  - id: "*"
+    note: >-
+      Audit (wrong_app_type, other): the checklist covers full, outline, reserved matters and s73
+      applications, but the workbook filed everything under Full planning, and the householder
+      checklist's items were not extracted. The list is the Jan 2020 revision (citing NPPF 2019
+      paragraphs); whether a newer list exists was not checked.
+  - id: biodiversity-survey-report
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('trees, then a bat survey will be required.')."
+  - id: flood-risk-assessment
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('to provide a Flood Risk Assessment.')."
+  - id: floor-plan-existing
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('and coloured elevations.')."
+  - id: floor-plan-proposed
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('and coloured elevations.')."
+  - id: elevation-existing
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('and coloured elevations.')."
+  - id: elevation-proposed
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('and coloured elevations.')."
+  - id: travel-plan
+    note: "Audit (wrong_trigger): the excerpt runs into the ventilation item; no trigger is given."

@@ -1,0 +1,546 @@
+# Corrections for Trafford Metropolitan Borough Council, from inputs/audit/trafford-metropolitan-borough-council.json.
+# The audit read Trafford's 'Planning Application Validation Checklist' (Adopted January 2025),
+# which is current. Its Local Information Requirements section gives a 'Threshold' for each item,
+# naming the application types (mostly 'Full and Outline'), and it has per-type checklists.
+# Grokbot mostly placed items under Full planning (INFERRED) or picked up text from the wrong item.
+# Below, application types are taken from the thresholds the workbook or audit quote; about 15
+# missing items are listed as unmapped (no MHCLG id fits them).
+local-authority: TRF
+
+submission-standards:
+  - item: Plans marked with a recognisable standard metric scale and a scale bar
+    level: must
+  - item: Plans marked 'do not scale' or with similar disclaimers are not accepted (the application
+      will be invalid)
+    level: must
+  - item: All drawings clearly referenced with a drawing title, north point, reference number and
+      details of any revisions
+    level: must
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is tree-protection method statement text"
+  - id: photos
+    reason: >-
+      wrong_trigger: the excerpt is Accurate Visual Representations text (computer visualisation of
+      designated views), recorded as unmapped
+  - id: site-plan
+    reason: >-
+      wrong_app_type: filed under listed building consent because the excerpt mentions 'Listed
+      Buildings' (Heritage Assessment definition); the national site plan rules apply
+  - id: sustainability-statement
+    reason: "the row is the Energy Statement, now under energy-statement"
+
+drop-unmapped:
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "duplicate / wrong_trigger: ALC text; Trafford's list has no agricultural workers' dwelling item"
+  - local-name: Cycle parking details
+    reason: "wrong_trigger: fragment ('and motorcycle parking standards.')"
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_trigger / duplicate: the same fragment as Cycle parking"
+  - local-name: Pre-application advice / engagement details
+    reason: "wrong_trigger: AVR guidance text; Accurate Visual Representations re-added below"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: bin-store text running into the Wind Impact heading"
+  - local-name: Water efficiency / water usage statement
+    reason: "not_a_requirement: quoted Core Strategy policy text"
+  - local-name: Design Code / Masterplan / Parameter plans
+    reason: "wrong_trigger: masterplan cross-reference; Design Code Compliance Statement and Parameter Plans re-added below"
+  - local-name: Drainage Strategy / SuDS
+    reason: "the Full row quoted SuDS pro-forma guidance; re-added below with the checklist threshold"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 10
+                description: Housing developments of 10 or more units (15 or more in 'cold' market
+                  locations).
+            - condition:
+                field: site-area-residential
+                operator: ">="
+                value: 0.5
+                description: A site area of 0.5 hectares or more ('hot' and 'moderate' market
+                  locations).
+    source-text: >-
+      AFFORDABLE HOUSING STATEMENT Threshold – Requirement for Full or Outline planning applications
+      for housing developments proposing 10 or more residential units or where the site has an area
+      of 0.5 hectares or more in “hot” market locations (Altrincham and open countryside) and
+      “moderate” market locations (Sale, Urmston and Stretford) and 15 or more residential units in
+      “cold” market locations (Partington, Carrington and Old Trafford).
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): Full or Outline, not Outline only. The market-location thresholds
+      can't be expressed as fields; in 'cold' locations (Partington, Carrington, Old Trafford) the
+      threshold is 15 units.
+
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - discretionary
+    source-text: >-
+      AIR QUALITY ASSESSMENT Threshold – Requirement for Full or Outline planning applications for
+      the following: Developments affecting waste handling facilities (including sewerage treatment
+      works or poultry farms);
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): Full or Outline, not Outline only. The excerpt gives only the first
+      of a list of triggers, so they are shown as officer discretion. The checklist also has an
+      'Air Quality Assessment – Ecology' for development that may affect designated sites (audit).
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees within the site, or on adjacent land, that could influence or
+          be affected by the development (including street trees).
+    notes: "The tree works and hedgerow checklists also name the Tree Survey (audit)."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline]
+        - any:
+            - site:
+                in: [special-protection-area, special-area-of-conservation,
+                  site-of-special-scientific-interest, local-wildlife-site]
+                description: Development within, adjacent to, or likely to affect a designated site
+                  (European Site, SSSI, Site of Biological Importance).
+            - condition:
+                field: demolition
+                value: true
+                description: The proposal involves demolition.
+            - discretionary
+    source-text: >-
+      ECOLOGICAL AND BIODIVERSITY SURVEY (INCLUDING PROTECTED SPECIES SURVEYS) Threshold –
+      Requirement for Full and Outline or Householder planning applications for the following:
+      Development (including householder) within, adjacent to, or likely to affect a designated site
+      (European Site, Site of Special Scientific Interest, Site of Biological Importance)
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    confidence: medium
+    notes: >-
+      From the audit (wrong_app_type): the survey also covers roofspace works and demolition. The
+      excerpt gives only the first trigger, so roofspace works and the rest are shown as officer
+      discretion.
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is not exempt from biodiversity net gain.
+    notes: "'Biodiversity Net Gain Statement/Plan – required for all applications unless exempt.' The audit
+      says the Reserved Matters checklist also lists BNG."
+
+  - id: cil-form
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline]
+        - any:
+            - condition:
+                field: floorspace
+                operator: ">"
+                value: 100
+                description: Development in excess of 100 square metres (GIA).
+            - discretionary
+    source-text: >-
+      Community Infrastructure Levy (CIL) Question Form – required for the following applications:
+      Development in excess of 100 square metres (GIA); or,
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): also for Full planning. The excerpt is cut off after 'or,', so the
+      remaining triggers are shown as officer discretion. The householder checklist names a missing
+      or incorrect CIL form as a common reason for invalid applications.
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters, non-material-amendment]
+        - discretionary
+    notes: "Audit (wrong_app_type): also Reserved Matters and NMA. 'Likely to have an adverse effect upon levels
+      of light' is a judgement."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: Two or more dwellings.
+            - discretionary
+    source-text: "Energy Statement – required for all full planning applications that comprise: Two or more
+      dwellings;"
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    confidence: medium
+    notes: "The excerpt gives only the first of a list of triggers; the rest are shown as officer discretion.
+      The workbook had filed this as a sustainability statement."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: Development listed in Schedule 1 (or Schedule 2) of the EIA Regulations.
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-text: "Fire Statement – required for all applications for full planning permission which involve:
+      Provision of one or more relevant buildings, or"
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    confidence: medium
+    notes: "'Relevant buildings' as defined in the DMPO (18m+ or 7+ storeys with 2+ dwellings or educational
+      accommodation). The excerpt is cut off after 'or'."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - any:
+            - site:
+                in: [flood-risk-zone]
+                description: The site is in Flood Zone 2 or 3.
+            - condition:
+                field: site-area-residential
+                operator: ">="
+                value: 1
+                description: A site of 1 hectare or more in Flood Zone 1.
+            - condition:
+                field: site-area-non-residential
+                operator: ">="
+                value: 1
+                description: A site of 1 hectare or more in Flood Zone 1.
+            - all:
+                - site:
+                    in: [critical-drainage-area]
+                    description: The site is in a Critical Drainage Area.
+                - any:
+                    - condition:
+                        field: site-area-residential
+                        operator: ">="
+                        value: 0.5
+                        description: The site measures 0.5ha or more.
+                    - condition:
+                        field: site-area-non-residential
+                        operator: ">="
+                        value: 0.5
+                        description: The site measures 0.5ha or more.
+            - discretionary
+    source-text: >-
+      Flood Risk Assessment – Where a site measures 0.5ha or more within Critical Drainage Areas as
+      identified in the Council’s Strategic Flood Risk Assessment
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the checklist threshold is Flood Zone 3 or 2, sites of
+      1ha or more in Flood Zone 1, 0.5ha or more in Critical Drainage Areas, and Canal Hazard Zones
+      (no field; shown as officer discretion), for Full and Outline applications, not listed
+      building consent.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, lbc]
+        - any:
+            - site:
+                in: [scheduled-monument, listed-building, listed-building-setting, park-and-garden,
+                  conservation-area, locally-listed-building]
+                description: The development may affect a heritage asset, including its setting.
+            - discretionary
+    source-text: >-
+      Heritage Assessment – required where a development may affect a heritage asset, including its
+      setting (designated heritage assets include Scheduled Monuments, Listed Buildings, Historic
+      Parks & Gardens, sites within Conservation Areas) and non-designated heritage assets. …
+      HERITAGE ASSESSMENT Threshold – Requirement for Full, Outline, Householder and Listed Building
+      Consent applications
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): also householder, full and outline. Non-designated assets are shown as
+      officer discretion."
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: The proposed end use is sensitive to contamination (for example allotments,
+              residential use, schools, some commercial premises).
+        - discretionary
+    source-text: >-
+      Contaminated Land Assessment – required where: The proposed end use of the development is
+      considered sensitive to contamination (for example, allotments, residential use, schools, some
+      commercial premises); or,
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    confidence: low
+    notes: "The excerpt is cut off after 'or,', so the other trigger(s) are shown as officer discretion. The
+      application types aren't given in the excerpt."
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      condition:
+        field: building-works
+        value: true
+        description: The application includes built development.
+    notes: "Site Wide Landscape Strategy – required for all applications that include built development."
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - any:
+            - condition:
+                field: noise-generating-use
+                value: true
+                description: Development that generates high levels of noise or vibration.
+            - condition:
+                field: noise-sensitive-use
+                value: true
+                description: Development of noise sensitive uses.
+    notes: "Audit (wrong_app_type): the checklist says 'Full and outline'."
+
+  - id: planning-statement
+    action: update
+    required-if:
+      application-type:
+        in: [full, outline]
+    notes: "Audit (wrong_app_type): 'Full and Outline', not Outline only."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - site:
+            in: [open-space]
+            description: Development affects Protected Open Space or other recreational open space
+              and buildings.
+    notes: "Audit (wrong_app_type): the checklist says 'Full and outline'."
+
+  - id: sci
+    action: update
+    required-if:
+      ref: major-development
+
+  - id: section-existing
+    action: replace
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal involves a change in ground levels.
+    source-text: Site Sections, Floor and Site Levels – Existing and Proposed - where a proposal
+      involves a change in ground levels
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): not specific to listed building consent; the words 'Listed Buildings' came
+      from the Heritage Assessment definition."
+  - id: section-proposed
+    action: replace
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal involves a change in ground levels.
+    source-text: Site Sections, Floor and Site Levels – Existing and Proposed - where a proposal
+      involves a change in ground levels
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): not specific to listed building consent; the words 'Listed Buildings' came
+      from the Heritage Assessment definition."
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Applications for mast and antenna development.
+
+  - id: transport-assessment
+    action: replace
+    required-if: discretionary
+    source-text: Transport Assessment/Transport Statement/Travel Plan – see guidance notes
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook's excerpt ran into the Tree Survey trigger. The threshold is
+      in the guidance notes, which weren't captured."
+  - id: travel-plan
+    action: replace
+    required-if: discretionary
+    source-text: Transport Assessment/Transport Statement/Travel Plan – see guidance notes
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    confidence: low
+    notes: "Audit (wrong_trigger, duplicate): the same excerpt as transport-assessment, ending in the Tree Survey
+      trigger."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    notes: "Needed where the developer considers that, on viability grounds, reduced planning obligations
+      should be provided."
+
+  - id: waste-management-plan
+    action: update
+    required-if:
+      application-type:
+        in: [full, outline, reserved-matters]
+    notes: >-
+      Waste Management Strategy: required where approval is sought for layout, for all residential
+      and non-residential development including changes of use, regardless of size. 'Where layout
+      is sought' can't be expressed; outline applications with layout reserved don't need it.
+
+unmapped:
+  - local-name: Drainage Strategy / Statement
+    source-text: "DRAINAGE STRATEGY / STATEMENT Threshold – Requirement for full and outline applications for
+      the following: Residential development consisting of 10 dwellings or more or with a site area of
+      0.5 hectares or more where the number of dwellings is not yet known."
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    suggested-id: drainage-strategy
+  - local-name: North West SuDS pro-forma
+    source-text: "This means if you do not submit a completed pro-forma your application will not be ‘valid’
+      and therefore will not be processed by the Local Planning Authority until a completed SuDS pro-forma
+      has been received."
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-validation-checklist-NW-SuDS-proforma-guidance.pdf
+    suggested-id: drainage-strategy
+  - local-name: Green Belt Impact Statement
+    source-text: "Green Belt Impact Statement – Where a site is within the green belt. From the audit: Full,
+      Outline and Householder applications for demolition, extension or replacement of dwellings in the Green
+      Belt, and all inappropriate development there"
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    suggested-id: green-belt-statement
+  - local-name: Accurate Visual Representations
+    source-text: "From the audit: proposals likely to significantly affect heritage assets or townscape/landscape
+      (also on the Reserved Matters and NMA checklists)"
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    suggested-id: computer-visualisations
+  - local-name: Accommodation Schedule
+    source-text: "From the audit: residential development (Full, Outline, Reserved Matters, NMA)"
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    suggested-id: accommodation-schedule
+  - local-name: Air Quality Assessment – Ecology
+    source-text: "From the audit: development that may affect designated sites"
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    suggested-id: ""
+  - local-name: Context Character Appraisal
+    source-text: "From the audit: new residential and non-residential development, excluding householder and
+      some changes of use"
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    suggested-id: ""
+  - local-name: Design Code Compliance Statement
+    source-text: "From the audit: new development excluding householder (Appendix 1 template)"
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    suggested-id: design-code
+  - local-name: Digital Connectivity Statement
+    source-text: "From the audit: new buildings and changes of use (Full and Outline)"
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    suggested-id: broadband-connectivity-assessment
+  - local-name: Façade Design Analysis
+    source-text: "From the audit: new buildings excluding B2/B8 uses (Full, Outline where appearance is not
+      reserved, Reserved Matters; also NMA)"
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    suggested-id: ""
+  - local-name: Green Infrastructure Statement
+    source-text: "From the audit: where Revised SPD1 requires it"
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    suggested-id: green-infrastructure-statement
+  - local-name: Heat and Energy Network Assessment
+    source-text: "From the audit: 10+ dwellings or more than 1,000 sq m within Heat and Energy Network
+      Opportunity Areas"
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    suggested-id: ""
+  - local-name: Housing Needs Statement
+    source-text: "From the audit: 10+ dwellings, or 0.5 ha+ where numbers are unknown"
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    suggested-id: housing-mix-statement
+  - local-name: Local Labour and Training Agreements
+    source-text: "From the audit: 10+ dwellings or 0.5 ha; non-residential 1,000 sq m+ or 1 ha+"
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    suggested-id: employment-skills-plan
+  - local-name: Materials Schedule
+    source-text: "From the audit: all applications with new buildings or extensions, or new materials on
+      existing buildings (including householder)"
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    suggested-id: materials-schedule
+  - local-name: Landscape/Townscape Visual Appraisal
+    source-text: "From the audit: buildings significantly taller than their neighbours, or sensitive sites"
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    suggested-id: townscape-visual-impact-assessment
+  - local-name: Parameter Plans
+    source-text: "From the audit: Outline applications"
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    suggested-id: parameter-plans
+  - local-name: Peat survey
+    source-text: "Peat surveys should be completed in accordance with the following methodology Field Protocol_
+      v2_clean.pdf (iucn-uk-peatlandprogramme.org)."
+    source-url: https://www.trafford.gov.uk/sites/default/files/2025-06/planning-application-validation-checklist-january-2025.pdf
+    suggested-id: ""
+
+low-confidence:
+  - id: roof-plan-existing
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('on the roof plan.') with no trigger."
+  - id: roof-plan-proposed
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('on the roof plan.') with no trigger."
+  - id: archaeological-assessment
+    note: "The excerpt is a fragment with no trigger; re-read the checklist."

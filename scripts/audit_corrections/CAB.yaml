@@ -1,0 +1,470 @@
+# Corrections for Cambridge City Council, from the council's audit.
+# Cambridge's checklists are published by Greater Cambridge Shared Planning (GCSP); the
+# cambridge.gov.uk checklist URLs now redirect there. Grokbot also took rows from GCSP pages that
+# are South Cambridgeshire DC checklists (householder-planning-application, full-planning-permission,
+# outline-planning-permission, approval-of-reserved-matters, listed-building-consent,
+# remove-or-variation-of-a-condition-section-73, advertisement-consent): those rows are dropped.
+# A new joint GCSP Local Validation Checklist was consulted on (closed 28 July 2026) and is
+# being reviewed; it has not taken effect.
+local-authority: CAB
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is Arboricultural Method Statement text"
+  - id: waste-management-plan
+    reason: "wrong_trigger: the excerpt is Biodiversity Net Gain text"
+  - id: fire-statement
+    sheets: [Full planning]
+    reason: "wrong_document: from the South Cambridgeshire full-planning-permission checklist"
+  - id: environmental-statement
+    sheets: [Variation of condition s73]
+    reason: "wrong_document: from the South Cambridgeshire section 73 checklist"
+  - id: heritage-statement
+    sheets: [Variation of condition s73]
+    reason: "wrong_document: from the South Cambridgeshire section 73 checklist"
+  - id: recreation-facilities-assessment
+    sheets: [Variation of condition s73]
+    reason: "wrong_document: from the South Cambridgeshire section 73 checklist"
+  - id: section-existing
+    sheets: [Listed building consent]
+    reason: "wrong_document: from the South Cambridgeshire listed-building-consent checklist"
+  - id: section-proposed
+    sheets: [Listed building consent]
+    reason: "wrong_document: from the South Cambridgeshire listed-building-consent checklist"
+
+drop-unmapped:
+  - local-name: Character / Conservation area appraisal reference
+    reason: "wrong_trigger / wrong_document: a references list running into other items' text, mostly from South
+      Cambridgeshire checklists"
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "wrong_document: a South Cambridgeshire requirement"
+  - local-name: Self-build / custom build information
+    reason: "wrong_document: a South Cambridgeshire requirement (SCLP Policy H/9)"
+  - local-name: Cycle parking details
+    reason: "wrong_document / wrong_app_type: one row is South Cambridgeshire's, the other filed under prior approval;
+      re-added below"
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_app_type: filed under prior approval; re-added below as Car and bicycle parking provision"
+  - local-name: Crime prevention / Secured by Design statement
+    reason: "wrong_trigger: a student tenancy fragment"
+  - local-name: Tall buildings / Wind microclimate assessment
+    reason: "wrong_trigger: the excerpt describes design masterplans (a duplicate of that row)"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advice to hold pre-application discussions"
+  - local-name: Odour / Dust / Vibration assessment
+    reason: "duplicate: the excerpt is the Noise and vibration assessment trigger (now in noise-assessment)"
+
+requirements:
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - all:
+            - site:
+                in: [conservation-area, world-heritage-site]
+                description: The site is in a Conservation Area or World Heritage Site.
+            - discretionary
+    source-text: >-
+      Design and access statement When required Major development (defined as development of 10
+      or more dwellings (or 0.5 hectares for residential development where the number of dwellings
+      is unknown) for the creation of more than a 1,000 sq m of floor space and where the site is
+      greater than 1 hectare).
+    source-url: &full https://www.greatercambridgeplanning.org/the-planning-application-process-and-advice/planning-application-validation-checklists/full-planning-permission-application-checklist
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook listed this under Householder, but the trigger is major
+      development, Conservation Area / World Heritage Site thresholds (not given in the audit, so
+      shown as officer discretion) or listed building consent.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+          scheduled-monument, park-and-garden]
+        description: Development affecting a heritage asset.
+    source-text: Heritage statement When required Development affecting a heritage asset.
+    source-url: *full
+    confidence: medium
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is EIA development (Schedule 1, or Schedule 2 with significant
+          environmental effects).
+    source-text: >-
+      Environmental impact assessment When required The Town and Country Planning (Environmental
+      Impact Assessment) Regulations (2017) apply to two separate types of development: Schedule 1
+      development, for which EIA is required in every case Schedule 2 development, for which EIA is
+      required only if the development in question is judged to give rise to significant
+      environmental effects.
+    source-url: *full
+    confidence: medium
+    notes: "For reserved matters, the council asks for it if the original EIA or part of it is out of date."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more in height.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains two or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-text: Fire safety statement When required Required where a building contains two or more
+      dwellings or educational accommodation and has a height of 18m or more, or 7 or more storeys
+      whichever is reached first.
+    source-url: https://www.cambridge.gov.uk/reserved-matters-approval-application-checklist
+    confidence: medium
+    notes: "From the Cambridge reserved matters checklist; the Full planning row came from South Cambridgeshire's
+      checklist and was dropped."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      ref: major-development
+    confidence: medium
+    notes: "The council's wording: 'You must demonstrate how your major development site meets the minimum mandatory
+      requirement of 10% biodiversity net gain'."
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The development would generate noise or vibration (including delivery and
+              servicing, vehicle movements or traffic changes on local roads) which may have an
+              adverse impact on existing or planned uses.
+        - discretionary
+    source-text: >-
+      Noise and vibration assessment When required Noise and vibration generation Where a proposed
+      new development would generate noise or vibration including delivery and servicing and
+      vehicle movements or traffic changes on local roads which may have an adverse impact on
+      existing or planned uses (in particular noise sensitive uses such as residential, hospitals,
+      nursing homes and schools).
+    source-url: *full
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's noise row gave only a list of guidance titles; the trigger
+      was filed under 'Odour / Dust / Vibration assessment'."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in flood zone 2 or 3, including minor development and change of
+              use.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: More than 1 hectare in flood zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: More than 1 hectare in flood zone 1.
+        - discretionary
+    source-text: >-
+      Flood risk assessment When required A site specific Flood Risk Assessment (FRA) is required
+      the site is: In flood zone 2 or 3 including minor development and change of use More than 1
+      hectare in flood zone 1 Less than 1 hectare in flood zone 1, including a change of use in
+      development type to a more vulnerable class (for example from commercial to residential),
+      where they could be affected by other sources of flooding such as surface water.
+    source-url: *full
+    confidence: medium
+    notes: >-
+      The workbook also filed this under Change of use - prior approval. Sites under 1 hectare in
+      flood zone 1 with a change to a more vulnerable use affected by other flood sources are shown
+      as officer discretion. Include evidence that the Sequential Test and, where necessary, the
+      Exception Test have been applied.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Demolition, building or engineering operations (including foundations, changes
+          in level and service runs) may affect trees on the site or on adjoining land.
+    confidence: medium
+
+  - id: section-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: The site or surrounding land is at variable levels.
+        - condition:
+            field: roof-alteration
+            value: true
+            description: A roof extension or installation of rooflights or windows.
+        - discretionary
+    confidence: medium
+
+  - id: section-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: The site or surrounding land is at variable levels.
+        - condition:
+            field: roof-alteration
+            value: true
+            description: A roof extension or installation of rooflights or windows.
+        - discretionary
+    confidence: medium
+
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 dwellings or more.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: The site area is 0.5 hectares or more.
+    source-url: *full
+    confidence: medium
+
+  - id: air-quality-assessment
+    action: update
+    required-if: discretionary
+    source-url: *full
+    confidence: medium
+    notes: "Where air quality is likely to be a significant issue (council's wording)."
+
+  - id: construction-management-plan
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: *full
+    confidence: medium
+    notes: "All major developments, or developments likely to cause noise, smells, dust, visual or other adverse
+      effects during demolition or construction (council's wording)."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: On or adjacent to land where contamination is known or suspected.
+    source-url: *full
+    confidence: medium
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+    source-url: *full
+    confidence: medium
+    notes: "Where development would overshadow neighbouring buildings or open spaces (council's wording)."
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: *full
+    confidence: medium
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    source-url: *full
+    confidence: medium
+    notes: "Major sites at the edge of Cambridge adjoining open countryside in South Cambridgeshire (council's
+      wording); the location test is shown as officer discretion."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 1
+        description: New residential development (conversions or new build) that needs to make
+          provision for open space.
+    source-url: *full
+    confidence: medium
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: Retail development proposed outside a centre.
+    source-url: *full
+    confidence: medium
+    notes: "The council's Retail statement: evidence of compliance with the sequential test."
+
+  - id: sci
+    action: update
+    required-if:
+      ref: major-development
+    source-url: *full
+    confidence: medium
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: All telecommunications proposals.
+    source-url: *full
+    confidence: medium
+
+  - id: transport-assessment
+    action: update
+    required-if: &transport
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 20
+            description: Residential development of 20 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: Residential development of 0.5 hectares or more.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: Other development of 1,000 square metres or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Other development of 1 hectare or more.
+        - discretionary
+    source-url: *full
+    confidence: medium
+    notes: "Developments with significant transport implications are shown as officer discretion."
+
+  - id: travel-plan
+    action: update
+    required-if: *transport
+    source-url: *full
+    confidence: medium
+    notes: "Developments with significant transport implications are shown as officer discretion."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    source-url: *full
+    confidence: low
+    notes: >-
+      The council's 'Marketing Assessment and/or Viability Appraisal' is for certain changes of use
+      in centres, loss of Class B or sui generis research institutes in protected industrial sites,
+      loss of a safeguarded public house, and loss of visitor accommodation; the rules can't express
+      these, so it is shown as officer discretion.
+
+  - id: energy-statement
+    action: add
+    required-if:
+      application-type:
+        in: [full, outline, reserved-matters]
+    source-url: *full
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): an Energy and carbon reduction statement for all new
+      development other than householder. The rules can't express 'not householder', so the main
+      non-householder types are listed.
+
+  - id: sustainability-statement
+    action: update
+    must-include:
+      - item: BREEAM pre-assessment
+        level: must
+        required-if:
+          all:
+            - condition:
+                field: new-build
+                value: true
+                description: New build.
+            - condition:
+                field: floorspace-non-residential
+                operator: ">"
+                value: 0
+                description: Non-residential floorspace.
+    notes: "The BREEAM item is from the audit (missing_requirement): a BREEAM pre-assessment for all new non-residential
+      development."
+
+unmapped:
+  - local-name: Car and bicycle parking provision
+    source-text: "Car and bicycle parking provision When required For all types of new development including change
+      of use applications and the redevelopment of existing sites."
+    source-url: *full
+    suggested-id: parking-plan
+  - local-name: Specialist housing statement
+    source-text: "From the audit: all specialist housing proposals"
+    source-url: *full
+    suggested-id: ""
+  - local-name: Student housing statement
+    source-text: "From the audit: all student housing"
+    source-url: *full
+    suggested-id: student-housing-management-plan
+  - local-name: Accessible homes statement
+    source-text: "From the audit: all housing; a wheelchair statement for affordable schemes of 20+"
+    source-url: *full
+    suggested-id: ""
+  - local-name: Traffic management plan
+    source-text: "From the audit: non-householder development without a construction management plan"
+    source-url: *full
+    suggested-id: ""
+  - local-name: Public art strategy
+    source-text: "From the audit: major residential; 1,000 sq m+ or 0.5ha+"
+    source-url: *full
+    suggested-id: public-art-strategy
+  - local-name: Community facilities statement
+    source-text: "From the audit: listed in the Cambridge full planning checklist; trigger not given"
+    source-url: *full
+    suggested-id: ""
+  - local-name: Home energy questionnaire
+    source-text: "From the audit: householder works to existing homes that need permission"
+    source-url: *full
+    suggested-id: ""
+

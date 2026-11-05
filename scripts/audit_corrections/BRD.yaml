@@ -1,0 +1,435 @@
+# Corrections for City of Bradford Metropolitan District Council, from
+# inputs/audit/city-of-bradford-metropolitan-district-council.json.
+# Grokbot linked the 'Validation Checklist - Major Planning Application' page; Bradford's local
+# list is the 'Local Requirements - All' page (55 local requirements, one web page each), with nine
+# type-specific checklists. None of the pages is dated. Items marked "From the audit" use the
+# audit's paraphrase of those pages.
+local-authority: BRD
+
+drop:
+  - id: arboriculturist-report
+    sheets: [Works to trees]
+    reason: "wrong_app_type: from the Tree Survey page for planning applications near trees, not tree works applications (re-added below)"
+  - id: site-plan
+    sheets: [Works to trees]
+    reason: "wrong_app_type: the excerpt is the Tree Survey trigger (now in arboriculturist-report)"
+  - id: schedule-of-works
+    reason: "wrong_app_type: an Arboricultural Method Statement mislabelled as a listed building schedule of works (now unmapped)"
+  - id: archaeological-assessment
+    reason: "wrong_app_type: only a sub-element of the Heritage Statement, not a standalone householder or LBC requirement"
+
+drop-unmapped:
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_app_type: not on the householder checklist; re-added below for the planning checklists"
+  - local-name: Landscape and Visual Impact Assessment
+    reason: "wrong_app_type: not on the householder checklist (taken from the landscape sensitivity page); re-added below"
+  - local-name: Gypsy & Traveller information
+    reason: "wrong_app_type: not a Bradford requirement; the excerpt is the South Pennine Moors HRA list of uses (re-added below)"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: Developments of 10 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: The site has an area of 0.5 hectares or more.
+    must-include:
+      - item: The total numbers of affordable dwellings
+        level: should
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt starts with the page title; the trigger is in the page text."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Trees on the application site (excluding changes of use where no building
+              works are proposed).
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - condition:
+                field: trees-on-or-near-site
+                value: true
+                description: The site contains trees.
+        - site:
+            in: [tree-preservation-zone]
+            description: Protected trees on adjoining land within falling distance of the site.
+        - condition:
+            field: veteran-trees
+            value: true
+            description: Development within 15m of a veteran or ancient tree.
+        - site:
+            in: [ancient-woodland]
+            description: Development within 25m of ancient woodland, semi natural ancient woodland or
+              ancient replanted woodland.
+    source-text: >-
+      the application site Planning applications on sites in a conservation area containing trees
+      and/or where protected trees on adjoining land which are within falling distance of the
+      application site Planning applications where development is planned within 15m of a veteran or
+      ancient tree Planning applications where development is planned within 25m of Ancient
+      woodland, semi natural ancient woodland or ancient replanted woodland Excluding proposals for:
+      Changes of use where no building works are p…
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-tree-survey/
+    must-include:
+      - item: A Tree Protection Plan showing how Root Protection Areas will be protected through
+          fencing to the BS 5837 specifications, or by other means such as ground protection
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the Tree Survey page is for planning applications near trees, not tree
+      works. The start of the trigger is cut off in the excerpt. The audit says the householder
+      checklist also lists a tree survey.
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: The position of all trees on the application site and those on adjoining land within
+          falling distance of the proposed development
+        level: must
+        required-if:
+          condition:
+            field: trees-on-or-near-site
+            value: true
+            description: There are trees on or near the site.
+    confidence: medium
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - all:
+            - application-type:
+                in: [full, outline]
+            - any:
+                - ref: major-development
+                - all:
+                    - site:
+                        in: [conservation-area, world-heritage-site]
+                        description: The site is in a conservation area and/or Saltaire World
+                          Heritage Site.
+                    - any:
+                        - condition:
+                            field: dwelling-count
+                            operator: ">="
+                            value: 1
+                            description: The provision of one or more dwellings.
+                        - condition:
+                            field: floorspace
+                            operator: ">="
+                            value: 100
+                            description: Building(s) where the floorspace created is 100 square
+                              metres or more.
+    source-text: >-
+      A Design and Access Statement must accompany the following types of application for outline
+      or full planning permission: All major planning applications* Applications for the provision
+      of one or more dwellings in a conservation area and/or Saltaire World Heritage Site
+      Applications for the provision of a building or buildings where the floorspace created is 100
+      square metres or more in a conservation area and/or Saltaire World Heritage Site All Listed
+      Building Consent applications
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/national-requirements-design-and-access-statement-planning/
+    confidence: medium
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: There is a reasonable likelihood of bats being present within or adjacent to
+              the site (for example in the Bradford Bat Alert layer).
+        - discretionary
+    confidence: medium
+    notes: >-
+      Bat survey where there is a 'reasonable likelihood' of bats (West Yorkshire Bat Alert Layer
+      Guidance). The Biodiversity/Geodiversity Survey page also names designated sites, but the
+      excerpt is garbled, so other cases are shown as officer discretion.
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      ref: major-development
+    must-include:
+      - item: A landscape strategy plan (integrating tree planting)
+        level: must
+      - item: A written landscape statement detailing the design approach proposed
+        level: must
+    confidence: medium
+    notes: "All major applications, including outline proposals, that include any external space."
+
+  - id: sci
+    action: update
+    required-if:
+      ref: major-development
+    must-include:
+      - item: The extent of the pre-application consultation and how this complies with the
+          Statement of Community Involvement
+        level: should
+      - item: Any outcomes of the consultation and how proposals have been amended to reflect them
+        level: should
+    confidence: medium
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    confidence: medium
+    notes: "Major development proposals likely to have significant transport implications."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Where an applicant claims the scheme cannot support the level of planning obligations and policy requirements."
+
+  - id: photos
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "'drawings and photographs may be required if the application affects a listed building.'"
+
+  - id: flood-risk-assessment
+    action: update
+    must-include:
+      - item: The estimated flood level for the development, taking into account the impacts of
+          climate change over its lifetime
+        level: must
+      - item: Details of the finished floor levels
+        level: must
+      - item: Details of flood resistance and resilience plans
+        level: must
+    confidence: low
+    notes: >-
+      Audit (missing_requirement): the workbook has only the householder FRA page; the FRA is also a
+      local requirement on the major checklist. The excerpt lists contents, not the trigger.
+
+  - id: cil-form
+    action: update
+    required-if:
+      application-type:
+        in: [hh, full, prior-approval, change-of-use]
+    confidence: low
+    notes: "Audit (missing_requirement): CIL Form 1 is also on the householder checklist. The excerpt gives no trigger."
+
+  - id: elevation-existing
+    action: add
+    required-if:
+      application-type:
+        in: [hh, full, advertising]
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    confidence: low
+    notes: "From the audit (missing_requirement): listed on the householder, planning and advertisement consent checklists; triggers not given."
+
+  - id: elevation-proposed
+    action: add
+    required-if:
+      application-type:
+        in: [hh, full, advertising]
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    confidence: low
+    notes: "From the audit (missing_requirement): listed on the householder, planning and advertisement consent checklists; triggers not given."
+
+  - id: floor-plan-existing
+    action: add
+    required-if:
+      application-type:
+        in: [hh, full]
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    confidence: low
+    notes: "From the audit (missing_requirement): listed on the householder and planning checklists; triggers not given."
+
+  - id: floor-plan-proposed
+    action: add
+    required-if:
+      application-type:
+        in: [hh, full]
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    confidence: low
+    notes: "From the audit (missing_requirement): listed on the householder and planning checklists; triggers not given."
+
+  - id: section-existing
+    action: add
+    required-if:
+      application-type:
+        in: [hh, full]
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    confidence: low
+    notes: "From the audit (missing_requirement): sections and levels are listed on the householder and planning checklists; triggers not given."
+
+  - id: section-proposed
+    action: add
+    required-if:
+      application-type:
+        in: [hh, full]
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    confidence: low
+    notes: "From the audit (missing_requirement): sections and levels are listed on the householder and planning checklists; triggers not given."
+
+  - id: roof-plan-existing
+    action: add
+    required-if:
+      application-type:
+        in: [hh, full]
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    confidence: low
+    notes: "From the audit (missing_requirement): listed on the householder and planning checklists; triggers not given."
+
+  - id: roof-plan-proposed
+    action: add
+    required-if:
+      application-type:
+        in: [hh, full]
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    confidence: low
+    notes: "From the audit (missing_requirement): listed on the householder and planning checklists; triggers not given."
+
+  - id: air-quality-assessment
+    action: add
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    confidence: low
+    notes: "From the audit (missing_requirement): on the major checklist; no trigger given."
+
+  - id: daylight-sunlight-assessment
+    action: add
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    confidence: low
+    notes: "From the audit (missing_requirement): on the major checklist; no trigger given."
+
+  - id: energy-statement
+    action: add
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    confidence: low
+    notes: "From the audit (missing_requirement): on the major checklist; no trigger given."
+
+  - id: lighting-assessment
+    action: add
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    confidence: low
+    notes: "From the audit (missing_requirement): on the major checklist; no trigger given."
+
+  - id: noise-assessment
+    action: add
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    confidence: low
+    notes: "From the audit (missing_requirement): on the major checklist; no trigger given."
+
+  - id: town-centre-impact-assessment
+    action: add
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    confidence: low
+    notes: "From the audit (missing_requirement): Town centre impact assessment and Town centre sequential test are on the major checklist; no trigger given."
+
+  - id: travel-plan
+    action: add
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    confidence: low
+    notes: "From the audit (missing_requirement): on the major checklist; no trigger given."
+
+unmapped:
+  - local-name: Arboricultural Method Statement
+    source-text: >-
+      An Arboricultural Method Statement (AMS) will be required in all instances where the siting of
+      development, including all buildings, means of access, service roads, car parking areas and
+      other engineering works cannot be located outside Root Protection Areas identified by the Tree
+      Constraints Plan.
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-tree-survey/
+    suggested-id: ""
+  - local-name: Habitat regulations assessment / South Pennine Moors recreational mitigation
+    source-text: >-
+      Gypsies and traveller pitches Hotels, boarding or guest house (use class C1) Self-contained
+      holiday accommodation, caravan and touring holiday accommodation What information is required?
+      Applications should comply with the requirements of Policy SC8 and provide mitigation for any
+      recreational impacts on the South Pennine Moors SPA/SAC.
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-habitat-regulations-assessment-and-impact-on-south-pennine-moors/
+    suggested-id: habitats-regulations-assessment
+  - local-name: Coal mining risk assessment
+    source-text: "From the audit: on the major checklist, not the householder checklist (no trigger given)"
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-coal-mining-risk-assessment/
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Landscape and visual impact assessment / Landscape sensitivity and capacity assessment
+    source-text: "From the audit: on the major checklist (no trigger given). 'visual effects, a landscape and visual impact assessment will also be required.'"
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-landscape-sensitivity-and-capacity-assessment/
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Agricultural statement
+    source-text: "From the audit: on the major checklist (no trigger given)"
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    suggested-id: agricultural-statement
+  - local-name: Air quality - exposure assessment
+    source-text: "From the audit: on the major checklist (no trigger given)"
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    suggested-id: ""
+  - local-name: Crime Impact Statement
+    source-text: "From the audit: on the major checklist (no trigger given)"
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    suggested-id: crime-prevention-statement
+  - local-name: Digital infrastructure statement
+    source-text: "From the audit: on the major checklist (no trigger given)"
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    suggested-id: ""
+  - local-name: Drawing/document register
+    source-text: "From the audit: on the major checklist (no trigger given)"
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    suggested-id: ""
+  - local-name: Foul drainage assessment
+    source-text: "From the audit: on the major checklist (no trigger given)"
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    suggested-id: foul-drainage-assessment
+  - local-name: Green belt assessment
+    source-text: "From the audit: on the major and householder checklists (no trigger given)"
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    suggested-id: green-belt-statement
+  - local-name: Structural survey
+    source-text: "From the audit: on the major checklist (no trigger given)"
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    suggested-id: structural-survey
+  - local-name: Ventilation and extraction statement
+    source-text: "From the audit: on the major checklist (no trigger given)"
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    suggested-id: ventilation-extraction-statement
+  - local-name: Visual representations
+    source-text: "From the audit: on the major checklist (no trigger given)"
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    suggested-id: computer-visualisations
+  - local-name: Minerals working and waste development additional requirements
+    source-text: "Minerals planning applications must also include the following information."
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-mineral-working-application/
+    suggested-id: minerals-waste-statement
+  - local-name: Advertisement plans
+    source-text: "From the audit: Advertisement consent checklist: 'Existing and proposed elevations', 'Advertisement plans'"
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    suggested-id: advertisement-drawings
+  - local-name: Detailed plans (listed building consent)
+    source-text: "From the audit: listed on the LBC checklist (no trigger given)"
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    suggested-id: ""
+  - local-name: Parking plan
+    source-text: "From the audit: listed on the planning checklist (no trigger given)"
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    suggested-id: parking-plan
+  - local-name: Habitat mitigation (annexe)
+    source-text: "From the audit: listed on the householder checklist (no trigger given)"
+    source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-all/
+    suggested-id: ""
+
+low-confidence:
+  - id: land-contamination-assessment
+    note: "Audit (wrong_trigger): the excerpt is a footnote from the YALPAG guidance PDF, with no trigger."
+  - id: heritage-statement
+    note: "Audit (missing_requirement): the excerpts are fragments with no trigger; the Heritage Statement is also a local requirement for full applications, not only householder and LBC."

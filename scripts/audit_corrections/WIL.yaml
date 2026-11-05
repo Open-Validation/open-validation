@@ -1,0 +1,476 @@
+# Corrections for Wiltshire Council, from the council's audit.
+# The link is the current Wiltshire Local Validation Checklist (published August 2025, in force from
+# 1 September 2025, valid to August 2027). It has a section per application type (Householder, Full,
+# Outline, Reserved matters, Listed building consent, Advertisement, Demolition in a conservation
+# area, s73, Non-material amendment, Discharge of conditions, Lawful development). Grokbot filed most
+# items under Full planning ('INFERRED'), which the audit says is mostly right, so most items below
+# keep no application type and carry a structured trigger. Several excerpts start with stray headings
+# or page numbers ('Application 33', 'Making Better Planning Applications Listed Building Content');
+# the source-text below trims them. Items marked "From the audit" use the audit's paraphrase.
+local-authority: WIL
+
+submission-standards:
+  - item: Drawings accurately drawn to a conventional metric scale (e.g. 1:50, 1:100), with the scale
+      clearly stated and a scale bar included
+    level: must
+  - item: Every drawing or plan has a unique drawing number and shows the site address, a description of
+      the proposal, the date the drawing was produced, the scale used and the paper size
+    level: must
+  - item: File names accurately reflect the content of the file
+    level: must
+  - item: All documents submitted in PDF format, unless otherwise specified
+    level: should
+
+drop:
+  - id: environmental-statement
+    reason: "wrong_trigger: the excerpt is the Landscape and Visual Appraisal text; the checklist has no EIA
+      requirement"
+  - id: photos
+    reason: "not_a_requirement: a note about material samples"
+
+drop-unmapped:
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: the location plan red-line rule"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: a fragment of the Heads of Terms trigger"
+  - local-name: Self-build / custom build information
+    reason: "not_a_requirement: S106/CIL exemption text"
+  - local-name: Minerals / Waste specific statements (county matters)
+    reason: "wrong mapping: this is the Waste Audit, now under waste-management-plan"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: self-build text; re-added below with the audit's trigger"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: a reference title; re-added below as the Odour Assessment"
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "wrong_trigger: the excerpt is the Air Quality trigger; re-added below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      any:
+        - all:
+            - site:
+                in: [designated-rural-area]
+                description: The site is in a Designated Rural Area.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 6
+                description: A net increase of 6-9 dwellings.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: A site of 0.5 hectares or more.
+    source-text: >-
+      Affordable Housing Statement/Details When required: Applications for residential developments in
+      the Designated Rural Areas (as defined in the NPPF) that provide a net increase of 6-9 dwellings
+      and developments of 10 or more dwellings or sites with an area of 0.5 hectares or more.
+    confidence: medium
+    notes: "Also listed for outline, and for reserved matters where the outline requires it (audit issues 1
+      and 2)."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: The proposal is in an Air Quality Management Area.
+        - discretionary
+    source-text: "Air Quality Assessment When required: All proposals in an Air Quality Management Area
+      (AQMA)."
+    confidence: medium
+    notes: "Audit (wrong_trigger): the source also covers large residential schemes and minerals/waste
+      (shown as officer discretion)."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [archaeological-priority-area]
+            description: The site includes heritage assets of archaeological significance.
+        - discretionary
+    source-text: "Archaeological Assessment When required: When the site includes, or has the potential to
+      include, heritage assets of archaeological significance."
+    confidence: medium
+    notes: "Sites with the potential to include such assets are shown as officer discretion."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: The development potentially affects trees on site or on adjoining land.
+    source-text: "Tree Survey/ Arboricultural Impact Assessment When required: When development potentially
+      affects trees on site or on adjoining land."
+    source-url: https://www.wiltshire.gov.uk/media/17833/Local-Validation-Checklist-from-1-Sept-2025/pdf/Local_Validation_Checklist_1_Sept_2025.pdf?m=1755190377417
+    confidence: medium
+    notes: "Audit (wrong_app_type): the LBC section does not list a tree survey; it is a householder, full
+      and outline item."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if: discretionary
+    source-text: "Ecological Assessments When required: Does my application need to be supported by
+      ecological information?"
+    source-url: https://www.wiltshire.gov.uk/media/17833/Local-Validation-Checklist-from-1-Sept-2025/pdf/Local_Validation_Checklist_1_Sept_2025.pdf?m=1755190377417
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement): Ecology Assessments are listed for householder, full, outline,
+      reserved matters (where details changed or the outline requires mitigation) and demolition in a
+      conservation area; the checklist asks applicants to check whether ecological information is
+      needed, so it is shown as officer discretion.
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The application is not subject to an exemption.
+    source-text: "Biodiversity Net Gain When required: All applications not subject to an exemption."
+    confidence: medium
+
+  - id: cil-form
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [full, reserved-matters]
+        - all:
+            - application-type:
+                in: [s73]
+            - discretionary
+    source-text: "Community Infrastructure Levy (CIL) Form When required: All applications."
+    confidence: medium
+    notes: "Full planning and reserved matters: all applications; s73: where floorspace changes (audit
+      issue 1)."
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      application-type:
+        in: [lbc]
+    source-text: "Design and Access Statement When required: All applications."
+    confidence: medium
+    notes: "From the Listed Building Consent section."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building of 18 metres or more.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building of 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains two or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-url: https://www.wiltshire.gov.uk/media/17833/Local-Validation-Checklist-from-1-Sept-2025/pdf/Local_Validation_Checklist_1_Sept_2025.pdf?m=1755190377417
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the CIL Form trigger. From the audit: buildings 18m+ or
+      7+ storeys with 2+ dwellings or educational accommodation."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3.
+        - discretionary
+    source-url: https://www.wiltshire.gov.uk/media/17833/Local-Validation-Checklist-from-1-Sept-2025/pdf/Local_Validation_Checklist_1_Sept_2025.pdf?m=1755190377417
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt was the fragment 'Floor Plan, Flood Risk Assessment).'. From
+      the audit: Flood Zones 2/3, larger Zone 1 sites and other listed flood-risk cases (the audit
+      gives no Zone 1 threshold, so those are officer discretion). Listed for householder, full and
+      outline.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+              scheduled-monument, park-and-garden]
+            description: Heritage assets are affected.
+    source-text: >-
+      Full: 'Statement of Heritage Significance/Heritage Statement: Required where heritage assets are
+      affected'; LBC: 'Statement of Heritage Significance/Heritage Statement: All applications.'
+    source-url: https://www.wiltshire.gov.uk/media/17833/Local-Validation-Checklist-from-1-Sept-2025/pdf/Local_Validation_Checklist_1_Sept_2025.pdf?m=1755190377417
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): 'All applications' is the LBC trigger. For full, outline, householder,
+      advertisement and non-material amendment applications it is required where heritage assets are
+      affected.
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: >-
+          Redevelopment of former petrol filling sites or commercial garages, or suspected
+          contaminated brownfield land.
+    source-text: "Land Contamination Assessment When required: For redevelopment of former petrol filling
+      sites or commercial garages."
+    confidence: medium
+    notes: "Audit (wrong_trigger): the source also covers suspected contaminated brownfield land."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: floodlighting
+            value: true
+            description: The proposal involves a floodlighting scheme.
+        - condition:
+            field: external-lighting
+            value: true
+            description: Lighting near homes that could affect residential amenity.
+    source-text: "Lighting Assessment … When required: Proposals involving floodlighting schemes."
+    confidence: medium
+    notes: "Audit (wrong_trigger): the source also covers development near homes that could affect amenity."
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      condition:
+        field: plant-equipment
+        value: true
+        description: >-
+          The development involves mechanical equipment or electrical building services plant (flues,
+          air handling or conditioning, extraction, air source heat pumps, combustion appliances).
+    source-text: >-
+      Noise Impact Assessment When required: Developments that involve the installation/operation of
+      mechanical equipment or electrical building services plant such as flues, air handling units/air
+      conditioning, extraction, air source heat pumps, combustion appliances etc.
+    confidence: medium
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      application-type:
+        in: [reserved-matters, demolition-con-area, s73, non-material-amendment, ldc-existing-use]
+    source-url: https://www.wiltshire.gov.uk/media/17833/Local-Validation-Checklist-from-1-Sept-2025/pdf/Local_Validation_Checklist_1_Sept_2025.pdf?m=1755190377417
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, missing_requirement): the outline row quoted a reserved matters item.
+      From the audit: a Planning/Compliance Statement for all reserved matters, a
+      Planning/Justification Statement for all demolition in a conservation area, a Planning
+      Statement for all s73 and existing-use lawful development applications, and a Planning
+      Statement or Covering Letter for all non-material amendments.
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: A roof is altered and the changes cannot be adequately shown on the elevations.
+    source-text: "Roof Plans (Existing and Proposed) When required: Where any roof is being altered, and the
+      changes cannot be adequately shown on the elevation plans."
+    confidence: medium
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: A roof is altered and the changes cannot be adequately shown on the elevations.
+    source-text: "Roof Plans (Existing and Proposed) When required: Where any roof is being altered, and the
+      changes cannot be adequately shown on the elevation plans."
+    confidence: medium
+
+  - id: schedule-of-works
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [lbc]
+        - discretionary
+    source-text: "Schedule of Works and/or Specification of Repairs When required: Mainly required for
+      complicated or larger scale proposals including a number of different elements."
+    confidence: medium
+    notes: "Audit (wrong_app_type): from the Listed Building Consent section, not Full planning."
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: A change in level is proposed (e.g. a sloping site, or a building part cut into the ground).
+    source-text: "Site Sections (Existing and Proposed) When required: When a change in level is proposed –
+      for example when on a sloping site or when a building is part cut into the ground."
+    confidence: medium
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: A change in level is proposed (e.g. a sloping site, or a building part cut into the ground).
+    source-text: "Site Sections (Existing and Proposed) When required: When a change in level is proposed –
+      for example when on a sloping site or when a building is part cut into the ground."
+    confidence: medium
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      ref: major-development
+    confidence: medium
+    notes: "The council's Sustainable Energy Strategy: 'When required: Major applications'."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Retail, leisure or office development outside town centres.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">="
+            value: 2500
+            description: A floorspace of 2,500 square metres or more.
+    source-text: >-
+      Town Centre Impact Assessment When required: Applications for retail, leisure and office
+      development outside of town centres, which are not in accordance with an up-to-date Local Plan,
+      where the development has a floorspace of 2,500 square metres or more.
+    confidence: medium
+    notes: "Only where the proposal is not in accordance with an up-to-date Local Plan."
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 100
+            description: Residential development of 100 or more dwellings.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: 1,000 square metres or more of retail, employment or leisure floorspace.
+        - discretionary
+    source-text: "Transport Assessment When required: Residential development of 100 dwellings."
+    source-url: https://www.wiltshire.gov.uk/media/17833/Local-Validation-Checklist-from-1-Sept-2025/pdf/Local_Validation_Checklist_1_Sept_2025.pdf?m=1755190377417
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt is cut short. From the audit: 100+ dwellings, 1,000 m2+
+      retail/employment/leisure, and waste facilities (shown as officer discretion)."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    source-text: >-
+      Viability Assessment When required: Applications where the proposed development does not comply
+      with planning policy requirements for the provision of affordable housing and essential
+      infrastructure.
+    confidence: medium
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: Residential development of 10 or more houses.
+    source-text: "Waste Audit Full Planning Application When required: For residential developments of 10 or
+      more houses."
+    source-url: https://www.wiltshire.gov.uk/media/17833/Local-Validation-Checklist-from-1-Sept-2025/pdf/Local_Validation_Checklist_1_Sept_2025.pdf?m=1755190377417
+    confidence: medium
+    notes: "Audit (not_a_requirement): the workbook filed the Waste Audit as a minerals/waste statement. Also
+      listed for outline."
+
+  - id: water-impact-assessment
+    action: add
+    required-if:
+      all:
+        - site:
+            in: [nutrient-neutrality-area]
+            description: >-
+              The site is in the Hampshire Avon, River Test, River Lambourn or Somerset Levels and Moors
+              catchment.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal increases overnight accommodation.
+    source-text: >-
+      All applications proposing an increase in overnight accommodation falling within one of the
+      following catchment areas - the Hampshire Avon, River Test and the River Lambourn and the
+      Somerset Levels and Moors.
+    source-url: https://www.wiltshire.gov.uk/media/17833/Local-Validation-Checklist-from-1-Sept-2025/pdf/Local_Validation_Checklist_1_Sept_2025.pdf?m=1755190377417
+    must-include:
+      - item: A completed Nutrient Neutrality Calculator specific to the catchment area the proposal falls
+          within
+        level: must
+    confidence: medium
+    notes: "Audit (missing_requirement): Phosphorus and Nitrogen Mitigation, captured only as tab text. Listed
+      for full and outline."
+
+unmapped:
+  - local-name: Planning Obligations / Heads of Terms
+    source-text: "From the audit: major housing, and wherever a legal agreement is needed or offered"
+    source-url: https://www.wiltshire.gov.uk/media/17833/Local-Validation-Checklist-from-1-Sept-2025/pdf/Local_Validation_Checklist_1_Sept_2025.pdf?m=1755190377417
+    suggested-id: planning-obligations-heads-of-terms
+  - local-name: Odour Assessment
+    source-text: "From the audit: odour affecting residential amenity, e.g. commercial kitchens; new
+      restaurants, hot food takeaways and pubs serving hot food"
+    source-url: https://www.wiltshire.gov.uk/media/17833/Local-Validation-Checklist-from-1-Sept-2025/pdf/Local_Validation_Checklist_1_Sept_2025.pdf?m=1755190377417
+    suggested-id: odour-assessment
+  - local-name: Agricultural, Forestry or Occupational Worker Dwelling Justification
+    source-text: "From the audit: rural workers' dwellings and removal of occupancy conditions (full and
+      outline)"
+    source-url: https://www.wiltshire.gov.uk/media/17833/Local-Validation-Checklist-from-1-Sept-2025/pdf/Local_Validation_Checklist_1_Sept_2025.pdf?m=1755190377417
+    suggested-id: rural-workers-dwelling-appraisal
+  - local-name: Fire Risk and Mitigation Strategy
+    source-text: "From the audit: solar farms with battery energy storage (BESS) and standalone BESS"
+    source-url: https://www.wiltshire.gov.uk/media/17833/Local-Validation-Checklist-from-1-Sept-2025/pdf/Local_Validation_Checklist_1_Sept_2025.pdf?m=1755190377417
+    suggested-id: fire-safety-strategy
+  - local-name: Condition Discharge Information Statement
+    source-text: "Condition Discharge Information Statement: All applications discharging more than 1
+      condition"
+    source-url: https://www.wiltshire.gov.uk/media/17833/Local-Validation-Checklist-from-1-Sept-2025/pdf/Local_Validation_Checklist_1_Sept_2025.pdf?m=1755190377417
+    suggested-id: condition-discharge-statement
+
+low-confidence:
+  - id: site-plan
+    note: "The householder row's excerpt is the Elevations trigger, not a site plan rule."

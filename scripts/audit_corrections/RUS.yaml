@@ -1,0 +1,380 @@
+# Corrections for Rushcliffe Borough Council, from inputs/audit/rushcliffe-borough-council.json.
+# Grokbot's link is the current Local Scheme of Validation (adopted January 2024, revised January
+# 2026; also published as local-scheme-of-validation-2026.pdf). Section 4 of the scheme gives
+# explicit local lists per application type (Householder, five Outline lists, Full Minor/Major,
+# LBC, Advertisement consent...), but Grokbot put about 50 items under Full planning as INFERRED,
+# and padded the output with Local Plan Part 1/Part 2 text and the obsolete 2000s
+# rbc_developer_checklist.pdf. Rows from those documents are dropped below. Items marked "From the
+# audit" use the audit's paraphrase of the scheme.
+local-authority: RUS
+
+validation-list:
+  date: 2026-01
+  date-basis: "audit: the scheme page says 'Adopted January 2024' and 'revised January 2026'; the revision
+    is the current version"
+
+submission-standards:
+  - item: A linear scale bar to assist with electronic scaling / measuring
+    level: must
+  - item: A unique plan / drawing reference number
+    level: must
+  - item: Site layout plans preferably on paper smaller than A2, at a typical scale of 1:200 or 1:500,
+      with critical dimensions marked
+    level: should
+  - item: Elevations and internal layouts preferably on paper smaller than A2, at a typical scale of 1:50
+      or 1:100 (existing and proposed at a similar scale), with the scale annotated
+    level: should
+
+drop:
+  - id: air-quality-assessment
+    reason: "wrong_document: the excerpt is Local Plan Part 2 text, not the validation scheme's trigger"
+  - id: recreation-facilities-assessment
+    reason: "wrong_document: the excerpt is a Local Plan Part 2 housing allocation policy"
+  - id: waste-management-plan
+    reason: "wrong_document: the excerpt is Core Strategy text"
+  - id: schedule-of-works
+    sheets: [Listed building consent]
+    reason: "wrong_document: from the obsolete rbc_developer_checklist.pdf"
+  - id: sustainability-statement
+    reason: "wrong mapping: the excerpt is the Renewable Energy Statement; re-added as energy-statement below"
+
+drop-unmapped:
+  - local-name: Equality / accessibility statement
+    reason: "not_a_requirement: Core Strategy text about its own Equality Impact Assessment"
+  - local-name: Gypsy & Traveller information
+    reason: "wrong_document: Core Strategy text"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_document: Local Plan Part 2 text about the plan's own HRA"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "wrong_document: Local Plan Part 2 policy text"
+  - local-name: Water efficiency / water usage statement
+    reason: "wrong_document: Local Plan Part 2 policy text"
+  - local-name: Minerals / Waste specific statements (county matters)
+    reason: "wrong_document: Core Strategy text"
+  - local-name: Employment / Economic Statement
+    reason: "wrong_document: Local Plan Part 2 fragment"
+  - local-name: Landscape and Visual Impact Assessment
+    reason: "wrong_document: Local Plan Part 2 policy text"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_document: Local Plan Part 2 policy text"
+  - local-name: Character / Conservation area appraisal reference
+    reason: "wrong_document: from the obsolete rbc_developer_checklist.pdf"
+  - local-name: Cycle parking details
+    reason: "wrong_trigger/wrong_document: obsolete developer checklist; the excerpt runs into '10 Transport
+      Assessment'"
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "wrong_trigger: uses the Agricultural Land Classification trigger; re-added below as
+      Agricultural Justification"
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_app_type: not on the LBC list; the excerpt is External Lighting Scheme content (now in
+      lighting-assessment)"
+
+requirements:
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees or hedges within or adjacent to the application site may be affected.
+    must-include:
+      - item: A survey of the trees detailing their current condition and the potential impact of the
+          development
+        level: must
+      - item: A concise list of trees to be removed / retained
+        level: must
+      - item: Details of how the trees and tree roots would be protected during construction
+        level: must
+    notes: "The scheme also lists Tree Survey/AIA for householder and listed building consent applications
+      (audit wrong_app_type)."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: Major and small developments, unless exempt.
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      condition:
+        field: protected-species
+        value: true
+        description: The proposal is likely to affect protected species.
+    notes: "The scheme lists an Ecology Report for householder and LBC applications too (audit
+      wrong_app_type)."
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [world-heritage-site, conservation-area]
+                description: Development in a designated area (a world heritage site or a conservation area).
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: One or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: A building or buildings with a floor space of 100 square metres or more.
+        - application-type:
+            in: [lbc]
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-text: Renewable Energy Statement Required for major applications and all applications for
+      renewable energy production.
+    source-url:
+      https://www.rushcliffe.gov.uk/about-us/about-the-council/policies-strategies-and-other-documents/accessible-documents/local-scheme-of-validation/
+    confidence: medium
+    notes: "The workbook mapped this to sustainability-statement. 'All applications for renewable energy
+      production' has no field, so it is shown as officer discretion."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: Residential (2 or more dwellings).
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: Educational establishment.
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: Ground levels would be modified.
+    notes: "The scheme lists Levels and Cross Sections for householder applications too (audit
+      wrong_app_type)."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: Ground levels would be modified.
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: floodlighting
+            value: true
+            description: All proposals involving floodlighting.
+        - all:
+            - application-type:
+                in: [advertising]
+            - condition:
+                field: illuminated
+                value: true
+                description: An illuminated advertisement.
+    must-include:
+      - item: Reasons why the lighting is proposed
+        level: must
+      - item: Mitigation measures
+        level: must
+      - item: Impact on the amenity of neighbouring properties, specifically if light could extend beyond
+          the site boundary
+        level: must
+      - item: Impact on roads / highway safety
+        level: must
+      - item: Impact on the character of the area and the wider landscape (Conservation Areas, Listed
+          Buildings, SSSI, AONB, dark rural areas)
+        level: must
+    confidence: medium
+    notes: >-
+      From the audit (wrong_app_type): Advertisement consent requires an External Lighting Scheme
+      and Light Impact Assessment; that they are for illuminated adverts is inferred. The contents
+      are from the workbook's 'Advertisement drawings' row, which is External Lighting Scheme text.
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The development may have a significant impact on existing noise levels.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: The existing noise environment may adversely affect the development.
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Outside defined Centres.
+        - condition:
+            field: retail-floorspace
+            operator: ">"
+            value: 200
+            description: Retail developments of more than 200 square metres net.
+
+  - id: sci
+    action: update
+    required-if: discretionary
+    notes: "Required for all applications where pre-application consultation has taken place with the local
+      community (no field for that)."
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    notes: "Major residential and commercial developments where the development is accessed from a Trunk or
+      Major A Road (no field for the road)."
+
+  - id: heritage-statement
+    action: update
+    must-include:
+      - item: Identification of the historic features on or adjacent to the application site
+        level: must
+    confidence: low
+    notes: "The excerpt is content, not the trigger. From the audit: the scheme's LBC list includes a
+      Heritage Statement."
+
+  - id: viability-assessment
+    action: update
+    must-include:
+      - item: A redacted copy, removing sensitive information and personal data
+        level: should
+    confidence: low
+    notes: "Audit (wrong_trigger): the excerpt is about who pays consultant fees, not when it is required."
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 11
+            description: 11 or more units.
+        - condition:
+            field: housing-floorspace
+            operator: ">="
+            value: 1000
+            description: 1,000 square metres or more.
+        - condition:
+            field: housing-type
+            value: older-people
+            description: Specialist older persons housing.
+    source-url:
+      https://www.rushcliffe.gov.uk/about-us/about-the-council/policies-strategies-and-other-documents/accessible-documents/local-scheme-of-validation/
+    confidence: medium
+    notes: "From the audit (missing_requirement): 11+ units or 1,000 sq m+, and specialist older persons
+      housing."
+
+unmapped:
+  - local-name: Agricultural Justification
+    source-text: "Agricultural Justification: erection of a countryside dwelling for agricultural or
+      equestrian purposes"
+    source-url:
+      https://www.rushcliffe.gov.uk/about-us/about-the-council/policies-strategies-and-other-documents/accessible-documents/local-scheme-of-validation/
+    suggested-id: rural-workers-dwelling-appraisal
+  - local-name: Aerodrome Safeguarding Assessment
+    source-text: "From the audit: development affecting protected surfaces or bird hazard, especially near
+      East Midlands Airport"
+    source-url:
+      https://www.rushcliffe.gov.uk/about-us/about-the-council/policies-strategies-and-other-documents/accessible-documents/local-scheme-of-validation/
+    suggested-id: aerodrome-safeguarding
+  - local-name: Building for a Healthy Life Assessment
+    source-text: "From the audit: all major residential development"
+    source-url:
+      https://www.rushcliffe.gov.uk/about-us/about-the-council/policies-strategies-and-other-documents/accessible-documents/local-scheme-of-validation/
+    suggested-id: ""
+  - local-name: Design Code Process Note
+    source-text: "From the audit: major development"
+    source-url:
+      https://www.rushcliffe.gov.uk/about-us/about-the-council/policies-strategies-and-other-documents/accessible-documents/local-scheme-of-validation/
+    suggested-id: design-code
+  - local-name: Glint and Glare Assessment
+    source-text: "From the audit: solar/PV development affecting receptors"
+    source-url:
+      https://www.rushcliffe.gov.uk/about-us/about-the-council/policies-strategies-and-other-documents/accessible-documents/local-scheme-of-validation/
+    suggested-id: ""
+  - local-name: Greenbelt Impact / Volume Calculation
+    source-text: "From the audit: householder extensions and outbuildings, and all development, in the Green
+      Belt"
+    source-url:
+      https://www.rushcliffe.gov.uk/about-us/about-the-council/policies-strategies-and-other-documents/accessible-documents/local-scheme-of-validation/
+    suggested-id: volume-calculations
+  - local-name: Evidence Statement (lawful development certificates)
+    source-text: "From the audit: LDCs, proof of need"
+    source-url:
+      https://www.rushcliffe.gov.uk/about-us/about-the-council/policies-strategies-and-other-documents/accessible-documents/local-scheme-of-validation/
+    suggested-id: lawful-development-evidence
+  - local-name: Site Survey Existing
+    source-text: "From the audit: on the Householder and Advertisement consent lists, among others"
+    source-url:
+      https://www.rushcliffe.gov.uk/about-us/about-the-council/policies-strategies-and-other-documents/accessible-documents/local-scheme-of-validation/
+    suggested-id: topographical-survey
+  - local-name: Vehicle Parking and Cycle Storage
+    source-text: "From the audit: on the Householder local list"
+    source-url:
+      https://www.rushcliffe.gov.uk/about-us/about-the-council/policies-strategies-and-other-documents/accessible-documents/local-scheme-of-validation/
+    suggested-id: parking-plan
+
+low-confidence:
+  - id: flood-risk-assessment
+    note: "The excerpt is the Drainage Assessment / Drainage Strategy trigger ('see also Flood Risk
+      Assessment'), not the FRA's own trigger. The scheme lists an FRA for householder applications too."
+  - id: archaeological-assessment
+    note: "The excerpt is further-guidance and BNG text, not the trigger. The scheme lists it for householder
+      applications too (audit wrong_app_type)."
+  - id: cil-form
+    note: "Audit (wrong_trigger): the excerpt is the Design Code Compliance Statement text. The scheme lists
+      CIL Forms for householder applications too."
+  - id: photos
+    note: "The excerpt is Structural Survey content, not the photographs trigger. The scheme lists
+      Photographs and Photomontages for householder applications."
+  - id: schedule-of-works
+    note: "'A schedule of works necessary to preserve the building' may be part of the Structural Survey
+      item; check the LBC list."

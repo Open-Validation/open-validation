@@ -1,0 +1,422 @@
+# Corrections for Tewkesbury Borough Council, from inputs/audit/tewkesbury-borough-council.json.
+# The workbook links the current list, 'TBC Validation Requirements Final Version Jan 2025'
+# (Version 5, January 2025; the build reads that date). Grokbot mixed in the superseded
+# 'Local-list-of-validation-requirements-1.pdf' (Version 4, March 2022) and the 'Invalid application
+# charges customer note' (April 2026), and many excerpts bled from neighbouring PDF columns. Item
+# numbers below are the Jan 2025 list's. The council also publishes application-type checklists
+# (Types 1-23, 'Final Jan 25'; Types 11 and 21 revised April 2026) that neither Grokbot nor the
+# audit read, so Reserved matters, adverts, LDC, s73, conditions, NMA and tree works may have local
+# items not shown here. Items without the council's own words use the audit's paraphrase.
+local-authority: TEW
+
+submission-standards:
+  - item: All drawings to a scale recognised in the local list; plans marked "not to scale" or "do
+      not scale" will not be registered
+    level: must
+
+drop:
+  - id: town-centre-impact-assessment
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: the excerpt is the Structural Survey text"
+  - id: transport-assessment
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: the excerpt is the Structural Survey text"
+  - id: land-contamination-assessment
+    sheets: [Minerals & waste (county)]
+    reason: "wrong_app_type: minerals and waste is not a Tewkesbury application type (old 2022 list row)"
+
+drop-unmapped:
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger/wrong_app_type: the Full row quotes the Daylight/Sunlight trigger, the LBC row the Historic Environment Statement text"
+  - local-name: Foul Sewage / Utilities Statement
+    reason: "wrong_app_type: the LBC row is Historic Environment Statement text; the FDA1 item is re-added below"
+  - local-name: Minerals / Waste specific statements (county matters)
+    reason: "wrong_trigger: the Full row is the Biodiversity trigger and the Outline row the Water Management Statement trigger (re-added below)"
+  - local-name: Structural Survey
+    reason: "garbled: column bleed from items 26-27; re-added below"
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_trigger: a bare fragment ('hours of illumination.')"
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "wrong_trigger: a bare fragment; the Social and Community Infrastructure item is added below"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: a fragment of the Planning Obligation trigger"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      any:
+        - all:
+            - site:
+                in: [designated-rural-area]
+                description: The site is in a Designated Rural Area.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 6
+                description: A net increase of 6 or more dwellings.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: A residential site of 0.5 hectares or more.
+    source-text: >-
+      Required for residential developments in the Designated Rural Areas, (as defined in the NPPF)
+      that provide a net increase of 6 – 9 dwellings a…
+    source-url: https://tewkesbury.gov.uk/wp-content/uploads/2023/10/TBC-Validation-Requirements-Final-Version-Jan-2025.pdf
+    policy: JCS SD11, SD12; Tewkesbury Borough Plan RES6, RES12, RES13
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt was cut off. From the audit (item 1): 6-9 dwellings net in Designated Rural Areas, or 10+ dwellings or 0.5 ha+."
+
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - site:
+                in: [air-quality-management-area]
+                description: The site is within or adjoining an Air Quality Management Area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 10
+                    description: 10 or more dwellings.
+                - condition:
+                    field: site-area-residential
+                    operator: ">="
+                    value: 0.5
+                    description: A residential site of 0.5 hectares or more.
+                - condition:
+                    field: floorspace-non-residential
+                    operator: ">"
+                    value: 1000
+                    description: Other development over 1,000 square metres.
+                - condition:
+                    field: site-area-non-residential
+                    operator: ">="
+                    value: 1
+                    description: Other development on a site of 1 hectare or more.
+        - discretionary
+    source-url: https://tewkesbury.gov.uk/wp-content/uploads/2023/10/TBC-Validation-Requirements-Final-Version-Jan-2025.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted item 3's trigger (new agricultural buildings).
+      From the audit (item 4): a site within or adjoining an AQMA with 10+ dwellings or 0.5 ha+,
+      or other development over 1,000 sqm or 1 ha+; plus proposals that add congestion, HGV
+      movements or significant parking, emit dust, or bring sensitive receptors into poor air
+      quality areas (officer discretion).
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      condition:
+        field: protected-species
+        value: true
+        description: An important wildlife site, habitat, natural feature or species could be
+          affected.
+    confidence: medium
+
+  - id: cil-form
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, hh, reserved-matters, ldc]
+        - condition:
+            field: housing-floorspace
+            operator: ">"
+            value: 0
+            description: The proposal creates residential floorspace.
+    confidence: medium
+    notes: "Audit (wrong_app_type): item 8 covers full, householder, reserved matters and lawful development certificate applications that create residential floorspace."
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+    source-text: >-
+      Any application where there is a potential adverse impact upon the current levels of
+      sunlight/daylight enjoyed by adjoining properties or building(s), including associated
+      gardens or amenity space Any application for development that may themselves be adversely
+      affected by adjoining sites or where one part of the proposed development may be impacted
+      upon by another part of the development.
+    confidence: medium
+    notes: "Item 9. The wording is from the superseded March 2022 list (audit: wrong_document); the Jan 2025 list keeps the item."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is EIA development.
+    confidence: medium
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: The building is 18 metres or higher.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: The building comprises 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    confidence: medium
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: Development in Flood Zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: Development of 1 hectare or greater in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Development of 1 hectare or greater in Flood Zone 1.
+    source-text: >-
+      A Flood risk assessment (FRA) is required for planning applications for: Any development of
+      1 hectare or greater in Flood Zone 1.
+    source-url: https://tewkesbury.gov.uk/wp-content/uploads/2023/10/TBC-Validation-Requirements-Final-Version-Jan-2025.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt omits all development in Flood Zones 2/3 (item 13)."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [conservation-area, listed-building, listed-building-setting, scheduled-monument,
+              park-and-garden, locally-listed-building]
+            description: Heritage assets are affected (including a proposal in a conservation area
+              or affecting a listed building).
+    source-text: >-
+      16 Historic Environment Statement … Required for planning applications where heritage assets
+      are affected.
+    source-url: https://tewkesbury.gov.uk/wp-content/uploads/2023/10/TBC-Validation-Requirements-Final-Version-Jan-2025.pdf
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement): item 16 applies to planning applications affecting heritage
+      assets, not just LBC. The charges note adds: "a heritage statement is required for when a
+      proposal falls within a conservation area or affecting a listed building."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: Risks from land contamination may be reasonably suspected (e.g. known
+          contaminated sites such as landfill, petrol stations, some agricultural uses, or former
+          industrial sites).
+    confidence: medium
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      any:
+        - all:
+            - site:
+                in: [area-of-outstanding-natural-beauty]
+                description: The development is within the National Landscape Area.
+            - condition:
+                field: external-lighting
+                value: true
+                description: External lighting is proposed.
+        - condition:
+            field: floodlighting
+            value: true
+            description: Proposals for floodlighting, e.g. for playing pitches or maneges.
+    confidence: medium
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      condition:
+        field: loss-of-open-space
+        value: true
+        description: The application involves the loss or partial loss of existing open space.
+    confidence: medium
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: The neighbouring properties
+        level: must
+    confidence: medium
+    notes: "From the invalid-application charges note: a block plan is needed for all new planning applications."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Telecommunications development, including prior approval applications.
+    source-url: https://tewkesbury.gov.uk/wp-content/uploads/2023/10/TBC-Validation-Requirements-Final-Version-Jan-2025.pdf
+    must-include:
+      - item: ICNIRP self-certification
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 29, a Telecommunications Supporting Statement for all telecoms development including prior approval."
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Retail, leisure or office development outside town centres, not in
+              accordance with the Local Plan.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">="
+            value: 2500
+            description: 2,500 square metres or more.
+    source-url: https://tewkesbury.gov.uk/wp-content/uploads/2023/10/TBC-Validation-Requirements-Final-Version-Jan-2025.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the Full row quoted the Open Space text and the LBC row the Structural Survey text. From the audit (item 26)."
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 50
+            description: 50 or more dwellings (Transport Statement 50-79; Transport Assessment 80+).
+        - discretionary
+    source-text: Required for applications likely to that generate significant amounts of transport movement.
+    source-url: https://tewkesbury.gov.uk/wp-content/uploads/2023/10/TBC-Validation-Requirements-Final-Version-Jan-2025.pdf
+    must-include:
+      - item: The Active Travel England toolkit
+        level: must
+        required-if:
+          any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 150
+                description: 150 or more dwellings.
+            - condition:
+                field: floorspace
+                operator: ">="
+                value: 7500
+                description: 7,500 square metres or more.
+            - condition:
+                field: site-area-residential
+                operator: ">="
+                value: 5
+                description: A site of 5 hectares or more.
+            - condition:
+                field: site-area-non-residential
+                operator: ">="
+                value: 5
+                description: A site of 5 hectares or more.
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): from the audit (item 27), 50-79 dwellings Transport Statement, 80+ Transport Assessment, and the ATE toolkit for 150+ dwellings, 7,500 sqm or 5 ha."
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    source-text: Required for applications likely to that generate significant amounts of transport movement.
+    confidence: low
+    notes: "Audit (wrong_trigger): the excerpt ran into the '29 Telecommunications Supporting Statement' heading; it is not certain this trigger is the Travel Plan's."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    must-include:
+      - item: A full, un-redacted viability assessment, which will be published in full
+        level: must
+    confidence: medium
+    notes: >-
+      Item 32: required where the proposal does not provide planning policy requirements for
+      affordable housing and infrastructure. The un-redacted item is from the March 2022 list.
+
+  - id: waste-management-plan
+    action: update
+    required-if:
+      ref: major-development
+    confidence: medium
+    notes: >-
+      Bin storage can be shown on the block plan, but major schemes need a separate plan. From the
+      audit (missing_requirement): item 33 Waste Minimisation Statement for 10+ dwellings or
+      0.5 ha+, or over 1,000 sqm or 1 ha+ (the major development thresholds).
+
+unmapped:
+  - local-name: Water Management Statement
+    source-text: >-
+      Required for all applications for full or outline planning permission except: …
+      non-residential extensions with a footprint less than 250 square metres. (From the audit:
+      also except alterations that do not increase building size, and householder development)
+    source-url: https://tewkesbury.gov.uk/wp-content/uploads/2023/10/TBC-Validation-Requirements-Final-Version-Jan-2025.pdf
+    suggested-id: drainage-strategy
+  - local-name: Foul Drainage Assessment Form (FDA1)
+    source-text: is proposed a foul drainage assessment form (FDA1) should be submitted with the planning application.
+    source-url: https://tewkesbury.gov.uk/wp-content/uploads/2023/08/Local-list-of-validation-requirements-1.pdf
+    suggested-id: foul-sewage-assessment
+  - local-name: Structural Survey/report
+    source-text: >-
+      Applications for listed building consent or conversion of rural buildings outside a
+      settlement boundary where the proposed works have implications for the structural integrity
+      of the building or where the proposed works are to address structural issues associated with
+      the building.
+    source-url: https://tewkesbury.gov.uk/wp-content/uploads/2023/10/TBC-Validation-Requirements-Final-Version-Jan-2025.pdf
+    suggested-id: structural-survey
+  - local-name: Agricultural Building Justification
+    source-text: "Required for any application for a new agricultural building. (From the audit: using sections A and C of the agricultural questionnaire)"
+    source-url: https://tewkesbury.gov.uk/wp-content/uploads/2023/10/TBC-Validation-Requirements-Final-Version-Jan-2025.pdf
+    suggested-id: agricultural-justification
+  - local-name: Condition Survey
+    source-text: Applications for listed building consent where partial or total demolition is proposed.
+    source-url: https://tewkesbury.gov.uk/wp-content/uploads/2023/08/Local-list-of-validation-requirements-1.pdf
+    suggested-id: structural-survey
+  - local-name: Landscape and Visual Impact Assessment
+    source-text: "From the audit (item 18): development affecting the landscape, especially the AONB/National Landscape or Special Landscape Areas"
+    source-url: https://tewkesbury.gov.uk/wp-content/uploads/2023/10/TBC-Validation-Requirements-Final-Version-Jan-2025.pdf
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Listed Building Drawings
+    source-text: "From the audit (item 20): listed building consent adding new architectural features; 1:20 elevations and 1:5 sections"
+    source-url: https://tewkesbury.gov.uk/wp-content/uploads/2023/10/TBC-Validation-Requirements-Final-Version-Jan-2025.pdf
+    suggested-id: ""
+  - local-name: Social and Community Infrastructure Justification Statement
+    source-text: "From the audit (item 24): loss of current or former community facilities"
+    source-url: https://tewkesbury.gov.uk/wp-content/uploads/2023/10/TBC-Validation-Requirements-Final-Version-Jan-2025.pdf
+    suggested-id: community-facilities-assessment
+
+low-confidence:
+  - id: arboriculturist-report
+    note: "The excerpt gives survey method, not a trigger; the audit says the Tree Survey also applies to householder applications."
+  - id: sustainability-statement
+    note: "The excerpt is Energy Statement content; no trigger is given in the workbook or the audit."

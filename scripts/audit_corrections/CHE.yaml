@@ -1,0 +1,318 @@
+# Corrections for Cheshire East Council, from inputs/audit/cheshire-east-council.json.
+# The council site blocks automated fetching, so the audit could not read the checklists
+# (contents_checked: false). It worked from the council's validation page and the source file
+# names in Grokbot's rows: VC1 general, VC2 householder, VC3 minerals, VC4 waste and a 2024
+# guidance note; several rows came from the superseded 2018 draft checklist. Kept light: obvious
+# junk dropped, misfiled minerals/waste rows re-scoped, clear workbook triggers structured.
+local-authority: CHE
+
+validation-list:
+  date: "2024-03-11"
+  date-basis: >-
+    audit: VC1 footer 'Validation Checklist_VC1_February 2024'; approved for adoption by the
+    Environment and Communities Committee on 11 March 2024
+
+submission-standards:
+  - item: Documents in PDF or Microsoft Word format, unsecured so that sensitive information can be
+      redacted
+    level: should
+  - item: Each file clearly labelled with its content and drawing number, e.g. 'Site Location Plan - 123
+      Rev A pdf'
+    level: should
+  - item: File size no more than the portal upload limit (10MB)
+    level: must
+
+drop:
+  - id: arboriculturist-report
+    sheets: [Works to trees]
+    reason: "wrong_app_type: the VC1 development tree survey text does not apply to tree works applications"
+  - id: design-and-access-statement
+    sheets: [Full planning]
+    reason: "outdated_link / wrong_trigger: a heading fragment from the superseded 2018 draft checklist"
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is the structural survey definition from the guidance note"
+
+drop-unmapped:
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "wrong_trigger: minerals soil / ALC restoration text, not a workers' dwelling requirement"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: fragments (householder access text; waste checklist headings)"
+  - local-name: Minerals / Waste specific statements (county matters)
+    reason: "wrong_trigger: fragment ('its proposed restoration scheme')"
+
+requirements:
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [tree-preservation-zone]
+            description: There is a tree on the site subject to a Tree Preservation Order.
+        - discretionary
+    source-text: >-
+      Tree Survey/Arboricultural Implications - An arboricultural statement is required (in accordance
+      with the latest requirements BS5837:2012) where: There is a tree(s) on the site subject to a
+      Tree Preservation Order (TPO)
+    must-include:
+      - item: In accordance with BS5837:2012
+        level: must
+    notes: >-
+      The excerpt gives only the first case ('a tree on the site subject to a TPO'); the rest of the
+      list was cut off and is shown as officer discretion. It is in both VC1 and VC2 (householder).
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: Scale of 1:500 or 1:200
+        level: must
+      - item: The direction of North
+        level: must
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - any:
+            - all:
+                - site:
+                    in: [conservation-area]
+                    description: Development in a Conservation Area.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: A building or buildings with a floor space of 100 square metres or more.
+            - site:
+                in: [listed-building]
+                description: The property is a listed building.
+    source-text: >-
+      DESIGN AND ACCESS STATEMENT  Development in a Conservation Area comprising of a building or
+      buildings with a floor space of 100 square metres or more  Is a Listed Building
+    notes: "From the VC2 householder checklist."
+
+  - id: section-existing
+    action: update
+    required-if: &che-levels
+      all:
+        - application-type:
+            in: [hh, mineral-app]
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: The proposal involves a change in ground levels.
+    must-include: &che-levels-items
+      - item: Existing and finished floor levels, including details of foundations and eaves
+        level: should
+        required-if:
+          application-type:
+            in: [hh]
+    notes: &che-levels-note >-
+      The householder (VC2) excerpt gives the trigger. Audit (wrong_app_type): the Full planning row
+      came from the VC3 minerals checklist, so it is scoped to minerals applications.
+
+  - id: section-proposed
+    action: update
+    required-if: *che-levels
+    must-include: *che-levels-items
+    notes: *che-levels-note
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - site:
+            in: [flood-risk-zone, critical-drainage-area]
+            description: The property is in flood zone 2 or 3 and/or the site suffers from critical drainage
+              issues.
+    source-text: >-
+      Flood Risk Assessment where: Property is located in flood zone 2 or 3 and / or the site suffers
+      from critical drainage issues
+    notes: >-
+      From the VC2 householder checklist. Audit (wrong_app_type): the Full planning row was VC3
+      minerals text with no trigger; the VC1 general trigger could not be checked.
+
+  - id: floor-plan-existing
+    action: update
+    must-include: &che-floor-items
+      - item: Scale of 1:50 or 1:100
+        level: must
+      - item: Existing walls or buildings to be demolished clearly shown
+        level: should
+
+  - id: floor-plan-proposed
+    action: update
+    must-include: *che-floor-items
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: Existing and proposed elevations side by side on the same drawing, at the same scale
+        level: should
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+              scheduled-monument, park-and-garden]
+            description: The development affects a designated or non-designated heritage asset or its setting.
+    source-text: >-
+      Heritage Statement (statement of significance) when: The development affects a designated or
+      non-designated heritage asset or its setting
+    notes: "From the VC2 householder checklist."
+
+  - id: roof-plan-existing
+    action: update
+    required-if: &che-roof
+      all:
+        - application-type:
+            in: [hh]
+        - discretionary
+    must-include: &che-roof-items
+      - item: Scale of 1:50 or 1:100
+        level: must
+      - item: The proposed roof form and details such as the roofing material and their location
+        level: must
+    notes: &che-roof-note "VC2: a roof plan 'where appropriate'."
+
+  - id: roof-plan-proposed
+    action: update
+    required-if: *che-roof
+    must-include: *che-roof-items
+    notes: *che-roof-note
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: Applications subject to mandatory BNG.
+    must-include:
+      - item: A statement of how the development will achieve BNG, including whether it will be delivered on
+          or off site or through statutory credits
+        level: must
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app]
+    notes: "Audit (wrong_app_type): from the VC3 minerals checklist; the trigger was cut off."
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app]
+    notes: "Audit (wrong_app_type): from the VC3 minerals checklist ('the product or process'); the trigger was not captured."
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: New or replacement dwellings.
+        - discretionary
+    must-include:
+      - item: In accordance with the CEC checklist for landscape schemes
+        level: must
+    notes: >-
+      VC1 gives examples: replacement dwellings, new dwellings, commercial, leisure and retail
+      development (non-residential cases shown as officer discretion).
+
+  - id: recreation-facilities-assessment
+    action: replace
+    required-if:
+      condition:
+        field: loss-of-open-space
+        value: true
+        description: Proposals involving the loss of existing leisure and recreation facilities.
+    source-text: >-
+      Leisure / Recreation Facilities Needs Assessment when: Proposals involving the loss of existing
+      leisure and recreation facilities unless alternative provision of equivalent or better quality
+      is to be made
+    source-url: &che-vc1 https://www.cheshireeast.gov.uk/pdf/planning/validation-checklists/vc1-draft-general-validation-checklist-2024.pdf
+    confidence: low
+    notes: >-
+      The workbook's 'Public Open Space Statement' row was a fragment from the superseded 2018 draft;
+      this VC1 wording was in the landscaping row.
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 50
+        description: The development is for 50 or more dwellings.
+    source-text: "Site Waste Management Plan when: The development is for 50 or more dwellings"
+    source-url: *che-vc1
+    confidence: low
+    notes: >-
+      The workbook's row was a 2018 fragment ('the NPPF Site Waste Management Plan'); this VC1
+      wording was in the heads of terms row.
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+    source-text: >-
+      A supporting planning statement will be required for all major applications, major change of
+      use applications or listed building applications
+    source-url: https://www.cheshireeast.gov.uk/docs/planning/validation-checklists/draft-general-validation-checklist-2018-dm-final.docx
+    confidence: low
+    notes: >-
+      Audit (outdated_link, duplicate): this is the superseded 2018 draft wording, repeated under
+      three sheets; it does not apply to prior approval. Check against VC1.
+
+  - id: air-quality-assessment
+    action: replace
+    source-text: >-
+      Air Quality Assessment - All Air Quality Assessments should indicate the change in air quality
+      resulting from the proposed development and outline appropriate mitigation measures as
+      necessary.
+    source-url: https://www.cheshireeast.gov.uk/pdf/planning/validation-checklists/planning-validation-checklists-guidance-2024.pdf
+    must-include:
+      - item: The change in air quality resulting from the proposed development
+        level: should
+      - item: Appropriate mitigation measures
+        level: should
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): placed under Outline only because of the verb 'outline'. The trigger
+      was not captured.
+
+unmapped:
+  - local-name: Shadow Flicker / Reflected Light Assessment
+    source-text: "Shadow Flicker / Reflected Light Assessment: Proposals for wind energy development"
+    source-url: https://www.cheshireeast.gov.uk/pdf/planning/validation-checklists/vc1-draft-general-validation-checklist-2024.pdf
+    suggested-id: shadow-flicker-assessment
+  - local-name: Odour Management Plan (waste)
+    source-text: "A supporting Odour Management Plan, the scale of which will depend on risks, must incorporate a
+      description of the odour sources and details of monitoring, evaluation and mitigation methods"
+    source-url: https://www.cheshireeast.gov.uk/pdf/planning/validation-checklists/vc4-waste-validation-checklist-2024.pdf
+    suggested-id: odour-assessment
+
+low-confidence:
+  - id: archaeological-assessment
+    note: "Audit (wrong_trigger): the excerpt is only the heading ('LOCAL REQUIREMENTS Archaeological Assessment')."
+  - id: cil-form
+    note: "Audit (wrong_trigger, outdated_link): heading fragments, one from the superseded 2018 draft."
+  - id: viability-assessment
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('of the viability assessment')."
+  - id: noise-assessment
+    note: "Audit (wrong_trigger): the excerpt is the guidance note's definition, not the VC1 'when:' trigger."

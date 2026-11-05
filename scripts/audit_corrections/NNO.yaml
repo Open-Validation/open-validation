@@ -1,0 +1,374 @@
+# Corrections for North Norfolk District Council, from inputs/audit/north-norfolk-district-council.json.
+# The list is the Local Validation List 2025 to 2027 (Guidance Document and Matrix), in effect from
+# 1 January 2025. The Matrix has explicit application-type columns, but Grokbot guessed most items
+# under Full planning, and many of its excerpts stop before the 'Required for' criteria; those are
+# marked low confidence below rather than guessed. About 14 local items were missing.
+local-authority: NNO
+
+validation-list:
+  date: 2025-01-01
+  date-basis: "council page: 'comes into effect from 1 January 2025' (the PDF metadata says December
+    2024)"
+
+submission-standards:
+  - item: Any 'do not scale' wording removed, including any wording which indicates the LPA is
+      unable to scale from the plans
+    level: must
+  - item: Plans and elevations provided at a metric scale with a relevant scale bar; photographs with
+      annotated dimensions are not accepted
+    level: must
+
+drop:
+  - id: heritage-statement
+    sheets: [Householder]
+    reason: "wrong_app_type: the list requires it only for non-householder development"
+  - id: lighting-assessment
+    sheets: [Householder]
+    reason: "wrong_app_type: the trigger says '(excluding Householder development)'"
+  - id: photos
+    reason: "wrong_trigger: the excerpt is LVIA guidance about photomontages, not a photographs
+      requirement"
+
+drop-unmapped:
+  - local-name: Advertisement drawings / illumination details
+    reason: "duplicate: the External Lighting trigger, already in lighting-assessment"
+  - local-name: Employment / Economic Statement
+    reason: "wrong_trigger: the excerpt is only 'Required for: a. b. c. d.'"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong mapping: the excerpt is about the retail sequential test and town centre impact"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if: discretionary
+    confidence: low
+    notes: "The excerpt only says an Air Quality Assessment or Air Quality Impact Statement 'may be
+      required'; the criteria are cut off."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees are present on the site or on adjacent land that could influence or be
+          affected by the development (including street trees).
+    must-include:
+      - item: Plans identifying and accurately plotting all trees on the site or on adjacent land
+          which may be affected by the development
+        level: must
+    confidence: medium
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: Mandatory biodiversity net gain applies.
+    confidence: medium
+    notes: "The metric spreadsheet is needed 'where applicable'; the BNG Statement for all applications is
+      under unmapped."
+
+  - id: coastal-change-assessment
+    action: add
+    required-if:
+      site:
+        in: [coastal-erosion-zone]
+        description: The site is within a Shoreline Management Plan 0-25, 25-50 or 50-100 year
+          erosion zone.
+    source-url: https://www.north-norfolk.gov.uk/media/10782/local-validation-list-2025-to-2027-guidance-document.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Coastal Erosion Vulnerability Assessment."
+
+  - id: elevation-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New buildings are proposed.
+        - condition:
+            field: external-alterations
+            value: true
+            description: Alterations to the exterior of an existing building (including replacement
+              windows and doors).
+    must-include:
+      - item: Metric scale, usually 1:50 or 1:100
+        level: must
+      - item: Each elevation clearly labelled (e.g. north, west) or a north point indicated
+        level: must
+    confidence: medium
+
+  - id: elevation-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New buildings are proposed.
+        - condition:
+            field: external-alterations
+            value: true
+            description: Alterations to the exterior of an existing building (including replacement
+              windows and doors).
+    must-include:
+      - item: Metric scale, usually 1:50 or 1:100
+        level: must
+      - item: Each elevation clearly labelled (e.g. north, west) or a north point indicated
+        level: must
+    confidence: medium
+
+  - id: fire-statement
+    action: add
+    source-url: https://www.north-norfolk.gov.uk/media/10782/local-validation-list-2025-to-2027-guidance-document.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Fire Statement is in the list; the audit gives no
+      trigger."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters, lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, scheduled-monument,
+              locally-listed-building, park-and-garden]
+            description: The proposal affects a heritage asset or its setting.
+    source-text: >-
+      Heritage Statement … Required in the case of development proposals (except Householder …
+      local planning authorities should require an applicant to describe the significance of any
+      heritage assets affected, including any contribution made by their setting.
+    source-url: https://www.north-norfolk.gov.uk/media/10782/local-validation-list-2025-to-2027-guidance-document.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): required for non-householder development affecting heritage assets.
+      'Not householder' is shown by listing the main other types; check the Matrix columns.
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: external-lighting
+            value: true
+            description: External lighting (including illuminated adverts) is proposed.
+        - any:
+            - site:
+                in: [dark-sky-area]
+                description: The proposal could impact on designated Dark Skies Sites.
+            - discretionary
+    source-text: >-
+      all development (excluding Householder development) where external lighting (Including
+      illuminated adverts) is proposed where: o residential amenity can be directly impacted and/or
+      o the proposal could impact on designated Dark Skies Sites or the nocturnal character of the
+      area
+    source-url: https://www.north-norfolk.gov.uk/media/10782/local-validation-list-2025-to-2027-guidance-document.pdf
+    must-include:
+      - item: Location, number and design of the proposed external lighting
+        level: must
+      - item: Manufacturers' product details, including illumination levels and beam orientation
+        level: must
+      - item: Times of operation
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): not for householder development. Officer discretion covers direct
+      impacts on residential amenity and on the nocturnal character of the area.
+
+  - id: location-plan
+    action: add
+    source-url: https://www.north-norfolk.gov.uk/media/10782/local-validation-list-2025-to-2027-guidance-document.pdf
+    must-include:
+      - item: Metric scale, usually 1:2500 or 1:1250
+        level: must
+      - item: Provided on an up-to-date map
+        level: must
+    confidence: low
+    notes: "From the audit (missing_requirement): local Location Plan requirements. The items are the
+      council's drawing standards."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise-sensitive development.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Noise-generating development.
+    source-url: https://www.north-norfolk.gov.uk/media/10782/local-validation-list-2025-to-2027-guidance-document.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Noise Impact Statement."
+
+  - id: protected-landscape-assessment
+    action: add
+    required-if:
+      any:
+        - all:
+            - site:
+                in: [area-of-outstanding-natural-beauty]
+                description: The site is in the Norfolk Coast National Landscape.
+            - condition:
+                field: outside-urban-area
+                value: true
+                description: The site is outside settlement boundaries.
+        - discretionary
+    source-url: https://www.north-norfolk.gov.uk/media/10782/local-validation-list-2025-to-2027-guidance-document.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): Assessment of Impact on the Norfolk Coast National
+      Landscape, for non-householder development in the National Landscape outside settlement
+      boundaries, or affecting its special qualities (officer discretion).
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      site:
+        in: [open-space]
+        description: The proposal affects playing field land.
+    must-include:
+      - item: The information set out at Annex B of Sport England's 'Playing Fields Policy and
+          Guidance'
+        level: should
+    confidence: medium
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: new-build
+        value: true
+        description: New buildings or floor space, except extensions to existing buildings.
+    confidence: medium
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: new-build
+        value: true
+        description: New buildings or floor space, except extensions to existing buildings.
+    confidence: medium
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: Metric scale (1:200 or 1:500)
+        level: must
+      - item: A north point
+        level: must
+    notes: "Required for all proposals where plans are submitted."
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Mast and antenna development by mobile network operators or wireless broadband
+          providers, or radio masts/aerials above 20m in height.
+    confidence: medium
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Needed where viability forms all or part of the justification for non-compliance with policy."
+
+unmapped:
+  - local-name: Biodiversity Net Gain Statement
+    source-text: "Biodiversity Net Gain Statement (and completed metric spreadsheet where applicable)
+      Required for: All applications A Statement with written confirmation that: Mandatory
+      Biodiversity Net Gain does or does not apply"
+    source-url: https://www.north-norfolk.gov.uk/media/10782/local-validation-list-2025-to-2027-guidance-document.pdf
+    suggested-id: biodiversity-gain-statement
+  - local-name: Air Source Heat Pump specifications and unit location
+    source-text: "From the audit: any proposal installing an air source heat pump"
+    source-url: https://www.north-norfolk.gov.uk/media/10782/local-validation-list-2025-to-2027-guidance-document.pdf
+    suggested-id: heat-pump-details
+  - local-name: Health and Wellbeing Statement
+    source-text: "From the audit: 250 or more dwellings"
+    source-url: https://www.north-norfolk.gov.uk/media/10782/local-validation-list-2025-to-2027-guidance-document.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Odour Impact Assessment
+    source-text: "From the audit: significant odour sources, or sensitive receptors near odorous processes"
+    source-url: https://www.north-norfolk.gov.uk/media/10782/local-validation-list-2025-to-2027-guidance-document.pdf
+    suggested-id: odour-assessment
+  - local-name: Minimum Space Standards
+    source-text: "From the audit: all new dwellings (emerging Policy HOU 9)"
+    source-url: https://www.north-norfolk.gov.uk/media/10782/local-validation-list-2025-to-2027-guidance-document.pdf
+    suggested-id: space-standards-statement
+  - local-name: Structural Survey
+    source-text: "From the audit: demolition of principal elements of listed buildings, locally listed or
+      positive buildings in conservation areas, and all countryside barn/building conversions"
+    source-url: https://www.north-norfolk.gov.uk/media/10782/local-validation-list-2025-to-2027-guidance-document.pdf
+    suggested-id: structural-survey
+  - local-name: Tier 1 Risk Screening Assessment
+    source-text: "From the audit: new or extended cemeteries"
+    source-url: https://www.north-norfolk.gov.uk/media/10782/local-validation-list-2025-to-2027-guidance-document.pdf
+    suggested-id: groundwater-risk-assessment
+  - local-name: Topographical Survey / Cross Section
+    source-text: "From the audit: sloping sites steeper than 1 in 14"
+    source-url: https://www.north-norfolk.gov.uk/media/10782/local-validation-list-2025-to-2027-guidance-document.pdf
+    suggested-id: topographical-survey
+  - local-name: Use of Artificial Intelligence disclosure
+    source-text: "From the audit: any application where AI produced reports or supporting information"
+    source-url: https://www.north-norfolk.gov.uk/media/10782/local-validation-list-2025-to-2027-guidance-document.pdf
+    suggested-id: ai-disclosure
+  - local-name: Utilities Assessment
+    source-text: "From the audit: over 100 dwellings or 10,000 sqm"
+    source-url: https://www.north-norfolk.gov.uk/media/10782/local-validation-list-2025-to-2027-guidance-document.pdf
+    suggested-id: utilities-statement
+
+low-confidence:
+  - id: affordable-housing-statement
+    note: "Audit (wrong_trigger): the excerpt stops at 'Required for: a.'; the criteria aren't captured."
+  - id: land-contamination-assessment
+    note: "Audit (wrong_trigger): the excerpt stops before the criteria ('…is required for: nature of the
+      proposal: a.')."
+  - id: flood-risk-assessment
+    note: "Audit (wrong_trigger): the excerpt is column-scrambled text; the criteria can't be read."
+  - id: landscaping-plan
+    note: "Audit (wrong_trigger): the Outline excerpt is scrambled ('to Existing landscape details: 0.9
+      hectares excluding outline applications…')."
+  - id: biodiversity-survey-report
+    note: "The excerpt runs the PEA heading into Sport England guidance; the trigger isn't captured."
+  - id: design-and-access-statement
+    note: "The excerpt is only a note that the Climate Emergency / Net Zero Statement can go inside a
+      Design & Access Statement; no trigger is captured."
+  - id: planning-statement
+    note: "The excerpt is a fragment ('required, within a Planning Statement.')."
+  - id: town-centre-impact-assessment
+    note: "The excerpt is a fragment about economic impact; the trigger isn't captured."
+  - id: roof-plan-existing
+    note: "The excerpt stops at 'Required where the proposals meets one or more of the following;'."
+  - id: roof-plan-proposed
+    note: "The excerpt stops at 'Required where the proposals meets one or more of the following;'."
+  - id: sci
+    note: "The excerpt only points to the council's own Statement of Community Involvement; no trigger is
+      captured."
+  - id: transport-assessment
+    note: "The excerpt stops before the floor-area thresholds."
+  - id: travel-plan
+    note: "The excerpt stops before the floor-area thresholds."
+  - id: waste-management-plan
+    note: "The excerpt is cut off ('e.g. all new dwellings, new holiday accommodation, new commercial,
+      leisure and…')."
+  - id: floor-plan-existing
+    note: "The workbook quoted the elevations trigger; the floor plan trigger isn't captured."
+  - id: floor-plan-proposed
+    note: "The workbook quoted the elevations trigger; the floor plan trigger isn't captured."
+
+new-fields:
+  - field: dark-sky-area
+    kind: designation
+    label: Dark sky area
+    description: Site is in a designated dark sky area, such as an International Dark Sky Reserve or
+      Park or a planning authority's dark sky zone.

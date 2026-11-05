@@ -1,0 +1,302 @@
+# Corrections for Stafford Borough Council, from the council's audit.
+# The audit read 'Planning application validation guidance and local validation criteria' (January 2026).
+# Its Section 24 table has 39 local items, each with the application types that need it; the workbook
+# missed about 20, mislabelled others, and quoted table-header noise or text from the wrong row. National
+# drawing requirements (sections 13-21) are dropped. Items marked "From the audit" use its paraphrase.
+local-authority: STA
+
+drop:
+  - id: site-plan
+    reason: "not_a_requirement: section 18 national drawing requirement, not a local item"
+  - id: floor-plan-existing
+    reason: "not_a_requirement: section 19 national drawing requirement, not a local item"
+  - id: floor-plan-proposed
+    reason: "not_a_requirement: section 19 national drawing requirement, not a local item"
+  - id: elevation-existing
+    reason: "not_a_requirement: section 19 national drawing requirement, not a local item"
+  - id: elevation-proposed
+    reason: "not_a_requirement: section 19 national drawing requirement, not a local item"
+  - id: section-existing
+    reason: "not_a_requirement: section 21 national drawing requirement, not a local item"
+  - id: section-proposed
+    reason: "not_a_requirement: section 21 national drawing requirement, not a local item"
+  - id: design-and-access-statement
+    reason: "not_a_requirement: section 14 statutory requirement, not a local item"
+  - id: schedule-of-works
+    reason: "wrong_trigger: ecology Precautionary Working Method Statement text; the list has no such local item"
+
+drop-unmapped:
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "wrong_trigger: really item 14 Garden areas plan, mixed with newt text; re-added below"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "wrong_trigger: Cannock Chase/education obligation text; the list has no NDSS validation item"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: location-plan blue-line text (17.5/17.6)"
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_trigger: a drawing note; item 25 Parking and access arrangements re-added below"
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_trigger: says who must prepare it; re-added below with its trigger"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_trigger: air-quality text; re-added below with its trigger"
+  - local-name: Self-build / custom build information
+    reason: "wrong_trigger: mixed with the Biodiversity Officer's phone number"
+  - local-name: Minerals / Waste specific statements (county matters)
+    reason: "other: really item 22 Mineral safeguarding statement; re-added below under its name"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_app_type: placed only under prior approval; re-added below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: 10 or more dwellings.
+    source-url: https://www.staffordbc.gov.uk/planning-application-validation-criteria
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 2."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: The site is in an Air Quality Management Area.
+        - discretionary
+    notes: "Audit (wrong_trigger): the excerpt is cut off and omits 'within 50m of the edge of M6
+      carriageway' (no field for that, so shown as discretionary)."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees on or next to the site.
+    notes: "Audit (wrong_app_type): applies to householder proposals too."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: The works may impact protected species.
+        - discretionary
+    notes: >-
+      Audit (wrong_app_type): ref 27 also covers 'Applications for listed building consent where works
+      may impact protected species'. The workbook's excerpt mixes in the Great Crested Newt item (added
+      as unmapped).
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: An Environmental Impact Assessment is needed.
+    source-text: Where an Environmental Impact Assessment is needed
+    source-url: https://www.staffordbc.gov.uk/planning-application-validation-criteria
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted a coal mining risk assessment sentence."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: 1 hectare or more in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: 1 hectare or more in Flood Zone 1.
+        - site:
+            in: [flood-risk-zone]
+            description: Development in or encroaching on Flood Zone 2 or 3.
+        - all:
+            - ref: major-development
+            - site:
+                in: [critical-drainage-area]
+                description: Non-minor development in a critical drainage area.
+    confidence: medium
+    notes: "From the audit (wrong_trigger): '1ha+ in FZ1, FZ2/3 encroaching, non-minor development in a
+      critical drainage area'."
+
+  - id: heritage-statement
+    action: replace
+    source-url: https://www.staffordbc.gov.uk/planning-application-validation-criteria
+    confidence: low
+    notes: "Audit (wrong_trigger, wrong_app_type): the workbook's excerpt is Habitats text. The audit says
+      it also applies to listed building consent, but gives no trigger."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: Non-householder new development on possibly contaminated land.
+        - discretionary
+    source-url: https://www.staffordbc.gov.uk/planning-application-validation-criteria
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 19 Phase 1, for all non-householder new development on
+      possibly contaminated land, agricultural conversions and all solar farms (the last two shown as
+      discretionary)."
+
+  - id: noise-assessment
+    action: add
+    source-url: https://www.staffordbc.gov.uk/planning-application-validation-criteria
+    confidence: low
+    notes: "From the audit (missing_requirement): item 23 Noise and vibration assessment; no trigger given."
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more dwellings.
+        - site:
+            in: [open-space]
+            description: Development within open space.
+    source-url: https://www.staffordbc.gov.uk/planning-application-validation-criteria
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 24 Open space assessment."
+
+  - id: sci
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.staffordbc.gov.uk/planning-application-validation-criteria
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 29, all major applications."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Telecommunications development.
+    source-url: https://www.staffordbc.gov.uk/planning-application-validation-criteria
+    confidence: low
+    notes: "From the audit (missing_requirement): item 31; the audit gives no trigger, so the usual
+      telecommunications condition is assumed."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: Main town centre uses not in an existing defined centre and not in accordance with the
+          Plan for Stafford Borough.
+    policy: Plan for Stafford Borough E8
+    notes: "Retail impact assessments are needed for edge or out-of-centre proposals over 1,000 sqm gross at
+      Stafford, 500 sqm at Stone and 300 sqm at local centres; the sequential test has no threshold."
+
+  - id: viability-assessment
+    action: add
+    required-if: discretionary
+    source-url: https://www.staffordbc.gov.uk/planning-application-validation-criteria
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 37, where standard obligations will not be met."
+
+  - id: water-impact-assessment
+    action: add
+    required-if: discretionary
+    source-url: https://www.staffordbc.gov.uk/planning-application-validation-criteria
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 39 Water quality statement, where there is a possible
+      detrimental impact on water quality."
+
+unmapped:
+  - local-name: Garden areas plan (item 14)
+    source-text: "Garden areas plan – All major applications for residential development where details of
+      dwellings are given"
+    source-url: https://www.staffordbc.gov.uk/planning-application-validation-criteria
+    suggested-id: garden-areas-plan
+  - local-name: Parking and access arrangements (item 25)
+    source-text: "All applications (including householders) which involve new, or alterations to existing,
+      access and parking arrangements"
+    source-url: https://www.staffordbc.gov.uk/planning-application-validation-criteria
+    suggested-id: parking-plan
+  - local-name: Coal Mining Risk Assessment
+    source-text: "all non-householder operational development in the Coal Mining Development High Risk Area"
+    source-url: https://www.staffordbc.gov.uk/planning-application-validation-criteria
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Habitats Regulations Assessment information (ref 16)
+    source-text: "All applications for planning permission (except householders) for development within 15km
+      of the Cannock Chase SAC"
+    source-url: https://www.staffordbc.gov.uk/planning-application-validation-criteria
+    suggested-id: habitats-regulations-assessment
+  - local-name: Mineral safeguarding statement (item 22)
+    source-text: "Staffordshire Minerals Local Plan: Policy 3 All major applications outside of a defined
+      settlement boundary and within Mineral Safeguarding Areas (MSAs) identified in the Staffordshire
+      Minerals Local Plan"
+    source-url: https://www.staffordbc.gov.uk/planning-application-validation-criteria
+    suggested-id: mineral-resource-assessment
+  - local-name: Ventilation and extraction statement (item 36)
+    source-text: "All applications for the use of premises for the following purposes"
+    source-url: https://www.staffordbc.gov.uk/planning-application-validation-criteria
+    suggested-id: ventilation-extraction-details
+  - local-name: Active Travel England toolkit (item 1)
+    source-text: "From the audit: significant traffic generators; ATE is a statutory consultee for 150+
+      dwellings, 7,500 sq m+ or 5ha+"
+    source-url: https://www.staffordbc.gov.uk/planning-application-validation-criteria
+    suggested-id: ""
+  - local-name: Agricultural land classification statement (item 3)
+    source-text: "From the audit: major outline/full non-agricultural development on agricultural land"
+    source-url: https://www.staffordbc.gov.uk/planning-application-validation-criteria
+    suggested-id: agricultural-land-classification
+  - local-name: Agricultural need statement (item 4)
+    source-text: "From the audit: new/replacement agricultural buildings and agricultural workers' dwellings"
+    source-url: https://www.staffordbc.gov.uk/planning-application-validation-criteria
+    suggested-id: ""
+  - local-name: BNG information for exempt applications (item 6)
+    source-text: "From the audit: applications exempt from the biodiversity gain condition (de minimis or
+      self-build)"
+    source-url: https://www.staffordbc.gov.uk/planning-application-validation-criteria
+    suggested-id: ""
+  - local-name: Business case (item 7)
+    source-text: "From the audit: new visitor accommodation"
+    source-url: https://www.staffordbc.gov.uk/planning-application-validation-criteria
+    suggested-id: ""
+  - local-name: Cannock Chase SAC statement of willingness (item 8)
+    source-text: "From the audit: within 15km with a net increase in dwellings, HMO units or Gypsy/Traveller
+      pitches"
+    source-url: https://www.staffordbc.gov.uk/planning-application-validation-criteria
+    suggested-id: habitats-regulations-assessment
+  - local-name: Great Crested Newt assessment (item 15)
+    source-text: "From the audit: all major applications plus amber/red risk zones, excluding householder and
+      change of use"
+    source-url: https://www.staffordbc.gov.uk/planning-application-validation-criteria
+    suggested-id: ""
+  - local-name: Joinery details (item 18)
+    source-text: "From the audit: listed building or conservation area where new/replacement doors, windows or
+      rooflights are proposed (householder included)"
+    source-url: https://www.staffordbc.gov.uk/planning-application-validation-criteria
+    suggested-id: joinery-details
+  - local-name: Landscape and visual impact assessment (item 20)
+    source-text: "From the audit: wind turbines; polytunnels/solar farms 1ha+; 200+ dwellings/4ha+ or 10,000 sq
+      m/2ha+"
+    source-url: https://www.staffordbc.gov.uk/planning-application-validation-criteria
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Retention of community facility statement (item 28)
+    source-text: "From the audit: redevelopment/change of use of community premises outside Stafford/Stone"
+    source-url: https://www.staffordbc.gov.uk/planning-application-validation-criteria
+    suggested-id: ""
+  - local-name: Visual effects assessment (item 38)
+    source-text: "From the audit: solar farms and wind turbines"
+    source-url: https://www.staffordbc.gov.uk/planning-application-validation-criteria
+    suggested-id: ""
