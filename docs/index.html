@@ -60,11 +60,15 @@ label.field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; 
 /* ===== Site pills ===== */
 .pills { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 0 12px; }
 .pills .lead { color: var(--text-muted); font-size: 13px; margin-right: 4px; }
-.pill { border-radius: 999px; border: 1px solid var(--text); background: transparent; padding: 5px 12px; cursor: pointer; font-size: 14px; color: var(--text); display: inline-flex; align-items: center; gap: 6px; }
+.pill { border-radius: 999px; border: 1px solid var(--text); background: transparent; padding: 4px 11px; cursor: pointer; font-size: 13.5px; line-height: 1.3; color: var(--text); display: inline-flex; align-items: center; gap: 5px; max-width: 100%; }
+.pill .lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 24ch; }
 .pill[aria-pressed="true"] { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 600; }
 .pill[aria-pressed="false"] { text-decoration: line-through; color: var(--text-muted); border-color: var(--line-soft); }
-.pill .state { font-size: 12px; opacity: 0.8; }
-.pill.num input { width: 80px; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 2px 6px; color: var(--text); }
+.pill .mark { font-size: 12px; font-weight: 600; }
+.pill.num input { width: 64px; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; color: var(--text); }
+.pill.num select { background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 1px 4px; color: var(--text); }
+.pill.num.open { border-color: var(--accent); }
+.pill.num.open label { display: inline-flex; align-items: center; gap: 8px; }
 .pill.num.set { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 600; }
 .pill.flash { box-shadow: 0 0 0 3px var(--check); }
 
@@ -276,11 +280,11 @@ var LPA_CELLS = ["validation-list-url", "validation-list-date", "validation-list
 var NEEDS_EVIDENCE = ["council-verified", "council-updated"];
 var MHCLG_FIELDS = {
   "dwelling-count": { label: "New homes", kind: "number" },
-  "site-area-residential": { label: "Site area, residential (ha)", kind: "number" },
-  "site-area-non-residential": { label: "Site area, non-residential (ha)", kind: "number" },
-  "floorspace-non-residential": { label: "Non-residential floorspace (m²)", kind: "number" },
-  "floorspace": { label: "Floorspace (m²)", kind: "number" },
-  "housing-floorspace": { label: "Housing floorspace (m²)", kind: "number" },
+  "site-area-residential": { label: "Residential site (ha)", kind: "number" },
+  "site-area-non-residential": { label: "Non-residential site (ha)", kind: "number" },
+  "floorspace-non-residential": { label: "Non-residential m²", kind: "number" },
+  "floorspace": { label: "Floorspace m²", kind: "number" },
+  "housing-floorspace": { label: "Housing m²", kind: "number" },
   "housing-type": { label: "Housing type", kind: "text" },
   "major-development": { label: "Major development", kind: "boolean" }
 };
@@ -689,26 +693,36 @@ function renderPills() {
   currentRules().forEach(function (r) { ruleFields(r, counts); });
   if (counts["major-development"]) Object.keys(ruleFields(S.defs["major-development"])).forEach(function (f) { counts[f] = (counts[f] || 0) + 1; });
   Object.keys(S.site).forEach(function (f) { if (!counts[f]) counts[f] = 0.5; });  // keep pills that are set
-  var fields = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a] || fieldLabel(a).localeCompare(fieldLabel(b)); });
-  var limit = S.showMoreFields ? fields.length : 10;
+  // Pills you've set come first (so they never hide under "More"), then the most-used
+  var fields = Object.keys(counts).sort(function (a, b) {
+    return (isSet(S.site[b]) - isSet(S.site[a])) || counts[b] - counts[a] || fieldLabel(a).localeCompare(fieldLabel(b)); });
+  var few = window.innerWidth <= 600 ? 6 : 10;   // fewer pills before "More" on a phone
+  var limit = S.showMoreFields ? fields.length : few;
   var el = $("#pills");
   if (!fields.length) { el.innerHTML = '<span class="lead">Choose a council to describe your site.</span>'; return; }
   el.innerHTML = '<span class="lead">Describe the site:</span>' + fields.slice(0, limit).map(pillHTML).join("") +
-    (fields.length > limit ? '<button class="btn small" id="morePills">More (' + (fields.length - limit) + ")</button>" : (fields.length > 10 ? '<button class="btn small" id="morePills">Fewer</button>' : "")) +
+    (fields.length > limit ? '<button class="btn small" id="morePills">More (' + (fields.length - limit) + ")</button>" : (fields.length > few ? '<button class="btn small" id="morePills">Fewer</button>' : "")) +
     (Object.keys(S.site).length ? '<button class="btn small" id="clearSite">Clear site</button>' : "");
 }
+// Pills are short: yes/no pills show their state by style (outline = not set, filled ✓ = yes,
+// struck through ✕ = no); number pills show only their label (and value) until tapped.
 function pillHTML(f) {
   var kind = fieldKind(f), v = S.site[f], label = esc(fieldLabel(f));
-  if (kind === "number") {
-    return '<span class="pill num' + (isSet(v) ? " set" : "") + '" data-field="' + esc(f) + '"><label>' + label + ' <input type="number" min="0" step="any" inputmode="decimal" value="' + (isSet(v) ? esc(v) : "") + '" aria-label="' + label + '"></label></span>';
-  }
-  if (kind === "text") {
-    var opts = ["", "student", "shared", "older-people", "general"];
-    return '<span class="pill num' + (isSet(v) ? " set" : "") + '" data-field="' + esc(f) + '"><label>' + label + ' <select aria-label="' + label + '">' + opts.map(function (o) { return '<option value="' + o + '"' + (v === o ? " selected" : "") + ">" + (o ? tidy(o) : "unknown") + "</option>"; }).join("") + "</select></label></span>";
+  var desc = esc((S.fields[f] && S.fields[f].description) || fieldLabel(f));
+  if (kind === "number" || kind === "text") {
+    if (S.openPill === f) {
+      var control = kind === "number"
+        ? '<input type="number" min="0" step="any" inputmode="decimal" value="' + (isSet(v) ? esc(v) : "") + '" aria-label="' + label + '">'
+        : '<select aria-label="' + label + '">' + ["", "student", "shared", "older-people", "general"].map(function (o) { return '<option value="' + o + '"' + (v === o ? " selected" : "") + ">" + (o ? tidy(o) : "not set") + "</option>"; }).join("") + "</select>";
+      return '<span class="pill num open" data-field="' + esc(f) + '"><label><span class="lbl">' + label + "</span> " + control + "</label></span>";
+    }
+    return '<button class="pill num' + (isSet(v) ? " set" : "") + '" data-field="' + esc(f) + '" data-kind="' + kind + '" aria-expanded="false" title="' + desc + '"><span class="lbl">' + label + (isSet(v) ? ": " + esc(kind === "text" ? tidy(v) : v) : "") + "</span></button>";
   }
   var state = v === true ? "true" : v === false ? "false" : "mixed";
-  var word = v === true ? "yes" : v === false ? "no" : "unknown";
-  return '<button class="pill" data-field="' + esc(f) + '" aria-pressed="' + state + '" title="' + esc((S.fields[f] && S.fields[f].description) || "") + '">' + label + ' <span class="state">' + word + "</span></button>";
+  var word = v === true ? "yes" : v === false ? "no" : "not set";
+  return '<button class="pill" data-field="' + esc(f) + '" aria-pressed="' + state + '" title="' + label + ": " + word + ". " + desc + '">' +
+    (v === true ? '<span class="mark" aria-hidden="true">✓</span>' : v === false ? '<span class="mark" aria-hidden="true">✕</span>' : "") +
+    '<span class="lbl">' + label + '</span><span class="sr-only">: ' + word + "</span></button>";
 }
 function setupPills() {
   var el = $("#pills");
@@ -717,6 +731,11 @@ function setupPills() {
     if (b.id === "morePills") { S.showMoreFields = !S.showMoreFields; renderPills(); return; }
     if (b.id === "clearSite") { S.site = {}; writeHash(); render(); return; }
     var f = b.dataset.field; if (!f) return;
+    if (b.dataset.kind) {   // a number or housing-type pill: open it for typing
+      S.openPill = f; renderPills();
+      var ctl = el.querySelector('[data-field="' + f + '"] input, [data-field="' + f + '"] select'); if (ctl) ctl.focus();
+      return;
+    }
     var v = S.site[f]; S.site[f] = v === undefined ? true : v === true ? false : undefined;   // unknown -> yes -> no
     if (S.site[f] === undefined) delete S.site[f];
     writeHash(true); renderPills(); renderPanel(); var again = el.querySelector('[data-field="' + f + '"]'); if (again) again.focus();
@@ -725,13 +744,26 @@ function setupPills() {
     var wrap = e.target.closest("[data-field]"); if (!wrap) return;
     var f = wrap.dataset.field, v = e.target.value;
     if (v === "") delete S.site[f]; else S.site[f] = e.target.type === "number" ? Number(v) : v;
-    writeHash(true); renderPills(); renderPanel();
+    S.openPill = ""; writeHash(true); renderPills(); renderPanel();
+    var again = el.querySelector('[data-field="' + f + '"]'); if (again) again.focus();
+  });
+  // Close an open number pill when you press Enter or Escape, or move away from it
+  el.addEventListener("keydown", function (e) {
+    if (!S.openPill || (e.key !== "Enter" && e.key !== "Escape")) return;
+    e.preventDefault(); var f = S.openPill;
+    if (e.key === "Enter") e.target.dispatchEvent(new Event("change", { bubbles: true }));
+    else { S.openPill = ""; renderPills(); var p = el.querySelector('[data-field="' + f + '"]'); if (p) p.focus(); }
+  });
+  el.addEventListener("focusout", function (e) {
+    var wrap = e.target.closest(".pill.open"); if (!wrap) return;
+    setTimeout(function () { if (S.openPill && !el.querySelector(".pill.open").contains(document.activeElement)) { S.openPill = ""; renderPills(); } }, 150);
   });
 }
 function flashPill(f) {
   if (!document.querySelector('#pills [data-field="' + f + '"]')) { S.showMoreFields = true; renderPills(); }
   var p = document.querySelector('#pills [data-field="' + f + '"]'); if (!p) return;
   p.scrollIntoView({ block: "center", behavior: "smooth" });
+  if (p.dataset.kind) { S.openPill = f; renderPills(); p = document.querySelector('#pills [data-field="' + f + '"]'); }
   var target = p.querySelector("input,select") || p; target.focus();
   p.classList.add("flash"); setTimeout(function () { p.classList.remove("flash"); }, 1600);
 }
