@@ -2,20 +2,128 @@ reference: transport-assessment
 local-authority: GRE
 required-if:
   any:
-  - condition:
-      field: dwelling-count
-      operator: '>='
-      value: 50
-      description: Major residential development of 50 or more units.
-  - condition:
-      field: floorspace-non-residential
-      operator: '>='
-      value: 1000
-      description: Major commercial development.
+  - any:
+    - condition:
+        field: dwelling-count
+        operator: '>'
+        value: 50
+        description: Major applications for over 50 residential units.
+    - all:
+      - ref: major-development
+      - condition:
+          field: floorspace-non-residential
+          operator: '>'
+          value: 0
+          description: Major applications for commercial development (including retail).
+  - all:
+    - condition:
+        field: dwelling-count
+        operator: '>='
+        value: 10
+        description: Major residential development of 10 plus units...
+    - condition:
+        field: dwelling-count
+        operator: <
+        value: 50
+        description: '...but less than 50.'
   - discretionary
 source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
+policy: Royal Greenwich Core Strategy policy IM4; London Plan policies T2 and T4
+source-text: • major applications for over 50 residential units • major applications for commercial development
+  (including retail), • all applications for schools and nurseries, hospitals, places of worship and others
+  where the proposed development would have significant transport implications. ... • all major applications
+  proposing residential development of 10 plus units but less than 50 • all applications where traffic
+  and travel implications will be increased
+must-include:
+- item: 'Transport Assessment: baseline conditions (including PTAL), trip generation, distribution and
+    modal share, and existing capacity of surrounding routes'
+  level: must
+  required-if:
+    any:
+    - condition:
+        field: dwelling-count
+        operator: '>'
+        value: 50
+        description: Major applications for over 50 residential units.
+    - all:
+      - ref: major-development
+      - condition:
+          field: floorspace-non-residential
+          operator: '>'
+          value: 0
+          description: Major applications for commercial development (including retail).
+- item: 'Transport Assessment: impacts on the road network (including loading), cycle and pedestrian routes,
+    parking and public transport, with mitigation and planning obligations'
+  level: must
+  required-if:
+    any:
+    - condition:
+        field: dwelling-count
+        operator: '>'
+        value: 50
+        description: Major applications for over 50 residential units.
+    - all:
+      - ref: major-development
+      - condition:
+          field: floorspace-non-residential
+          operator: '>'
+          value: 0
+          description: Major applications for commercial development (including retail).
+- item: 'Transport Assessment: car and cycle parking, including car club spaces and electric vehicle charging
+    points'
+  level: must
+  required-if:
+    any:
+    - condition:
+        field: dwelling-count
+        operator: '>'
+        value: 50
+        description: Major applications for over 50 residential units.
+    - all:
+      - ref: major-development
+      - condition:
+          field: floorspace-non-residential
+          operator: '>'
+          value: 0
+          description: Major applications for commercial development (including retail).
+- item: 'Transport Assessment: a Travel Plan and an Active Travel Zone assessment'
+  level: must
+  required-if:
+    any:
+    - condition:
+        field: dwelling-count
+        operator: '>'
+        value: 50
+        description: Major applications for over 50 residential units.
+    - all:
+      - ref: major-development
+      - condition:
+          field: floorspace-non-residential
+          operator: '>'
+          value: 0
+          description: Major applications for commercial development (including retail).
+- item: 'Transport Statement: PTAL, expected trip generation and highway implications, access to public
+    transport and sustainable modes, parking impact, and car or cycle parking provision'
+  level: must
+  required-if:
+    all:
+    - condition:
+        field: dwelling-count
+        operator: '>='
+        value: 10
+        description: Major residential development of 10 plus units...
+    - condition:
+        field: dwelling-count
+        operator: <
+        value: 50
+        description: '...but less than 50.'
+- item: How the proposals support TfL's ten Healthy Streets Indicators, reduce vehicle dominance and improve
+    pedestrian and cycle permeability and connections to public transport
+  level: must
 confidence: medium
-notes: 'Audit (wrong_trigger): the excerpt was only a heading. From the audit: major residential of 50+
-  units, major commercial, and schools, hospitals and similar uses (shown as officer discretion).'
+notes: From the council's list (published June 2025), page 62-63. Combines the Transport Assessment and
+  Transport Statement sections. Schools, nurseries, hospitals, places of worship and other schemes with
+  'significant transport implications', and any scheme that increases traffic and travel implications,
+  show as discretionary.
 review-status: unverified
 field-status: {}
