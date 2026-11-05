@@ -1,0 +1,699 @@
+# Corrections for Babergh District Council, from inputs/audit/babergh-district-council.json.
+# Babergh and Mid Suffolk share one joint Local Validation List (Part One Householder, Part Two
+# Major and Minor), so BAB.yaml and MSU.yaml carry the same rules; the two audits' findings are
+# combined. Grokbot used the superseded Oct 2023 'LVL review' drafts; the adopted lists are the
+# April 2024 'joint-lvl ... v3-final' documents (the build takes the url and date from the audit).
+# Part One applies to householder applications and Part Two to major and minor applications, so a
+# Part One item is limited to householder applications and a Part Two item to the other types
+# only where the other part has no matching item. Items marked "From the audit" use the audits'
+# paraphrase of the April 2024 lists, not the councils' exact words.
+local-authority: BAB
+
+drop:
+  - id: photos
+    reason: >-
+      wrong_trigger: the excerpts are Heritage Statement content ('using photographic, map, archival
+      and fabric evidence'), now a heritage-statement must-include item
+  - id: noise-assessment
+    sheets: [Change of use - prior approval]
+    reason: "wrong_trigger: the air source heat pump acoustic assessment; the list doesn't apply it to prior approval"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advice to consider pre-application advice"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: Location Plan red-line rule (now in location-plan)"
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_app_type: Lighting Assessment text (now in lighting-assessment)"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: the Manufacturers' Specifications product list; re-added below under that name"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: content fragment; re-added below with the list's thresholds"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_trigger: fragment; re-added below with the list's trigger"
+
+requirements:
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: The proposal potentially affects trees.
+    source-text: >-
+      An Arboricultural Impact Assessment may be required for any proposal potentially affecting
+      trees, in accordance with the current ‘BS 5837 Trees in relation to Design, Demolition and
+      Construction Recommendations’
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    must-include:
+      - item: In accordance with BS 5837 (Trees in relation to design, demolition and construction)
+        level: must
+    confidence: medium
+    notes: "The same wording is in Part One (householder) and Part Two."
+
+  - id: site-plan
+    action: replace
+    required-if:
+      condition:
+        field: external-alterations
+        value: true
+        description: Any external works within the site, for example outbuildings.
+    source-text: "Block Plans are required for any external works within the site, for example outbuildings."
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    must-include:
+      - item: A scale of 1:200 or 1:500, with the relevant scale bar
+        level: should
+      - item: Written dimensions
+        level: should
+      - item: A north point
+        level: should
+      - item: Details of the site surroundings (buildings, landscaping, roads)
+        level: should
+      - item: Proposed works clearly annotated
+        level: should
+    confidence: medium
+    notes: "The must-include items are the Part Two block plan notes ('The plans should: …')."
+
+  - id: location-plan
+    action: add
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    must-include:
+      - item: Any access or visibility splay to the highway included within the red line
+        level: must
+        source-text: "includes access/visibility splay to the highway, the access must be included within the red line"
+      - item: The site location drawn around the immediate residential curtilage
+        level: should
+        required-if:
+          application-type:
+            in: [hh]
+        source-text: "The site location should be around the immediate residential curtilage"
+    confidence: medium
+    notes: "The workbook filed this location plan text as an unmapped highways item."
+
+  - id: cil-form
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 100
+            description: New build over 100 square metres internal floorspace.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: Any new dwelling.
+    source-text: "Required for new build over 100 sqm internal ... and all new dwellings"
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpts were fragments ('Infrastructure Levey (CIL).')."
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: Contamination is known or suspected on site.
+        - site:
+            in: [near-landfill-site]
+            description: The site is within 250 metres of a landfill site.
+        - all:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: New residential units, including replacement units.
+            - condition:
+                field: greenfield-site
+                value: true
+                description: Land that has served as garden/domestic curtilage, or land not
+                  previously developed.
+        - discretionary
+    source-text: >-
+      The Land Contamination Report and Questionnaire are only required in the following situations
+      for householder development. o (1) Contamination is suspected on site. o (2) Contamination is
+      known to exist on site o (3) The proposed site is within 250 metres of a landfill site
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-1-householder-v3-final-pdf
+    must-include:
+      - item: A Phase I Site Walkover and Risk Assessment in accordance with BS10175:2011+A2:2017 (or
+          the equivalent current standard) by an appropriate person
+        level: must
+        required-if:
+          any:
+            - application-type:
+                in: [hh]
+            - discretionary
+    confidence: medium
+    notes: >-
+      Part Two: a Land Contamination Report 'for 1-2 residential units including replacement
+      residential units on Land that has served as garden/domestic curtilage, and/or not previously
+      developed land in the NPPF and/or involves conversion of agricultural building/s'. Barn
+      conversions (officer discretion here) also need the Phase I walkover.
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a Conservation Area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: One or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: A building or buildings with 100 square metres or more of floor
+                      space.
+        - application-type:
+            in: [lbc]
+        - all:
+            - application-type:
+                in: [hh]
+            - site:
+                in: [listed-building]
+                description: Householder applications submitted jointly with listed building
+                  consent.
+    source-text: >-
+      What applications must be accompanied by a Design and Access Statement? o Applications for
+      major development … o Applications for development in a Conservation area, where the proposed
+      development consists of one or more dwellings and/or a building or buildings with a floor space
+      of 100 square metres or more.
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): Part One adds 'Householder Applications jointly
+      submitted with listed building consent applications'; the list also covers listed building
+      consent.
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: Protected species may be affected.
+        - all:
+            - application-type:
+                in: [hh]
+            - any:
+                - condition:
+                    field: roof-alteration
+                    value: true
+                    description: Any roof works (bat survey).
+                - condition:
+                    field: demolition
+                    value: true
+                    description: Demolition (bat survey).
+        - discretionary
+    source-text: >-
+      Adequate ecological survey and impact assessment is necessary to provide certainty of likely
+      impacts and that any mitigation and compensation necessary can be secured by either a
+      condition of any consent or a mitigation licence.
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    must-include:
+      - item: Where an ecology report recommends further protected species surveys, the full results
+          of those surveys and details of any mitigation measures
+        level: must
+        source-text: >-
+          For any ecology reports recommending further protected species surveys, the full results
+          of these surveys, and further details of any mitigation measures will be required prior
+          to validation.
+    confidence: medium
+    notes: "From the audit (missing_requirement): Part One item 16a asks for a bat survey for any roof works or demolition."
+
+  - id: section-existing
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: site-level-change
+            operator: ">"
+            value: 500
+            description: Changing the ground levels (normally more than 500mm).
+        - all:
+            - application-type:
+                in: [hh]
+            - any:
+                - condition:
+                    field: basement
+                    value: true
+                    description: Excavation for a basement.
+                - discretionary
+    source-text: >-
+      For a householder application if you are changing the ground levels (normally more than
+      500mm), these plans will need to be provided.
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-1-householder-v3-final-pdf
+    confidence: medium
+    notes: >-
+      Part Two uses the same 500mm threshold. From the audit: Part One item 10 also asks for section
+      plans for excavation (pools, basements, manèges), shown as basement or officer discretion.
+
+  - id: section-proposed
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: site-level-change
+            operator: ">"
+            value: 500
+            description: Changing the ground levels (normally more than 500mm).
+        - all:
+            - application-type:
+                in: [hh]
+            - any:
+                - condition:
+                    field: basement
+                    value: true
+                    description: Excavation for a basement.
+                - discretionary
+    source-text: >-
+      For a householder application if you are changing the ground levels (normally more than
+      500mm), these plans will need to be provided.
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-1-householder-v3-final-pdf
+    must-include:
+      - item: An appropriate scale, with the relevant scale bar
+        level: should
+      - item: A fixed datum point
+        level: should
+      - item: Written dimensions
+        level: should
+    confidence: medium
+    notes: >-
+      Part Two uses the same 500mm threshold. From the audit: Part One item 10 also asks for section
+      plans for excavation (pools, basements, manèges), shown as basement or officer discretion.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [flood-risk-zone, surface-water-flood-risk]
+            description: The site is at risk of any form of flooding within the red line boundary
+              (for householder, Flood Zone 2 or 3).
+    source-text: >-
+      A site-specific flood risk assessment (FRA) is required to be provided for all major planning
+      applications and some minor planning applications that are at risk of any form of flood risk
+      within the red line boundary of the proposed developments.
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the householder row was a fragment. From the audit: Part One item 17
+      asks for details of development within Flood Zone 2/3 (minor extensions up to 250 sqm).
+
+  - id: floor-plan-existing
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New development.
+        - condition:
+            field: building-works
+            value: true
+            description: Existing buildings altered by the proposed development.
+    source-text: "Floor Plans are required for new development, and for existing buildings if altered by the proposed development."
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    confidence: medium
+
+  - id: floor-plan-proposed
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New development.
+        - condition:
+            field: building-works
+            value: true
+            description: Existing buildings altered by the proposed development.
+    source-text: "Floor Plans are required for new development, and for existing buildings if altered by the proposed development."
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    must-include:
+      - item: A scale of 1:50 or 1:100, with the relevant scale bar
+        level: should
+      - item: At least two key dimensions
+        level: should
+      - item: Clearly labelled as existing and/or proposed
+        level: should
+      - item: The proposed floor area, including any window/door openings
+        level: should
+    confidence: medium
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: A scale of 1:50 or 1:100, with the relevant scale bar
+        level: should
+      - item: Written height, width and depth dimensions (where applicable)
+        level: should
+      - item: Each elevation clearly labelled (existing/proposed; front, side, rear or north, south
+          etc.)
+        level: should
+      - item: Proposed details such as doors and windows annotated on each elevation
+        level: should
+    notes: "The workbook's excerpt for this row was the floor plan rule; the list's elevation notes give no trigger."
+
+  - id: roof-plan-existing
+    action: replace
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: A roof is created or altered.
+    source-text: "Roof Plans are only required when a roof is created or altered."
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    confidence: medium
+
+  - id: roof-plan-proposed
+    action: replace
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: A roof is created or altered.
+    source-text: "Roof Plans are only required when a roof is created or altered."
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    must-include:
+      - item: A scale of 1:50 or 1:100 with the relevant scale bar (or 1:200 or 1:500 if shown on
+          the block plan)
+        level: should
+      - item: Written dimensions
+        level: should
+    confidence: medium
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, conservation-area, locally-listed-building, scheduled-monument, park-and-garden]
+        description: The proposal directly involves, or affects the setting of, a heritage asset.
+    source-text: >-
+      A Heritage Statement is required with all development proposals requiring planning permission
+      or listed building consent, when the proposal directly involves, or affects the setting of a
+      heritage asset.
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    must-include:
+      - item: Consideration of the relevant Historic Environment Record
+        level: must
+      - item: A photographic record showing the site context and the spaces and features which might
+          be affected, preferably cross-referenced to survey drawings
+        level: must
+    confidence: medium
+    notes: "The must-include items were filed under the photos row in the workbook."
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: New or extended commercial uses (B, D, E and sui generis).
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Residential within 250m of commercial uses or intensive livestock, or next
+              to a railway or roads of 40mph or more.
+        - discretionary
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    must-include:
+      - item: A Transport Network Noise Assessment, for residential next to a railway, trunk road or
+          road of 40mph or more
+        level: must
+        required-if:
+          condition:
+            field: noise-sensitive-use
+            value: true
+            description: Residential development next to a railway or a road of 40mph or more.
+      - item: A full acoustic assessment of air source heat pump noise, in accordance with MCS 020
+        level: must
+        required-if: discretionary
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement, wrong_trigger): Part Two items 24a and 24b. The workbook
+      quoted the air source heat pump acoustic assessment from Manufacturers' Specifications (shown
+      here as a discretionary item).
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [full, outline, reserved-matters, s73]
+        - all:
+            - application-type:
+                in: [hh]
+            - any:
+                - condition:
+                    field: residential-annexe
+                    value: true
+                    description: An annexe.
+                - discretionary
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Part Two item 13 asks for it with all applications
+      except discharge of conditions; Part One with annexes and cart lodges ('A Planning Statement is
+      not always required, but may be needed for certain applications').
+
+  - id: landscaping-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - ref: major-development
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    must-include:
+      - item: Details of all boundaries
+        level: should
+      - item: Details of all hard surface treatment
+        level: should
+      - item: Details of all soft landscaped areas, with exact planting details or percentage mix,
+          identifying all species
+        level: should
+      - item: A layout plan at a relevant scale, with scale bar(s)
+        level: should
+    confidence: medium
+    notes: "Audit (wrong_app_type): landscaping applies to full major applications. The items are the list's 'The Landscaping Scheme should provide' text."
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: External lighting, other than lighting contained to private domestic gardens.
+    source-text: >-
+      that includes external lighting unless for internal lighting or lighting that will only relate
+      and is contained to private domestic gardens.
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    must-include:
+      - item: A polar luminance diagram based on vertical luminance at the nearest sensitive premises
+        level: must
+      - item: Confirmation of hours of operation
+        level: must
+    confidence: medium
+
+  - id: bng-metric
+    action: add
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the biodiversity gain condition.
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    confidence: medium
+    notes: "From the audit (missing_requirement): Part Two item 17b, most major and minor applications."
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: All new residential development.
+        - ref: major-development
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: Non-residential development of 1,000 square metres or more.
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    must-include:
+      - item: BREEAM information
+        level: must
+        required-if:
+          condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: Non-residential development of 1,000 square metres or more.
+      - item: Expected EPC ratings
+        level: must
+        required-if:
+          application-type:
+            in: [outline]
+    confidence: medium
+    notes: "From the audit (missing_requirement): Part Two item 26, Sustainability Design and Construction Statement."
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 2
+        description: More than one housing unit.
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    must-include:
+      - item: Housing mix / accommodation schedule
+        level: must
+      - item: Affordable housing plan and schedule
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): Part Two item 28a, Viability and Housing Mix (more than one unit)."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: Main town centre uses outside a town centre.
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    must-include:
+      - item: A retail impact assessment
+        level: must
+        required-if:
+          condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 400
+            description: More than 400 square metres.
+    confidence: medium
+    notes: "From the audit (missing_requirement): Part Two item 33, sequential test and retail impact over 400 sqm."
+
+  - id: transport-assessment
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 50
+        description: 50 or more dwellings.
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Transport Statement for 50-80 dwellings and a Transport Assessment for more than 80 (items 35a, 35b)."
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if:
+      condition:
+        field: loss-of-open-space
+        value: true
+        description: Loss of open space or a community facility.
+    policy: "LP28"
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    confidence: medium
+    notes: "From the audit (missing_requirement): items 37a/37b, loss of open space/community facilities (LP28) and education/health facilities (LP31)."
+
+unmapped:
+  - local-name: Biodiversity Enhancement
+    source-text: "From the audit: all applications, including every householder application (LP16; Part One 16a, Part Two 17c)"
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    suggested-id: biodiversity-enhancement
+  - local-name: Surface Water Drainage Strategy
+    source-text: >-
+      From the audit: major development (10+ dwellings/0.5 ha, 1,000 sqm, more than 1 ha) or where an
+      FRA is required; item 20b for minor development with level changes
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    suggested-id: drainage-strategy
+  - local-name: RAMS contribution / Habitats Regulations Assessment
+    source-text: >-
+      Required for new residential developments (Net gain of any number of dwellings) within the
+      Zone of Influence of the Suffolk Coast Recreational disturbance Avoidance and Mitigation
+      Strategy (RAMS). … Schemes of 50 or more units must provide on-site SANGS
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    suggested-id: recreational-impact-mitigation
+  - local-name: Manufacturers' Specifications
+    source-text: >-
+      The specification should include: o Photo of product o Dimensions/sizes o Technical information
+      about the product, including noise, performance
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-1-householder-v3-final-pdf
+    suggested-id: ""
+  - local-name: Access Plan
+    source-text: >-
+      Scale at 1:50, 1:100, 1:200 or 1:500 (including the relevant scale bar) Include a north point
+      Clearly label the visibility splays, including dimensions Include details of surface materials,
+      boundary treatment and nearby landscaping The access plan can be shown on the Block Plan
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-1-householder-v3-final-pdf
+    suggested-id: ""
+  - local-name: Structural Survey
+    source-text: "From the audit: barn/building conversions, extra floors, listed building demolition (Part Two item 11)"
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    suggested-id: structural-survey
+  - local-name: Wellbeing Impact Assessment
+    source-text: "From the audit: 10+ dwellings or more than 10,000 sqm (Part Two item 27)"
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    suggested-id: health-impact-assessment
+  - local-name: LP29 Safe, Sustainable and Active Travel Compliance Statement
+    source-text: "From the audit: all developments (Part Two item 34)"
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    suggested-id: ""
+  - local-name: Designing Out Crime / Statement of Crime Prevention
+    source-text: "From the audit: all major applications"
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    suggested-id: crime-prevention-statement
+  - local-name: Section 106 Infrastructure Statement
+    source-text: "From the audit: Part Two item 36"
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    suggested-id: heads-of-terms
+  - local-name: Housing items (supported housing, community-led/rural exception, self-build)
+    source-text: "From the audit: Part Two items 28b-28d"
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    suggested-id: ""
+  - local-name: Rural items (agricultural land / BMV and solar PV, intensive livestock, rural workers' dwellings)
+    source-text: "From the audit: Part Two items 29a-29c (and item 28 Agricultural Land Assessment for solar PV)"
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    suggested-id: agricultural-land-assessment
+  - local-name: Employment land and loss of employment
+    source-text: "From the audit: Part Two items 30a/30b (LP10), with 6 months' marketing"
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    suggested-id: marketing-evidence
+  - local-name: Tourist accommodation justification
+    source-text: "From the audit: Part Two item 31"
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    suggested-id: ""
+  - local-name: Water Supply Management Statement; Water Resources and Infrastructure evidence
+    source-text: "From the audit: water supply management for major non-domestic development (item 32a); water resources/wastewater (item 32b)"
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    suggested-id: water-impact-assessment
+  - local-name: Renewable energy (traffic and grid connection)
+    source-text: "From the audit: Part Two item 38"
+    source-url: https://www.babergh.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+    suggested-id: ""
+
+low-confidence:
+  - id: schedule-of-works
+    note: >-
+      Audit (wrong_trigger, wrong_app_type): the excerpt is the fragment 'the site, a Schedule of
+      Works must be provided', filed under Householder and Full planning but not listed building
+      consent; the trigger wasn't captured.
+  - id: elevation-existing
+    note: "The workbook's excerpt for this row was the floor plan rule; the list's elevation notes give no trigger."
