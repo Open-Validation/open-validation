@@ -1,19 +1,73 @@
 reference: archaeological-assessment
 local-authority: CRW
 required-if:
-  all:
-  - condition:
-      field: ground-disturbance
-      value: true
-      description: The proposal involves groundworks.
+  any:
+  - all:
+    - &id001
+      condition:
+        field: ground-disturbance
+        value: true
+        description: Ground works.
+    - site:
+        in:
+        - listed-building
+        - listed-building-setting
+        description: Adjacent to or in the curtilage of a listed building.
   - site:
       in:
-      - archaeological-priority-area
-      description: The site is near heritage assets or in an Archaeological Notification Area.
+      - scheduled-monument
+      description: Any activity within a Scheduled Ancient Monument.
+  - all:
+    - site:
+        in:
+        - archaeological-priority-area
+        description: In an Archaeological Notification Area.
+    - *id001
+    - discretionary
+  - all:
+    - site:
+        in:
+        - archaeological-priority-area
+        description: In an Amber Archaeological Notification Area.
+    - any:
+      - condition:
+          field: dwelling-count
+          operator: '>='
+          value: 5
+          description: Five or more residential units.
+      - condition:
+          field: site-area-non-residential
+          operator: '>'
+          value: 0.2
+          description: Non-residential or mixed use development over 0.2 ha.
+  - condition:
+      field: dwelling-count
+      operator: '>='
+      value: 10
+      description: 10 or more new units (outside an Archaeological Notification Area).
+  - condition:
+      field: site-area-non-residential
+      operator: '>'
+      value: 0.5
+      description: Over 0.5 ha of non-residential or mixed use development.
 source-url: https://crawley.gov.uk/sites/default/files/2025-11/National%20and%20local%20list%20of%20validation%20requirements%203%20November%202025.pdf
-confidence: low
-notes: 'Audit (wrong_app_type): the workbook placed it under listed building consent, but the source ties
-  the Archaeological Desk-based Assessment to groundworks near heritage assets and Archaeological Notification
-  Area thresholds. The thresholds were not given.'
+policy: Crawley Borough Local Plan 2023-2040 chapter 6; West Sussex County Council guidance on Archaeological
+  Notification Areas
+source-text: 'An Archaeological Desk-based assessment must also be provided when development comprises:
+  ground works adjacent to or in the curtilage of a Listed Building; any activity within a Scheduled Ancient
+  Monument; ground works within a Red Archaeological Notification Area; five or more residential units
+  OR non-residential/mixed use development over 0.2Ha within an Amber Archaeological Notification Area
+  development outside an Archaeological Notification Area comprising 10 or more new units OR over 0.5
+  ha of non-residential/ mixed use development.'
+must-include:
+- item: Results of a search of the Historic Environment Record (HER)
+  level: must
+- item: A heritage professional's assessment of the likelihood of archaeological finds or features of
+    all periods on the site
+  level: must
+confidence: medium
+notes: From the council's list (adopted 3 November 2025), section 3, page 32-34. Ground works in an Archaeological
+  Notification Area show as 'check' because only Red areas need one for any ground works; the map doesn't
+  yet tell Red from Amber.
 review-status: unverified
 field-status: {}

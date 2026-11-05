@@ -134,3 +134,10 @@ All checks passed.
 
 - Inputs are in `inputs/`; never edit them.
 - After any data change: `python scripts/set_status.py --recompute && python scripts/check.py`.
+
+### 2026-11-05: Crawley rewritten from its list
+Crawley's files were rebuilt by hand from its list adopted 3 November 2025, the first council done
+under the new everyday routine. Every file now has a trigger, the policy the council cites, the
+council's own wording and what the document must show. Eight files were added: location plan, fire
+statement, habitat baseline, sustainable drainage strategy, and four tree-works documents. The
+unmapped items (data/unmapped-requirement.csv) now quote the list itself, not the audit.
