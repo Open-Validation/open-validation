@@ -129,14 +129,28 @@ The explorer's buttons open GitHub issues from the forms in `.github/ISSUE_TEMPL
 - A **`cell-marks`** issue: save its YAML as `reviews/pending/<date>-<name>.yaml` and run
   `python scripts/apply_reviews.py`.
 
-## How to add or correct a council
+## How to fix or add data (the everyday routine)
 
-1. Find the council's folder: `specification/planning-requirement/<CODE>/` (codes are in `data/lpa.csv`).
-2. Edit or add a `<requirement-id>.yaml` file following [FORMAT.md](FORMAT.md). The file name must be
-   an id from `data/planning-requirement.csv`; if nothing fits, add a row to
-   `data/unmapped-requirement.csv` instead.
-3. Run `python scripts/set_status.py --recompute`, then `python scripts/check.py`, and fix anything it reports.
-4. Open a pull request.
+**The council files are the data.** Each requirement is one small file in
+`specification/planning-requirement/<CODE>/` (codes are in `data/lpa.csv`). There is no other copy:
+to change something, you change that file. Nothing regenerates or overwrites it.
+
+1. **Spot it.** In the explorer, if something is wrong, switch on Review, tap the cell, choose
+   **Incorrect** and say what the council's list actually says. (You get an email; the cell turns purple.)
+2. **Fix it.** Edit the council's file (on GitHub: open the file, pencil icon, commit to a new branch,
+   open a pull request), following [FORMAT.md](FORMAT.md). Or ask Claude to do it. When the value
+   changes, any "incorrect" flag on it clears itself.
+3. **Check it.** The `check` workflow runs on the pull request. Locally:
+   `python scripts/set_status.py --recompute` then `python scripts/check.py`.
+4. **Verify it.** Once it matches the council's list, mark it **Human verified** in review mode.
+
+A new requirement is a new file named after an id in `data/planning-requirement.csv`; if no id fits,
+add a row to `data/unmapped-requirement.csv` instead.
+
+**How the data was first built (history):** Grokbot's workbook (`inputs/`) was turned into council files
+by `scripts/build_from_workbook.py`, applying each council's audit through
+`scripts/audit_corrections/<CODE>.yaml`. That was a one-off: the script is now retired and refuses to
+run unless given `--rebuild-from-workbook`, because regenerating would undo hand edits.
 
 ## Scripts
 
@@ -145,14 +159,14 @@ Install once: `pip install -r requirements.txt`. Then, from the repo root:
 | Script | What it does |
 |---|---|
 | `python scripts/check.py` | Checks everything and prints a summary (also runs on every push) |
-| `python scripts/set_status.py ...` | Marks cells; `--recompute` refreshes every status |
+| `python scripts/set_status.py ...` | Marks cells; `--recompute` refreshes every status and the index `data/local-planning-requirement.csv` (run it after editing a file) |
 | `python scripts/apply_reviews.py` | Applies marks waiting in `reviews/pending/` |
 | `python scripts/right_of_reply.py` | Drafts emails to councils whose data is fully checked, so they can confirm or correct it; `--mark-sent CODE` records it |
 | `python scripts/stale_lists.py` | Lists councils whose list is over 2 years old (a monthly Action keeps a `stale-lists` issue up to date) |
 | `python scripts/new_incorrect_flags.py <commit>` | Lists cells newly flagged `incorrect` since a commit (used for the email alert) |
 | `python scripts/update_register.py` | Checks MHCLG's register of planning authorities for new, abolished or renamed councils and updates `data/organisation.csv` (runs monthly; opens an issue if anything changed) |
-| `python scripts/build_lpas.py` | Matches workbook councils to MHCLG codes; creates folders, `_lpa.yaml`, `lpa.csv` |
-| `python scripts/build_from_workbook.py` | Builds requirement files from the workbook + audit |
+| `python scripts/build_lpas.py` | Matches councils to MHCLG codes and creates new council folders (e.g. after the register adds one) |
+| `python scripts/build_from_workbook.py` | *Retired.* Built the council files once from the workbook + audit |
 | `python scripts/build_map.py` | Builds `docs/map/uk-lpa.geojson` from the boundary files |
 | `python scripts/convert_national.py` | MHCLG's national `.md` files → our `.yaml` |
 | `python scripts/to_mhclg.py <folder>` | Our `.yaml` → MHCLG's `.md` format |

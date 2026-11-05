@@ -98,6 +98,9 @@ All checks passed.
 - National parks use short codes (BROADS, DNPA, ENPA, LDNPA, NFNPA, NYMNPA, NNPA, PDNPA, SDNPA, YDNPA).
 - The council register lives in `data/organisation.csv` (refreshed by `scripts/update_register.py`), not `inputs/`.
 - Working branch is `ccr-f743743a-pji9c0`, not `build`.
+- **After the first build the workbook route is retired**: the council files are the only copy of the data
+  and are edited directly (`build_from_workbook.py` refuses to run without `--rebuild-from-workbook`;
+  `set_status.py --recompute` rebuilds the index). `scripts/audit_corrections/` is historical.
 - A fifth status, **`incorrect`** (purple `#B388FF`, CSS `--status-incorrect`), sits below `unverified`.
   It needs a `note`. Fixing the value clears it (hash). It has its own texture in Patterns mode
   (horizontal lines) and a ✕ in table cells. Every new `incorrect` flag landing on `main` opens an
