@@ -7,6 +7,11 @@
 # ('Local Area Requirements List Merged 2021.pdf'). Items marked "From the audit" use the audit's
 # paraphrase; quoted wording is from the workbook excerpts or the audit's evidence. The 2021 Heads of
 # Terms row is dropped; the 2025 list's version still needs a manual read.
+# Kept consistent with WYC.yaml (same joint list). Differences come from this council's audit or
+# rows: the schedule-of-works row here is the rural-building conversion schedule (WYC's row was
+# Arboricultural Method Statement text), the Design and Access Statement wording is from Malvern
+# Hills' own planning page, and the travel plan and town centre rules add the extra cases the
+# Malvern Hills audit quotes.
 local-authority: MAV
 
 drop:
@@ -40,11 +45,24 @@ drop-unmapped:
 requirements:
   - id: affordable-housing-statement
     action: update
-    required-if: discretionary
+    required-if:
+      any:
+        - all:
+            - site:
+                in: [designated-rural-area]
+                description: The site is in a Designated Rural Area.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: At least a single new dwelling.
+        - discretionary
     policy: South Worcestershire Development Plan 2016 Policy SWDP15
     confidence: medium
-    notes: "Needed where a development plan policy requires affordable housing or a contribution on the site;
-      the thresholds are in the policy, not the list."
+    notes: >-
+      Needed where a development plan policy requires affordable housing or a contribution on the
+      site (officer discretion). The 'at least a single new dwelling in a Designated Rural Area'
+      trigger comes from the Wychavon audit of the same joint list (WYC.yaml).
 
   - id: air-quality-assessment
     action: update
@@ -76,7 +94,13 @@ requirements:
 
   - id: biodiversity-survey-report
     action: update
-    required-if: discretionary
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: The development is likely to affect protected species.
+        - discretionary
     policy: South Worcestershire Development Plan 2016 Policy SWDP22
     confidence: medium
     notes: "'Certain types of development are likely to require ecological surveys', such as barn
@@ -182,14 +206,16 @@ requirements:
   - id: lighting-assessment
     action: update
     required-if:
-      condition:
-        field: external-lighting
-        value: true
-        description: >-
-          Artificial external lighting that may materially alter light levels outside the site, or
-          affect amenity, highway/railway safety or the natural environment.
+      all:
+        - condition:
+            field: external-lighting
+            value: true
+            description: The development includes artificial external lighting.
+        - discretionary
     policy: South Worcestershire Development Plan 2016 Policies SWDP21 and SWDP25
     confidence: medium
+    notes: "Where the lighting may materially alter light levels outside the site, or affect residential or
+      visual amenity, highway/railway safety or the natural environment (officer judgement)."
 
   - id: land-contamination-assessment
     action: update
@@ -281,6 +307,28 @@ requirements:
       investment in the centre(s) in the catchment of the proposal; …
     source-url: *list
     policy: South Worcestershire Development Plan 2016 Policy SWDP10
+    must-include:
+      - item: Compliance with the sequential test
+        level: must
+      - item: The scale of development is appropriate to the location
+        level: must
+      - item: Impact on existing, committed and planned public and private investment in centres in the
+          catchment
+        level: must
+        required-if:
+          condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 1000
+            description: Retail or leisure development of over 1,000 sq metres.
+      - item: Impact on town centre vitality and viability, including local consumer choice
+        level: must
+        required-if:
+          condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 1000
+            description: Retail or leisure development of over 1,000 sq metres.
     confidence: medium
     notes: "Audit (wrong_trigger): the workbook labelled the Retail and Centres Impact Assessment as a flood
       sequential test."
@@ -314,11 +362,12 @@ requirements:
     notes: "Audit (wrong_trigger): also for any proposal with a Transport Assessment (shown as officer
       discretion)."
 
-  - id: viability-assessment
+  - id: planning-statement
     action: update
     required-if: discretionary
     confidence: low
-    notes: "Audit (wrong_trigger): the excerpt is a 4-word fragment; the audit gives no trigger."
+    notes: "The council's wording is optional: a Planning Statement 'can be submitted with any planning
+      application'."
 
 unmapped:
   - local-name: Water Management Statement
@@ -370,6 +419,6 @@ unmapped:
     suggested-id: marketing-evidence
 
 low-confidence:
-  - id: planning-statement
-    note: "The list says a Planning Statement 'can be submitted with any planning application': it reads as
-      optional, not required."
+  - id: viability-assessment
+    note: "Audit (wrong_trigger): the excerpt is a 4-word fragment ('reasoning (e.g. a Viability
+      Assessment).'); re-read the list for the trigger."
