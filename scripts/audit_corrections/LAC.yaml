@@ -1,0 +1,288 @@
+# Corrections for Lancaster City Council, from inputs/audit/lancaster-city-council.json.
+# The workbook links the council's current Planning Application Validation Guide (PAVG,
+# Publication Version, January 2020), still linked from the council's 'Submit a planning
+# application' page (last updated 1 April 2026). The PAVG's local list (L1-L25) applies by the
+# nature, scale and location of the development, not by consent type, so Grokbot's 'INFERRED: Full
+# planning' rows carry no application type unless the list names one. The list is more than six
+# years old and cites 'Emerging Local Plan' policies and pre-2023 NPPF paragraphs.
+# Items without the council's own words use the audit's paraphrase ("From the audit").
+local-authority: LAC
+
+submission-standards:
+  - item: Existing and proposed plans at an appropriate metric scale, usually 1:50 or 1:100, which
+      explain the proposal in detail
+    level: should
+
+drop:
+  - id: design-and-access-statement
+    reason: "other: the PAVG labels it a national requirement; it is not a local list item"
+  - id: environmental-statement
+    reason: "not_a_requirement: a citation of the EIA regulations, not a trigger"
+  - id: landscaping-plan
+    reason: "not_a_requirement: a sub-item of the Arboricultural Implications Assessment (now in its must-include)"
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is the L24 tree AIA bullet list"
+  - id: sustainability-statement
+    reason: "wrong mapping: the excerpt is the L6 Energy Statement trigger (re-added as energy-statement)"
+  - id: floor-plan-existing
+    reason: "other: national list item, not a local requirement (its scale guidance is kept as a submission standard)"
+  - id: floor-plan-proposed
+    reason: "other: national list item, not a local requirement"
+  - id: elevation-existing
+    reason: "other: national list item, not a local requirement"
+  - id: elevation-proposed
+    reason: "other: national list item, not a local requirement"
+
+drop-unmapped:
+  - local-name: Design Code / Masterplan / Parameter plans
+    reason: "wrong_trigger: the West End Masterplan exemption from L1 Affordable Housing; no design code requirement"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: the list of measures from the L6 Energy Statement"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: a clause of the L18/L19 triggers"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_app_type: filed under Householder, which the quoted text exempts from the sequential test"
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_trigger: a fragment; re-added below with the L4 trigger"
+  - local-name: Minerals / Waste specific statements (county matters)
+    reason: "wrong_trigger: a fragment; re-added below with the L14 trigger"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: a fragment; re-added below with the L20 trigger"
+
+requirements:
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: The proposal creates 10 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: The residential site is 0.5 hectares or more.
+        - all:
+            - site:
+                in: [area-of-outstanding-natural-beauty]
+                description: The site is in the Arnside & Silverdale AONB.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The proposal creates 2 or more dwellings.
+    source-text: >-
+      West End Masterplan area (as defined by the Emerging Local Plan Policies Map and successor
+      versions) where no AHS will be required.
+    source-url: https://www.lancaster.gov.uk/assets/attach/135/PAVG-publication-version-Jan-2020.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): L1, for 10+ dwellings or 0.5ha+, and 2+ dwellings in
+      the Arnside & Silverdale AONB. It is not needed in the Morecambe Area Action Plan or West End
+      Masterplan areas (the council's words above, which the workbook had filed as a design code
+      row); the rule cannot express that exemption.
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: The proposal is in or affects an Air Quality Management Area.
+        - discretionary
+    source-url: https://www.lancaster.gov.uk/assets/attach/135/PAVG-publication-version-Jan-2020.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): L2, for proposals in or affecting AQMAs, larger sites
+      above thresholds, schemes that could create a new AQMA, and slurry tanks or intensive
+      livestock units near designated sites. The audit gives no figures, so the other cases are
+      shown as officer discretion.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: The proposal affects protected trees (householder proposals included).
+    must-include:
+      - item: A survey of existing trees and hedgerows
+        level: must
+      - item: A method statement indicating how the work will be carried out in relation to any trees
+          (including site preparation and earth works)
+        level: must
+      - item: A tree constraints plan
+        level: must
+      - item: A tree protection plan
+        level: must
+      - item: A proposed landscaping plan
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): L24 covers any proposal affecting protected trees, householder
+      included. The landscaping plan is "to be included with the AIA" (council's words).
+
+  - id: biodiversity-survey-report
+    action: update
+    must-include:
+      - item: A Bat Survey where the development is likely to disturb an existing roof structure
+          within 100m of freshwater or woodland, or involves the conversion or disturbance
+          (including extension, alteration, demolition or replacement) of an existing barn,
+          farmhouse, stable or church, regardless of location
+        level: must
+    confidence: low
+    notes: >-
+      The excerpt gives when a Bat Survey must be included, not when the Biodiversity Report itself
+      is needed; the audit does not give that trigger.
+
+  - id: energy-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-text: An Energy Statement will be required for all major applications
+    source-url: https://www.lancaster.gov.uk/assets/attach/135/PAVG-publication-version-Jan-2020.pdf
+    confidence: medium
+    notes: "L6. The workbook had mapped this row to sustainability-statement."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      site:
+        in: [flood-risk-zone]
+        description: New development in Flood Zone 2 or 3.
+    confidence: medium
+    notes: >-
+      L8 applies to all new development in Flood Zones 2 and 3, householder included; householder
+      development is exempt only from the sequential test.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+              scheduled-monument, park-and-garden, world-heritage-site]
+            description: The proposal has the potential to affect a heritage asset.
+    source-text: A Heritage Statement will be required for all proposals that have the potential to affect heritage assets listed above.
+    source-url: https://www.lancaster.gov.uk/assets/attach/135/PAVG-publication-version-Jan-2020.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): L10 applies to listed building consent too. The excerpt refers to
+      heritage assets "listed above", which the workbook did not capture; the designations shown
+      are the usual ones and need checking against the PAVG.
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: The site is potentially contaminated, or may be affected by off-site
+              contamination.
+        - site:
+            in: [near-landfill-site]
+            description: The site is within 250m of a possible landfill site.
+    source-url: https://www.lancaster.gov.uk/assets/attach/135/PAVG-publication-version-Jan-2020.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): L12, potentially contaminated sites, sites within 250m of possible landfill, and off-site contamination."
+
+  - id: noise-assessment
+    action: add
+    source-url: https://www.lancaster.gov.uk/assets/attach/135/PAVG-publication-version-Jan-2020.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): L15 Noise & Vibration Statement; the audit gives no trigger."
+
+  - id: sci
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: departure-from-development-plan
+            value: true
+            description: The application is a departure from the development plan.
+        - discretionary
+    source-url: https://www.lancaster.gov.uk/assets/attach/135/PAVG-publication-version-Jan-2020.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): L19, for departures, wind schemes of more than 2
+      turbines or hub height over 15m, Assets of Community Value, and where pre-application advice
+      requires one. Only departures can be expressed; the rest are shown as officer discretion.
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The site has differing ground levels, or a change in ground level is being
+          introduced (including garden decking).
+    confidence: medium
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The site has differing ground levels, or a change in ground level is being
+          introduced (including garden decking).
+    confidence: medium
+
+  - id: telecommunications-report
+    action: replace
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: The application proposes telecommunications equipment.
+    source-text: For all applications proposing telecommunications equipment.
+    source-url: https://www.lancaster.gov.uk/assets/attach/135/PAVG-publication-version-Jan-2020.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the L13 LVIA trigger; this is the L21 trigger."
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "A Travel Plan forms part of a TA on schemes that generate significant amounts of movement."
+
+unmapped:
+  - local-name: Coal Mining Risk Assessment
+    source-text: >-
+      A CMRA will be required for all applications for non-householder development … (from the
+      audit: in the Coal Authority Development High Risk Area)
+    source-url: https://www.lancaster.gov.uk/assets/attach/135/PAVG-publication-version-Jan-2020.pdf
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Mineral Safeguarding assessment
+    source-text: All major applications partially or fully within a Mineral Safeguarding Area
+    source-url: https://www.lancaster.gov.uk/assets/attach/135/PAVG-publication-version-Jan-2020.pdf
+    suggested-id: mineral-assessment
+  - local-name: Drainage Strategy / SuDS
+    source-text: required for any major developments … 5 or more residential units
+    source-url: https://www.lancaster.gov.uk/assets/attach/135/PAVG-publication-version-Jan-2020.pdf
+    suggested-id: drainage-strategy
+  - local-name: Employment and Skills Plan
+    source-text: >-
+      An ESP will be required for all applications proposing 20 or more residential units (from the
+      audit: or 1,000 sq.m+ of new leisure, education or commercial floorspace)
+    source-url: https://www.lancaster.gov.uk/assets/attach/135/PAVG-publication-version-Jan-2020.pdf
+    suggested-id: employment-statement
+  - local-name: Hydrological Risk Assessment
+    source-text: >-
+      All development within the following areas: … (from the audit: Port of Heysham Expansion,
+      Port of Heysham Industrial Estate, Middleton Towers, Glasson Dock Industrial Area)
+    source-url: https://www.lancaster.gov.uk/assets/attach/135/PAVG-publication-version-Jan-2020.pdf
+    suggested-id: hydrological-risk-assessment
+  - local-name: Utilities Assessment
+    source-text: A Utilities Assessment will be required for any major developments or any new proposal that involves non-mains sewerage.
+    source-url: https://www.lancaster.gov.uk/assets/attach/135/PAVG-publication-version-Jan-2020.pdf
+    suggested-id: utilities-statement
+
+low-confidence:
+  - id: archaeological-assessment
+    note: "Audit (wrong_trigger): the excerpt gives no trigger."
+  - id: transport-assessment
+    note: "Audit (wrong_trigger): the excerpt omits the L23 floorspace and 100+ dwelling thresholds, which the audit does not give."

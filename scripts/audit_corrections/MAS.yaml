@@ -1,0 +1,589 @@
+# Corrections for Mansfield District Council, from inputs/audit/mansfield-district-council.json.
+# The audit read the Local Validation Checklist 'Adopted August 2024' (a copy the user uploaded).
+# Grokbot filed everything under Full planning and mostly quoted mid-paragraph text instead of the
+# 'When is this required?' column; 13 of the 33 Table Two items were missing. The rules below give
+# no application type where the list's trigger applies to any application (para 4.1 brings
+# householder schemes in for listed buildings, conservation areas, TPOs and flood zones). Quoted
+# source-text is the audit's quotation of the list.
+local-authority: MAS
+
+submission-standards:
+  - item: Floor plans, elevations and roof plans drawn to scale (1:50 or 1:100), with title, drawing
+      number and scale bar
+    level: must
+  - item: Location plan at an identified standard metric scale (typically 1:1250 or 1:2500), scaled
+      to fit onto A4 or A3 paper wherever possible
+    level: should
+
+drop:
+  - id: recreation-facilities-assessment
+    reason: "wrong_trigger: the row is the Sport England playing-fields sentence from the Planning
+      Statement (2.20); the list has no separate open space assessment"
+
+drop-unmapped:
+  - local-name: Advertisement drawings / illumination details
+    reason: "duplicate: the polar luminance diagram text belongs to the External Lighting Scheme (2.9)"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: national Site Location Plan guidance (1.4)"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: a sentence from the Design Code entry (2.6)"
+  - local-name: Cycle parking details
+    reason: "wrong_trigger: fragment; re-added below as Vehicle Parking, Cycle Storage and Electric
+      Charging Points (2.33)"
+  - local-name: Design Code / Masterplan / Parameter plans
+    reason: "wrong_trigger: merges two requirements and cuts off the threshold; re-added below"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_trigger: the 400m SPA trigger is now in biodiversity-survey-report"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: quotes the mitigation sentence; re-added below with the thresholds"
+  - local-name: Landscape and Visual Impact Assessment
+    reason: "wrong_trigger: omits the Landscape Policy Zones trigger; re-added below"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: quotes an advisory CCG note; re-added below"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: now a must-include item of the flood risk assessment (Flood Zones 2 and 3)"
+  - local-name: Structural Survey
+    reason: "wrong_trigger: quotes Heritage Statement text; re-added below with the 2.28 triggers"
+
+requirements:
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: The application is for 10 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: The site area is 0.5 hectares or more.
+    policy: Local Plan H4
+    source-text: Planning applications for sites of 10 or more dwellings or where the site area is
+      0.5 hectares or more.
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    must-include:
+      - item: Compliance with Policy H4 parts 4 and 5
+        level: must
+    confidence: medium
+    notes: "Audit (missing_requirement): item 2.1."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    policy: Local Plan P7
+    source-text: >-
+      Air Quality Assessment All Major Developments Where proposals might lead to a significant
+      deterioration in air quality, or national air quality objectives will be exceeded, an Air
+      Quality Assessment must be provided in accordance with Policy P7.
+    confidence: medium
+    notes: "Officer discretion covers proposals that might significantly worsen air quality."
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [archaeological-priority-area, scheduled-monument]
+            description: The development is known to be on or adjacent to a heritage asset of
+              archaeological interest.
+    source-text: >-
+      Applications for major development; Applications for development known to be on or adjacent
+      to a heritage asset of archaeological interest
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the mitigation wording (item 2.14)."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [consent-under-tpo, notice-trees-in-con-area]
+        - site:
+            in: [tree-preservation-zone]
+            description: The development may have an impact on a TPO tree.
+        - ref: major-development
+    source-text: >-
+      Tree survey and/or associated Arboricultural Impact Assessment Where works are required to a
+      fell a protected tree (TPO or tree in Conservation Area). … Where a development proposal may
+      have an impact on a TPO tree. All major development schemes.
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the workbook gave only the first trigger and filed it
+      under Works to trees. For tree applications it is needed where a protected tree is to be
+      felled.
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [site-of-special-scientific-interest, local-wildlife-site, priority-habitat]
+            description: The site is on or next to a statutory or non-statutory nature conservation
+              site, or contains natural habitats.
+        - condition:
+            field: protected-species
+            value: true
+            description: Protected species could be on or near the site.
+        - condition:
+            field: demolition
+            value: true
+            description: The proposal involves demolition of a structure (bat survey).
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Significant alterations to the roof or loft space (bat survey).
+        - site:
+            in: [special-protection-area]
+            description: The site is within 400m of the possible potential Sherwood Forest Special
+              Protection Area.
+        - discretionary
+    source-text: >-
+      Where a proposal involves the demolition of a structure or significant alterations to the
+      roof and/or loft space, or the conversion of an agricultural building, then the application
+      must be accompanied by a bat survey report. … A risk based assessment will be required for
+      developments within 400m of the possible potential Special Protection Area
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    must-include:
+      - item: A bat survey report
+        level: must
+        required-if:
+          any:
+            - condition:
+                field: demolition
+                value: true
+                description: Demolition of a structure.
+            - condition:
+                field: roof-alteration
+                value: true
+                description: Significant alterations to the roof or loft space.
+            - discretionary
+      - item: A risk-based assessment
+        level: must
+        required-if:
+          site:
+            in: [special-protection-area]
+            description: Within 400m of the possible potential Sherwood Forest SPA.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): item 2.7 asks for an EcIA, a bat survey and a risk-based SPA
+      assessment. Officer discretion covers agricultural building conversions and large trees to
+      be removed or significantly pruned (bat survey). Sherwood Forest is a possible potential SPA,
+      not a designated one.
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the biodiversity gain condition.
+    source-text: >-
+      1.13 Biodiversity Net Gain Metric (Major developments) A Biodiversity Net Gain Metric (Major
+      developments) is required: Where an applicant believes the development would be subject to
+      the biodiversity gain condition, the application must be accompanied by minimum information
+      set out in Article 7 of The Town and Country Planning (Development Management Procedure)
+      (England) Order 2015 …
+    confidence: medium
+    notes: >-
+      From the audit: item 1.13 covers major developments and 1.14 lets minor developments use the
+      small sites metric. The local Biodiversity Net Gain Statement (2.3) is under unmapped.
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: renewable-energy-development
+            value: true
+            description: The application is for renewable energy production.
+    policy: Local Plan P5
+    source-text: Major applications and all applications for renewable energy production.
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    confidence: medium
+    notes: "Audit (missing_requirement): the Renewable Energy Statement (2.21)."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: Schedule 1 development, or Schedule 2 development likely to have significant
+          effects.
+    confidence: medium
+    notes: "From the audit: the developer should request a screening opinion for all applications over
+      0.5ha (item 2.8)."
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: The building is 18 metres or more in height.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: The building has 7 or more storeys.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 2
+            description: A multi-occupied residential building.
+    source-text: >-
+      1.7 Fire Statement Multi-occupied residential buildings of 18 metres or more in height, or 7
+      or more storeys, must be accompanied by a Fire Statement completed by an expert.
+    confidence: medium
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or greater (Flood Zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or greater (Flood Zone 1).
+        - site:
+            in: [critical-drainage-area]
+            description: A site under 1 hectare with critical drainage problems.
+        - all:
+            - site:
+                in: [flood-risk-zone]
+                description: The site is in Flood Zone 2 or 3.
+            - condition:
+                field: new-build
+                value: true
+                description: New built development.
+        - discretionary
+    source-text: >-
+      All Major Developments; All developments in Floodzone 1 when: - The site is 1 hectare or
+      greater … All new built development within Flood Zones 2 and 3.
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    must-include:
+      - item: Flood risk sequential test / exception test as set out in NPPF & PPG
+        level: must
+        required-if:
+          site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): item 2.10. Officer discretion covers Flood Zone 1 sites under 1 ha
+      changing to a more vulnerable use.
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+          scheduled-monument]
+        description: The proposal will or may affect designated heritage assets or their setting,
+          including conservation areas, locally listed buildings, non-designated assets and
+          scheduled ancient monuments.
+    source-text: >-
+      All development proposals which will/may impact designated Heritage Assets and/or their
+      settings (including conservation areas, locally listed buildings. Non designated assets and
+      Scheduled Ancient Monuments).
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    confidence: medium
+    notes: "Audit (missing_requirement, wrong_app_type): item 2.14; applies to householder, listed building
+      and conservation area applications too."
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: A former petrol filling station, landfill or industrial site, or a site
+              with known contamination on or around it.
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: Development with a vulnerable end user (e.g. residential development).
+    source-text: >-
+      New developments on former petrol filling stations, former landfill sites and former
+      industrial sites. Development with a vulnerable end user (e.g. residential development).
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    must-include:
+      - item: As a minimum, a desk study and site walkover report
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): item 2.15; the must-include item is the audit's summary."
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: floodlighting
+                value: true
+                description: Floodlighting is proposed.
+            - condition:
+                field: external-lighting
+                value: true
+                description: External lighting is proposed.
+        - any:
+            - condition:
+                field: outside-urban-area
+                value: true
+                description: The site is outside the urban boundary.
+            - site:
+                in: [conservation-area, listed-building, listed-building-setting]
+                description: The site is in or next to a conservation area, or on or next to a
+                  listed building.
+            - discretionary
+    source-text: >-
+      If floodlighting or external lighting is proposed on a site adjacent to residential
+      properties, outside the urban boundary, adjacent or within a Conservation Area or
+      adjacent/on a Listed Building and buildings within the town centres.
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    must-include:
+      - item: Hours of operation and details of lighting spill, including a polar luminance diagram
+          based on vertical luminance at the nearest sensitive premises
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, duplicate): item 2.9; the workbook quoted the ecology sentence and filed
+      the luminance diagram text as an advertisement row. Officer discretion covers sites next to
+      homes and in the town centres.
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The development would generate significant levels of noise or vibration
+              near residential or commercial properties.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: A noise-sensitive use in proximity to a known noise source.
+    source-text: >-
+      Instances where the development would generate significant levels of noise or vibration …
+      or it proposes a noise sensitive use in proximity to a known noise source.
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    must-include:
+      - item: Prepared by a suitably qualified acoustician
+        level: must
+    confidence: medium
+    notes: "Audit (missing_requirement): item 2.19."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: loss-of-open-space
+            value: true
+            description: Loss of open space (IN3).
+        - condition:
+            field: loss-of-use
+            value: true
+            description: Loss of existing facilities such as pubs, churches or community centres
+              (IN7).
+        - site:
+            in: [open-space]
+            description: Development affecting playing field land.
+        - discretionary
+    source-text: Planning Statement including Statement of Community Involvement - All Major
+      Developments. … Development affecting playing field land.
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    must-include:
+      - item: Statement of Community Involvement
+        level: must
+        required-if:
+          ref: major-development
+      - item: Sport England Appendix A checklist
+        level: must
+        required-if:
+          site:
+            in: [open-space]
+            description: Development affecting playing field land.
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement): item 2.20. Officer discretion covers alternative uses on
+      allocated employment sites (E3), allotment land (IN5) and leisure and visitor facilities
+      (RT11).
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: A main town centre use neither in an existing centre nor in line with the local
+          plan.
+    source-text: >-
+      Retail and leisure developments over 500 sqm (net) which are proposed in edge of centre and
+      out of centre locations and which are not allocated in the Local Plan.
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    must-include:
+      - item: Sequential test
+        level: must
+      - item: Retail impact assessment (checked by a third party at the applicant's expense)
+        level: must
+        required-if:
+          condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 500
+            description: Retail and leisure development over 500 sqm (net), edge or out of centre and
+              not allocated.
+    confidence: medium
+    notes: "Audit (wrong_trigger): item 2.25."
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    policy: Local Plan IN9, IN10
+    source-text: >-
+      Transport Assessment/ Statement and Travel Plan All developments that will generate
+      significant amounts of movement will be required to provide a travel plan, and the
+      application should be supported by a transport statement or transport assessment.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt carried the previous row's policies (P1 and S4)."
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    policy: Local Plan IN9, IN10
+    source-text: >-
+      Transport Assessment/ Statement and Travel Plan All developments that will generate
+      significant amounts of movement will be required to provide a travel plan, and the
+      application should be supported by a transport statement or transport assessment.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt carried the previous row's policies (P1 and S4)."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    source-text: Where schemes are not proposing to meet all policy requirements, such as affordable
+      housing, education etc.
+    confidence: medium
+    notes: "Audit (wrong_trigger): item 2.32."
+
+  - id: waste-management-plan
+    action: add
+    required-if: discretionary
+    source-text: All applications for residential or commercial development (including changes of
+      use) that will have an impact on the generation of waste.
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    must-include:
+      - item: A plan of bin storage locations and bin sizes
+        level: must
+      - item: The design and materials of any bin enclosure
+        level: must
+    confidence: medium
+    notes: "Audit (missing_requirement): Site Waste Management (2.26)."
+
+unmapped:
+  - local-name: Biodiversity Net Gain Statement
+    source-text: "Biodiversity Net Gain Statement | All applications not exempt from biodiversity net gain."
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    suggested-id: biodiversity-gain-statement
+  - local-name: Habitat Management and Monitoring Plan
+    source-text: "Applications where Significant On-Site Enhancements for Biodiversity Net Gain are proposed."
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    suggested-id: habitat-management-monitoring-plan
+  - local-name: Building for a Healthy Life Assessment
+    source-text: "Building for a Healthy Life Assessment | All Major Developments"
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    suggested-id: building-for-a-healthy-life
+  - local-name: Health Impact Assessment
+    source-text: "A. residential development of 50 dwellings or more; B. non-residential developments of
+      5,000 square metres or more (C. other development likely to have a significant impact on
+      health and wellbeing, from the audit)"
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    suggested-id: health-impact-assessment
+  - local-name: Planning Obligations / Heads of Terms
+    source-text: "All Major Developments. Sites above 0.5 hectares (Affordable Housing)."
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    suggested-id: heads-of-terms
+  - local-name: Landscape and Visual Impact Assessment
+    source-text: "All major developments those developments in and adjacent to Landscape Policy Zones likely
+      to have a significant adverse impact."
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Masterplan
+    source-text: "Sites of 5ha or more or 150 dwellings or more."
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    suggested-id: masterplan
+  - local-name: Design Code
+    source-text: "Design Code | Large Scale Major Application."
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    suggested-id: design-code
+  - local-name: Minerals Statement
+    source-text: "Major Applications in Mineral Safeguarding and Consultation Areas as set out in the
+      Nottinghamshire Minerals Local Plan"
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    suggested-id: minerals-assessment
+  - local-name: Public Right of Way Statement and Plan
+    source-text: "All applications where a Right of Way (RoW) exists: within the application boundary, OR
+      alongside the outside edge of the development OR where a RoW in the close vicinity is likely
+      to receive increased use"
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    suggested-id: public-right-of-way-statement
+  - local-name: Slope Stability Assessment
+    source-text: "All minor and major residential applications located adjacent to a substantial slope e.g.
+      more than 2m"
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    suggested-id: slope-stability-assessment
+  - local-name: Town Centre Design Code compliance checklist
+    source-text: "All Major Developments in Mansfield Town Centre (as defined in the adopted Mansfield Town
+      Centre Design Code November 2023)"
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    suggested-id: design-code-compliance
+  - local-name: Secured by Design Assessment
+    source-text: "2.24 Secured by Design Assessment All Major Applications."
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    suggested-id: crime-prevention-statement
+  - local-name: School Site Suitability Checklist
+    source-text: "Any planning application for a residential or mixed use development that includes a site
+      for a new primary or secondary school as part of the proposal A school site suitability
+      checklist should be submitted demonstrating that the proposed school site is suitable for
+      the construction of high quality education buildings."
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    suggested-id: school-site-suitability-checklist
+  - local-name: Structural Survey
+    source-text: "The demolition, or partial demolition of a Listed building(s), or The conversion of a
+      Listed building. Conversion of Agricultural Buildings."
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    suggested-id: structural-survey
+  - local-name: Vehicle Parking, Cycle Storage and Electric Charging Points
+    source-text: "Vehicle Parking, Cycle Storage and Electric Charging Points | Proposals for new dwellings
+      and/or new or changes to employment premises."
+    source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
+    suggested-id: parking-plan
+
+new-fields:
+  - field: renewable-energy-development
+    kind: boolean
+    label: Renewable energy development
+    description: The proposal is for renewable or low carbon energy generation (for example solar
+      or wind) or electricity grid infrastructure.

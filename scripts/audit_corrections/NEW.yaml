@@ -1,0 +1,351 @@
+# Corrections for New Forest District Council, from inputs/audit/new-forest-district-council.json.
+# The audit compared the workbook with NFDC's 'Local Requirements, what is required and when'
+# (approved by Planning Committee on 11 November 2020), the same document. The workbook's
+# Householder and Outline rows copy every row label of the summary matrix regardless of its
+# Yes/No cells, so their excerpts state no trigger (audit issues 1 and 2). Item numbers below are
+# the list's own.
+local-authority: NEW
+
+submission-standards:
+  - item: Plans and drawings drawn to an identified metric scale; plans show the direction of north
+    level: must
+  - item: Plans for new development include a scale bar and/or key dimensions
+    level: must
+  - item: All plans state the original paper size
+    level: must
+  - item: Plans named in a logical manner
+    level: should
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is Arboricultural Method Statement text"
+  - id: sustainability-statement
+    sheets: [Householder, Full planning]
+    reason: "wrong_app_type: householder works are exempt (item 25); the Full planning row is Energy Statement
+      text (now energy-statement)"
+  - id: flood-risk-assessment
+    sheets: [Outline]
+    reason: "wrong_trigger: the Outline excerpt is the surface water drainage strategy text, not the FRA"
+
+drop-unmapped:
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "wrong_trigger: the Householder and Outline rows are matrix labels (re-added below with the
+      council's wording)"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: matrix labels and a fragment that drops the threshold (re-added below)"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: The application proposes 10 units or more.
+    source-text: In accordance with the NPPF and NPPG this applies to all applications proposing 
+      10-units or more
+    source-url: 
+      https://www.newforest.gov.uk/media/1199/Summary-of-what-is-requried-and-when/pdf/Summary_of_what_is_requried_and_when.pdf?m=1605271374517
+    policy: HOU1, HOU2
+    must-include:
+      - item: Information on both the affordable housing and any open market housing
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): 10 or more units only, so not householder applications."
+
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal is new housing development.
+        - site:
+            in: [air-quality-management-area]
+            description: The site is within or adjoining an Air Quality Management Area.
+    source-text: Air Quality Assessment … New housing development within or adjoining AQMA.
+    source-url: 
+      https://www.newforest.gov.uk/media/1199/Summary-of-what-is-requried-and-when/pdf/Summary_of_what_is_requried_and_when.pdf?m=1605271374517
+    policy: STR1, CCC1, IMPL2
+    confidence: medium
+    notes: "Audit (wrong_trigger): the Householder and Outline excerpts were matrix labels; the trigger
+      is the Full planning wording."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees within the application site or on land next to it.
+    source-text: >-
+      An arboricultural report (see Table 2) must be submitted where there are trees within … a
+      proposed application site, or on land wi…
+    source-url: 
+      https://www.newforest.gov.uk/media/1199/Summary-of-what-is-requried-and-when/pdf/Summary_of_what_is_requried_and_when.pdf?m=1605271374517
+    policy: DM9
+    must-include:
+      - item: How the tree constraints on and adjacent to the site have been incorporated into the 
+          design, and how the trees are to be retained
+        level: should
+    confidence: medium
+    notes: "Audit (wrong_trigger): the Householder and Outline excerpts were the merged matrix label 'Tree
+      Survey /Arboricultural Statement 32 Viability Appraisal 33.' The council's sentence is cut off in
+      the source extract."
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      site:
+        in: [archaeological-priority-area, scheduled-monument]
+        description: The development affects an archaeologically sensitive area, including a 
+          Scheduled Ancient Monument or non-designated sites of archaeological interest.
+    source-text: >-
+      A desk-based assessment will be required where an initial assessment indicates the proposed
+      development affects an archaeologically sensitive area (including a Scheduled Ancient
+      Monument or nondesignated sites of archaeological interest).
+    source-url: 
+      https://www.newforest.gov.uk/media/1199/Summary-of-what-is-requried-and-when/pdf/Summary_of_what_is_requried_and_when.pdf?m=1605271374517
+    policy: DM1
+    confidence: medium
+    notes: "Audit (wrong_trigger): the Householder and Outline excerpts were matrix labels."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [special-protection-area, site-of-special-scientific-interest, local-wildlife-site]
+            description: The site is in or adjacent to a European site, SSSI, NNR, SINC, RIGS, LNR, 
+              wildlife corridor or priority habitat.
+        - discretionary
+    confidence: medium
+    notes: >-
+      'Where a proposal is likely to affect protected species, the applicant must submit a
+      Protected Species Survey and Assessment', and any development where protected or notable
+      species could be affected (council's wording); the designated sites are from the council's
+      list of features.
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      ref: major-development
+    source-text: >-
+      Biodiversity Net Gain Report New Forest District Council Local Plan 2016-2036 For ‘major’
+      applications ‘Minor’ applications, defined as residential development of nine units or less,
+      or commercial development of less than 1000 m2 of floor space or on a site of less than 1 ha
+      are not exempt from providing biodiversity net gains but use of the Defra Biodiversity Metric
+      will not be required.
+    source-url: 
+      https://www.newforest.gov.uk/media/1199/Summary-of-what-is-requried-and-when/pdf/Summary_of_what_is_requried_and_when.pdf?m=1605271374517
+    confidence: medium
+    notes: "The metric is needed for major applications only (council's wording, 2020; it predates mandatory
+      BNG). The Householder and Outline excerpts were matrix labels."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 100
+            description: New floorspace of more than 100 square metres.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: One or more new dwellings.
+    source-url: 
+      https://www.newforest.gov.uk/media/1199/Summary-of-what-is-requried-and-when/pdf/Summary_of_what_is_requried_and_when.pdf?m=1605271374517
+    must-include:
+      - item: The predicted regulated energy use of the development and the energy generation 
+          achieved through the proposed renewable/low carbon measures
+        level: should
+        source-text: >-
+          An Energy Statement should include evidence to demonstrate the predicted regulated energy
+          use of the proposed development and the energy generation achieved through the proposed
+          renewable/low carbon measures.
+    confidence: medium
+    notes: "From the audit (wrong_trigger): Renewable and Low Carbon Energy Statement for new floorspace
+      >100 sqm or 1+ dwellings. The workbook filed this text under sustainability-statement."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment (subject to screening 
+          opinion).
+    source-text: Environmental Impact Assessment, Subject to screening opinion
+    source-url: 
+      https://www.newforest.gov.uk/media/1192/Major-Full-Checklist/pdf/Major_Full_Checklist.pdf?m=1605612823493
+    confidence: medium
+    notes: "Audit (wrong_app_type): not a householder requirement; the Householder and Outline excerpts
+      were matrix labels."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: >-
+          The development includes artificial external lighting that may materially alter light
+          levels outside the site, or affect residential amenity, highway or railway safety, or the
+          natural environment.
+    confidence: medium
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: departure-from-development-plan
+            value: true
+            description: The application is a departure from the development plan.
+        - discretionary
+    source-url: 
+      https://www.newforest.gov.uk/media/1199/Summary-of-what-is-requried-and-when/pdf/Summary_of_what_is_requried_and_when.pdf?m=1605271374517
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt says a planning statement 'can be submitted
+      with any planning application'. From the audit: major applications, departures and
+      proposals needing detailed policy consideration (shown as officer discretion).
+
+  - id: sci
+    action: replace
+    required-if:
+      ref: major-development
+    source-text: Community Involvement Statement Types of Application or development that require 
+      this information? Major Development
+    source-url: https://www.newforest.gov.uk/article/1192/Local-Checklists-for-Planning-Applications
+    confidence: medium
+    notes: "Audit (wrong_app_type): major development only, not householder. The council's wording was
+      found in the workbook's agricultural land row."
+
+  - id: telecommunications-report
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [pa-ecomms-network]
+        - condition:
+            field: telecommunications-development
+            value: true
+            description: The application proposes telecommunications development.
+    source-text: >-
+      applications proposing telecommunications development, including applications for prior
+      approval under part 16 of the Town and Country Planning (General Permitted Development)
+      Order) 2015.
+    source-url: 
+      https://www.newforest.gov.uk/media/1199/Summary-of-what-is-requried-and-when/pdf/Summary_of_what_is_requried_and_when.pdf?m=1605271374517
+    confidence: medium
+    notes: "Audit (wrong_app_type, missing_requirement): Part 16 telecoms prior approval is not a change
+      of use, and full telecoms applications need the statement too."
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - condition:
+                field: out-of-centre-town-centre-use
+                value: true
+                description: The site is outside town centre boundaries.
+            - condition:
+                field: floorspace-non-residential
+                operator: ">"
+                value: 1000
+                description: Retail development of over 1,000 square metres gross internal area.
+        - all:
+            - condition:
+                field: floorspace-non-residential
+                operator: ">"
+                value: 500
+                description: Retail development of over 500 square metres in villages or outside 
+                  built-up areas.
+            - discretionary
+    source-text: >-
+      Retail development of over 1,000sqm gross internal area (GIA) outside of town centre
+      boundaries needs a Retail Impact Assessment.
+    source-url: 
+      https://www.newforest.gov.uk/media/1199/Summary-of-what-is-requried-and-when/pdf/Summary_of_what_is_requried_and_when.pdf?m=1605271374517
+    policy: ECON5
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): not householder. From the audit: also over 500 sqm
+      in villages or outside built-up areas; that location has no field, so it is shown as officer
+      discretion.
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    source-text: A Travel Plan is also required with all Transport Assessments.
+    notes: "Needed with every Transport Assessment (council's wording). The workbook's excerpt ran on
+      into the Tree Survey item (cut here)."
+
+  - id: viability-assessment
+    action: replace
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    source-text: "… polices then a Viability Assessment will be required (see below)."
+    source-url: 
+      https://www.newforest.gov.uk/media/1199/Summary-of-what-is-requried-and-when/pdf/Summary_of_what_is_requried_and_when.pdf?m=1605271374517
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, wrong_trigger): a major-application requirement, not householder; the
+      Householder and Outline excerpts were the merged label 'Tree Survey /Arboricultural Statement
+      32 Viability Appraisal 33.' and the Full excerpt ran into the archaeology item (cut here).
+
+unmapped:
+  - local-name: Rural Workers' Dwelling Justification
+    source-text: "evidence of functional need for the proposed dwelling;"
+    source-url: 
+      https://www.newforest.gov.uk/media/1199/Summary-of-what-is-requried-and-when/pdf/Summary_of_what_is_requried_and_when.pdf?m=1605271374517
+    suggested-id: rural-worker-statement
+  - local-name: Sustainable Drainage System Strategy
+    source-text: "Any outline application for a development falling within the definition of ‘major’ shall
+      be accompanied by a drainage strategy. From the audit: 10+ units, >0.5 ha or 1,000 sqm."
+    source-url: 
+      https://www.newforest.gov.uk/media/1199/Summary-of-what-is-requried-and-when/pdf/Summary_of_what_is_requried_and_when.pdf?m=1605271374517
+    suggested-id: drainage-strategy
+  - local-name: High Speed Broadband statement
+    source-text: "From the audit: item 5, all new residential development"
+    source-url: 
+      https://www.newforest.gov.uk/media/1199/Summary-of-what-is-requried-and-when/pdf/Summary_of_what_is_requried_and_when.pdf?m=1605271374517
+    suggested-id: broadband-statement
+  - local-name: Green Belt Openness Statement
+    source-text: "From the audit: item 9, development affecting Green Belt openness"
+    source-url: 
+      https://www.newforest.gov.uk/media/1199/Summary-of-what-is-requried-and-when/pdf/Summary_of_what_is_requried_and_when.pdf?m=1605271374517
+    suggested-id: green-belt-statement
+  - local-name: Recreational mitigation strategy, New Forest and the Solent Coast
+    source-text: "New Forest Sites providing 50 or more homes, the threshold for on-site provision of
+      ANRG (alternative natural recreational greenspace) to mitigate recreational visits to the New Forest
+      European Sites For sites of less than 50 homes, mitigation is secured by a financial contribution
+      Solent Coast All residential development within 5.6km of the Solent coast."
+    source-url: https://www.newforest.gov.uk/article/1192/Local-Checklists-for-Planning-Applications
+    suggested-id: habitats-regulations-assessment
+
+low-confidence:
+  - id: design-and-access-statement
+    note: "Audit (wrong_trigger): the Full planning excerpt is legislative boilerplate and the other rows
+      are matrix labels; the trigger needs re-reading in the list."
+  - id: heritage-statement
+    note: "Audit (wrong_trigger): the Full planning excerpt is a web reference and the other rows are
+      matrix labels; the trigger needs re-reading in the list."
+  - id: sustainability-statement
+    note: "Audit (wrong_app_type): item 25 exempts householder works; only an Outline matrix label is
+      left, so the trigger needs re-reading in the list."
+  - id: transport-assessment
+    note: "Audit (wrong_trigger): the Householder and Outline excerpts are matrix labels and the Full
+      excerpt is garbled table text; the trigger needs re-reading in the list."
+

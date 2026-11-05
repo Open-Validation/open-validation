@@ -1,0 +1,308 @@
+# Corrections for Eastbourne Borough Council, from the audit.
+# The audit could not read the council's site (contents_checked: false), so this file rests on
+# the workbook's own excerpts: run-together Excel rows are split back out, and the clear triggers
+# in the householder checklist (Version 1.1, September 2015) are structured.
+local-authority: EAS
+
+validation-list:
+  url: 
+    https://www.lewes-eastbourne.gov.uk/media/2934/Eastbourne-Validation-List/excel/Eastbourne_Validation_List.xlsx?m=638248564889130000
+  date: 2015-09
+  date-basis: >-
+    audit: the Excel list is undated; the householder checklist reads 'Version Number 1.1 /
+    September 2015' and the list cites the 2013 Core Strategy and 2007 Borough Plan, so it is
+    probably more than 2 years old
+
+submission-standards:
+  - item: All plans drawn to a recognised scale, clearly stating the scale and paper size, with an 
+      accurate scale bar
+    level: must
+
+drop-unmapped:
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "wrong_trigger: the excerpt is the 'Biodiversity survey and report' row run into CIL and DAS;
+      re-added as biodiversity-survey-report"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: the excerpt runs into the Flood Risk Assessment item; re-added below with
+      the run-on cut"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 11
+        description: 11 or more dwellings are proposed.
+    source-text: >-
+      Affordable housing statement | Core Strategy Local Plan 2013 Policy D5 and Affordable Housing
+      Implimentation Technical Note | | Yes if 11 or more dwellings proposed to be created
+    source-url: 
+      https://www.lewes-eastbourne.gov.uk/media/2934/Eastbourne-Validation-List/excel/Eastbourne_Validation_List.xlsx?m=638248564889130000
+    policy: Core Strategy Local Plan 2013 Policy D5
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt ran into the Archaeological Assessment row."
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [archaeological-priority-area]
+                description: The site is in an Archaeological Notification Area (ANA).
+            - condition:
+                field: dwelling-count
+                operator: ">"
+                value: 5
+                description: Over 5 dwellings are proposed.
+    source-text: >-
+      Archaeological Assessment … Click to check if site is situated within an Archaeological
+      Notification Area (ANA) | If over 5 dwellings proposed, full archaeological assessment such as
+      a desk based assessment or archaeological evaluation will be requ…
+    source-url: 
+      https://www.lewes-eastbourne.gov.uk/media/2934/Eastbourne-Validation-List/excel/Eastbourne_Validation_List.xlsx?m=638248564889130000
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): the source ties this to major applications, ANA sites and
+      over-5-dwelling schemes, not to listed building consent as such. How the ANA and 5-dwelling
+      conditions combine is our reading of the cut-off text.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      site:
+        in: [listed-building, scheduled-monument, conservation-area, archaeological-priority-area]
+        description: The application involves a listed building or scheduled monument, or the site 
+          is in a conservation area or an Archaeological Notification Area.
+    source-text: >-
+      Any application which involves a listed building, scheduled monument or falls within a
+      conservation or an archaeological notification area will be required to submit a completed
+      Heritage Statement form AND unless minor will also be required to submit a HER Consultation
+      report.
+    source-url: 
+      https://www.lewes-eastbourne.gov.uk/media/2934/Eastbourne-Validation-List/excel/Eastbourne_Validation_List.xlsx?m=638248564889130000
+    policy: Saved Policy UHT17 of the Borough Plan 2007
+    must-include:
+      - item: The completed Heritage Statement form
+        level: must
+      - item: A HER (Historic Environment Record) Consultation report, unless the application is 
+          minor
+        level: must
+      - item: An Assessment of Significance, informed and supplemented by the HER statement
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, missing_requirement): the householder row narrowed this to
+      Archaeological Notification Areas, and it was missing from listed building consent, demolition
+      in a conservation area and outline. The Assessment of Significance (Saved Policy UHT17; 'YES as
+      informed and supplemented by HER Statement') was hidden inside the Roof plan excerpt; the
+      planning page names a 'Heritage Statement and Assessment of Significance pro-forma'.
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 100
+            description: The floorspace created is 100 square metres or more.
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 1
+            description: More than 1 dwelling is proposed.
+    source-text: >-
+      Design and Access Statement | Core Strategy Local Plan 2013 Policy D8, and Saved Policies UHT1
+      & UHT10 of the Borough Plan 2007 | | Yes if floorspace created is 100sqm or more or more than 1
+      dwelling proposed.
+    source-url: 
+      https://www.lewes-eastbourne.gov.uk/media/2934/Eastbourne-Validation-List/excel/Eastbourne_Validation_List.xlsx?m=638248564889130000
+    policy: Core Strategy Local Plan 2013 Policy D8; Saved Policies UHT1 and UHT10 of the Borough 
+      Plan 2007
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the householder excerpt was a list of download links, and this
+      threshold had been put on the CIL row. National rules for a Design and Access Statement still
+      apply.
+
+  - id: cil-form
+    action: replace
+    source-text: Community Infrastructure Levy | | Additional Information Requirement Form 
+      (available here)
+    source-url: 
+      https://www.lewes-eastbourne.gov.uk/media/2934/Eastbourne-Validation-List/excel/Eastbourne_Validation_List.xlsx?m=638248564889130000
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook gave this row the Design and Access Statement threshold.
+      The council's row names the Additional Information Requirement Form but no threshold.
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if: discretionary
+    source-text: >-
+      Biodiversity survey and report | Core Strategy Local Plan 2013 Policy D9, and Saved Policy NE22
+      of the Borough Plan 2007 | | YES if ecologically sensitive site
+    source-url: 
+      https://www.lewes-eastbourne.gov.uk/media/2934/Eastbourne-Validation-List/excel/Eastbourne_Validation_List.xlsx?m=638248564889130000
+    policy: Core Strategy Local Plan 2013 Policy D9; Saved Policy NE22 of the Borough Plan 2007
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook filed this as a Biodiversity Checklist and ran it into
+      the CIL and DAS rows. 'Ecologically sensitive site' isn't defined, so it is shown as officer discretion."
+
+  - id: roof-plan-existing
+    action: replace
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The proposal alters or impacts a roof.
+    source-text: >-
+      Existing & Proposed Roof Plans … When required: - Where any roof is being altered. … Roof plan.
+      1:50 or 1:100 … YES where proposal impacts roof
+    source-url: 
+      https://www.lewes-eastbourne.gov.uk/media/2934/Eastbourne-Validation-List/excel/Eastbourne_Validation_List.xlsx?m=638248564889130000
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the Excel roof plan row ran on through Assessment of Significance,
+      CIL and DAS."
+
+  - id: roof-plan-proposed
+    action: replace
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The proposal alters or impacts a roof.
+    source-text: >-
+      Existing & Proposed Roof Plans … When required: - Where any roof is being altered. … Roof plan.
+      1:50 or 1:100 … YES where proposal impacts roof
+    source-url: 
+      https://www.lewes-eastbourne.gov.uk/media/2934/Eastbourne-Validation-List/excel/Eastbourne_Validation_List.xlsx?m=638248564889130000
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the Excel roof plan row ran on through Assessment of Significance,
+      CIL and DAS."
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: Scale of 1:500, 1:200 or 1:100, with a metric scale bar
+        level: must
+
+  - id: section-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: The development and/or the plot is on a steep incline or decline.
+        - condition:
+            field: new-vehicle-access
+            value: true
+            description: A new vehicular access is proposed.
+        - condition:
+            field: basement
+            value: true
+            description: Development is proposed below ground level.
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Development is proposed within roof slopes (to show head height).
+    must-include:
+      - item: Scale of 1:100, 1:50 or 1:20
+        level: must
+
+  - id: section-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: The development and/or the plot is on a steep incline or decline.
+        - condition:
+            field: new-vehicle-access
+            value: true
+            description: A new vehicular access is proposed.
+        - condition:
+            field: basement
+            value: true
+            description: Development is proposed below ground level.
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Development is proposed within roof slopes (to show head height).
+    must-include:
+      - item: Scale of 1:100, 1:50 or 1:20
+        level: must
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      site:
+        in: [flood-risk-zone]
+        description: The development is within Flood Zone 2 or 3 (with certain limited exceptions) 
+          and meets the criteria in the Environment Agency Flood Risk Standing Advice.
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: All elevations of any new outbuilding
+        level: must
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - any:
+            - site:
+                in: [tree-preservation-zone]
+                description: A protected tree (TPO) is affected by the proposal.
+            - all:
+                - site:
+                    in: [conservation-area]
+                    description: The site is in a conservation area.
+                - condition:
+                    field: trees-on-or-near-site
+                    value: true
+                    description: A tree in the conservation area is affected by the proposal.
+    source-text: >-
+      Tree Assessment (Arboricultural Statement) if a protected tree (TPO) or a tree in a
+      conservation area is affected by the proposal
+    notes: "Audit (wrong_trigger): the workbook's excerpt ran into the photomontage item. This is from
+      the householder checklist only."
+
+  - id: photos
+    action: update
+    source-text: >-
+      Photographs / photomontages showing the whole of the building and its setting and/or the
+      particular section of the building affected by the proposal(s)
+    must-include:
+      - item: The whole of the building and its setting and/or the particular section of the 
+          building affected
+        level: must
+    notes: "The householder checklist doesn't say when photographs are needed."
+
+unmapped:
+  - local-name: Highways / access details (visibility splays)
+    source-text: dimensions and visibility splays of the new access shown
+    source-url: 
+      https://www.lewes-eastbourne.gov.uk/media/2929/Householder-planning-permission-validation-checklist-Eastbourne-Borough-Council/pdf/Householder_planning_permission_validation_checklist_Eastbourne_Borough_Council.pdf?m=1689259633920
+    suggested-id: ""
+
+low-confidence:
+  - id: planning-statement
+    note: "Audit (wrong_trigger): the householder row reuses the heritage text and has no trigger of its
+      own."
+

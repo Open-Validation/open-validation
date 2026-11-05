@@ -1,0 +1,328 @@
+# Corrections for Tunbridge Wells Borough Council, from the council's audit.
+# The audit could not re-read the list (contents_checked false), so these corrections rest on
+# Grokbot's own excerpts: obvious junk is dropped, spliced triggers are moved to the right item,
+# and only clear triggers are structured. Rows come from both the September 2026 PDF and the
+# council's validation guidance web page.
+local-authority: TUN
+
+validation-list:
+  url: https://tunbridgewells.gov.uk/__data/assets/pdf_file/0011/546491/Local-Validation-List-1.pdf
+  date: 2026-09
+  date-basis: >-
+    audit: document title and footer 'Local Validation List September 2026' (the workbook's 2026-11
+    was PDF metadata). A November 2026 council news item says the new list was agreed; check it as
+    the possible adoption date.
+
+submission-standards:
+  - item: Individual electronic files no larger than 5MB
+    level: must
+  - item: >-
+      Accepted file types only: images/plans as pdf, bmp, gif, jpg/jpeg, png or tif/tiff; documents as
+      pdf, rtf, txt, xls or plt (docx, docm, xlsx and xlsm are not accepted)
+    level: must
+
+drop:
+  - id: land-contamination-assessment
+    sheets: [Minerals & waste (county)]
+    reason: "wrong_app_type: Tunbridge Wells is not the minerals and waste authority; the requirement
+      is for ordinary planning applications"
+  - id: photos
+    reason: "wrong_trigger: a policy reference string from the heritage statement entry, not a stand-alone
+      requirement"
+
+drop-unmapped:
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "wrong_trigger: carries the lighting text; re-added below with the rural dwellings wording"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: the excerpt is tree works application content"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: quotes the retail ED10 sequential test and the telecoms item (now telecommunications-report)"
+  - local-name: Parking provision / Parking plan
+    reason: "duplicate: same reference-list text as the Transport Assessment row"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "wrong_trigger: bare fragment ('meet Part M4(2).')"
+  - local-name: Self-build / custom build information
+    reason: "wrong_trigger: runs on into the LVIA text; re-added below trimmed"
+  - local-name: Structural Survey
+    reason: "wrong_trigger: the Full planning row runs into energy text; re-added below from the web page's
+      wording"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    must-include:
+      - item: Tenure type of each affordable unit (e.g. social rent, intermediate housing)
+        level: must
+      - item: Number of bedrooms per unit
+        level: must
+      - item: Details of any Registered Provider who will be buying or managing the affordable 
+          housing
+        level: must
+    notes: >-
+      The trigger is cut off ('All applications proposing or required to'). The must-include items
+      are from text the workbook filed under the noise row ('provide on-site affordable housing …
+      Tenure type of each affordable units (e.g. social rent, intermediate housing) No. of bedrooms
+      per unit Details of any Registered Provider who will be buying or managing the affordable
+      housing').
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: >-
+              Development that affects any trees, particularly trees protected by a TPO, in a
+              conservation area, in or affecting ancient woodland or veteran trees, or in a historic
+              park and garden, Nature Conservation Site or Area of Landscape Importance.
+        - application-type:
+            in: [consent-under-tpo, notice-trees-in-con-area]
+    source-text: >-
+      Tree Survey or Arboricultural Assessment A Tree Survey or Arboricultural Assessment is required
+      for all development that affects any trees, particularly: Protected by a Tree Preservation Order
+      In a conservation area Within or affects ancient woodlands or ancient and veteran trees In a
+      historic park and garden Within a Nature Conservation Site In an Area of Landscape Importance,
+      Important Landscape Approach or Arcadian Area Considered to be important landscape or townsca…
+    must-include:
+      - item: A description of proposed works
+        level: must
+        required-if:
+          application-type:
+            in: [consent-under-tpo, notice-trees-in-con-area]
+      - item: A plan (not an aerial image) showing the position of the trees listed in the 
+          description of works
+        level: must
+        required-if:
+          application-type:
+            in: [consent-under-tpo, notice-trees-in-con-area]
+      - item: Reasons for the proposed work
+        level: must
+        required-if:
+          application-type:
+            in: [consent-under-tpo, notice-trees-in-con-area]
+      - item: Where trees are felled, proposals for replacement planting (quantity, species, 
+          position, size) or reasons for not replanting
+        level: must
+        required-if:
+          application-type:
+            in: [consent-under-tpo, notice-trees-in-con-area]
+    notes: >-
+      Audit (wrong_trigger): the Full planning row quoted the tree works application content, and
+      the replacement planting text was filed under the S106 row. The development trigger is from the
+      council's web page.
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [archaeological-priority-area]
+            description: The site has potential to include heritage assets with archaeological 
+              interest.
+        - discretionary
+    source-text: Archaeological Assessment All sites that have potential to include heritage assets 
+      with archaeological interest
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [local-wildlife-site, site-of-special-scientific-interest, special-protection-area]
+            description: Sites designated for nature conservation (Local Wildlife Site, SSSI, SPA).
+        - discretionary
+    source-text: >-
+      Ecology and Protected Species Survey All development likely to affect notable or protected
+      species, semi natural habitats or sites designated for the … Where semi-natural habitats will be
+      disturbed by or lost to development, a Preliminary Ecological Appraisal will be required at
+      submission.
+    must-include:
+      - item: A Preliminary Ecological Appraisal, where semi-natural habitats will be disturbed or 
+          lost
+        level: must
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to BNG requirements.
+    source-text: >-
+      Where development is subject to BNG requirements the application must legally be accompanied
+      by: Completed Statutory Metric showing the pre-development Biodiversity Value of all on-site
+      habitats (including irreplaceable habitats) undertaken by a competent person.
+    must-include:
+      - item: The pre-development biodiversity value of all on-site habitats (including 
+          irreplaceable habitats), by a competent person
+        level: must
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The application is subject to an Environmental Impact Assessment.
+    source-text: >-
+      Applications subject to an Environmental Impact Assessment (EIA) must be accompanied with an
+      Environmental Statement and non-technical summary.
+    must-include:
+      - item: A non-technical summary
+        level: must
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - discretionary
+    must-include:
+      - item: Description of the asset - what it is and why it is significant
+        level: must
+      - item: Assessment of impact - how the proposed works affect heritage significance, including 
+          setting
+        level: must
+    notes: >-
+      Audit (wrong_app_type): the Heritage Statement appears only under Listed building consent, but it
+      applies to other development affecting heritage assets; that trigger wasn't captured, so it is
+      shown as officer discretion.
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: >-
+          Previous risk-sensitive uses on or adjoining the site are likely to have caused
+          contamination (landfill, former industrial and commercial processes, petrol filling
+          stations, institutional uses, chemical storage including farms), or natural hazards.
+    source-text: >-
+      Ground conditions/Land Contamination Report A Ground conditions/Land Contamination Report is
+      required for all development where Previous risk-sensitive uses on or adjoining the site are
+      likely to have given rise to contamination, such as landfill sites, former industrial and
+      commercial processes, petrol filling stations, institutional uses, storage of chemicals (inc.
+      farms) Areas which may be affected by natural or background occurrence of potentially hazar…
+
+  - id: landscaping-plan
+    action: update
+    required-if: discretionary
+    source-text: Landscaping Scheme All development proposals affecting the urban or rural landscape
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      any:
+        - all:
+            - condition:
+                field: external-lighting
+                value: true
+                description: Outdoor lighting is proposed.
+            - site:
+                in: [area-of-outstanding-natural-beauty]
+                description: In a rural or light sensitive location (High Weald National Landscape).
+        - discretionary
+    source-text: >-
+      Lighting impact assessment All applications where outdoor lighting is proposed in rural or light
+      sensitive locations (High Weald National Landscape) or where there are concerns about light
+      pollution or lighting
+    notes: "Other rural locations and concerns about light pollution are shown as officer discretion."
+
+  - id: planning-statement
+    action: update
+    required-if:
+      always: true
+    source-text: "All applications Planning Statement(s) Including details of: Policy compliance"
+    must-include:
+      - item: Policy compliance
+        level: must
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      site:
+        in: [open-space]
+        description: The proposal affects sports or playing fields, or recreational buildings and 
+          land.
+    must-include:
+      - item: >-
+          Evidence that the facilities are surplus to requirements (quantity, contribution to local
+          character and setting) and that there is no need for an alternative community, sports or
+          recreational use, or how alternative provision will be met
+        level: must
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Telecommunication applications.
+    source-text: >-
+      Supporting information for Telecommunications Proposals Required for Telecommunication
+      applications Information required Pre-submission consultation information.
+    source-url: 
+      https://tunbridgewells.gov.uk/planning/applications/national-planning-requirements-validation-guidance
+    must-include:
+      - item: Pre-submission consultation information
+        level: must
+    notes: "Audit (missing_requirement): the text was filed under a 'Sequential / Exception Test (flood)'
+      row."
+
+  - id: waste-management-plan
+    action: update
+    required-if: discretionary
+    source-text: Waste Management Strategy All development that proposes a change to or new 
+      refuse/recycling facilities
+
+unmapped:
+  - local-name: Isolated homes in the countryside (rural workers' dwellings)
+    source-text: >-
+      Isolated homes in the countryside New dwellings for rural workers employed in agriculture,
+      forestry, and commercial equestrian, and other types of rural employment
+    source-url: 
+      https://tunbridgewells.gov.uk/__data/assets/pdf_file/0011/546491/Local-Validation-List-1.pdf
+    suggested-id: agricultural-worker-dwelling-statement
+  - local-name: Ashdown Forest mitigation contribution
+    source-text: >-
+      Developments within the 7km zone are likely to be required to make a financial contribution to
+      mitigation projects for the Ashdown Forest.
+    source-url: 
+      https://tunbridgewells.gov.uk/__data/assets/pdf_file/0011/546491/Local-Validation-List-1.pdf
+    suggested-id: habitats-regulations-assessment
+  - local-name: Self/Custom Build application form
+    source-text: >-
+      Self/Custom Build application form All residential development identified as falling within
+      the definition of a self/custom build
+    source-url: 
+      https://tunbridgewells.gov.uk/__data/assets/pdf_file/0011/546491/Local-Validation-List-1.pdf
+    suggested-id: self-build-statement
+  - local-name: Structural Survey or Statement
+    source-text: >-
+      A Structural Survey or Statement is required for all development where: It is important to know
+      if the building is of permanent, substantial construction and capable of conversion rather than
+      reconstruction or modification - barn conversions or conversion of rural buildings Applications
+      to Listed Buildings where works are proposed that involve demolition or affect the structural
+      integrity of a building Replacement dwellings o…
+    source-url: 
+      https://tunbridgewells.gov.uk/planning/applications/national-planning-requirements-validation-guidance
+    suggested-id: structural-survey
+
+low-confidence:
+  - id: sustainability-statement
+    note: >-
+      The excerpt is the Energy Statement entry ('An Energy Statement is required for: All minor
+      development'; elsewhere 'Energy Strategy Report (major development) or Energy Statement (minor
+      development)'); it may belong under energy-statement.
+  - id: noise-assessment
+    note: "Audit (wrong_trigger): the excerpt is affordable housing tenure text; the noise trigger wasn't
+      captured."
+  - id: flood-risk-assessment
+    note: "The excerpt is the SuDS strategy sentence; the flood risk trigger wasn't captured."
+  - id: transport-assessment
+    note: "Audit (wrong_trigger): the excerpt is reference-list text shared with Parking and Travel Plan."
+  - id: travel-plan
+    note: "Audit (wrong_trigger): the excerpt is reference-list text shared with Parking and Transport."
+

@@ -1,0 +1,244 @@
+# Corrections for Hertsmere Borough Council, from inputs/audit/hertsmere-borough-council.json.
+# Grokbot's link is an undated, legacy Householder Planning Application Validation Checklist that
+# the current planning pages no longer link; no other local list was found. Its local requirements
+# table uses development-type codes A-K (A single storey extension, B two storey extension,
+# C roof alterations ... G satellite dish, H wall/fence, J hard surfacing), so every item below is
+# householder-only. Items marked "From the audit" use the audit's paraphrase.
+local-authority: HER
+
+validation-list:
+  url: https://www.hertsmere.gov.uk/Documents/09-Planning--Building-Control/Planning/Planning-applications/Householder-Local-List.pdf
+  date: 2016-10
+  date-basis: "PDF metadata only; the audit found no date in the document and could not confirm it is
+    current"
+
+submission-standards:
+  - item: Plans have a drawing number
+    level: should
+  - item: Drawings state the paper size and include a scale bar, and do not carry a 'Do Not Scale' note
+    level: must
+
+drop:
+  - id: site-plan
+    reason: "not_a_requirement: block plan is a national requirement; the excerpt runs several table
+      cells together"
+  - id: design-and-access-statement
+    reason: "not_a_requirement: a national requirement; the excerpt runs several table cells together"
+  - id: photos
+    reason: "not_a_requirement: 'Beneficial although not a statutory requirement'"
+
+drop-unmapped:
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "not_a_requirement: 'Beneficial although not a statutory requirement'"
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "wrong_trigger: used the Biodiversity Survey text; replaced below with the checklist's trigger"
+  - local-name: Parking provision / Parking plan
+    reason: "garbled: the excerpt ran into the next rows; replaced below with the clean trigger"
+
+requirements:
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - site:
+            in: [tree-preservation-zone]
+            description: Existing trees protected by a TPO would be removed or affected by the
+              development.
+    source-text: >-
+      Tree survey / Arboricultural Statement Required for all development types except C, G and I
+      whereby existing TPO trees are to be removed and or affected by the development
+    confidence: medium
+    notes: "The list excludes development types C, G and I."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - any:
+            - site:
+                in: [local-wildlife-site]
+                description: The development could affect a wildlife site.
+            - condition:
+                field: protected-species
+                value: true
+                description: The development could affect protected species.
+    source-text: >-
+      Biodiversity Survey and Report All Development types (excluding G and I) if potentially
+      affecting a wildlife site or protected species.
+    source-url: https://www.hertsmere.gov.uk/Documents/09-Planning--Building-Control/Planning/Planning-applications/Householder-Local-List.pdf
+    confidence: medium
+    notes: >-
+      Audit (duplicate): the workbook drew both 'Ecological Survey' and 'Biodiversity Checklist'
+      from this one row; the Ecological Survey excerpt was a fragment.
+
+  - id: daylight-sunlight-assessment
+    action: update
+    source-text: Daylight/Sunlight assessment A, B, C, D, E, H and K
+    confidence: low
+    notes: >-
+      Audit (duplicate): the workbook's excerpt also held the Flood Risk Assessment row. The list
+      gives only development-type codes (A, B, C, D, E, H and K), which the rules can't express.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - site:
+            in: [flood-risk-zone]
+            description: The site is within a flood zone.
+    source-text: Flood risk assessment A, B, D, E, F, H, J and K if within a flood zone.
+    source-url: https://www.hertsmere.gov.uk/Documents/09-Planning--Building-Control/Planning/Planning-applications/Householder-Local-List.pdf
+    confidence: medium
+    notes: "Audit (duplicate): the workbook's excerpt also held the Daylight/Sunlight row."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - site:
+            in: [listed-building, listed-building-setting, archaeological-priority-area]
+            description: The site is within or adjacent to a listed building or an archaeological
+              area.
+    source-text: >-
+      Heritage statement ... within or adjacent to a listed building or archaeological area
+    source-url: https://www.hertsmere.gov.uk/Documents/09-Planning--Building-Control/Planning/Planning-applications/Householder-Local-List.pdf
+    must-include:
+      - item: Historical and archaeological features and Scheduled Ancient Monuments
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook showed 'All development types' without the condition. The
+      must-include item is from the entry's title, "Heritage Statement (including Historical,
+      archaeological features and Scheduled Ancient Monuments)".
+
+  - id: landscaping-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - any:
+            - condition:
+                field: new-boundary-treatment
+                value: true
+                description: The proposal is for a wall or fence (type H).
+            - condition:
+                field: hard-surfacing
+                value: true
+                description: The proposal is for hard surfacing (type J).
+    source-text: Landscaping details - H and J
+    source-url: https://www.hertsmere.gov.uk/Documents/09-Planning--Building-Control/Planning/Planning-applications/Householder-Local-List.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook showed 'All development types'; the list says H (wall/fence)
+      and J (hard surfacing) only."
+
+  - id: roof-plan-existing
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - condition:
+            field: roof-alteration
+            value: true
+            description: The roof is altered.
+    source-url: https://www.hertsmere.gov.uk/Documents/09-Planning--Building-Control/Planning/Planning-applications/Householder-Local-List.pdf
+    confidence: low
+    notes: >-
+      From the audit (wrong_trigger): roof plans for types A-D and K where the roof is altered, and
+      G (satellite dish) on a roof. The workbook's excerpt was a fragment. The dish case is not
+      expressed in the rule.
+
+  - id: roof-plan-proposed
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - condition:
+            field: roof-alteration
+            value: true
+            description: The roof is altered.
+    source-url: https://www.hertsmere.gov.uk/Documents/09-Planning--Building-Control/Planning/Planning-applications/Householder-Local-List.pdf
+    confidence: low
+    notes: >-
+      From the audit (wrong_trigger): roof plans for types A-D and K where the roof is altered, and
+      G (satellite dish) on a roof. The workbook's excerpt was a fragment. The dish case is not
+      expressed in the rule.
+
+  - id: section-existing
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: Levels change on a sloping site.
+    source-url: https://www.hertsmere.gov.uk/Documents/09-Planning--Building-Control/Planning/Planning-applications/Householder-Local-List.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): existing and proposed site sections and finished floor/site
+      levels, for all types except G, where levels change on a sloping site."
+
+  - id: section-proposed
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: Levels change on a sloping site.
+    source-url: https://www.hertsmere.gov.uk/Documents/09-Planning--Building-Control/Planning/Planning-applications/Householder-Local-List.pdf
+    must-include:
+      - item: Finished floor and site levels
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): existing and proposed site sections and finished floor/site
+      levels, for all types except G, where levels change on a sloping site."
+
+unmapped:
+  - local-name: Biodiversity Checklist
+    source-text: "From the audit: required within a wildlife site or an area with protected species"
+    source-url: https://www.hertsmere.gov.uk/Documents/09-Planning--Building-Control/Planning/Planning-applications/Householder-Local-List.pdf
+    suggested-id: biodiversity-checklist
+  - local-name: Parking provision
+    source-text: "Parking provision Applicable to all developments which increase the number of bedrooms or
+      results in the loss of existing parking provision"
+    source-url: https://www.hertsmere.gov.uk/Documents/09-Planning--Building-Control/Planning/Planning-applications/Householder-Local-List.pdf
+    suggested-id: parking-plan
+  - local-name: Shenley Neighbourhood Plan Code Compliance Checklist
+    source-text: "From the audit: applications within the Shenley Neighbourhood Plan area; the apply page
+      says it will form part of local validation requirements 'in due course'"
+    source-url: https://www.hertsmere.gov.uk/planning-building-control/planning-applications/apply-for-planning-permission
+    suggested-id: design-code-compliance-checklist
+
+low-confidence:
+  - id: floor-plan-existing
+    note: "Audit (missing_requirement): floor plans and elevations depend on the A-K development-type codes,
+      which the workbook didn't capture."
+  - id: floor-plan-proposed
+    note: "Audit (missing_requirement): floor plans and elevations depend on the A-K development-type codes,
+      which the workbook didn't capture."
+  - id: elevation-existing
+    note: "Audit (missing_requirement): floor plans and elevations depend on the A-K development-type codes,
+      which the workbook didn't capture."
+  - id: elevation-proposed
+    note: "Audit (missing_requirement): proposed elevations are needed for all types except J (hard
+      surfacing); the workbook's excerpt was about existing elevations."
+
+new-fields:
+  - field: hard-surfacing
+    kind: boolean
+    label: New hard surfacing
+    description: The proposal includes new or replacement hard surfacing (for example a driveway or patio).

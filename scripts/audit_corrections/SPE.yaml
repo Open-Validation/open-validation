@@ -1,0 +1,498 @@
+# Corrections for Spelthorne Borough Council, from inputs/audit/spelthorne-borough-council.json.
+# The audit read the June 2026 Local List of Requirements (the only list the council publishes;
+# the council page presents it as a consultation version, 11 June to 9 July 2026, with no adoption
+# date). Each item in the list has a 'Types of application' column that the workbook ignored.
+# Items marked "From the audit" use the audit's paraphrase.
+local-authority: SPE
+
+submission-standards:
+  - item: Plans in PDF format for electronic submissions
+    level: should
+  - item: Plans annotated with the overall dimensions and height of each element of the proposed 
+      development, and the distance to the adjoining boundaries from each elevation
+    level: should
+  - item: Personal details redacted from any photographs submitted
+    level: should
+
+drop:
+  - id: environmental-statement
+    reason: "not_a_requirement: only mentioned in the explanatory notes ('might form part of an Environmental
+      Statement')"
+  - id: construction-management-plan
+    reason: "not_a_requirement: only inside Explanatory Note 2 (air quality), not a numbered item"
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is the Construction Management Plan text"
+
+drop-unmapped:
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_trigger: table column headers only; SPA is covered by the PEA trigger"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: table column headers only; re-added below"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: fragment ('consultee for SuDS.'); re-added below"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: table column headers only; re-added below with the council's wording from
+      the waste row"
+  - local-name: Structural Survey
+    reason: "wrong_trigger: from the old explanatory notes; re-added below with the Item 37 trigger"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more dwellings.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: 1,000 square metres or more of non-residential floorspace.
+    confidence: medium
+    notes: "From the audit (missing_requirement): Item 15 applies to 10+ dwellings or 1,000 sq m+ non-residential;
+      the whole borough is an AQMA."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees within the site or on adjacent land (including street trees) 
+          that could influence or be affected by the development.
+    source-text: >-
+      Tree survey/Arboriculture implications Where there are trees within the application site, or on
+      land adjacent to it that could influence or be affected by the development (including street
+      trees), information will be required on which trees are to be retained and on the means of
+      protecting these trees during construction works.
+    must-include:
+      - item: Which trees are to be retained
+        level: must
+      - item: How the retained trees will be protected during construction works
+        level: must
+    confidence: medium
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, demolition-con-area]
+        - site:
+            in: [archaeological-priority-area]
+            description: The site is of high archaeological potential.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.4
+            description: The site is 0.4 hectares or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 0.4
+            description: The site is 0.4 hectares or more.
+    source-text: Applications for Listed Building or Conservation Area Consent
+    source-url: 
+      https://www.spelthorne.gov.uk/sites/default/files/2026-06/Local%20List%20of%20Requirements_0.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook had the foul sewage/utilities text. From the audit: Item 21
+      covers LBC and conservation area consent, sites of high archaeological potential and sites of
+      0.4 ha or more; how these combine needs checking.
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [site-of-special-scientific-interest, local-wildlife-site, special-protection-area]
+            description: Designated sites (SSSI, SNCI, SPA).
+        - discretionary
+    source-url: 
+      https://www.spelthorne.gov.uk/sites/default/files/2026-06/Local%20List%20of%20Requirements_0.pdf
+    must-include:
+      - item: Results of a search from the Surrey Biodiversity Information Centre (for all but the 
+          most minor applications)
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt was column headers. From the audit: PEA for designated
+      sites (SSSI/SNCI/SPA), major development or land within 100m of priority habitat (shown as officer
+      discretion)."
+
+  - id: bng-metric
+    action: replace
+    source-text: Measurable biodiversity net gain must be outlined within the assessment.
+    source-url: 
+      https://www.spelthorne.gov.uk/sites/default/files/2026-06/Local%20List%20of%20Requirements_0.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): Item 38 says 'All', not only outline."
+
+  - id: cil-form
+    action: update
+    must-include:
+      - item: All internal dimensions clearly shown on the drawings, where the proposal is CIL 
+          liable
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): the CIL item applies to all applications, not only Full planning."
+
+  - id: daylight-sunlight-assessment
+    action: update
+    must-include:
+      - item: Based on the BRE guidelines on daylight assessments
+        level: must
+    confidence: low
+    notes: "Audit (wrong_trigger): the excerpt ends with the LLFA SuDS sentence and gives no trigger."
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: Blank elevations included (to show that this is the case)
+        level: must
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 2
+            description: The building contains 2 or more dwellings.
+    source-text: >-
+      The applicant is required to submit a fire statement setting out fire safety considerations
+      specific to the development with a relevant application for planning permission for
+      development which involves one or more relevant buildings.
+    source-url: 
+      https://www.spelthorne.gov.uk/sites/default/files/2026-06/Local%20List%20of%20Requirements_0.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt leaves out the 18m / 7+ storey, 2+ dwellings threshold."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - site:
+                in: [flood-risk-zone]
+                description: The site is in Flood Zone 2, 3 or 3b.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: Residential development created by new build or conversion.
+                - condition:
+                    field: residential-extension
+                    value: true
+                    description: Residential extensions (in Flood Zone 3b).
+        - site:
+            in: [critical-drainage-area]
+            description: The site is in an area at risk of surface water flooding.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 0.5
+            description: The site is over 0.5 hectares.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 0.5
+            description: The site is over 0.5 hectares.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more dwellings.
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 1000
+            description: 1,000 square metres or more of floorspace.
+    source-text: Residential development created by new build or conversion
+    source-url: 
+      https://www.spelthorne.gov.uk/sites/default/files/2026-06/Local%20List%20of%20Requirements_0.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the excerpt was column headers. From the audit: Flood Zones 2/3/3b and
+      surface-water risk areas, for new dwellings/conversions, residential extensions in FZ3b and
+      sites over 0.5ha / 10+ dwellings / 1,000 sq m. How the site-size thresholds combine with the
+      locations needs checking in Item 19.
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      application-type:
+        in: [lbc, demolition-con-area]
+    source-text: Applications for Listed Building or Conservation Area Consent
+    source-url: 
+      https://www.spelthorne.gov.uk/sites/default/files/2026-06/Local%20List%20of%20Requirements_0.pdf
+    confidence: low
+    notes: "From the audit (wrong_app_type): Item 21 (heritage) is limited to LBC and conservation area
+      works; the workbook had no heritage row."
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: previously-developed-land
+            value: true
+            description: Development on or adjacent to land previously in industrial or commercial 
+              use, or former or active landfill.
+        - site:
+            in: [contaminated-land]
+            description: Development on or adjacent to land known to be affected by contamination.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more dwellings.
+    source-text: >-
+      Land Contamination assessment Applications where the development is for new housing or other
+      forms of development which are particularly sensitive to contamination, and/or which propose
+      development on or adjacent to land that has been subject to previous industrial or commercial
+      uses, former landfill sites, active landfill sites or other land known to be affected by
+      contamination must include an appropriate assessment of land contamination risk…
+    source-url: 
+      https://www.spelthorne.gov.uk/sites/default/files/2026-06/Local%20List%20of%20Requirements_0.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): not a minerals and waste item. From the audit: Item 18 applies to
+      development on or next to previously developed or contaminated land, and to 10+ dwellings."
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: External lighting or floodlighting would be provided or made necessary by the 
+          development.
+    source-text: >-
+      Lighting assessment Proposals involving the provision of publicly accessible developments, in
+      the vicinity of residential property, a listed building or a conservation area, or open
+      countryside, where external lighting would be provided or made necessary by the development,
+      should be required to be accompanied by details of external lighting and the proposed hours when
+      the lighting would be switched on.
+    source-url: 
+      https://www.spelthorne.gov.uk/sites/default/files/2026-06/Local%20List%20of%20Requirements_0.pdf
+    must-include:
+      - item: Details of the external lighting
+        level: must
+      - item: The proposed hours when the lighting would be switched on
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): not an LBC item; Item 22's trigger is 'Application for floodlighting'."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Noise-generating development.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise-sensitive uses near noise sources.
+    source-url: 
+      https://www.spelthorne.gov.uk/sites/default/files/2026-06/Local%20List%20of%20Requirements_0.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Item 23, noise-generating development or noise-sensitive
+      uses near noise sources."
+
+  - id: roof-plan-existing
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New buildings.
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Extensions with complex roofs.
+    source-url: 
+      https://www.spelthorne.gov.uk/sites/default/files/2026-06/Local%20List%20of%20Requirements_0.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Item 8, new buildings and extensions with complex roofs."
+
+  - id: roof-plan-proposed
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New buildings.
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Extensions with complex roofs.
+    source-url: 
+      https://www.spelthorne.gov.uk/sites/default/files/2026-06/Local%20List%20of%20Requirements_0.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Item 8, new buildings and extensions with complex roofs."
+
+  - id: section-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Roof extensions and dormers.
+        - discretionary
+    confidence: low
+    notes: "From the audit (wrong_app_type): Item 9 levels/sections also catches roof extensions and dormers;
+      its full trigger isn't given."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Roof extensions and dormers.
+        - discretionary
+    confidence: low
+    notes: "From the audit (wrong_app_type): Item 9 levels/sections also catches roof extensions and dormers;
+      its full trigger isn't given."
+
+  - id: sustainability-statement
+    action: replace
+    source-text: Completion of Climate Change Checklist plus additional documents required as set 
+      out in the Spelthorne Climate Change SPD.
+    source-url: 
+      https://www.spelthorne.gov.uk/sites/default/files/2026-06/Local%20List%20of%20Requirements_0.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): Item 39 applies to 'All Planning Applications' (the SPD has householder
+      and minor versions). The workbook also quoted an Energy Statement ("setting out how you have met
+      efficiency and clean energy targets (including provision of on-site renewable energy facilities)
+      at a scale that is appropriate to the type of development proposed"), without its trigger.
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Mast and antenna development by mobile phone network operators.
+    must-include:
+      - item: The area of search
+        level: should
+      - item: Details of any consultation undertaken
+        level: should
+      - item: Details of the proposed structure
+        level: should
+      - item: Technical justification and information about the proposed development
+        level: should
+    confidence: medium
+
+  - id: viability-assessment
+    action: update
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: 10 or more dwellings.
+    confidence: medium
+    notes: "From the audit (missing_requirement): Item 12, Affordable Housing Viability Statement, for
+      10+ dwellings where the policy (at least 30% affordable, 50% on greenfield) is not met."
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more units.
+        - discretionary
+    source-url: 
+      https://www.spelthorne.gov.uk/sites/default/files/2026-06/Local%20List%20of%20Requirements_0.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger, missing_requirement): the excerpt was the Heads of Terms text. From
+      the audit: Item 27 Waste and Recycling Strategy for major, 10+ units or flatted development (flatted
+      shown as officer discretion)."
+
+unmapped:
+  - local-name: Planning Obligations Draft Heads of Terms
+    source-text: "Where Development Plan Documents contain policies that give details of likely planning
+      obligations requirements, or where these have been discussed in pre- application discussions, the
+      Council will require a statement of the proposed heads of terms or a draft legal agreement to be
+      submitted with the application."
+    source-url: 
+      https://www.spelthorne.gov.uk/sites/default/files/2026-06/Local%20List%20of%20Requirements_0.pdf
+    suggested-id: planning-obligations-heads-of-terms
+  - local-name: SuDS statement / pro forma
+    source-text: "All planning applications are required to demonstrate..."
+    source-url: 
+      https://www.spelthorne.gov.uk/sites/default/files/2026-06/Local%20List%20of%20Requirements_0.pdf
+    suggested-id: drainage-strategy
+  - local-name: Ventilation / extraction details
+    source-text: "From the audit: commercial kitchens and Class E food uses"
+    source-url: 
+      https://www.spelthorne.gov.uk/sites/default/files/2026-06/Local%20List%20of%20Requirements_0.pdf
+    suggested-id: plant-specification
+  - local-name: Structural Survey
+    source-text: "Listed Building and applications and applications within a Conservation Area that propose
+      the demolition or partial demolition of buildings"
+    source-url: 
+      https://www.spelthorne.gov.uk/sites/default/files/2026-06/Local%20List%20of%20Requirements_0.pdf
+    suggested-id: structural-survey
+  - local-name: Accessibility Compliance Statement
+    source-text: "From the audit: Item 14, new dwellings (M4(2)/M4(3))"
+    source-url: 
+      https://www.spelthorne.gov.uk/sites/default/files/2026-06/Local%20List%20of%20Requirements_0.pdf
+    suggested-id: access-statement
+  - local-name: Wind microclimate study
+    source-text: "From the audit: Item 35, buildings over 6 storeys"
+    source-url: 
+      https://www.spelthorne.gov.uk/sites/default/files/2026-06/Local%20List%20of%20Requirements_0.pdf
+    suggested-id: wind-microclimate-assessment
+  - local-name: Tree sketch / location plan
+    source-text: "From the audit: Item 40, works to TPO trees or trees in Conservation Areas"
+    source-url: 
+      https://www.spelthorne.gov.uk/sites/default/files/2026-06/Local%20List%20of%20Requirements_0.pdf
+    suggested-id: tree-plan
+  - local-name: Plans of adjoining properties' windows
+    source-text: "From the audit: Item 5, built development adjoining homes"
+    source-url: 
+      https://www.spelthorne.gov.uk/sites/default/files/2026-06/Local%20List%20of%20Requirements_0.pdf
+    suggested-id: ""
+  - local-name: Manufacturer's details of listed building features
+    source-text: "From the audit: Item 10, listed building consent"
+    source-url: 
+      https://www.spelthorne.gov.uk/sites/default/files/2026-06/Local%20List%20of%20Requirements_0.pdf
+    suggested-id: ""
+
+low-confidence:
+  - id: "*"
+    note: "Audit (other): the council page presents the June 2026 list as a consultation version (11 June
+      to 9 July 2026) and never says it has been adopted; adoption should be confirmed."
+  - id: travel-plan
+    note: "Audit (wrong_trigger): the excerpt runs on into the tree survey note and gives no trigger."
+

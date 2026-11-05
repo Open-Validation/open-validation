@@ -1,0 +1,357 @@
+# Corrections for Gedling Borough Council, from inputs/audit/gedling-borough-council.json.
+# The May 2025 Local Requirements List (adopted 22 May 2025) is current. The audit could not read
+# the .docx, so it checked the contents against the January 2024 amended draft. Grokbot filed every
+# item under Full planning ('INFERRED'); the build already drops those types. The list has a matrix
+# by application type (HH, NB, RC, CNR, CoU, AG, OUT, RM, LBC, HR) that the audit summarised only in
+# part, so items without a clear trigger stay low confidence.
+local-authority: GED
+
+drop:
+  - id: floor-plan-existing
+    reason: "wrong_trigger: the excerpt ('at 1:5 elevations with 1:2 sections') is from the joinery details guidance (LBC)"
+  - id: floor-plan-proposed
+    reason: "wrong_trigger: as above; joinery details are added as an unmapped item"
+  - id: elevation-existing
+    reason: "wrong_trigger: as above"
+  - id: elevation-proposed
+    reason: "wrong_trigger: as above"
+
+drop-unmapped:
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_trigger: the excerpt starts with S106 Heads of Terms text; re-added below without it"
+
+requirements:
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are mature trees on the site, or within a hedgerow to be removed.
+    confidence: low
+    notes: >-
+      The excerpt is the hedgerow-removal wording ("required where mature trees are located within
+      the hedgerow"). From the audit (wrong_app_type): the matrix also asks for a tree survey,
+      conditionally, for householder applications and hedgerow removal; the other types and the
+      general trigger were not given.
+
+  - id: bng-metric
+    action: update
+    must-include:
+      - item: A statement as to whether the applicant believes that planning permission, if granted,
+          would be subject to mandatory Biodiversity Net Gain
+        level: must
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: The direction north
+        level: must
+      - item: The proposed development in relation to the site boundaries and other existing
+          buildings on the site, with written dimensions including those to the boundaries
+        level: must
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: The site (in Flood Zone 1) is over 1 hectare.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: The site (in Flood Zone 1) is over 1 hectare.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: The proposal creates 10 or more dwellings.
+    must-include:
+      - item: Written by a suitably qualified person, with their name and qualifications
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt only gave the authorship rule. From the audit: Flood Zones
+      2/3, and in Flood Zone 1 sites over 1ha or 10+ dwellings ('Flood Zone 1 ... over 1 ha ... 10+
+      dwellings').
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+          scheduled-monument, park-and-garden]
+        description: The development affects a heritage asset.
+    source-text: development affecting a heritage asset
+    must-include:
+      - item: Any archaeological issues at the site
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted only the archaeology sentence ("Heritage Impact
+      Assessment will need to cover any archaeological issues at the site"), now a must-include
+      item. The matrix also lists it, conditionally, for householder applications.
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: floodlighting
+        value: true
+        description: Floodlighting is proposed.
+    source-text: where floodlighting is proposed
+    must-include:
+      - item: Written by a suitably qualified person
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt ('must include:-') was cut off before the trigger."
+
+  - id: noise-assessment
+    action: update
+    source-text: "Noise assessment A noise impact assessment should include the following information:-"
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the excerpt began with 'This document can be viewed at:-' and gives
+      no trigger; the audit does not give one either.
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      site:
+        in: [open-space]
+        description: The application affects playing field land.
+    must-include:
+      - item: Sport-specific information in line with Annex B of Sport England's Playing Fields Policy
+        level: must
+    confidence: medium
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: retail-floorspace
+            operator: ">="
+            value: 500
+            description: The proposal is for retail uses of 500 square metres or more (gross).
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: The site is not within a defined Town or Local Centre.
+    confidence: medium
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: The proposal is for telecommunications development.
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the excerpt is the aerodrome notification text (a step before
+      applying), not the trigger for supplementary information.
+
+  - id: transport-assessment
+    action: update
+    source-text: ""
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted the document's introduction instead of the
+      Appendix 1 Transport Statement thresholds, which the audit does not give. Re-read Appendix 1.
+
+  - id: travel-plan
+    action: update
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">"
+        value: 50
+        description: The development is over 50 units.
+    must-include:
+      - item: The specific required outcomes, targets and measures
+        level: should
+      - item: Future monitoring and management arrangements
+        level: should
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the threshold is 'developments over 50 units'. Whether 'units' also
+      covers non-residential units is not clear.
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: >-
+      Needed where the developer considers it is not financially viable to enter into an agreement,
+      or that they can make reduced payments (council's wording).
+
+  - id: cil-form
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 100
+            description: A net increase of over 100 square metres of residential or retail floorspace.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates a new dwelling.
+        - condition:
+            field: residential-annexe
+            value: true
+            description: The proposal creates a residential annexe.
+    source-url: https://www.gedling.gov.uk/sites/default/files/2025-08/GBC%20Local%20Requirements%20List%20May%202025.docx
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): CIL forms for a net increase over 100sqm of
+      residential/retail floorspace, or a new dwelling/annex (also for householder applications).
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: Contamination is possible from a former use of the site.
+    source-url: https://www.gedling.gov.uk/sites/default/files/2025-08/GBC%20Local%20Requirements%20List%20May%202025.docx
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): 'Environmental statement / land contamination' Phase
+      I-III reports where contamination is possible from a former use.
+
+  - id: landscaping-plan
+    action: add
+    required-if: discretionary
+    source-url: https://www.gedling.gov.uk/sites/default/files/2025-08/GBC%20Local%20Requirements%20List%20May%202025.docx
+    must-include:
+      - item: Layout plans at a metric scale of 1:500, and planting schemes at 1:200 or 1:100
+        level: must
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): landscaping details for ecologically or visually
+      sensitive sites (the matrix also lists them for outline and reserved matters). No field
+      expresses 'visually sensitive', so this is shown as officer discretion. The scales are from
+      the council tab.
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: The proposal creates 10 or more dwellings.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Commercial development on a site of 1 hectare or more.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: Commercial development of 1,000 square metres or more.
+    source-url: https://www.gedling.gov.uk/sites/default/files/2025-08/GBC%20Local%20Requirements%20List%20May%202025.docx
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Low Carbon Planning Guidance statement for 10+
+      dwellings or commercial development of 1ha / 1,000sqm or more.
+
+  - id: planning-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: departure-from-development-plan
+            value: true
+            description: The application is a departure from the development plan.
+    source-url: https://www.gedling.gov.uk/sites/default/files/2025-08/GBC%20Local%20Requirements%20List%20May%202025.docx
+    confidence: medium
+    notes: "From the audit (missing_requirement): major applications and departures."
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal includes new residential development.
+        - discretionary
+    source-url: https://www.gedling.gov.uk/sites/default/files/2025-08/GBC%20Local%20Requirements%20List%20May%202025.docx
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Site Waste Management Plan for all new residential
+      development, plus commercial development that generates waste (shown as officer discretion);
+      bin storage to be shown on the plan.
+
+  - id: sci
+    action: add
+    required-if:
+      condition:
+        field: pre-application-community-consultation
+        value: true
+        description: Community consultation took place before the application was submitted.
+    source-url: https://www.gedling.gov.uk/sites/default/files/2025-08/GBC%20Local%20Requirements%20List%20May%202025.docx
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Statement of Community Involvement where
+      pre-application community consultation took place (the matrix also lists it for reserved
+      matters).
+
+unmapped:
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    source-text: >-
+      Coal Mining Risk Assessment All land within the coalfield falls within either a Development
+      High Risk Area or Development Low Risk Area as defined by the Mining Remediation Authority.
+    source-url: https://www.gedling.gov.uk/sites/default/files/2025-08/GBC%20Local%20Requirements%20List%20May%202025.docx
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Joinery details
+    source-text: "From the audit: listed building consent for new/replacement windows, doors, mouldings and shopfronts; 'at 1:5 elevations with 1:2 sections.'"
+    source-url: https://www.gedling.gov.uk/sites/default/files/2025-08/GBC%20Local%20Requirements%20List%20May%202025.docx
+    suggested-id: joinery-details
+  - local-name: Green Belt calculations
+    source-text: "From the audit: Green Belt previously developed land housing, conversions, commercial and householder proposals"
+    source-url: https://www.gedling.gov.uk/sites/default/files/2025-08/GBC%20Local%20Requirements%20List%20May%202025.docx
+    suggested-id: green-belt-calculations
+  - local-name: Parking provision
+    source-text: "From the audit: where existing parking is altered"
+    source-url: https://www.gedling.gov.uk/sites/default/files/2025-08/GBC%20Local%20Requirements%20List%20May%202025.docx
+    suggested-id: parking-plan
+  - local-name: Ventilation/Extraction statement
+    source-text: "From the audit: where new ventilation or extraction is proposed"
+    source-url: https://www.gedling.gov.uk/sites/default/files/2025-08/GBC%20Local%20Requirements%20List%20May%202025.docx
+    suggested-id: ventilation-extraction-statement
+  - local-name: Design Code checklist
+    source-text: "Design Code checklist A design code checklist should be provided for the applications as outlined above."
+    source-url: https://www.gedling.gov.uk/sites/default/files/2025-08/GBC%20Local%20Requirements%20List%20May%202025.docx
+    suggested-id: design-code-checklist
+
+low-confidence:
+  - id: daylight-sunlight-assessment
+    note: >-
+      Audit (wrong_app_type): the excerpt is a fragment with no trigger; the matrix lists it,
+      conditionally, for householder applications (45-degree line).
+  - id: biodiversity-survey-report
+    note: >-
+      Audit (wrong_app_type): 'Where required' gives no trigger; the matrix lists ecology,
+      conditionally, for householder and hedgerow removal applications as well.
+
+new-fields:
+  - field: pre-application-community-consultation
+    kind: boolean
+    label: Pre-application community consultation
+    description: The applicant consulted the local community before submitting the application.

@@ -1,0 +1,669 @@
+# Corrections for South Downs National Park Authority, from the audit of the SDNPA.
+# Grokbot read the superseded September 2023 list; the authority's page now links only the 'BNG
+# version 2024-002' list, which changes the BNG wording. The audit compared the two. Grokbot put
+# everything under Full planning, took many triggers from reference columns or the next row, and
+# missed about 20 requirements. Items marked "From the audit" use the audit's paraphrase, not the
+# authority's exact words; quoted text is from the list.
+local-authority: SDNPA
+
+validation-list:
+  date: 2024
+  date-basis: "audit: 'BNG version 2024-002' file; no adoption date stated, its BNG triggers take effect
+    12 February and 2 April 2024"
+
+submission-standards:
+  - item: All scaled plans include a metric scale bar
+    level: must
+
+drop:
+  - id: schedule-of-works
+    reason: "not_a_requirement: not in the SDNPA list; the excerpt is the tree survey text"
+
+drop-unmapped:
+  - local-name: Schedule of works (listed building)
+    reason: "not_a_requirement: not in the SDNPA list"
+  - local-name: Self-build / custom build information
+    reason: "not_a_requirement: a statutory BNG exemption, not a document to submit"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "duplicate: repeats the Affordable Housing Statement trigger (Heads of Terms now a must-include
+      item there)"
+  - local-name: Water efficiency / water usage statement
+    reason: "duplicate: truncated Water Neutrality Statement text"
+  - local-name: Water Neutrality Statement
+    reason: "now under water-impact-assessment with its full trigger"
+  - local-name: Nutrient Neutrality statement / calculator
+    reason: "now under water-impact-assessment with its location trigger"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "duplicate: a sentence from the Affordable Housing row; the Mix of Homes Statement is re-added
+      below"
+  - local-name: Landscape and Visual Impact Assessment
+    reason: "wrong_trigger: land contamination text; re-added below with the list's trigger"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: Building Regulations and HRA text; re-added below as two items"
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_trigger: reference list; re-added below with the audit's trigger"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: guidance titles; re-added below with the audit's trigger"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: Housing development.
+        - discretionary
+    policy: South Downs Local Plan Policy SD28
+    source-text: >-
+      Affordable Housing Statement (& S106 Agreement Heads of Terms, if Affordable Housing required as
+      part of the application) All applications for housing development which require on-site
+      affordable housing provision and/or a financial contribution in lieu, in accordance with policy
+      SD28, including rural exception sites.
+    must-include:
+      - item: S106 Agreement Heads of Terms, if affordable housing is required as part of the 
+          application
+        level: must
+    confidence: medium
+    notes: "Needed where Policy SD28 requires on-site affordable housing or a contribution (thresholds
+      are in the policy, not the list)."
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - discretionary
+        - site:
+            in: [air-quality-management-area]
+            description: The development would affect an Air Quality Management Area.
+        - discretionary
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): major development increasing traffic, bio-aerosols,
+      particulates or odour, or affecting an AQMA; B8 over 500 sqm (no field for use class, shown as
+      officer discretion).
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Development affecting trees, unless the SDNPA checklist shows no adverse impact
+          on trees.
+    policy: South Downs Local Plan Policy SD11
+    source-text: >-
+      Tree Survey/ Arboricultural Assessment/Arboricultural Method Statement and Tree Protection Plan
+      (in accordance with BS:5837 All applications for development affecting trees unless accurate
+      completion of the SDNPA checklist demonstrates no adverse impact on trees
+    confidence: medium
+    notes: "Audit (wrong_app_type): applies to all application types, including householder."
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [site-of-special-scientific-interest, special-protection-area, local-wildlife-site]
+            description: Development within, next to or affecting a designated site.
+        - discretionary
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a biodiversity survey / Ecological Impact Assessment for
+      development within, adjacent to or affecting priority species or designated sites, including
+      householder where protected species are likely (shown as officer discretion).
+
+  - id: bng-metric
+    action: replace
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    must-include:
+      - item: A strategy to deliver 10% Biodiversity Net Gain
+        level: must
+      - item: The statutory biodiversity metric, in macro-disabled Excel format
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, outdated_link): the workbook's text was cut off and called BNG
+      'forthcoming'. The current list applies statutory BNG to major sites from 12 February 2024
+      (10+ dwellings or housing on more than 0.5ha, 1,000 sqm or more floorspace, or a site of 1ha or
+      more) and small sites from 2 April 2024; national exemptions apply.
+
+  - id: cil-form
+    action: replace
+    required-if:
+      application-type:
+        in: [hh, full, s73, outline, reserved-matters, prior-approval, ldc]
+    source-text: All householder, minor and major applications (including S73 applications), outline
+      and reserved matters applications
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type, wrong_trigger): CIL Forms 1, 2 and 5; the 2024 list extends them to
+      prior approvals and LDCs."
+
+  - id: construction-management-plan
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 80
+            description: Major development of over 80 properties.
+        - discretionary
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Construction and Strategic Traffic Management Plans
+      for major development over 80 properties or significant commercial/tourism development."
+
+  - id: elevation-existing
+    action: add
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    must-include:
+      - item: Full elevations, including outbuildings
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): local drawing requirement for full existing and proposed
+      elevations including outbuildings."
+
+  - id: elevation-proposed
+    action: add
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    must-include:
+      - item: Full elevations, including outbuildings
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): local drawing requirement for full existing and proposed
+      elevations including outbuildings."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: EIA development.
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was land contamination text."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: All proposals in Flood Zones 2 or 3, including minor development and change
+              of use.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: A site over 1 hectare in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: A site over 1 hectare in Flood Zone 1.
+        - site:
+            in: [critical-drainage-area]
+            description: A site under 1 hectare in Flood Zone 1 with other flood risk or in a 
+              critical drainage area.
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was a list of guidance titles."
+
+  - id: floor-plan-existing
+    action: add
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    must-include:
+      - item: Full floor plans, including outbuildings
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): local drawing requirement for full existing and proposed
+      floor plans including outbuildings."
+
+  - id: floor-plan-proposed
+    action: add
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    must-include:
+      - item: Full floor plans, including outbuildings
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): local drawing requirement for full existing and proposed
+      floor plans including outbuildings."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, scheduled-monument]
+            description: The development affects a designated heritage asset.
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    must-include:
+      - item: Follows the SDNPA's Heritage Statement Guidance
+        level: must
+        source-text: Heritage statements must follow the SDNPA’s Heritage Statement Guidance
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): the workbook's excerpt was contamination text. From
+      the audit: development affecting a designated heritage asset, for all application types including
+      householder and LBC."
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: >-
+              Contamination is known or suspected (including previous military uses), or the site is
+              within 250m of a current licensed or historic landfill site.
+        - discretionary
+    source-text: >-
+      Land contamination Assessment All applications if contamination is known/suspected to exist,
+      including previous military uses in case of unexploded ordnance and ordnance clearance All
+      applications where the site is within 250m of a current licensed or historic landfill site.
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): not a minerals and waste requirement; it applies to all applications.
+      A sensitive use proposed on previously used land is shown as officer discretion.
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: The proposal includes any outdoor lighting.
+    policy: South Downs Local Plan Policy SD8
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Lighting assessment / Dark Night Skies for any outdoor
+      lighting, non-householder development outside settlement boundaries, near listed buildings or
+      in conservation areas, and where bats are present.
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Non-householder development likely to generate noise.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: A noise-sensitive use near a noise source.
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): not for householder applications."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: loss-of-use
+            value: true
+            description: Public open space would be lost.
+        - discretionary
+    policy: South Downs Local Plan Policy SD46
+    source-text: >-
+      Open space Assessment All applications for development where public open space is to be lost
+      or new open space required as part of the development
+    confidence: medium
+    notes: "Where new open space is required is shown as officer discretion. The audit also lists a separate
+      Playing Field/Sports provision assessment."
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Extensions to roof forms.
+        - condition:
+            field: new-build
+            value: true
+            description: New buildings.
+    source-text: Roof plans (Required for all applications involving extensions to roof forms and 
+      new buildings).
+    confidence: medium
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Extensions to roof forms.
+        - condition:
+            field: new-build
+            value: true
+            description: New buildings.
+    source-text: Roof plans (Required for all applications involving extensions to roof forms and 
+      new buildings).
+    confidence: medium
+
+  - id: section-existing
+    action: add
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: Levels change or the site slopes.
+    source-text: Existing and proposed site sections, finished floor and site levels, and a datum 
+      point (1:50 or 1:100)
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    must-include:
+      - item: Finished floor and site levels
+        level: must
+      - item: A datum point
+        level: must
+      - item: Scale 1:50 or 1:100
+        level: must
+    confidence: medium
+    notes: "Audit (missing_requirement): local drawing requirement where levels change or the site slopes."
+
+  - id: section-proposed
+    action: add
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: Levels change or the site slopes.
+    source-text: Existing and proposed site sections, finished floor and site levels, and a datum 
+      point (1:50 or 1:100)
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    must-include:
+      - item: Finished floor and site levels
+        level: must
+      - item: A datum point
+        level: must
+      - item: Scale 1:50 or 1:100
+        level: must
+    confidence: medium
+    notes: "Audit (missing_requirement): local drawing requirement where levels change or the site slopes."
+
+  - id: site-plan
+    action: add
+    source-url: 
+      https://www.southdowns.gov.uk/wp-content/uploads/2023/05/Local-Validation-List-September-2023.pdf
+    source-text: >-
+      Block plan including site access details, scale bar, key dimensions (distance of the
+      development from the boundaries of the site and size of the building), original paper size and
+      a north point.
+    must-include:
+      - item: Site access details
+        level: must
+      - item: Scale bar
+        level: must
+      - item: Key dimensions (distance of the development from the site boundaries, and size of the 
+          building)
+        level: must
+      - item: Original paper size
+        level: must
+    confidence: medium
+    notes: "From the authority's drawing standards (September 2023 list)."
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New residential, commercial, agricultural or community buildings.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: Conversion of existing buildings.
+        - all:
+            - condition:
+                field: residential-extension
+                value: true
+                description: A residential extension.
+            - condition:
+                field: floorspace
+                operator: ">"
+                value: 100
+                description: The extension adds more than 100 sqm internal floor area.
+    policy: South Downs Local Plan Policy SD48
+    source-text: >-
+      Sustainability Assessment All applications for new residential, commercial, agricultural,
+      community buildings (and also conversion of existing buildings) and residential extensions with
+      an increase of more than 100sqm internal floor area.
+    source-url: 
+      https://www.southdowns.gov.uk/wp-content/uploads/2023/05/Local-Validation-List-September-2023.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement): the workbook had this only as a garbled tab item."
+
+  - id: telecommunications-report
+    action: add
+    policy: South Downs Local Plan Policy SD44
+    source-text: All telecommunications equipment applications (excluding Prior Approval 
+      Applications and Notifications)
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement): the Telecommunications Statement; the workbook's text was in
+      its viability row. Not for prior approvals."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      all:
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 150
+            description: Retail over 150 sqm outside settlements, over 500 sqm in larger villages, 
+              or over 750 sqm in market towns.
+        - discretionary
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): retail impact assessment over 750 sqm in market towns,
+      over 500 sqm in larger villages, over 150 sqm outside settlements. The location test has no field."
+
+  - id: transport-assessment
+    action: add
+    required-if:
+      ref: major-development
+    source-text: Transport assessment All applications for major development
+    source-url: 
+      https://www.southdowns.gov.uk/wp-content/uploads/2023/05/Local-Validation-List-September-2023.pdf
+    policy: South Downs Local Plan Policy SD19
+    confidence: medium
+    notes: "Audit (missing_requirement): the workbook had this only as a garbled tab item."
+
+  - id: travel-plan
+    action: add
+    required-if:
+      ref: major-development
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Transport Assessment and Travel Plan for all major development."
+
+  - id: viability-assessment
+    action: replace
+    required-if: discretionary
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): not a prior approval requirement; the excerpt was a reference title
+      running into the Telecommunications row. From the audit: wherever viability is relevant
+      (under-provision of affordable housing, enabling development, optimum viable use, loss of
+      employment or visitor uses, agricultural building conversion, rural worker dwellings).
+
+  - id: water-impact-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [water-neutrality-area]
+            description: The site is in the Sussex North Water Resource Zone and the proposal would 
+              materially increase water demand.
+        - site:
+            in: [nutrient-neutrality-area]
+            description: >-
+              The site is in the Solent or Itchen catchment and the proposal is residential, provides
+              overnight accommodation or is a tourism attraction bringing people from outside the catchment.
+    source-text: >-
+      Applications within the Sussex North Water Resource Zone that would lead to a material increase
+      in water demand will need to demonstrate ‘water neutrality’ in a water budget showing the
+      baseline and proposed water consumption and mitigation measures proposed.
+
+      Applications within the Solent or Itchen Catchments for residential development, including new
+      homes and other uses that provide overnight accommodation and tourism attractions of a nature
+      that would bring people from outside the catchment. These applications must demonstrate
+      nutrient neutrality by submitting a nutrient budget using the most up-to-date Natural England
+      calculator.
+    source-url: 
+      https://www.southdowns.gov.uk/wp-content/uploads/2023/05/Local-Validation-List-September-2023.pdf
+    must-include:
+      - item: Water budget showing baseline and proposed water consumption, and the mitigation 
+          proposed
+        level: must
+        required-if:
+          site:
+            in: [water-neutrality-area]
+            description: Sussex North Water Resource Zone.
+      - item: Nutrient budget using the most up-to-date Natural England calculator
+        level: must
+        required-if:
+          site:
+            in: [nutrient-neutrality-area]
+            description: Solent or Itchen catchment.
+    confidence: medium
+    notes: >-
+      The authority's Water Neutrality Statement and nutrient neutrality information, which the
+      workbook had as unmapped rows with cut-off triggers. The full triggers are from the workbook's
+      'Policy-driven requirements' tab.
+
+unmapped:
+  - local-name: Ecosystem Services Statement
+    source-text: "All applications (with exception of Listed Building Consent, Prior Approvals, LDCE/LDP,
+      Advertisement Consent)"
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    suggested-id: ecosystem-services-statement
+  - local-name: Landscape Appraisal/Study / Relative Tranquillity and Visual Impact assessment
+    source-text: "All applications for development (including change of use) with the exception of householder
+      applications. *Landscape & Visual Impact Assessment only required as part of an EIA"
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Surface Water Drainage Strategy
+    source-text: "Surface Water Drainage Strategy - All applications for major development"
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    suggested-id: drainage-strategy
+  - local-name: Foul sewerage and utilities assessment
+    source-text: "From the audit: major development or where there is no mains drainage connection"
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    suggested-id: foul-sewage-assessment
+  - local-name: Parking Assessment
+    source-text: "From the audit: major development, plus new, extended or relocated public or visitor
+      parking"
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    suggested-id: parking-plan
+  - local-name: Ventilation / extraction details
+    source-text: "From the audit: Class E, sui generis and B2 uses with new extraction equipment"
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    suggested-id: ventilation-extraction-details
+  - local-name: Odour assessment
+    source-text: "Odour assessment Development likely to generate odours (e.g. sewage works, intensive
+      animal rearing, processing of animal remains, solid waste management, composting and some industrial
+      processes, commercial kitchens)"
+    source-url: 
+      https://www.southdowns.gov.uk/wp-content/uploads/2023/05/Local-Validation-List-September-2023.pdf
+    suggested-id: odour-assessment
+  - local-name: Mix of Homes Statement
+    source-text: "From the audit: all applications for housing development"
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    suggested-id: housing-mix-statement
+  - local-name: Soils Management Plan
+    source-text: "From the audit: any movement of top or subsoils"
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    suggested-id: soils-management-plan
+  - local-name: Aerodrome Safeguarding Statement
+    source-text: "From the audit: wind turbines; structures 45m or more above ground"
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    suggested-id: aerodrome-safeguarding-statement
+  - local-name: Agriculture and Forestry Workers Statement
+    source-text: "From the audit: development or loss of agricultural or forestry workers' housing"
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    suggested-id: rural-worker-appraisal
+  - local-name: Agriculture/Forestry Diversification Plan
+    source-text: "From the audit: listed without a trigger in the audit's summary"
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    suggested-id: ""
+  - local-name: Marketing assessment
+    source-text: "From the audit: loss of visitor accommodation, employment land, retail units or community
+      facilities/ACVs; removal of rural worker occupancy conditions"
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    suggested-id: marketing-evidence
+  - local-name: Needs or Site Selection Assessment
+    source-text: "From the audit: Gypsy/Traveller sites, rural exception sites, loss of community facilities,
+      rural worker dwellings"
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    suggested-id: protected-landscape-assessment
+  - local-name: Options Review Assessment
+    source-text: "From the audit: rural exception sites, agricultural, infrastructure, telecoms, outdoor
+      sport buildings"
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    suggested-id: protected-landscape-assessment
+  - local-name: Playing Field/Sports provision assessment
+    source-text: "From the audit: listed without a trigger in the audit's summary"
+    source-url: 
+      https://www.southdowns.gov.uk/app/uploads/2023/05/Local-Validation-List-BNG-version-2024-002.pdf
+    suggested-id: recreation-facilities-assessment
+  - local-name: Equestrian management plan
+    source-text: "Equestrian management plan Will depend on extent of Equestrian Development proposed."
+    source-url: 
+      https://www.southdowns.gov.uk/wp-content/uploads/2023/05/Local-Validation-List-September-2023.pdf
+    suggested-id: equestrian-management-plan
+

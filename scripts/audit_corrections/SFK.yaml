@@ -1,0 +1,551 @@
+# Corrections for Suffolk County Council, from inputs/audit/ (Suffolk audit).
+# The July 2025 county list is current. It applies only to minerals, waste and County Council
+# (Regulation 3) development, so every requirement is scoped to mineral-app, waste-dev and reg-3
+# (the planning statement also to s73, LBC and NMA, as the list says). Grokbot captured about 10
+# of the list's 42 items; the rest are added from the audit's summary ('From the audit').
+# The submission page also asks for the information in the 'Development Management Charter 2022',
+# which the audit did not check.
+local-authority: SFK
+submission-standards:
+- item: Location plan typically at 1:1250 or 1:2500, scaled wherever possible to fit A4 or A3 paper
+  level: should
+drop:
+- id: schedule-of-works
+  reason: 'not_a_requirement: the excerpt is the arboricultural sentence; the list has no schedule of
+    works'
+drop-unmapped:
+- local-name: Highways / access details (visibility splays)
+  reason: 'not_a_requirement: a fragment of the block plan contents'
+- local-name: Drainage Strategy / SuDS
+  reason: 'wrong_trigger: climate-change text; re-added below with the audit''s trigger'
+requirements:
+- id: air-quality-assessment
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in:
+        - mineral-app
+        - waste-dev
+        - reg-3
+    - any:
+      - site:
+          in:
+          - air-quality-management-area
+          description: The site is in or near an Air Quality Management Area.
+      - discretionary
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): significant air pollution, or in or near an AQMA.'
+- id: arboriculturist-report
+  action: replace
+  required-if:
+    all:
+    - application-type:
+        in:
+        - mineral-app
+        - waste-dev
+        - reg-3
+    - any:
+      - condition:
+          field: trees-on-or-near-site
+          value: true
+          description: Trees or hedgerows are proposed to be lost or could be affected by the development.
+      - site:
+          in:
+          - tree-preservation-zone
+          description: A tree preservation order within the site boundary.
+  source-text: trees or hedgerows are proposed to be lost or have the potential to be affected by the
+    development
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  must-include:
+  - item: An Arboricultural Method Statement, if an impact is identified
+    level: must
+    source-text: If an impact is identified, an Arboricultural Method statement will be required.
+  confidence: medium
+  notes: 'Audit (wrong_app_type): the list covers only minerals, waste and County Council (Regulation
+    3) development, not Full planning. Audit (wrong_trigger): the workbook quoted the consequence, not
+    the trigger (trees or hedgerows lost or affected, or a TPO within the site).'
+- id: archaeological-assessment
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in:
+        - mineral-app
+        - waste-dev
+        - reg-3
+    - any:
+      - site:
+          in:
+          - archaeological-priority-area
+          description: The site has known or potential archaeological interest or is near Suffolk HER
+            sites.
+      - discretionary
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): known or potential archaeological interest or near Suffolk
+    Historic Environment Record sites.'
+- id: biodiversity-survey-report
+  action: replace
+  required-if:
+    all:
+    - application-type:
+        in:
+        - mineral-app
+        - waste-dev
+        - reg-3
+    - discretionary
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  confidence: medium
+  notes: 'Audit (wrong_app_type): the list covers only minerals, waste and County Council (Regulation
+    3) development, not Full planning. Audit (duplicate): the workbook reused the Shadow HRA trigger.
+    From the audit: the Preliminary Ecological Appraisal is required where there is potential impact on
+    ecology or biodiversity (shown as officer discretion).'
+- id: daylight-sunlight-assessment
+  action: replace
+  required-if:
+    all:
+    - application-type:
+        in:
+        - mineral-app
+        - waste-dev
+        - reg-3
+    - discretionary
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  confidence: medium
+  notes: 'Audit (wrong_app_type): the list covers only minerals, waste and County Council (Regulation
+    3) development, not Full planning. Audit (wrong_trigger): the workbook quoted climate/energy text.
+    From the audit: where the development could adversely affect light to neighbouring properties, gardens
+    or amenity space (shown as officer discretion).'
+- id: elevation-existing
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in:
+        - mineral-app
+        - waste-dev
+        - reg-3
+    - condition:
+        field: building-works
+        value: true
+        description: Built infrastructure is constructed, altered or extended.
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): Elevations where built infrastructure is constructed,
+    altered or extended.'
+- id: elevation-proposed
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in:
+        - mineral-app
+        - waste-dev
+        - reg-3
+    - condition:
+        field: building-works
+        value: true
+        description: Built infrastructure is constructed, altered or extended.
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): Elevations where built infrastructure is constructed,
+    altered or extended.'
+- id: energy-statement
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in:
+        - mineral-app
+        - waste-dev
+        - reg-3
+    - any:
+      - condition:
+          field: floorspace
+          operator: '>='
+          value: 1000
+          description: 1,000 square metres or more gross internal area.
+      - condition:
+          field: site-area-non-residential
+          operator: '>'
+          value: 1
+          description: The site is over 1 hectare.
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): 1,000m2+ GIA or a site over 1ha.'
+- id: environmental-statement
+  action: update
+  required-if:
+    all:
+    - application-type:
+        in:
+        - mineral-app
+        - waste-dev
+        - reg-3
+    - condition:
+        field: eia-development
+        value: true
+        description: The application requires an Environmental Impact Assessment.
+  must-include:
+  - item: A non-technical summary
+    level: must
+  confidence: medium
+  notes: 'Audit (wrong_app_type): the list covers only minerals, waste and County Council (Regulation
+    3) development, not Full planning.'
+- id: flood-risk-assessment
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in:
+        - mineral-app
+        - waste-dev
+        - reg-3
+    - any:
+      - condition:
+          field: site-area-non-residential
+          operator: '>'
+          value: 1
+          description: The site is over 1 hectare (in Flood Zone 1).
+      - condition:
+          field: floorspace
+          operator: '>='
+          value: 1000
+          description: 1,000 square metres or more of new floorspace.
+      - site:
+          in:
+          - flood-risk-zone
+          description: The site is in Flood Zone 2 or 3.
+      - condition:
+          field: near-watercourse
+          value: true
+          description: The site is within or adjacent to a floodplain or main river.
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  confidence: medium
+  notes: From the audit (missing_requirement).
+- id: floor-plan-existing
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in:
+        - mineral-app
+        - waste-dev
+        - reg-3
+    - condition:
+        field: building-works
+        value: true
+        description: Built infrastructure is constructed, altered or extended.
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): Floor plans where built infrastructure is constructed,
+    altered or extended.'
+- id: floor-plan-proposed
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in:
+        - mineral-app
+        - waste-dev
+        - reg-3
+    - condition:
+        field: building-works
+        value: true
+        description: Built infrastructure is constructed, altered or extended.
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): Floor plans where built infrastructure is constructed,
+    altered or extended.'
+- id: heritage-statement
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in:
+        - mineral-app
+        - waste-dev
+        - reg-3
+    - site:
+        in:
+        - listed-building
+        - listed-building-setting
+        - conservation-area
+        - scheduled-monument
+        - locally-listed-building
+        - park-and-garden
+        description: The development may affect a heritage asset or its setting.
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): Heritage Assessment where the development may affect a
+    heritage asset or its setting.'
+- id: land-contamination-assessment
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in:
+        - mineral-app
+        - waste-dev
+        - reg-3
+    - site:
+        in:
+        - contaminated-land
+        description: Contamination is known or suspected by the district council or Environment Agency.
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  confidence: medium
+  notes: From the audit (missing_requirement).
+- id: landscaping-plan
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in:
+        - mineral-app
+        - waste-dev
+        - reg-3
+    - condition:
+        field: building-works
+        value: true
+        description: Built infrastructure is constructed, altered or extended.
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): Hard Landscaping Plan where built infrastructure is constructed,
+    altered or extended.'
+- id: lighting-assessment
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in:
+        - mineral-app
+        - waste-dev
+        - reg-3
+    - condition:
+        field: external-lighting
+        value: true
+        description: The development includes lighting.
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  confidence: medium
+  notes: From the audit (missing_requirement).
+- id: noise-assessment
+  action: add
+  required-if:
+    application-type:
+      in:
+      - mineral-app
+      - waste-dev
+      - reg-3
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  confidence: low
+  notes: 'From the audit (missing_requirement): Noise Assessment is listed; the audit gives no trigger.'
+- id: planning-statement
+  action: replace
+  required-if:
+    application-type:
+      in:
+      - mineral-app
+      - waste-dev
+      - reg-3
+      - s73
+      - lbc
+      - non-material-amendment
+  source-text: Full Planning Applications, Variation of Conditions, Listed Building Consent and Non-Material
+    Amendments.
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  confidence: medium
+  notes: 'Audit (wrong_trigger, wrong_app_type): Planning Statement (all developments) is mandatory for
+    full applications, variations of condition, listed building consent and non-material amendments within
+    the county''s remit. From the audit: separate minerals and waste planning statements add further content
+    for full, variation of condition and NMA applications.'
+- id: roof-plan-existing
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in:
+        - mineral-app
+        - waste-dev
+        - reg-3
+    - condition:
+        field: building-works
+        value: true
+        description: Built infrastructure is constructed, altered or extended.
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): Roof plan where built infrastructure is constructed, altered
+    or extended.'
+- id: roof-plan-proposed
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in:
+        - mineral-app
+        - waste-dev
+        - reg-3
+    - condition:
+        field: building-works
+        value: true
+        description: Built infrastructure is constructed, altered or extended.
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): Roof plan where built infrastructure is constructed, altered
+    or extended.'
+- id: sci
+  action: add
+  required-if:
+    application-type:
+      in:
+      - mineral-app
+      - waste-dev
+      - reg-3
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): Statement of Community Involvement for all applications.'
+- id: section-existing
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in:
+        - mineral-app
+        - waste-dev
+        - reg-3
+    - condition:
+        field: building-works
+        value: true
+        description: Built infrastructure is constructed, altered or extended.
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): Site sections where built infrastructure is constructed,
+    altered or extended.'
+- id: section-proposed
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in:
+        - mineral-app
+        - waste-dev
+        - reg-3
+    - condition:
+        field: building-works
+        value: true
+        description: Built infrastructure is constructed, altered or extended.
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): Site sections where built infrastructure is constructed,
+    altered or extended.'
+- id: site-plan
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in:
+        - mineral-app
+        - waste-dev
+        - reg-3
+    - condition:
+        field: building-works
+        value: true
+        description: Built infrastructure is constructed, altered or extended.
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): Block Plan where built infrastructure is constructed,
+    altered or extended.'
+- id: transport-assessment
+  action: replace
+  required-if:
+    all:
+    - application-type:
+        in:
+        - mineral-app
+        - waste-dev
+        - reg-3
+    - discretionary
+  source-text: where the traffic or person(s) trip is significant in both volume and area of impact
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  confidence: medium
+  notes: 'Audit (wrong_app_type): the list covers only minerals, waste and County Council (Regulation
+    3) development, not Full planning. Audit (wrong_trigger): the workbook quoted ''What is required?''
+    text. From the audit: a Transport Statement is needed where the impact is local-level.'
+- id: travel-plan
+  action: add
+  required-if:
+    all:
+    - application-type:
+        in:
+        - reg-3
+    - discretionary
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  confidence: medium
+  notes: 'From the audit (missing_requirement): County Council applications generating significant traffic
+    or pedestrian movement (shown as officer discretion).'
+unmapped:
+- local-name: Drainage strategy / SuDS
+  source-text: 'From the audit: major development, 1,000sqm+ new floorspace or a site of 1ha or more'
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  suggested-id: drainage-strategy
+- local-name: Aerodrome Safeguarding Assessment
+  source-text: 'From the audit: within the consultation area of a civil or military aerodrome or airstrip'
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  suggested-id: aerodrome-safeguarding-assessment
+- local-name: Dust Assessment
+  source-text: 'From the audit: significant dust during demolition, construction or operation'
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  suggested-id: dust-assessment
+- local-name: Health Impact Assessment
+  source-text: 'From the audit: listed; trigger not given'
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  suggested-id: health-impact-assessment
+- local-name: Landscape and Visual Impact Assessment
+  source-text: 'From the audit: listed; trigger not given'
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  suggested-id: landscape-visual-impact-assessment
+- local-name: Climate Change Statement
+  source-text: All minerals, waste and County Council development planning applications.
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  suggested-id: climate-change-statement
+- local-name: Utilities, fire hydrant and foul sewage connection plan
+  source-text: 'From the audit: where built infrastructure is constructed, altered or extended'
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  suggested-id: utilities-statement
+- local-name: Aftercare Plan
+  source-text: 'From the audit: minerals extraction or a temporary waste facility that disturbs ground'
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  suggested-id: aftercare-plan
+- local-name: Agricultural Land Assessment
+  source-text: 'From the audit: loss of more than 20ha of best and most versatile agricultural land'
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  suggested-id: agricultural-land-classification
+- local-name: Glint and Glare Assessment
+  source-text: 'From the audit: solar at minerals or waste sites, County Council solar, or next to strategic
+    or local highways'
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  suggested-id: glint-glare-assessment
+- local-name: Habitat Monitoring and Management Plan and Soft Landscaping Plan
+  source-text: 'From the audit: where biodiversity net gain applies and is not exempt'
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  suggested-id: habitat-management-plan
+- local-name: Hydrology / Hydrogeology Assessment
+  source-text: 'From the audit: ground disturbance above a groundwater protection zone or affecting the
+    water table'
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  suggested-id: hydrogeological-assessment
+- local-name: Odour Assessment
+  source-text: 'From the audit: any waste application, or County Council development with significant
+    odour potential'
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  suggested-id: odour-assessment
+- local-name: Phasing Plan
+  source-text: 'From the audit: minerals extraction or waste landfill'
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  suggested-id: phasing-plan
+- local-name: Meteorological Site Impact Assessment
+  source-text: Any building, structure or works exceeding 91.4m in height above ground level within the
+    consultation area of Old Buckenham Meteorological radio facility
+  source-url: https://www.suffolk.gov.uk/asset-library/suffolk-county-council-local-validation-list-2025.pdf
+  suggested-id: meteorological-safeguarding-assessment

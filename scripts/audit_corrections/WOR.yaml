@@ -1,0 +1,419 @@
+# Corrections for Worcestershire County Council, from inputs/audit/worcestershire-county-council.json.
+# Grokbot's link is the current Planning Validation Document (Update June 2025), which the council
+# publishes with Checklists 1-10 (own developments, outline, mineral working, waste, landfill, LDC
+# existing/proposed, advertisements, demolition, s73) and Appendices 1-4.
+# As a county planning authority it decides minerals, waste and its own (Regulation 3)
+# development, so the general requirements below are scoped to mineral-app, waste-dev and reg-3
+# (the workbook spread them over Full, Outline and s73, all marked INFERRED; audit issue 11).
+# The Reg 3 rows came from the Outline checklist, the Demolition checklist rows were filed under
+# prior approval, and the Mineral working, Landfill and LDC checklists were not read.
+local-authority: WOR
+
+drop:
+  - id: arboriculturist-report
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: Checklist 9 (Demolition) rows filed under prior approval"
+  - id: biodiversity-survey-report
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: as above"
+  - id: photos
+    sheets: [Change of use - prior approval, Full planning]
+    reason: "wrong_app_type: Demolition checklist row under prior approval; the Full planning excerpt is BNG
+      small-sites metric text"
+  - id: planning-statement
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: Checklist 9 (Demolition) row filed under prior approval"
+  - id: lighting-assessment
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: a Checklist 1 (own developments) item filed under listed building consent"
+  - id: waste-management-plan
+    reason: "wrong_trigger: the excerpt is the Safeguarding Waste Management Facilities Assessment (unmapped
+      below)"
+
+drop-unmapped:
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "duplicate: not a county requirement; carries the Agricultural Land Classification text"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advice ('It is strongly advised that you have a pre-application
+      discussion...') or a repeat of the Consultation Statement text"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "wrong_trigger: the fragment 'gardens or amenity space.' from the Daylight / Sunlight item"
+  - local-name: Drainage Strategy / SuDS
+    reason: "duplicate: holds the Foul Sewage text; the Surface Water Drainage Strategy is added below"
+  - local-name: Ground investigation / Geotechnical / Basement Impact Assessment
+    reason: "wrong_trigger: mislabelled Water Environment Hydrology / Hydrogeology Assessment; re-added below"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: mislabelled Emissions Assessment; re-added below"
+  - local-name: Minerals / Waste specific statements (county matters)
+    reason: "wrong_trigger: mislabelled Mineral Resource Assessment; re-added below"
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_app_type: filed under Householder although it excludes householder; re-added below, with
+      Land Stability separately"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: a definition instead of the trigger; re-added below"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - site:
+                in: [air-quality-management-area]
+                description: In the vicinity of an Air Quality Management Area or other area of poor air
+                  quality.
+            - discretionary
+    notes: "Also where the development is likely to have an impact on air quality, e.g. road traffic or point
+      source emissions (officer judgement)."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Works that affect any trees or hedgerows within the site or on adjacent land
+              (including street trees).
+
+  - id: bng-metric
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: biodiversity-gain-condition
+            value: true
+            description: Within the scope of mandatory Biodiversity Net Gain.
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - site:
+            in: [contaminated-land]
+            description: Contamination is known or suspected.
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - discretionary
+    notes: "Where there is a potential adverse impact on the sunlight/daylight of adjoining properties or
+      buildings, including gardens or amenity space."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    must-include:
+      - item: As a minimum, a scoping survey (such as a Preliminary Ecological Appraisal), and further
+          specific surveys if identified during scoping
+        level: must
+    notes: "The council's wording: 'All development proposals need to be informed by ecological surveys and
+      reports'."
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    notes: "The council's wording: 'A Sustainability Statement is required to accompany all development
+      proposals.'"
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: eia-development
+            value: true
+            description: An Environmental Statement is required by the EIA Regulations 2017.
+    notes: "Audit (wrong_trigger): the Full planning excerpt is the coal-mining sentence about including the
+      CMRA in an ES."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - site:
+            in: [flood-risk-zone]
+            description: All development in Flood Zones 2 and 3.
+    notes: "The list adds that a Sequential Test may be needed even where no FRA is."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3, advertising]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+              scheduled-monument, park-and-garden, archaeological-priority-area]
+            description: The proposal is in an archaeologically sensitive area or affects a heritage asset
+              and/or its setting.
+    notes: "Archaeology is covered within the Heritage Statement heading (audit wrong_trigger)."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3, advertising]
+        - any:
+            - condition:
+                field: external-lighting
+                value: true
+                description: The provision of external lighting, including floodlighting, that may have
+                  an impact upon the locality.
+            - condition:
+                field: illuminated
+                value: true
+                description: The proposal includes illuminated signage.
+
+  - id: photos
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3, advertising]
+        - any:
+            - condition:
+                field: demolition
+                value: true
+                description: The proposal involves the demolition of an existing building.
+            - site:
+                in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+                  scheduled-monument, park-and-garden]
+                description: The proposal affects heritage assets.
+            - all:
+                - application-type:
+                    in: [advertising]
+                - discretionary
+    source-text: "Photographs and Photomontages: This information is required for proposals that involve the
+      demolition of an existing building or for proposals affecting heritage assets."
+    source-url: https://www.worcestershire.gov.uk/sites/default/files/2025-06/validation_document_2025.pdf
+    must-include:
+      - item: For advertisement consent, annotated photographs and photomontages dated, numbered and
+          cross-referenced to a plan, showing the advertisement(s) on the site and its locality
+        level: should
+        required-if:
+          application-type:
+            in: [advertising]
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the Full planning excerpt was BNG text. Annotated photographs and
+      photomontages "may also be required" for County Council advertisement consents; the
+      Photographs heading also says some LDC applications need them.
+
+  - id: planning-statement
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3, advertising]
+    notes: "The council's wording: 'All planning applications should be accompanied by a Planning
+      Statement.'"
+
+  - id: site-plan
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3, advertising]
+    must-include:
+      - item: Existing and proposed site plan(s) at 1:500 or 1:200 or as appropriate (1:2500 recommended
+          for larger applications)
+        level: should
+        required-if:
+          application-type:
+            in: [mineral-app, waste-dev]
+      - item: Block plan of the site at 1:100 or 1:200
+        level: must
+        required-if:
+          application-type:
+            in: [reg-3]
+    confidence: low
+    notes: "The scales come from different checklists (the workbook's Reg 3 rows were from the Outline
+      checklist, audit wrong_document); check each checklist."
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - discretionary
+    notes: "All developments that would generate significant amounts of movement (NPPF para 117, as the list
+      quotes)."
+
+  - id: travel-plan
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - discretionary
+    notes: "Audit (duplicate): the excerpt repeats the Transport Assessment text."
+
+  - id: sci
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - discretionary
+    notes: "A Consultation Statement for any proposal involving pre-application engagement with the public
+      (no field for that)."
+
+  - id: viability-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - discretionary
+    notes: "Where obligations or contributions are required but not proposed for viability reasons."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [mineral-app, waste-dev, reg-3]
+            - any:
+                - ref: major-development
+                - all:
+                    - site:
+                        in: [conservation-area, world-heritage-site]
+                        description: The site is in a designated area.
+                    - condition:
+                        field: floorspace
+                        operator: ">="
+                        value: 100
+                        description: 100 square metres or more of floorspace.
+        - application-type:
+            in: [lbc]
+    source-url: https://www.worcestershire.gov.uk/sites/default/files/2025-06/validation_document_2025.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook kept only 'not required for all developments'; the list's
+      cases are major development, 100sqm+ in designated areas, and listed building consent."
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - discretionary
+    must-include:
+      - item: Scale at least 1:500 or 1:250
+        level: must
+    confidence: low
+    notes: "The excerpt gives no trigger (only that landscaping is also needed to protect the setting of
+      designated heritage assets)."
+
+unmapped:
+  - local-name: Coal Mining Risk Assessment
+    source-text: "COAL MINING RISK ASSESSMENT When might it be required? For all non-householder applications
+      which fall within the Coal Mining Development High Risk Areas as defined by The Coal Authority and
+      held by the County Planning Authority."
+    source-url: https://www.worcestershire.gov.uk/sites/default/files/2025-06/validation_document_2025.pdf
+    suggested-id: ""
+  - local-name: Land Stability Assessment
+    source-text: "From the audit: development on or adjoining land known or suspected to be unstable"
+    source-url: https://www.worcestershire.gov.uk/sites/default/files/2025-06/validation_document_2025.pdf
+    suggested-id: land-stability-assessment
+  - local-name: Water Environment Hydrology / Hydrogeology Assessment
+    source-text: "ENVIRONMENT HYDROLOGY / HYDROGEOLOGY ASSESSMENT When might it be required? Any development
+      scheme which has potential to threaten the qualitative or quantitative status of any waterbody."
+    source-url: https://www.worcestershire.gov.uk/sites/default/files/2025-06/validation_document_2025.pdf
+    suggested-id: hydrogeological-assessment
+  - local-name: Emissions Assessment (dust, noise, odours and vibration)
+    source-text: "(DUST, NOISE, ODOURS, AND VIBRATION) When might it be required? For all proposals that could
+      involve processes and uses generating noise, dust, odours and vibrations."
+    source-url: https://www.worcestershire.gov.uk/sites/default/files/2025-06/validation_document_2025.pdf
+    suggested-id: odour-dust-vibration-assessment
+  - local-name: Mineral Resource Assessment
+    source-text: "MINERAL RESOURCE ASSESSMENT When might it be required? For all non-exempt development, as set
+      out in Tables 7.1 and 7.2 of the Worcestershire Minerals Local Plan, proposed within or partially
+      within the Mineral Consultation Areas as defined on the Worcestershire Minerals Local Plan Policies
+      Map."
+    source-url: https://www.worcestershire.gov.uk/sites/default/files/2025-06/validation_document_2025.pdf
+    suggested-id: minerals-assessment
+  - local-name: Safeguarding Waste Management Facilities Assessment
+    source-text: "SAFEGUARDING WASTE MANAGEMENT FACILITIES ASSESSMENT When might it be required? For all
+      non-waste related development on or adjacent to a site with…"
+    source-url: https://www.worcestershire.gov.uk/sites/default/files/2025-06/validation_document_2025.pdf
+    suggested-id: minerals-waste-statement
+  - local-name: Health Impact Assessment Screening
+    source-text: "Mineral working in all areas. In South Worcestershire and Wyre Forest, also waste
+      development, buildings of 1,000 sq m or more, or sites of 1 hectare or more"
+    source-url: https://www.worcestershire.gov.uk/sites/default/files/2025-06/validation_document_2025.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Public Rights of Way Assessment
+    source-text: "PUBLIC RIGHTS OF WAY ASSESSMENT When might it be required? Planning applications where a
+      Public Right of Way (PRoW) and/or Public Access traverses, passes close by, or impacts the
+      application site or involves the temporary diversion or closure of part of a route in order to
+      construct the developme…"
+    source-url: https://www.worcestershire.gov.uk/sites/default/files/2025-06/validation_document_2025.pdf
+    suggested-id: public-rights-of-way-statement
+  - local-name: Surface Water Drainage Strategy
+    source-text: "From the audit: a separate 'Surface Water Drainage Strategy' heading, backed by Appendix 3
+      (the LLFA Surface Water Checklist)"
+    source-url: https://www.worcestershire.gov.uk/sites/default/files/2025-06/validation_document_2025.pdf
+    suggested-id: drainage-strategy
+  - local-name: Bio-Aerosol Assessment
+    source-text: "From the audit: composting or shredding organic matter within 250m of sensitive receptors"
+    source-url: https://www.worcestershire.gov.uk/sites/default/files/2025-06/validation_document_2025.pdf
+    suggested-id: ""
+  - local-name: Control of Litter, Vermin and Birds
+    source-text: "From the audit: processes that could attract vermin or birds or generate litter"
+    source-url: https://www.worcestershire.gov.uk/sites/default/files/2025-06/validation_document_2025.pdf
+    suggested-id: ""
+  - local-name: Geodiversity Assessment
+    source-text: "From the audit: all mineral developments, and risks to geodiversity sites (Appendix 2)"
+    source-url: https://www.worcestershire.gov.uk/sites/default/files/2025-06/validation_document_2025.pdf
+    suggested-id: ""
+  - local-name: Green Belt Statement
+    source-text: "From the audit: all development within or partly within the Green Belt, including grey belt"
+    source-url: https://www.worcestershire.gov.uk/sites/default/files/2025-06/validation_document_2025.pdf
+    suggested-id: green-belt-statement
+  - local-name: Restoration and Aftercare Scheme
+    source-text: "From the audit: mineral working and landfill"
+    source-url: https://www.worcestershire.gov.uk/sites/default/files/2025-06/validation_document_2025.pdf
+    suggested-id: restoration-aftercare-scheme
+  - local-name: Soil Handling Strategy
+    source-text: "From the audit: listed in the June 2025 Validation Document; no trigger given"
+    source-url: https://www.worcestershire.gov.uk/sites/default/files/2025-06/validation_document_2025.pdf
+    suggested-id: ""
+  - local-name: Safeguarding Mineral Sites and Supporting Infrastructure Assessment
+    source-text: "From the audit: listed in the June 2025 Validation Document; no trigger given"
+    source-url: https://www.worcestershire.gov.uk/sites/default/files/2025-06/validation_document_2025.pdf
+    suggested-id: minerals-waste-statement
+  - local-name: Lawful development certificate checklists (6 and 7)
+    source-text: "From the audit: Checklist 6 (LDC existing use) and Checklist 7 (LDC proposed use) were not
+      read"
+    source-url: https://www.worcestershire.gov.uk/sites/default/files/2025-06/validation_document_2025.pdf
+    suggested-id: lawful-development-evidence
+
+low-confidence:
+  - id: archaeological-assessment
+    note: "Audit (wrong_trigger): the excerpt is the fragment 'submit an Archaeological Assessment.';
+      archaeology sits within the Heritage Statement heading."
+  - id: recreation-facilities-assessment
+    note: "Audit (wrong_trigger): this is the Playing Pitch Assessment, but the excerpt is a list of Sport
+      England guidance titles and the PRoW trigger; re-read the list."

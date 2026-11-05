@@ -1,0 +1,629 @@
+# Corrections for West Northamptonshire Council, from inputs/audit/west-northamptonshire-council.json.
+# The Planning Application Validation Requirements 2026-2028 (adopted 25 February 2026, in effect
+# from 1 June 2026) is current; the audit read a copy the user uploaded. The document has a local
+# table for each of 21 application types, but Grokbot put about 47 rows under Full planning
+# ('INFERRED') and many triggers come from the neighbouring row. The audit recommends re-extracting
+# the list section by section; this file fixes the rows the audit names and adds the missing items
+# it lists. Per-type items with no MHCLG id are unmapped. Items marked "From the audit" use the
+# audit's summary of the list.
+local-authority: WNUA
+
+validation-list:
+  date: 2026-02-25
+  date-basis: >-
+    Introduction: 'This document was adopted on 25 February 2026 following consultation' (took
+    effect 1 June 2026; the PDF metadata date of August 2026 is a later re-save)
+
+submission-standards:
+  - item: Plans drawn to scale (1:50 or 1:100) with a title, drawing number and scale bar
+    level: should
+  - item: Drawings with 'do not scale' written on them are not accepted
+    level: must
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: contents-page dot leaders; pre-application advice is a separate enquiry list (s13)"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: the retail/main town centre Sequential Test with the 'schedule of plans' sentence as trigger; re-added below once"
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "wrong_trigger: the national Biodiversity Statement text; re-added below"
+  - local-name: Crime prevention / Secured by Design statement
+    reason: "wrong_trigger: mostly daylight text (now in daylight-sunlight-assessment); re-added below as the Crime Statement"
+  - local-name: Cycle parking details
+    reason: "not_a_requirement: block plan guidance (now site-plan must-include items)"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: location plan red-line guidance"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: daylight text; re-added below with the real trigger"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "not_a_requirement: a fragment of the Affordable Housing / Housing Quality Statement; re-added below as the Housing Quality Statement"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "not_a_requirement: a fragment of the Housing Quality Statement"
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "wrong_trigger: ran into the Planning Obligations Statement; re-added below without it"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [reserved-matters]
+    confidence: medium
+    notes: >-
+      From the audit (wrong_app_type): in the Major development table only (s8), and the Reserved
+      Matters table (s18).
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees within or adjacent to the site.
+    confidence: medium
+    notes: "A tree protection plan; the audit confirms it in the Householder table as well."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the biodiversity gain condition (not exempt).
+    source-text: >-
+      Draft Post Development BNG Matrix which should be provided in both an Excel format as well as a
+      'fit to page' publishable .pdf export.
+    must-include:
+      - item: A habitat condition assessment
+        level: must
+      - item: A draft Biodiversity Gain Plan
+        level: must
+      - item: A draft post-development metric
+        level: must
+      - item: A habitats plan
+        level: must
+      - item: The metric in both Excel format and a 'fit to page' publishable PDF export
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the discharge-of-conditions heading."
+
+  - id: cil-form
+    action: replace
+    required-if:
+      application-type:
+        in: [hh, full, outline, reserved-matters, s73, prior-approval]
+    source-text: Completed CIL Form 1 and 2
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger / missing_requirement): the excerpt merged three headings. From the audit,
+      CIL Forms 1 and 2 are in the Householder, full, outline, Reserved Matters, s73 and Prior
+      Approval tables.
+
+  - id: daylight-sunlight-assessment
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      In instances where developments that are located immediately adjacent to existing residential
+      properties, a proposed site plan (Scale 1:100 or 1:200) showing a 45-degree line (60 degree in a
+      case of single storey extensions within the former Daventry District) must be shown from the
+      nearest habitable room within the neighbouring property.
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    must-include:
+      - item: A proposed site plan (1:100 or 1:200) showing a 45-degree line (60 degrees for single
+          storey extensions in the former Daventry District) from the nearest habitable room of the
+          neighbouring property
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt merged the CIL and Dropped Kerb headings. The
+      council's wording was found in the workbook's crime row. Required where development is
+      immediately adjacent to existing residential properties; a full assessment is needed if the
+      line is breached.
+
+  - id: design-and-access-statement
+    action: update
+    source-text: ""
+    notes: >-
+      Audit (wrong_trigger / other): the excerpt was the demolition heritage text; the Design and
+      Access Statement is in the document's National Requirement tables, so national rules apply.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [conservation-area, listed-building, listed-building-setting, locally-listed-building,
+              scheduled-monument, park-and-garden]
+            description: The site is in a conservation area or the proposal affects a heritage asset.
+    source-text: Heritage Statement Only if in a Conservation Area or affecting a heritage asset.
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    must-include:
+      - item: For demolition, a justification having regard to the significance of the structure and
+          the impact on the character and appearance of the conservation area
+        level: must
+        required-if:
+          condition:
+            field: demolition
+            value: true
+            description: The proposal involves demolition.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted the demolition-only heritage text. The source-text is
+      the Demolition (s2) wording; the LBC table (s7) and outline table also list it.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: Schedule 1 development likely to have a significant effect on the environment.
+    notes: "Audit (other): a national requirement in the document's National Requirement tables."
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 2
+            description: A multi-occupied residential building.
+    must-include:
+      - item: The principles, concepts and approach to fire safety applied to each building
+        level: must
+      - item: The site layout
+        level: must
+      - item: Emergency vehicle access and water supplies for firefighting
+        level: must
+      - item: Any consultation on fire safety and what account has been taken of it
+        level: must
+      - item: How planning policies on fire safety have been taken into account
+        level: must
+    confidence: medium
+    notes: "Audit (other): a national requirement (multi-occupied residential buildings of 18m+ or 7+ storeys)."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: Within flood zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: Over 1 hectare in flood zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: Over 1 hectare in flood zone 1.
+        - condition:
+            field: near-watercourse
+            value: true
+            description: Within 10m of a watercourse.
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: The proposal raises land levels.
+        - discretionary
+    source-text: "Flood Risk Assessment Any development falling into the following categories: - within flood zone 2 or 3..."
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook used the bat roost text. From the audit, the trigger also
+      covers a change to a more vulnerable use and sites next to a flood defence (shown as officer
+      discretion). For householder and minor extensions up to 250sqm in Flood Zones 2 and 3 it sets
+      out floor levels or flood-proofing.
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: demolition
+            value: true
+            description: A building is demolished.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: A vacant building is converted.
+        - condition:
+            field: protected-species
+            value: true
+            description: A building has potential roost features.
+        - discretionary
+    must-include:
+      - item: A Preliminary Roost Assessment where a vacant building is converted, a building is
+          demolished, or a building has potential roost features
+        level: must
+    confidence: low
+    notes: >-
+      The PRA wording ('A Preliminary Roost Assessment (PRA) is required where a vacant building is
+      converted, a building is demolished, or where a building has potential roost features') was in
+      the workbook's FRA row. The PEAR's own trigger was not captured. From the audit, the PRA is in
+      the Householder, LBC and Demolition tables too.
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: previously-developed-land
+            value: true
+            description: The application is on brownfield land.
+        - site:
+            in: [contaminated-land]
+            description: The development is known or suspected to be affected by land contamination.
+    confidence: medium
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: The application is for external lighting.
+    source-text: >-
+      Lighting Assessment Applications for external lighting must include a lighting assessment which
+      must include: hours of operation, light levels, off site light spillage, column heights,
+      equipment design, layout plan with beam orientations and details of any mitigation measures
+      required
+    must-include:
+      - item: Hours of operation
+        level: must
+      - item: Light levels and off-site light spillage
+        level: must
+      - item: Column heights and equipment design
+        level: must
+      - item: A layout plan with beam orientations
+        level: must
+      - item: Details of any mitigation measures required
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt ran into the LVIA text, which is cut here."
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      condition:
+        field: noise-sensitive-use
+        value: true
+        description: Residential schemes in close proximity to noise sources (such as roads or
+          commercial premises).
+    policy: Joint Core Strategy BN9
+    confidence: medium
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: loss-of-open-space
+            value: true
+            description: Loss of playing fields, formal, public or amenity open space.
+        - all:
+            - ref: major-development
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: Residential development.
+    confidence: medium
+
+  - id: site-plan
+    action: update
+    source-text: ""
+    must-include:
+      - item: Facilities for cycle parking
+        level: must
+      - item: Vehicle access and visibility splays at the highway boundary
+        level: must
+      - item: The species, position and spread of all trees within 12 metres of any proposed building
+          works
+        level: must
+      - item: The extent and type of any hard surfacing
+        level: must
+      - item: Boundary treatment, including all heights and materials
+        level: must
+      - item: Provision for the storage and collection of waste and recyclables (new developments)
+        level: must
+    notes: >-
+      The workbook's excerpt concatenated several plan rows with Article 7 citations. The block plan
+      contents were found in the workbook's cycle parking row.
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Out of centre and edge of centre proposals.
+        - discretionary
+    confidence: medium
+    notes: "From the audit (wrong_app_type): in the Major and outline tables, not the minor residential table; no threshold given."
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    policy: Joint Core Strategy CS2
+    confidence: medium
+    notes: "The list refers to the PPG for when a Transport Assessment or Statement is required."
+
+  - id: travel-plan
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      A (draft) travel plan should … outline the way in which the transport implications of the
+      development are going to be managed in order to ensure the minimum environmental, social and
+      economic impacts.
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    policy: Joint Core Strategy CS2 and BN9
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): filed under Outline only because the text says 'should outline'; no
+      trigger was captured.
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    must-include:
+      - item: A full unredacted FVA, which will be published online
+        level: must
+      - item: An updated planning obligations statement
+        level: must
+        required-if:
+          application-type:
+            in: [s73, non-material-amendment]
+    confidence: medium
+    notes: >-
+      Where the level of affordable housing or financial contributions falls below that required by
+      Development Plan policies (council's wording).
+
+  - id: sci
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - application-type:
+                in: [outline]
+            - condition:
+                field: large-minor-development
+                value: true
+                description: Large minor development or above, at outline.
+    source-text: "Statement of Community Involvement A Community Engagement Statement is required..."
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted the national wind-turbine row. From the audit, the
+      local Community Engagement Statement applies to majors, and at outline to large minors and above.
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: Residential development, including changes of use.
+        - discretionary
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    must-include:
+      - item: Bin storage, collection points and enclosures
+        level: must
+        required-if:
+          application-type:
+            in: [reserved-matters]
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted Sequential Test text. From the audit, the Site Waste
+      Management Plan applies to all residential development, including changes of use, that
+      affects waste.
+
+  - id: photos
+    action: replace
+    required-if:
+      always: true
+    source-text: All applications should include photographs.
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    must-include:
+      - item: Contextual elevations and 3D visualisations
+        level: must
+        required-if:
+          ref: major-development
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted the householder EWI item. From the audit, site photos
+      are in the full, outline, reserved matters, LBC, advert, demolition and prior approval tables
+      ('all applications'); the wording is from the prior approval section.
+
+  - id: schedule-of-works
+    action: replace
+    required-if:
+      application-type:
+        in: [lbc]
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger / wrong_app_type): the workbook quoted the Demolition Method Statement.
+      From the audit, the LBC table (s7) asks for a Method Statement for the repair and alteration
+      works.
+
+  - id: air-quality-assessment
+    action: add
+    required-if: discretionary
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    confidence: medium
+    notes: "From the audit (missing_requirement): development likely to cause pollution or expose occupiers to it."
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      application-type:
+        in: [full, outline]
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    confidence: medium
+    notes: "From the audit (missing_requirement): in all four full/outline tables (major, minor residential, minor commercial, outline)."
+
+unmapped:
+  - local-name: Sequential Test (retail and main town centre uses)
+    source-text: "Sequential Test Any proposals for retail and other Main Town Centre uses..."
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: sequential-test
+  - local-name: Biodiversity Checklist
+    source-text: "complete the Checklist in Appendix 1 of the Biodiversity SPD"
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: biodiversity-checklist
+  - local-name: Crime Statement
+    source-text: "From the audit: listed in the outline and Reserved Matters tables; trigger not given"
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: crime-prevention-statement
+  - local-name: Drainage Strategy
+    source-text: "For 5 - 9 dwellings or creation or change of use of 500-999sqm floor space"
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: drainage-strategy
+  - local-name: Street Scene Plan
+    source-text: >-
+      Street Scene Plan where scale and/or appearance is to be considered on proposals filling a gap
+      between existing buildings, a street scene drawing(s), particularly where the development is
+      visible from the public realm
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: street-scene-plan
+  - local-name: Housing Quality Statement
+    source-text: "From the audit: residential development, to NDSS standards (also at reserved matters)"
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: housing-quality-statement
+  - local-name: Health Impact Assessment
+    source-text: "From the audit: major development (and outline majors)"
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: health-impact-assessment
+  - local-name: Landscape and Visual Impact Assessment
+    source-text: "From the audit: where the LPA considers visual or landscape impacts notable"
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Swept Path plan
+    source-text: "From the audit: majors and reserved matters; refuse vehicle tracking at 1:500 or 1:1000"
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: swept-path-plan
+  - local-name: Phasing Plan
+    source-text: "From the audit: large-scale majors with phasing"
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: phasing-plan
+  - local-name: Schedule of development / Schedule of plans and drawings
+    source-text: "From the audit: new dwellings or residential/commercial floorspace; schedule of plans for new dwellings or change of use, majors (s73/NMA) and PiP"
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: drawing-schedule
+  - local-name: Public Transport Strategy
+    source-text: "From the audit: development generating notable demand for sustainable modes"
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: public-transport-strategy
+  - local-name: Rural Enterprise Statement
+    source-text: "Rural Enterprise Statement for creation of a rural worker's dwelling"
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: rural-workers-dwelling-appraisal
+  - local-name: Independent Design Review Panel report
+    source-text: "From the audit: homes justified under NPPF para 84(e)"
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: design-review-report
+  - local-name: Design Code
+    source-text: "Design Code Outline applications for large-scale major development (200+ houses, 10,000 square metres..."
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: design-code
+  - local-name: Illustrative Masterplan
+    source-text: "From the audit: outline applications where access, layout and/or scale is reserved, showing access points, layout and maximum ridge and eaves heights"
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: illustrative-masterplan
+  - local-name: Dropped Kerb Plan
+    source-text: "From the audit: householder applications providing or altering a vehicular access"
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: access-drawing
+  - local-name: External Wall Insulation details
+    source-text: "Photograph or detailed scale drawing of existing elevation(s) to be changed;"
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: external-wall-insulation-details
+  - local-name: Parking Plan / parking statement
+    source-text: >-
+      A parking statement should justify the level of parking proposed with the development and
+      should include: surveys of parking capacity and occupancy levels on surrounding streets and
+      parking areas; consideration of likely trip generation and parking accumulations for the
+      proposed development with supporting evidence; and details of how the parking will be managed
+      and how that will mitigate any under or over provision.
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: parking-plan
+  - local-name: Drainage / FRA compliance statements (reserved matters)
+    source-text: "For sites where a Drainage Strategy was required at Outline, a compliance statement..."
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: drainage-strategy
+  - local-name: Marketing Report (s73 / NMA)
+    source-text: "Marketing Report where the application concerns the removal of an occupancy or restrictive use condition"
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: marketing-evidence
+  - local-name: Condition tracker and Condition pro-forma
+    source-text: "From the audit: discharge of conditions; a tracker for phased sites and a pro-forma identifying the conditions and documents submitted"
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: condition-tracker
+  - local-name: Evidence (lawful development certificates)
+    source-text: "Evidence ... for applications made under section 191; any statement(s) of fact to be in the form of a statutory declaration"
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: lawful-development-evidence
+  - local-name: Rural Building Questionnaire
+    source-text: "Rural Building Questionnaire For Agricultural Prior Approval"
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: rural-building-questionnaire
+  - local-name: SAMM Payment
+    source-text: >-
+      For residential developments (inc. Houses of Multiple Occupation) which result in a net
+      increase in the number of dwellings within the buffer zone of the Upper Nene Valley Gravel Pits
+      SPA Special Protection Area (SPA), it is necessary to avoid and mitigate likely significant
+      effect on the SPA by making a financial contribution per dwelling towards Strategic Access
+      Management and Monitoring (SAMM) or provide other suitable infrastructure.
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: habitats-regulations-assessment
+  - local-name: Technical Information for Prior Approval Application
+    source-text: "From the audit: where constraints or consultees raise concern: transport statement, FRA, land contamination, noise, odour, air quality, site waste management plan and archaeological DBA"
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: ""
+  - local-name: Advertisement layout plan
+    source-text: "Plan: Layout Plan Showing the location within the site of all proposed signage"
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: advertisement-drawings
+  - local-name: Fabric condition survey (listed buildings)
+    source-text: "From the audit: where historic features are to be renewed or replaced on grounds of poor condition"
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: condition-survey
+  - local-name: Specific plans for architectural details (listed buildings)
+    source-text: "From the audit: plans at no less than 1:20 for doors, windows, shopfronts and mouldings"
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: joinery-details
+  - local-name: Structural Report / Structural survey
+    source-text: >-
+      A structural survey may be required, for example, to support any proposal for … demolition on
+      the grounds that the building or structure is structurally unsound
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: structural-survey
+  - local-name: Illustrative layout plan (permission in principle)
+    source-text: "Plan: Illustrative Plan Illustrative layout plan."
+    source-url: https://cms.westnorthants.gov.uk/media/30003/download
+    suggested-id: illustrative-masterplan
+

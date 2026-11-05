@@ -1,0 +1,465 @@
+# Corrections for Castle Point Borough Council, from inputs/audit/castle-point-borough-council.json.
+# The workbook link is the current Validation Checklist V3.5 (published 11 May 2026, effective
+# 25 June 2026); the build reads the published date from the audit. Grokbot's extraction
+# interleaved the list's two-column tables, placed everything under Full planning, and missed the
+# list's separate sections (Householder, LDC, Prior Approvals, Full, Major, Change of Use, Outline,
+# PiP, LBC, Tree Works, Advertisement). The Major section applies to 10+ units or 0.5 ha.
+# Items marked "From the audit" use the audit's paraphrase of the list.
+local-authority: CAS
+
+submission-standards:
+  - item: A scale bar on all plans; plans at standard metric scales such as 1:50 or 1:100
+    level: must
+  - item: Plans must be scalable; no notes such as "Do not scale from this drawing"
+    level: must
+  - item: Electronic plans in PDF format, saved or scanned at "Actual Size" (not fit to page) so they
+      can be accurately scaled
+    level: must
+  - item: Information consistent across all documents and plans (red line, measurements, proposed
+      development)
+    level: must
+  - item: Each plan submitted as an individual PDF file
+    level: should
+  - item: Files named logically (e.g. "Proposed South Elevation.pdf") rather than by drawing number
+    level: should
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is AIA / Health Impact Assessment text; the list has no schedule of works requirement"
+
+drop-unmapped:
+  - local-name: Health Impact Assessment
+    reason: "wrong_app_type: Major (50+ units) or hot food takeaways only; re-added below with the right trigger"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: block plan contents (no visibility splay requirement); now under site-plan"
+  - local-name: Drainage Strategy / SuDS
+    reason: "garbled excerpt; re-added below with the list's wording"
+
+requirements:
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      all:
+        - ref: major-development
+        - any:
+            - all:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: The proposal includes housing.
+                - site:
+                    in: [air-quality-management-area]
+                    description: The site is within or adjoining an Air Quality Management Area.
+            - discretionary
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    source-text: >-
+      May be required for proposals that would: ▪ Include housing and is within or adjoining an Air
+      Quality Management Area
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, wrong_trigger): Air Quality Assessment is in the Major table only, and
+      the workbook's trigger was cut off mid-sentence. Only the first of the list's bullets is
+      quoted, so the other cases are shown as officer discretion.
+
+  - id: arboriculturist-report
+    action: replace
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    source-text: >-
+      Arboricultural Impact Assessment (AIA) To include: ▪ Tree survey ▪ Tree Constraints Plan ▪
+      Method Statement ▪ Tree Protection Plan
+    must-include:
+      - item: Tree survey
+        level: must
+      - item: Tree Constraints Plan
+        level: must
+      - item: Method Statement
+        level: must
+      - item: Tree Protection Plan
+        level: must
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt ran on into the Health Impact Assessment text,
+      and the trigger was lost. From the audit: the Householder section also lists a tree
+      assessment. No trigger is given, so this needs checking.
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      all:
+        - ref: major-development
+        - site:
+            in: [scheduled-monument, archaeological-priority-area]
+            description: >-
+              The development is within the setting of an ancient monument, or other archaeological
+              constraints.
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    source-text: >-
+      Archaeological Assessment Desk-based assessment, geophysical assessment or evaluation works
+      assessing the extent and significance of archaeological deposits within the application
+      site. … Developments within the setting of ancient monuments, or other archaeological
+      constraints
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): in the Major table only. The excerpt's two table columns were
+      interleaved; the text above separates them without changing the words.
+
+  - id: bng-metric
+    action: replace
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was a run of table headers ('Fee Calculator ...
+      Correct Fee 18 back to CONTENTS'). From the audit: BNG documents are listed for Householder
+      and other sections; the audit gives no trigger.
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [hh]
+            - any:
+                - site:
+                    in: [conservation-area, world-heritage-site]
+                    description: The site is in a designated area.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: The proposal creates 100 square metres or more of floorspace.
+        - application-type:
+            in: [full]
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was a run of table headers. From the audit: the
+      Householder section asks for a D&AS in a designated area or for 100 sqm+. The workbook put it
+      under Full planning, but the Full trigger was not captured, so that branch needs checking.
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      site:
+        in: [flood-risk-zone]
+        description: The site is in flood zone 2 or 3.
+    confidence: low
+    notes: >-
+      The excerpt does not give the trigger. From the audit: the Householder section asks for a
+      Flood Risk Worksheet in flood zones 2 and 3 (listed as unmapped) and a Flood Zone 3
+      assessment. The full and major triggers need checking.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+              scheduled-monument]
+            description: The proposal affects a heritage asset or its setting.
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    source-text: >-
+      Heritage Statement Describe the significance of any heritage assets affected, including any
+      contribution made by their setting.
+    confidence: medium
+    notes: >-
+      From the audit (wrong_app_type): listed in the Householder, LBC and Advertisement sections
+      (adverts in a conservation area or on a listed building). The workbook's excerpt began with a
+      stray fragment ('noise-sensitive areas') from the next row.
+
+  - id: noise-assessment
+    action: update
+    must-include:
+      - item: Prepared by a qualified acoustician
+        level: must
+    confidence: low
+    notes: >-
+      The trigger was not captured (the Heritage Statement excerpt begins 'noise-sensitive areas',
+      which may be the end of it). From the audit: also listed in the Householder section.
+
+  - id: transport-assessment
+    action: replace
+    required-if: discretionary
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    source-text: >-
+      Transport Assessment / Statement The Transport Assessment (TA) will identify the sustainable
+      transport measures and highway mitigation measures necessary to mitigate the residual impact
+      of the development traffic … Developments that generate significant traffic
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the two table columns were interleaved; the trigger is 'Developments
+      that generate significant traffic'.
+
+  - id: site-plan
+    action: add
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    source-text: >-
+      Site access details Roads, footpaths, and / or any public rights of way crossing or adjoining
+      the site Parking spaces Boundary treatments Extent of any hard landscaping and drainage
+      provision Unique drawing reference(s) Where the application specifies two or more uses,
+      operations or other matters, the plan which accompanies the application must indicate to
+      which part of the land each such use, operation or matter relates.
+    must-include:
+      - item: Site access details
+        level: must
+      - item: Roads, footpaths and any public rights of way crossing or adjoining the site
+        level: must
+      - item: Parking spaces
+        level: must
+      - item: Boundary treatments
+        level: must
+      - item: Extent of any hard landscaping and drainage provision
+        level: must
+      - item: Unique drawing reference(s)
+        level: must
+      - item: Which part of the land each use, operation or matter relates to, where the application
+          specifies two or more
+        level: must
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): these are the block plan contents, which the workbook had filed as a
+      visibility splay requirement. The application types the block plan rule covers need checking.
+
+  - id: section-proposed
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: The site slopes or the proposal changes levels.
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    must-include:
+      - item: Detail and section plans at 1:20 to 1:100
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+    confidence: medium
+    notes: >-
+      From the audit (wrong_app_type, missing_requirement): the Householder section asks for
+      sections for sloping sites and level changes; the LBC section asks for detail/section plans
+      at 1:20-1:100.
+
+  - id: photos
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, consent-under-tpo, notice-trees-in-con-area]
+        - all:
+            - application-type:
+                in: [hh]
+            - discretionary
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    must-include:
+      - item: Internal and external photographs
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+    confidence: low
+    notes: >-
+      From the audit (wrong_app_type): photographs are listed for Householder, LBC (internal and
+      external) and tree works. The audit gives no Householder trigger.
+
+  - id: condition-of-trees
+    action: add
+    required-if:
+      application-type:
+        in: [consent-under-tpo, notice-trees-in-con-area]
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    must-include:
+      - item: Trees identified by their TPO number
+        level: must
+    confidence: low
+    notes: >-
+      From the audit (wrong_app_type): the Tree Works section asks for tree identification by TPO
+      number, photographs and qualified evidence. When the qualified evidence applies is not given.
+
+  - id: cil-form
+    action: add
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    must-include:
+      - item: CIL Form 5
+        level: must
+        required-if:
+          application-type:
+            in: [prior-approval]
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): CIL Forms 1/2 are listed (including in the Householder
+      section) and prior approvals need CIL Form 5. The audit gives no trigger.
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      condition:
+        field: protected-species
+        value: true
+        description: The proposal has a potential impact on biodiversity.
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Biodiversity checklist and report for any potential
+      biodiversity impact; the Householder section also lists an ecology survey.
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if: discretionary
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): where there would be a significant loss of light (also in the Householder section)."
+
+  - id: waste-management-plan
+    action: add
+    required-if: discretionary
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): Refuse and Recycling details for homes 25m or more from
+      the highway, flats and commercial development. These cases can't be expressed with existing
+      fields.
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: floodlighting
+            value: true
+            description: The proposal includes floodlighting.
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): floodlighting, and all major applications."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Energy Strategy for all major applications."
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: The proposal creates 10 or more net new dwellings.
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): 10+ net units."
+
+  - id: travel-plan
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: staff-count
+            operator: ">="
+            value: 50
+            description: The development will have 50 or more employees.
+        - discretionary
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Draft Travel Plan at Essex County Council thresholds,
+      50+ employees, and schools. The ECC thresholds and schools are shown as officer discretion.
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      all:
+        - ref: major-development
+        - site:
+            in: [contaminated-land]
+            description: The site is known or suspected to be contaminated.
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    confidence: medium
+    notes: "From the audit (wrong_app_type, missing_requirement): in the Major table, for known or suspected contamination."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: A main town centre use outside a defined centre.
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Retail Assessment for main town centre uses out of centre."
+
+  - id: sci
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Statement of Community Involvement for all major applications."
+
+unmapped:
+  - local-name: Health Impact Assessment
+    source-text: >-
+      The Health Impact Assessment (HIA) must assess how the development affects health and
+      wellbeing … Residential developments of 50+ units
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    suggested-id: health-impact-assessment
+  - local-name: Health Impact Assessment (hot food takeaways)
+    source-text: "From the audit: in the Full section, for sui generis hot food takeaways"
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    suggested-id: health-impact-assessment
+  - local-name: Essex SuDS Water Quantity and Quality Proforma / SuDS Strategy
+    source-text: >-
+      Essex SUDS Water Quantity and Quality Proforma Sustainable Drainage (SuDS) Strategy … All full
+      and outline developments
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    suggested-id: drainage-strategy
+  - local-name: Schedule of Development
+    source-text: >-
+      Schedule of Development Detailed schedule of the number and types of residential units
+      proposed … Complex, phased and major development
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    suggested-id: accommodation-schedule
+  - local-name: Schedule of Plans and Documents
+    source-text: >-
+      Schedule of Plans and Documents All submitted drawings, plans, documents with references /
+      drawing numbers, revisions and dates … All developments
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    suggested-id: ""
+  - local-name: Parking Assessment
+    source-text: "From the audit: changes to parking or departures from Essex Parking Guidance 2024; all majors"
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    suggested-id: parking-plan
+  - local-name: Bat survey declaration
+    source-text: "From the audit: any modification, conversion, extension or demolition of buildings"
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    suggested-id: biodiversity-checklist
+  - local-name: Flood Risk Worksheet
+    source-text: "From the audit: householder applications in flood zones 2 and 3"
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    suggested-id: ""
+  - local-name: Street scene drawings
+    source-text: "From the audit: householder proposals where the roof is notably higher or lower than its neighbours"
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    suggested-id: street-scene-elevations
+  - local-name: Advertisement sign drawings
+    source-text: "From the audit: detailed sign drawings (Advertisement section)"
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    suggested-id: advertisement-drawings
+  - local-name: Evidence for certificates of lawfulness
+    source-text: "From the audit: evidence or sworn affidavits (LDC section)"
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    suggested-id: lawful-development-evidence
+  - local-name: Prior approval written description
+    source-text: "From the audit: a detailed written description (Prior Approvals section)"
+    source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
+    suggested-id: ""

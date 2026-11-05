@@ -1,0 +1,566 @@
+# Corrections for New Forest National Park Authority, from the authority's audit.
+# The audit checked the current list (Local Requirements, adopted 1 September 2026). The list is
+# general and applies proportionately to all planning applications, so most rows are left for
+# every type with a structured trigger. Several workbook triggers were cross-wired between
+# neighbouring items; they are rebuilt here from the council's own words quoted in the audit.
+local-authority: NFNPA
+
+submission-standards:
+  - item: All plans in metric
+    level: must
+  - item: Plans preferably at A3 size
+    level: should
+  - item: No plans larger than A1 size
+    level: must
+  - item: >-
+      All plans to have a metric scale bar, key dimensions (distance of the development from the
+      site boundaries and size of the building), the original paper size, a drawing number and a
+      North point where applicable
+    level: must
+  - item: Where a drawing disclaimer says "Do not scale", it must continue "unless for planning 
+      purposes"
+    level: must
+
+drop:
+  - id: photos
+    reason: "wrong_trigger: a fragment of the listed-building Heritage Statement (now a must-include item
+      there)"
+  - id: schedule-of-works
+    reason: "wrong_trigger: a fragment of the listed-building Heritage Statement (construction method
+      statement)"
+  - id: arboriculturist-report
+    sheets: [Works to trees]
+    reason: "wrong_app_type: the list covers planning applications, not tree works applications"
+
+drop-unmapped:
+  - local-name: Character / Conservation area appraisal reference
+    reason: "wrong_trigger: the list has no such requirement; the text is Land Contamination and Heritage
+      Statement wording"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_trigger: the row is the Construction management statement (now construction-management-plan)"
+  - local-name: Water efficiency / water usage statement
+    reason: "not_a_requirement: a fragment of the Sustainability Statement content"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 3
+            description: New residential development of 3 or more units.
+        - condition:
+            field: housing-floorspace
+            operator: ">"
+            value: 1000
+            description: The floor space of the proposed housing exceeds 1,000 square metres.
+        - discretionary
+    policy: New Forest Local Plan SP28
+    source-text: >-
+      Affordable Housing Statement Required for all new residential development of 3 or more units or
+      where the floor space of the proposed housing would exceed 1,000 square metres and for all
+      applications for Rural Exceptions Sites under Local Plan Policy SP28 and NPPF paragraph 78.
+    confidence: medium
+    notes: "Rural Exceptions Sites are shown as officer discretion (no field for them)."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: The development affects an Air Quality Management Area.
+        - discretionary
+    policy: New Forest Local Plan DP31
+    source-text: >-
+      Air Quality Assessment Required for any development affecting Air Quality Management Areas
+      (AQMAs) or where the development could lead to the designation of an AQMA with high levels of
+      pollution.
+    confidence: medium
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Trees or hedgerows are proposed to be lost or would be affected (directly 
+              or indirectly).
+        - site:
+            in: [tree-preservation-zone, conservation-area, ancient-woodland]
+            description: >-
+              The application includes or is likely to affect protected trees (TPO and Conservation
+              Area), ancient or veteran trees, or Ancient and Semi Natural Woodland.
+    policy: New Forest Local Plan DP2 and SP6
+    source-text: >-
+      Arboricultural Implications Assessment Required for all applications that include or are
+      likely to affect any protected trees (TPO and Conservation Area), ancient or veteran trees, or
+      Ancient and Semi Natural Woodland … Required for all applications where trees or hedgerows are
+      proposed to be lost or would be affected (directly or indirectly) by the development.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt ran into the Archaeological DBA heading and
+      left out the Tree Survey/AIA trigger."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [archaeological-priority-area]
+            description: Minor applications in areas of recognised archaeology.
+    source-text: >-
+      Archaeological Desk-Based Assessment Required for all major planning applications and minor
+      applications in areas of recognized archaeology and should include details of groundworks and
+      foundation information.
+    must-include:
+      - item: Details of groundworks and foundation information
+        level: should
+    confidence: medium
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [site-of-special-scientific-interest, special-protection-area, 
+                  special-area-of-conservation]
+            description: Development within, adjacent to or close to designated sites.
+        - condition:
+            field: demolition
+            value: true
+            description: >-
+              Demolition or changes to a structure, or changes to roofs and cladding (fascias,
+              soffits, hanging tiles or weather boarding).
+        - discretionary
+    source-text: >-
+      Preliminary Ecological Assessment (including Potential Bat Roost Assessment) required for any
+      development involving demolition or changes of a structure or changes to roof and cladding
+      structures including fascias, soffits,
+    source-url: https://www.newforestnpa.gov.uk/document/local-requirements-01-september-2026/
+    must-include:
+      - item: Preliminary Ecological Assessment, including a Potential Bat Roost Assessment
+        level: must
+        required-if:
+          condition:
+            field: demolition
+            value: true
+            description: Demolition or changes to a structure, roof or cladding.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook only repeated the biodiversity checklist line (the checklist
+      is a separate item, required for all applications). Roof and cladding changes without
+      demolition have no field, so they are covered by officer discretion. It can apply to
+      householder work.
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The application is subject to the general biodiversity gain condition.
+    source-text: Condition assessment required to confirm types and state of habitats on site.
+    source-url: https://www.newforestnpa.gov.uk/document/local-requirements-01-september-2026/
+    must-include:
+      - item: A condition assessment confirming the types and state of habitats on site
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's text belonged to the Construction management statement
+      and the DAS."
+
+  - id: construction-management-plan
+    action: replace
+    required-if:
+      site:
+        in: [site-of-special-scientific-interest, special-protection-area, 
+              special-area-of-conservation]
+        description: Within or immediately adjacent to a SSSI, Ramsar, SAC or SPA.
+    policy: New Forest Local Plan SP5 and SP6
+    source-text: >-
+      Construction management statement Required for all applications within or immediately adjacent
+      to SSSI or Ramsar, SAC or SPA areas
+    source-url: https://www.newforestnpa.gov.uk/document/local-requirements-01-september-2026/
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the listed-building construction method statement
+      instead."
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: One or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: Buildings of 100 square metres or more.
+    source-text: >-
+      Design and Access Statement Required for all applications for major development; applications
+      in a conservation area consisting of 1 or more dwellings or buildings of 100+ square metres.
+    confidence: medium
+    notes: "Audit (wrong_app_type): the list also says 'Required for applications for listed building
+      consent.'"
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: Proposed materials clearly annotated on elevations of heritage assets
+        level: must
+        required-if:
+          site:
+            in: [listed-building, locally-listed-building, conservation-area]
+            description: The proposal affects a heritage asset.
+        source-text: Elevation plans for all heritage assets should be annotated to clearly describe
+          the proposed materials.
+      - item: Additional scalable elevations showing the previous proposals superimposed over the 
+          current proposals
+        level: must
+        required-if:
+          application-type:
+            in: [s73]
+        source-text: >-
+          For Section 73 (variation of condition applications), additional, scalable elevations and
+          floor plans clearly showing the previous proposals superimposed over current proposals.
+    confidence: medium
+    notes: "Audit (wrong_app_type): the S73 row said '(none)', but the list asks for superimposed plans
+      and elevations."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: All development in Flood Zones 2 and 3, including householder development.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: Flood Zone 1 sites of 1 hectare or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Flood Zone 1 sites of 1 hectare or more.
+        - site:
+            in: [critical-drainage-area]
+            description: Land with critical drainage problems.
+        - discretionary
+    source-text: >-
+      A site-specific flood risk assessment should be provided for all development in Flood Zones 2
+      and 3. … In Flood Zone 1, an assessment should accompany all proposals involving: sites of 1
+      hectare or more;
+    source-url: https://www.newforestnpa.gov.uk/document/local-requirements-01-september-2026/
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted the Heritage Statement text. From the audit: also land
+      the SFRA shows at increased future risk, and land at risk from other flood sources where a more
+      vulnerable use is introduced (shown as officer discretion). 'This includes householder
+      development, small non-residential extensions'.
+
+  - id: floor-plan-proposed
+    action: update
+    must-include:
+      - item: Additional scalable floor plans showing the previous proposals superimposed over the 
+          current proposals
+        level: must
+        required-if:
+          application-type:
+            in: [s73]
+        source-text: >-
+          For Section 73 (variation of condition applications), additional, scalable elevations and
+          floor plans clearly showing the previous proposals superimposed over current proposals.
+    confidence: medium
+
+  - id: habitat-baseline
+    action: add
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The application is subject to the general biodiversity gain condition.
+    source-text: >-
+      The existing on-site habitat plan to be submitted under national requirements must also include
+      an accurate scale bar and page size.
+    source-url: https://www.newforestnpa.gov.uk/document/local-requirements-01-september-2026/
+    must-include:
+      - item: An accurate scale bar
+        level: must
+      - item: The page size
+        level: must
+    confidence: medium
+    notes: "From the council's drawing standards and the audit (wrong_trigger, BNG)."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, conservation-area, locally-listed-building, scheduled-monument, 
+                  park-and-garden, archaeological-priority-area]
+            description: >-
+              Applications affecting designated and non-designated heritage assets (listed buildings
+              and their curtilage, conservation areas and land adjacent to them, historic parks and
+              gardens, battlefields, Scheduled Ancient Monuments, areas of significant archaeological
+              potential).
+    source-text: >-
+      Heritage Statement (including Historical, Archaeological features and Scheduled Ancient
+      Monuments) Required for all applications affecting designated and non-designated heritage
+      assets (including historic parks and gardens, battlefields and Scheduled Ancient Monuments,
+      areas of significant archaeological potential and areas with the potential to impact on
+      heritage assets with archaeological interest). … Required for all applications within and
+      adjacent to Conservation Areas, including demolition of non-listed buildings within
+      Conservation Areas.
+    source-url: https://www.newforestnpa.gov.uk/document/local-requirements-01-september-2026/
+    must-include:
+      - item: Internal and external photographs
+        level: must
+        required-if:
+          any:
+            - application-type:
+                in: [lbc]
+            - site:
+                in: [listed-building]
+                description: Works affecting a listed building or buildings within its curtilage.
+        source-text: >-
+          Statements must include internal and external photographs and a construction method
+          statement giving details of appropriate working methods and practices.
+      - item: A construction method statement giving details of appropriate working methods and 
+          practices
+        level: must
+        required-if:
+          any:
+            - application-type:
+                in: [lbc]
+            - site:
+                in: [listed-building]
+                description: Works affecting a listed building or buildings within its curtilage.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the conservation-area text was filed as a separate
+      requirement and the photographs/method statement as stand-alone Full planning items. The list
+      says 'Required for all applications affecting Listed Buildings including works and buildings
+      within the curtilage of a listed building.'
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      site:
+        in: [contaminated-land, near-landfill-site]
+        description: >-
+          Contamination is known or suspected, or the proposed use is vulnerable, or the site is
+          within 250 metres of a currently licensed or historic landfill site.
+    source-text: >-
+      Land Contamination Assessment Required where contamination is known or suspected to exist or the
+      proposed use is vulnerable and is included on the list of contaminated sites. … Within 250
+      metres of a currently licensed or historic landfill site.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook left out the 250m landfill trigger."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: Large areas of external lighting (lit car parks, floodlighting of buildings, 
+          structures or areas).
+    source-text: >-
+      Lighting Assessment/ Lighting Information Required for all proposals involving large areas of
+      external lighting (lit car parks, floodlighting of buildings, structures or areas).
+    confidence: medium
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      condition:
+        field: noise-generating-use
+        value: true
+        description: The development is likely to generate associated noise or activity in noise 
+          sensitive areas.
+    source-text: >-
+      Noise Assessment Required for any development where it is likely to generate associated noise
+      or activity in noise sensitive areas.
+    confidence: medium
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New buildings.
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Alterations to roof forms.
+        - discretionary
+    source-text: >-
+      Roof Plans (required for all applications involving complex extensions, alterations to roof
+      forms and new buildings).
+    confidence: medium
+    notes: "Complex extensions (including householder work) are shown as officer discretion."
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New buildings.
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Alterations to roof forms.
+        - discretionary
+    source-text: >-
+      Roof Plans (required for all applications involving complex extensions, alterations to roof
+      forms and new buildings).
+    confidence: medium
+    notes: "Complex extensions (including householder work) are shown as officer discretion."
+
+  - id: sci
+    action: update
+    required-if:
+      ref: major-development
+    source-text: Statement of Community Involvement Required for all major applications.
+    confidence: medium
+
+  - id: section-existing
+    action: add
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal involves a change in ground levels or is on a sloping site.
+    source-text: >-
+      Existing and proposed site sections and finished floor and site levels (1:50 or 1:100) … in all
+      cases where proposals involve a change in ground levels or is on a sloping site.
+    source-url: https://www.newforestnpa.gov.uk/document/local-requirements-01-september-2026/
+    must-include:
+      - item: Finished floor and site levels
+        level: must
+      - item: At 1:50 or 1:100
+        level: must
+    confidence: medium
+    notes: "Audit (missing_requirement): part of the list's Additional Plans; it can apply to householder
+      work."
+
+  - id: section-proposed
+    action: add
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal involves a change in ground levels or is on a sloping site.
+    source-text: >-
+      Existing and proposed site sections and finished floor and site levels (1:50 or 1:100) … in all
+      cases where proposals involve a change in ground levels or is on a sloping site.
+    source-url: https://www.newforestnpa.gov.uk/document/local-requirements-01-september-2026/
+    must-include:
+      - item: Finished floor and site levels
+        level: must
+      - item: At 1:50 or 1:100
+        level: must
+    confidence: medium
+    notes: "Audit (missing_requirement): part of the list's Additional Plans; it can apply to householder
+      work."
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: Site access
+        level: must
+      - item: The works in relation to adjacent neighbours
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): the list's Additional Plans ask for a block plan showing
+      site access and the works in relation to adjacent neighbours."
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      always: true
+    source-text: Sustainability Statement Required for all planning applications.
+    must-include:
+      - item: How the proposal is resilient and responsive to the impacts of climate change
+        level: must
+        source-text: details of how the proposal is resilient and responsive to the impacts of 
+          climate change
+    confidence: medium
+    notes: "Applies to all planning applications, including householder."
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Telecommunications applications.
+    source-text: Telecommunications Development - Supplementary Information Required for all 
+      Telecommunications applications.
+    confidence: medium
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    source-text: Transport Assessment Required where proposal would lead to significant transport 
+      implications.
+    confidence: medium
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    source-text: Travel Plan Required for all planning applications where a Transport Assessment is 
+      required.
+    confidence: medium
+
+  - id: viability-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: Applications for new dwellings.
+        - discretionary
+    source-text: >-
+      Viability Appraisal Required for all applications for new dwellings where the applicant is
+      seeking relaxation from contribution requirements.
+    confidence: medium
+
+unmapped:
+  - local-name: Agricultural and Forestry/Estate Worker/Commoner's Dwelling Statement
+    source-text: >-
+      Required for proposals for agricultural/ forestry/ estate worker's or commoner's dwellings and
+      all new agricultural buildings.
+    source-url: https://www.newforestnpa.gov.uk/document/local-requirements-01-september-2026/
+    suggested-id: agricultural-worker-dwelling-statement
+  - local-name: Landscape Statement
+    source-text: >-
+      Required for development where existing trees, hedges and other landscape features will be
+      affected by the proposals
+    source-url: https://www.newforestnpa.gov.uk/document/local-requirements-01-september-2026/
+    suggested-id: landscape-statement
+

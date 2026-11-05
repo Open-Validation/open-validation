@@ -1,0 +1,588 @@
+# Corrections for Hart District Council, from the council's audit.
+# The audit read the current lists: 'General Validation Requirements' (non-householder) and the
+# Householder companion, both 'Version February 2025'. The non-householder list covers all
+# non-householder applications, so requirements built from it carry no application type unless
+# the list names one. Two-column PDF extraction had mixed up many triggers.
+local-authority: HAT
+
+submission-standards:
+  - item: All drawings drawn to a recognised metric scale, with a scale bar
+    level: must
+  - item: Drawings must not contain 'Do not scale' or similar wording
+    level: must
+  - item: Each drawing has a title (e.g. proposed / existing elevation / floor plans)
+    level: must
+  - item: Plans and elevations clearly labelled, annotated to show which floor each plan represents
+    level: should
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: mapped to the Arboricultural Method Statement / ancient woodland text; neither
+      list has a schedule of works item"
+  - id: site-plan
+    sheets: [Householder]
+    reason: "wrong_trigger: the householder excerpt is Location Plan notes"
+
+drop-unmapped:
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: site plan content about window openings near the boundary, not a highways
+      requirement"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "not_a_requirement: drawing content advice"
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "not_a_requirement: part of the Economic Statement content"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "not_a_requirement: advice within the Planning Statement item"
+  - local-name: Cycle parking details
+    reason: "wrong_trigger: the fragment 'Also where cycle stores are required;'"
+  - local-name: Crime prevention / Secured by Design statement
+    reason: "wrong_trigger: matrix column headers from the 2022 key; re-added below with the audit's trigger"
+  - local-name: Employment / Economic Statement
+    reason: "wrong_trigger / wrong_app_type: matrix headers, and filed under prior approval; re-added
+      below"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_trigger: merged with the Refuse trigger; re-added below without it"
+
+requirements:
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: New building work (including access drives, patios and drains/services) may 
+          affect trees or woodland on the site or on adjacent land.
+    source-text: >-
+      Tree Survey and Arboricultural Assessment When required … Where any new building work
+      (including construction of access drive, patios, and the laying of drains/services) may have
+      an impact on trees or woodland within the application site or on adjacent land.
+    source-url: 
+      https://www.hart.gov.uk/sites/default/files/2025-02/Householder-Validation-requirements-published-Feb-2025-version.pdf
+    must-include:
+      - item: An Arboricultural Method Statement where the development requires works to a tree 
+          subject to a Tree Preservation Order
+        level: must
+        required-if:
+          site:
+            in: [tree-preservation-zone]
+            description: The development requires works to a tree protected by a Tree Preservation 
+              Order.
+        source-text: >-
+          An Arboricultural Method Statement must be provided where the development requires works
+          to be carried out to a tree that is the subject of a Tree Preservation Order.
+    policy: "Saved Local Plan (Replacement) 1996-2006 CON8; Local Plan (Strategy and Sites) 2032 NBE4"
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook also put this under Works to trees; it is a requirement of
+      development applications that affect trees, not of tree works applications.
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: Contamination is known to exist, or is likely from existing or previous 
+              uses of the site.
+        - all:
+            - application-type:
+                in: [full, outline]
+            - site:
+                in: [near-landfill-site]
+                description: The site is within 250 metres of a former landfill site (not 
+                  householder applications).
+    source-url: 
+      https://www.hart.gov.uk/sites/default/files/2025-02/General-Non-householder-Validation-requirements-pubished-Feb-2025-version_0.pdf
+    confidence: medium
+    notes: >-
+      From the audit (wrong_trigger): likely contamination from existing or previous uses, within
+      250m of a former landfill (excluding householder), or contamination known to exist. The
+      workbook quoted content text and garbled two-column text.
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: The proposal creates one or more dwelling houses.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: The proposal creates 100 square metres or more of additional 
+                      floorspace.
+        - all:
+            - application-type:
+                in: [hh]
+            - site:
+                in: [listed-building]
+                description: The house is a listed building.
+    source-text: >-
+      Design and Access Statement Notes When required: a) Applications for Major Development b)
+      Applications for one or more dwelling houses in a Conservation Area c) Applications for 100m2
+      or more of additional floorspace in a Conservation Area … [Householder] Only required if
+      creating 100m2 or more of additional floorspace in a Conservation Area or where the house is a
+      listed building.
+    source-url: 
+      https://www.hart.gov.uk/sites/default/files/2025-02/General-Non-householder-Validation-requirements-pubished-Feb-2025-version_0.pdf
+    must-include:
+      - item: The design principles and design concept, and how the design relates to its wider 
+          context
+        level: should
+    confidence: medium
+    notes: "Built from both lists' 'When required' text (non-householder and householder)."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [site-of-special-scientific-interest, local-wildlife-site]
+            description: The site is within a SSSI or a Site of Interest for Nature Conservation 
+              (SINC).
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates one or more new homes.
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 100
+            description: The development creates 100 square metres or more of floorspace.
+        - all:
+            - application-type:
+                in: [hh]
+            - condition:
+                field: demolition
+                value: true
+                description: The householder proposal involves demolition.
+        - discretionary
+    source-text: >-
+      Ecological Assessment When required For: Any application within a Site of Special Scientific
+      Interest (SSSI), or a Site of Interest for Nature Conservation (SINC); or … Any major
+      development; Creation of one or more new homes; …floor space created by the development is
+      100 square metres or more
+    source-url: 
+      https://www.hart.gov.uk/sites/default/files/2025-02/General-Non-householder-Validation-requirements-pubished-Feb-2025-version_0.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's non-householder trigger was cut off and the householder
+      one was garbled with the contamination item. From the audit: the householder triggers are
+      demolition, tree or hedge loss, within 0.5km of waterways or ponds, or within 2km of an SSSI
+      or ancient woodland. Only demolition has a field; the rest are shown as discretionary.
+
+  - id: section-existing
+    action: replace
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal involves a change in ground levels, or the site is sloping.
+    source-text: >-
+      Section Drawing and Site Levels Plan Notes Only required: a) Where a proposal involves a change
+      in ground levels b) On sloping sites
+    source-url: 
+      https://www.hart.gov.uk/sites/default/files/2025-02/General-Non-householder-Validation-requirements-pubished-Feb-2025-version_0.pdf
+    must-include:
+      - item: Scale preferably 1:50 or 1:100
+        level: should
+    confidence: medium
+
+  - id: section-proposed
+    action: replace
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal involves a change in ground levels, or the site is sloping.
+    source-text: >-
+      Section Drawing and Site Levels Plan Notes Only required: a) Where a proposal involves a change
+      in ground levels b) On sloping sites – full information is required concerning alterations to
+      levels, the way in which a proposal sits within the site and in particular, the relative
+      levels between existing and proposed buildings.
+    source-url: 
+      https://www.hart.gov.uk/sites/default/files/2025-02/General-Non-householder-Validation-requirements-pubished-Feb-2025-version_0.pdf
+    must-include:
+      - item: Scale preferably 1:50 or 1:100
+        level: should
+      - item: Alterations to levels, how the proposal sits within the site, and the relative levels 
+          of existing and proposed buildings
+        level: must
+        required-if:
+          condition:
+            field: change-in-ground-levels
+            value: true
+            description: The site is sloping.
+    confidence: medium
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: Development in flood zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: Development of more than 1 hectare in flood zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: Development of more than 1 hectare in flood zone 1.
+        - site:
+            in: [critical-drainage-area]
+            description: An area in flood zone 1 with critical drainage problems notified by the 
+              Environment Agency.
+        - discretionary
+    source-text: >-
+      Flood Risk Assessment Notes When required: a) Development in flood zone 2 or 3 b) Developments
+      of more than 1hectare(ha) in flood zone 1. c) Less than 1ha in flood zone 1 for development to
+      a more vulnerable class (e.g. commercial to residential) where they could be affected by
+      sources flooding other than rivers such as surface water or ground water flooding. d) In an
+      area within flood zone 1 which has critical drainage problems as notified by the environment
+      agency (not currently relevant…
+    source-url: 
+      https://www.hart.gov.uk/sites/default/files/2025-02/General-Non-householder-Validation-requirements-pubished-Feb-2025-version_0.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the householder row had the Design and Access Statement trigger.
+      Case (c), a change to a more vulnerable use at risk from other sources of flooding, has no
+      field and is shown as discretionary.
+
+  - id: floor-plan-existing
+    action: update
+    must-include:
+      - item: The use of each room, with windows, doors and walls
+        level: must
+        source-text: indicate on the floor plans the use of each room along with any windows, doors 
+          and walls.
+
+  - id: floor-plan-proposed
+    action: update
+    must-include:
+      - item: The use of each room, with windows, doors and walls
+        level: must
+        source-text: indicate on the floor plans the use of each room along with any windows, doors 
+          and walls.
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area]
+            description: The proposal affects a designated heritage asset or its setting.
+        - all:
+            - application-type:
+                in: [hh]
+            - site:
+                in: [locally-listed-building]
+                description: The householder proposal affects a non-designated heritage asset or its
+                  setting.
+    notes: >-
+      Audit (wrong_app_type): the non-householder list applies to listed building consent too. The
+      householder list also covers non-designated heritage assets.
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: New dwellings or schools within 300m of the M3, within 100m of a railway, 
+              or inside Farnborough Airport's 50dB LAeq contour.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Motor sports, shooting, nurseries or windfarms.
+        - condition:
+            field: plant-equipment
+            value: true
+            description: New multiple air source heat pump installations within a defined settlement
+              (without MCS 020 compliance).
+    source-text: >-
+      New dwellings and schools that are proposed close to major roads (within 300m of the M3) …
+      All new multiple airsource heat pump installations, situated within a defined settlement …
+      BS 4142:2014-compliant Noise Impact Assessment.
+    source-url: 
+      https://www.hart.gov.uk/sites/default/files/2025-02/General-Non-householder-Validation-requirements-pubished-Feb-2025-version_0.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, missing_requirement): the workbook only had the ASHP fragment. From the
+      audit: dwellings or schools within 300m of the M3, within 100m of a railway or inside
+      Farnborough Airport's 50dB LAeq contour, plus motor sports, shooting, nurseries and windfarms;
+      and a BS 4142 assessment for multiple ASHP installations in a defined settlement without
+      MCS 020 (householder and non-householder lists).
+
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more dwellings (gross).
+        - condition:
+            field: housing-floorspace
+            operator: ">"
+            value: 1000
+            description: More than 1,000 square metres of residential floorspace.
+        - discretionary
+    source-url: 
+      https://www.hart.gov.uk/sites/default/files/2025-02/General-Non-householder-Validation-requirements-pubished-Feb-2025-version_0.pdf
+    confidence: medium
+    notes: >-
+      From the audit (wrong_trigger): 10+ dwellings gross or over 1,000m2 residential floorspace,
+      regeneration of affordable housing, and rural exception schemes (the last two shown as
+      discretionary). The workbook quoted the 2022 matrix headers.
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [conservation-area]
+            description: New residential or minor commercial development in a conservation area, 
+              except where no material physical alterations are proposed.
+    must-include:
+      - item: Broad indications of landscaping, along with any strategic landscaping
+        level: should
+        source-text: broad indications of landscaping should be shown along with any strategic 
+          landscaping.
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: Major, residential or commercial development with external lighting, including 
+          floodlit sports or recreation facilities.
+    source-text: Any major or residential or commercial development where external lighting is 
+      proposed
+    source-url: 
+      https://www.hart.gov.uk/sites/default/files/2025-02/General-Non-householder-Validation-requirements-pubished-Feb-2025-version_0.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook used the Landscaping trigger. From the audit: floodlit
+      sports or recreation, any major, residential or commercial development with external
+      lighting, and countryside sites of ecological interest.
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: loss-of-use
+            value: true
+            description: The development involves the loss of playing fields or major sporting 
+              facilities.
+        - discretionary
+    notes: "Also where the development proposes playing fields or sporting facilities (council's wording);
+      there is no field for that yet, so it is shown as discretionary."
+
+  - id: planning-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    notes: "Major applications, and other complex proposals clearly contrary to a Development Plan policy
+      (council's wording)."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if: discretionary
+    notes: >-
+      Town Centre Uses Statement for main town centre uses not in an existing centre and not in
+      accordance with an up-to-date Local Plan. Audit (wrong_trigger): the workbook omits the
+      over-2,500m2 out-of-centre threshold. There are no fields for town centre uses or location yet.
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates new homes (by new build or conversion).
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 0
+            description: The proposal creates new retail or commercial premises.
+    source-text: >-
+      Refuse Bin storage details and collection points … When required Any proposal for the creation
+      of new homes (whether by new build or conversion) New retail or commercial premises
+    source-url: 
+      https://www.hart.gov.uk/sites/default/files/2025-02/General-Non-householder-Validation-requirements-pubished-Feb-2025-version_0.pdf
+    confidence: medium
+    notes: >-
+      The council's item is Refuse Bin storage details and collection points (mapped here to waste
+      management plan). Audit (wrong_trigger): the workbook's excerpt merged it with the SANGS/SAMM
+      trigger; 'New retail or commercial premises' belongs to Refuse.
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 100
+                description: Residential development of 100 units.
+            - discretionary
+    source-text: >-
+      Transport Assessment When required a) Residential Development: 100 units b) Class E and B2
+      uses: 2,500m2 c) B8 uses: 5,000m2 d) Retail uses: 1,000m2 e) Education uses: 2,500m2 f) Health
+      uses: 2,500m2 g) Care Establishments: 500m2 or 5 bedrooms h) Leisure, stadia or ice rinks : All
+      (1,500 seats) i) Leisure, other: 1,000m2 j) Commercial development not falling in the above
+      categories: 500m2
+    source-url: 
+      https://www.hart.gov.uk/sites/default/files/2025-02/General-Non-householder-Validation-requirements-pubished-Feb-2025-version_0.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): filed under prior approval; it belongs to full and outline
+      applications. The use-specific floorspace thresholds have no fields yet, so they are shown as
+      discretionary.
+
+  - id: travel-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - any:
+            - condition:
+                field: floorspace-non-residential
+                operator: ">"
+                value: 1000
+                description: Retail, other leisure, or Class E, B2 or B8 floorspace greater than 
+                  1,000 square metres.
+            - discretionary
+    source-text: >-
+      Travel Plan When required All planning applications for: a) Food and non-food retail,
+      including extensions, where the gross floorspace created is greater than 1,000m2 b) Cinema and
+      conference facilities c) Other leisure (D2) uses (excluding stadia) where the gross floorspace
+      is 1000m2 d) Class E, B2, B8 floorspace where the gross floorspace created is greater than
+      1,000m2 e) Higher and further education establishments where the gross floorspace is 2500m2 or
+      more. f) Stadia of 1500 or more s…
+    source-url: 
+      https://www.hart.gov.uk/sites/default/files/2025-02/General-Non-householder-Validation-requirements-pubished-Feb-2025-version_0.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): filed under prior approval; it belongs to full and outline
+      applications. The excerpt is cut off; cinema, conference, education and stadia cases are shown
+      as discretionary.
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 0
+            description: The development proposes new floorspace.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: The development changes the use of existing floorspace.
+    source-text: Climate Mitigation Statement - For all development proposing new floorspace and 
+      changes of use of existing floorspace
+    source-url: 
+      https://www.hart.gov.uk/sites/default/files/2025-02/General-Non-householder-Validation-requirements-pubished-Feb-2025-version_0.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement): the council calls it a Climate Mitigation Statement."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: The proposal includes a new telecommunications antenna.
+    source-text: Telecommunications Report - For all new telecommunications antenna
+    source-url: 
+      https://www.hart.gov.uk/sites/default/files/2025-02/General-Non-householder-Validation-requirements-pubished-Feb-2025-version_0.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement)."
+
+unmapped:
+  - local-name: Crime Prevention / ASB Statement
+    source-text: "From the audit: 25+ dwellings, E/B2/B8 over 1,500m2, pubs, nightclubs, hotels, takeaways,
+      restaurants, ATMs and banks"
+    source-url: 
+      https://www.hart.gov.uk/sites/default/files/2025-02/General-Non-householder-Validation-requirements-pubished-Feb-2025-version_0.pdf
+    suggested-id: crime-prevention-statement
+  - local-name: Economic Statement
+    source-text: >-
+      Economic Statement When required For any new Commercial development in a Rural location Or in
+      any location where: a) The proposed uses fall within Use Classes E, B2 or B8 and exceed
+      1,500m2 in gross external area; or b) The proposal would result in the change of use or loss
+      of land used for Use Classes E, B2 or B8;
+    source-url: 
+      https://www.hart.gov.uk/sites/default/files/2025-02/General-Non-householder-Validation-requirements-pubished-Feb-2025-version_0.pdf
+    suggested-id: employment-statement
+  - local-name: SANGS/SAMM Mitigation
+    source-text: >-
+      SANGS/SAMM Mitigation When required … a) All schemes for one or more additional dwellings
+      within 5km of the SPA b) All schemes for 50+ additional dwellings within 7km of the SPA, where
+      SANGS is part of the proposed mitigation.
+    source-url: 
+      https://www.hart.gov.uk/sites/default/files/2025-02/General-Non-householder-Validation-requirements-pubished-Feb-2025-version_0.pdf
+    suggested-id: habitats-regulations-assessment
+  - local-name: Agricultural Statement
+    source-text: "From the audit: new agricultural or equestrian buildings in the countryside, and new
+      dwellings justified by agricultural need"
+    source-url: 
+      https://www.hart.gov.uk/sites/default/files/2025-02/General-Non-householder-Validation-requirements-pubished-Feb-2025-version_0.pdf
+    suggested-id: agricultural-statement
+  - local-name: Air Source Heat Pump Calculation
+    source-text: "From the audit: an MCS calculation for 'All new single air-source heat pumps within
+      a defined settlement' (householder and non-householder lists)"
+    source-url: 
+      https://www.hart.gov.uk/sites/default/files/2025-02/Householder-Validation-requirements-published-Feb-2025-version.pdf
+    suggested-id: heat-pump-noise-calculation
+  - local-name: Flood Risk Management Statement and Flood Impact Form (Causal Areas)
+    source-text: "From the audit: non-major development in Causal Areas (Policy NBE5)"
+    source-url: 
+      https://www.hart.gov.uk/sites/default/files/2025-02/General-Non-householder-Validation-requirements-pubished-Feb-2025-version_0.pdf
+    suggested-id: flood-risk-assessment
+  - local-name: Shop Front Details
+    source-text: Shop Front Details - All applications for new shop fronts
+    source-url: 
+      https://www.hart.gov.uk/sites/default/files/2025-02/General-Non-householder-Validation-requirements-pubished-Feb-2025-version_0.pdf
+    suggested-id: shopfront-details
+
+low-confidence:
+  - id: site-plan
+    note: "Audit (wrong_trigger): the remaining excerpt is general text ('site/block plans, elevations,
+      sections are required to describe the subject of your application')."
+  - id: bng-metric
+    note: "The excerpt is a heading fragment ('Statutory Biodiversity Metric. 11 PART 2 – Local Requirements...');
+      BNG is a national requirement."
+

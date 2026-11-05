@@ -1,0 +1,528 @@
+# Corrections for St Albans City and District Council, from
+# inputs/audit/st-albans-city-and-district-council.json.
+# St Albans' local list is a set of about 25 application-type checklists (mostly '2023', from the
+# 2022 review; some June 2017) on the 'Application forms and validation checklists' page. The
+# workbook linked only the Major full-planning checklist. Two-column PDF layouts swapped many
+# triggers between items; LBC rows were copied from the combined Householder + LBC checklist,
+# Reserved Matters rows were filed under Full planning, and prior notification rows (demolition,
+# agricultural building, telecoms) under change-of-use prior approval. The Tree Works (2017),
+# Hedgerow, Larger Home Extension and Planning + Advertising checklists were not captured.
+# Items marked "From the audit" use the audit's paraphrase of the checklists.
+local-authority: SAL
+
+validation-list:
+  url: https://www.stalbans.gov.uk/application-forms-and-validation-checklists
+  date: 2023
+  date-basis: >-
+    audit: checklist link titles '... 2023' (Demolition in a CA '2022'); the checklists are undated
+    in their text, and the revised lists from the Aug-Sep 2022 consultation were to operate from
+    November 2022. Some checklists still in use are dated June 2017
+
+submission-standards:
+  - item: A scale bar for the scale of all plans must be shown
+    level: must
+  - item: The scale on submitted plans must state the paper size at which it applies (e.g. scale 1:200
+      at A3)
+    level: must
+  - item: All submitted plans and drawings must have written dimensions
+    level: must
+
+drop:
+  - id: photos
+    sheets: [Householder]
+    reason: "duplicate/wrong_app_type: LBC-only supporting information list copied from the combined Householder + LBC checklist"
+  - id: arboriculturist-report
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: from the demolition prior notification checklist, not change of use (covered by the tree trigger below)"
+  - id: site-plan
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: from a prior notification checklist, not change of use"
+  - id: biodiversity-survey-report
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: from a prior notification checklist, not change of use"
+  - id: section-existing
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: from a prior notification checklist, not change of use; excerpt is fee-guidance debris"
+  - id: section-proposed
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: as above"
+  - id: floor-plan-existing
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: as above"
+  - id: floor-plan-proposed
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: as above"
+  - id: elevation-existing
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: as above"
+  - id: elevation-proposed
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: as above"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: NPPF encouragement to engage early, not a validation requirement"
+  - local-name: Validation checklist form (completed)
+    reason: "not_a_requirement: checklist header boilerplate"
+  - local-name: Design Code / Masterplan / Parameter plans
+    reason: "not_a_requirement: a policy reference ('National Model Design Code (S5)'); the Outline excerpt is shadow-diagram text"
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "wrong_trigger: the excerpts are archaeological evaluation text (now an archaeological-assessment must-include item)"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: heritage text (Householder/LBC) or the retail sequential test (Full/Outline); the FRA sequential-test sentence is now an FRA must-include item"
+  - local-name: Structural Survey
+    reason: "wrong_trigger: the excerpts are the tree survey trigger or merged with contamination text; re-added below"
+  - local-name: Drainage Strategy / SuDS
+    reason: "not a separate requirement: Flood Risk Assessment contents (now an FRA must-include item)"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not a separate requirement: site plan contents"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "duplicate: the Daylight and Sunlight Assessment trigger"
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "wrong_trigger: headings only; re-added below with the street-scene trigger"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 15
+        description: Applications providing 15 or more new residential units.
+    source-text: "Affordable Housing Statement 'Required for applications providing 15 or more new residential units'"
+    source-url: https://www.stalbans.gov.uk/sites/default/files/documents/publications/planning-building-control/Validation%20Checklists/2023/Validation%20Checklist%20-%20Full%20Planning%20Permission%20Major.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the workbook quoted street-scene and scale-bar text.
+      One workbook row came from the Reserved Matters checklist, so no application type is given.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are significant trees within the site, or street trees, that may be
+          affected by the development or construction works, including storage of materials.
+    source-text: >-
+      This is required where: There are significant trees within the site or street trees that may
+      be affected by the development or construction works, including storage of materials; or
+    confidence: medium
+    notes: "Audit (wrong_trigger): the tree survey trigger was filed under the workbook's Structural Survey row; the tree rows themselves quoted only policy references."
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: ground-disturbance
+            value: true
+            description: Groundworks are proposed.
+        - site:
+            in: [scheduled-monument, archaeological-priority-area]
+            description: Within a Scheduled Monument, an archaeological site for local preservation
+              or an archaeological site subject to recording conditions.
+    source-text: >-
+      Archaeology Assessment An archaeological desk based assessment is required for all
+      applications where groundworks are proposed within a: Scheduled Monument Archaeological sites
+      for local preservation Archaeological sites subject to recording conditions
+    source-url: https://www.stalbans.gov.uk/sites/default/files/documents/publications/planning-building-control/Validation%20Checklists/2023/Validation%20Checklist%20-%20Full%20Planning%20Permission%20Major.pdf
+    must-include:
+      - item: Previous nearby finds recorded in the historic environment record
+        level: should
+      - item: The archaeological potential of the site
+        level: should
+      - item: The results of an archaeological evaluation
+        level: should
+        required-if:
+          condition:
+            field: basement
+            value: true
+            description: New basements, extensions to basements or other extensive groundworks.
+        source-text: >-
+          Where such proposals include new basements, extensions to basements or other extensive
+          groundworks, the results of an archaeological evaluation should be included.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the Householder/LBC excerpt was drawing-dimension text; the trigger is from the Major and Outline checklists."
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: All major and minor developments, with some exceptions.
+    source-text: >-
+      Biodiversity Net Gain (BNG) – New Validation Requirement All major and minor developments, with
+      some exceptions, are now required to provide a Biodiversity Net Gain of 10%.
+    source-url: https://www.stalbans.gov.uk/application-forms-and-validation-checklists
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook placed it under Full planning only; it also covers Outline (householder is exempt nationally)."
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+    must-include:
+      - item: Diagrams of how the shadows of the building will impact on neighbours for all four
+          quarters of the year
+        level: should
+        source-text: "Should include diagrams of how the shadows of the building will impact on neighbours for all four quarters of the year."
+    confidence: medium
+    notes: >-
+      Required where the proposal would affect the daylight/sunlight enjoyed by adjoining properties
+      (including gardens or amenity space), or breaches the 45 degree line. The shadow-diagram text
+      was in the workbook's Householder FRA row.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is EIA development.
+    confidence: medium
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building of 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-url: https://www.stalbans.gov.uk/sites/default/files/documents/publications/planning-building-control/Validation%20Checklists/2023/Validation%20Checklist%20-%20Full%20Planning%20Permission%20Major.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted FRA/BRE daylight text. From the audit: buildings with 2+ dwellings or educational accommodation at 18m+ or 7+ storeys."
+
+  - id: flood-risk-assessment
+    action: replace
+    source-url: https://www.stalbans.gov.uk/sites/default/files/documents/publications/planning-building-control/Validation%20Checklists/2023/Validation%20Checklist%20-%20OUTLINE%20WITH%20SOME%20MATTERS%20RESERVED%202023.pdf
+    must-include:
+      - item: The design of surface water management systems including Sustainable Drainage (SuDS)
+        level: should
+      - item: How the requirement for safe access to and from the development in areas at risk of
+          flooding is addressed
+        level: should
+      - item: Evidence that the Sequential and Exception Tests of the NPPF have been met, where
+          required
+        level: should
+    source-text: >-
+      The FRA should include the design of surface water management systems including Sustainable
+      Drainage (SUDS) and address the requirement for safe access to and from the development in
+      areas at risk of flooding. … The FRA should provide evidence that demonstrates, where
+      required, the Sequential and Exception Test of NPPF have been met
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the Householder/LBC excerpt was shadow-diagram text, and the FRA
+      contents were scattered across other rows. The extract gives no trigger for the FRA.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, demolition-con-area]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, scheduled-monument,
+              park-and-garden]
+            description: The application is likely to affect designated heritage assets.
+    source-text: >-
+      Heritage Statement … This is required for Applications which are likely to affect: Designated
+      heritage assets (e.g.
+    source-url: https://www.stalbans.gov.uk/sites/default/files/documents/publications/planning-building-control/Validation%20Checklists/2023/Validation%20Checklist-%20%20Householder%20and%20Listed%20Building%20Consent%202023.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the Householder/LBC excerpt was FRA sequential-test text. The list of designated assets is cut off in the excerpt."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: Contamination is known or suspected, i.e. a potentially contaminative former use
+          such as industrial/commercial/agricultural.
+    confidence: medium
+
+  - id: landscaping-plan
+    action: replace
+    required-if:
+      ref: major-development
+    source-text: "Landscape Strategy - Required for all major developments"
+    source-url: https://www.stalbans.gov.uk/sites/default/files/documents/publications/planning-building-control/Validation%20Checklists/2023/Validation%20Checklist%20-%20Full%20Planning%20Permission%20Major.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement): the workbook had only a garbled 'Landscaping scheme' row."
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Residential development introduced to a noisy environment.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Noisy uses near housing.
+        - condition:
+            field: plant-equipment
+            value: true
+            description: New plant such as air source heat pumps.
+        - discretionary
+    source-text: >-
+      Such an Assessment may be required in the following circumstances (this list is not
+      exhaustive): Where it is proposed to introduce residential development to a noisy environment
+    source-url: https://www.stalbans.gov.uk/sites/default/files/documents/publications/planning-building-control/Validation%20Checklists/2023/Validation%20Checklist%20-%20OUTLINE%20WITH%20SOME%20MATTERS%20RESERVED%202023.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted parking-standards text. The list is 'not exhaustive', so officer discretion is included."
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [green-belt]
+            description: Applications within the Metropolitan Green Belt.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: Applications for 10 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: 0.5 hectares, if it is not known how many dwellings are proposed.
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 1000
+            description: Building(s) where the floor space to be created is 1,000 square metres.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Sites of 1 hectare or more.
+        - application-type:
+            in: [pa-demo-building]
+    source-text: >-
+      Supporting Planning Statement Required for: Applications within the Metropolitan Green Belt …
+      Required for: Applications for 10 or more dwellings, or 0.5 hectares if is not known how many
+      dwellings are proposed Applications for a building or buildings where the floor space to be
+      created by the development is 1,000 square metres Application on a sit…
+    source-url: https://www.stalbans.gov.uk/sites/default/files/documents/publications/planning-building-control/Validation%20Checklists/2023/Validation%20Checklist%20-%20OUTLINE%20WITH%20SOME%20MATTERS%20RESERVED%202023.pdf
+    must-include:
+      - item: A full explanation of the proposal including any relevant background or site history
+        level: should
+      - item: The context and need for the proposed development, including justifications
+        level: should
+      - item: An overview of how the proposal accords with the Local Plan, Neighbourhood Plans and
+          other relevant documents
+        level: should
+      - item: Current/last use and a detailed justification for the demolition
+        level: must
+        required-if:
+          application-type:
+            in: [pa-demo-building]
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the Full planning excerpt was the Recycling/Waste Strategy trigger. The
+      Green Belt trigger is from the Householder checklist; the size thresholds from the Outline and
+      Major checklists ('sites of 1ha+' per the audit). The s73 checklist says an application 'may
+      include' one.
+
+  - id: schedule-of-works
+    action: replace
+    required-if:
+      application-type:
+        in: [lbc, ldc-proposed-work-lb]
+    source-text: >-
+      This could include:  Photographs  Schedule of works  Method Statement for the works/repairs
+       Technical specifications of materials/finishes (e.g. a lime mortar specification)
+    source-url: https://www.stalbans.gov.uk/sites/default/files/documents/publications/planning-building-control/Validation%20Checklists/2023/Validation%20Checklist-%20%20Householder%20and%20Listed%20Building%20Consent%202023.pdf
+    confidence: low
+    notes: >-
+      Audit (duplicate, wrong_app_type): LBC-only items from the combined Householder + LBC
+      checklist and the 'LDC for proposed works to a Listed Building' checklist; the other workbook
+      rows were tree and demolition method statement text. 'This could include' is not a firm
+      requirement.
+
+  - id: telecommunications-report
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [pa-ecomms-network]
+        - condition:
+            field: telecommunications-development
+            value: true
+            description: The proposal is for telecommunications equipment.
+    source-text: >-
+      This should include existing masts, structures and other buildings within the search area.
+      Explanation if no alternatives considered. Map showing the relationship of the application
+      site to schools and other telecommunication equipment in the vicinity.
+    source-url: https://www.stalbans.gov.uk/sites/default/files/documents/publications/planning-building-control/Validation%20Checklists/2023/Validation%20Checklist%20-%20Prior%20Notification%20for%20Telecoms%202023.pdf
+    must-include:
+      - item: Existing masts, structures and other buildings within the search area
+        level: should
+      - item: Explanation if no alternatives considered
+        level: should
+      - item: Map showing the relationship of the application site to schools and other
+          telecommunication equipment in the vicinity
+        level: should
+    confidence: medium
+    notes: "Audit (wrong_app_type): from the Prior Notification for Telecoms checklist, not change-of-use prior approval."
+
+  - id: biodiversity-survey-report
+    action: update
+    must-include:
+      - item: A Preliminary Roost Assessment
+        level: must
+        required-if:
+          application-type:
+            in: [pa-demo-building]
+        source-text: "The demolition of buildings in areas where bat activity has been identified will require a Preliminary Roost Assessment."
+    notes: "The extract gives no general trigger ('Depending on the results of the initial survey, further protected species surveys may be required.')."
+
+  - id: sustainability-statement
+    action: update
+    required-if: discretionary
+    confidence: low
+    notes: >-
+      Listed among Neighbourhood Plan documents that 'may also be required' for householder
+      applications within a Neighbourhood Plan area (Harpenden, Sandridge, St Stephen); there is no
+      designation for those areas. The audit says it is also a Neighbourhood Plan requirement for
+      major applications.
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Main town centre uses in an edge of centre or out of centre location, not in
+              accordance with the Development Plan.
+        - discretionary
+    must-include:
+      - item: Details of the sequential test process that supports the chosen site location
+        level: should
+    confidence: medium
+    notes: "The start of the retail trigger is cut off in the excerpt, so it is shown as officer discretion."
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      ref: major-development
+    source-text: >-
+      Transport Assessment survey All developments which are likely to generate significant amount
+      of vehicle movement i.e. major developments
+    source-url: https://www.stalbans.gov.uk/sites/default/files/documents/publications/planning-building-control/Validation%20Checklists/2023/Validation%20Checklist%20-%20Full%20Planning%20Permission%20Major.pdf
+    confidence: medium
+    notes: "The Outline excerpt was structural-survey and floor-plan text (audit wrong_trigger)."
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    confidence: low
+    notes: "'A Green Travel Plan may also be required by the Local Highway Authority.' One row came from the Reserved Matters checklist."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Required where there is a planning policy requirement to provide affordable housing or where the development departs from other policy."
+
+  - id: construction-management-plan
+    action: add
+    required-if:
+      ref: major-development
+    source-text: "Construction Environment Management Plan - Required for all major developments"
+    source-url: https://www.stalbans.gov.uk/sites/default/files/documents/publications/planning-building-control/Validation%20Checklists/2023/Validation%20Checklist%20-%20Full%20Planning%20Permission%20Major.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement)."
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-text: >-
+      Recycling / Waste Strategy … Required for any new mixed use development, any major development
+      and any development involving blocks of apartments. … Strategy will need to demonstrate: How
+      refuse and recycling will be stored and collected That the proposal will meet the current
+      waste and recycling requirements and is flexible enough to adapt to future needs
+    source-url: https://www.stalbans.gov.uk/sites/default/files/documents/publications/planning-building-control/Validation%20Checklists/2023/Validation%20Checklist%20-%20Full%20Planning%20Permission%20Major.pdf
+    must-include:
+      - item: How refuse and recycling will be stored and collected
+        level: must
+      - item: That the proposal will meet the current waste and recycling requirements and is
+          flexible enough to adapt to future needs
+        level: must
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): the workbook filed this trigger under Planning Statement.
+      Mixed use development and apartment blocks have no field, so they are shown as officer
+      discretion. The Outline checklist asks for it when layout is being sought.
+
+unmapped:
+  - local-name: Structural survey
+    source-text: "Include a structural survey (if required)"
+    source-url: https://www.stalbans.gov.uk/sites/default/files/documents/publications/planning-building-control/Validation%20Checklists/2023/Validation%20Checklist-%20%20Householder%20and%20Listed%20Building%20Consent%202023.pdf
+    suggested-id: structural-survey
+  - local-name: Street scene drawings
+    source-text: "Normally required when there is a change in height between a proposed development and the neighbouring buildings."
+    source-url: https://www.stalbans.gov.uk/sites/default/files/documents/publications/planning-building-control/Validation%20Checklists/2023/Validation%20Checklist%20-%20OUTLINE%20WITH%20SOME%20MATTERS%20RESERVED%202023.pdf
+    suggested-id: street-scene-elevations
+  - local-name: Climate Change Statement
+    source-text: "From the audit: added for major developments in the 2022 review"
+    source-url: https://www.stalbans.gov.uk/sites/default/files/documents/publications/planning-building-control/Validation%20Checklists/2023/Validation%20Checklist%20-%20Full%20Planning%20Permission%20Major.pdf
+    suggested-id: ""
+  - local-name: Agricultural Land Survey
+    source-text: "From the audit: loss of agricultural land (folded into the workbook's Air Quality row)"
+    source-url: https://www.stalbans.gov.uk/sites/default/files/documents/publications/planning-building-control/Validation%20Checklists/2023/Validation%20Checklist%20-%20Full%20Planning%20Permission%20Major.pdf
+    suggested-id: agricultural-land-classification
+  - local-name: Neighbourhood Plan statements (major applications)
+    source-text: >-
+      From the audit: major applications in the Harpenden, Sandridge and St Stephen parish areas need
+      a Sustainability Statement, Dwelling Mix Statement, Public Open Space Provision Statement,
+      Design Brief, Utilities and Infrastructure Statement, CO2 Emissions Statement, Healthcare
+      Provision Statement and Retail and Employment Statement
+    source-url: https://www.stalbans.gov.uk/sites/default/files/documents/publications/planning-building-control/Validation%20Checklists/2023/Validation%20Checklist%20-%20Full%20Planning%20Permission%20Major.pdf
+    suggested-id: ""
+  - local-name: Surface Water Drainage Statement (HCC major proforma)
+    source-text: "From the audit: major applications (HCC surface water proforma linked from the checklists page)"
+    source-url: https://www.stalbans.gov.uk/application-forms-and-validation-checklists
+    suggested-id: drainage-strategy
+  - local-name: Demolition Method Statement
+    source-text: "Tree Protection Method Statement Demolition Method Statement"
+    source-url: https://www.stalbans.gov.uk/sites/default/files/documents/publications/planning-building-control/Validation%20Checklists/2023/Validation%20Checklist%20-%20Prior%20Notification%20for%20Demolition%202023.pdf
+    suggested-id: demolition-method-statement
+
+low-confidence:
+  - id: air-quality-assessment
+    note: "Audit (missing_requirement): the Full planning excerpt is agricultural land / occupancy condition text; the extract gives no air quality trigger."
+  - id: sci
+    note: "Audit (wrong_app_type): the excerpts are headings with no trigger, and one row came from the Reserved Matters checklist (filed under Full planning)."
+  - id: design-and-access-statement
+    note: "Audit (wrong_app_type): one row came from the Reserved Matters checklist (filed under Full planning); the excerpts give contents, not a trigger."
+  - id: photos
+    note: "Audit (wrong_app_type): rows come from LBC, LDC-listed-building, demolition and advert checklists ('This could include: Photographs...'; 'Annotated photographs may be required to indicate the location of the proposed sign(s)'); no firm trigger."

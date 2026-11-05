@@ -1,0 +1,611 @@
+# Corrections for Gravesham Borough Council, from inputs/audit/gravesham-borough-council.json.
+# Grokbot's link is the council's only list: the 2020 list (in force from 1 April 2020),
+# reformatted later, which is why the PDF metadata says 2024. The build already takes the audit's
+# date. Items marked "From the audit" use the audit's paraphrase of the list, not its exact words.
+local-authority: GRA
+
+submission-standards:
+  - item: >-
+      All drawings (excluding supplementary renders or sketches) include a title and drawing number,
+      with the revision number as necessary
+    level: must
+  - item: All drawings state the print (paper) size
+    level: must
+  - item: >-
+      All drawings at a recognised scale (1:50, 1:100, 1:200, 1:500, 1:1250 or 1:2500), with a scale
+      bar and the scale at that print size identified (e.g. 1:50 at A3)
+    level: must
+  - item: The wording "do not scale" should not be used on drawings
+    level: must
+
+drop:
+  - id: archaeological-assessment
+    reason: "duplicate: a clause of the Heritage Statement (now a must-include item there)"
+  - id: waste-management-plan
+    reason: "duplicate: 'location of waste storage' is a fragment of the block plan drawing standards"
+  - id: bng-metric
+    reason: "wrong_trigger: 'to demonstrate a Biodiversity Net Gain' is a clause inside the 2020 Biodiversity
+      Survey requirement, not a standalone local requirement"
+  - id: design-and-access-statement
+    reason: "not_a_requirement: national content guidance, not a local trigger"
+  - id: environmental-statement
+    reason: "not_a_requirement: national (EIA Regulations) text, not a local requirement"
+
+drop-unmapped:
+  - local-name: Sequential / Exception Test (flood)
+    reason: "duplicate: part of the Flood Risk Assessment (added below)"
+  - local-name: Highways / access details (visibility splays)
+    reason: "duplicate: a fragment of the block plan drawing standards (now a site-plan must-include item)"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: the excerpt comes from another section; replaced below"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: the use-class trigger is missing; replaced below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 15
+            description: The proposal is for 15 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: The residential site is 0.5 hectares or more.
+        - all:
+            - site:
+                in: [rural-area]
+                description: The site is in the rural area.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 3
+                description: The proposal is for 3 or more dwellings.
+    source-text: >-
+      Affordable Housing Statement This is required for residential developments of: 15 or more
+      dwellings or Sites of 0.5 hectares or more in the urban area, or 3 or more dwellings, or Sites
+      of 0.5 hectares or more in the rural area Statements should include information on affordable
+      and market housing including: Number of residential units
+    source-url: https://www.gravesham.gov.uk/downloads/file/382/local-validation-list
+    must-include:
+      - item: Number of residential units
+        level: must
+    confidence: medium
+    notes: "The workbook guessed Full planning ('INFERRED'); the excerpt gives the thresholds. The list
+      of contents is cut off after the first item."
+
+  - id: air-quality-assessment
+    action: add
+    required-if: discretionary
+    source-url: https://www.gravesham.gov.uk/downloads/file/382/local-validation-list
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Air Quality Impact Assessment for development that may
+      increase air pollution (significant traffic or parking increases, dust) or puts sensitive uses
+      in areas of poor air quality. No threshold is given, so it is shown as officer discretion.
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: The development affects trees on or adjoining the site.
+        - application-type:
+            in: [consent-under-tpo, notice-trees-in-con-area]
+    source-url: https://www.gravesham.gov.uk/downloads/file/382/local-validation-list
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt is the Utilities/Drainage text. From the audit:
+      'Tree Survey & Report' is needed for development affecting trees on or adjoining the site, or
+      works to trees.
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [site-of-special-scientific-interest, special-protection-area, local-wildlife-site]
+            description: The development is likely to affect a designated site.
+        - discretionary
+    source-text: >-
+      This applies to applications for Major development and other development likely to have a
+      biodiversity impact on…
+    source-url: https://www.gravesham.gov.uk/downloads/file/382/local-validation-list
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was a garbled fragment. From the audit: Major
+      development and other development likely to affect designated sites, protected species or
+      habitats, with bat surveys where buildings or roofs are affected. Protected species and
+      habitats are shown as officer discretion.
+
+  - id: daylight-sunlight-assessment
+    action: replace
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    source-text: >-
+      This applies to applications for Major development: where there is a potential adverse impact
+      upon the current levels of sunlight and daylight
+    source-url: https://www.gravesham.gov.uk/downloads/file/382/local-validation-list
+    must-include:
+      - item: An overshadowing study, showing shadow diagrams at different times of day and 
+          throughout the year
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): Major development only, where daylight or sunlight could be adversely
+      affected."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - all:
+            - condition:
+                field: new-build
+                value: true
+                description: New-build commercial floorspace.
+            - condition:
+                field: floorspace-non-residential
+                operator: ">="
+                value: 1000
+                description: 1,000 square metres or more of commercial floorspace.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: A residential site of 0.5 hectares or more.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more dwellings.
+        - all:
+            - condition:
+                field: involves-change-of-use
+                value: true
+                description: A conversion.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: The conversion creates residential units.
+        - discretionary
+    source-url: https://www.gravesham.gov.uk/downloads/file/382/local-validation-list
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Energy / Sustainability Assessment for new-build
+      commercial schemes of 1,000 sq m or more, residential sites of 0.5ha or more or 10+ dwellings,
+      conversions to residential, and large non-residential extensions or conversions (no size
+      given, so shown as officer discretion). Its waste and recycling provision part applies to all
+      applications.
+
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in flood zone 2 or 3 (including minor development and change of
+              use).
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare (flood zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare (flood zone 1).
+        - site:
+            in: [critical-drainage-area]
+            description: The site is in an area with critical drainage problems.
+        - discretionary
+    source-text: In flood zone 2 or 3 including minor development and change of use
+    source-url: https://www.gravesham.gov.uk/downloads/file/382/local-validation-list
+    must-include:
+      - item: An Exceptions Test where the proposal fails the Sequential Test
+        level: must
+        source-text: fail the Sequential Test will need to undertake an Exceptions Test to provide a
+          safe environment.
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): flood zone 2 or 3, sites over 1ha in zone 1, smaller
+      zone 1 sites with more vulnerable uses or other flood sources (shown as officer discretion),
+      and areas with critical drainage problems.
+
+  - id: heritage-statement
+    action: update
+    must-include:
+      - item: A description of the significance of the asset and of the contribution of its setting 
+          to that significance
+        level: must
+      - item: A schedule of, and justification for, the proposed works
+        level: must
+      - item: For archaeological assets, a desk-based assessment and, where necessary, the results 
+          of a field evaluation
+        level: must
+        required-if:
+          site:
+            in: [archaeological-priority-area]
+            description: The proposal affects archaeological assets.
+        source-text: >-
+          in the case of archaeological assets, the provision of a desk-based assessment and, where
+          necessary, the results of a field evaluation
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: Contamination is known or suspected.
+        - discretionary
+    source-url: https://www.gravesham.gov.uk/downloads/file/382/local-validation-list
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): known or suspected contamination, sensitive uses (e.g.
+      residential or educational), or sites within 250m of a former landfill or other potentially
+      contaminated land. The last two are shown as officer discretion.
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: >-
+          External lighting or floodlighting in a publicly accessible location; near homes, listed
+          buildings or conservation areas; near wildlife sites or in open countryside; or next to a
+          public highway.
+    source-text: >-
+      Where external lighting or floodlighting is provided or made necessary by development in: a
+      publicly accessible location the vicinity of residential property, listed buildings or
+      conservation areas the vicinity of sites of importance for wildlife and nature conservation
+      or the open countryside; and sites adjacent to a public highway.
+    source-url: https://www.gravesham.gov.uk/downloads/file/382/local-validation-list
+    confidence: medium
+    notes: "Audit (wrong_app_type): not an LBC-only requirement; it applies to any development with external
+      lighting in these locations."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Noise-generating development near noise-sensitive uses.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise-sensitive development near noise sources.
+        - discretionary
+    source-url: https://www.gravesham.gov.uk/downloads/file/382/local-validation-list
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Noise and Vibration Impact Assessment for noise-generating
+      development near noise-sensitive uses or the reverse, mixed-use schemes combining both, and
+      noise-generating uses near wildlife or tranquil areas (shown as officer discretion).
+
+  - id: planning-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.gravesham.gov.uk/downloads/file/382/local-validation-list
+    confidence: medium
+    notes: "From the audit (missing_requirement): Planning Statement for all major development."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: The application is for telecommunications development.
+    source-url: https://www.gravesham.gov.uk/downloads/file/382/local-validation-list
+    confidence: medium
+    notes: "From the audit (missing_requirement): Telecommunications Development Statement for all telecommunications
+      applications."
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - condition:
+                field: out-of-centre-town-centre-use
+                value: true
+                description: Retail or leisure development outside defined centres.
+            - condition:
+                field: floorspace-non-residential
+                operator: ">"
+                value: 2499
+                description: Over 2,499 square metres of retail or leisure floorspace.
+        - discretionary
+    source-url: https://www.gravesham.gov.uk/downloads/file/382/local-validation-list
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was a change-of-use fragment. From the audit:
+      retail or leisure over 2,499 sq m outside defined centres, or proposals not in line with the
+      Local Plan (shown as officer discretion).
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    policy: Policy CS10
+    must-include:
+      - item: Baseline and future years traffic assessment
+        level: must
+    confidence: medium
+    notes: >-
+      For developments that generate significant amounts of transport movement or significant
+      transport implications; detailed thresholds are in Kent County Council SPG 4 (Transport
+      Statements at half the Transport Assessment threshold), not in the list itself.
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    policy: Policy CS10
+    confidence: medium
+    notes: >-
+      Shares the Transport Assessment heading: for developments that generate significant amounts of
+      transport movement or significant transport implications (thresholds in KCC SPG 4).
+
+  - id: viability-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: loss-of-use
+            value: true
+            description: The proposal involves the loss of a public house.
+        - discretionary
+    source-text: "Major residential development… Any application proposing the loss of a public house"
+    source-url: https://www.gravesham.gov.uk/downloads/file/382/local-validation-list
+    must-include:
+      - item: A solicitor's undertaking to meet the Council's costs of having the viability 
+          appraisal independently reviewed
+        level: must
+        source-text: >-
+          The viability appraisal must be accompanied by a solicitor’s undertaking to meet the
+          Council’s costs in having the statement independently reviewed.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): from the audit, major residential, other major development, loss of a
+      public house, demolition of or harm to a heritage asset, and existing-use viability (the last
+      two shown as officer discretion).
+
+  - id: roof-plan-existing
+    action: replace
+    required-if:
+      condition:
+        field: building-works
+        value: true
+        description: The application involves building works (including changes of use).
+    source-text: >-
+      Floor Plans (Existing and proposed, including roof plans) Applications that involve building
+      works (including changes of use) Plans must be at an appropriate scale, usually 1:50 or 1:100
+      for householder and minor applications
+    source-url: https://www.gravesham.gov.uk/downloads/file/382/local-validation-list
+    confidence: medium
+    notes: "Audit (wrong_app_type): not Householder only; '1b. Floor Plans' applies to all applications
+      involving building works."
+
+  - id: roof-plan-proposed
+    action: replace
+    required-if:
+      condition:
+        field: building-works
+        value: true
+        description: The application involves building works (including changes of use).
+    source-text: >-
+      Floor Plans (Existing and proposed, including roof plans) Applications that involve building
+      works (including changes of use) Plans must be at an appropriate scale, usually 1:50 or 1:100
+      for householder and minor applications
+    source-url: https://www.gravesham.gov.uk/downloads/file/382/local-validation-list
+    confidence: medium
+    notes: "Audit (wrong_app_type): not Householder only; '1b. Floor Plans' applies to all applications
+      involving building works."
+
+  - id: floor-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: building-works
+        value: true
+        description: The application involves building works (including changes of use).
+    confidence: medium
+    notes: >-
+      '1b. Floor Plans' applies to "Applications that involve building works (including changes of
+      use)" (audit, wrong_app_type).
+
+  - id: floor-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: building-works
+        value: true
+        description: The application involves building works (including changes of use).
+    must-include:
+      - item: The proposed building, including each floor and the roof
+        level: must
+      - item: All floors, including floors where no changes are proposed
+        level: must
+      - item: The site boundary and the outline of any existing neighbouring buildings
+        level: must
+      - item: Any existing buildings or walls to be demolished
+        level: must
+      - item: Cycle parking arrangements, annotated with the number of cycle stands
+        level: must
+      - item: Internal storage and proposed refuse storage facilities
+        level: must
+      - item: >-
+          A full update of the originally approved plans, annotated or marked up to highlight the
+          proposed changes
+        level: must
+        required-if:
+          application-type:
+            in: [s73, non-material-amendment]
+        source-text: >-
+          A full update or revision of the originally approved plans where changes occur, including
+          proposed plans, elevations, and sections, being annotated or marked up to highlight the
+          proposed changes
+    confidence: low
+    notes: >-
+      '1b. Floor Plans' applies to "Applications that involve building works (including changes of
+      use)" (audit, wrong_app_type). The must-include items come from drawing-standard text the
+      workbook captured in fragments; check them against the list. The amendment item is from
+      'Drawings relating to Amendment Applications' ("applicable to Minor Material (section 73)
+      Amendments or Non-material Amendments (section 96a)").
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: All elevations affected, including blank elevations (annotated clearly if no external 
+          changes are proposed)
+        level: must
+        source-text: >-
+          be included for all elevations affected, including blank elevations (if no external
+          changes are proposed, plans should be annotated clearly to reflect this);
+      - item: >-
+          A full update of the originally approved elevations, annotated or marked up to highlight
+          the proposed changes
+        level: must
+        required-if:
+          application-type:
+            in: [s73, non-material-amendment]
+    notes: >-
+      The amendment item is from 'Drawings relating to Amendment Applications' ("applicable to Minor
+      Material (section 73) Amendments or Non-material Amendments (section 96a)").
+
+  - id: section-existing
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal includes new buildings.
+        - condition:
+            field: residential-extension
+            value: true
+            description: The proposal includes an extension.
+        - discretionary
+    source-text: Existing and proposed ground levels must always be shown for any extensions or new 
+      buildings.
+    source-url: https://www.gravesham.gov.uk/downloads/file/382/local-validation-list
+    must-include:
+      - item: Existing and proposed ground levels
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type / missing_requirement): '1c. Sections' covers new or altered buildings,
+      changes in ground level, sloping sites and roof-level accommodation (the last three shown as
+      officer discretion); site levels apply to any extensions or new buildings, including
+      householder schemes.
+
+  - id: section-proposed
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal includes new buildings.
+        - condition:
+            field: residential-extension
+            value: true
+            description: The proposal includes an extension.
+        - discretionary
+    source-text: Existing and proposed ground levels must always be shown for any extensions or new 
+      buildings.
+    source-url: https://www.gravesham.gov.uk/downloads/file/382/local-validation-list
+    must-include:
+      - item: Existing and proposed ground levels
+        level: must
+      - item: Revised sections, annotated or marked up to highlight the proposed changes
+        level: must
+        required-if:
+          application-type:
+            in: [s73, non-material-amendment]
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type / missing_requirement): '1c. Sections' covers new or altered buildings,
+      changes in ground level, sloping sites and roof-level accommodation (the last three shown as
+      officer discretion).
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: Scale of 1:100, 1:200 or 1:500, with a scale bar on the drawing
+        level: must
+      - item: The direction of north
+        level: must
+      - item: The proposed development in relation to the site boundaries and other existing 
+          buildings, with written dimensions including those to the boundaries
+        level: must
+      - item: All buildings, roads and footpaths on land adjoining the site, including access 
+          arrangements
+        level: must
+      - item: All public rights of way crossing or adjoining the site
+        level: must
+      - item: The position of all trees (existing and proposed) on the site
+        level: must
+      - item: Public highway, visibility splays, landscaping, car parking and open areas around 
+          buildings
+        level: must
+        source-text: public highway, visibility splays, landscaping, car parking and open areas 
+          around buildings.
+      - item: Location of waste storage
+        level: must
+        source-text: location of waste storage
+    notes: >-
+      Block plan contents from the council's list. The last two items are fragments of the same
+      list that the workbook filed as separate rows (audit, duplicate).
+
+unmapped:
+  - local-name: Planning Obligations Statement / draft Heads of Terms
+    source-text: "From the audit: where planning obligations are proposed"
+    source-url: https://www.gravesham.gov.uk/downloads/file/382/local-validation-list
+    suggested-id: heads-of-terms
+  - local-name: Ventilation / Extraction details (odour)
+    source-text: >-
+      Development within Use Classes A3, A4, and A5 or where retail, business, industrial,
+      commercial… an odour impact assessment, where ventilation or extraction is/will be in the
+      vicinity of residential dwellings or other sensitive receptors
+    source-url: https://www.gravesham.gov.uk/downloads/file/382/local-validation-list
+    suggested-id: ventilation-extraction-details
+  - local-name: Economic Statement
+    source-text: "From the audit: new employment uses, or loss of existing B-class employment uses"
+    source-url: https://www.gravesham.gov.uk/downloads/file/382/local-validation-list
+    suggested-id: economic-statement
+  - local-name: Minerals Impact Assessment
+    source-text: "From the audit: development affecting safeguarded mineral deposits, or within 250m of
+      or causing loss of a safeguarded minerals facility"
+    source-url: https://www.gravesham.gov.uk/downloads/file/382/local-validation-list
+    suggested-id: minerals-assessment
+  - local-name: Structural Survey
+    source-text: "From the audit: substantial demolition, doubtful structural stability of a building
+      to be converted, or demolition/structural works affecting listed buildings, conservation areas or
+      heritage assets"
+    source-url: https://www.gravesham.gov.uk/downloads/file/382/local-validation-list
+    suggested-id: structural-survey
+  - local-name: Advertisement consent drawings
+    source-text: "This applies to all Applications for Express Consent."
+    source-url: https://www.gravesham.gov.uk/downloads/file/382/local-validation-list
+    suggested-id: advertisement-drawings
+  - local-name: Listed Building Consent and Certificates drawings
+    source-text: "This is required for most alterations to a listed building."
+    source-url: https://www.gravesham.gov.uk/downloads/file/382/local-validation-list
+    suggested-id: listed-building-drawings
+

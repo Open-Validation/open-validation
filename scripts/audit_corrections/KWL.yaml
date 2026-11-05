@@ -1,0 +1,473 @@
+# Corrections for Knowsley Metropolitan Borough Council, from
+# inputs/audit/knowsley-metropolitan-borough-council.json.
+# Grokbot's link is the current list, 'Validation Checklist - Adopted July 2025' (para 1.16 still
+# calls it a 'draft Local Validation Checklist'). The list sets 41 numbered local requirements in
+# Section 3, triggered by development type, not application type. Grokbot captured about 17, all
+# marked INFERRED under Full planning, many with excerpts from the wrong row. Items marked "From
+# the audit" use the audit's paraphrase of the list's triggers.
+local-authority: KWL
+
+submission-standards:
+  - item: All plans at an appropriate scale, including a scale bar, clearly showing the proposed works
+      in relation to what is already there
+    level: must
+  - item: Any location plan or site plan includes a clearly marked north point
+    level: must
+
+drop:
+  - id: site-plan
+    reason: "not_a_requirement: national plan requirement from the phrase 'show the site plan, floorplans,
+      elevations and roof plans'"
+  - id: floor-plan-existing
+    reason: "not_a_requirement: as above"
+  - id: floor-plan-proposed
+    reason: "not_a_requirement: as above"
+  - id: elevation-existing
+    reason: "not_a_requirement: as above"
+  - id: elevation-proposed
+    reason: "not_a_requirement: as above"
+  - id: roof-plan-existing
+    reason: "not_a_requirement: as above"
+  - id: roof-plan-proposed
+    reason: "not_a_requirement: as above"
+  - id: design-and-access-statement
+    reason: "duplicate: the excerpt is copied from the Heritage Assessment row"
+  - id: waste-management-plan
+    reason: "duplicate: one of three rows built from item 20 'Parking, Access, Deliveries and Refuse Details'"
+
+drop-unmapped:
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_document: from the SuDS Pro-Forma 1 (securing SuDS maintenance), not the local list"
+  - local-name: Ground investigation / Geotechnical / Basement Impact Assessment
+    reason: "wrong_document: a soil-permeability evidence line in the SuDS Pro-Forma 1"
+  - local-name: Highways / access details (visibility splays)
+    reason: "duplicate: item 20, re-added below as Parking, Access, Deliveries and Refuse Details"
+  - local-name: Parking provision / Parking plan
+    reason: "duplicate/wrong_trigger: scrambled item 20 text; re-added below"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: a garbled note instead of the thresholds; re-added below"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_document: a line of the SuDS Pro-Forma 1; re-added below from item 10"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 10
+            description: More than 10 residential units (stage 1 criteria).
+        - discretionary
+    notes: >-
+      The council's wording: "may be required if the proposed development would exceed the stage 1
+      criteria (more than 10 residential units) and/or stage 2 criteria (more than 500 AADT for light
+      duty vehicles)". The traffic criterion has no field, so it is shown as officer discretion.
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: There are trees on or adjacent to the site.
+        - any:
+            - application-type:
+                in: [full, outline, reserved-matters, lbc, change-of-use]
+            - site:
+                in: [conservation-area, tree-preservation-zone]
+                description: Householder development in a Conservation Area or near TPO trees.
+    source-text: excluding householder development outside a Conservation Area or near TPO trees
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted Works to Trees text. Item 31 Tree Survey: trees on
+      or adjacent to the site, excluding householder development outside a Conservation Area or
+      not near TPO trees.
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the statutory biodiversity gain condition.
+    notes: >-
+      Audit (wrong_trigger): item 41's exemptions (householder, self-build of 9 or fewer dwellings
+      on 0.5 ha or less, de minimis) were left out; they are the statutory exemptions. The list
+      also asks for "GIS layers in table file format of pre-development baseline and post
+      development baseline".
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [site-of-special-scientific-interest, local-wildlife-site, priority-habitat]
+            description: The site is on or adjacent to designated sites or habitats.
+        - condition:
+            field: protected-species
+            value: true
+            description: Buildings with potential for bat roosts, or other protected species.
+        - discretionary
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted introductory text. From the audit: sites on or
+      adjacent to designated sites, habitats, and buildings that may hold bat roosts.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or greater.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or greater.
+        - site:
+            in: [flood-risk-zone]
+            description: All new development in Flood Zones 2 and 3, including minor and change of use.
+        - site:
+            in: [critical-drainage-area]
+            description: Sites under 1 hectare with critical drainage problems.
+    source-text: >-
+      - The site is 1 hectare or greater Site Specific Flood Risk Assessment (FRA) - Where one is
+      required under the National Planning Policy Framework.
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): item 10 also covers "Flood Zones 2 and 3 ... all new development
+      including minor and change of use" and sub-1 ha sites with critical drainage problems. It
+      applies to householder applications too.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building]
+            description: Works to a listed building.
+        - discretionary
+    source-text: If a Design and Access Statement is also required, the Heritage Assessment may be
+      included within it.
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): the Heritage Impact Assessment is triggered by listed building works
+      and also applies to householder schemes. The audit doesn't give the full trigger, so other
+      heritage cases are shown as officer discretion.
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Retail or other main town centre use outside town, district or local centres.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 1000
+            description: Over 1,000 square metres of gross floorspace.
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: The proposal is for telecommunications development or mobile phone masts.
+    must-include:
+      - item: A statement that the proposal, when operational, will meet the ICNIRP guidelines
+        level: must
+        source-text: A statement that the proposal, when operational, will meet the ICNIRP
+          (International Commission on Non-Ionizing Radiation Protection) guidelines must accompany
+          all applications.
+      - item: Evidence of alternative sites considered
+        level: must
+      - item: Notification of Liverpool John Lennon Airport where within 3 km
+        level: must
+    notes: "From the audit (wrong_trigger): the alternative-sites and 3 km Liverpool John Lennon Airport
+      notification rules were left out."
+
+  - id: photos
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [consent-under-tpo, notice-trees-in-con-area, lbc, demolition-con-area]
+        - all:
+            - condition:
+                field: demolition
+                value: true
+                description: The proposal involves demolition.
+            - site:
+                in: [conservation-area]
+                description: In or affecting a Conservation Area.
+        - all:
+            - ref: major-development
+            - site:
+                in: [green-belt]
+                description: Major development in the Green Belt.
+    source-text: >-
+      Works to Trees Specification of Works and Photographic Evidence … Where works are required to a
+      protected tree (TPO or tree in a Conservation Area).
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): item 21 Photographs and Photomontages - demolition in
+      or affecting a Conservation Area, Listed Building works (including internal), major Green
+      Belt development. The works-to-trees trigger is the workbook's excerpt.
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 15
+            description: Major residential development of 15 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: Residential sites of 0.5 hectares or more.
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 3 - major residential of 15+ dwellings or 0.5 ha+,
+      including specialist/supported housing."
+
+  - id: archaeological-assessment
+    action: add
+    required-if:
+      site:
+        in: [archaeological-priority-area, scheduled-monument]
+        description: On or adjacent to a heritage asset with archaeological interest.
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): on or adjacent to a heritage asset with archaeological
+      interest."
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: floodlighting
+            value: true
+            description: The proposal includes floodlighting.
+        - all:
+            - condition:
+                field: external-lighting
+                value: true
+                description: The proposal includes external lighting.
+            - condition:
+                field: protected-species
+                value: true
+                description: The Preliminary Ecological Appraisal shows lighting may affect bat roosts or
+                  flight paths.
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    must-include:
+      - item: Light pollution assessment
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): External Lighting / Floodlighting with a light pollution
+      assessment - floodlighting schemes, or where a PEA shows lighting may affect bat roosts or flight
+      paths."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [green-belt]
+            description: Development in the Green Belt.
+        - site:
+            in: [strategic-allocation]
+            description: Development in a Sustainable Urban Extension.
+        - condition:
+            field: departure-from-development-plan
+            value: true
+            description: The application is a departure from the development plan.
+        - discretionary
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): all major applications, Green Belt, Sustainable Urban
+      Extensions, departures, and listed building cases 'in the planning balance' (officer discretion)."
+
+  - id: travel-plan
+    action: add
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - discretionary
+        - all:
+            - site:
+                in: [air-quality-management-area]
+                description: Smaller schemes near an Air Quality Management Area.
+            - discretionary
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): major traffic-generating non-housing development, and
+      smaller schemes near AQMAs. 'Non-housing' can't be expressed."
+
+  - id: viability-assessment
+    action: add
+    required-if: discretionary
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): where policy requirements including affordable housing
+      cannot be met, or for enabling development."
+
+  - id: construction-management-plan
+    action: add
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): item 39 Construction Environmental Management Plan - major
+      development not on an industrial estate (no field for that exception)."
+
+unmapped:
+  - local-name: Parking, Access, Deliveries and Refuse Details
+    source-text: "All applications where parking/access are required to be part of the proposal"
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    suggested-id: parking-plan
+  - local-name: Health Impact Assessment (item 12)
+    source-text: "From the audit: residential over 50 units; commercial/industrial over 1,000 sq m; all new
+      major public buildings and community facilities"
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Sustainable Drainage Strategy and Pro-Forma 1
+    source-text: "From the audit: all major development needs a Sustainable Drainage Strategy and pro-forma
+      (item 10)"
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2023-12/Pro-Forma%201%20-%20Requirement%20of%20the%20Planning%20Application%20Validation%20Checklist..pdf
+    suggested-id: drainage-strategy
+  - local-name: 3D Visuals
+    source-text: "From the audit: residential/commercial schemes over 150 dwellings / 7,500 sq m"
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    suggested-id: computer-visualisations
+  - local-name: Active Travel England Assessment Toolkit
+    source-text: "From the audit: 150+ dwellings, 7,500 sq m+ or 5 ha+"
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    suggested-id: ""
+  - local-name: Coal Mining Risk Assessment
+    source-text: "From the audit: built development in Coal Authority High Risk Referral Areas, excluding
+      change of use and reserved matters, plus minerals working"
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    suggested-id: ""
+  - local-name: Economic Statement
+    source-text: "From the audit: where economic benefits are used to justify the proposal"
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    suggested-id: economic-statement
+  - local-name: Materials
+    source-text: "From the audit: new/altered shopfronts, development in Conservation Areas or affecting
+      Listed Buildings (including householder)"
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    suggested-id: materials-schedule
+  - local-name: Operations Statement and Restoration & Aftercare Plan
+    source-text: "From the audit: all minerals applications, including aggregate depots (item 19: 'All
+      minerals applications')"
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    suggested-id: restoration-aftercare-scheme
+  - local-name: Sequential Test
+    source-text: "From the audit: main town centre uses outside centres, separate from the 1,000 sq m impact
+      test"
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    suggested-id: sequential-test
+  - local-name: Scheme for Site Treatment and Management Plan
+    source-text: "All applications including demolition"
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    suggested-id: ""
+  - local-name: Social Value Strategy
+    source-text: "From the audit: 30+ dwellings, commercial sites 1 ha+ or new commercial buildings
+      1,000 sq m+"
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    suggested-id: ""
+  - local-name: Volume Calculations
+    source-text: "From the audit: extensions to or redevelopment of previously developed land in the Green
+      Belt"
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    suggested-id: volume-calculations
+  - local-name: Waste Assessment
+    source-text: "From the audit: all waste development; evidence of need if the site is not in the Waste
+      Local Plan"
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    suggested-id: minerals-waste-statement
+  - local-name: Housing Delivery Statement
+    source-text: "From the audit: major residential development on sites not allocated for housing in the
+      Core Strategy"
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    suggested-id: ""
+  - local-name: Children's Home Statement
+    source-text: "From the audit: all new children's homes, with the separate Children's Home Pro Forma"
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    suggested-id: ""
+  - local-name: Evidence of Self Build
+    source-text: "From the audit: all self-build applications"
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    suggested-id: self-build-statement
+  - local-name: Glint and Glare Assessment
+    source-text: "From the audit: all solar farms (item 40)"
+    source-url:
+      https://www.knowsley.gov.uk/sites/default/files/2025-07/Validation%20Checklist%20-%20Adopted%20July%202025.pdf
+    suggested-id: ""
+
+low-confidence:
+  - id: noise-assessment
+    note: "Audit (wrong_trigger): the workbook quoted a mixed-use note ('should include an analysis of each
+      use that has been applied for'), not the trigger; re-read the list."
+  - id: transport-assessment
+    note: "Audit (wrong_trigger): the workbook quoted a mixed-use note, not the trigger; re-read the list.
+      It is not limited to full applications."
+  - id: section-existing
+    note: "Audit (wrong_trigger): the workbook quoted content ('spot levels, cross sections and a cut and
+      fill plan'), not the trigger for the levels item."
+  - id: section-proposed
+    note: "Audit (wrong_trigger): the workbook quoted content ('spot levels, cross sections and a cut and
+      fill plan'), not the trigger for the levels item."

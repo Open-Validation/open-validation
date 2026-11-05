@@ -1,0 +1,256 @@
+# Corrections for Bolsover District Council, from the audit of Bolsover.
+# Grokbot captured nothing. The audit read the Local Validation Checklist adopted by Planning
+# Committee (3 April 2025, in force 1 June 2025), Appendix 2, and listed its 20 local requirements.
+# Everything below is the audit's paraphrase ("From the audit"), not the council's exact words.
+# The audit key: H = Householder; Oth = changes of use, advertisement consent and listed building
+# consent. Only FRA, heritage, archaeology (Tier 1), ground conditions and tree survey apply to
+# Householder applications.
+local-authority: BOS
+
+validation-list:
+  date: 2025-06
+  date-basis: "audit: Appendix 2 'Local Validation Checklist for Planning Applications' dated June 2025, in force 1 June 2025"
+
+requirements:
+  - id: proposed-habitat-plan
+    action: add
+    required-if:
+      all:
+        - condition:
+            field: biodiversity-gain-condition
+            value: true
+            description: The development is subject to the statutory biodiversity gain condition.
+        - discretionary
+    source-url: https://committees.bolsover.gov.uk/documents/s27228/Appendix+2.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): an Indicative Post Development Biodiversity Gain Plan
+      where the biodiversity gain condition applies and the site has more than 5 habitat units or
+      medium-high distinctiveness habitat is affected. There is no field for habitat units or
+      distinctiveness, so that part is shown as officer discretion.
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: The proposal is likely to harm bats or their roosts, or other protected
+              species.
+        - condition:
+            field: near-watercourse
+            value: true
+            description: There is a watercourse within 30 metres of the site.
+        - site:
+            in: [site-of-special-scientific-interest, local-wildlife-site, ancient-woodland,
+              priority-habitat]
+            description: The site is in or near a designated site, woodland or other habitat.
+        - discretionary
+    source-url: https://committees.bolsover.gov.uk/documents/s27228/Appendix+2.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Bat Survey and Assessment where harm to bats or roosts
+      is likely, and a Preliminary Ecological Appraisal / Ecological Impact Assessment where there
+      is woodland, hedgerows, ponds within 500m (major) or 250m (minor), watercourses within 30m,
+      brownfield or greenfield land, or designated sites. The pond and hedgerow distances have no
+      field and are shown as officer discretion. Not listed for Householder applications.
+
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone, critical-drainage-area]
+            description: The site is in flood zone 2, 3 or 3b, or in a critical drainage area.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (in flood zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (in flood zone 1).
+    source-url: https://committees.bolsover.gov.uk/documents/s27228/Appendix+2.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a site-specific FRA in flood zones 2, 3 and 3b, in flood
+      zone 1 on sites of 1ha or more, and in critical drainage areas. Includes Householder.
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, scheduled-monument,
+              park-and-garden, world-heritage-site]
+            description: The proposal affects a designated heritage asset.
+    source-url: https://committees.bolsover.gov.uk/documents/s27228/Appendix+2.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Statement of Significance and Heritage Impact
+      Assessment where a designated heritage asset is affected. Includes Householder.
+
+  - id: archaeological-assessment
+    action: add
+    required-if:
+      site:
+        in: [archaeological-priority-area]
+        description: The site is in an area of archaeological interest (the checklist's site tiers).
+    source-url: https://committees.bolsover.gov.uk/documents/s27228/Appendix+2.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): Archaeological Information, tiered by the site's tier,
+      with Householder applications at Tier 1. The audit does not say how the tiers are defined.
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: The site is known or suspected to be contaminated.
+    source-url: https://committees.bolsover.gov.uk/documents/s27228/Appendix+2.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Phase 1 Land Contamination report on known or suspected
+      contaminated land."
+
+  - id: noise-assessment
+    action: add
+    source-url: https://committees.bolsover.gov.uk/documents/s27228/Appendix+2.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Noise/Nuisance Impact Assessment is listed, but the audit
+      gives no trigger."
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: The proposal creates 10 or more dwellings.
+    source-url: https://committees.bolsover.gov.uk/documents/s27228/Appendix+2.pdf
+    must-include:
+      - item: Affordable housing and green space provision
+        level: must
+        required-if:
+          condition:
+            field: dwelling-count
+            operator: ">="
+            value: 25
+            description: The proposal creates 25 or more dwellings.
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): an Affordable Housing and Developer Contributions
+      Statement for 10+ dwellings, with affordable housing and green space at 25+.
+
+  - id: transport-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 50
+            description: The proposal creates more than 50 dwellings.
+        - condition:
+            field: retail-floorspace
+            operator: ">"
+            value: 800
+            description: The proposal creates more than 800 square metres of retail floorspace.
+        - discretionary
+    source-url: https://committees.bolsover.gov.uk/documents/s27228/Appendix+2.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a Transport Assessment at the 6Cs Design Guide
+      thresholds, "e.g. >50 dwellings, retail >800m2". The other 6Cs thresholds are not given, so
+      they are shown as officer discretion.
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://committees.bolsover.gov.uk/documents/s27228/Appendix+2.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Climate Change Statement for all major development."
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [tree-preservation-zone]
+            description: There are TPO trees on or adjoining the site.
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - condition:
+                field: trees-on-or-near-site
+                value: true
+                description: There are trees on or next to the site.
+    source-url: https://committees.bolsover.gov.uk/documents/s27228/Appendix+2.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Tree Survey / Arboricultural Impact Assessment where
+      TPO trees are on or adjoining the site, or trees in a conservation area. Includes Householder.
+
+  - id: recreation-facilities-assessment
+    action: add
+    source-url: https://committees.bolsover.gov.uk/documents/s27228/Appendix+2.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Playing Field Impact Assessment is listed, but the audit
+      gives no trigger."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: A main town centre use outside a defined centre.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 200
+            description: More than 200 square metres of main town centre use floorspace (the lowest
+              of the checklist's thresholds).
+    source-url: https://committees.bolsover.gov.uk/documents/s27228/Appendix+2.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a Sequential Test and Retail/Leisure Impact Assessment
+      for out-of-centre proposals over 200, 280 or 500 square metres. The audit does not say which
+      threshold applies where, so the lowest is used.
+
+unmapped:
+  - local-name: Sustainable Drainage Strategy
+    source-text: "From the audit: major development, or surface water drainage in flood-risk areas"
+    source-url: https://committees.bolsover.gov.uk/documents/s27228/Appendix+2.pdf
+    suggested-id: drainage-strategy
+  - local-name: Structural Survey
+    source-text: "From the audit: conversion of countryside buildings, demolition of listed buildings or
+      buildings in a conservation area"
+    source-url: https://committees.bolsover.gov.uk/documents/s27228/Appendix+2.pdf
+    suggested-id: structural-survey
+  - local-name: Coal Mining Risk Assessment
+    source-text: "From the audit: excavation in a Coal Authority Development High Risk Area (not
+      householder)"
+    source-url: https://committees.bolsover.gov.uk/documents/s27228/Appendix+2.pdf
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Ground Conditions and Land Stability Report
+    source-text: "From the audit: sites in Landslide Hazard Zones 1-4 (includes householder)"
+    source-url: https://committees.bolsover.gov.uk/documents/s27228/Appendix+2.pdf
+    suggested-id: land-stability-assessment
+  - local-name: Self and Custom Build Proforma
+    source-text: "From the audit: any self or custom build dwelling"
+    source-url: https://committees.bolsover.gov.uk/documents/s27228/Appendix+2.pdf
+    suggested-id: self-build-statement
+  - local-name: Masterplan and Design Statement
+    source-text: "From the audit: sites of 2ha or more, or 150+ dwellings"
+    source-url: https://committees.bolsover.gov.uk/documents/s27228/Appendix+2.pdf
+    suggested-id: masterplan

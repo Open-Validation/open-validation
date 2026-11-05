@@ -1,0 +1,393 @@
+# Corrections for Leicestershire County Council, from the audit of Leicestershire CC.
+# A county (minerals, waste and its own Regulation 3 development). The workbook link is the current
+# Planning Application Validation Requirements (May 2026), which apply "with all applications
+# (unless otherwise stated)". Grokbot filed everything under Full planning ('INFERRED'); below,
+# requirements are scoped to mineral-app, waste-dev and reg-3, narrowed where the list says so.
+# Items marked "From the audit" use the audit's paraphrase, not the council's exact words.
+local-authority: LEC
+
+submission-standards:
+  - item: Plans at an appropriate scale (usually 1:50 or 1:100), with a unique drawing reference number
+      and title
+    level: must
+  - item: Drawings include a scale bar, key dimensions, the paper size and the scale (e.g. 1:1250 at A3)
+    level: should
+
+drop:
+  - id: cil-form
+    reason: "other: the county does not charge CIL; the excerpt is the Reg 122 tests text"
+
+drop-unmapped:
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: the excerpt is carbon emissions text; drainage strategies follow the FRA"
+  - local-name: Odour / Dust / Vibration assessment
+    reason: "wrong_trigger: duplicates the noise paragraph (now in noise-assessment)"
+  - local-name: Pre-application advice / engagement details
+    reason: "other: encouragement, not a validation requirement"
+  - local-name: Minerals / Waste specific statements (county matters)
+    reason: "wrong_trigger: Sustainability Statement content (paras 4.87-4.88), not a separate statement"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: quotes general aims; re-added below with the audit's trigger"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: omits the limiting condition; re-added below"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - all:
+                - condition:
+                    field: sensitive-end-use
+                    value: true
+                    description: The proposal introduces a sensitive receptor, such as a school.
+                - site:
+                    in: [air-quality-management-area]
+                    description: The site is in an area of poor air quality.
+            - discretionary
+    confidence: medium
+    notes: "Emissions, dust and increases in vehicle movements (particularly HGVs) have no threshold, so
+      they are shown as officer discretion."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: The proposal involves work affecting trees or hedgerows within or adjacent to
+              the site.
+    source-text: Where a proposal involves work that affect any trees or hedgerows within or adjacent to
+      the application site
+    source-url:
+      https://www.leicestershire.gov.uk/sites/default/files/field/pdf/2021/8/25/LCC-Planning-Application-Validation-Requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): para 4.37. The workbook quoted a sentence about the BS 5837 revision."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - site:
+            in: [archaeological-priority-area]
+            description: The proposal could impact upon sites of archaeological interest.
+    confidence: medium
+
+  - id: bng-metric
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: biodiversity-gain-condition
+            value: true
+            description: The development is subject to the statutory biodiversity gain condition.
+    source-text: >-
+      Submit a completed metric calculation showing the baseline and proposed postdevelopment
+      biodiversity values. … exempt from Biodiversity Net Gain (BNG), the justification for that
+      exemption should be submitted alongside the planning application.
+    confidence: medium
+
+  - id: site-plan
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: low
+    notes: "The workbook's excerpt is a fragment ('layout and block plans and where appropriate, elevation
+      plans')."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - site:
+                in: [contaminated-land]
+                description: Land is known and/or suspected to be contaminated.
+            - condition:
+                field: sensitive-end-use
+                value: true
+                description: The proposed use would be vulnerable to the presence of contamination.
+            - discretionary
+    confidence: medium
+    notes: "The desktop-study trigger (sites which have previously …) is cut off in the excerpt, so it is
+      shown as officer discretion."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [reg-3]
+        - ref: major-development
+    source-text: >-
+      A Design and Access Statement is required to accompany the following: All applications for
+      major development … other than for the exceptions set out below; … Applications for waste
+      development, a material change of use, engineering or mining operations do not need to be
+      accompanied by a Design and Access Statement.
+    source-url:
+      https://www.leicestershire.gov.uk/sites/default/files/field/pdf/2021/8/25/LCC-Planning-Application-Validation-Requirements.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): para 3.16 exempts waste development, material change of use,
+      engineering and mining operations, so only the council's own (Reg 3) major development is
+      covered. Any further cases in para 3.15 were not captured.
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: low
+    notes: "The workbook's excerpt does not say when species surveys are needed."
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: low
+    notes: "The workbook's excerpt does not say when the statement is needed."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: eia-development
+            value: true
+            description: The development needs an Environmental Impact Assessment.
+    source-url:
+      https://www.leicestershire.gov.uk/sites/default/files/field/pdf/2021/8/25/LCC-Planning-Application-Validation-Requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted text about the number of hard copies."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - site:
+                in: [flood-risk-zone, critical-drainage-area]
+                description: The site is in flood zone 2 or 3, or in a critical drainage area.
+            - condition:
+                field: site-area-residential
+                operator: ">="
+                value: 1
+                description: The site is 1 hectare or more (in flood zone 1).
+            - condition:
+                field: site-area-non-residential
+                operator: ">="
+                value: 1
+                description: The site is 1 hectare or more (in flood zone 1).
+            - discretionary
+    source-text: >-
+      A site-specific Flood Risk Assessment (FRA) is required to be provided for all development in
+      Flood Zones 2 and 3. … In Flood Zone 1, an assessment should accompany all proposals
+      involving: sites of 1 hectare or more;
+    source-url:
+      https://www.leicestershire.gov.uk/sites/default/files/field/pdf/2021/8/25/LCC-Planning-Application-Validation-Requirements.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): para 4.20 also covers flood zone 1 areas flagged by a SFRA, and other
+      sources of flooding where a more vulnerable use is introduced (shown as officer discretion).
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, scheduled-monument,
+              park-and-garden]
+            description: The proposal affects a heritage asset or its setting.
+    confidence: medium
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: noise-generating-use
+                value: true
+                description: A potentially noisy development or use likely to disturb occupants of
+                  nearby buildings.
+            - condition:
+                field: noise-sensitive-use
+                value: true
+                description: A noise-sensitive use (such as a school or care home) close to existing
+                  sources of noise.
+    confidence: medium
+    notes: "For noise-sensitive uses the council says applicants 'are advised to submit' an assessment."
+
+  - id: planning-statement
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: medium
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - discretionary
+    policy: DM9
+    confidence: medium
+    notes: "'All developments that generate significant numbers of vehicular movements': no threshold, so
+      shown as officer discretion."
+
+  - id: travel-plan
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: low
+    notes: "The workbook's excerpt describes contents, not when a travel plan is needed."
+
+  - id: water-impact-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev]
+        - discretionary
+    source-url:
+      https://www.leicestershire.gov.uk/sites/default/files/field/pdf/2021/8/25/LCC-Planning-Application-Validation-Requirements.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Hydrological/Hydrogeological Assessment for minerals and
+      waste development with dewatering or effects on the water table or surface water."
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    source-url:
+      https://www.leicestershire.gov.uk/sites/default/files/field/pdf/2021/8/25/LCC-Planning-Application-Validation-Requirements.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Sunlight/Daylight/Lighting Assessment is listed; the
+      audit gives no trigger."
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    source-url:
+      https://www.leicestershire.gov.uk/sites/default/files/field/pdf/2021/8/25/LCC-Planning-Application-Validation-Requirements.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Sunlight/Daylight/Lighting Assessment is listed; the
+      audit gives no trigger."
+
+  - id: sci
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - ref: major-development
+    source-url:
+      https://www.leicestershire.gov.uk/sites/default/files/field/pdf/2021/8/25/LCC-Planning-Application-Validation-Requirements.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Statement of Community Involvement for major
+      development."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+
+unmapped:
+  - local-name: Health Impact Assessment (screening)
+    source-text: "From the audit: HIA Screening for all major development, including minerals and waste,
+      buildings of 1,000 m2 or more, and sites of 1 ha or more (paras 4.62-4.66)"
+    source-url:
+      https://www.leicestershire.gov.uk/sites/default/files/field/pdf/2021/8/25/LCC-Planning-Application-Validation-Requirements.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Draft Heads of Terms
+    source-text: "From the audit: only where LCC considers them essential and this was agreed at
+      pre-application stage (paras 4.17-4.19)"
+    source-url:
+      https://www.leicestershire.gov.uk/sites/default/files/field/pdf/2021/8/25/LCC-Planning-Application-Validation-Requirements.pdf
+    suggested-id: heads-of-terms
+  - local-name: National Forest planting
+    source-text: "From the audit: sites in the National Forest must show how planting will be accommodated"
+    source-url:
+      https://www.leicestershire.gov.uk/sites/default/files/field/pdf/2021/8/25/LCC-Planning-Application-Validation-Requirements.pdf
+    suggested-id: ""
+  - local-name: River Mease SAC Habitats Regulations Assessment
+    source-text: "Within the River Mease SAC there are issues with water quality which suffers from high
+      phosphate levels."
+    source-url:
+      https://www.leicestershire.gov.uk/sites/default/files/field/pdf/2021/8/25/LCC-Planning-Application-Validation-Requirements.pdf
+    suggested-id: habitats-regulations-assessment
+  - local-name: Public Rights of Way
+    source-text: "From the audit: proposals affecting a public right of way, including temporary effects"
+    source-url:
+      https://www.leicestershire.gov.uk/sites/default/files/field/pdf/2021/8/25/LCC-Planning-Application-Validation-Requirements.pdf
+    suggested-id: public-rights-of-way-statement
+  - local-name: Landscape and Visual Impact Assessment
+    source-text: "From the audit: listed (no trigger given)"
+    source-url:
+      https://www.leicestershire.gov.uk/sites/default/files/field/pdf/2021/8/25/LCC-Planning-Application-Validation-Requirements.pdf
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Economic Statement
+    source-text: "From the audit: new or lost employment uses"
+    source-url:
+      https://www.leicestershire.gov.uk/sites/default/files/field/pdf/2021/8/25/LCC-Planning-Application-Validation-Requirements.pdf
+    suggested-id: economic-statement
+  - local-name: Aerodrome Safeguarding Assessment
+    source-text: "From the audit: near East Midlands Airport, and lighting, solar, wind and bird-attracting
+      landscaping"
+    source-url:
+      https://www.leicestershire.gov.uk/sites/default/files/field/pdf/2021/8/25/LCC-Planning-Application-Validation-Requirements.pdf
+    suggested-id: aerodrome-safeguarding
+  - local-name: Mineral Assessment
+    source-text: "From the audit: non-mineral development in a Minerals Safeguarding Area"
+    source-url:
+      https://www.leicestershire.gov.uk/sites/default/files/field/pdf/2021/8/25/LCC-Planning-Application-Validation-Requirements.pdf
+    suggested-id: minerals-assessment
+  - local-name: Restoration and Aftercare
+    source-text: "From the audit: all mineral extraction"
+    source-url:
+      https://www.leicestershire.gov.uk/sites/default/files/field/pdf/2021/8/25/LCC-Planning-Application-Validation-Requirements.pdf
+    suggested-id: restoration-aftercare-scheme
+  - local-name: Habitat Management and Monitoring Plan
+    source-text: "From the audit: where BNG applies"
+    source-url:
+      https://www.leicestershire.gov.uk/sites/default/files/field/pdf/2021/8/25/LCC-Planning-Application-Validation-Requirements.pdf
+    suggested-id: ""
+  - local-name: LNRS alignment statement / Statement of biodiversity impact
+    source-text: "From the audit: listed (no trigger given)"
+    source-url:
+      https://www.leicestershire.gov.uk/sites/default/files/field/pdf/2021/8/25/LCC-Planning-Application-Validation-Requirements.pdf
+    suggested-id: ""
+
+low-confidence:
+  - id: recreation-facilities-assessment
+    note: "Audit (wrong_trigger): the workbook's excerpt is the Transport Assessment heading; the playing
+      fields item's trigger was not captured."

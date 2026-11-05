@@ -1,0 +1,358 @@
+# Corrections for Rotherham Metropolitan Borough Council, from inputs/audit/ (Rotherham audit).
+# Grokbot's link is the current 'Planning Application Validation Checklist 2026' (approved
+# 1 April 2026, published May 2026); the build takes the date from the audit's 'May 2026'.
+# The Word copy of the same list (file/5034) was also extracted, so tab items repeat.
+local-authority: ROT
+
+submission-standards:
+  - item: All drawings include a scale bar and key dimensions, and state the paper size and scale
+      (for example 1:1250 at A3)
+    level: must
+  - item: Each plan and drawing labelled with the site address, drawing title, scale, date and
+      drawing number, with any revisions clearly identified
+    level: should
+  - item: Drawings submitted electronically in PDF format, to allow accurate measurement
+    level: should
+  - item: Photographs submitted in PDF format
+    level: should
+  - item: Maximum single or combined file size of 15 MB (the sum of all document file sizes)
+    level: must
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is contaminated-land remediation text"
+
+drop-unmapped:
+  - local-name: Crime prevention / Secured by Design statement
+    reason: "wrong_trigger: the excerpt is a list of Health Impact Assessment / DAS topics"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: the excerpt is the retail town-centre sequential test (in
+      town-centre-impact-assessment)"
+  - local-name: Pre-application advice / engagement details
+    reason: "wrong_trigger: the excerpt is S106 heads-of-terms text"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: the excerpt is site-plan content"
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_app_type / duplicate: the Lighting Assessment trigger filed under listed building
+      consent (now in lighting-assessment)"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "duplicate: a continuation of the Affordable Housing Statement contents list"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    must-include:
+      - item: The total number of all residential units proposed
+        level: must
+      - item: The percentage of affordable housing units proposed, and how this relates to Local Plan
+          Policy CS27 and the Affordable Housing SPD
+        level: must
+      - item: A schedule of all accommodation (private sale, rent and affordable), with the tenure,
+          number of bedrooms, unit size and plot number of each affordable unit
+        level: must
+    notes: >-
+      'An affordable Housing Statement shall be submitted by the applicant and must clearly set out
+      the following: …'. The excerpt gives no threshold. The schedule continued in the workbook's
+      housing-mix row (accessibility standard, Nationally Described Space Standards, parking).
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: The site is within, adjacent to or impacting on an Air Quality Management
+              Area.
+        - discretionary
+    confidence: medium
+    notes: >-
+      'All sites within, adjacent or impacting on Air Quality Management Areas (AQMA) or where a
+      development would result in air quality issues such as certain industrial processes' (shown as
+      officer discretion).
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees or hedges on the site, or on adjacent land (including street
+          trees), that could be affected by the development.
+    must-include:
+      - item: Which trees and hedges are to be retained
+        level: must
+      - item: The means of protecting them during construction works
+        level: must
+    confidence: medium
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: Protected species are known to be present on the site.
+        - discretionary
+    confidence: medium
+    notes: "'Any site where there is known protected species present'; the excerpt starts mid-list,
+      so other cases are shown as officer discretion."
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [conservation-area, world-heritage-site]
+                description: The site is in a Conservation Area or World Heritage Site.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: The development consists of one or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: A building or buildings with floorspace of 100 square metres or
+                      more.
+    confidence: medium
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: A Schedule 2 development where the Council's Screening Opinion says an EIA is
+          required.
+    confidence: medium
+
+  - id: fire-statement
+    action: update
+    confidence: low
+    notes: >-
+      The excerpt is cut off: 'Required for relevant buildings which: Contain two or more dwellings
+      or educational accommodation and' (the height test is missing). Re-read the list.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (in Flood Zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (in Flood Zone 1).
+    source-url: https://www.rotherham.gov.uk/downloads/file/5033/local-validation-requirements-pdf-
+    confidence: medium
+    notes: >-
+      From the audit (wrong_trigger): item 29 covers sites of 1 ha or more in Flood Zone 1 and all
+      development in Flood Zones 2 and 3. The workbook's excerpt was a fragment.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - discretionary
+    source-text: "Required for: Listed Building Consent..."
+    source-url: https://www.rotherham.gov.uk/downloads/file/5033/local-validation-requirements-pdf-
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, wrong_trigger): item 33 requires a Heritage Statement for listed building
+      consent; the workbook's excerpt was a fragment and the rest of the trigger was not quoted, so
+      other cases are shown as officer discretion.
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: Contamination is known or suspected due to the previous use of the site.
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: The proposed use would be particularly vulnerable to contamination.
+    confidence: medium
+    notes: >-
+      'Any Minor/Major application where contamination is known or suspected due to the nature of
+      the previous use of the site or the proposed use would be particularly vulnerable.' Minor and
+      householder applications without a desk study must give enough evidence that contamination is
+      unlikely.
+
+  - id: landscaping-plan
+    action: replace
+    required-if:
+      application-type:
+        in: [full, outline]
+    source-text: full or outline applications (where landscaping is not reserved)
+    source-url: https://www.rotherham.gov.uk/downloads/file/5033/local-validation-requirements-pdf-
+    confidence: low
+    notes: >-
+      From the audit (wrong_app_type): item 31 Landscape Strategy is for full or outline applications
+      where landscaping is not reserved. The workbook's excerpt was about landscaping conditions. The
+      audit quotes only part of the trigger, so check whether it is limited to some sizes of scheme.
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: external-lighting
+            value: true
+            description: The proposal includes external illumination (security lighting, car-park
+              lighting, floodlighting of sports facilities).
+        - any:
+            - site:
+                in: [listed-building, listed-building-setting, conservation-area]
+                description: The site is in the vicinity of a listed building or a conservation area.
+            - site:
+                in: [rural-area]
+                description: The site is in open countryside.
+            - condition:
+                field: protected-species
+                value: true
+                description: The lighting scheme is likely to impact on protected species.
+            - discretionary
+    source-text: >-
+      Lighting Assessment Required for: o An application that includes proposals for external
+      illumination (e.g. security lighting of buildings and open areas, car-park lighting,
+      floodlighting of sports facilities) and where the development site is in the vicinity of
+      residential property, a listed building or a conservation area, or is in open countryside, or
+      where it is likely that the lighting scheme will impact on protected species the applicant must
+      provide a lighting impact assessment.
+    source-url: https://www.rotherham.gov.uk/downloads/file/5033/local-validation-requirements-pdf-
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook filed this under listed building consent. 'In the vicinity
+      of residential property' is shown as officer discretion.
+
+  - id: noise-assessment
+    action: update
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the excerpt is a cut-off fragment ('supported by a noise assessment
+      prepared by a suitably qualified acoustician.'); the trigger is not given.
+
+  - id: planning-statement
+    action: update
+    required-if:
+      ref: major-development
+    confidence: medium
+    notes: "'Planning Statement Required for: All major planning applications'. The audit notes this
+      covers outline as well as full applications."
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: loss-of-open-space
+            value: true
+            description: The proposal would lose allocated or incidental green or open space.
+        - discretionary
+    policy: Local Plan Policy SP37; SPD 13
+    source-url: https://www.rotherham.gov.uk/downloads/file/5033/local-validation-requirements-pdf-
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Open Space Assessment (Part Two item 36) for loss of
+      allocated or incidental green/open space, or where open space is required in new development
+      under Policy SP37 / SPD 13 (shown as officer discretion).
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The proposal alters the roof (e.g. dormer windows, solar panels, increase in roof
+          height).
+    confidence: medium
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The proposal alters the roof (e.g. dormer windows, solar panels, increase in roof
+          height).
+    confidence: medium
+
+  - id: sci
+    action: update
+    required-if:
+      ref: major-development
+    confidence: medium
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Mast and antenna development by mobile phone network operators.
+    confidence: medium
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: A main town centre use in an edge-of-centre or out-of-centre location.
+    confidence: medium
+    notes: "The excerpt is the sequential test: 'A Sequential Test will be required for any main town
+      centre uses ( in edge of centre or out of centre locations.'"
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: >-
+      'A Transport Assessment (TA) should be submitted as part of any planning application where the
+      proposed development has significant transport implications.' The thresholds are in a
+      separate guidance document.
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    confidence: low
+    notes: >-
+      The workbook gave the Transport Assessment text (duplicate trigger); the Travel Plan thresholds
+      are in a separate guidance document.
+
+unmapped:
+  - local-name: Building for a Healthy Life Assessment
+    source-text: "From the audit: all major residential development (full and outline) or sites over
+      0.5 ha (Part Two item 23)"
+    source-url: https://www.rotherham.gov.uk/downloads/file/5033/local-validation-requirements-pdf-
+    suggested-id: building-for-healthy-life
+  - local-name: Geology Report
+    source-text: "From the audit: proposals that could affect a Local Geological Site (Part Two item 30)"
+    source-url: https://www.rotherham.gov.uk/downloads/file/5033/local-validation-requirements-pdf-
+    suggested-id: geology-report
+  - local-name: Security Considerations Assessment
+    source-text: "From the audit: recommended (not required), following NPSA guidance (Part Two item
+      40)"
+    source-url: https://www.rotherham.gov.uk/downloads/file/5033/local-validation-requirements-pdf-
+    suggested-id: security-considerations-assessment
+
+low-confidence:
+  - id: archaeological-assessment
+    note: "The excerpt is a fragment with no trigger ('… will vary according to the particular
+      circumstances of each application')."

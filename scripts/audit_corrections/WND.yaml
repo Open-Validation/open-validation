@@ -1,0 +1,560 @@
+# Corrections for London Borough of Wandsworth, from inputs/audit/london-borough-of-wandsworth.json.
+# The audit compared the workbook with Wandsworth's Local Validation Checklist (cover dated
+# July 2026; the build already takes that date from the audit). Every Full planning row was
+# 'INFERRED', so no application type was given; most triggers are scale- or location-based and
+# apply to all types, including householder. Items marked "From the audit" use the audit's
+# paraphrase; quotes in source-text are the audit's quotes from the checklist.
+local-authority: WND
+
+submission-standards:
+  - item: Plans show the direction of north
+    level: must
+  - item: A linear scale bar, particularly for electronic submissions
+    level: should
+
+drop-unmapped:
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: the excerpt is the Affordable Workspace Management Plan sentence (re-added below)"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: the excerpt is guidance, not the trigger (re-added below with the 50+ units trigger)"
+  - local-name: Tall buildings / Wind microclimate assessment
+    reason: "wrong_trigger: a modelling sentence instead of the trigger (re-added below)"
+  - local-name: Structural Survey
+    reason: "not_a_requirement: fragment ('or Chartered Structural Engineer (MI Struct.')"
+  - local-name: Crime prevention / Secured by Design statement
+    reason: "wrong_trigger: a fragment of the Student Housing Management and Maintenance Plan, mislabelled (re-added below)"
+
+requirements:
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      all:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The scheme proposes at least 1 residential unit (gross).
+        - condition:
+            field: dwelling-count
+            operator: "<="
+            value: 9
+            description: The scheme proposes no more than 9 residential units (gross).
+    source-text: Small site schemes proposing 1-9 residential units (gross)
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Small Sites Affordable Housing Statement (item 49)."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook omitted the trigger, which begins 'Major or large-scale applications...'; the rest of it wasn't quoted."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees within the application site or on land adjacent to it.
+    source-text: Where there are trees within a proposed application site, or on land adjacent to an application site
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    must-include:
+      - item: A tree survey with a plan showing the location of trees and Root Protection Areas
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): item 44 applies to all applications, including householder."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      all:
+        - site:
+            in: [archaeological-priority-area]
+            description: The site is in an Archaeological Priority Area.
+        - condition:
+            field: ground-disturbance
+            value: true
+            description: The proposal involves ground disturbance.
+    confidence: medium
+    notes: "From the audit (wrong_app_type): ground disturbance in APAs, including householder schemes."
+
+  - id: bng-metric
+    action: replace
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was Affordable Workspace text (now unmapped) and
+      the checklist's stale note that BNG 'will come into force later this year (2023)'. BNG is
+      the national requirement.
+
+  - id: cil-form
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 100
+            description: The proposal creates 100 square metres or more of floorspace.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates a dwelling (even where below 100 square metres).
+    source-text: "...creation of 100 square metres or more ... or involve creation of a dwelling (even where below 100 square metres)"
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was a fragment ('in determining CIL liability.')."
+
+  - id: construction-management-plan
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: basement
+            value: true
+            description: Development in a confined location, including basements and subterranean development.
+        - condition:
+            field: earthworks
+            value: true
+            description: Substantial demolition or excavation.
+        - discretionary
+    source-text: "All major planning applications ... Developments of sites in confined locations (including basements and subterranean developments) or near sensitive receptors"
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    confidence: medium
+    notes: >-
+      Audit (other, duplicate): the workbook quoted the basement Construction Method Statement text
+      (see unmapped). Sites near sensitive receptors are shown as officer discretion.
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if: discretionary
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    confidence: medium
+    notes: "From the audit (wrong_app_type): Daylight and Sunlight where there is an impact on host or adjoining properties, including householder schemes."
+
+  - id: elevation-existing
+    action: replace
+    required-if:
+      application-type:
+        in: [hh, full]
+    source-text: "4.Floor and Roof Plans 5.Section Plans 6.Elevations Applications that involve building works and applications for change of use Proposals for new and altered buildings and/or changes in ground levels Applications that involve building works"
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    confidence: low
+    notes: "Audit (wrong_app_type): from the checklist's national requirements table (elevations: applications that involve building works); not a prior approval item."
+
+  - id: elevation-proposed
+    action: replace
+    required-if:
+      application-type:
+        in: [hh, full]
+    source-text: "4.Floor and Roof Plans 5.Section Plans 6.Elevations Applications that involve building works and applications for change of use Proposals for new and altered buildings and/or changes in ground levels Applications that involve building works"
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    confidence: low
+    notes: "Audit (wrong_app_type): from the checklist's national requirements table (elevations: applications that involve building works); not a prior approval item."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - all:
+            - condition:
+                field: new-build
+                value: true
+                description: New residential development.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: The proposal creates one or more dwellings.
+        - all:
+            - ref: major-development
+            - condition:
+                field: floorspace-non-residential
+                operator: ">"
+                value: 0
+                description: Major non-residential development.
+    source-text: The Energy Statement must demonstrate how the energy requirements will be met in line with the Energy Hierarchy.
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    must-include:
+      - item: How the energy requirements will be met in line with the Energy Hierarchy
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook filed the Energy Statement under sustainability-statement
+      and omitted its trigger, 'All new residential development and major non-residential
+      development'.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    confidence: medium
+
+  - id: fire-statement
+    action: update
+    notes: >-
+      The excerpt is the London Plan Fire Safety Strategy ('All developments', with exemption
+      statements for smaller schemes). From the audit: the checklist also asks for a separate Fire
+      Safety Statement for all major applications.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone, critical-drainage-area]
+            description: The site falls within a Flood Risk Area.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: Sites of 1 hectare or more in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Sites of 1 hectare or more in Flood Zone 1.
+    source-text: All applications that fall within a Flood Risk Area should submit a Flood Risk Assessment
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was a fragment. From the audit: also 1ha+ in Flood Zone 1."
+
+  - id: floor-plan-existing
+    action: replace
+    required-if:
+      application-type:
+        in: [hh, full, change-of-use]
+    source-text: "4.Floor and Roof Plans … Applications that involve building works and applications for change of use"
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    confidence: low
+    notes: "Audit (wrong_app_type): from the checklist's national requirements table; 'applications for change of use' are planning applications, not prior approvals."
+
+  - id: floor-plan-proposed
+    action: replace
+    required-if:
+      application-type:
+        in: [hh, full, change-of-use]
+    source-text: "4.Floor and Roof Plans … Applications that involve building works and applications for change of use"
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    confidence: low
+    notes: "Audit (wrong_app_type): from the checklist's national requirements table; 'applications for change of use' are planning applications, not prior approvals."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building]
+            description: The application affects a heritage asset and/or its setting.
+    source-text: >-
+      All applications affecting a heritage asset and or its setting must be accompanied by a
+      Statement of Heritage Significance and Impact (Heritage Statement), either as a separate
+      document or as part of a Design and Access Statement.
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): the workbook glued the Heliport zone text to the front (see unmapped); it applies to all types, including householder and LBC."
+
+  - id: landscaping-plan
+    action: add
+    required-if: discretionary
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    confidence: medium
+    notes: "From the audit (wrong_app_type): Landscaping where there are changes to landscaping, including householder schemes."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: The site is known or suspected to be contaminated.
+        - discretionary
+    confidence: medium
+    notes: "All new development with a sensitive end use needs at least a Preliminary Risk Assessment, regardless of the site's history (council's wording)."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: external-lighting
+            value: true
+            description: External lighting would be provided or made necessary by the development.
+        - condition:
+            field: illuminated
+            value: true
+            description: The advertisement is illuminated.
+    confidence: low
+    notes: "The excerpt ('advertisements, where external lighting would be provided or made necessary by the development') is cut off at the start, so the full list of application types wasn't captured."
+
+  - id: noise-assessment
+    action: update
+    must-include:
+      - item: Prepared by a qualified acoustician
+        level: must
+
+  - id: planning-statement
+    action: update
+    required-if:
+      application-type:
+        in: [full, outline]
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): the checklist's trigger is 'All applications for full and outline planning permission.'"
+
+  - id: recreation-facilities-assessment
+    action: add
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): an Open Space, Sport, Recreation and Green Infrastructure Assessment is listed, but the audit gives no trigger."
+
+  - id: roof-plan-existing
+    action: replace
+    required-if:
+      application-type:
+        in: [hh, full, change-of-use]
+    source-text: "4.Floor and Roof Plans … Applications that involve building works and applications for change of use"
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    confidence: low
+    notes: "Audit (wrong_app_type): from the checklist's national requirements table; not a prior approval item."
+
+  - id: roof-plan-proposed
+    action: replace
+    required-if:
+      application-type:
+        in: [hh, full, change-of-use]
+    source-text: "4.Floor and Roof Plans … Applications that involve building works and applications for change of use"
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    confidence: low
+    notes: "Audit (wrong_app_type): from the checklist's national requirements table; not a prior approval item."
+
+  - id: schedule-of-works
+    action: replace
+    required-if:
+      all:
+        - site:
+            in: [listed-building, listed-building-setting]
+            description: Works to or adjacent to a listed building.
+        - any:
+            - condition:
+                field: basement
+                value: true
+                description: The application adds a basement.
+            - condition:
+                field: structural-alteration
+                value: true
+                description: The application significantly alters structure.
+    source-text: Where an application seeks to add a basement/significantly alters structure to or adjacent to Listed Buildings
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    confidence: medium
+    notes: >-
+      Audit (other): the checklist's 'Schedule of Works Affecting Listed Buildings and Structural
+      Impact Assessment' (item 28); the workbook quoted the basement Construction Method Statement.
+
+  - id: sci
+    action: update
+    required-if:
+      ref: major-development
+    confidence: medium
+
+  - id: section-existing
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full]
+        - discretionary
+    source-text: "5.Section Plans … Proposals for new and altered buildings and/or changes in ground levels"
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    confidence: low
+    notes: "Audit (wrong_trigger): the excerpt was national-requirements table text. Sections are for new and altered buildings and/or changes in ground levels."
+
+  - id: section-proposed
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full]
+        - discretionary
+    source-text: "5.Section Plans … Proposals for new and altered buildings and/or changes in ground levels"
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    confidence: low
+    notes: "Audit (wrong_trigger): the excerpt was national-requirements table text. Sections are for new and altered buildings and/or changes in ground levels."
+
+  - id: sustainability-statement
+    action: replace
+    source-text: >-
+      Council’s Sustainability Checklist Developments are expected to achieve carbon reduction beyond
+      Part L (of the Regulations) from energy efficiency measures alone to reduce energy demand as far
+      as possible.
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    must-include:
+      - item: BREEAM Pre-Assessment
+        level: must
+        required-if:
+          condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 100
+            description: Non-residential applications over 100 square metres.
+        source-text: All non-residential planning applications over 100sqm
+      - item: BREEAM Domestic Refurbishment assessment
+        level: must
+        required-if:
+          condition:
+            field: involves-change-of-use
+            value: true
+            description: A change of use to residential.
+        source-text: Where proposals are for a change of use to residential
+    confidence: low
+    notes: >-
+      The Sustainability Checklist's own trigger wasn't captured; the Energy Statement text is now
+      in energy-statement. The BREEAM items are separate checklist items (7 and 8) per the audit.
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      condition:
+        field: floorspace-non-residential
+        operator: ">"
+        value: 400
+        description: Retail and leisure development exceeding 400 sqm (gross) outside existing town centres and other appropriate areas.
+    confidence: medium
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-text: All non-major applications that could give rise to transport impacts such as the loss or increase of parking provision
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    confidence: medium
+    notes: >-
+      Audit (duplicate, wrong_trigger): the checklist has a Transport Assessment (major/TfL
+      thresholds) and a Transport Statement (the non-major trigger quoted above); the workbook gave
+      both rows the same Healthy Streets fragment.
+
+  - id: travel-plan
+    action: replace
+    required-if: discretionary
+    source-text: "a full transport assessment and travel plan are required (TFL thresholds)"
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    confidence: low
+    notes: "Audit (duplicate): the Travel Plan's own trigger was lost; the excerpt refers to TfL thresholds without stating them."
+
+  - id: viability-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: Developments comprising or capable of delivering 1 or more gross residential dwellings.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 1000
+            description: More than 1,000 square metres of economic floorspace.
+    source-text: Developments comprising or capable of delivering 1 or more gross residential dwellings
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    must-include:
+      - item: A full unredacted version of the viability report, for the council's independent viability assessors (at the applicant's cost)
+        level: must
+      - item: An unredacted executive summary
+        level: must
+      - item: A redacted version for publication, with each redaction justified against the public interest test
+        level: should
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was a fragment. The must-include items are the council's viability submission rules (audit issue 9)."
+
+unmapped:
+  - local-name: Affordable Workspace Management Plan
+    source-text: "All development that provides economic floorspace will be expected to contribute to the provision of affordable and/or open workspace, in perpetuity, which will be secured by way of S106 planning obligation and/or conditions, with details provided in an Affordable Workspace Management Plan."
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    suggested-id: affordable-workspace-plan
+  - local-name: Health Impact Assessment
+    source-text: "All development proposals which include 50 or more residential units"
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Tall buildings assessment
+    source-text: "buildings that are 7 storeys or over or 21 metres or more from the ground level to the top of the building (whichever is lower)"
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    suggested-id: tall-buildings-assessment
+  - local-name: Heliport Supporting Information
+    source-text: "Red zone – All development types Pink zone – buildings exceeding 30m in height Blue zone – Buildings exceeding 90m in height Yellow zone – Buildings exceeding 150m in height"
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    suggested-id: aerodrome-safeguarding
+  - local-name: Student Housing Management and Maintenance Plan
+    source-text: "… compliance procedures secured by design principles as outlined in CPG, student tenancy agreement, move in/out strategy for arriving/departing students."
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    suggested-id: student-housing-management-plan
+  - local-name: Construction Method Statement (basements)
+    source-text: "For basements projects a Construction Method Statement would be expected to cover: appointment of a suitably qualified professional (civil or structural engineer), a ground and hydrological condition report dealing with groundwater flow ensuring structural stability during excavation and demolition, …"
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    suggested-id: basement-impact-assessment
+  - local-name: Carbon Dioxide Emissions / Zero Carbon statement
+    source-text: "From the audit: major and non-major new-build residential"
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    suggested-id: ""
+  - local-name: Parking Survey
+    source-text: "From the audit: where development is likely to reduce on-street parking"
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    suggested-id: parking-survey
+  - local-name: Circular Economy Statement
+    source-text: "From the audit: GLA referable applications"
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    suggested-id: circular-economy-statement
+  - local-name: Whole Life Cycle Assessment
+    source-text: "All major applications must submit a Whole Life Cycle Assessment."
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    suggested-id: whole-life-carbon-assessment
+  - local-name: Carbon Offsetting
+    source-text: "From the audit: listed without a trigger"
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    suggested-id: ""
+  - local-name: Community Facilities Assessment
+    source-text: "From the audit: Policy SDS1 A.1 locations"
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    suggested-id: community-facilities-assessment
+  - local-name: Arts and Culture Action Plan
+    source-text: "Development of 100 or more dwellings or non-residential developments of 10,000sqm or more"
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    suggested-id: arts-culture-plan
+  - local-name: Construction Logistics Plan and Delivery and Servicing Plan
+    source-text: "From the audit: Mayoral referable applications"
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    suggested-id: delivery-servicing-plan
+  - local-name: Marketing Report and Justification Statement
+    source-text: "From the audit: listed without a trigger"
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    suggested-id: marketing-report
+  - local-name: Urban Greening
+    source-text: "From the audit: all major applications"
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    suggested-id: urban-greening-factor
+  - local-name: Metropolitan Open Land Assessment
+    source-text: "From the audit: listed without a trigger"
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    suggested-id: ""
+  - local-name: Healthy Streets Assessment
+    source-text: "From the audit: listed without a trigger"
+    source-url: https://www.wandsworth.gov.uk/media/d1jhsd5t/wandsworth_local_planning_application_requirements.pdf
+    suggested-id: healthy-streets-assessment
+
+low-confidence:
+  - id: design-and-access-statement
+    note: "Audit (wrong_trigger): the workbook's excerpt is a fragment ('part of a Design and Access Statement.')."
+  - id: waste-management-plan
+    note: "Audit (wrong_trigger): the excerpt is national-requirements table headings (Application Form), not the waste trigger."

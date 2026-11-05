@@ -1,0 +1,600 @@
+# Corrections for Rugby Borough Council, from the council's audit.
+# The list is the Validation Checklist, Version 2, February 2024 (with a companion
+# Sustainability Checklist). It has numbered sections: 2 basic plans, 3 householder, 4 heritage,
+# 5 minor development, 6 major development, 7 other application types. Grokbot captured only a
+# fraction of the 60+ items and spliced many excerpts from neighbouring rows; most of what is
+# added below is the audit's summary of Sections 2-6.
+local-authority: RUG
+
+submission-standards:
+  - item: Plans which state "Do Not Scale" on them are not accepted
+    level: must
+  - item: Floor plans, elevations and sections drawn to scale (1:50 or 1:100), with title, drawing
+      number and scale bar
+    level: should
+  - item: Documents over 10 MB should be split (the Planning Portal limit is 10 MB per document)
+    level: should
+
+drop:
+  - id: site-plan
+    sheets: [Lawful development cert]
+    reason: "wrong_app_type: 2.1 Block plan applies to built development and advert consent, not LDCs"
+  - id: floor-plan-existing
+    sheets: [Advertisement consent]
+    reason: "wrong_app_type: 2.2 Floor plans apply to built development and LDCs, not adverts"
+  - id: floor-plan-proposed
+    sheets: [Advertisement consent]
+    reason: "wrong_app_type: as above"
+  - id: elevation-existing
+    sheets: [Lawful development cert]
+    reason: "wrong_app_type: 2.3 Elevations apply to adverts; the LDC placement came from the 2.2 column"
+  - id: elevation-proposed
+    sheets: [Lawful development cert]
+    reason: "wrong_app_type: as above"
+
+drop-unmapped:
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: FRA guidance and the 6.14 heading; re-added below (6.9, all major)"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "not_a_requirement: FRA guidance plus the 5.8 floor space schedule; the schedule is re-added below"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "wrong_trigger: a fragment of the 5.8/6.14 accommodation schedule, re-added below"
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "wrong_trigger: merged with the lighting excerpt; re-added below"
+  - local-name: Health Impact Assessment
+    reason: "wrong_app_type: threshold lost; re-added below"
+  - local-name: Design Code / Masterplan / Parameter plans
+    reason: "wrong_app_type: threshold lost; re-added below"
+
+requirements:
+  - id: schedule-of-works
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [lbc]
+        - any:
+            - condition:
+                field: structural-alteration
+                value: true
+                description: The works involve structural alterations.
+            - condition:
+                field: demolition
+                value: true
+                description: The works involve demolition.
+    source-text: Listed building consent involving structural alterations or demolition
+    source-url: &list
+      https://www.rugby.gov.uk/documents/20124/6589626/Validation+Checklist+Feb+2024.pdf/0e5c8781-9b91-e1b7-1a18-f762bd430f97?t=1750866323611
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook placed an Arboricultural Method Statement excerpt under Full
+      planning. Source item 4.3."
+
+  - id: sustainability-statement
+    action: update
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): householders complete the council's Sustainability Checklist (3.7).
+      The workbook's excerpt is the 3.8 'roof space or demolition' heading. An Energy statement is
+      only for major development (see energy-statement).
+
+  - id: energy-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-text: Major development with energy demand
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (wrong_app_type): 6.11 Energy statement; for outline schemes it may be deferred
+      to reserved matters."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is EIA development.
+    source-url: *list
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt ran on into the 6.13 Flood Risk Assessment text."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-text: >-
+      6.13 Flood Risk Assessment All major development; and … A flood risk assessment (FRA) is
+      required, appropriate to the scale and nature of the development proposed, assessing the
+      level of flood risk from all sources.
+    source-url: *list
+    policy: Rugby Borough Local Plan Policies SDC5 and SDC6
+    must-include:
+      - item: An assessment of the level of flood risk from all sources
+        level: must
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the trigger is cut off after 'All major development; and'; the rest
+      is shown as officer discretion and needs checking in the list.
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      condition:
+        field: floodlighting
+        value: true
+        description: The proposal includes floodlighting.
+    source-text: 5.9 … Lighting Assessment … Proposals that include floodlighting
+    source-url: *list
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt merged 5.9 Lighting, 5.10 Marketing and housing-mix
+      text."
+
+  - id: travel-plan
+    action: replace
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    source-url: *list
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): the excerpt was a fragment. From the audit: 6.33, major
+      development with travel impacts."
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The application raises disturbance issues.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise-sensitive development.
+    source-text: Applications raising disturbance issues or noise-sensitive development
+    source-url: *list
+    must-include:
+      - item: Prepared by a qualified acoustician
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was content only. Source items 5.11/6.25."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - any:
+            - condition:
+                field: demolition
+                value: true
+                description: The proposal includes demolition.
+            - condition:
+                field: roof-alteration
+                value: true
+                description: Alteration of roof space, or an extension at eaves or roofline level.
+            - condition:
+                field: protected-species
+                value: true
+                description: There is evidence of nearby bat roosts.
+            - discretionary
+    source-text: >-
+      Triggers for bat survey may include demolition, alteration of roof space or extension at the
+      level of the eaves/roofline, favorable building condition, age and construction, evidence of
+      nearby roosts and good quality habitat and existing trees to support bat species.
+    source-url: *list
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt ran on into '3.9 Householder application affecting trees'
+      (now in arboriculturist-report). This is item 3.8, householder applications affecting roof
+      space or including demolition; building condition, age, construction and habitat are shown
+      as officer discretion.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees within or adjacent to the site.
+    policy: Policies SDC1 & SDC2 of the Rugby Local Plan 2019
+    confidence: medium
+    notes: >-
+      The council's text: 'A tree protection plan may be required where there are trees within or
+      adjacent to the site.' The audit adds 3.9, householder applications affecting trees (tree
+      protection plan where trees are within or next to the site).
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The scheme will impact on over 25 square metres or 5 linear metres of existing
+          habitat.
+    policy: Policy NE1 of the Rugby Borough Local Plan 2019
+    confidence: medium
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more in height.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 2
+            description: The building is multi-occupied residential.
+    confidence: medium
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      condition:
+        field: loss-of-open-space
+        value: true
+        description: The proposal involves the loss of playing fields.
+    must-include:
+      - item: Full details of the existing playing fields and associated facilities to be lost
+        level: should
+      - item: The reason for the proposed location of the development
+        level: should
+      - item: Any proposed changes in sports provision on the site
+        level: should
+    confidence: medium
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Telecommunications applications, including telecoms prior approvals.
+    must-include:
+      - item: ICNIRP certificate
+        level: must
+      - item: Detailed justification for the proposed siting of the development
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): source item 7.8 Telecommunications applications, which includes telecoms
+      prior approvals; the workbook placed it under Full planning."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, conservation-area]
+            description: The application affects a listed building or would have an impact on a
+              Conservation Area.
+    confidence: medium
+    notes: "Source item 4.2: applications affecting a listed building or that would have an impact on a Conservation
+      Area; listed building consent applications."
+
+  - id: photos
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [demolition-con-area]
+        - all:
+            - site:
+                in: [listed-building, conservation-area]
+                description: A listed building or a building within a Conservation Area.
+            - condition:
+                field: demolition
+                value: true
+                description: The proposal demolishes the building.
+    source-text: Local Requirement 4.1 Photographic record Type of Application Required For
+      Application for demolition of a listed building or building within a Conservation Area
+    source-url: *list
+    must-include:
+      - item: Detailed photographic record of the building inside and out, identifying the location
+          of all photographs
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): 4.1 applies to demolition of a listed building or a building in a Conservation
+      Area, which the workbook missed."
+
+  - id: site-plan
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [advertising]
+        - condition:
+            field: building-works
+            value: true
+            description: Planning applications for built development.
+    source-text: All planning applications for built development and applications for
+      advertisement consent
+    source-url: *list
+    must-include:
+      - item: Drawn to scale (1:200 or 1:500)
+        level: should
+    confidence: medium
+    notes: "Audit (wrong_app_type): source item 2.1; the workbook ran the 2.1 and 2.2 columns together."
+
+  - id: floor-plan-existing
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: building-works
+            value: true
+            description: Planning applications for built development.
+        - application-type:
+            in: [ldc]
+    source-text: All planning applications for built development; applications for
+      existing/proposed certificate of lawful development (where relevant)
+    source-url: *list
+    confidence: medium
+    notes: "Audit (wrong_app_type): source item 2.2; LDCs only where relevant."
+
+  - id: floor-plan-proposed
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: building-works
+            value: true
+            description: Planning applications for built development.
+        - application-type:
+            in: [ldc]
+    source-text: All planning applications for built development; applications for
+      existing/proposed certificate of lawful development (where relevant)
+    source-url: *list
+    confidence: medium
+    notes: "Audit (wrong_app_type): source item 2.2; LDCs only where relevant."
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 11
+            description: 11 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 0.36
+            description: The residential site is over 0.36 hectares.
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): 6.2 Affordable housing statement."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): 6.28 Planning statement, all major development."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Main town centre uses outside a defined centre.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 500
+            description: Over 500 square metres gross.
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): 6.29 Retail impact assessment."
+
+  - id: transport-assessment
+    action: add
+    required-if: discretionary
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): 6.32 Transport assessment/statement, per DfT thresholds."
+
+  - id: viability-assessment
+    action: add
+    required-if: discretionary
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): 6.35 Viability assessment, where not all contributions can
+      be paid."
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: eia-development
+            value: true
+            description: The development is EIA development.
+        - discretionary
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): 5.1/6.3, possible exposure above statutory limits, transport
+      assessment thresholds (both shown as officer discretion), or EIA development."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: Known or suspected contamination.
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): 5.6/6.8 Contaminated land assessment."
+
+  - id: landscaping-plan
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, reserved-matters]
+        - ref: major-development
+    source-text: Full applications or reserved matters for major development
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement, wrong_app_type): 6.17 Landscape plans."
+
+  - id: cil-form
+    action: add
+    source-url: *list
+    confidence: low
+    notes: "From the audit (missing_requirement): 2.8 Community Infrastructure Levy forms, from 1 April 2024,
+      for most applications and certain prior approvals. The exact scope wasn't given."
+
+  - id: roof-plan-existing
+    action: add
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The proposal alters the roof.
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): 2.4 Existing and proposed roof plans, for roof alterations."
+
+  - id: roof-plan-proposed
+    action: add
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The proposal alters the roof.
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): 2.4 Existing and proposed roof plans, for roof alterations."
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: minor-development
+            value: true
+            description: Minor development, including changes of use.
+    source-url: *list
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): 5.3 Bin storage, for all applications including changes
+      of use (in the minor-development section), and 6.31 Site waste management plan for major
+      development.
+
+  - id: archaeological-assessment
+    action: add
+    required-if:
+      condition:
+        field: ground-disturbance
+        value: true
+        description: Groundworks that may affect archaeological deposits.
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): 4.4 Archaeological assessment."
+
+unmapped:
+  - local-name: Drainage strategy
+    source-text: "From the audit: 6.9, all major development"
+    source-url: *list
+    suggested-id: drainage-strategy
+  - local-name: Floor space / accommodation schedule
+    source-text: "5.8 Floor space / accommodation schedule All major development proposals A schedule of accommodation
+      types, mix and floorspace (gross internal area (GIA))."
+    source-url: *list
+    suggested-id: accommodation-schedule
+  - local-name: Marketing Information
+    source-text: "Any proposals for the redevelopment of Rugby’s protected employment sites contained within Policy
+      ED1 of the Local Plan."
+    source-url: *list
+    suggested-id: marketing-evidence
+  - local-name: Employment loss statement
+    source-text: "From the audit: 6.22, Policy ED1 sites"
+    source-url: *list
+    suggested-id: employment-statement
+  - local-name: Health Impact Assessment
+    source-text: "A Health Impact Assessment screening report is required and if this identifies that significant
+      impacts on health and wellbeing would arise from the proposed development a full Health Impact Assessment
+      is required. (From the audit: 6.16, only large residential or industrial schemes or sites over 1 ha)"
+    source-url: *list
+    suggested-id: health-impact-assessment
+  - local-name: Masterplan and Parameters plan
+    source-text: "From the audit: 6.23 Masterplan and 6.26 Parameters plan, large-scale major schemes, especially
+      outline or phased"
+    source-url: *list
+    suggested-id: masterplan
+  - local-name: Broadband statement
+    source-text: "From the audit: 6.7, all major development"
+    source-url: *list
+    suggested-id: broadband-statement
+  - local-name: Electric vehicle charging plan
+    source-text: "From the audit: 6.10, major development with non-residential parking"
+    source-url: *list
+    suggested-id: ev-charging-plan
+  - local-name: Planning obligations heads of terms
+    source-text: "From the audit: 6.27, where contributions are proposed"
+    source-url: *list
+    suggested-id: planning-obligations-statement
+  - local-name: Aerodrome safeguarding assessment
+    source-text: "From the audit: 6.1, no trigger given"
+    source-url: *list
+    suggested-id: aerodrome-safeguarding-assessment
+  - local-name: Sequential test
+    source-text: "5.12 Sequential test - main town centre uses or offices outside a defined centre"
+    source-url: *list
+    suggested-id: sequential-test
+  - local-name: Materials plan
+    source-text: "From the audit: 6.24, full applications or reserved matters for major development"
+    source-url: *list
+    suggested-id: materials-schedule
+  - local-name: Landscape and Visual Impact Assessment; Townscape Visual Impact Assessment
+    source-text: "From the audit: 6.18 LVIA and 6.19 Townscape VIA; no trigger given"
+    source-url: *list
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Levels
+    source-text: "From the audit: 2.6, new buildings, and householder applications with level changes"
+    source-url: *list
+    suggested-id: site-levels
+  - local-name: Structural survey
+    source-text: "From the audit: 4.5, full or partial demolition of a listed building"
+    source-url: *list
+    suggested-id: structural-survey
+  - local-name: External wall insulation (householder)
+    source-text: "From the audit: 3.2 External wall insulation, in the householder checklist; contents not given"
+    source-url: *list
+    suggested-id: ""
+  - local-name: Dropped kerb (householder)
+    source-text: "From the audit: 3.3 Dropped kerb, in the householder checklist; contents not given"
+    source-url: *list
+    suggested-id: ""
+
+low-confidence:
+  - id: elevation-existing
+    note: "The council's elevations trigger is cut off ('All advertisement consent applications; and Applications
+      for ...'); only advertisement consent is shown."
+  - id: elevation-proposed
+    note: "The council's elevations trigger is cut off ('All advertisement consent applications; and Applications
+      for ...'); only advertisement consent is shown."
+  - id: construction-management-plan
+    note: "Audit (wrong_app_type): the workbook guessed Full planning; the excerpt (CEMP, bat scoping report,
+      method of demolition, hoardings) appears to belong to a demolition item, and no trigger was captured."

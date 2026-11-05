@@ -1,0 +1,393 @@
+# Corrections for Cornwall Council, from the council's audit.
+# The adopted list is the Validation Guide v17 (validation-guide-17-web.pdf), still linked
+# from the council's Validation page (last updated 02/09/2026). A 'Validation Guide 2026 DRAFT'
+# was consulted on 17 July - 7 August 2026 and is being finalised. The audit could not fetch
+# the PDF (robots disallowed), so it judged the workbook from Grokbot's excerpts and the
+# council's Validation updates page. The guide covers all application types in one document.
+local-authority: CON
+
+submission-standards:
+  - item: Scale bars on elevations, floor plans and other plans the council is required to scale
+      from, with a scale bar for each scale ratio shown (not needed on the location or block
+      plan)
+    level: must
+  - item: No 'do not scale' wording, or other wording that stops the council scaling from the
+      plan; only 'do not scale for construction purposes' is accepted
+    level: must
+  - item: Plans provided at the scale indicated on them (e.g. a plan stating 1:100 @A3 must be
+      provided at A3)
+    level: must
+  - item: Plans copied from the council's interactive mapping are not accepted
+    level: must
+  - item: Documents titled 'confidential' are not accepted; redacted versions only in exceptional
+      circumstances where specific commercial harm is demonstrated
+    level: must
+  - item: Development descriptions containing 'retrospective', 'retention' or 're-submission' are
+      not accepted
+    level: must
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is the moveable-structure Method Statement"
+  - id: sci
+    reason: "wrong_trigger: the excerpt is the Town Centre Impact Assessment trigger (a duplicate)"
+  - id: photos
+    reason: "not_a_requirement: the excerpt says photographs are 'not required to validation'"
+
+drop-unmapped:
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "wrong_trigger: the excerpt is the application form / ownership certificates text"
+  - local-name: Agricultural Land Classification / Soils
+    reason: "wrong_trigger: the excerpt is the application form / ownership certificates text"
+  - local-name: Structural Survey
+    reason: "wrong_trigger: the excerpt is the Tree Survey trigger"
+  - local-name: Drainage Strategy / SuDS
+    reason: "duplicate: same 'Missing foul drainage assessment form' text as Foul Sewage / Utilities Statement"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: the fragment 'of any pre-application advice.'"
+  - local-name: Nutrient Neutrality statement / calculator
+    reason: "wrong_app_type: filed under prior approval; re-added below"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_app_type: filed under prior approval; re-added below as Odour Impact Assessment"
+
+requirements:
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more in height.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-text: relevant building … 2 or more dwellings or educational accommodation … 18m or more
+      or has 7 or more storeys
+    source-url:
+      https://www.cornwall.gov.uk/planning-and-building-control/planning-advice-and-guidance/validation-updates/
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's trigger was garbled; the threshold is from the council's
+      Validation updates page."
+
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: The application is for dwellings.
+            - site:
+                in: [air-quality-management-area]
+                description: Within an Air Quality Priority Area of concern, including a 1km buffer.
+        - all:
+            - site:
+                in: [special-protection-area, special-area-of-conservation,
+                  site-of-special-scientific-interest]
+                description: The development is likely to affect a habitats site (SPA/SAC/Ramsar) or
+                  an SSSI.
+            - discretionary
+    source-text: >-
+      Air Quality Assessment LR When Required: Applications for dwellings within an Air Quality
+      Priority Area of concern including 1km buffer
+    source-url: &list https://www.cornwall.gov.uk/media/wadiaqe0/validation-guide-17-web.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, missing_requirement): the workbook's excerpt ran two sentences together.
+      From the audit: under Natural England standing advice of 16 October 2025, a detailed air
+      quality assessment with a mitigation plan is needed where agricultural, industrial or
+      traffic-generating development (shown as officer discretion) is likely to affect a habitats
+      site or an SSSI.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone, critical-drainage-area]
+            description: The site is in Flood Zone 2 or 3, or in an area with critical drainage
+              problems.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare.
+    source-text: A Flood Risk Assessment [FRA] is required where proposed development is in an area
+      where the Environment Agency have indicated as having critical drainage problems.
+    source-url: *list
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook gave only the critical drainage case and left out Flood Zones
+      2 and 3 and sites over 1ha."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - all:
+            - site:
+                in: [world-heritage-site, conservation-area]
+                description: The site is in a World Heritage Site or a Conservation Area.
+            - any:
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: The development creates 100 square metres or more of floor space.
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: The development creates one or more dwellings.
+    source-text: "Design and Access Statement NR When required: Developments within World Heritage
+      Site (WHS) or Conservation Area (CA) creating 100sqm or more floor space."
+    source-url: *list
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook gave only the WHS/Conservation Area 100sqm case and left out
+      major development, 1+ dwellings in designated areas and listed building consent."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is EIA development.
+    source-url: *list
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook's excerpt was the guide's boilerplate list of legislation."
+
+  - id: biodiversity-survey-report
+    action: replace
+    source-url: *list
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): 'Ecology Report Trigger Table … All householder development' is a
+      heading of the council's ecology trigger table, not a rule that every householder application
+      needs an ecology report; the Full planning row was a checklist fragment. The trigger table
+      was not captured.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - discretionary
+    source-url: *list
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the workbook's excerpt came from the list of reasons
+      applications are made invalid ('Missing heritage statement … where required'). A heritage
+      statement is needed for listed building consent; the other triggers were not captured.
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the general biodiversity gain condition.
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): the guide's trigger still reads 'Applications submitted
+      from 12th February 2024'. From 6 August 2026 sites of 0.2 ha or less and temporary
+      permissions of 5 years or less are exempt, and the self-build exemption no longer applies to
+      new applications (council's Validation updates page).
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Mast and antenna development, including telecoms prior approvals.
+    confidence: medium
+    notes: "Audit (wrong_app_type): also applies to telecoms prior approvals."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Development within two metres of the canopy spread of a tree.
+    confidence: medium
+    notes: "Audit (wrong_app_type): the trigger covers householder extensions too."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [archaeological-priority-area]
+            description: Land known to have archaeological interest.
+        - discretionary
+    confidence: medium
+    notes: "Also where an archaeological assessment was requested in pre-application advice (shown as officer
+      discretion)."
+
+  - id: section-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal involves new buildings.
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 0
+            description: The proposal creates new floor space.
+        - condition:
+            field: ground-disturbance
+            value: true
+            description: Any groundworks, e.g. access tracks or hard surfaced areas.
+    confidence: medium
+    notes: "The council's item is 'Existing and Proposed Site Levels'."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal involves new buildings.
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 0
+            description: The proposal creates new floor space.
+        - condition:
+            field: ground-disturbance
+            value: true
+            description: Any groundworks, e.g. access tracks or hard surfaced areas.
+    confidence: medium
+    notes: "The council's item is 'Existing and Proposed Site Levels'."
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      condition:
+        field: noise-generating-use
+        value: true
+        description: Restaurants, cafes, drink establishments, hot food takeaways and general
+          industrial uses in the vicinity of sensitive uses.
+    confidence: medium
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      site:
+        in: [open-space]
+        description: The application involves the loss or gain of a playing field.
+    confidence: medium
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Retail and leisure development not located within an existing centre.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 2500
+            description: Over 2,500 square metres gross floor space.
+        - condition:
+            field: departure-from-development-plan
+            value: true
+            description: Not in accordance with an up-to-date development plan.
+    confidence: medium
+
+  - id: roof-plan-existing
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Proposals involving more complex roof design (council's wording)."
+
+  - id: roof-plan-proposed
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Proposals involving more complex roof design (council's wording)."
+
+  - id: travel-plan
+    action: update
+    required-if:
+      ref: major-development
+    confidence: medium
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "All Rural and Entry-Level Exception Site applications, and other cases where the Affordable Housing
+      policy position is not met in full (council's wording); shown as officer discretion."
+
+  - id: elevation-existing
+    action: update
+    must-include:
+      - item: All elevations, including any blank elevations (unless visibility is completely
+          obscured)
+        level: must
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: All elevations, including any blank elevations (unless visibility is completely
+          obscured)
+        level: must
+
+unmapped:
+  - local-name: Nutrient Neutrality - River Camel Phosphate Budget Calculator and Nutrient Neutrality
+      Statement
+    source-text: "Required for developments within the River Camel Catchment Area comprising a change of use to
+      any of the following: New residential units;"
+    source-url: *list
+    suggested-id: nutrient-neutrality-statement
+  - local-name: Odour Impact Assessment
+    source-text: "Change of use to odour generating activities in the vicinity of existing odour-sensitive developments
+      – residential, schools and hospitals."
+    source-url: *list
+    suggested-id: odour-assessment
+
+low-confidence:
+  - id: "*"
+    note: "Audit (other): a 'Validation Guide 2026 DRAFT' was consulted on in July-August 2026 and is being finalised;
+      recheck once it is adopted."
+  - id: cil-form
+    note: "Audit (wrong_trigger): the workbook's excerpt was the guide's boilerplate list of legislation."
+  - id: land-contamination-assessment
+    note: "Audit (wrong_trigger): the excerpt is a BS 10175 methodology line from a separate guidance PDF, not a
+      trigger."
+  - id: transport-assessment
+    note: "Audit (wrong_trigger): the excerpt is a fragment with no trigger."

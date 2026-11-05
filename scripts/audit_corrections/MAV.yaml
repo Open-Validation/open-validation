@@ -1,0 +1,424 @@
+# Corrections for Malvern Hills District Council, from the council's audit.
+# The link is the current November 2025 'Local Area Planning Application Validation Requirements
+# List', a joint list for Malvern Hills and Wychavon District Councils (shared planning service,
+# South Worcestershire Development Plan); the workbook missed that it is joint. It replaces the 2023
+# version. The list works by trigger ('When required'), not by application type, so no application
+# types are given below. Some workbook rows and tab items came from the superseded 2021 list
+# ('Local Area Requirements List Merged 2021.pdf'). Items marked "From the audit" use the audit's
+# paraphrase; quoted wording is from the workbook excerpts or the audit's evidence. The 2021 Heads of
+# Terms row is dropped; the 2025 list's version still needs a manual read.
+# Kept consistent with WYC.yaml (same joint list). Differences come from this council's audit or
+# rows: the schedule-of-works row here is the rural-building conversion schedule (WYC's row was
+# Arboricultural Method Statement text), the Design and Access Statement wording is from Malvern
+# Hills' own planning page, and the travel plan and town centre rules add the extra cases the
+# Malvern Hills audit quotes.
+local-authority: MAV
+
+drop:
+  - id: environmental-statement
+    reason: "wrong_trigger: the excerpt is a fragment about CIL adoption; no Environmental Statement trigger
+      is given"
+  - id: floor-plan-existing
+    reason: "wrong_trigger: the excerpt is the Street-scene Elevations item, which is also a separate row"
+  - id: floor-plan-proposed
+    reason: "wrong_trigger: as above"
+  - id: elevation-existing
+    reason: "wrong_trigger: as above"
+  - id: elevation-proposed
+    reason: "wrong_trigger: as above"
+  - id: sustainability-statement
+    reason: "the item is the Energy Statement; now under energy-statement"
+
+drop-unmapped:
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: the town centre retail sequential test, now under town-centre-impact-assessment"
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "wrong_trigger: reused the Agricultural Land Classification excerpt; re-added below"
+  - local-name: Agricultural Land Classification / Soils
+    reason: "wrong_trigger: the excerpt lacks the thresholds; re-added below"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "outdated_link: sourced from the superseded 2021 list"
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "wrong_app_type / outdated_link: one row was under prior approval from the 2021 list; re-added
+      once below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      any:
+        - all:
+            - site:
+                in: [designated-rural-area]
+                description: The site is in a Designated Rural Area.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: At least a single new dwelling.
+        - discretionary
+    policy: South Worcestershire Development Plan 2016 Policy SWDP15
+    confidence: medium
+    notes: >-
+      Needed where a development plan policy requires affordable housing or a contribution on the
+      site (officer discretion). The 'at least a single new dwelling in a Designated Rural Area'
+      trigger comes from the Wychavon audit of the same joint list (WYC.yaml).
+
+  - id: air-quality-assessment
+    action: update
+    required-if: discretionary
+    policy: South Worcestershire Development Plan 2016 Policy SWDP31
+    confidence: medium
+    notes: "'Application proposals that impact upon air quality or are potential pollutants'."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees or hedges on the site, or on adjacent land.
+    policy: South Worcestershire Development Plan 2016 Policy SWDP22
+    confidence: medium
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      site:
+        in: [archaeological-priority-area, scheduled-monument]
+        description: >-
+          The development affects an archaeologically sensitive area (including a Scheduled Ancient
+          Monument or non-designated sites of archaeological interest).
+    policy: South Worcestershire Development Plan 2016 Policy SWDP24
+    confidence: medium
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: The development is likely to affect protected species.
+        - discretionary
+    policy: South Worcestershire Development Plan 2016 Policy SWDP22
+    confidence: medium
+    notes: "'Certain types of development are likely to require ecological surveys', such as barn
+      conversions (the excerpt is cut off)."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the statutory biodiversity gain condition.
+    confidence: medium
+
+  - id: cil-form
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "'For all applications that are CIL liable' (see the joint CIL Charging Schedule); the list gives no
+      threshold."
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+    policy: South Worcestershire Development Plan 2016 Policy SWDP21
+    confidence: medium
+    notes: "Where there is a potential adverse impact on the sunlight or daylight of adjoining properties."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      Design and access statement In some circumstances, a design and access statement will be
+      required, please see the Design and Access Statements guidance notes for more information.
+    source-url: https://www.malvernhills.gov.uk/planning/making-a-planning-application
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the Full planning row carried a fragment about CIL adoption. The planning
+      page refers to the guidance notes; national rules for a Design and Access Statement still
+      apply.
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 100
+            description: New development over 100 square metres gross.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: One or more dwellings.
+    policy: South Worcestershire Development Plan 2016 Policy SWDP27
+    source-text: >-
+      Energy Statement … When required With planning applications for new development over 100 sq.
+      metres gross, or one or more dwellings.
+    source-url: &list https://www.malvernhills.gov.uk/component/fileman/?view=file&routed=1&itemless=1&name=Local%20Area%20Requirements%20List%202025%20Final.pdf&folder=Documents/Planning/Making%20a%20Planning%20Application&container=fileman-files
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook mapped the Energy Statement to sustainability-statement and
+      placed it under Full planning only."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: Proposals of 1 hectare or greater in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Proposals of 1 hectare or greater in Flood Zone 1.
+        - site:
+            in: [flood-risk-zone]
+            description: New development (including minor development and change of use) in Flood Zone 2 or 3.
+    policy: South Worcestershire Development Plan 2016 Policy SWDP28
+    confidence: medium
+    notes: "Audit (wrong_app_type): the triggers refer to planning applications, not prior approval. The
+      excerpt is cut off after 'Flood Zone'."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+              scheduled-monument, park-and-garden]
+            description: The proposal affects the significance of a designated or non-designated heritage
+              asset, including its setting.
+    policy: South Worcestershire Development Plan 2016 Policy SWDP24
+    confidence: medium
+    notes: "Audit (missing_requirement): 'Any planning application or application seeking listed building
+      consent' affecting a heritage asset, so also householder, full and outline."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: external-lighting
+            value: true
+            description: The development includes artificial external lighting.
+        - discretionary
+    policy: South Worcestershire Development Plan 2016 Policies SWDP21 and SWDP25
+    confidence: medium
+    notes: "Where the lighting may materially alter light levels outside the site, or affect residential or
+      visual amenity, highway/railway safety or the natural environment (officer judgement)."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: new-build
+            value: true
+            description: The application proposes new buildings.
+        - site:
+            in: [contaminated-land]
+            description: The site is or has been used for purposes that may lead to ground contamination.
+    policy: South Worcestershire Development Plan 2016 Policy SWDP31
+    confidence: medium
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: New development that may create noise near existing noise-sensitive development.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: New noise-sensitive development (housing, hotels, hostels) in a noisy area.
+    source-text: >-
+      Noise Assessments will be required ... new development that may create additional noise in areas
+      where noise sensitive development already exists
+    source-url: *list
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was a cut-off fragment about the PPG."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      condition:
+        field: loss-of-open-space
+        value: true
+        description: >-
+          Loss of recreational buildings or land, without an improved or equivalent replacement and
+          not for related recreational or community purposes.
+    confidence: medium
+
+  - id: schedule-of-works
+    action: replace
+    required-if:
+      condition:
+        field: involves-change-of-use
+        value: true
+        description: The conversion of an existing rural building.
+    source-text: >-
+      a full schedule of works (with plans) will be required to clearly explain and illustrate the works
+      required to carry out the proposed conversion.
+    source-url: *list
+    policy: South Worcestershire Development Plan 2016 Policy SWDP35
+    confidence: medium
+    notes: "Audit (wrong_trigger): this is the schedule required with a Structural Survey for converting a
+      rural building, not a listed-building schedule."
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Telecommunications development, including prior approval under Part 24 of the GPDO.
+    policy: South Worcestershire Development Plan 2016 Policy SWDP26
+    confidence: medium
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: A main town centre use outside the SWDP10 centres.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 1000
+            description: Retail or leisure development of over 1,000 square metres (net).
+    source-text: >-
+      with the sequential test as set out under para. 87 of the NPPF; the scale of development is
+      appropriate to the location; for all retail or leisure development of over 1,000 sq metres, the
+      impact of the development proposal on existing, committed and planned public and private
+      investment in the centre(s) in the catchment of the proposal; …
+    source-url: *list
+    policy: South Worcestershire Development Plan 2016 Policy SWDP10
+    must-include:
+      - item: Compliance with the sequential test
+        level: must
+      - item: The scale of development is appropriate to the location
+        level: must
+      - item: Impact on existing, committed and planned public and private investment in centres in the
+          catchment
+        level: must
+        required-if:
+          condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 1000
+            description: Retail or leisure development of over 1,000 sq metres.
+      - item: Impact on town centre vitality and viability, including local consumer choice
+        level: must
+        required-if:
+          condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 1000
+            description: Retail or leisure development of over 1,000 sq metres.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook labelled the Retail and Centres Impact Assessment as a flood
+      sequential test."
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "The thresholds are in the Worcestershire Local Transport Plan 4 Highway Design Guide, not the list."
+
+  - id: travel-plan
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more dwellings.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 1000
+            description: More than 1,000 square metres of non-residential floorspace.
+        - discretionary
+    source-text: >-
+      Travel Plans will be required for all major development ... 10 or more dwellings or more than
+      1,000 sq. metres of non-residential building floorspace
+    source-url: *list
+    confidence: medium
+    notes: "Audit (wrong_trigger): also for any proposal with a Transport Assessment (shown as officer
+      discretion)."
+
+  - id: planning-statement
+    action: update
+    required-if: discretionary
+    confidence: low
+    notes: "The council's wording is optional: a Planning Statement 'can be submitted with any planning
+      application'."
+
+unmapped:
+  - local-name: Water Management Statement
+    source-text: >-
+      Water Management Statement ... For all applications that result in waste or surface water to be
+      drained. (Planning page: 'The Water Management Statement should be submitted with householder
+      planning applications.')
+    source-url: *list
+    suggested-id: drainage-strategy
+  - local-name: Householder biodiversity checklist
+    source-text: "Planning page: for householder applications 'complete this checklist and include it with
+      your application'"
+    source-url: https://www.malvernhills.gov.uk/planning/making-a-planning-application
+    suggested-id: biodiversity-checklist
+  - local-name: Glint and Glare Assessment
+    source-text: "Glint and Glare Assessment ... With all planning applications proposing solar farms."
+    source-url: *list
+    suggested-id: glint-glare-assessment
+  - local-name: Existing Employment Sites Assessment
+    source-text: >-
+      An assessment will be required with:- all planning applications proposing change of
+      use/re-development of existing B1, B2 and/or B8 use class premises (from the audit: 1,000 sq m net
+      or more in urban areas, or rural employment, tourism or leisure premises, with 12 months of
+      marketing evidence)
+    source-url: *list
+    suggested-id: marketing-evidence
+  - local-name: Replacement Rural Dwellings Statement
+    source-text: "With all applications proposing the demolition of an existing dwelling in open countryside
+      and its replacement with a new dwelling."
+    source-url: *list
+    suggested-id: replacement-dwelling-statement
+  - local-name: Rural Workers' Dwelling Justification
+    source-text: "Where an application is made for a dwelling in a rural location justified by its
+      association with an agricultural/forestry or other rural business need"
+    source-url: *list
+    suggested-id: rural-workers-dwelling-appraisal
+  - local-name: Agricultural Land Classification
+    source-text: >-
+      any development that results in the loss of over 5 hectares of land currently in agricultural use
+      or 2 hectares BMV (from the audit: and large greenfield solar farms)
+    source-url: *list
+    suggested-id: agricultural-land-classification
+  - local-name: Change of Use of Rural Buildings – Marketing Report
+    source-text: >-
+      For applications proposing the conversion of a rural building last used for B1, B2, B8, tourism
+      leisure and/or recreation-related purposes to any non-employment generating purpose (including
+      residential use) .
+    source-url: *list
+    suggested-id: marketing-evidence
+
+low-confidence:
+  - id: viability-assessment
+    note: "Audit (wrong_trigger): the excerpt is a 4-word fragment ('reasoning (e.g. a Viability
+      Assessment).'); re-read the list for the trigger."

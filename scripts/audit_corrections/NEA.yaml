@@ -1,0 +1,481 @@
+# Corrections for Newark and Sherwood District Council, from
+# inputs/audit/newark-and-sherwood-district-council.json.
+# The workbook link is the current Planning Application Validation Checklist (v.6), adopted at
+# Planning Committee on 11 July 2024; the build reads that date from the audit. Grokbot ignored
+# Part 4 (a checklist for each application type) and placed about 45 items under Full planning
+# ('INFERRED'); the audit does not give the Part 4 contents, so they are not added here. About 12
+# Part 3 items were missed. Items marked "From the audit" use its paraphrase of the list.
+local-authority: NEA
+
+submission-standards:
+  - item: Plans drawn to an appropriate metric scale (for example 1:50 or 1:100), annotated
+      accordingly and including the paper size (e.g. 1:50 paper size A3), or drawn with the
+      appropriate scale bar
+    level: must
+
+drop-unmapped:
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "wrong_trigger: quotes the Agricultural Land Classification trigger; re-added below"
+  - local-name: Self-build / custom build information
+    reason: "duplicate: the same CIL self-build exemption text as the CIL row"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "wrong_trigger: the fragment 'gardens or amenity space.' from the daylight/sunlight trigger"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: fragment; re-added below with the trigger"
+  - local-name: Highways / access details (visibility splays)
+    reason: "fragment of the site plan contents; now under site-plan"
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "duplicate: the excerpt is the viability trigger (now in viability-assessment)"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: eia-development
+            value: true
+            description: The proposal requires an Environmental Impact Assessment.
+        - condition:
+            field: biomass-or-chp
+            value: true
+            description: Biomass boilers or combined heat and power plants.
+        - condition:
+            field: traffic-aadt-increase
+            operator: ">"
+            value: 5
+            description: Traffic flows will increase by more than 5% on roads with less than 10,000 annual average daily trips.
+        - condition:
+            field: earthworks
+            value: true
+            description: Significant demolition or construction works are proposed.
+        - discretionary
+    confidence: medium
+    notes: "Industrial installations and other proposals likely to affect air quality ('etc.') are shown as officer discretion."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees may be affected.
+    must-include:
+      - item: All the information required by BS 5837:2012 (or any later update)
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt is content. The trigger 'Tree Survey - applications where trees may be affected' was in the workbook's landscaping row."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      all:
+        - site:
+            in: [archaeological-priority-area]
+            description: An area of known archaeological interest.
+        - condition:
+            field: ground-disturbance
+            value: true
+            description: The proposal involves disturbance of ground.
+    confidence: medium
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the biodiversity gain condition.
+    source-url: https://www.newark-sherwooddc.gov.uk/sites/default/files/2026-01/Planning-Application-Validation-Checklist-2024.pdf
+    source-text: >-
+      Biodiversity Net Gain The current national minimum requirements that need to be submitted to
+      validate an application are those set out in Article 7 of the Town and Country Planning
+      (Development Management Procedure) (England) Order 2015 as modified and amended by Part 4,
+      Regulation 15 of the Biodiversity Gain (Town and Country Planning) (Modification and
+      Amendments) (England) Regulations 2024.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt began with a page fragment ('pay. 4|Page'), removed here. The list defers to the national requirements."
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: The site has a contaminative use listed in the checklist.
+        - discretionary
+    source-url: https://www.newark-sherwooddc.gov.uk/sites/default/files/2026-01/Planning-Application-Validation-Checklist-2024.pdf
+    source-text: However, there are some circumstances where a contamination survey is required at validation stage.
+    confidence: low
+    notes: "Audit (wrong_trigger): from the audit, the list names allocated sites and listed contaminative uses; the allocated sites are shown as officer discretion."
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    confidence: medium
+    notes: "Major applications with a potential adverse impact on the daylight/sunlight of adjoining properties, gardens or amenity space."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a Conservation Area (the District's designated area).
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: One or more dwellinghouses.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: A building or buildings creating 100 square metres or more of floor space.
+        - application-type:
+            in: [lbc]
+    source-url: https://www.newark-sherwooddc.gov.uk/sites/default/files/2026-01/Planning-Application-Validation-Checklist-2024.pdf
+    source-text: >-
+      Design and Access Statements are required for: (a) development which is major development; or
+      (b) development in a designated area [in our District this means a Conservation Area] where
+      the proposed development consists of: (i) the provision of one or more dwellinghouses; or (ii)
+      the provision of a building or buildings where the floor space created by the development is
+      100 square metres or more; or (iii) applications for listed building consent.
+    confidence: medium
+
+  - id: biodiversity-survey-report
+    action: update
+    must-include:
+      - item: Carried out by a suitably competent ecologist, with surveys at the correct time of year
+          using relevant best practice guidance
+        level: must
+    confidence: low
+    notes: "The excerpt is content; the trigger (it mentions buildings likely 'to house protected species') was cut off."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    source-url: https://www.newark-sherwooddc.gov.uk/sites/default/files/2026-01/Planning-Application-Validation-Checklist-2024.pdf
+    confidence: medium
+    notes: "The workbook's excerpt was air quality text; the national EIA rule applies."
+
+  - id: section-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: >-
+              A change in ground levels, or ground levels outside the site are noticeably different.
+        - condition:
+            field: earthworks
+            value: true
+            description: The application proposes engineering operations.
+    confidence: medium
+
+  - id: section-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: >-
+              A change in ground levels, or ground levels outside the site are noticeably different.
+        - condition:
+            field: earthworks
+            value: true
+            description: The application proposes engineering operations.
+    must-include:
+      - item: Existing and proposed site levels and finished floor levels, with cross sections where
+          relevant
+        level: should
+      - item: Levels related to a fixed datum point off site
+        level: should
+    confidence: medium
+    notes: "The must-include items are from the council's drawing notes ('Plans should ... showing existing and proposed site levels and finished floor levels')."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in flood zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The development is 1 hectare or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The development is 1 hectare or more.
+        - site:
+            in: [surface-water-flood-risk]
+            description: The site could be affected by sources of flooding other than rivers and the sea.
+    confidence: medium
+    notes: "From the list's 'When a Flood Risk Assessment is not required' text: not needed under 1 ha in flood zone 1 unless affected by other sources of flooding."
+
+  - id: floor-plan-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: building-works
+            value: true
+            description: Alterations or extensions to buildings.
+        - condition:
+            field: demolition
+            value: true
+            description: Demolition.
+    confidence: medium
+
+  - id: heritage-statement
+    action: update
+    must-include:
+      - item: Archaeological impacts, where the development could disturb buried archaeology or sites of
+          archaeological interest
+        level: must
+        required-if:
+          condition:
+            field: ground-disturbance
+            value: true
+            description: The development could disturb buried archaeology.
+    confidence: low
+    notes: "The excerpt is content; the Heritage Impact Assessment trigger was not captured."
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The development could have a significant impact on existing noise levels.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: The existing noise environment could adversely affect the development.
+    confidence: medium
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      condition:
+        field: loss-of-open-space
+        value: true
+        description: The development will result in the loss of open space.
+    must-include:
+      - item: Plans showing any areas of existing or proposed open space within or adjoining the site
+        level: should
+    confidence: medium
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: >-
+          Main town centre uses and retail not in an existing centre and not in accordance with an
+          up-to-date Development Plan (except small scale rural offices or other small scale rural
+          development).
+    confidence: medium
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: external-alterations
+        value: true
+        description: The application proposes alterations to existing buildings.
+    must-include:
+      - item: The existing roof materials
+        level: should
+    confidence: medium
+
+  - id: roof-plan-proposed
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New buildings.
+        - condition:
+            field: external-alterations
+            value: true
+            description: External alterations.
+    source-url: https://www.newark-sherwooddc.gov.uk/sites/default/files/2026-01/Planning-Application-Validation-Checklist-2024.pdf
+    source-text: Proposed Roof Plans Required for all applications proposing new buildings or external alterations.
+    confidence: medium
+
+  - id: sci
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Required where pre-application consultation has taken place with the local community; this can't be expressed with existing fields."
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Telecommunications development.
+    must-include:
+      - item: For a mast within 3 km of the perimeter of an aerodrome, notification of the Civil
+          Aviation Authority, the Secretary of State for Defence or the aerodrome operator before the
+          application
+        level: must
+    confidence: medium
+
+  - id: viability-assessment
+    action: replace
+    required-if: discretionary
+    source-url: https://www.newark-sherwooddc.gov.uk/sites/default/files/2026-01/Planning-Application-Validation-Checklist-2024.pdf
+    source-text: >-
+      Viability and Marketing Statements Threshold/Trigger Where applicants do not consider that
+      development schemes would be viable in relation to the policy requirements and/or planning
+      obligations made of them, a viability assessment justifying the reasons for this must
+      accompany the planning application.
+    confidence: medium
+
+  - id: site-plan
+    action: replace
+    source-url: https://www.newark-sherwooddc.gov.uk/sites/default/files/2026-01/Planning-Application-Validation-Checklist-2024.pdf
+    must-include:
+      - item: Public highway, visibility splays, landscaping, car parking and open areas around
+          buildings
+        level: must
+      - item: A north arrow
+        level: must
+    confidence: low
+    notes: >-
+      The workbook's Outline row was table text ('Guidance Note 34 Outline with all Matters
+      Reserved'); the must-include items are a fragment of the site plan contents (the start is cut
+      off). The application types come from the Part 4 checklists, which the audit did not list.
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 11
+            description: 11 or more units.
+        - condition:
+            field: housing-floorspace
+            operator: ">="
+            value: 1000
+            description: 1,000 square metres or more of residential floorspace.
+    source-url: https://www.newark-sherwooddc.gov.uk/sites/default/files/2026-01/Planning-Application-Validation-Checklist-2024.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): 11+ units or 1,000 sqm+ residential."
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - condition:
+            field: new-build
+            value: true
+            description: New buildings.
+    source-url: https://www.newark-sherwooddc.gov.uk/sites/default/files/2026-01/Planning-Application-Validation-Checklist-2024.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Climate Change Statement for all new buildings except householder."
+
+  - id: construction-management-plan
+    action: add
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    source-url: https://www.newark-sherwooddc.gov.uk/sites/default/files/2026-01/Planning-Application-Validation-Checklist-2024.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): major development with significant construction traffic, e.g. solar farms."
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      condition:
+        field: floodlighting
+        value: true
+        description: Floodlighting proposals.
+    source-url: https://www.newark-sherwooddc.gov.uk/sites/default/files/2026-01/Planning-Application-Validation-Checklist-2024.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): External Lighting details for all floodlighting proposals."
+
+low-confidence:
+  - id: cil-form
+    note: "Audit (duplicate): the excerpt is CIL self-build exemption text, not the trigger."
+  - id: planning-statement
+    note: "Audit (wrong_trigger): the excerpt is cut off at 'Threshold/Trigger Required for'."
+  - id: schedule-of-works
+    note: "The excerpt is the fragment 'an attached schedule of works.'; the application types were guessed."
+  - id: transport-assessment
+    note: "The excerpt is a garbled threshold table; the triggers need re-reading in the list."
+  - id: floor-plan-proposed
+    note: "The workbook's excerpt is the Existing Floor Plans trigger only; the proposed floor plan trigger was not captured."
+  - id: elevation-existing
+    note: "The workbook's excerpt is the Existing Floor Plans trigger only; the elevations trigger was not captured."
+  - id: elevation-proposed
+    note: "The workbook's excerpt is the Existing Floor Plans trigger only; the elevations trigger was not captured."
+
+unmapped:
+  - local-name: Agricultural Justification
+    source-text: "From the audit: new, replacement or temporary rural workers' dwellings and extensions to them"
+    source-url: https://www.newark-sherwooddc.gov.uk/sites/default/files/2026-01/Planning-Application-Validation-Checklist-2024.pdf
+    suggested-id: rural-workers-dwelling-appraisal
+  - local-name: Drainage information
+    source-text: "All major applications; applications that could increase flood risk"
+    source-url: https://www.newark-sherwooddc.gov.uk/sites/default/files/2026-01/Planning-Application-Validation-Checklist-2024.pdf
+    suggested-id: drainage-strategy
+  - local-name: Broadband Statement
+    source-text: "From the audit: residential development of 10+ units"
+    source-url: https://www.newark-sherwooddc.gov.uk/sites/default/files/2026-01/Planning-Application-Validation-Checklist-2024.pdf
+    suggested-id: ""
+  - local-name: Coal Mining Risk Assessment
+    source-text: "From the audit: sites in a Coal Authority High Risk Area"
+    source-url: https://www.newark-sherwooddc.gov.uk/sites/default/files/2026-01/Planning-Application-Validation-Checklist-2024.pdf
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Green Belt Impact Assessment
+    source-text: "From the audit: new buildings, replacements, extensions and engineering in the Green Belt, including householder extensions"
+    source-url: https://www.newark-sherwooddc.gov.uk/sites/default/files/2026-01/Planning-Application-Validation-Checklist-2024.pdf
+    suggested-id: green-belt-assessment
+  - local-name: Health Impact Assessment
+    source-text: "From the audit: over 50 dwellings, or other major development with significant health impacts"
+    source-url: https://www.newark-sherwooddc.gov.uk/sites/default/files/2026-01/Planning-Application-Validation-Checklist-2024.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Rights of Way
+    source-text: "From the audit: listed in Part 3 (trigger not given)"
+    source-url: https://www.newark-sherwooddc.gov.uk/sites/default/files/2026-01/Planning-Application-Validation-Checklist-2024.pdf
+    suggested-id: public-rights-of-way-statement
+  - local-name: Tourism Need Statement
+    source-text: "From the audit: listed in Part 3 (trigger not given)"
+    source-url: https://www.newark-sherwooddc.gov.uk/sites/default/files/2026-01/Planning-Application-Validation-Checklist-2024.pdf
+    suggested-id: need-statement
+  - local-name: Highway Information
+    source-text: "From the audit: all new residential development"
+    source-url: https://www.newark-sherwooddc.gov.uk/sites/default/files/2026-01/Planning-Application-Validation-Checklist-2024.pdf
+    suggested-id: highways-access-details
+  - local-name: Wind Turbine information
+    source-text: "From the audit: listed in Part 3 (trigger not given)"
+    source-url: https://www.newark-sherwooddc.gov.uk/sites/default/files/2026-01/Planning-Application-Validation-Checklist-2024.pdf
+    suggested-id: ""

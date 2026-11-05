@@ -1,0 +1,561 @@
+# Corrections for Uttlesford District Council, from the council's audit.
+# Uttlesford's local list is a suite of about 17 type-specific checklists (Householder, Full, Full
+# + LB, Full + CA, Advert, LBC, Outline some/all matters, Reserved Matters 'DFO', CLEUD, CLOPUD,
+# householder prior approval, s73) plus biodiversity, contamination, fire and self-build proformas,
+# on the 'Planning application forms and checklists' page. The Full Planning checklist reads
+# 'Current version: July 2024'. Grokbot filed most 'Outline' rows from the DFO checklist, which is
+# Reserved Matters ('Details Following Outline'), and many triggers are column merges. Most rows
+# below carry no application type because the same items recur across the checklists; types are
+# given where the audit names them. The CLEUD/CLOPUD, householder prior approval and conservation
+# area checklists were not read by Grokbot and still need a manual read. Items marked "From the
+# audit" use the audit's paraphrase.
+local-authority: UTT
+
+validation-list:
+  url: https://www.uttlesford.gov.uk/planning-application-forms-and-checklists
+  date: 2024-07
+  date-basis: >-
+    audit: the Full Planning checklist reads 'Current version: July 2024' (the workbook's 2026-03-01
+    is PDF metadata); the list is the suite of checklists on the forms and checklists page
+
+submission-standards:
+  - item: A scale bar included on all drawings
+    level: must
+  - item: All drawings at a recognised scale, identifying the scale at the print size (e.g. 1:50 at A3);
+      'do not scale' not used (unless 'do not scale, except for planning purposes')
+    level: must
+  - item: All drawings (excluding supplementary renders or sketches) include a title and drawing number,
+      with the revision number as necessary
+    level: must
+
+drop-unmapped:
+  - local-name: Validation checklist form (completed)
+    reason: "not_a_requirement: repeats the biodiversity checklist instruction"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advice to seek Natural England pre-application advice"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: the excerpt is shared nonsense with the Heritage row; re-added below"
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "wrong_trigger: column merges; re-added below with the checklist's instruction"
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_trigger: the householder row is a column merge; re-added below"
+  - local-name: Design Code / Masterplan / Parameter plans
+    reason: "wrong_app_type: filed under householder; re-added below for majors"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "duplicate: affordable housing / viability / air quality text"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "duplicate: a fragment of the daylight/sunlight item"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: a fragment of the block plan contents"
+  - local-name: Self-build / custom build information
+    reason: "wrong_trigger: merged with schedule of materials text; re-added below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [full, outline]
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 15
+                description: Residential development of 15 or more dwellings.
+        - all:
+            - application-type:
+                in: [reserved-matters]
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 10
+                description: Residential development of 10 or more dwellings.
+    source-text: >-
+      Full Planning checklist: 'Residential development of 15 or more dwellings'. DFO (reserved
+      matters) checklist: Affordable Housing Statement Residential development of: … 10 or more
+      dwellings
+    source-url: https://www.uttlesford.gov.uk/media/11354/004-Full-Planning-Validation-Checklist/pdf/004_Full_Planning_Validation_Checklist.pdf?m=638313180438070000
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the workbook's full-planning excerpt was a column merge.
+      The July 2024 Full checklist says 15+; the older DFO (reserved matters) checklist says 10+.
+
+  - id: air-quality-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Air Quality Impact Assessment for 'Development that may increase levels of air' pollution (the
+      excerpt is a column merge)."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Development affecting trees within, or adjoining, the site.
+        - application-type:
+            in: [consent-under-tpo, notice-trees-in-con-area]
+    source-text: >-
+      Tree reports Required for trees with Tree preservation orders (TPO) or trees in conservation
+      areas either on or within 5.0 metres of the site.
+    source-url: https://www.uttlesford.gov.uk/article/4875/Validating-applications-help-for-agents-and-applicants
+    must-include:
+      - item: Carried out by a qualified arboriculturist, following BS5837
+        level: should
+    confidence: medium
+    notes: "Audit (wrong_trigger): the householder excerpt was a column merge with the Public Right of Way
+      text."
+
+  - id: archaeological-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [archaeological-priority-area]
+            description: The site includes a heritage asset of archaeological interest.
+        - discretionary
+    source-url: https://www.uttlesford.gov.uk/media/11354/004-Full-Planning-Validation-Checklist/pdf/004_Full_Planning_Validation_Checklist.pdf?m=638313180438070000
+    confidence: medium
+    notes: "From the audit (missing_requirement): where the site includes or may include a heritage asset of
+      archaeological interest ('may include' shown as officer discretion)."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Any works to a roof (preliminary roost assessment for bats).
+        - condition:
+            field: demolition
+            value: true
+            description: Any proposed demolition works (preliminary roost assessment for bats).
+        - discretionary
+    must-include:
+      - item: A preliminary roost assessment for bats, for any works to a roof or any demolition
+        level: must
+      - item: Reports meet BS42020 and CIEEM advice on the age of data (reports over 12 months old may need
+          updating)
+        level: must
+    confidence: medium
+    notes: "Other cases follow the stipulations in Core Policy 38 and the biodiversity checklist (officer
+      discretion)."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The application is not exempt from biodiversity net gain.
+    confidence: medium
+    notes: "'Biodiversity Net Gain All applications unless exempt'."
+
+  - id: cil-form
+    action: replace
+    required-if:
+      condition:
+        field: new-build
+        value: true
+        description: New buildings and extensions.
+    source-text: Community Infrastructure Levy (CIL) All applications for new buildings and extensions
+    source-url: https://www.uttlesford.gov.uk/media/11352/001-Householder-Validation-Checklist/pdf/001_Householder_Validation_Checklist.pdf?m=638181064725400000
+    confidence: medium
+    notes: "Audit (wrong_app_type): the 'Outline' row was DFO (reserved matters) text about the Statement of
+      Community Involvement."
+
+  - id: daylight-sunlight-assessment
+    action: replace
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    source-url: https://www.uttlesford.gov.uk/media/11354/004-Full-Planning-Validation-Checklist/pdf/004_Full_Planning_Validation_Checklist.pdf?m=638313180438070000
+    must-include:
+      - item: An overshadowing study, showing shadow diagrams at different times of the day and throughout
+          the year
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): 'Daylight/sunlight assessment - Major developments with potential adverse
+      light impacts'."
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: All elevations affected, including blank elevations (if no external changes are proposed, plans
+          annotated clearly to reflect this)
+        level: must
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development (or the original application) is EIA development.
+    source-text: application was EIA development, please see further guidance for Environmental Statements
+    source-url: https://www.uttlesford.gov.uk/media/11365/025-RemovalVary-Condition-Validation-Checklist/pdf/025_RemovalVary_Condition_Validation_Checklist.pdf?m=637829510563070000
+    confidence: medium
+    notes: "Audit (wrong_trigger): the full planning row was ecology (EcIA) text, not an EIA trigger."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: building-height
+            operator: ">"
+            value: 18
+            description: Buildings over 18m.
+        - condition:
+            field: storey-count
+            operator: ">="
+            value: 7
+            description: Buildings having 7 storeys or more.
+    source-text: Fire Statement Form Buildings over 18m or having 7 storeys or more
+    source-url: https://www.uttlesford.gov.uk/media/11364/023-DFO-Validation-Checklist/pdf/023_DFO_Validation_Checklist.pdf?m=637829510558930000
+    confidence: medium
+    notes: "Audit (wrong_trigger): the full planning excerpt ran into airport safeguarding text."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+          scheduled-monument, park-and-garden, article-4-direction-area]
+        description: >-
+          Development with the potential to impact designated and non-designated heritage assets and
+          their settings, Conservation Areas or Article 4 areas.
+    source-text: >-
+      Heritage Statement Development which has the potential to impact designated and nondesignated
+      heritage assets and their settings.
+    source-url: https://www.uttlesford.gov.uk/media/11360/011-Listed-Building-Validation-Checklist/pdf/011_Listed_Building_Validation_Checklist.pdf?m=637829510545730000
+    confidence: medium
+    notes: "Audit (wrong_trigger): the full planning excerpt was nonsense shared with the HIA row."
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land, near-landfill-site]
+            description: Known or suspected contamination, or within 250m of a former landfill.
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: A sensitive end use.
+    source-url: https://www.uttlesford.gov.uk/media/11354/004-Full-Planning-Validation-Checklist/pdf/004_Full_Planning_Validation_Checklist.pdf?m=638313180438070000
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted HIA screening text. From the audit: known/suspected
+      contamination, sensitive uses, or within 250m of a former landfill."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: External lighting or floodlighting provided or made necessary by development in a
+          publicly accessible place (or the other places the list names).
+    confidence: medium
+    notes: "'Where external lighting or flooding is provided or made necessary by development in: A publicly
+      accessible place' (the list continues)."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: A noise-generating use (including mixed use).
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: A noise-sensitive use (including mixed use).
+    source-url: https://www.uttlesford.gov.uk/media/11354/004-Full-Planning-Validation-Checklist/pdf/004_Full_Planning_Validation_Checklist.pdf?m=638313180438070000
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Noise and vibration impact assessment for noise-generating
+      or noise-sensitive uses, and mixed use."
+
+  - id: photos
+    action: replace
+    required-if:
+      application-type:
+        in: [advertising]
+    source-text: a clear photograph(s) of existing building;
+    source-url: https://www.uttlesford.gov.uk/media/11361/012-Advertisement-Validation-Checklist/pdf/012_Advertisement_Validation_Checklist.pdf?m=638404887543000000
+    confidence: medium
+    notes: >-
+      The other rows quoted Design and Access Statement contents ('plans and photographs to explain
+      the evolution of the proposals where appropriate') and tree works advice ('would be
+      beneficial'), which are not photo requirements.
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [s73]
+    source-text: >-
+      Planning Statement All major development … Planning Statement explaining reasons for seeking
+      variation or removal of condition(s).
+    source-url: https://www.uttlesford.gov.uk/media/11364/023-DFO-Validation-Checklist/pdf/023_DFO_Validation_Checklist.pdf?m=637829510558930000
+    must-include:
+      - item: The reasons for seeking variation or removal of the condition(s)
+        level: must
+        required-if:
+          application-type:
+            in: [s73]
+    confidence: medium
+    notes: "Audit (missing_requirement, wrong_app_type): a planning statement for all major development appears
+      in the Full checklist too, not only under Outline (DFO) and s73."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      site:
+        in: [open-space]
+        description: The application affects playing field land.
+    must-include:
+      - item: Sport-specific information, using the playing fields checklist (appendix 1)
+        level: must
+    confidence: medium
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: building-works
+        value: true
+        description: The application involves building works (including changes of use).
+    confidence: medium
+    notes: "'Applications that involve building works (including changes of use)'; plans 'usually 1:50 or 1:100
+      for householder and minor applications'."
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: building-works
+        value: true
+        description: The application involves building works (including changes of use).
+    confidence: medium
+    notes: "'Applications that involve building works (including changes of use)'; plans 'usually 1:50 or 1:100
+      for householder and minor applications'."
+
+  - id: sci
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: Major development of 10 or more dwellings.
+        - condition:
+            field: retail-floorspace
+            operator: ">="
+            value: 1000
+            description: Retail of 1,000 sqm or more.
+        - discretionary
+    source-text: >-
+      Statement of Community Involvement Large road schemes … And other developments of 1,000sqm or more
+      likely to generate significant public interest.
+    source-url: https://www.uttlesford.gov.uk/media/11364/023-DFO-Validation-Checklist/pdf/023_DFO_Validation_Checklist.pdf?m=637829510558930000
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement): a Community engagement report for majors of 10+ dwellings and
+      retail of 1,000 sqm+ is in the Full checklist too. Large road schemes and other 1,000sqm+
+      schemes of public interest are shown as officer discretion.
+
+  - id: site-plan
+    action: update
+    required-if:
+      application-type:
+        in: [hh, full, outline, reserved-matters, lbc]
+    must-include:
+      - item: A block plan at 1:100, 1:200 or 1:500 with a scale bar
+        level: must
+    confidence: medium
+    notes: >-
+      'All applications – except for window replacements, shopfronts, advertisement' (the block plan
+      text is interleaved across columns). Audit (wrong_app_type): the advertisement row came from
+      the outline checklist.
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      any:
+        - all:
+            - condition:
+                field: new-build
+                value: true
+                description: New buildings.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: One or more new dwellings.
+        - all:
+            - condition:
+                field: new-build
+                value: true
+                description: New buildings.
+            - condition:
+                field: floorspace-non-residential
+                operator: ">="
+                value: 100
+                description: 100m2 or more of non-residential floorspace.
+    confidence: medium
+    notes: "Climate Change Sustainability Statement: 'All new buildings (of one or more new dwellings or 100m2
+      or more nonresidential floor space)', designed to be Net Zero Carbon in operation."
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Telecommunications development.
+    confidence: low
+    notes: "The help page only says 'Check the local list to see if required'."
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      condition:
+        field: town-centre-use-floorspace
+        operator: ">"
+        value: 2499
+        description: Retail or leisure proposals above 2,499 sqm.
+    source-text: Retail impact assessment and sequential test - Proposals above 2,499 sqm
+    source-url: https://www.uttlesford.gov.uk/media/11354/004-Full-Planning-Validation-Checklist/pdf/004_Full_Planning_Validation_Checklist.pdf?m=638313180438070000
+    confidence: medium
+    notes: "Audit (wrong_app_type): filed under prior approval, but it is a planning application item."
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: Residential development (Transport Statement for 1-9 dwellings, Assessment for 10+).
+        - discretionary
+    source-text: >-
+      Transport Statement -All applications for 1-9 dwellings Transport Assessment for all applications
+      for 10 or more dwellings – for non residential developments
+    source-url: https://www.uttlesford.gov.uk/media/11358/008-Full-Planning-LB-Validation-Checklist/pdf/008_Full_Planning___LB_Validation_Checklist.pdf?m=637829510540470000
+    confidence: medium
+    notes: "Audit (wrong_app_type): not a Reg 3 item. The non-residential threshold is cut off, so it is shown
+      as officer discretion."
+
+  - id: travel-plan
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: staff-count
+            operator: ">="
+            value: 50
+            description: Non-residential development with 50 employees or more.
+        - discretionary
+    source-text: Travel Plans are expected for non residential development proposals with 50 employees or more.
+    source-url: https://www.uttlesford.gov.uk/media/11358/008-Full-Planning-LB-Validation-Checklist/pdf/008_Full_Planning___LB_Validation_Checklist.pdf?m=637829510540470000
+    confidence: medium
+    notes: "Audit (wrong_app_type): not a Reg 3 item. The full checklist's garbled text also mentions schemes
+      employing 20 or more staff and over 50 residential units (shown as officer discretion)."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Needed where the level of affordable housing proposed is less than the policy requirement."
+
+  - id: waste-management-plan
+    action: update
+    must-include:
+      - item: How waste collection and recycling facilities will be provided
+        level: should
+      - item: A waste management scheme, e.g. for keeping horses, poultry or livestock
+        level: must
+        required-if: discretionary
+    notes: "From the audit (missing_requirement): the Full checklist's Waste management scheme (e.g. keeping
+      horses, poultry or livestock)."
+
+unmapped:
+  - local-name: Health Impact Assessment
+    source-text: >-
+      Full Planning checklist: 'More than 200 residential units'. Development proposals of 50 to 99
+      dwellings or 1,000m2 to 4,999m2 floorspace should undertake a screening which assesses if a full
+      Health Impact Assessment is required.
+    source-url: https://www.uttlesford.gov.uk/media/11354/004-Full-Planning-Validation-Checklist/pdf/004_Full_Planning_Validation_Checklist.pdf?m=638313180438070000
+    suggested-id: health-impact-assessment
+  - local-name: Biodiversity Checklist
+    source-text: >-
+      Biodiversity Checklist All applications Householder and Listed Building applications should
+      complete and submit UDC_Householder_and_Listed_Building_Consent_Biodiversity_Validation_Checklist …
+      For major developments you must complete and submit Essex County Council’s Checklist … For minor
+      developments you must complete and submit UDC_Minor_Development_Biodiversity_Checklist1.pdf
+    source-url: https://www.uttlesford.gov.uk/media/11360/011-Listed-Building-Validation-Checklist/pdf/011_Listed_Building_Validation_Checklist.pdf?m=637829510545730000
+    suggested-id: biodiversity-checklist
+  - local-name: Parking plan
+    source-text: >-
+      Parking plan - Garage conversions, more bedrooms, or building over a parking space. Parking
+      Layouts & Turning Heads and Turning Circles (including Cycle Parking and Motorcycle parking) All
+      major applications and where minor development create additional parking, turning heads etc.
+    source-url: https://www.uttlesford.gov.uk/media/11354/004-Full-Planning-Validation-Checklist/pdf/004_Full_Planning_Validation_Checklist.pdf?m=638313180438070000
+    suggested-id: parking-plan
+  - local-name: Urban Design Code checklist
+    source-text: Urban Design Code checklist - Majors, once the Design Code is adopted
+    source-url: https://www.uttlesford.gov.uk/media/11354/004-Full-Planning-Validation-Checklist/pdf/004_Full_Planning_Validation_Checklist.pdf?m=638313180438070000
+    suggested-id: design-code
+  - local-name: Self-build / custom build declaration
+    source-text: >-
+      Self-Build/Custom Build dwellings Declaration Form All planning applications for proposed
+      self-build custom build and Completed and signed Self-build/Custom build Validation form
+      Conversions involving a “material change of use” that results in a new, self -contained dwelling
+      intended for your primary residence.
+    source-url: https://www.uttlesford.gov.uk/media/11358/008-Full-Planning-LB-Validation-Checklist/pdf/008_Full_Planning___LB_Validation_Checklist.pdf?m=637829510540470000
+    suggested-id: self-build-statement
+  - local-name: Minerals and waste infrastructure impact assessments
+    source-text: "Minerals infrastructure impact assessment - Within 250 m... (from the audit: also Waste
+      infrastructure impact assessment; 400m for Water Recycling Centres)"
+    source-url: https://www.uttlesford.gov.uk/media/11354/004-Full-Planning-Validation-Checklist/pdf/004_Full_Planning_Validation_Checklist.pdf?m=638313180438070000
+    suggested-id: minerals-assessment
+  - local-name: Minerals resource assessment
+    source-text: "From the audit: Minerals Safeguarding Area: 5ha sand/gravel, 3ha chalk, >1 dwelling
+      brickearth"
+    source-url: https://www.uttlesford.gov.uk/media/11354/004-Full-Planning-Validation-Checklist/pdf/004_Full_Planning_Validation_Checklist.pdf?m=638313180438070000
+    suggested-id: minerals-assessment
+  - local-name: Wildlife hazard risk assessment
+    source-text: "Wildlife hazard risk assessment - Development within 13 km of Cambridge aerodrome (from the
+      audit: bird-attracting development)"
+    source-url: https://www.uttlesford.gov.uk/media/11354/004-Full-Planning-Validation-Checklist/pdf/004_Full_Planning_Validation_Checklist.pdf?m=638313180438070000
+    suggested-id: aerodrome-safeguarding
+  - local-name: Public right of way plan
+    source-text: "From the audit: a public right of way on, adjoining or affected by the site"
+    source-url: https://www.uttlesford.gov.uk/media/11354/004-Full-Planning-Validation-Checklist/pdf/004_Full_Planning_Validation_Checklist.pdf?m=638313180438070000
+    suggested-id: public-rights-of-way-statement
+  - local-name: Schedule of materials
+    source-text: "Schedule of materials - All applications with external materials"
+    source-url: https://www.uttlesford.gov.uk/media/11354/004-Full-Planning-Validation-Checklist/pdf/004_Full_Planning_Validation_Checklist.pdf?m=638313180438070000
+    suggested-id: materials-schedule
+  - local-name: Memorandum of understanding
+    source-text: "From the audit: applications by or on behalf of Uttlesford District Council"
+    source-url: https://www.uttlesford.gov.uk/media/11354/004-Full-Planning-Validation-Checklist/pdf/004_Full_Planning_Validation_Checklist.pdf?m=638313180438070000
+    suggested-id: memorandum-of-understanding
+  - local-name: Amendment drawings
+    source-text: >-
+      A full update or revision of the originally approved plans where changes … occur, including
+      proposed plans, elevations and sections, being annotated … or marked up to highlight the
+      proposed changes (from the audit: s73 and s96A)
+    source-url: https://www.uttlesford.gov.uk/media/11365/025-RemovalVary-Condition-Validation-Checklist/pdf/025_RemovalVary_Condition_Validation_Checklist.pdf?m=637829510563070000
+    suggested-id: amendment-documents

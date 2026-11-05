@@ -1,0 +1,393 @@
+# Corrections for Tameside Metropolitan Borough Council, from
+# inputs/audit/tameside-metropolitan-borough-council.json.
+# Tameside's current requirements are the 'Validation Checklist July 2025' plus 13 local list
+# pages, one per application type, approved on 23 July 2025 (hub:
+# https://tameside.gov.uk/planning/consultation). The build takes the audit's current_url and
+# current_date. Grokbot read only the Full-applications page and captured 3 items from it.
+# The audit read the Full and Householder pages; items marked "From the audit" use its paraphrase.
+# Not added: the lists for Outline (all / some matters reserved), Reserved matters, Listed building,
+# Advertisement, s73, Hedgerow and the prior notifications exist but the audit gives no contents
+# (wrong_app_type, Confirmed). The Full list also asks for unique drawing reference numbers; that
+# is a Full-list rule, not a council-wide standard, so it is not under submission-standards.
+local-authority: TAM
+
+requirements:
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [full]
+            - any:
+                - condition:
+                    field: involves-change-of-use
+                    value: false
+                    description: The application is not a change of use.
+                - condition:
+                    field: external-alterations
+                    value: true
+                    description: The proposal includes external alterations.
+        - all:
+            - application-type:
+                in: [hh]
+            - site:
+                in: [listed-building, conservation-area]
+                description: The property is a listed building or is in a conservation area.
+    source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+    source-text: >-
+      A Design and Access Statement must be submitted (unless the application is for a change of
+      use with no external alterations)
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook filed this under prior approval; it is on the
+      Full-applications list. From the audit: the Householder list also asks for a Design and Access
+      Statement where the property is a listed building or in a conservation area. The workbook's
+      excerpt ran on into the disabled-access drawing rule (now under floor-plan-proposed).
+
+  - id: section-existing
+    action: update
+    required-if:
+      application-type:
+        in: [full, hh]
+    must-include:
+      - item: Existing site levels
+        level: must
+    confidence: medium
+    notes: >-
+      Mandatory on the Full-applications list (audit: the page title names the type, so the
+      'INFERRED' flag was wrong). From the audit: the Householder list also asks for existing and
+      proposed levels.
+
+  - id: section-proposed
+    action: update
+    required-if:
+      application-type:
+        in: [full, hh]
+    must-include:
+      - item: Proposed floor and site levels
+        level: must
+    confidence: medium
+    notes: >-
+      Mandatory on the Full-applications list (audit: the page title names the type, so the
+      'INFERRED' flag was wrong). From the audit: the Householder list also asks for existing and
+      proposed levels.
+
+  - id: waste-management-plan
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, hh]
+        - discretionary
+    must-include:
+      - item: Refuse storage and collection arrangements shown on the drawings
+        level: must
+    confidence: medium
+    notes: >-
+      "Where appropriate" on the Full-applications list (the 'INFERRED' flag was wrong). From the
+      audit: the Householder list asks for refuse storage where appropriate, and the Full list also
+      names 'Refuse Disposal details' and a 'Site Waste Management Plan' among items that may be
+      required depending on the proposal.
+
+  - id: site-plan
+    action: add
+    required-if:
+      application-type:
+        in: [full, hh]
+    source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+    must-include:
+      - item: Existing and proposed vehicular and pedestrian access, visibility splays, gradients and
+          parking, and any closure or diversion of a right of way
+        level: must
+      - item: Trees and shrubs to be removed or retained, and new planting
+        level: must
+      - item: New boundary treatments
+        level: must
+      - item: Dimensions, including to the boundaries
+        level: must
+        required-if:
+          application-type:
+            in: [full]
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): mandatory drawing items on the Full-applications list
+      ("Your application will not be registered if the relevant information is missing"). The
+      Householder list has access and parking, trees and landscaping, and boundary treatments.
+      These items are the audit's summary; which drawing shows each needs checking.
+
+  - id: elevation-proposed
+    action: add
+    required-if:
+      application-type:
+        in: [full, hh]
+    source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+    must-include:
+      - item: Building materials and where they are used
+        level: must
+      - item: A contextual drawing such as a street scene
+        level: must
+        required-if:
+          all:
+            - application-type:
+                in: [full]
+            - discretionary
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): mandatory drawing items on the Full-applications list
+      (a street scene 'where appropriate'); the Householder list also asks for materials. These
+      items are the audit's summary.
+
+  - id: floor-plan-proposed
+    action: add
+    required-if:
+      application-type:
+        in: [full]
+    source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+    source-text: Your drawings must show how disabled people will be accommodated.
+    must-include:
+      - item: How disabled people will be accommodated
+        level: must
+    confidence: low
+    notes: >-
+      Audit (missing_requirement): a mandatory drawing item on the Full-applications list; the
+      workbook only had it as stray text in the Design and Access Statement row. Which drawing it
+      belongs on needs checking.
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, hh]
+        - discretionary
+    source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): 'may be required depending on the proposal' on the
+      Full-applications list (with an ecology unit link if great crested newts are present); the
+      Householder list names an ecological assessment as possibly required.
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - discretionary
+    source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+    confidence: medium
+    notes: "From the audit (missing_requirement): 'may be required depending on the proposal' on the Full-applications list."
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, hh]
+        - discretionary
+    source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+    confidence: medium
+    notes: "From the audit (missing_requirement): may be required depending on the proposal, on both the Full and Householder lists."
+
+  - id: environmental-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - condition:
+            field: eia-development
+            value: true
+            description: The development needs an Environmental Impact Assessment.
+    source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+    confidence: medium
+    notes: "From the audit (missing_requirement): Environmental Impact Assessment / Environmental Statement, listed as may be required on the Full-applications list."
+
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - discretionary
+    source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+    confidence: medium
+    notes: "From the audit (missing_requirement): 'may be required depending on the proposal' on the Full-applications list; the audit gives no trigger."
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, hh]
+        - discretionary
+    source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+    confidence: medium
+    notes: "From the audit (missing_requirement): may be required depending on the proposal, on both the Full and Householder lists."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, hh]
+        - discretionary
+    source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a Land Contamination assessment may be required on the
+      Full-applications list. The Householder list's mandatory items include land contamination
+      measures such as gas protection membranes or garden cover systems; the audit does not say
+      when they apply.
+
+  - id: landscaping-plan
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - discretionary
+    source-url: https://tameside.gov.uk/planning/consultation/householderapplication
+    confidence: medium
+    notes: "From the audit (wrong_app_type): hard and soft landscaping details may be required on the Householder list."
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - discretionary
+    source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+    confidence: medium
+    notes: "From the audit (missing_requirement): 'may be required depending on the proposal' on the Full-applications list."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - discretionary
+    source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+    confidence: medium
+    notes: "From the audit (missing_requirement): Noise Impact Assessment, 'may be required depending on the proposal' on the Full-applications list."
+
+  - id: photos
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - discretionary
+    source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+    confidence: medium
+    notes: "From the audit (missing_requirement): Photographs/Photomontages, 'may be required depending on the proposal' on the Full-applications list."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, hh]
+        - discretionary
+    source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+    confidence: medium
+    notes: "From the audit (missing_requirement): may be required depending on the proposal, on both the Full and Householder lists."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - discretionary
+    source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+    confidence: medium
+    notes: "From the audit (missing_requirement): Retail Impact Assessment, 'may be required depending on the proposal' on the Full-applications list."
+
+  - id: sci
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - discretionary
+    source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+    confidence: medium
+    notes: "From the audit (missing_requirement): Statement of Community Involvement, 'may be required depending on the proposal' on the Full-applications list."
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - discretionary
+    source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+    confidence: medium
+    notes: "From the audit (missing_requirement): 'may be required depending on the proposal' on the Full-applications list."
+
+  - id: transport-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - discretionary
+    source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+    confidence: medium
+    notes: "From the audit (missing_requirement): 'may be required depending on the proposal' on the Full-applications list."
+
+  - id: travel-plan
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - discretionary
+    source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+    confidence: medium
+    notes: "From the audit (missing_requirement): 'may be required depending on the proposal' on the Full-applications list."
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - discretionary
+    source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+    confidence: medium
+    notes: "From the audit (missing_requirement): Tree Survey, 'may be required depending on the proposal' on the Full-applications list."
+
+unmapped:
+  - local-name: Crime Impact Statement
+    source-text: "From the audit: may be required depending on the proposal (Full applications)"
+    source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+    suggested-id: crime-prevention-statement
+  - local-name: Economic Statement
+    source-text: "From the audit: may be required depending on the proposal (Full applications)"
+    source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+    suggested-id: economic-statement
+  - local-name: Foul sewage and utilities assessment
+    source-text: "From the audit: may be required depending on the proposal (Full applications)"
+    source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+    suggested-id: foul-sewage-utilities-statement
+  - local-name: Parking and servicing details
+    source-text: "From the audit: may be required depending on the proposal (Full and Householder applications)"
+    source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+    suggested-id: parking-plan
+  - local-name: Planning obligations / Unilateral Undertaking
+    source-text: "From the audit: may be required depending on the proposal (Full applications)"
+    source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+    suggested-id: planning-obligations-heads-of-terms
+  - local-name: Structural survey
+    source-text: "From the audit: may be required depending on the proposal (Full applications)"
+    source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+    suggested-id: structural-survey
+  - local-name: Ventilation / Extraction Statement
+    source-text: "From the audit: may be required depending on the proposal (Full applications)"
+    source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+    suggested-id: ventilation-extraction-details

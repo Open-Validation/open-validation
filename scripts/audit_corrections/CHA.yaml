@@ -1,0 +1,483 @@
+# Corrections for Charnwood Borough Council, from the council's audit.
+# The council's page now links '1A Local Validation List 2026 FINAL PDF.pdf' (the build takes that url
+# from the audit); the document is headed 'Local Validation List 2025' and has no adoption date.
+# Grokbot placed most items under Full planning by guess, missed the Householder Application Guide,
+# Section 4 (other application types) and about 17 local items, and several rows carry another
+# row's excerpt. Triggers below have no application type unless the list names one, so they also
+# cover householder applications, as the audit says the Householder guide does. Items marked
+# "From the audit" use the audit's paraphrase. Section 4 also sets requirements for non-material
+# amendments (comparison plans, explanatory statement), discharge of conditions, tree works (sketch
+# map, pruning specification, arboricultural evidence) and prior approvals, which the audit only names.
+local-authority: CHA
+
+validation-list:
+  date: 2025
+  date-basis: >-
+    audit: no adoption date in the text; the document is headed 'Local Validation List 2025' (the
+    filename says 2026; the web page was last updated 4 Aug 2025)
+
+submission-standards:
+  - item: All plans include critical dimensions and are drawn to a recognisable, annotated, metric
+      scale
+    level: must
+  - item: Plans titled and numbered, identifying revisions, and annotated with dimensions and a scale
+      bar
+    level: should
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is tree text (AIA, AMS and Tree Protection Plan)"
+  - id: section-existing
+    reason: "wrong_trigger: the excerpt is the Topographical Survey/Site Level Plan item (re-added below as unmapped)"
+  - id: section-proposed
+    reason: "wrong_trigger: as above"
+
+drop-unmapped:
+  - local-name: Employment / Economic Statement
+    reason: "wrong_trigger: the excerpt is the Materials details (LBC) item; re-added below under that name"
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "wrong_app_type: garbled text placed under Outline and LBC; re-added below with its own trigger"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Needed if the proposal could have a significant impact on air quality, directly or indirectly."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees with a diameter greater than 75mm within influencing distance of
+          the development.
+    confidence: medium
+    notes: "The Householder Application Guide also lists a Tree Survey (audit, wrong_app_type)."
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      all:
+        - site:
+            in: [archaeological-priority-area]
+            description: The site is within an archaeological alert area.
+        - condition:
+            field: ground-disturbance
+            value: true
+            description: The proposal disturbs previously undisturbed ground.
+    source-text: >-
+      Archaeological assessment If your proposals involve a disturbance of previously undisturbed
+      ground within an archaeological alert area … An archaeological desk-based assessment and a
+      field evaluation report where necessary.
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    confidence: medium
+    notes: "The workbook's excerpt also held the Aviation Impact Assessment trigger (now unmapped below)."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The application is not exempt from the statutory biodiversity gain condition.
+    must-include:
+      - item: A scale plan showing north and the extent of onsite habitat
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the list's own thresholds are habitat change over 25 sqm, or over 5m of
+      hedgerow or watercourse.
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      any:
+        - all:
+            - condition:
+                field: new-build
+                value: true
+                description: New-build development.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: Residential development.
+        - site:
+            in: [contaminated-land]
+            description: The land could be contaminated as a result of current or historic use.
+    confidence: medium
+    notes: >-
+      Required for new build residential development, and where land that could be contaminated
+      is redeveloped or its use significantly changed.
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - all:
+            - site:
+                in: [conservation-area, world-heritage-site]
+                description: The site is in a designated area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: The proposal creates one or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: The proposal creates 100 square metres or more of floorspace.
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook carried the Tree Survey excerpt. From the audit: major
+      development, dwellings or 100 sqm+ in a designated area, and LBC; the Householder guide lists
+      it in conservation areas over 100 sqm.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    confidence: medium
+
+  - id: planning-statement
+    action: update
+    required-if: discretionary
+    source-text: >-
+      Planning/Supporting Statement Required only where there is a need to justify the use of
+      specific rooms or explain special circumstances of specific development.
+    confidence: medium
+    notes: "Audit (wrong_trigger): this trigger was in the workbook's site levels row."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-text: Contain two or more dwellings or educational accommodation Are 18m or more in height,
+      or 7 more storeys
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook merged it with the Flooding Sequential Test (now unmapped below)."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      site:
+        in: [flood-risk-zone]
+        description: The site is in flood zone 2 or 3.
+    confidence: medium
+    notes: "Always required in flood zones 2 and 3; also listed in the Householder guide."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: external-lighting
+            value: true
+            description: The proposal includes external lighting.
+        - condition:
+            field: floodlighting
+            value: true
+            description: The proposal includes floodlighting.
+    must-include:
+      - item: Hours of operation
+        level: must
+      - item: Light spillage
+        level: must
+      - item: Light levels
+        level: must
+      - item: Column heights
+        level: must
+      - item: Layout plan with beam orientation
+        level: must
+      - item: Equipment design
+        level: must
+      - item: Mitigation measures if required to meet current light guidelines
+        level: must
+      - item: Details of any timers or automatic switch-off/on
+        level: must
+    confidence: medium
+
+  - id: recreation-facilities-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: Residential development.
+        - condition:
+            field: loss-of-open-space
+            value: true
+            description: The proposal would lose open space, including playing fields.
+    source-text: All major residential developments where there would be a loss of open space,
+      including playing fields.
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the source says major residential OR loss of open space or playing field."
+
+  - id: photos
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: demolition
+            value: true
+            description: The proposal involves demolition.
+        - site:
+            in: [conservation-area, listed-building]
+            description: Demolition in a conservation area or of a listed building.
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted RAL colour text. From the audit: demolition in a conservation area or of a listed building."
+
+  - id: town-centre-impact-assessment
+    action: replace
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook carried the open space trigger. A Retail impact assessment
+      is item 43 of the list, but the audit gives no trigger.
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: Works are taking place to the roof.
+    confidence: medium
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: Works are taking place to the roof.
+    confidence: medium
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    source-text: >-
+      Viability assessment Developments that do not offer planning obligations in accordance with the
+      council’s Local Plan Housing Supplementary Planning Document (SPD)
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt ran on into the Visual impact assessment item (now unmapped below)."
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [outline, full, reserved-matters]
+        - discretionary
+    confidence: medium
+    notes: "Applications that include external space, where necessary."
+
+  - id: sci
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      the development involves the installation of more than two turbines … the hub height of any
+      turbine exceeds 15 metres
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): wind power development with more than two turbines or a hub height over
+      15m, not outline or LBC. Wind turbines can't be expressed as a field, so it is shown as officer
+      discretion.
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [conservation-area, listed-building, listed-building-setting]
+            description: The site is in a conservation area, the property is a listed building, or the
+              proposal affects a heritage asset or its setting.
+        - discretionary
+    confidence: medium
+    notes: "Also listed in the Householder guide (audit, wrong_app_type). Other heritage assets are shown as officer discretion."
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: Major residential development of 10 or more dwellings.
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): major, 10+ dwellings."
+
+  - id: structural-damage
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [consent-under-tpo]
+        - discretionary
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): the Structural Survey item covers felling protected trees
+      because of structural damage (and rural conversions and listed building works; see unmapped).
+
+  - id: transport-assessment
+    action: add
+    required-if: discretionary
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): Transport Statement/Assessment by the Leicestershire Highways Design Guide Part 2 thresholds, which the audit doesn't give."
+
+  - id: travel-plan
+    action: add
+    required-if: discretionary
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): Travel Plan by the Leicestershire Highways Design Guide Part 2 thresholds, which the audit doesn't give."
+
+unmapped:
+  - local-name: Topographical Survey/Site Level Plan
+    source-text: Topographical Survey/Site Level Plan Required if there is a significant change is
+      levels on the application site or surrounding properties
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    suggested-id: topographical-survey
+  - local-name: Materials details (LBC)
+    source-text: >-
+      Materials details(LBC) When Required Listed Building Consent Applications … Manufacturers
+      specification accompanied by photographs and RAL colour system numbers.
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    suggested-id: materials-schedule
+  - local-name: Street Scene
+    source-text: "Street scene … New build residential development – except outline applications for access only"
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    suggested-id: street-scene
+  - local-name: Statement of justification
+    source-text: "Statement of justification … Structural alterations to a listed building or demolition of a listed building"
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    suggested-id: heritage-statement
+  - local-name: Aviation Impact Assessment
+    source-text: For all wind turbine applications located within 30 km of East Midlands Airport
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    suggested-id: aviation-impact-assessment
+  - local-name: Flooding Sequential Test
+    source-text: >-
+      Relevant applications within Flood Zones 2 or 3. From the audit: excluding householder and minor
+      extensions under 250 m2.
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    suggested-id: flood-sequential-test
+  - local-name: Visual impact assessment
+    source-text: An application where is a potential significant impact from the visual effects from the
+      proposed development
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Accommodation Schedule
+    source-text: "From the audit: residential development"
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    suggested-id: accommodation-schedule
+  - local-name: Agricultural Land Quality Assessment
+    source-text: "From the audit: major development on best and most versatile agricultural land"
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    suggested-id: agricultural-land-assessment
+  - local-name: Bird Strike Assessment
+    source-text: "From the audit: within 13 km of East Midlands Airport, development likely to attract birds"
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    suggested-id: bird-strike-assessment
+  - local-name: Building for a Healthy Life Assessment
+    source-text: "From the audit: major residential development"
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    suggested-id: building-for-a-healthy-life
+  - local-name: Character Analysis and Appraisal
+    source-text: "From the audit: new build residential development"
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    suggested-id: character-appraisal
+  - local-name: Glint/Glare Assessment
+    source-text: "From the audit: major solar PV development"
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    suggested-id: glint-glare-assessment
+  - local-name: Marketing Information
+    source-text: "From the audit: loss of B2/B8 sites"
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    suggested-id: marketing-report
+  - local-name: Site Waste Management Plan
+    source-text: "From the audit: listed as a local item; no trigger given"
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    suggested-id: waste-management-plan
+  - local-name: Structural Survey
+    source-text: >-
+      From the audit: rural conversions, listed building structural works, protected tree felling due
+      to structural damage
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    suggested-id: structural-survey
+  - local-name: Town Centre Sequential Test
+    source-text: "From the audit: listed as a local item; no trigger given"
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    suggested-id: sequential-test
+  - local-name: Hardstanding plan
+    source-text: "From the audit: listed in the Householder Application Guide"
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    suggested-id: ""
+  - local-name: Evidence of Lawful Use/Development
+    source-text: "Evidence of Lawful Use/Development - Lawful Development Certificate for change of use"
+    source-url: https://www.charnwood.gov.uk/files/documents/validation_requirements_for_planning_applications/1A%20Local%20Validation%20List%202026%20FINAL%20PDF.pdf
+    suggested-id: lawful-development-evidence
+
+low-confidence:
+  - id: biodiversity-survey-report
+    note: >-
+      Audit (wrong_trigger): the excerpt is BNG metric text, not the ecological assessment trigger;
+      the Householder guide also lists an Ecological Assessment.
+  - id: floor-plan-existing
+    note: "The excerpt is a prior-approval fragment about dwellinghouse windows; the workbook guessed the type."
+  - id: floor-plan-proposed
+    note: "The excerpt is a prior-approval fragment about dwellinghouse windows; the workbook guessed the type."
+  - id: elevation-existing
+    note: "The excerpt is a prior-approval fragment about dwellinghouse windows; the workbook guessed the type."
+  - id: elevation-proposed
+    note: "The excerpt is a prior-approval fragment about dwellinghouse windows; the workbook guessed the type."
+  - id: waste-management-plan
+    note: >-
+      The excerpt is the Bin stores/recycling facilities item (all new development needing new bin
+      storage); the list also has a separate Site Waste Management Plan item (unmapped).
+  - id: noise-assessment
+    note: "The excerpt says what the assessment must include, not when it is needed; the workbook guessed the type."

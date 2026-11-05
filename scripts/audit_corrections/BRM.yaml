@@ -1,0 +1,119 @@
+# Corrections for Bromsgrove District Council, from inputs/audit/bromsgrove-district-council.json.
+# The council's 'Submit a planning application' page says "The District Council uses the national
+# validation criteria for planning applications", so there is no current local list. The last
+# adopted Local Validation Checklist (May 2012, a Planning Committee appendix) cites PPS3 and the
+# 2010 DMPO and is no longer linked, so it is not used. The page links a guidance note, 'Plans and
+# Drawings to be submitted with a Planning Application' (bdc-plans-and-drawings-04-10-17.pdf);
+# the items below come from the audit's quotation and summary of that note (as for Redditch, RED).
+local-authority: BRM
+
+validation-list:
+  url: https://www.bromsgrove.gov.uk/residents/planning-building-control/planning-permission/submit-planning-application/
+  status: national-only
+  date-basis: >-
+    audit: the page says the council uses the national validation criteria; the only formal local
+    list (Adopted May 2012) is outdated and no longer linked
+
+submission-standards:
+  - item: Location plan at 1:1250 or 1:2500 on an OS base, with a north point, the site edged red
+      (including access to the public highway) and other land owned edged blue
+    level: must
+  - item: Block plan at 1:200 or 1:500, showing existing buildings, the proposed works, trees, layout
+      and landscaping
+    level: must
+  - item: Existing and proposed elevations (all changed elevations) and floor plans at 1:50 or 1:100
+    level: must
+
+requirements:
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      site:
+        in: [archaeological-priority-area]
+        description: The site includes or has the potential to include heritage assets with
+          archaeological interest.
+    source-text: >-
+      Where a site includes or has the potential to include heritage assets with archaeological
+      interest … an appropriate desk-based assessment and, where necessary, a field evaluation.
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the excerpt dropped the trigger; it applies whatever
+      the application type. The council uses the national validation criteria.
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the biodiversity gain condition.
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type, wrong_trigger): the statutory national Biodiversity Net Gain
+      requirement, not a local one, and the excerpt is cut off. It applies to non-exempt full,
+      outline and s73 applications; householder applications are exempt.
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees may be affected by the proposal.
+    source-text: Tree protection plan, where trees may be affected
+    source-url: https://www.bromsgrove.gov.uk/residents/planning-building-control/planning-permission/submit-planning-application/
+    must-include:
+      - item: Tree protection plan
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): Plans and Drawings guidance note."
+
+  - id: roof-plan-proposed
+    action: add
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The roof is to be altered.
+    source-text: Roof plan, if the roof is to be altered
+    source-url: https://www.bromsgrove.gov.uk/residents/planning-building-control/planning-permission/submit-planning-application/
+    confidence: medium
+    notes: "From the audit (missing_requirement): Plans and Drawings guidance note."
+
+  - id: section-proposed
+    action: add
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal changes land levels.
+    source-text: Cross-sections, if the proposal changes land levels.
+    source-url: https://www.bromsgrove.gov.uk/residents/planning-building-control/planning-permission/submit-planning-application/
+    confidence: medium
+    notes: "From the audit (missing_requirement): Plans and Drawings guidance note."
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      condition:
+        field: protected-species
+        value: true
+        description: Protected species may be affected.
+    source-url: https://www.bromsgrove.gov.uk/residents/planning-building-control/planning-permission/submit-planning-application/
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Preliminary Ecological Survey where protected species may
+      be affected (Plans and Drawings guidance note)."
+
+  - id: heritage-statement
+    action: add
+    required-if: discretionary
+    source-url: https://www.bromsgrove.gov.uk/residents/planning-building-control/planning-permission/submit-planning-application/
+    confidence: low
+    notes: "From the audit (missing_requirement): a Heritage Statement where the building is of historic
+      significance (Plans and Drawings guidance note). The audit does not say which designations count."
+
+unmapped:
+  - local-name: Street scene images
+    source-text: "From the audit: street scene images may be required with elevations"
+    source-url: https://www.bromsgrove.gov.uk/residents/planning-building-control/planning-permission/submit-planning-application/
+    suggested-id: street-scene-elevations

@@ -1,0 +1,491 @@
+# Corrections for Devon County Council, from the council's audit.
+# The audit read Devon CC's 'Validation Requirements - Planning' page (published 4 May 2023, last
+# updated 15 September 2025). The list applies to waste and Regulation 3 development (full, outline,
+# reserved matters, change of use, extension of time, variation of condition and retrospective);
+# minerals use the separate M1 form. Requirements are scoped here to waste-dev and reg-3. The workbook
+# filed about 15 items under Full planning, several with another item's text, and missed most of the
+# list's ~45 items. Items marked "From the audit" use the audit's paraphrase.
+local-authority: DEV
+
+validation-list:
+  date: 2025-09-15
+  date-basis: "audit: page header 'Last Updated: 15/09/2025' (published 04/05/2023)"
+
+submission-standards:
+  - item: No individual electronic document larger than 5 MB; large documents broken into manageable files
+      (e.g. chapters)
+    level: should
+  - item: Electronic file names reflect the plan or document names
+    level: should
+  - item: Drawings oriented so that they appear correctly when viewed on screen
+    level: should
+
+drop-unmapped:
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_trigger: Devon has no coal mining requirement; this is the land stability report, re-added
+      below"
+  - local-name: Pre-application advice / engagement details
+    reason: "wrong_trigger: a line from the Planning Statement content list"
+  - local-name: Landscape and Visual Impact Assessment
+    reason: "wrong_trigger: quotes the cumulative CLVIA side note; re-added below with its trigger"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3]
+        - any:
+            - site:
+                in: [air-quality-management-area]
+                description: The site is within or adjacent to an Air Quality Management Area.
+            - discretionary
+    notes: "Also needed for proposals that require a Transport Assessment or Statement, or that will generate
+      dust, PM10s, fumes, vapours, odour or other emissions to air (shown as discretionary)."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: The development has the potential to affect trees or hedges on or off the site.
+
+  - id: bng-metric
+    action: add
+    required-if:
+      application-type:
+        in: [waste-dev, reg-3]
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    confidence: medium
+    notes: "From the audit (missing_requirement): Biodiversity Metric and 10% net gain, for all applications
+      unless agreed otherwise."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      application-type:
+        in: [waste-dev, reg-3]
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    must-include:
+      - item: The Wildlife Checklist, completed by the ecological consultant
+        level: must
+        source-text: >-
+          The Wildlife Checklist must also be completed by the ecological consultant and included with any
+          Wildlife or Geology Report.
+    confidence: medium
+    notes: "Audit (wrong_trigger, missing_requirement): the workbook's excerpt was external lighting text. From
+      the audit: Wildlife and Geology Information is needed for all applications."
+
+  - id: coastal-change-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3]
+        - site:
+            in: [coastal-erosion-zone]
+            description: The site is in a vulnerable coastal area or Coastal Change Management Area.
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    confidence: medium
+    notes: "From the audit (missing_requirement)."
+
+  - id: construction-management-plan
+    action: add
+    required-if:
+      application-type:
+        in: [waste-dev, reg-3]
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    confidence: low
+    notes: "From the audit (missing_requirement): Construction Management Scheme; the audit gives no trigger."
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3]
+        - discretionary
+    must-include:
+      - item: An assessment of the potential loss of daylight and sunlight
+        level: must
+      - item: A plan of the extent of overshadowing that would occur
+        level: must
+
+  - id: design-and-access-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3]
+        - any:
+            - ref: major-development
+            - all:
+                - site:
+                    in: [conservation-area, world-heritage-site]
+                    description: The site is in a conservation area or World Heritage Site.
+                - any:
+                    - condition:
+                        field: dwelling-count
+                        operator: ">="
+                        value: 1
+                        description: One or more dwellings.
+                    - condition:
+                        field: floorspace
+                        operator: ">"
+                        value: 100
+                        description: Over 100 square metres of floorspace.
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    confidence: low
+    notes: "From the audit (missing_requirement): exempt for waste, engineering/mining and change of use,
+      which the rule cannot express."
+
+  - id: environmental-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3]
+        - condition:
+            field: eia-development
+            value: true
+            description: Schedule 1 development, or Schedule 2 development with likely significant effects.
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    confidence: medium
+    notes: "From the audit (missing_requirement)."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3]
+        - any:
+            - site:
+                in: [flood-risk-zone, critical-drainage-area]
+                description: The site is in Flood Zone 2 or 3, or in a Critical Drainage Area.
+            - condition:
+                field: site-area-residential
+                operator: ">"
+                value: 1
+                description: More than 1 hectare in Flood Zone 1.
+            - condition:
+                field: site-area-non-residential
+                operator: ">"
+                value: 1
+                description: More than 1 hectare in Flood Zone 1.
+            - discretionary
+    source-text: >-
+      Flood Risk Assessment Required for proposals: in Flood Zones 2 and 3 of more than 1 hectare in Flood
+      Zone 1 in a Critical Drainage Area in Flood Zone 1 or less than 1 hectare in Flood Zone 1 (including
+      a change of use proposals to a more vulnerable class) where they could be affected by sources of
+      flooding other than rivers and the sea, e.g. surface water drains, reservoirs
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    confidence: medium
+    notes: "Audit (wrong_app_type): not only outline or prior approval (prior approvals are not covered).
+      Sites under 1 ha affected by other flood sources are shown as discretionary."
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3]
+        - site:
+            in: [world-heritage-site, listed-building, listed-building-setting, conservation-area,
+              archaeological-priority-area, locally-listed-building]
+            description: The proposal affects a World Heritage Site, listed building, conservation area,
+              archaeology or non-designated heritage assets, or their settings.
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    confidence: medium
+    notes: "From the audit (missing_requirement)."
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3]
+        - any:
+            - site:
+                in: [contaminated-land]
+                description: Contamination could be an issue due to the previous use of the site or adjacent
+                  land.
+            - condition:
+                field: sensitive-end-use
+                value: true
+                description: The application is for a sensitive use.
+    source-text: >-
+      Required where contamination could be an issue due to the previous use of the site or adjacent land,
+      or where the application is for a sensitive use
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook carried the land stability report text. The list also asks
+      for a Phase 2 report (see unmapped)."
+
+  - id: landscaping-plan
+    action: add
+    required-if:
+      application-type:
+        in: [waste-dev, reg-3]
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    confidence: low
+    notes: "From the audit (missing_requirement): Landscaping Scheme; the audit gives no trigger."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3]
+        - condition:
+            field: external-lighting
+            value: true
+            description: External lighting in the open countryside, facing homes, spilling into a designated
+              habitat or onto the transport network, or affecting a protected species.
+    must-include:
+      - item: A layout plan
+        level: must
+      - item: Mounting height, beam orientation and spread
+        level: must
+      - item: Design of lighting fixtures
+        level: must
+      - item: Controls, including movement sensors and/or timers where practical
+        level: should
+      - item: Hours of use
+        level: must
+      - item: The area of any light spill, mitigating measures and an assessment of the impact on receptors
+        level: must
+
+  - id: planning-statement
+    action: add
+    required-if:
+      application-type:
+        in: [waste-dev, reg-3]
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    must-include:
+      - item: Details of pre-application discussions with the County Council and statutory consultees
+        level: must
+      - item: A summary of the conclusions and recommendations of the reports submitted, stating which are
+          taken forward and which are not, and why
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): all applications. The must-include items are from the
+      council's content list (filed by the workbook as pre-application advice)."
+
+  - id: protected-landscape-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3]
+        - site:
+            in: [area-of-outstanding-natural-beauty]
+            description: Within or affecting the setting of an AONB (National Landscape).
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    confidence: medium
+    notes: "From the audit (missing_requirement): AONB Statement."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3]
+        - site:
+            in: [open-space]
+            description: The application affects a playing field, or land used or allocated for playing fields.
+    notes: "Audit (wrong_trigger): this is the Playing Field Assessment."
+
+  - id: sci
+    action: add
+    required-if:
+      application-type:
+        in: [waste-dev, reg-3]
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    confidence: medium
+    notes: "From the audit (missing_requirement): Community Consultation Statement for all applications,
+      especially where the boundary is shared with residential or sensitive uses."
+
+  - id: section-existing
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3]
+        - any:
+            - condition:
+                field: change-in-ground-levels
+                value: true
+                description: The application proposes altered land levels.
+            - discretionary
+
+  - id: section-proposed
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3]
+        - any:
+            - condition:
+                field: change-in-ground-levels
+                value: true
+                description: The application proposes altered land levels.
+            - discretionary
+    must-include:
+      - item: Existing and proposed sections in context with surrounding buildings, structures and
+          topographical features
+        level: must
+    notes: "Also where topography is key, or where the relationship with existing buildings, mature
+      vegetation or other features must be shown (discretionary)."
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      application-type:
+        in: [waste-dev, reg-3]
+    source-text: >-
+      Sustainable Design Statement All applications (as relevant, proportionate, and specific to the
+      development) With regard to Carbon Emissions this must state the carbon emissions associated with
+      each stage of the development’s lifecycle.
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    must-include:
+      - item: The carbon emissions associated with each stage of the development's lifecycle
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook filed this text under Waste / Refuse."
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3]
+        - discretionary
+    source-text: "Transport Statement or Assessment: All developments generating significant movement"
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted a cross-reference."
+
+  - id: travel-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3]
+        - any:
+            - condition:
+                field: pupil-increase
+                operator: ">"
+                value: 0
+                description: School development increasing pupil numbers.
+            - discretionary
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    confidence: medium
+    notes: "From the audit (wrong_trigger): school developments increasing pupil numbers, significant
+      sustainable/active travel movement, or any increase in motorised transport (the last two shown as
+      discretionary)."
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [waste-dev, reg-3]
+        - any:
+            - ref: major-development
+            - discretionary
+    source-text: "Waste Audit Statement: major development or significant volumes of waste"
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook carried Sustainable Design Statement text."
+
+  - id: water-impact-assessment
+    action: add
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [waste-dev]
+            - discretionary
+        - all:
+            - application-type:
+                in: [reg-3]
+            - ref: major-development
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    confidence: medium
+    notes: "From the audit (missing_requirement): Hydrological and Hydrogeological Assessments for waste with
+      significant groundworks, dewatering, abstraction or infilling, and major Reg 3 development."
+
+unmapped:
+  - local-name: Geo-technical Data (Land Stability Report)
+    source-text: "Applications: where the site or adjacent area is suspected or likely to be unstable or on land
+      within 200 metres of cliffs, ridges or steep embankments, steep slopes or mining activities"
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    suggested-id: land-stability-report
+  - local-name: Landscape and Visual Impact Assessment
+    source-text: "LVIA: Applications likely to have significant landscape and/or visual effects"
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Mineral applications (DCC M1 form)
+    source-text: "Mineral applications ... should be submitted using the separate DCC M1 form"
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    suggested-id: ""
+  - local-name: Waste Planning Statement
+    source-text: "From the audit: all waste applications"
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    suggested-id: planning-statement
+  - local-name: Utilities Site Survey
+    source-text: "From the audit: utilities within or next to the site"
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    suggested-id: utilities-statement
+  - local-name: Education Statement
+    source-text: "From the audit: school developments increasing pupil numbers"
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    suggested-id: ""
+  - local-name: Green Infrastructure Scheme
+    source-text: "From the audit: all major development"
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    suggested-id: ""
+  - local-name: Landscape and Ecological Management Plan
+    source-text: "From the audit: major schemes needing long-term mitigation"
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    suggested-id: ""
+  - local-name: Habitats Regulations Assessment information
+    source-text: "From the audit: development that may affect a SAC, SPA or Ramsar site, including South Hams
+      SAC and Beer Quarry and Caves SAC"
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    suggested-id: habitats-regulations-assessment
+  - local-name: Open Space and Public Rights of Way Statement
+    source-text: "From the audit: listed without a trigger"
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    suggested-id: public-rights-of-way-statement
+  - local-name: Road Safety Audit
+    source-text: "From the audit: any change to the existing highway"
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    suggested-id: ""
+  - local-name: Sustainable Drainage Scheme
+    source-text: "From the audit: major development, or minor development altering drainage"
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    suggested-id: drainage-strategy
+  - local-name: Foul Drainage Assessment
+    source-text: "From the audit: non-mains foul drainage"
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    suggested-id: foul-drainage-assessment
+  - local-name: Pollution Control Statement
+    source-text: "From the audit: all major development"
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    suggested-id: ""
+  - local-name: Agricultural Land Classification and Soil Statement
+    source-text: "From the audit: best and most versatile land (Grades 1, 2, 3a), or new or extended waste
+      disposal"
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    suggested-id: agricultural-land-classification
+  - local-name: Phase 2 contamination report
+    source-text: "From the audit: listed without a trigger"
+    source-url: https://www.devon.gov.uk/planning/document/validation-requirements-2/
+    suggested-id: ""

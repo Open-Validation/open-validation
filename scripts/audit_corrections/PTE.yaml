@@ -1,0 +1,351 @@
+# Corrections for Peterborough City Council, from inputs/audit/peterborough-city-council.json.
+# Peterborough's local list is a set of web pages, one per application type, under the 'Apply for
+# planning/building permission' hub. Grokbot read mainly the Full planning page (PF04) and the
+# mineral working page, and placed the mineral working rows under Full planning. The householder
+# (PF01) and listed building (PF11) items below come from the audit's quotations of those pages.
+# The advertisement, LDC, discharge, non-material amendment, tree and s106 pages each have their own
+# checklist, which the workbook didn't capture (audit missing_requirement).
+local-authority: PTE
+
+submission-standards:
+  - item: All plans accurately labelled and numbered, with a scale bar or metric measurements
+    level: must
+  - item: Location plan on an A4 size plan or larger
+    level: should
+
+drop:
+  - id: environmental-statement
+    reason: "not_a_requirement: the PF04 page says EIA is 'not part of the local list'"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: a cut-off fragment ('part of pre-application advice, the following is
+      required;')"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "now a must-include item of the flood risk assessment ('normally as part of an FRA')"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if: discretionary
+    source-text: >-
+      Air Quality Assessment Required if the development proposals could impact upon air quality or
+      there are potential pollutants.
+    confidence: medium
+    notes: "Audit (not_a_requirement): the excerpt began with the previous section's policy reference."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees are on or adjacent to the proposed site.
+    source-text: >-
+      Tree or Arboricultural Survey - Local requirement - Required for all Minor Proposals
+      (including householder) where trees are on or adjacent to the proposed site … Tree survey
+      Arboricultural Impacts Assessment Tree Protection Plan The above must be in accordance with
+      BS5837:2012: Trees in relation to design, demolition and construction.
+    source-url: https://www.peterborough.gov.uk/council/planning-and-development/planning-and-building/apply-for-planning-building-permission/householder-works-or-extension-pf01
+    must-include:
+      - item: Tree survey, arboricultural impacts assessment and tree protection plan in accordance
+          with BS5837:2012
+        level: must
+      - item: A Level 2 BS5837 survey
+        level: must
+        required-if:
+          any:
+            - site:
+                in: [tree-preservation-zone, conservation-area]
+                description: Trees covered by a TPO or in a conservation area.
+            - ref: major-development
+    confidence: medium
+    notes: "Audit (missing_requirement): PF01 householder checklist; the Level 2 survey item is from the
+      audit's summary."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      site:
+        in: [archaeological-priority-area]
+        description: The works are within an area of potential archaeological importance.
+    confidence: medium
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      application-type:
+        in: [mineral-app, lbc]
+    source-text: Protected Species Survey Always required.
+    source-url: https://www.peterborough.gov.uk/council/planning-and-development/planning-and-building/apply-for-planning-building-permission/carrying-out-of-mineral-working-and-associated-development
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, missing_requirement): 'Always required' on the mineral working page
+      and on the PF11 listed building page, not for full planning generally. For other
+      applications the council asks for its Biodiversity checklist (see unmapped).
+
+  - id: cil-form
+    action: replace
+    required-if:
+      condition:
+        field: housing-floorspace
+        operator: ">="
+        value: 100
+        description: New residential development of 100 square metres and over, including
+          householder extensions.
+    source-text: CIL Questions form - New residential development of 100 square metres and over …
+      (this includes householder extensions)
+    source-url: https://www.peterborough.gov.uk/council/planning-and-development/planning-and-building/apply-for-planning-building-permission/full-planning-permission-pf04
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt stopped at 'For applications creating;'."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+    source-text: >-
+      Design and Access Statement Only required for Major development , or; … Design and Access
+      Statement - Required for any application for listed building consent, except where
+    source-url: https://www.peterborough.gov.uk/council/planning-and-development/planning-and-building/apply-for-planning-building-permission/full-planning-permission-pf04
+    confidence: low
+    notes: >-
+      The PF04 trigger is cut off after 'Major development, or;'; the PF11 listed building page
+      requires it for any listed building consent, subject to exceptions the audit doesn't quote.
+
+  - id: elevation-existing
+    action: update
+    must-include:
+      - item: All sides affected by the proposal, usually at 1:100, with a scale bar or metric
+          measurements
+        level: must
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: The proposal against the existing building from all sides, usually at 1:100, with a
+          scale bar or metric measurements
+        level: must
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, reserved-matters]
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The proposal contains two or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The proposal contains educational accommodation.
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: 18m or more in height.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: 7 or more storeys.
+    source-text: >-
+      Fire statement form Required for full and reserved matters applications where the proposal
+      contains two or more dwellings or educational accommodation, and is 18m or more in height, or
+      7 or more storeys
+    source-url: https://www.peterborough.gov.uk/council/planning-and-development/planning-and-building/apply-for-planning-building-permission/full-planning-permission-pf04
+    confidence: medium
+    notes: "Audit (wrong_app_type, not_a_requirement): placed only under Reserved matters, with page boilerplate."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      all:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3.
+        - condition:
+            field: footprint-increase
+            value: true
+            description: The footprint increases.
+    source-url: https://www.peterborough.gov.uk/council/planning-and-development/planning-and-building/apply-for-planning-building-permission/householder-works-or-extension-pf01
+    must-include:
+      - item: Evidence that the sequential test is passed, where a sequential test is required
+        level: must
+        required-if: discretionary
+        source-text: "Where a sequential test is required in accordance with paragraph 103 of the
+          National Planning Policy Framework, the applicant is required to provide the evidence to
+          demonstrate the sequential test is passed with the submitted application (normally as part
+          of an FRA)."
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): PF01 asks for an FRA in Flood Zone 2/3 where the
+      footprint increases. The PF04 excerpt is cut off ('In order to determine whether you need to
+      submit a site specific flood risk assessment … do the following: 1.'), so the general
+      trigger isn't captured.
+
+  - id: floor-plan-existing
+    action: update
+    must-include:
+      - item: The full existing floor layout, usually at 1:100, with a scale bar or metric
+          measurements
+        level: must
+
+  - id: floor-plan-proposed
+    action: update
+    must-include:
+      - item: The full proposed floor layout, usually at 1:100, with a scale bar or metric
+          measurements
+        level: must
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, conservation-area, scheduled-monument,
+          park-and-garden]
+        description: The proposal would affect a designated heritage asset.
+    source-text: Heritage Statement Required for all development proposals that would affect any
+      designated heritage asset.
+    confidence: medium
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: Site contamination is known or suspected.
+    source-text: Landfill Statement and/or Land Contamination Assessment Land Contamination
+      Assessment Required where site contamination is known or suspected.
+    source-url: https://www.peterborough.gov.uk/council/planning-and-development/planning-and-building/apply-for-planning-building-permission/full-planning-permission-pf04
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook filed it under Minerals & waste; it is on the general PF04
+      list."
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app]
+    source-url: https://www.peterborough.gov.uk/council/planning-and-development/planning-and-building/apply-for-planning-building-permission/carrying-out-of-mineral-working-and-associated-development
+    must-include:
+      - item: Drawings and schedules of existing landscaping, trees to be retained and new
+          landscaping
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): this row comes from the mineral working checklist."
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: New development which gives rise to potential noise nuisance and/or
+              vibration to the surrounding area.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: New residential development that may be subject to noise nuisance from
+              adjacent sites or trunk roads.
+    policy: Peterborough Core Strategy CS8
+    source-text: >-
+      Noise Impact Assessment or Acoustic Report (including vibration) Required for all new
+      development which gives rise to potential noise nuisance and/or vibration to surrounding area
+      and for all new residential development that may be subject to noise nuisance from adjacent
+      sites or trunk roads.
+    confidence: medium
+
+  - id: roof-plan-existing
+    action: update
+    required-if: discretionary
+    source-text: Roof Plans Required only for complex roof structures.
+    confidence: medium
+
+  - id: roof-plan-proposed
+    action: update
+    required-if: discretionary
+    source-text: Roof Plans Required only for complex roof structures.
+    confidence: medium
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The site or surrounding land are at variable levels, or ground levels would be
+          modified.
+    source-text: >-
+      Cross-Section and Site Levels Only required where a site or site and surrounding land are at
+      variable levels Section drawings to show how proposals relate to existing ground levels or
+      where ground levels outside the extension would be modified.
+    confidence: medium
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The site or surrounding land are at variable levels, or ground levels would be
+          modified.
+    source-text: >-
+      Cross-Section and Site Levels Only required where a site or site and surrounding land are at
+      variable levels Section drawings to show how proposals relate to existing ground levels or
+      where ground levels outside the extension would be modified.
+    confidence: medium
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: A recognised scale (1:100, 1:200 or 1:500 as appropriate)
+        level: must
+      - item: The direction of North
+        level: must
+      - item: A scale bar or metric measurements
+        level: must
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      condition:
+        field: town-centre-use-floorspace
+        operator: ">"
+        value: 2500
+        description: New retail and/or leisure floorspace greater than 2,500 square metres.
+    source-text: Retail or leisure development Impact Assessment … greater than 2,500 square metres
+    source-url: https://www.peterborough.gov.uk/council/planning-and-development/planning-and-building/apply-for-planning-building-permission/full-planning-permission-pf04
+    confidence: medium
+    notes: "Audit (missing_requirement): on the PF04 page."
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    source-text: Transport Statement or Assessment Required for all developments that are likely to
+      generate significant amounts of movement.
+    confidence: medium
+
+unmapped:
+  - local-name: Open Space
+    source-text: "Open Space … developments of 10 dwellings or more or residential developments of 0.5
+      hectares or more"
+    source-url: https://www.peterborough.gov.uk/council/planning-and-development/planning-and-building/apply-for-planning-building-permission/full-planning-permission-pf04
+    suggested-id: open-space-assessment
+  - local-name: Lifetime Homes details
+    source-text: "Lifetime Homes details … 15 or more dwellings"
+    source-url: https://www.peterborough.gov.uk/council/planning-and-development/planning-and-building/apply-for-planning-building-permission/full-planning-permission-pf04
+    suggested-id: accessible-housing-statement
+  - local-name: Detailed Drawings (listed building consent)
+    source-text: "Detailed Drawings - Always required"
+    source-url: https://www.peterborough.gov.uk/council/planning-and-development/planning-and-building/apply-for-planning-building-permission
+    suggested-id: joinery-details
+

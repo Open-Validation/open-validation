@@ -1,0 +1,601 @@
+# Corrections for North West Leicestershire District Council, from
+# inputs/audit/north-west-leicestershire-district-council.json (contents read from a manual upload).
+# NWL's current list is the joint 'National and Local Requirements for Planning Applications' for
+# the Leicestershire and Rutland authorities, adopted July 2013 (audit, other: it is a joint list,
+# not council-specific). It is over 13 years old: it cites NPPF 2012, Conservation Area Consent
+# (abolished 2013), A3/A4/A5 use classes and the revoked SWMP Regulations. The list is a set of
+# proformas, one per application type; items here are scoped to the types the audit names.
+# Rutland-only items (Rutland Water SPA report) and the glossary entries (items 41-57) are not
+# requirements for NWL. Not added: S73/NMA ('any original plan, statement or report that needs
+# revising') and discharge of conditions ('information required by condition').
+local-authority: NWL
+
+submission-standards:
+  - item: Plans drawn to a standardised metric scale (site/block plan preferably 1:100 or 1:200;
+      elevations, floor plans, sections and roof plans preferably 1:50 or 1:100), with critical
+      dimensions
+    level: should
+
+drop:
+  - id: planning-statement
+    reason: "not_a_requirement: glossary item, not in any proforma; the excerpt was EIA text"
+  - id: arboriculturist-report
+    reason: "not_a_requirement: glossary item (refers to the 1APP form), not in any proforma"
+  - id: waste-management-plan
+    reason: "not_a_requirement: glossary item (refuse storage / SWMP), not in any proforma"
+  - id: schedule-of-works
+    reason: "wrong_app_type: guidance inside the Heritage Statement explanation; now a must-include of heritage-statement"
+
+drop-unmapped:
+  - local-name: Advertisement drawings / illumination details
+    reason: "duplicate: the isolux sentence from the lighting assessment explanation"
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "duplicate: a table-of-contents fragment; the list has no biodiversity questionnaire"
+  - local-name: Drainage Strategy / SuDS
+    reason: "not_a_requirement: glossary item"
+  - local-name: Foul Sewage / Utilities Statement
+    reason: "not_a_requirement: glossary item"
+  - local-name: Ground investigation / Geotechnical / Basement Impact Assessment
+    reason: "not_a_requirement: glossary item"
+  - local-name: Parking provision / Parking plan
+    reason: "not_a_requirement: glossary item"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: glossary item (location plan red-line text)"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: applicants are only invited to seek pre-application advice; the excerpt is birdstrike text"
+  - local-name: Landscape and Visual Impact Assessment
+    reason: "not_a_requirement: the list says 'This is not a requirement'"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_trigger: the Rutland Water SPA report applies only in Rutland"
+  - local-name: Employment / Economic Statement
+    reason: "wrong_trigger: runs into EIA text; re-added below"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: Section 2 commentary; re-added below"
+  - local-name: Structural Survey
+    reason: "wrong_trigger: the LBC trigger is wrong; re-added below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - discretionary
+    confidence: medium
+    notes: "'If development meets Local Planning Authority threshold as specified in LPA's Development Plan'; the threshold is not in the list."
+
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - site:
+            in: [air-quality-management-area]
+            description: Inside or adjacent to an AQMA and likely to affect or be affected by air quality.
+    source-url: https://www.nwleics.gov.uk/files/documents/national_and_local_requirements_for_planning_applications_july_2013/Adopted%20PAR%20list%20of%20requirements%20July%202013.doc
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt ran into the biodiversity item. From the audit: inside or adjacent to an AQMA and likely to affect or be affected by air quality."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - any:
+            - condition:
+                field: protected-species
+                value: true
+                description: >-
+                  The site contains or is close to a known location for a protected species, or there
+                  is a high probability that one will be present.
+            - site:
+                in: [special-protection-area, special-area-of-conservation,
+                  site-of-special-scientific-interest, local-wildlife-site]
+                description: The proposal is likely to affect a designated site.
+    source-url: https://www.nwleics.gov.uk/files/documents/national_and_local_requirements_for_planning_applications_july_2013/Adopted%20PAR%20list%20of%20requirements%20July%202013.doc
+    source-text: >-
+      16 Biodiversity Survey and Report Where the proposed development may have possible impacts on
+      protected species, designated sites and important habitats, a full biodiversity survey and
+      report may be needed.
+    confidence: medium
+    notes: >-
+      Audit (duplicate, not_a_requirement): the workbook's excerpt was a table-of-contents fragment;
+      the wording above was in its air quality row. The designated sites are the list's Table 2
+      trigger list.
+
+  - id: site-plan
+    action: replace
+    required-if:
+      always: true
+    source-url: https://www.nwleics.gov.uk/files/documents/national_and_local_requirements_for_planning_applications_july_2013/Adopted%20PAR%20list%20of%20requirements%20July%202013.doc
+    source-text: >-
+      Site Plan All applications – suggested scale 1:100, 1:200 or 1:500 (except where the
+      information is only a duplication of that clearly visible and identifiable on the location
+      plan)
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt merged national table rows. This is a national item."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: One or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">"
+                    value: 100
+                    description: Over 100 square metres of floor space.
+    source-url: https://www.nwleics.gov.uk/files/documents/national_and_local_requirements_for_planning_applications_july_2013/Adopted%20PAR%20list%20of%20requirements%20July%202013.doc
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook gave the Householder threshold ('Development creating over 100 square metres of floor space in a conservation area'). From the audit, Full: major development, or in a CA one or more dwellings or 100 sq m."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: Schedule 1 development, or Schedule 2 development where EIA is required.
+    source-url: https://www.nwleics.gov.uk/files/documents/national_and_local_requirements_for_planning_applications_july_2013/Adopted%20PAR%20list%20of%20requirements%20July%202013.doc
+    source-text: >-
+      Environmental statement Statutory requirement (Included in local list for ease of reference)
+      Environmental Impact Assessment is required for schedule 1 developments and maybe required
+      for schedule 2 developments as specified by The Town and Country Planning (Environmental
+      Impact Assessment) Regulations 2011.
+    confidence: medium
+    notes: "A statutory item; the Reserved matters proforma also lists it where EIA applies."
+
+  - id: section-existing
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, reserved-matters, lbc, ldc-prospective-use, advertising]
+        - discretionary
+    confidence: medium
+    notes: "'As necessary to clearly show the proposed works in relation to what is already there'. For outline only if the relevant matters are not reserved (audit, wrong_app_type)."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, reserved-matters, lbc, ldc-prospective-use, advertising]
+        - discretionary
+    must-include:
+      - item: A cross section through the proposed building(s), with critical dimensions
+        level: should
+      - item: Advert projection and depth
+        level: must
+        required-if:
+          application-type:
+            in: [advertising]
+      - item: Cross-section details of proposed windows and doors, at 1:50 or 1:20
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+    confidence: medium
+    notes: "'As necessary to clearly show the proposed works in relation to what is already there'. For outline only if the relevant matters are not reserved. From the audit: the advert and LBC proformas add the last two items."
+
+  - id: elevation-existing
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, reserved-matters, lbc, ldc-existing-use, ldc-prospective-use,
+              advertising]
+        - discretionary
+    confidence: medium
+    notes: "'As necessary'. Not needed for existing buildings the proposal does not alter. LDC (existing): where alterations or split uses are involved."
+
+  - id: elevation-proposed
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, reserved-matters, lbc, ldc-prospective-use, advertising]
+        - discretionary
+    must-include:
+      - item: Critical external dimensions (heights, width, length)
+        level: should
+      - item: The proposed works in relation to what is already there
+        level: should
+      - item: New buildings shown in context with adjacent buildings (including property numbers)
+        level: should
+    confidence: medium
+    notes: "'As necessary to clearly show the proposed works in relation to what is already there'. For outline only if appearance is not reserved."
+
+  - id: floor-plan-existing
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, reserved-matters, lbc, ldc-existing-use, ldc-prospective-use]
+        - discretionary
+    confidence: medium
+    notes: "'As necessary'. LDC (existing): where alterations or split uses are involved."
+
+  - id: floor-plan-proposed
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, reserved-matters, lbc, ldc-prospective-use]
+        - discretionary
+    must-include:
+      - item: Critical dimensions (width, length), explaining the proposal in detail
+        level: should
+    confidence: medium
+    notes: "'As necessary'. For outline only if layout or scale is not reserved."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - any:
+            - condition:
+                field: near-watercourse
+                value: true
+                description: Within Main river bye-law distance.
+            - site:
+                in: [flood-risk-zone]
+                description: Within flood zones 2 and 3.
+            - condition:
+                field: site-area-residential
+                operator: ">"
+                value: 1
+                description: A site greater than 1 hectare in Flood Zone 1.
+            - condition:
+                field: site-area-non-residential
+                operator: ">"
+                value: 1
+                description: A site greater than 1 hectare in Flood Zone 1.
+            - all:
+                - ref: major-development
+                - site:
+                    in: [critical-drainage-area]
+                    description: Non-minor development in a critical drainage area.
+    source-url: https://www.nwleics.gov.uk/files/documents/national_and_local_requirements_for_planning_applications_july_2013/Adopted%20PAR%20list%20of%20requirements%20July%202013.doc
+    source-text: >-
+      Where the development is proposed within Main river bye-law distance or where the development
+      is within flood zones 2 & 3 or the site is greater than 1 hectare within Flood Zone 1
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted the Householder proforma, where a standard form
+      replaces the FRA (listed as unmapped). The critical drainage area branch is from the list's
+      explanation.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, demolition-con-area]
+        - all:
+            - application-type:
+                in: [full, outline]
+            - any:
+                - ref: major-development
+                - site:
+                    in: [historic-environment-record]
+                    description: The site has an entry in the Leicestershire and Rutland HER.
+    source-url: https://www.nwleics.gov.uk/files/documents/national_and_local_requirements_for_planning_applications_july_2013/Adopted%20PAR%20list%20of%20requirements%20July%202013.doc
+    must-include:
+      - item: A schedule of works to the listed building(s), an analysis of the significance of its
+          archaeology, history and character, and the principles of and justification for the works
+          and their impact on its special character and setting
+        level: should
+        required-if:
+          application-type:
+            in: [lbc]
+        source-text: >-
+          that includes a schedule of works to the Listed Building(s), an analysis of the
+          significance of archaeology, history and character of the building/structure, the
+          principles of and justification for the proposed works and their impact on the special
+          character of the Listed Building or structure, its setting and the setting of adjacent
+          Listed Buildings may be required.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): from the audit, all major applications and any site
+      with an entry in the Leicestershire and Rutland HER; all applications for CA consent and LBC
+      types (including householder + CA/LBC).
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: external-lighting
+            value: true
+            description: External lighting would be provided or made necessary by the development.
+        - all:
+            - application-type:
+                in: [advertising]
+            - condition:
+                field: illuminated
+                value: true
+                description: Illuminated advertisements are proposed.
+    must-include:
+      - item: Details of the proposed external lighting
+        level: must
+      - item: The hours when the lighting would be switched on
+        level: must
+      - item: An 'isolux' or similar drawing showing luminance at specified heights above ground
+        level: should
+        required-if: discretionary
+    confidence: medium
+    notes: "The excerpt starts mid-sentence ('countryside, where external lighting ...'), so the location part of the trigger is cut off. Isolux drawings 'may also be requested' for sensitive proposals such as sports floodlighting in rural or residential areas."
+
+  - id: photos
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, demolition-con-area, pa-demo-building]
+        - all:
+            - application-type:
+                in: [advertising]
+            - discretionary
+    source-url: https://www.nwleics.gov.uk/files/documents/national_and_local_requirements_for_planning_applications_july_2013/Adopted%20PAR%20list%20of%20requirements%20July%202013.doc
+    source-text: Photos/Photomontages All applications
+    must-include:
+      - item: The whole building and its setting
+        level: must
+        required-if:
+          application-type:
+            in: [demolition-con-area]
+      - item: A record of the building to be demolished
+        level: must
+        required-if:
+          application-type:
+            in: [pa-demo-building]
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the plain Full planning proforma has no photograph requirement; 'All
+      applications' is from the combined CA/LBC proformas. Adverts (and planning permission with
+      advert consent) need them when hoardings are proposed, shown as officer discretion.
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 0
+            description: Retail, leisure, office, cultural or tourist uses.
+    confidence: low
+    notes: "Audit (wrong_trigger): the excerpt omits the retail, leisure, office, cultural and tourist uses it covers; the exact threshold or location test is not given."
+
+  - id: sci
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - ref: major-development
+    confidence: medium
+
+  - id: telecommunications-report
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [pa-ecomms-network]
+        - condition:
+            field: telecommunications-development
+            value: true
+            description: Telecommunications development.
+    source-url: https://www.nwleics.gov.uk/files/documents/national_and_local_requirements_for_planning_applications_july_2013/Adopted%20PAR%20list%20of%20requirements%20July%202013.doc
+    must-include:
+      - item: The Supplementary Information Template (Annex F of the Code of Best Practice on Mobile
+          Phone Network Development)
+        level: must
+        required-if:
+          application-type:
+            in: [pa-ecomms-network]
+    confidence: medium
+    notes: "Audit (wrong_trigger, missing_requirement): the workbook's excerpt was Town Centre Uses text. From the audit: every telecoms code operator notification needs the Annex F template."
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - discretionary
+    source-url: https://www.nwleics.gov.uk/files/documents/national_and_local_requirements_for_planning_applications_july_2013/Adopted%20PAR%20list%20of%20requirements%20July%202013.doc
+    source-text: >-
+      37 Transport assessment Paragraph 32 of the National Planning Policy Framework requires a
+      transport assessment to be submitted where the proposed development has significant transport
+      implications and should be proportionate to the proposal.
+    confidence: medium
+
+  - id: travel-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - discretionary
+    source-url: https://www.nwleics.gov.uk/files/documents/national_and_local_requirements_for_planning_applications_july_2013/Adopted%20PAR%20list%20of%20requirements%20July%202013.doc
+    source-text: >-
+      38 Travel Plan Paragraph 36 of the National Planning Policy Framework requires a travel plan
+      to be submitted where a development will generate significant amounts of movement.
+    confidence: medium
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    must-include:
+      - item: Carried out by a suitably qualified valuer
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): needed when seeking an exception to affordable housing policy on financial grounds."
+
+  - id: water-impact-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, lbc, demolition-con-area]
+        - site:
+            in: [special-area-of-conservation]
+            description: The site is in the catchment area of the River Mease Special Area of Conservation.
+    source-url: https://www.nwleics.gov.uk/files/documents/national_and_local_requirements_for_planning_applications_july_2013/Adopted%20PAR%20list%20of%20requirements%20July%202013.doc
+    source-text: >-
+      SAC report - Any proposal located in catchment area of the River Mease Special Area of
+      Conservation (SAC) North West Leicestershire District.
+    must-include:
+      - item: No adverse effect on the integrity of the SAC, alone or in combination with other
+          proposals
+        level: must
+      - item: Water quality
+        level: must
+      - item: Water volumes
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement): the River Mease SAC report is the main NWL-specific item and is
+      in every Householder, Full, Outline, CA consent and LBC proforma. The must-include items are
+      the audit's summary.
+
+  - id: roof-plan-proposed
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, reserved-matters, lbc]
+        - discretionary
+    source-url: https://www.nwleics.gov.uk/files/documents/national_and_local_requirements_for_planning_applications_july_2013/Adopted%20PAR%20list%20of%20requirements%20July%202013.doc
+    source-text: Roof Plan - Where the roof design is not simple single dual or mono pitches
+    confidence: medium
+    notes: "Audit (missing_requirement): a roof that is not a simple pitch can't be expressed with existing fields. Outline only if not reserved."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - site:
+            in: [contaminated-land]
+            description: Contamination is known or suspected.
+    source-url: https://www.nwleics.gov.uk/files/documents/national_and_local_requirements_for_planning_applications_july_2013/Adopted%20PAR%20list%20of%20requirements%20July%202013.doc
+    source-text: Land Contamination assessment - Where contamination is known or suspected.
+    confidence: medium
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - any:
+            - condition:
+                field: noise-sensitive-use
+                value: true
+                description: Noise-sensitive development close to existing sources of noise.
+            - condition:
+                field: noise-generating-use
+                value: true
+                description: The proposal will generate significant noise levels.
+    source-url: https://www.nwleics.gov.uk/files/documents/national_and_local_requirements_for_planning_applications_july_2013/Adopted%20PAR%20list%20of%20requirements%20July%202013.doc
+    source-text: >-
+      Noise impact assessment - Where noise sensitive developments are close to existing sources of
+      noise or the proposal will generate significant noise levels.
+    must-include:
+      - item: Prepared by a qualified acoustician
+        level: must
+    confidence: medium
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - any:
+            - all:
+                - ref: major-development
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: Residential development.
+            - condition:
+                field: loss-of-open-space
+                value: true
+                description: There would be a loss of open space.
+    source-url: https://www.nwleics.gov.uk/files/documents/national_and_local_requirements_for_planning_applications_july_2013/Adopted%20PAR%20list%20of%20requirements%20July%202013.doc
+    source-text: >-
+      Open Space assessment - All major residential developments and applications where there would
+      be a loss of open space.
+    confidence: medium
+
+unmapped:
+  - local-name: Economic Statement
+    source-text: "From the audit: 'Where viability is an issue'"
+    source-url: https://www.nwleics.gov.uk/files/documents/national_and_local_requirements_for_planning_applications_july_2013/Adopted%20PAR%20list%20of%20requirements%20July%202013.doc
+    suggested-id: economic-statement
+  - local-name: Planning obligations - Unilateral undertaking / Draft agreement / Heads of Terms
+    source-text: >-
+      Planning obligations – Unilateral undertaking or Draft agreement or Heads of Terms for S106
+      agreement required If development triggers contributions within Development Plan Documents
+      and/or the developer wishes to either: Voluntarily propose contributions
+    source-url: https://www.nwleics.gov.uk/files/documents/national_and_local_requirements_for_planning_applications_july_2013/Adopted%20PAR%20list%20of%20requirements%20July%202013.doc
+    suggested-id: planning-obligations-heads-of-terms
+  - local-name: Structural Survey
+    source-text: >-
+      Structural Survey - Barn conversions or demolition and rebuild or when the justification for
+      demolition is based on structural condition / soundness
+    source-url: https://www.nwleics.gov.uk/files/documents/national_and_local_requirements_for_planning_applications_july_2013/Adopted%20PAR%20list%20of%20requirements%20July%202013.doc
+    suggested-id: structural-survey
+  - local-name: Flood risk standard form (householder)
+    source-text: >-
+      Any proposal located in Flood Zones 2 or 3 a standard form is required to be completed to
+      negate the need for a Flood Risk Assessment.
+    source-url: https://www.nwleics.gov.uk/files/documents/national_and_local_requirements_for_planning_applications_july_2013/Adopted%20PAR%20list%20of%20requirements%20July%202013.doc
+    suggested-id: ""
+  - local-name: Building for Life 12 assessment
+    source-text: >-
+      Building for life 12 assessment - All major residential developments in Charnwood, Leicester
+      City and North West Leicestershire areas.
+    source-url: https://www.nwleics.gov.uk/files/documents/national_and_local_requirements_for_planning_applications_july_2013/Adopted%20PAR%20list%20of%20requirements%20July%202013.doc
+    suggested-id: building-for-life-assessment
+  - local-name: Aviation Impact Assessment
+    source-text: "Aviation Impact Assessment: For all Wind Turbine applications located within 30 km of East Midlands Airport"
+    source-url: https://www.nwleics.gov.uk/files/documents/national_and_local_requirements_for_planning_applications_july_2013/Adopted%20PAR%20list%20of%20requirements%20July%202013.doc
+    suggested-id: aerodrome-safeguarding
+  - local-name: Birdstrike Assessment
+    source-text: "Birdstrike Assessments - Developments within 13km of East Midlands Airport that are likely to attract birds."
+    source-url: https://www.nwleics.gov.uk/files/documents/national_and_local_requirements_for_planning_applications_july_2013/Adopted%20PAR%20list%20of%20requirements%20July%202013.doc
+    suggested-id: aerodrome-safeguarding
+  - local-name: Existing site survey plan (LDC existing)
+    source-text: "Existing site survey plan (e.g. at a scale of 1:50 or 1:100) - All applications"
+    source-url: https://www.nwleics.gov.uk/files/documents/national_and_local_requirements_for_planning_applications_july_2013/Adopted%20PAR%20list%20of%20requirements%20July%202013.doc
+    suggested-id: lawful-development-evidence
+
+new-fields:
+  - field: historic-environment-record
+    kind: designation
+    label: Historic Environment Record entry
+    description: The site has an entry in the county Historic Environment Record (HER).

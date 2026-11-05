@@ -1,0 +1,431 @@
+# Corrections for Medway Council, from the audit.
+# The audit could not read the DOCX checklist (contents_checked: false), so this file rests on the
+# workbook's own excerpts. Most of them carry a clear 'When required?' line, which is structured
+# here; mislabelled and duplicated rows are dropped.
+local-authority: MDW
+
+validation-list:
+  url: 
+    https://www.medway.gov.uk/download/downloads/id/7949/planning_permission_validation_checklist.docx
+  date: 2025-04
+  date-basis: "audit (claude_response): the checklist says 'our validation checklist was reviewed in April
+    2025, and no changes to the local list was necessary'"
+
+submission-standards:
+  - item: Drawings at a recognised metric scale (1:50, 1:100, 1:200, 1:500, 1:1250 or 1:2500)
+    level: must
+  - item: A scale bar indicating a minimum of 0-10 metres on all drawings
+    level: must
+
+drop:
+  - id: section-existing
+    reason: "duplicate: the excerpt is the landscaping-scheme sentence"
+  - id: section-proposed
+    reason: "duplicate: the excerpt is the landscaping-scheme sentence"
+
+drop-unmapped:
+  - local-name: Agricultural Land Classification / Soils
+    reason: "wrong_trigger / duplicate: only the landscaping-scheme sentence about a soil management survey"
+  - local-name: Electric vehicle charging details
+    reason: "wrong_trigger / duplicate: carries the item 33 Retail and town centre uses trigger"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: the excerpt is the retail sequential test, not the flood test; re-added below
+      under the right name"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: the tail of the Affordable Housing item plus the Air Quality trigger"
+  - local-name: Drainage Strategy / SuDS
+    reason: "duplicate: item 22 Flood Risk Assessment / Drainage Strategy, kept as flood-risk-assessment"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 25
+            description: Within the urban area, 25 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: Within the urban area, a site of 1 hectare or more.
+        - discretionary
+    source-text: >-
+      5) Affordable Housing Statement When required? Within the urban area, developments which
+      include 25 or more dwellings or where the site area is 1 hectare or more or in rural
+      settlements as defined by the local plan, with a population of 3,000.
+    notes: "The rural-settlements threshold is unclear in the excerpt, so it is shown as officer discretion."
+
+  - id: air-quality-assessment
+    action: update
+    required-if: discretionary
+    source-text: >-
+      6) Air Quality Assessment When required? The Medway Air Quality Planning Guidance (April 2016)
+      contains two screening checklists that can be used to identify when an air quality assessment
+      and/or emissions mitigation assessment may be required.
+    notes: "When it is needed depends on the screening checklists in the Medway Air Quality Planning Guidance."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: The proposed works are within 5 metres of the crown spread of any tree.
+    source-text: 38) Tree Survey/Arboricultural assessment When required? Where the proposed works 
+      are within 5 metres of the crown spread of any tree.
+    notes: "Audit (wrong_app_type): applies to all application types, including householder."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      site:
+        in: [archaeological-priority-area]
+        description: The presence of buried archaeology is known or suspected.
+    source-text: 3) Archaeological Statement When required? Where the presence of buried archaeology
+      is known or suspected.
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+    source-text: >-
+      14) Daylight/sunlight assessment When required? All applications where there is a potential
+      adverse impact upon the current levels of daylight/sunlight enjoyed by adjoining properties and
+      buildings.
+    notes: "Audit (wrong_app_type): applies to all application types, including householder."
+
+  - id: design-and-access-statement
+    action: update
+    source-text: ""
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was a stray sentence ('Where no Design and Access
+      Statement is required, it should be a stand-alone document') with no trigger. The national
+      rules for a Design and Access Statement still apply.
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 1000
+            description: Buildings with a floorspace of 1000 sqm or more.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: Residential developments providing 10 or more units.
+    source-text: >-
+      32) Renewable Energy Assessment When required? Buildings with a floorspace of 1000sqm or more
+      and/or residential developments providing 10 or more residential units.
+    notes: "The council calls this a Renewable Energy Assessment."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: Development defined in Schedule 1 or 2 of the EIA Regulations 2017.
+    source-text: >-
+      21) Environmental Statement When required? As defined in Schedule 1 and 2 of the Town and
+      Country Planning (Environmental Impact Assessment) Regulations 2017.
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: new-build
+            value: true
+            description: A new building.
+        - any:
+            - condition:
+                field: building-height
+                operator: ">"
+                value: 18
+                description: Over 18 metres tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: 7 storeys or more.
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 1
+            description: Containing more than one dwelling.
+    source-text: 44) Fire Statement When required? New buildings of over 18 metres (or 7 stories) 
+      tall containing more than one dwelling.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: In flood zone 2 or 3, including minor development and change of use.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: More than 1 hectare in flood zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: More than 1 hectare in flood zone 1.
+        - site:
+            in: [critical-drainage-area]
+            description: In an area within flood zone 1 which has critical drainage problems.
+        - discretionary
+    source-text: >-
+      22) Flood Risk Assessment / Drainage Strategy When required? In flood zone 2 or 3 including
+      minor development and change of use, more than 1 hectare (ha) in flood zone 1; less than 1 ha
+      in flood zone 1, including a change of use in development type to a more vulnerable class (for
+      example from commercial to residential), where the site could be affected by sources of
+      flooding other than rivers and the sea (for example surface water drains, reservoirs); in an
+      area within flood zone 1 which ha…
+    source-url: 
+      https://www.medway.gov.uk/download/downloads/id/7949/planning_permission_validation_checklist.docx
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, duplicate): placed under prior approval only because the text says
+      'change of use'; it applies to all applications. The workbook also split it into a separate
+      Drainage Strategy row. Small sites at risk from other sources of flooding are shown as officer
+      discretion.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, 
+                  locally-listed-building]
+            description: The application involves a heritage asset or its setting.
+    source-text: 2) Heritage Statement When required? All applications involving a heritage asset or
+      its setting.
+    source-url: 
+      https://www.medway.gov.uk/download/downloads/id/7949/planning_permission_validation_checklist.docx
+    confidence: medium
+    notes: "Audit (wrong_app_type, wrong_trigger): applies to householder and listed building consent
+      too; the workbook's excerpt began with the end of the previous item."
+
+  - id: landscaping-plan
+    action: update
+    must-include:
+      - item: Proposed finished ground levels or contours
+        level: should
+      - item: A soil management survey where significant earthworks are required
+        level: should
+      - item: Means of enclosure such as fencing, boundary walls or hedging
+        level: should
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: Commercial or residential development that includes the installation of 
+          external lighting.
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Proposals that could cause significant noise disturbance, e.g. noisy sports
+              or industrial developments using noisy machinery.
+        - condition:
+            field: plant-equipment
+            value: true
+            description: Refrigeration plant and equipment.
+    source-text: >-
+      24) Noise impact assessment When required? Proposals that could cause significant noise
+      disturbance, e.g. noisy sports; industrial developments using noisy machinery; refrigeration
+      plant and equipment.
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      site:
+        in: [open-space]
+        description: Proposals to develop open space, sports and recreational buildings and land for
+          other purposes.
+    source-text: 25) Open Space Assessment When required? Proposals to develop open space, sports 
+      and recreational buildings and land for other purposes.
+
+  - id: photos
+    action: update
+    required-if: discretionary
+    source-text: 27) Photographs/photomontages When required? We would welcome photos on all 
+      application types.
+    notes: "The council welcomes photos on all application types; it doesn't require them."
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      ref: major-development
+    source-text: 29) Planning Statement When required? Major applications and should include.
+    source-url: 
+      https://www.medway.gov.uk/download/downloads/id/7949/planning_permission_validation_checklist.docx
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt is cut off after 'should include', so the contents are
+      missing."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      condition:
+        field: retail-floorspace
+        operator: ">"
+        value: 2500
+        description: Retail developments over 2,500 sqm gross floorspace.
+    source-text: 33) Retail and town centre uses When required? Retail developments over 2,500sqm 
+      gross floorspace.
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The proposal creates or alters a roof.
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The proposal creates or alters a roof.
+
+  - id: sci
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 100
+            description: Residential development of 100 units or more.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: 1000 sqm or more of commercial floorspace.
+    source-text: >-
+      34) Statement of Community Involvement (SCI) When required? Residential development of 100
+      units or more and/or 1000sqm or more of commercial floorspace.
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 50
+            description: Residential development of over 50 households (general guide).
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 1000
+            description: Non-residential development of over 1,000 square metres (general guide).
+        - discretionary
+    source-text: >-
+      37) Transport Assessment/Transport Statement and Travel Plan When required? Subject to
+      discussion with the Local Planning Authority, however as a general guide: Residential: over 50
+      households, Non-residential: over 1,000m²
+    notes: "The thresholds are a general guide, subject to discussion with the council."
+
+  - id: travel-plan
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 50
+            description: Residential development of over 50 households (general guide).
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 1000
+            description: Non-residential development of over 1,000 square metres (general guide).
+        - discretionary
+    source-text: >-
+      37) Transport Assessment/Transport Statement and Travel Plan When required? Subject to
+      discussion with the Local Planning Authority, however as a general guide: Residential: over 50
+      households, Non-residential: over 1,000m²
+    notes: "The thresholds are a general guide, subject to discussion with the council."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    notes: "Needed where the applicant says the development can't support the likely developer contributions
+      (council's wording)."
+
+  - id: waste-management-plan
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: The creation of 10 new dwellings or more.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 0
+            description: New retail, business, industrial, leisure or other similar development.
+    source-text: >-
+      31) Refuse Collection When required? All proposals for the creation of 10 new dwellings or
+      more, new retail business, industrial, leisure or other similar developments.
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      application-type:
+        in: [pa-ecomms-network]
+    notes: "Audit (wrong_app_type): this is for telecoms prior approval (GPDO Part 16), not change of
+      use."
+
+  - id: land-contamination-assessment
+    action: add
+    source-url: 
+      https://www.medway.gov.uk/download/downloads/id/7949/planning_permission_validation_checklist.docx
+    confidence: low
+    notes: "From the audit (other, Amended): item 13 Contaminated Land is in the checklist but was not
+      captured; its trigger is unknown."
+
+unmapped:
+  - local-name: Sequential test (main town centre uses)
+    source-text: >-
+      Sequential tests should reflect the National PPG; if outside the town centres, and not in
+      accordance with any part of the retail and main town centre use strategy in the development
+      plan a sequential test is required.
+    source-url: 
+      https://www.medway.gov.uk/download/downloads/id/7949/planning_permission_validation_checklist.docx
+    suggested-id: sequential-test
+  - local-name: Accurate visual representations
+    source-text: "From the audit: item 7 Accurate visual representations is in the checklist but was not
+      captured; its trigger is unknown"
+    source-url: 
+      https://www.medway.gov.uk/download/downloads/id/7949/planning_permission_validation_checklist.docx
+    suggested-id: computer-visualisations
+
+low-confidence:
+  - id: biodiversity-survey-report
+    note: "Audit (wrong_trigger): the excerpt stops at 'Proposals that directly or indirectly affect;'
+      and omits the list of what is affected."
+

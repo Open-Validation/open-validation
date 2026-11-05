@@ -1,0 +1,477 @@
+# Corrections for Somerset Council, from the council's audit.
+# Grokbot read only the 'Information requirements for planning applications' landing page, not the
+# Somerset-wide Local Validation Checklist it links (published 1 April 2025; the build now uses the
+# audit's SharePoint link and date). That PDF is robots-blocked, so the audit compared against the
+# live page and the November 2024 consultation draft of the same checklist; the final may differ in
+# detail. Almost everything below is the audit's paraphrase of the draft ("From the audit").
+# Not added here: listed building consent elevations and floor plans (a local requirement for LBC,
+# but national plan rules already cover them), the reserved matters rule that the red line must not
+# extend beyond the outline (not a document), and the separate minerals and waste 'Local Validation
+# Checklist guidance', which nobody has read yet (audit issue 10).
+local-authority: SUA
+
+drop-unmapped:
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "wrong_trigger: the excerpt describes the form, not when it is needed; re-added below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      any:
+        - all:
+            - site:
+                in: [rural-area]
+                description: The site is in a rural location.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 6
+                description: The proposal creates 6 or more units.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: The proposal creates 10 or more units.
+    source-text: >-
+      Affordable Housing Statement: Residential development of 6 or more units within a rural location
+      or 10 or more in an urban location
+    source-url: &list https://somersetcc.sharepoint.com/:b:/s/SCCPublic/EXumNGRLz7tBh2yzrGBuimkBBUMpxpuI4wQ-UkB_z9MfWQ?e=wIIPMU
+    must-include:
+      - item: Draft S106 Heads of Terms
+        level: must
+    confidence: medium
+    notes: "Audit (missing_requirement): quoted from the November 2024 consultation draft."
+
+  - id: archaeological-assessment
+    action: add
+    required-if:
+      site:
+        in: [archaeological-priority-area]
+        description: The site is in an area of high archaeological potential.
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): listed in the full and major tables for areas of high
+      archaeological potential."
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees on or next to the site could be affected.
+    source-url: *list
+    must-include:
+      - item: Tree survey to BS5837
+        level: must
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a BS5837 tree survey where trees on or next to the site
+      could be affected (householder table); a tree survey is also listed in the full and major
+      tables.
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - all:
+            - condition:
+                field: roof-alteration
+                value: true
+                description: Works to a roof, loft or outbuilding.
+            - any:
+                - site:
+                    in: [rural-area]
+                    description: The site is in a rural area.
+                - condition:
+                    field: near-watercourse
+                    value: true
+                    description: The site is near woodland or a watercourse.
+        - site:
+            in: [special-area-of-conservation]
+            description: The site is in a Bat Consultation Zone around a bat Special Area of Conservation.
+        - discretionary
+    source-text: Wildlife or Ecology Survey is required as part of a planning application.
+    source-url: *list
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement, wrong_app_type): an ecology report or bat survey for roof, loft or
+      outbuilding works in Bat Consultation Zones, rural areas, or near woodland or watercourses
+      (householder table); also listed for change of use, outline, reserved matters and s73. The
+      page names three bat SACs (North Somerset and Mendip; Exmoor and Quantocks; Hestercombe
+      House). Other cases depend on the Biodiversity Checklist, so they are officer discretion.
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - condition:
+            field: biodiversity-gain-condition
+            value: true
+            description: The application is liable for biodiversity net gain.
+    source-text: >-
+      The council has adopted BNG validation requirements that go beyond the national minimum … A BNG
+      declaration form is required
+    source-url: *list
+    must-include:
+      - item: BNG declaration form
+        level: must
+      - item: BNG Overall and Phase Gain Plans, for phased schemes
+        level: must
+        required-if:
+          application-type:
+            in: [reserved-matters]
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook filed this under minerals and waste with page navigation
+      as its trigger. From the audit: the BNG package applies to BNG-liable full, outline and
+      reserved matters applications.
+
+  - id: design-and-access-statement
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [listed-building]
+            description: The works affect a listed building.
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - condition:
+                field: floorspace
+                operator: ">="
+                value: 100
+                description: The proposal creates 100 square metres or more of floorspace.
+        - discretionary
+    source-url: *list
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): householder table: listed building, or conservation area
+      where floorspace is 100m2 or more. A Design and Access Statement is also listed in the full
+      and major tables without a trigger.
+
+  - id: energy-statement
+    action: add
+    required-if: discretionary
+    source-url: *list
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a Sustainability Checklist and Energy Statement for all
+      development, including extensions and conversions, in the former Taunton Deane area only. The
+      rules can't express a former-district area, so this is shown as officer discretion.
+
+  - id: fire-statement
+    action: add
+    required-if:
+      all:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 2
+            description: The building contains two or more dwellings.
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: The building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: The building has 7 or more storeys.
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): two or more dwellings and 18m+ or 7+ storeys."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3.
+        - condition:
+            field: near-watercourse
+            value: true
+            description: Works within 8 metres of a main river.
+    source-text: >-
+      Flood Risk Assessment Required for development in Flood Zone 2 and 3 or works within 8 metres of
+      a main river.
+    source-url: https://www.somerset.gov.uk/planning-buildings-and-land/information-requirements-for-planning-applications/
+    must-include:
+      - item: The Householder Flood Risk Assessment form, for householder applications
+        level: must
+        required-if:
+          application-type:
+            in: [hh]
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): not only full planning; the source also applies it to householder,
+      change of use, outline, reserved matters and s73 applications, and provides a householder FRA
+      form.
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      site:
+        in: [conservation-area, listed-building, scheduled-monument]
+        description: The site is in a conservation area, or affects a listed building or scheduled monument.
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): householder table: conservation area, listed building or
+      scheduled monument."
+
+  - id: land-contamination-assessment
+    action: add
+    source-url: *list
+    confidence: low
+    notes: "From the audit (missing_requirement): a Contaminated Land Report is listed in the full and major
+      tables; the audit gives no trigger."
+
+  - id: landscaping-plan
+    action: add
+    source-url: *list
+    confidence: low
+    notes: "From the audit (missing_requirement): a Landscape Plan is listed in the full and major tables;
+      the audit gives no trigger."
+
+  - id: noise-assessment
+    action: add
+    source-url: *list
+    confidence: low
+    notes: "From the audit (missing_requirement): a noise, vibration and odour evaluation is listed in the full
+      and major tables; the audit gives no trigger."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [ldc, s73, change-of-use]
+        - discretionary
+    source-url: *list
+    must-include:
+      - item: Evidence for the 4- or 10-year rule
+        level: must
+        required-if:
+          application-type:
+            in: [ldc]
+      - item: An explanation of the change sought
+        level: must
+        required-if:
+          application-type:
+            in: [s73]
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a planning statement for lawful development certificates
+      (with evidence), s73 applications and all change of use applications; also listed in the full
+      and major tables without a trigger. Reserved matters need a Compliance Statement (majors, and
+      minors discharging conditions).
+
+  - id: sci
+    action: add
+    source-url: *list
+    confidence: low
+    notes: "From the audit (missing_requirement): a Statement of Community Involvement is listed among the
+      threshold-based documents; the audit gives no threshold."
+
+  - id: section-proposed
+    action: add
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: Ground levels change.
+    source-url: *list
+    must-include:
+      - item: Levels for all detached buildings, and for extensions whose floor levels differ from the main
+          dwelling
+        level: must
+        required-if:
+          application-type:
+            in: [hh]
+    confidence: medium
+    notes: "From the audit (missing_requirement): householder table: section plans where ground levels change;
+      levels for detached buildings and some extensions."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      condition:
+        field: town-centre-use-floorspace
+        operator: ">"
+        value: 2500
+        description: More than 2,500 square metres of retail, leisure or office floorspace.
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Retail Impact Assessment for over 2,500m2 of retail,
+      leisure or office floorspace."
+
+  - id: transport-assessment
+    action: add
+    source-url: *list
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a Transport Assessment and Travel Plan are listed in the
+      full and major tables; the audit gives no threshold. The Active Travel England toolkit (150+
+      dwellings, 7,500m2+ non-residential, or 5ha+) is under unmapped.
+
+  - id: travel-plan
+    action: add
+    source-url: *list
+    confidence: low
+    notes: "From the audit (missing_requirement): listed with the Transport Assessment in the full and major
+      tables; the audit gives no threshold."
+
+  - id: viability-assessment
+    action: add
+    source-url: *list
+    confidence: low
+    notes: "From the audit (missing_requirement): a Viability or Marketing Assessment is listed among the
+      threshold-based documents; the audit gives no trigger."
+
+  - id: waste-management-plan
+    action: add
+    source-url: *list
+    confidence: low
+    notes: "From the audit (missing_requirement): a Site Waste Management Statement or Plan is listed in the
+      full and major tables; the audit gives no trigger."
+
+  - id: water-impact-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters, s73, approval-condition, prior-approval]
+        - site:
+            in: [nutrient-neutrality-area]
+            description: The site is in the Somerset Levels and Moors Ramsar or River Axe SAC catchment.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: >-
+                  New residential units (including tourist accommodation and traveller sites).
+            - discretionary
+    source-url: *list
+    must-include:
+      - item: Nutrient Neutrality Assessment and Mitigation Strategy (NNAMS)
+        level: must
+      - item: Habitat Regulations Assessment information
+        level: must
+      - item: Phosphate Budget Calculator
+        level: must
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): nutrient neutrality in the Somerset Levels and Moors
+      Ramsar and River Axe SAC catchments, for new residential units (including tourist
+      accommodation and traveller sites), agricultural development that increases herd size, and
+      commercial uses with overnight accommodation. It covers full, outline, reserved matters, s73
+      (where floorspace or drainage changes), pre-commencement discharges, retrospective
+      applications, and prior approvals in the River Axe catchment only.
+
+  - id: condition-of-trees
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [consent-under-tpo]
+        - discretionary
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): a tree report for TPO trees said to be diseased or
+      dangerous."
+
+  - id: structural-damage
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [consent-under-tpo]
+        - discretionary
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): a tree report for TPO trees said to be causing property
+      damage."
+
+unmapped:
+  - local-name: Biodiversity Checklist
+    source-text: >-
+      From the audit: the Biodiversity Checklist is 'used to assess whether a wildlife or ecology survey
+      is needed'; the draft lists it in the BNG package for BNG-liable applications and for
+      householder, change of use, outline, reserved matters and s73 applications
+    source-url: *list
+    suggested-id: biodiversity-checklist
+  - local-name: Street scene
+    source-text: "From the audit: householder table: a street scene where the access changes"
+    source-url: *list
+    suggested-id: street-scene-elevations
+  - local-name: Climate Emergency Checklist
+    source-text: "Climate Emergency Checklist: West area only (from the audit: on full, outline, LBC, s73 and
+      LDC applications)"
+    source-url: *list
+    suggested-id: climate-change-checklist
+  - local-name: Local Labour Agreement / Employment and Skills Plan
+    source-text: "Local Labour Agreement: North and West areas only ... Major development > 50 dwellings (from
+      the audit: or 5,000sqm commercial)"
+    source-url: *list
+    suggested-id: employment-skills-plan
+  - local-name: Health Impact Assessment
+    source-text: "From the audit: North and former West Somerset areas, generally 100+ dwellings or 5ha+"
+    source-url: *list
+    suggested-id: health-impact-assessment
+  - local-name: Surface Water Drainage Assessment
+    source-text: "From the audit: listed in the full and major tables"
+    source-url: *list
+    suggested-id: drainage-strategy
+  - local-name: Active Travel England toolkit
+    source-text: "From the audit: 150+ dwellings, 7,500m2+ non-residential floorspace, or 5ha+ sites"
+    source-url: *list
+    suggested-id: active-travel-assessment
+  - local-name: Landscape and Visual Impact Assessment
+    source-text: "From the audit: solar or wind, open countryside, National Landscape"
+    source-url: *list
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Local Housing Needs Assessment
+    source-text: "From the audit: 6+ units"
+    source-url: *list
+    suggested-id: housing-needs-assessment
+  - local-name: Public Open Space, Play and Recreation Statement
+    source-text: "From the audit: 8+ units"
+    source-url: *list
+    suggested-id: open-space-statement
+  - local-name: Agricultural Appraisal
+    source-text: "From the audit: agricultural buildings or rural workers' dwellings in the countryside"
+    source-url: *list
+    suggested-id: rural-workers-dwelling-appraisal
+  - local-name: Business Case (holiday lets)
+    source-text: "From the audit: holiday lets in the countryside"
+    source-url: *list
+    suggested-id: business-plan
+  - local-name: Education Impact Assessment
+    source-text: "From the audit: listed among the threshold-based documents; no trigger given"
+    source-url: *list
+    suggested-id: education-impact-assessment
+  - local-name: Structural Survey and Conversion Method Statement
+    source-text: "From the audit: listed building structural works or rural building conversions"
+    source-url: *list
+    suggested-id: structural-survey
+  - local-name: Compliance Statement (reserved matters)
+    source-text: "From the audit: reserved matters for majors, and minors discharging conditions"
+    source-url: *list
+    suggested-id: compliance-statement
+  - local-name: S73 BNG Statement
+    source-text: "From the audit: s73 applications"
+    source-url: *list
+    suggested-id: biodiversity-gain-plan
+  - local-name: Advertisement drawings
+    source-text: "From the audit: advertisement consent: drawings showing colours, materials, dimensions and
+      illumination, plus elevations"
+    source-url: *list
+    suggested-id: advertisement-drawings

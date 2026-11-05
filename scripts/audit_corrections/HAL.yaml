@@ -1,0 +1,260 @@
+# Corrections for Halton Borough Council, from inputs/audit/halton-borough-council.json.
+# Halton's only identifiable local list is an undated committee appendix ('Validation Checklists
+# Requirements - Advice for officers and applicants', c.2007-08). It cites revoked guidance and
+# pre-2020 use classes, and the council no longer publishes it as a current list, so treat it as
+# stale. The list is general (it doesn't name application types), so Grokbot's 'Full planning'
+# (INFERRED) and 'Listed building consent' placements are removed: items apply to any
+# application that meets the trigger. Sections 3.13-3.20 are missing from the readable text
+# (audit issue 5), so up to eight local requirements are not recorded here.
+local-authority: HAL
+
+validation-list:
+  date: 2008
+  date-basis: >-
+    audit: the document text has no date; it is c.2007-08 from the guidance it cites (PPG24 1994,
+    PPG13 2001, EIA Regs 1999, Circular 06/2005). The workbook's 2008-08-01 was the converter's PDF
+    CreationDate
+
+drop:
+  - id: cil-form
+    reason: >-
+      not_a_requirement: the excerpt is the section 3.0 introduction; the list predates the CIL
+      Regulations 2010
+  - id: design-and-access-statement
+    reason: >-
+      not_a_requirement: a national requirement cross-referenced to section 2.6; the excerpt is
+      landscaping and lighting text
+
+drop-unmapped:
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "wrong_trigger: the excerpt runs on into Structural Survey and Transport Assessment; re-added below"
+
+requirements:
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      site:
+        in: [air-quality-management-area]
+        description: The site is inside, or adjacent to, an air quality management area.
+    source-text: >-
+      … inside, or adjacent to an air quality management area … provide an air quality assessment
+      as part of their planning application.
+    source-url: https://moderngov.halton.gov.uk/documents/s6473/Appendix%20a.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt left out the trigger, 'inside, or adjacent to an
+      air quality management area' (3.1)."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees within the site, or on land adjacent to it, that could influence
+          or be affected by development (including street trees).
+    source-text: >-
+      3.26 Tree Survey Where there are trees within the application site, or on land adjacent to it
+      that could influence or be affected by development (including street trees), information will
+      be required detailing which trees are to be retained and on the means of protecting these
+      trees during construction works.
+    source-url: https://moderngov.halton.gov.uk/documents/s6473/Appendix%20a.pdf
+    must-include:
+      - item: Which trees are to be retained
+        level: must
+      - item: The means of protecting the retained trees during construction works
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): not Full planning only; the trigger applies to any application, including
+      householder."
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      site:
+        in: [archaeological-priority-area]
+        description: The site is of archaeological interest or adjoins a site of archaeological
+          interest.
+    source-text: >-
+      3.2 Archaeological Assessment An archaeological assessment will be required where the site is
+      of archaeological interest or adjoins a site of archaeological interest.
+    source-url: https://moderngov.halton.gov.uk/documents/s6473/Appendix%20a.pdf
+    confidence: medium
+    notes: "The list is general; Grokbot's 'Full planning' placement was a guess (INFERRED)."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      condition:
+        field: protected-species
+        value: true
+        description: The proposal may affect protected species (for example demolition of older
+          buildings or roof spaces, removal of trees, scrub or hedgerows, or alterations to
+          watercourses).
+    source-text: >-
+      Certain proposals which might include work such as the demolition of older buildings or roof
+      spaces, removal of trees, scrub, hedgerows or alterations to water courses may affect
+      protected species and will need to provide information on them.
+    source-url: https://moderngov.halton.gov.uk/documents/s6473/Appendix%20a.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger / missing_requirement): the workbook's 'Ecological Survey' row was a
+      fragment; this is 3.3 Biodiversity Survey and Report. The wording above was found in the
+      workbook's Environmental Statement row.
+
+  - id: daylight-sunlight-assessment
+    action: replace
+    required-if: discretionary
+    source-text: potential adverse impact upon the current levels of daylight/sunlight enjoyed by
+      adjoining properties
+    source-url: https://moderngov.halton.gov.uk/documents/s6473/Appendix%20a.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was EIA and flood risk text. 3.4 asks for an
+      assessment where there is a potential adverse impact on daylight/sunlight of adjoining
+      properties, which is a judgement, so it is shown as officer discretion.
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    source-url: https://moderngov.halton.gov.uk/documents/s6473/Appendix%20a.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was biodiversity text. Section 3.5 refers to the
+      Town and Country Planning (Environmental Impact Assessment) Regulations; its text was cut off,
+      so the trigger is the regulations' own test.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (Flood Zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (Flood Zone 1).
+        - site:
+            in: [flood-risk-zone]
+            description: New development in Flood Zone 2 or 3.
+    source-text: >-
+      A Flood Risk Assessment (FRA) will be required for development proposals of 1 hectare or more
+      in Flood Zone 1 and for all proposals for new development located in Flood Zones 2 and 3 as
+      designated by the Environment Agency.
+    source-url: https://moderngov.halton.gov.uk/documents/s6473/Appendix%20a.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt had page-break debris ('(Environmental 8'); cleaned. Applies
+      to any application type, including householder."
+
+  - id: landscaping-plan
+    action: replace
+    source-text: >-
+      … detailed landscape proposals for the development, which follow from the design concept in
+      the Design and Access Statement (see Section 2.6 Design & Access Statement).
+    source-url: https://moderngov.halton.gov.uk/documents/s6473/Appendix%20a.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): 3.10 Landscaping Details is not specific to listed building consent;
+      the excerpt was cut off before any trigger, so none is given.
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: >-
+          External lighting would be provided or made necessary by a publicly accessible
+          development in the vicinity of residential property, a listed building or conservation
+          area, or open countryside.
+    source-text: >-
+      3.11 Lighting Assessment Proposals involving the provision of publicly accessible
+      developments, in the vicinity of residential property, a listed building or conservation area,
+      or open countryside, where external lighting would be provided or made necessary by the
+      development, should be required to be accompanied by details of external lighting and the
+      proposed hours when the lighting would be switched on.
+    source-url: https://moderngov.halton.gov.uk/documents/s6473/Appendix%20a.pdf
+    must-include:
+      - item: Details of the external lighting
+        level: must
+      - item: The proposed hours when the lighting would be switched on
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): not listed building consent. The 'publicly accessible development
+      near homes, heritage assets or countryside' part can't be expressed as a field and is in the
+      description.
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The development raises issues of disturbance by noise to the occupants of
+              nearby existing buildings.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise-sensitive development near existing sources of noise.
+    source-text: Applications for developments that raise issues of disturbance by noise to the
+      occupants of nearby existing buildings...
+    source-url: https://moderngov.halton.gov.uk/documents/s6473/Appendix%20a.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement): 3.12 Noise Assessment was not captured. From the audit: also
+      for noise-sensitive development near existing noise sources."
+
+  - id: sci
+    action: replace
+    required-if: discretionary
+    source-text: 3.21 Statement of Community Involvement A separate statement on pre-application
+      consultations may be required.
+    source-url: https://moderngov.halton.gov.uk/documents/s6473/Appendix%20a.pdf
+    confidence: medium
+    notes: "'May be required' with no threshold, so officer discretion."
+
+  - id: transport-assessment
+    action: replace
+    required-if: discretionary
+    source-url: https://moderngov.halton.gov.uk/documents/s6473/Appendix%20a.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt ('conversions. 3.24Transport Assessment
+      mitigate transport impacts.') left out the trigger. From the audit: applications with
+      'significant transport implications', which is a judgement.
+
+  - id: travel-plan
+    action: add
+    required-if: discretionary
+    source-text: A travel plan should be submitted alongside planning applications which are likely
+      to have significant transport implications
+    source-url: https://moderngov.halton.gov.uk/documents/s6473/Appendix%20a.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement): 3.25 Travel Plan was not captured."
+
+unmapped:
+  - local-name: Street Scene Elevation
+    source-text: "3.22 Street Scene Elevation These should be provided to accompany the planning application
+      where proposals are to be integrated into the existing street scene."
+    source-url: https://moderngov.halton.gov.uk/documents/s6473/Appendix%20a.pdf
+    suggested-id: street-scene-elevations
+  - local-name: Structural Survey (substantial demolition)
+    source-text: "3.23 Structural Survey A structural survey may be required in support of an application
+      if the proposal involves substantial demolition, e.g. barn conversions."
+    source-url: https://moderngov.halton.gov.uk/documents/s6473/Appendix%20a.pdf
+    suggested-id: structural-survey
+
+low-confidence:
+  - id: heritage-statement
+    note: >-
+      Audit (wrong_trigger): the excerpt is a mid-sentence fragment with no trigger. The audit says
+      it applies to conservation area consent (demolition in a conservation area) as well as other
+      types; re-read the list.

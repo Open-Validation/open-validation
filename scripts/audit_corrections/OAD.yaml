@@ -1,0 +1,214 @@
+# Corrections for Oadby and Wigston Borough Council, from inputs/audit/oadby-and-wigston-borough-council.json.
+# The list is the Local Validation Checklist August 2026 (in effect from 5 August 2026). Grokbot
+# placed all 14 captured items under Full planning and missed five local items; the rules below
+# give no application type unless the checklist names one.
+local-authority: OAD
+
+submission-standards:
+  - item: All plans and drawings clearly illustrate all critical dimensions and do not contain the
+      phrase 'do not scale from this plan' (or similar wording)
+    level: must
+  - item: All plans and drawings specify the printing page size for which the scale applies, are
+      correctly orientated for on-screen display and include a scale bar
+    level: must
+  - item: All plans and drawings given a meaningful title and dated with a unique plan reference
+    level: must
+
+drop-unmapped:
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "duplicate: mislabelled copy of the Agricultural Land Classification row; the checklist has
+      no rural workers' dwelling item"
+  - local-name: Agricultural Land Classification / Soils
+    reason: "wrong_trigger: omits the 1 hectare threshold; re-added below"
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "wrong mapping: this is the Biodiversity Survey and Report trigger (now in
+      biodiversity-survey-report)"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advice to seek pre-application advice"
+
+requirements:
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: Major planning applications for 10 or more dwellings.
+    policy: Local Plan Policy 13
+    source-text: Affordable Housing Statement – Major planning applications for 10 or more dwellings
+    source-url: https://www.oadby-wigston.gov.uk/files/documents/local_validation_checklist_august_2026/Local%20Validation%20Checklist%20August%202026.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement)."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: The development affects trees or hedgerows within or adjacent to the site.
+    confidence: medium
+    notes: "Applies to householder schemes too (audit wrong_app_type)."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Works affecting the roof space.
+        - condition:
+            field: demolition
+            value: true
+            description: The proposal involves demolition.
+        - discretionary
+    source-text: >-
+      Biodiversity Survey and Report Required for all major development proposals (comprising 10
+      dwellings or more) and developments which impact upon:
+    source-url: https://www.oadby-wigston.gov.uk/files/documents/local_validation_checklist_august_2026/Local%20Validation%20Checklist%20August%202026.pdf
+    confidence: low
+    notes: >-
+      The list of what developments 'impact upon' is cut off (shown as officer discretion). From
+      the audit: roof-space works and demolition also trigger it, including for householder
+      schemes.
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is not exempt from biodiversity net gain.
+    confidence: medium
+    notes: "Audit (other): a national requirement restated in the checklist ('Developers must deliver a
+      BNG of 10%')."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: Schedule 1 development, or Schedule 2 development where EIA is required.
+    confidence: medium
+    notes: "Audit (other): a national requirement restated in the checklist."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The development is within flood zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: A site of 1 hectare and over within flood zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: A site of 1 hectare and over within flood zone 1.
+        - site:
+            in: [critical-drainage-area]
+            description: An area within flood zone 1 with critical drainage problems as notified by
+              the Environment Agency.
+    confidence: medium
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, scheduled-monument, park-and-garden,
+              conservation-area, archaeological-priority-area, locally-listed-building]
+            description: Development affecting a scheduled monument, registered park or garden,
+              archaeology, or designated or non-designated heritage assets, or within or adjoining a
+              conservation area.
+    source-text: Listed Building Consent; … development within or adjoining a conservation area
+    source-url: https://www.oadby-wigston.gov.uk/files/documents/local_validation_checklist_august_2026/Local%20Validation%20Checklist%20August%202026.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted location-plan text. The fuller trigger is the
+      audit's summary."
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: residential-extension
+        value: true
+        description: Extensions to existing buildings.
+    must-include:
+      - item: Existing and proposed site sections, finished floor levels and site levels
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the trigger is extensions to existing buildings, including
+      householder schemes."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: residential-extension
+        value: true
+        description: Extensions to existing buildings.
+    must-include:
+      - item: Existing and proposed site sections, finished floor levels and site levels
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the trigger is extensions to existing buildings, including
+      householder schemes."
+
+  - id: site-plan
+    action: add
+    source-text: "- Existing and Proposed block plan at 1:100, 1:200 or 1:500 scale, including north arrow."
+    source-url: https://www.oadby-wigston.gov.uk/files/documents/local_validation_checklist_august_2026/Local%20Validation%20Checklist%20August%202026.pdf
+    must-include:
+      - item: Scale of 1:100, 1:200 or 1:500, with a north arrow
+        level: must
+      - item: All trees and hedges on or adjacent to the site identified and annotated on the
+          proposed block plan
+        level: should
+    confidence: low
+    notes: "From the council's drawing standards; the checklist's trigger for block plans isn't captured."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Telecommunications proposals that could affect amenity.
+    source-url: https://www.oadby-wigston.gov.uk/files/documents/local_validation_checklist_august_2026/Local%20Validation%20Checklist%20August%202026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Telecommunications Area of Search."
+
+unmapped:
+  - local-name: Agricultural Land Classification Report
+    source-text: "Agricultural Land Classification Report – Development on 1 hectare or more of land
+      currently or last in agricultural use"
+    source-url: https://www.oadby-wigston.gov.uk/files/documents/local_validation_checklist_august_2026/Local%20Validation%20Checklist%20August%202026.pdf
+    suggested-id: agricultural-land-classification
+  - local-name: Active Travel England Toolkit
+    source-text: "Active Travel England Toolkit – 150 or more homes, 7,500 sqm or more… 5 hectares or more"
+    source-url: https://www.oadby-wigston.gov.uk/files/documents/local_validation_checklist_august_2026/Local%20Validation%20Checklist%20August%202026.pdf
+    suggested-id: active-travel-assessment
+  - local-name: Streetscene Drawings
+    source-text: "From the audit: proposals including new dwellings"
+    source-url: https://www.oadby-wigston.gov.uk/files/documents/local_validation_checklist_august_2026/Local%20Validation%20Checklist%20August%202026.pdf
+    suggested-id: street-scene
+  - local-name: Advertising Drawings and Sections
+    source-text: "Advertising Drawings and Sections: 'Advertisement applications'"
+    source-url: https://www.oadby-wigston.gov.uk/files/documents/local_validation_checklist_august_2026/Local%20Validation%20Checklist%20August%202026.pdf
+    suggested-id: advertisement-drawings
+
+low-confidence:
+  - id: design-and-access-statement
+    note: "Audit (wrong_trigger): the excerpt is a fragment about combining DAS and Heritage Statements
+      run into location-plan rules; the DAS is a national requirement."

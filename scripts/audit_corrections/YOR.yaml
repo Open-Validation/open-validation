@@ -1,0 +1,487 @@
+# Corrections for City of York Council, from inputs/audit/city-of-york-council.json.
+# Grokbot's link is the current 'City of York Council Validation Requirements List', dated
+# December 2025 in its text (the workbook's 2026-02 was PDF metadata; the build takes the audit's
+# date). About 19 local requirements were missed, many triggers belong to the next requirement in
+# the PDF, and the type-specific checklists (LDC, adverts, S73/NMA, prior notification) were
+# ignored. Items marked "From the audit" use the audit's paraphrase of the list.
+local-authority: YOR
+
+submission-standards:
+  - item: Plans show a title and drawing number (with the relevant revision number as necessary)
+    level: must
+  - item: A scale bar of 10 metres highlighting each metre (5m is acceptable for householder and minor
+      applications)
+    level: must
+  - item: All plans to a recognisable metric scale (i.e. 1:50, 1:100, 1:200, 1:1250)
+    level: must
+  - item: Plans marked "do not scale" or any similar phrase will be returned
+    level: must
+
+drop:
+  - id: section-existing
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type/wrong mapping: the excerpt is the change of use floor plan text (now under
+      floor-plan-proposed)"
+  - id: section-proposed
+    sheets: [Change of use - prior approval]
+    reason: "as above"
+
+drop-unmapped:
+  - local-name: Tall buildings / Wind microclimate assessment
+    reason: "not_a_requirement: not in York's list; the excerpt is the sections drawing scale note"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: the fragment 'part of pre-application advice;'"
+  - local-name: Self-build / custom build information
+    reason: "wrong_trigger: the excerpt is the retail impact threshold (now in town-centre-impact-assessment);
+      re-added below"
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_trigger: the excerpt is the Community Facilities trigger; re-added below"
+  - local-name: Crime prevention / Secured by Design statement
+    reason: "wrong_trigger: the excerpt is the Delivery and Servicing trigger; re-added below"
+  - local-name: Lawful development evidence (statutory declarations etc.)
+    reason: "wrong_app_type: filed under Full planning; re-added below for certificates of lawfulness"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: only further-guidance links; re-added below"
+
+requirements:
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees on or next to the site that could be affected.
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    confidence: medium
+    notes: "Audit (wrong_trigger): 'All strategic sites' is the Travel Plan trigger. From the audit: trees
+      on or next to the site that could be affected."
+
+  - id: travel-plan
+    action: update
+    required-if:
+      site:
+        in: [strategic-allocation]
+        description: All strategic sites.
+    source-text: "Travel Plan … When is it required? All strategic sites;"
+    notes: "The audit (wrong_trigger) confirms 'All strategic sites' is the Travel Plan's own trigger. The
+      excerpt is cut off after it."
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: Residential development of 10 or more units (Transport Statement 10-49;
+              Transport Assessment over 50).
+        - discretionary
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted the Telecoms trigger. From the audit: a Transport
+      Assessment for major residential over 50 units, major commercial, and schools, hospitals and
+      places of worship; a Transport Statement for major residential of 10-49 units or schemes
+      increasing traffic or parking. The non-residential cases are shown as officer discretion.
+
+  - id: sci
+    action: replace
+    required-if:
+      ref: major-development
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the Student Housing trigger; the SCI is for all major
+      applications."
+
+  - id: viability-assessment
+    action: replace
+    required-if: discretionary
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    must-include:
+      - item: An un-redacted viability assessment, for publication with the other application documents
+        level: should
+        source-text: An un-redacted viability assessment should be submitted for publication along with
+          the other application documents.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted flue text. From the audit: applications that fail
+      affordable housing policy on viability grounds, including S73 applications."
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      application-type:
+        in: [full, outline, reserved-matters, lbc, s73, demolition-con-area]
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): 'All major applications' is the Landscaping trigger. From the audit:
+      most applications except householder, flat extensions, adverts, prior approvals and discharge
+      of conditions; the types listed are an approximation of that.
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      ref: major-development
+    source-text: "Landscaping Strategy When is it required? All major applications;"
+    confidence: medium
+    notes: "The audit (wrong_trigger) confirms 'All major applications' is the Landscaping trigger."
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: An out of centre proposal.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">="
+            value: 2500
+            description: 2500 sqm gross floorspace and above.
+    source-text: >-
+      For out of centre proposals of 2500sqm gross floorspace and above, an impact assessment is also
+      required to demonstrate that the development would not individually or cumulatively have a
+      detrimental impact on the vitality and viability of town and local centres.
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    confidence: medium
+    notes: >-
+      The workbook's retail row quoted Planning Statement text; this wording was in its
+      'Self-build' row (audit wrong_trigger). The Retail Statement's own trigger for smaller
+      schemes isn't in the extract.
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-text: "Fire Statement: full planning applications involving relevant buildings ... 18m+ or 7+
+      storeys"
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    confidence: medium
+    notes: "Audit (wrong_app_type): filed under listed building consent with the LBC Design and Access
+      Statement text."
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+    must-include:
+      - item: For listed building consent, the design principles and concepts applied and how they take
+          account of the special architectural or historic importance of the building
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+        source-text: Design and Access Statements accompanying applications for listed building consent
+          must include an explanation of the design principles and concepts that have been applied to the
+          proposed works, and how they have taken account of the special architectural or historic
+          importance of the building;
+    confidence: low
+    notes: "The excerpt's trigger ('major developments ...') is cut off and may list more cases. The LBC
+      wording was in the workbook's Fire Statement row (audit wrong_app_type)."
+
+  - id: site-plan
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: building-works
+            value: true
+            description: Extensions to the building.
+        - condition:
+            field: new-build
+            value: true
+            description: A new building is being constructed.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: A change of use is proposed.
+        - application-type:
+            in: [pa-extension]
+    source-text: >-
+      Site Plan/ Block Plan (existing and proposed) … When is it required? All applications involving
+      extensions to the building, where a new building is being constructed, or a change of use is
+      proposed.
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook filed this general item only under prior approval. From
+      the audit: the prior notification list (larger home extensions) needs a written description
+      with dimensions, a site plan and the addresses of adjoining properties.
+
+  - id: floor-plan-proposed
+    action: update
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: must
+      - item: For change of use, floor plans indicating the extent of the use and its relationship to
+          adjacent development, for example where part of a floor or building changes use
+        level: must
+        required-if:
+          condition:
+            field: involves-change-of-use
+            value: true
+            description: A change of use is proposed.
+      - item: Each room size and overall unit sizes, for new residential accommodation including
+          conversions
+        level: must
+        required-if:
+          condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates new residential accommodation.
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: All elevations, including blank elevations (householder applications may instead confirm
+          in a statement that elevations will remain unchanged)
+        level: must
+      - item: The full elevation of the building (for flats in a larger converted property, the entire
+          elevation, not just the flat)
+        level: must
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: floodlighting
+        value: true
+        description: Outdoor floodlighting is proposed.
+    must-include:
+      - item: Conformity with the Obtrusive Light Limitations for Exterior Lighting Installations for the
+          relevant Environmental Zone (ILP Guidance Notes for the Reduction of Obtrusive Lighting)
+        level: must
+      - item: Any possible effects on wildlife sensitive to lighting, e.g. bats
+        level: must
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Includes noise generating sources or activities.
+        - condition:
+            field: plant-equipment
+            value: true
+            description: Includes plant and/or machinery.
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+    notes: "Any application with a potential adverse impact on the sunlight/daylight of adjoining properties
+      or buildings, including gardens or amenity space."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: All sites with evidence of land contamination.
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, conservation-area, scheduled-monument, park-and-garden]
+            description: All applications involving designated heritage assets.
+    notes: "The excerpt's list of assets is cut off. The audit (missing_requirement) says the householder
+      and advertisement checklists also ask for a heritage statement."
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Any application for masts and/or antennae by mobile phone network operators.
+    must-include:
+      - item: The area of search
+        level: must
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: New residential development.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: Non-residential development of 1,000 sq m or more.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: Conversions and changes of use.
+        - site:
+            in: [strategic-allocation]
+            description: Strategic sites.
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    confidence: medium
+    notes: "From the audit (missing_requirement): Sustainability and Energy Statement - new residential,
+      non-residential 1,000 sq m+, conversions/changes of use, strategic sites."
+
+  - id: construction-management-plan
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    confidence: medium
+    notes: "From the audit (missing_requirement): a draft Demolition and/or Construction Environment
+      Management Plan for major schemes and others with air, noise or traffic impacts during works."
+
+unmapped:
+  - local-name: Self build and custom housing statement
+    source-text: "From the audit: developments with more than one self/custom build plot"
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    suggested-id: self-build-statement
+  - local-name: Coal Mining Risk Assessment
+    source-text: "From the audit: sites in Coal Authority Development High Risk Areas"
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    suggested-id: ""
+  - local-name: Crime Prevention / Secured by Design
+    source-text: "From the audit: all major applications, and ATMs"
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    suggested-id: crime-prevention-statement
+  - local-name: Evidence for certificates of lawfulness (existing use)
+    source-text: "Council tax bills (all sensitive information must be redacted) Utility bills (all
+      sensitive information must be redacted) Sworn affidavits (all sensitive information must be
+      redacted)"
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    suggested-id: lawful-development-evidence
+  - local-name: Sustainable Drainage / Drainage Strategy
+    source-text: "From the audit: major and minor applications, except householder under 50 sq m and
+      changes of use"
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    suggested-id: drainage-strategy
+  - local-name: Habitats Regulation Assessment
+    source-text: "Housing development on unallocated sites within the zone of influence of Strensall Common
+      Special Area of Conservation (SAC); and For any development which might affect a European site
+      (SSSI, SAC, SPA or Ramsar)."
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    suggested-id: habitats-regulations-assessment
+  - local-name: Accessibility Statement
+    source-text: "From the audit: major residential full/reserved matters, public buildings, new public
+      spaces"
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    suggested-id: accessibility-statement
+  - local-name: Built Sports Facilities Needs Assessment
+    source-text: "From the audit: loss of built sports facilities, or residential on Strategic Sites"
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    suggested-id: ""
+  - local-name: Burial Ground Need Assessment
+    source-text: "From the audit: use of land as a burial or memorial ground"
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    suggested-id: ""
+  - local-name: Childcare Provision Assessment
+    source-text: "From the audit: loss of or new childcare facilities; strategic/allocated residential sites"
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    suggested-id: ""
+  - local-name: Community Facilities Assessment
+    source-text: "All applications resulting in the loss of allocated or existing land or facilities in a
+      community use; and"
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    suggested-id: community-facilities-statement
+  - local-name: Cultural Wellbeing Plan
+    source-text: "From the audit: strategic sites"
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    suggested-id: ""
+  - local-name: Delivery and Servicing Management Plan (draft)
+    source-text: "Any application likely to result in a significant number of deliveries or servicing
+      movements."
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    suggested-id: delivery-servicing-plan
+  - local-name: Economic Statement
+    source-text: "From the audit: loss of employment land or buildings"
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    suggested-id: economic-statement
+  - local-name: Foul Sewage
+    source-text: "From the audit: major developments connecting to the foul network"
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    suggested-id: foul-sewage-assessment
+  - local-name: Healthcare Services
+    source-text: "From the audit: loss of primary or secondary care facilities"
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    suggested-id: ""
+  - local-name: Healthy Places Statement
+    source-text: "From the audit: major residential, including communal establishments"
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    suggested-id: ""
+  - local-name: Housing Statement
+    source-text: "From the audit: new residential development of 1+ dwellings"
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    suggested-id: housing-mix-statement
+  - local-name: Local Affordable Housing Need Assessment
+    source-text: "From the audit: rural exception sites in the Green Belt"
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    suggested-id: ""
+  - local-name: Masterplan
+    source-text: "From the audit: strategic sites"
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    suggested-id: ""
+  - local-name: Student Housing Need Assessment
+    source-text: "All proposals for Purpose Built Student Accommodation located off campus."
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    suggested-id: student-housing-management-plan
+  - local-name: Advertisement consent drawings
+    source-text: "From the audit: existing elevations/photos, advert drawings with colours, materials and
+      illumination, sections showing the fixing, and a heritage statement"
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    suggested-id: advertisement-drawings
+  - local-name: Marked-up composite of approved plans (S96a and S73)
+    source-text: "A composite document containing marked-up versions of the approved plans (at A3 or A4 size
+      and not necessarily to scale) to visually show each proposed amendment against the relevant
+      existing and consented part of development, for information and comparison purposes."
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    suggested-id: amendment-documents
+  - local-name: Draft S106 in track changes (S73)
+    source-text: "From the audit: for S73 applications where a S106 agreement exists"
+    source-url: https://www.york.gov.uk/downloads/file/2748/validation-requirements-for-planning-and-other-applications
+    suggested-id: planning-obligations-heads-of-terms
+
+low-confidence:
+  - id: recreation-facilities-assessment
+    note: "Audit (wrong_trigger): the excerpt is Planning Statement text, not the Play Space Strategy
+      trigger; re-read the list."
+  - id: environmental-statement
+    note: "The excerpt ('scale or EIA development).') is a fragment of the paper-copy submission text, not a
+      trigger."

@@ -1,0 +1,334 @@
+# Corrections for Sevenoaks District Council, from inputs/audit/sevenoaks-district-council.json.
+# The workbook captured no requirements (it linked the generic "apply for planning permission"
+# page and wrongly marked the list unreadable). The audit read the current checklists
+# (Householder, revision September 2026; Planning Permission, revision October 2026) and listed
+# the local requirements below. Most items use the audit's paraphrase, not the council's words.
+# The build already takes the list URL and date from the audit (current_url, current_date).
+local-authority: SEV
+
+requirements:
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: There are trees on or next to the site.
+        - any:
+            - site:
+                in: [tree-preservation-zone, conservation-area, ancient-woodland]
+                description: >-
+                  The trees are protected by a Tree Preservation Order or are in a Conservation
+                  Area, or the site is in Ancient Woodland or its 15m buffer.
+            - condition:
+                field: veteran-trees
+                value: true
+                description: There are ancient or veteran trees on or next to the site.
+    source-url: https://www.sevenoaks.gov.uk/downloads/download/1057/planning_validation_checklists
+    must-include:
+      - item: Assessment to BS5837
+        level: must
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Arboricultural Assessment (BS5837) where trees are
+      protected by a TPO, in a Conservation Area, in Ancient Woodland including its 15m buffer,
+      or are Ancient/Veteran trees (householder checklist). The Planning Permission checklist also
+      lists an Arboricultural Assessment; the audit gives no separate trigger for it.
+
+  - id: cil-form
+    action: add
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [hh]
+            - any:
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: The gross internal floor space increases by 100 square metres or 
+                      more.
+                - condition:
+                    field: residential-annexe
+                    value: true
+                    description: The proposal includes a residential annexe.
+        - all:
+            - application-type:
+                in: [full]
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: The proposal creates new homes, including by change of use to a 
+                      dwelling.
+                - condition:
+                    field: residential-extension
+                    value: true
+                    description: The proposal includes a residential extension or outbuilding.
+                - condition:
+                    field: floorspace-non-residential
+                    operator: ">="
+                    value: 100
+                    description: The proposal includes 100 square metres or more of retail 
+                      floorspace.
+    source-url: https://www.sevenoaks.gov.uk/downloads/download/1057/planning_validation_checklists
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): householder - where gross internal floor space
+      increases by 100 sqm or more, or for any residential annexe; full - new homes, change of use
+      to a dwelling, residential extensions and outbuildings, retail of 100 sqm or more.
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full]
+        - any:
+            - site:
+                in: [site-of-special-scientific-interest, special-protection-area, 
+                      local-wildlife-site]
+                description: The site is in or next to a designated site.
+            - discretionary
+    source-url: https://www.sevenoaks.gov.uk/downloads/download/1057/planning_validation_checklists
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Ecology Reports (Preliminary Ecological Appraisal and
+      surveys) where the site is in or adjacent to designated sites, meadows, grassland, mature
+      trees, woodland or ponds, or the proposal alters rural or older buildings. The habitat
+      features have no field, so they are shown as officer discretion.
+
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full]
+        - any:
+            - site:
+                in: [flood-risk-zone]
+                description: The site is in Flood Zone 2 or 3.
+            - condition:
+                field: site-area-residential
+                operator: ">"
+                value: 1
+                description: The site is over 1 hectare (in Flood Zone 1).
+            - condition:
+                field: site-area-non-residential
+                operator: ">"
+                value: 1
+                description: The site is over 1 hectare (in Flood Zone 1).
+            - discretionary
+    source-url: https://www.sevenoaks.gov.uk/downloads/download/1057/planning_validation_checklists
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Flood Zone 2/3, or Flood Zone 1 over 1ha, or at risk
+      from other sources of flooding (shown as officer discretion).
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full]
+        - site:
+            in: [conservation-area, listed-building, listed-building-setting, 
+                  locally-listed-building, scheduled-monument]
+            description: >-
+              The site is within or next to a designated area, affects a statutory or locally
+              listed building or its setting, or is within the setting of a scheduled monument.
+    source-url: https://www.sevenoaks.gov.uk/downloads/download/1057/planning_validation_checklists
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): within or adjacent to a designated area, affecting a
+      statutory or locally listed building or its setting, or within the setting of a scheduled
+      monument.
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full]
+        - any:
+            - condition:
+                field: noise-sensitive-use
+                value: true
+                description: The site is near commercial or industrial uses, main roads or railways.
+            - condition:
+                field: plant-equipment
+                value: true
+                description: The proposal includes air source heat pumps or air conditioning.
+    source-url: https://www.sevenoaks.gov.uk/downloads/download/1057/planning_validation_checklists
+    must-include:
+      - item: Assessment to BS4142 for air source heat pumps or air conditioning
+        level: must
+        required-if:
+          condition:
+            field: plant-equipment
+            value: true
+            description: The proposal includes air source heat pumps or air conditioning.
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): near commercial/industrial uses, main roads or
+      railways, or where air source heat pumps or air conditioning are proposed (BS4142).
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - any:
+            - ref: major-development
+            - condition:
+                field: floorspace
+                operator: ">"
+                value: 1000
+                description: The development is over 1,000 square metres.
+    source-url: https://www.sevenoaks.gov.uk/downloads/download/1057/planning_validation_checklists
+    confidence: medium
+    notes: "From the audit (missing_requirement): major development, or other development over 1000 sqm."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - site:
+            in: [contaminated-land]
+            description: The site has an industrial, commercial or agricultural history.
+    source-url: https://www.sevenoaks.gov.uk/downloads/download/1057/planning_validation_checklists
+    must-include:
+      - item: Phase 1 assessment as a minimum
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): sites with industrial, commercial or agricultural history;
+      Phase 1 minimum."
+
+  - id: design-and-access-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: The proposal includes new or replacement dwellings, including by change
+                  of use.
+            - ref: major-development
+            - condition:
+                field: floorspace-non-residential
+                operator: ">="
+                value: 100
+                description: The proposal includes 100 square metres or more of commercial 
+                  floorspace.
+    source-url: https://www.sevenoaks.gov.uk/downloads/download/1057/planning_validation_checklists
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): all new or replacement dwellings including change of
+      use, major development, commercial of 100 sqm or more.
+
+  - id: fire-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-url: https://www.sevenoaks.gov.uk/downloads/download/1057/planning_validation_checklists
+    confidence: medium
+    notes: "From the audit (missing_requirement): 2 or more dwellings or educational accommodation at
+      18m or more, or 7 or more storeys."
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 10
+                description: The development proposes 10 or more residential units.
+            - all:
+                - site:
+                    in: [designated-rural-area]
+                    description: The site is in a Designated Rural Area.
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 6
+                    description: The development proposes 6 or more residential units.
+    source-text: Affordable Housing provision required where the development proposes 10 or more 
+      residential units
+    source-url: https://www.sevenoaks.gov.uk/downloads/download/1057/planning_validation_checklists
+    confidence: medium
+    notes: "From the audit (missing_requirement): S106 Affordable Housing for 10 or more units, or 6 or
+      more in a Designated Rural Area."
+
+  - id: viability-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - discretionary
+    policy: SP3
+    source-url: https://www.sevenoaks.gov.uk/downloads/download/1057/planning_validation_checklists
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Financial Viability Report where affordable housing is
+      not proposed or the policy SP3 / SPD requirements are not met.
+
+unmapped:
+  - local-name: Ancient Woodland and Ancient/Veteran Trees information
+    source-text: "From the audit: Ancient Woodland (including its 15m buffer) and Ancient/Veteran Trees
+      information, householder and planning permission checklists"
+    source-url: https://www.sevenoaks.gov.uk/downloads/download/1057/planning_validation_checklists
+    suggested-id: ancient-woodland-assessment
+  - local-name: Drainage Assessment
+    source-text: "From the audit: householder - non-mains drainage; planning permission - major development,
+      or non-mains drainage"
+    source-url: https://www.sevenoaks.gov.uk/downloads/download/1057/planning_validation_checklists
+    suggested-id: drainage-strategy
+  - local-name: Metropolitan Green Belt Information
+    source-text: "Any application for works to a dwelling or to an outbuilding within 5m of the dwelling"
+    source-url: https://www.sevenoaks.gov.uk/downloads/download/1057/planning_validation_checklists
+    suggested-id: green-belt-statement
+  - local-name: Structural Survey
+    source-text: "From the audit: conversion of agricultural or rural buildings"
+    source-url: https://www.sevenoaks.gov.uk/downloads/download/1057/planning_validation_checklists
+    suggested-id: structural-survey
+

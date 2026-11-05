@@ -1,0 +1,334 @@
+# Corrections for North Devon District Council, from the audit of North Devon.
+# The list is the joint North Devon / Torridge Local List (in effect from 1 November 2022), with a
+# Local List Matrix (September 2023) giving application types. The audit could not fetch the PDF
+# (robots-blocked), so contents were only partly checked: this file drops the clearly misfiled rows
+# and structures the triggers the workbook excerpts state plainly ("When is this required?").
+local-authority: NDE
+
+submission-standards:
+  - item: A linear scale bar on the location plan, block plan and site plan
+    level: should
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is tree text ('associated arboricultural method statement.')"
+  - id: fire-statement
+    reason: "not_a_requirement: a national requirement; the excerpt is the national form's content list"
+  - id: design-and-access-statement
+    reason: "not_a_requirement: the list restates the national requirement; national rules apply"
+
+drop-unmapped:
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_app_type: placed under exactly the types the source excludes; re-added once below"
+  - local-name: Advertisement drawings / illumination details
+    reason: "duplicate: carries the Lighting Impact Assessment (item 21) text"
+  - local-name: Character / Conservation area appraisal reference
+    reason: "duplicate: carries the Lighting Impact Assessment (item 21) text"
+  - local-name: Pre-application advice / engagement details
+    reason: "wrong_trigger: carries the Air Quality (item 2) text"
+  - local-name: Drainage Strategy / SuDS
+    reason: "duplicate: same item 13 Foul Drainage Assessment text as Foul Sewage / Utilities Statement"
+  - local-name: Minerals / Waste specific statements (county matters)
+    reason: "wrong_trigger: this is the Waste Audit Statement (item 36), now in waste-management-plan"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: location/block plan content boilerplate"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "The criteria and thresholds are in Tables 1 and 2 of the North Devon and Torridge Air Quality
+      SPD, not in the list itself."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees, hedgerows or significant shrub masses within the site or on adjacent land
+          (including street trees) could be influenced or affected by the development.
+    confidence: medium
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      site:
+        in: [archaeological-priority-area]
+        description: The site includes or has the potential to include heritage assets with archaeological
+          interest.
+    confidence: medium
+
+  - id: biodiversity-survey-report
+    action: replace
+    source-url: https://www.northdevon.gov.uk/media/382034/local-list-november-2022.pdf
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook excerpt was the Archaeological Assessment (item 4) text.
+      The list refers to Natural England's Standing Advice for Protected Species, but the ecology trigger
+      wasn't captured."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development falls within Schedule 1 or 2 of the EIA Regulations 2017.
+    confidence: medium
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The development is within, in whole or in part, flood zone 2 and/or flood zone 3.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (in any flood zone).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (in any flood zone).
+        - site:
+            in: [critical-drainage-area]
+            description: The development is within a critical drainage area.
+    confidence: medium
+    notes: "'All planning applications for' these cases, so it applies beyond Full planning (audit
+      wrong_app_type)."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [conservation-area, listed-building, listed-building-setting, locally-listed-building,
+              scheduled-monument, park-and-garden]
+            description: The development is within or affects a conservation area (including demolition),
+              or may affect the significance of any heritage asset, including its setting.
+    source-text: "checklist 17) Heritage Statement (Statement of Significance) When it this required?
+      listed building consent applications; major planning applications within or otherwise affecting
+      conservation areas; planning applications for developments within conservation areas, including
+      demolition; where the proposal would materially affect its character or appearance; and planning
+      applications that may affect the significance of any heritage asset, including its setting."
+    source-url: https://www.northdevon.gov.uk/media/382034/local-list-november-2022.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook placed it under Listed building consent only."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      all:
+        - site:
+            in: [contaminated-land]
+            description: Contamination is known or suspected, or the site is in the vicinity of such land
+              and ground works are proposed.
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: A sensitive or vulnerable end user, such as allotments, residential development
+              (including residential rural building conversions), schools or hospitals.
+    confidence: medium
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    confidence: medium
+    notes: "Major development, and minor development likely to affect the existing landscape character or
+      appearance of the site (shown as officer discretion)."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - condition:
+                field: external-lighting
+                value: true
+                description: The development includes external lighting or illumination.
+        - condition:
+            field: floodlighting
+            value: true
+            description: Floodlighting, or external lighting for sports pitches, car parks, illumination of
+              buildings, work areas and security lighting.
+    confidence: medium
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The development has the potential to raise issues of disturbance.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: The development is noise sensitive.
+    confidence: medium
+
+  - id: photos
+    action: update
+    must-include:
+      - item: All photographs fully annotated showing where the proposed development would cut into the
+          building
+        level: must
+
+  - id: planning-statement
+    action: update
+    required-if:
+      ref: major-development
+    must-include:
+      - item: A discussion of how the development relates to national policy and the development plan
+          policies
+        level: must
+    confidence: medium
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: loss-of-open-space
+            value: true
+            description: The proposal would result in the loss or relocation of, or would prejudice the value
+              of, existing open space.
+        - discretionary
+    confidence: low
+    notes: "Residential and listed non-residential use classes that generate a need for open space can't
+      be expressed as a rule, so that branch is officer discretion. The excerpt is cut off (audit)."
+
+  - id: sci
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: wind-turbine-count
+            operator: ">="
+            value: 2
+            description: Wind farm development of two or more turbines.
+        - condition:
+            field: turbine-hub-height
+            operator: ">"
+            value: 15
+            description: The turbine hub height is greater than 15 metres.
+    source-text: "28) Pre-application Consultation Statement When is this required? wind farm development
+      proposals for two or more turbines, or where the turbine hub height is greater than 15 metres."
+    source-url: https://www.northdevon.gov.uk/media/382034/local-list-november-2022.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): this is the Pre-application Consultation Statement for wind farms, not a
+      general Statement of Community Involvement."
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      ref: major-development
+    confidence: medium
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Major development that generates significant traffic movements, or other development that
+      creates or exacerbates a traffic problem or affects the local highway network."
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "As transport-assessment."
+
+  - id: site-plan
+    action: update
+    required-if:
+      condition:
+        field: footprint-increase
+        value: true
+        description: The proposal will alter an existing building/structure footprint or create a new one.
+    must-include:
+      - item: Block plan at 1:500 or site plan at 1:200, based on an up-to-date map
+        level: must
+      - item: The proposed development within the context of existing
+        level: must
+      - item: Any existing or proposed vehicle parking spaces and areas
+        level: must
+      - item: The species, position and spread of all trees on the site, and those on adjacent land that
+          overhang the site
+        level: must
+      - item: A north point
+        level: must
+      - item: The scale used, a scale bar and one significant measurement
+        level: must
+    confidence: medium
+    notes: "Contents are from the council's site plan notes in the workbook's drawing standards tab."
+
+  - id: viability-assessment
+    action: update
+    must-include:
+      - item: A full, un-redacted viability assessment, to be published in full like other application
+          documents except in exceptional circumstances
+        level: must
+    notes: "The excerpt is cut off mid-sentence (audit wrong_trigger)."
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      ref: major-development
+    source-text: "36) Waste Audit Statement When is this required? major development proposals What
+      information is required? The statement should demonstrate how through the demolition, construction
+      and operational phases of development, waste generated on site has been minimised and that it will
+      be managed in accordance with the waste hierarchy."
+    source-url: https://www.northdevon.gov.uk/media/382034/local-list-november-2022.pdf
+    must-include:
+      - item: How waste generated on site through the demolition, construction and operational phases has
+          been minimised and will be managed in accordance with the waste hierarchy
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's refuse row carried Ventilation/Extraction text; the Waste
+      Audit Statement was filed under minerals/waste."
+
+unmapped:
+  - local-name: Coal Mining Risk Assessment
+    source-text: "Coal Mining Risk Assessment When is this required? development proposals located in an
+      area defined as “high risk area” by the Coal Authority, other than: householder development,
+      heritage consents (listed building and conservation area consent, lawful development certificates,
+      prior notification (any type) hazardous substances consents and tree or hedgerow works (TPO in a
+      conservation area)."
+    source-url: https://www.northdevon.gov.uk/media/382034/local-list-november-2022.pdf
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Crime and Disorder Statement
+    source-text: "major development proposals; the provision or alteration of a take-away; the provision or
+      alteration of a public house or licensed premises; and public toilets"
+    source-url: https://www.northdevon.gov.uk/media/382034/local-list-november-2022.pdf
+    suggested-id: crime-prevention-statement
+
+low-confidence:
+  - id: town-centre-impact-assessment
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('other main town centre uses.')."
+  - id: section-existing
+    note: "Audit (wrong_trigger): the excerpt is a fragment about finished floor and flood levels, likely
+      from the Flood Risk Assessment item."
+  - id: section-proposed
+    note: "Audit (wrong_trigger): as section-existing."
+  - id: bng-metric
+    note: "The excerpt says requirements vary site by site; no trigger was captured."
+
+new-fields:
+  - field: wind-turbine-count
+    kind: number
+    label: Wind turbines
+    description: Number of wind turbines proposed.
+  - field: turbine-hub-height
+    kind: number
+    label: Turbine hub height (m)
+    description: Hub height of the proposed wind turbine(s), in metres.

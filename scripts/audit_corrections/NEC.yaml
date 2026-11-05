@@ -1,0 +1,398 @@
+# Corrections for Newcastle-under-Lyme Borough Council, from
+# inputs/audit/newcastle-under-lyme-borough-council.json.
+# Grokbot links the council's only published list, the List of Local Validation Requirements
+# (1 October 2023), still titled 'Draft' on the download page. By November 2026 it is more than two
+# years old with no published review; the council's own LLVR page says an unreviewed list's
+# requirements 'will have no bearing' on validity (DMPO art. 34(6)).
+# Every Full planning row was marked INFERRED, and most excerpts are page footers, policy-driver
+# text or the wrong item; the source's 'TYPES OF APPLICATIONS AND GEOGRAPHIC LOCATION(S)' column
+# gives each item's scope. Items marked "From the audit" use the audit's paraphrase of that column.
+local-authority: NEC
+
+drop:
+  - id: design-and-access-statement
+    reason: "not_a_requirement: a national requirement, quoted from a 'can be included within the DAS' note"
+  - id: environmental-statement
+    reason: "not_a_requirement: the excerpt is a sentence from the agricultural land item"
+  - id: site-plan
+    reason: "duplicate: the excerpt is the Parking Provision Details / railway-boundary text"
+
+drop-unmapped:
+  - local-name: Advertisement drawings / illumination details
+    reason: "not_a_requirement: a Lighting Assessment fragment ('hours of illumination during the summer
+      and winter. 2.')"
+  - local-name: Highways / access details (visibility splays)
+    reason: "duplicate: part of Parking Provision Details (re-added below)"
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_trigger: quoted only the policy driver; re-added below with the trigger"
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "wrong_trigger: the excerpt is the page footer; re-added below"
+  - local-name: Agricultural Land Classification / Soils
+    reason: "wrong_trigger: the excerpt is the page footer; re-added below"
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_trigger: the excerpt is a table header; re-added below"
+  - local-name: Design Code / Masterplan / Parameter plans
+    reason: "wrong_trigger: the item is the Landscape Master Plan and the excerpt is a footer; re-added below"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: the excerpt is the sequential-test sentence; re-added below"
+  - local-name: Foul Sewage / Utilities Statement
+    reason: "wrong_trigger: fragment ('surface water/foul waters away from the railway'); re-added below"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: the excerpt is the Noise and Odour Assessment for new dwellings near a Waste
+      Water Treatment Works; re-added below"
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "misnamed: the source item is 'Biodiversity survey and report' (biodiversity-survey-report)"
+
+requirements:
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (Flood Zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (Flood Zone 1).
+        - site:
+            in: [flood-risk-zone]
+            description: All new development in Flood Zones 2 and 3, including minor development and
+              changes of use.
+        - site:
+            in: [critical-drainage-area]
+            description: The site is in a critical drainage area.
+    source-text: >-
+      Sites of 1ha+ in Flood Zone 1; all new development in Flood Zones 2 and 3 (including minor
+      development and changes of use)
+    source-url:
+      https://www.newcastle-staffs.gov.uk/downloads/file/1938/draft-list-of-local-validation-requirements-1-october-2023-
+    must-include:
+      - item: Whether the proposed development is likely to be affected by current or future flooding
+          from any source
+        level: must
+      - item: That the development is safe and where possible reduces flood risk overall
+        level: must
+      - item: Whether it will increase flood risk elsewhere
+        level: must
+      - item: The measures proposed to deal with these effects and risks
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted 'what information is required' instead of the
+      trigger. Critical drainage areas are from the audit's summary. It applies to householder
+      applications too (audit issue 3).
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters, change-of-use]
+        - any:
+            - site:
+                in: [contaminated-land]
+                description: Land contamination can reasonably be expected on or adjacent to the site.
+            - site:
+                in: [near-landfill-site]
+                description: Active or closed landfill sites within 250 metres of the site.
+    source-text: >-
+      developments) where land contamination can reasonably be expected to be found on or adjacent
+      to the development site (e.g. activities for which DOE industry profiles have been developed,
+      active or closed landfill sites within 250 metres of the development site, coal seams under
+      the development site, areas of infilled land, petrol stations, industrial land, waste sites,
+      transport depots and yards, cleared sites, agricultural to residential conversions).
+    source-url:
+      https://www.newcastle-staffs.gov.uk/downloads/file/1938/draft-list-of-local-validation-requirements-1-october-2023-
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): filed under county minerals & waste, but the item (Land Contamination
+      Preliminary Risk Assessment) applies to 'All non-householder applications' where
+      contamination is reasonably expected. The rules can't say "not householder", so the main
+      non-householder types are listed.
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 1
+        description: The proposal creates one or more new dwellings.
+    source-text: "Waste and Recycling Management: All new dwellings"
+    source-url:
+      https://www.newcastle-staffs.gov.uk/downloads/file/1938/draft-list-of-local-validation-requirements-1-october-2023-
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook row quoted the Waste Management Facilities Safeguarding
+      Statement (now unmapped below) under county minerals & waste; the real refuse item is Waste
+      and Recycling Management for all new dwellings.
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: A noise or vibration-sensitive use or location.
+        - discretionary
+    must-include:
+      - item: Follows recognised assessment protocols where available, or an approach agreed in advance
+          with Environmental Health
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted method text. From the audit: wind turbines and
+      noise/vibration-sensitive uses or locations; wind turbines have no field, so they are covered
+      by officer discretion.
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: The proposal is likely to affect protected species.
+        - site:
+            in: [local-wildlife-site, priority-habitat]
+            description: The proposal is likely to affect locally designated sites or priority habitats.
+        - discretionary
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the source's trigger is a long list; the workbook kept fragments
+      ('to affect protected species, locally designated sites and priority habitats and species';
+      'Proposals affecting former quarries and natural cliff faces and rock outcrops with crevices,
+      caves or other fissures'). The rest is shown as officer discretion; re-read the list.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [tree-preservation-zone]
+            description: Trees protected by a tree preservation order are affected.
+        - discretionary
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted only the policy driver. From the audit: the item
+      also applies to householder applications where TPO trees are affected; the full trigger
+      wasn't given.
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 15
+            description: Urban area - 15 or more dwellings.
+        - all:
+            - site:
+                in: [rural-area]
+                description: The site is in the rural area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 10
+                    description: Rural area - 10 or more dwellings.
+                - discretionary
+    source-url:
+      https://www.newcastle-staffs.gov.uk/downloads/file/1938/draft-list-of-local-validation-requirements-1-october-2023-
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): urban 15+ dwellings; rural 10+ dwellings or more than
+      1,000m3; rural exception sites. The volume and exception-site cases have no field, so they
+      are shown as officer discretion.
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, demolition-con-area]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+              scheduled-monument, park-and-garden]
+            description: Development affecting designated or non-designated heritage assets or their
+              settings.
+    source-url:
+      https://www.newcastle-staffs.gov.uk/downloads/file/1938/draft-list-of-local-validation-requirements-1-october-2023-
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Heritage Asset Statement for development affecting
+      designated or non-designated heritage assets or their settings, including LBC and householder."
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: The proposal creates 10 or more dwellings.
+        - site:
+            in: [open-space]
+            description: The proposal affects open space or sports facilities.
+    source-url:
+      https://www.newcastle-staffs.gov.uk/downloads/file/1938/draft-list-of-local-validation-requirements-1-october-2023-
+    confidence: medium
+    notes: "From the audit (missing_requirement): Open Space Assessment for 10+ dwellings or development
+      affecting open space/sports facilities."
+
+  - id: sci
+    action: add
+    required-if:
+      ref: major-development
+    source-text: "All major applications"
+    source-url:
+      https://www.newcastle-staffs.gov.uk/downloads/file/1938/draft-list-of-local-validation-requirements-1-october-2023-
+    confidence: medium
+    notes: "From the audit (missing_requirement): Statement of Community Involvement for all major
+      applications and major changes of use."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: All telecommunications development, including prior approvals.
+    source-url:
+      https://www.newcastle-staffs.gov.uk/downloads/file/1938/draft-list-of-local-validation-requirements-1-october-2023-
+    confidence: medium
+    notes: "From the audit (missing_requirement): Telecommunications Supplementary Information for all
+      telecoms development, including prior approval types."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: A main town centre use outside a defined centre.
+    source-url:
+      https://www.newcastle-staffs.gov.uk/downloads/file/1938/draft-list-of-local-validation-requirements-1-october-2023-
+    must-include:
+      - item: Sequential test
+        level: must
+      - item: Impact assessment
+        level: must
+        required-if:
+          condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 2500
+            description: Retail, leisure or office floorspace over 2,500 square metres.
+    confidence: low
+    notes: "From the audit (missing_requirement): Town Centre Uses Evidence - sequential test; impact
+      assessment for retail/leisure/office over 2,500m2. The out-of-centre trigger is inferred from
+      'sequential test'."
+
+  - id: transport-assessment
+    action: add
+    required-if: discretionary
+    source-url:
+      https://www.newcastle-staffs.gov.uk/downloads/file/1938/draft-list-of-local-validation-requirements-1-october-2023-
+    confidence: medium
+    notes: "From the audit (missing_requirement): applications likely to generate significant traffic."
+
+  - id: travel-plan
+    action: add
+    required-if: discretionary
+    source-url:
+      https://www.newcastle-staffs.gov.uk/downloads/file/1938/draft-list-of-local-validation-requirements-1-october-2023-
+    confidence: medium
+    notes: "From the audit (missing_requirement): applications likely to generate significant traffic."
+
+unmapped:
+  - local-name: Parking Provision Details
+    source-text: "Outline applications where layout is not reserved; all other applications involving
+      parking"
+    source-url:
+      https://www.newcastle-staffs.gov.uk/downloads/file/1938/draft-list-of-local-validation-requirements-1-october-2023-
+    suggested-id: parking-plan
+  - local-name: Agricultural workers' dwelling appraisal
+    source-text: "From the audit: new agricultural workers' dwellings"
+    source-url:
+      https://www.newcastle-staffs.gov.uk/downloads/file/1938/draft-list-of-local-validation-requirements-1-october-2023-
+    suggested-id: rural-workers-dwelling-appraisal
+  - local-name: Agricultural Land Quality Assessment
+    source-text: "From the audit: development on Grade 1, 2 or 3a agricultural land"
+    source-url:
+      https://www.newcastle-staffs.gov.uk/downloads/file/1938/draft-list-of-local-validation-requirements-1-october-2023-
+    suggested-id: agricultural-land-classification
+  - local-name: Coal Mining Risk Assessment
+    source-text: "From the audit: sites in Coal Mining Referral Areas, excluding Coal Authority exemptions"
+    source-url:
+      https://www.newcastle-staffs.gov.uk/downloads/file/1938/draft-list-of-local-validation-requirements-1-october-2023-
+    suggested-id: ""
+  - local-name: Landscape Master Plan
+    source-text: "From the audit: strategic major development; non-householder development in or adjacent
+      to the Green Heritage Network and the rural area"
+    source-url:
+      https://www.newcastle-staffs.gov.uk/downloads/file/1938/draft-list-of-local-validation-requirements-1-october-2023-
+    suggested-id: ""
+  - local-name: Sustainable drainage / Drainage Strategy
+    source-text: "From the audit: major development; sites of 0.5ha+ in critical drainage areas; canal buffer
+      zones"
+    source-url:
+      https://www.newcastle-staffs.gov.uk/downloads/file/1938/draft-list-of-local-validation-requirements-1-october-2023-
+    suggested-id: drainage-strategy
+  - local-name: Foul Sewage Assessment
+    source-text: "From the audit: major development, trade waste, or non-mains foul disposal"
+    source-url:
+      https://www.newcastle-staffs.gov.uk/downloads/file/1938/draft-list-of-local-validation-requirements-1-october-2023-
+    suggested-id: foul-sewage-assessment
+  - local-name: Noise and Odour Assessment (Waste Water Treatment Works)
+    source-text: "noise and odour arising of from the Waste Water Treatment Works and the implications of
+      introducing new sensitive receptors within close proximity."
+    source-url:
+      https://www.newcastle-staffs.gov.uk/downloads/file/1938/draft-list-of-local-validation-requirements-1-october-2023-
+    suggested-id: odour-assessment
+  - local-name: Waste Management Facilities Safeguarding Statement
+    source-text: "From the audit: district development that might constrain a permitted waste management
+      facility"
+    source-url:
+      https://www.newcastle-staffs.gov.uk/downloads/file/1938/draft-list-of-local-validation-requirements-1-october-2023-
+    suggested-id: minerals-waste-statement
+  - local-name: Community Infrastructure Statement
+    source-text: "From the audit: Loggerheads Neighbourhood Plan area, 10+ dwellings or more than 0.5ha"
+    source-url:
+      https://www.newcastle-staffs.gov.uk/downloads/file/1938/draft-list-of-local-validation-requirements-1-october-2023-
+    suggested-id: ""
+  - local-name: Design Review
+    source-text: "Design Review: All major applications"
+    source-url:
+      https://www.newcastle-staffs.gov.uk/downloads/file/1938/draft-list-of-local-validation-requirements-1-october-2023-
+    suggested-id: design-review
+  - local-name: Hedgerow Assessment
+    source-text: "From the audit: removal of hedgerows needing consent"
+    source-url:
+      https://www.newcastle-staffs.gov.uk/downloads/file/1938/draft-list-of-local-validation-requirements-1-october-2023-
+    suggested-id: ""
+  - local-name: Landscape / Visual Impact Assessment
+    source-text: "From the audit: major development in the rural area"
+    source-url:
+      https://www.newcastle-staffs.gov.uk/downloads/file/1938/draft-list-of-local-validation-requirements-1-october-2023-
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Structural Survey
+    source-text: "From the audit: reuse of rural buildings; demolition of listed buildings or of unlisted
+      buildings in conservation areas"
+    source-url:
+      https://www.newcastle-staffs.gov.uk/downloads/file/1938/draft-list-of-local-validation-requirements-1-october-2023-
+    suggested-id: structural-survey
+
+low-confidence:
+  - id: air-quality-assessment
+    note: "Audit (wrong_trigger): the workbook quoted only the policy-driver references; the source's trigger
+      wasn't captured."
+  - id: lighting-assessment
+    note: "Audit (wrong_trigger): the workbook quoted the canal land-stability text; the source's trigger
+      wasn't captured."

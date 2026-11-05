@@ -1,0 +1,63 @@
+# Corrections for South Kesteven District Council, from inputs/audit/south-kesteven-district-council.json.
+# Grokbot's link is the generic 'Submit a planning application' step-by-step page, not a local
+# validation list. The audit found no current adopted local list; a committee appendix
+# ('Planning Applications Requirements', moderngov PLA713 appendix A) could not be fetched, so
+# this council needs a manual check before it is marked as having no local list. The audit did
+# not check the contents of any list (contents_checked: false).
+local-authority: SKE
+
+requirements:
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: The proposal creates one or more new dwellings.
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+    notes: >-
+      Trigger from the page's own wording: "required for major scale proposals or applications for
+      new dwellings if the proposal is in a conservation area".
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      site:
+        in: [conservation-area, listed-building]
+        description: The works are in a conservation area or to a listed building.
+    source-text: flood risk and heritage impact assessments may be validation requirements for 
+      certain application types
+    source-url: 
+      https://www.southkesteven.gov.uk/planning-building-control/planning-development-management/step-by-step/planning-application-0
+    confidence: low
+    notes: "From the audit (missing_requirement): a Heritage Impact Assessment for conservation area or
+      listed building works."
+
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in flood zone 2 or 3.
+    source-text: flood risk and heritage impact assessments may be validation requirements for 
+      certain application types
+    source-url: 
+      https://www.southkesteven.gov.uk/planning-building-control/planning-development-management/step-by-step/planning-application-0
+    confidence: low
+    notes: "From the audit (missing_requirement): a Flood Risk Assessment for major applications or sites
+      in Flood Zone 2/3."
+
+low-confidence:
+  - id: "*"
+    note: >-
+      Audit (other, Stands): no current adopted South Kesteven local validation list was found; the
+      source is a generic guidance page. A committee appendix ('Planning Applications Requirements',
+      moderngov.southkesteven.gov.uk/documents/s5577/PLA713 appendix A.pdf) needs a manual check.

@@ -1,0 +1,676 @@
+# Corrections for Ashfield District Council, from inputs/audit/ (Ashfield audit).
+# Grokbot recorded no requirements: it linked only the 'Apply for permission' page. The audit read
+# the three adopted April 2025 guides (householder; full and major; miscellaneous), uploaded by the
+# council on 05 September 2025, from a manual upload. Everything below comes from the audit; the
+# source-text is the guides' wording where the audit quotes it.
+# The full and major guide has separate 'minor' (1-9 dwellings, under 1,000 sq m or 1 ha) and
+# 'major' tables; items only in the major table are scoped with ref: major-development. Items in
+# the full/minor and major tables are given no application type (the outline guide applies the
+# full/major requirements to the matters being considered).
+local-authority: ASH
+
+validation-list:
+  url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+  date: 2025-04
+  date-basis: "audit: 'April 2025' on the cover of all three guides (householder:
+    /media/325jhu1k/validation-list-householder-2025-1.docx; miscellaneous:
+    /media/cw3m1dzz/validation-list-miscellaneous-2025-1.docx), uploaded 05 September 2025 as the
+    'Adopted validation list'"
+
+requirements:
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      all:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The development is residential.
+    source-text: Affordable Housing Statement | All major residential developments
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    must-include:
+      - item: The private/affordable mix, tenure and number of bedrooms
+        level: must
+      - item: The affordable units shown on the floor plans
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): the contents are the audit's summary."
+
+  - id: air-quality-assessment
+    action: add
+    required-if: discretionary
+    source-text: >-
+      Air Quality Assessment | Any proposal that could have a significant impact on air quality,
+      either directly or indirectly.
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    confidence: medium
+    notes: "From the audit (missing_requirement): in the Full and Major local lists."
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees at or adjoining the site that could be affected.
+    source-text: >-
+      Any proposal where there are trees at or adjoining the site that could be affected by the
+      proposed development.
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    must-include:
+      - item: Prepared by an arboricultural specialist
+        level: must
+      - item: Root protection zones shown on a scaled plan
+        level: must
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Tree Survey and/or Arboricultural Impact Assessment, in
+      the Householder, Full and Major local lists ('Tree Survey' for demolition in a conservation
+      area). The contents are the audit's summary.
+
+  - id: archaeological-assessment
+    action: add
+    required-if:
+      all:
+        - ref: major-development
+        - condition:
+            field: ground-disturbance
+            value: true
+            description: Disturbance of previously undisturbed ground where archaeological
+              artefacts are believed to remain.
+    source-text: >-
+      Archaeological Assessment | Any proposal which involves disturbance of previously undisturbed
+      ground where archaeological artefacts are believed to remain.
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    must-include:
+      - item: A desk-based assessment
+        level: must
+      - item: A geophysical survey
+        level: must
+        required-if: discretionary
+    confidence: medium
+    notes: "From the audit (missing_requirement): Major local list; geophysical survey 'where necessary'."
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: Development that could affect species protected under the Wildlife and
+              Countryside Act 1981, the Habitats Regulations 2010 or the Protection of Badgers Act
+              1992.
+        - site:
+            in: [priority-habitat]
+            description: Development that could affect s41 NERC Act habitats and species.
+    source-text: "Ecology / Protected Species Surveys and Report | Developments that have the potential
+      to affect: ..."
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    confidence: medium
+    notes: "From the audit (missing_requirement): in the Full, Major, Demolition in CA and LBC local lists."
+
+  - id: environmental-statement
+    action: add
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: Schedule 1 or Schedule 2 development under the EIA Regulations 2017.
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Major list. 'You should request a screening opinion
+      before submitting a planning application if the development area is over 0.5ha'.
+
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: Development of 1 hectare or more (in Flood Zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Development of 1 hectare or more (in Flood Zone 1).
+        - site:
+            in: [critical-drainage-area]
+            description: Development in a critical (drainage) area.
+        - site:
+            in: [flood-risk-zone]
+            description: All development in Flood Zones 2 and 3.
+    source-text: >-
+      All development of 1 hectare or more in Flood Zone 1, development in a critical area, all
+      development in Flood Zones 2 and 3
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    confidence: medium
+    notes: "From the audit (missing_requirement): in the Householder, Full minor and Major local lists."
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area,
+              locally-listed-building]
+            description: The application affects a listed building, conservation area or locally
+              listed building, including their setting.
+        - application-type:
+            in: [ldc-proposed-work-lb]
+    source-text: >-
+      Heritage Statement | Applications affecting a listed building, conservation area, or locally
+      listed building, including the setting of these heritage assets.
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): in the Householder, Full, Major, Demolition in CA and LBC
+      local lists, and for all Certificates of Lawfulness of Proposed Works to a Listed Building.
+      Non-designated assets are judged against the council's 'Criteria for Local Heritage Assets'.
+      The Article 4 checklist also requires it for excavations in an Archaeological Constraint area
+      and for works affecting the setting of a scheduled monument.
+
+  - id: landscaping-plan
+    action: add
+    required-if: discretionary
+    source-text: Landscaping Scheme | Applications that include external space.
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    must-include:
+      - item: Planting, materials, levels and long-term maintenance
+        level: must
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Full and Major lists. No field captures 'includes
+      external space', so it is shown as officer discretion.
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: The proposal redevelops or significantly changes the use of land that could be
+          contaminated by current or historic uses.
+    source-text: You must submit a Phase 1 contaminated land assessment.
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    must-include:
+      - item: A Phase 1 contaminated land assessment
+        level: must
+      - item: A Phase 2 report and remediation strategy
+        level: must
+        required-if: discretionary
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Full and Major lists. Phase 2 and a remediation strategy
+      where the Phase 1 recommends them, and a verification report.
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: floodlighting
+            value: true
+            description: The proposal installs floodlighting that could affect existing
+              light-sensitive uses.
+        - condition:
+            field: external-lighting
+            value: true
+            description: The proposal installs other external lighting that could affect existing
+              light-sensitive uses.
+    source-text: >-
+      Any proposal which involves the installation of flood lighting or other external lighting and
+      that lighting has the potential to impact on existing light sensitive uses.
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    confidence: medium
+    notes: "From the audit (missing_requirement): Full, Major and Advertisement consent lists."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: The development is close to existing sources of noise.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The proposal could generate significant noise levels.
+    source-text: >-
+      Noise Impact Assessment | Where developments are close to existing sources of noise, or the
+      proposal could generate significant noise levels.
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    must-include:
+      - item: Prepared by a qualified acoustician
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): Full and Major lists."
+
+  - id: photos
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [consent-under-tpo, notice-trees-in-con-area]
+        - all:
+            - application-type:
+                in: [advertising, lbc]
+            - discretionary
+    source-text: All retrospective applications | Photographs of the signage in situ.
+    source-url: https://www.ashfield.gov.uk/media/cw3m1dzz/validation-list-miscellaneous-2025-1.docx
+    must-include:
+      - item: For tree works, photographs edited to show the shape of the tree after the works, with
+          metric measurements
+        level: must
+        required-if:
+          application-type:
+            in: [consent-under-tpo, notice-trees-in-con-area]
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): photographs for all tree works applications, and for
+      retrospective advertisement applications (signage in situ) and retrospective listed building
+      consent applications (works carried out). No field captures 'retrospective', so those are shown
+      as officer discretion.
+
+  - id: planning-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [advertising, reserved-matters, s73, ldc, ldc-existing-use, ldc-prospective-use]
+    source-text: "Planning Statement | All | A planning statement justifying the design and location of
+      the advert."
+    source-url: https://www.ashfield.gov.uk/media/cw3m1dzz/validation-list-miscellaneous-2025-1.docx
+    must-include:
+      - item: Justification of the design and location of the advert
+        level: must
+        required-if:
+          application-type:
+            in: [advertising]
+      - item: How the details relate to the reserved matters
+        level: must
+        required-if:
+          application-type:
+            in: [reserved-matters]
+      - item: An explanation and justification of the removal or variation of the condition
+        level: must
+        required-if:
+          application-type:
+            in: [s73]
+      - item: Background, compliance with the Local Plan, when the use started, opening times and
+          parking
+        level: must
+        required-if:
+          application-type:
+            in: [ldc, ldc-existing-use, ldc-prospective-use]
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): all major developments; all advertisement, reserved
+      matters, s73 and LDC (existing and proposed) applications. The contents are the audit's
+      summary.
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if:
+      condition:
+        field: loss-of-open-space
+        value: true
+        description: The proposal would lose open space, including playing fields.
+    source-text: >-
+      Open Space Assessment | All applications where there would be a loss of open space, including
+      playing fields.
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    confidence: medium
+    notes: "From the audit (missing_requirement): Full and Major lists."
+
+  - id: roof-plan-existing
+    action: add
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: Roof extensions, roof terraces or dormer windows (the list also names window
+          and door replacement).
+    source-text: Roof Plans | Roof extensions, roof terraces, dormer windows and window and door
+      replacement.
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): in the National tables of the Householder, Full, Major
+      and LBC guides. 'Window and door replacement' is not captured by the rule.
+
+  - id: roof-plan-proposed
+    action: add
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: Roof extensions, roof terraces or dormer windows (the list also names window
+          and door replacement).
+    source-text: Roof Plans | Roof extensions, roof terraces, dormer windows and window and door
+      replacement.
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    must-include:
+      - item: Elevations of the whole property and roof sections
+        level: must
+      - item: For roof terraces, the nearest neighbouring windows and any privacy screens
+        level: must
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): in the National tables of the Householder, Full, Major
+      and LBC guides. The contents are the audit's summary.
+
+  - id: sci
+    action: add
+    required-if:
+      all:
+        - ref: major-development
+        - any:
+            - condition:
+                field: loss-of-open-space
+                value: true
+                description: Loss of open space or development on allotment land.
+            - condition:
+                field: loss-of-use
+                value: true
+                description: Loss of an existing community facility (such as a pub, church or
+                  community centre).
+            - discretionary
+    source-text: >-
+      a) The development involves the installation of more than two turbines b) The hub height of
+      any turbine exceeds 15 metres ...
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Major list. Triggers: wind energy with more than two
+      turbines or a hub height over 15 m; alternative uses on allocated employment sites; loss of
+      open space or development on allotment land; leisure and visitor facilities; loss of existing
+      community facilities. The turbine, employment-site and leisure cases are shown as officer
+      discretion.
+
+  - id: section-existing
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: There is a significant change in levels across the site or street scene.
+        - discretionary
+    source-text: >-
+      All applications where there is a significant change in levels across the site or street scene
+      ...
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): 'Levels, Existing and Proposed Site Sections and Finished
+      Floor Levels', also where more construction detail is needed (officer discretion). In the Full
+      local list and the Major, Outline, LBC and Reserved Matters tables.
+
+  - id: section-proposed
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: There is a significant change in levels across the site or street scene.
+        - discretionary
+    source-text: >-
+      All applications where there is a significant change in levels across the site or street scene
+      ...
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    must-include:
+      - item: Existing and proposed site levels and finished floor levels
+        level: must
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): 'Levels, Existing and Proposed Site Sections and Finished
+      Floor Levels', also where more construction detail is needed (officer discretion).
+
+  - id: structural-damage
+    action: add
+    required-if:
+      application-type:
+        in: [consent-under-tpo, notice-trees-in-con-area]
+    source-text: >-
+      Structural Report | Circumstances where it is alleged that Trees are causing structural damage
+      to property.
+    source-url: https://www.ashfield.gov.uk/media/cw3m1dzz/validation-list-miscellaneous-2025-1.docx
+    must-include:
+      - item: Prepared by a suitably qualified person
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): tree works applications where trees are alleged to be
+      causing structural damage."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Retail and leisure development outside town centres.
+        - discretionary
+    source-text: >-
+      Applications for retail and leisure development outside town centres, which are not in
+      accordance with an up-to-date plan if over the relevant thresholds
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Retail Impact Assessment, Major list. The thresholds and
+      the plan test are left to officer discretion.
+
+  - id: transport-assessment
+    action: add
+    required-if:
+      ref: major-development
+    source-text: Transport Assessment | All major development.
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    confidence: medium
+    notes: "From the audit (missing_requirement): further guidance from Nottinghamshire County Council
+      highways officers."
+
+  - id: travel-plan
+    action: add
+    required-if:
+      ref: major-development
+    source-text: Travel Plan | All major development.
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    must-include:
+      - item: A named travel plan coordinator
+        level: must
+      - item: Management and marketing of the plan
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): Nottinghamshire County Council guidance applies."
+
+  - id: viability-assessment
+    action: add
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - discretionary
+        - all:
+            - application-type:
+                in: [demolition-con-area]
+            - discretionary
+    source-text: >-
+      Any major development that does not offer planning obligations in accordance with the
+      council's Housing Supplementary Planning Document (SPD).
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): major development not offering policy-compliant
+      obligations; and a 'Viability Report' for demolition in a conservation area where demolition is
+      proposed because of the cost of repair.
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      all:
+        - ref: major-development
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: Residential development.
+            - discretionary
+    source-text: >-
+      Site Waste Management Plan | All residential development and other applications that have an
+      impact on the generation of waste.
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    must-include:
+      - item: Bin storage, waste vehicle tracking and collection arrangements
+        level: must
+      - item: A litter management plan
+        level: must
+        required-if:
+          condition:
+            field: food-or-drink-use
+            value: true
+            description: The proposal is a hot food takeaway.
+    confidence: medium
+    notes: "From the audit (missing_requirement): Major list; the contents are the audit's summary."
+
+unmapped:
+  - local-name: Coal Mining Risk Assessment
+    source-text: "Coal Mining Risk Assessment | Sites within Coal Mining referral areas."
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Drainage Strategy
+    source-text: "Drainage Strategy | Major applications."
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    suggested-id: drainage-strategy
+  - local-name: Health Impact Assessment
+    source-text: "Health Impact Assessment | All major applications"
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    suggested-id: health-impact-assessment
+  - local-name: Parking Plan
+    source-text: "Parking Plan | All applications which increase the quantum of development and/or alter
+      the amount of on-site parking. (From the audit: householder 'Parking Plan and Access
+      Arrangements' where there is an impact on parking or highways/access.)"
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    suggested-id: parking-plan
+  - local-name: Hard standing
+    source-text: "Hard standing | All applications where new hardstanding is proposed."
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    suggested-id: hardstanding-details
+  - local-name: Structural Survey
+    source-text: "Structural Survey | Any applications that involve: - The change of use or conversation
+      of rural/agricultural buildings ... (From the audit: also listed building works involving
+      demolition or affecting structural integrity, and substantial demolition in a conservation
+      area.)"
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    suggested-id: structural-survey
+  - local-name: Bin Stores / Recycling Facilities
+    source-text: "Bin Stores / Recycling Facilities | All new development which would result in the need
+      for new or storage or recycling facilities."
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    suggested-id: refuse-storage-details
+  - local-name: Floor Space / Accommodation Schedule
+    source-text: "Floor Space/ Accommodation Schedule | Applications for residential use."
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    suggested-id: accommodation-schedule
+  - local-name: Legal Documentation (BNG self-build exemption)
+    source-text: "Legal Documentation | BNG Self Build Exemption Applications."
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    suggested-id: ""
+  - local-name: Self Build Statement
+    source-text: "Self Build Statement | Self Build applications"
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    suggested-id: self-build-statement
+  - local-name: Marketing Information
+    source-text: "Marketing Information | Any development that results in the loss of employment space."
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    suggested-id: marketing-evidence
+  - local-name: Material Details & Materials Plan
+    source-text: "Material Details & Materials Plan | All applications where new buildings are proposed"
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    suggested-id: materials-details
+  - local-name: Renewable Energy Statement
+    source-text: "Renewable Energy Statement | Applications for renewable energy production."
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    suggested-id: renewable-energy-statement
+  - local-name: Ventilation/Extraction Statement and Design
+    source-text: "For any retail, business, industrial, leisure or other developments where ventilation
+      or extraction equipment is proposed."
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    suggested-id: ventilation-extraction-details
+  - local-name: Building for a Healthy Life Assessment
+    source-text: "Building for a Healthy Life Assessment | All major residential applications."
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    suggested-id: building-for-healthy-life
+  - local-name: Glint/Glare Assessment
+    source-text: "Glint/Glare Assessment | Major development for solar (photovoltaic) panels."
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    suggested-id: glint-glare-assessment
+  - local-name: Heads of Terms (S106 Agreements)
+    source-text: "Heads of Terms (S106 Agreements) | All major applications"
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    suggested-id: heads-of-terms
+  - local-name: Utilities Assessment
+    source-text: "Utilities Assessment | All major developments"
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    suggested-id: utilities-statement
+  - local-name: Visual Impact Assessment
+    source-text: "Visual Impact Assessment | Any application which has a potential significant impact
+      from the visual effects from the proposed development."
+    source-url: https://www.ashfield.gov.uk/media/uvofnrse/validation-list-full-and-major-2025.docx
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Demolition Statement
+    source-text: "Demolition Statement | Any application where a structure/outbuilding is over 50m3 is
+      proposed for demolition"
+    source-url: https://www.ashfield.gov.uk/media/cw3m1dzz/validation-list-miscellaneous-2025-1.docx
+    suggested-id: demolition-statement
+  - local-name: Material Plans (listed building consent)
+    source-text: "Material Plans | All | Plans to show all new doors, windows, shop fronts, panelling,
+      fireplaces, plaster moulding ..."
+    source-url: https://www.ashfield.gov.uk/media/cw3m1dzz/validation-list-miscellaneous-2025-1.docx
+    suggested-id: ""
+  - local-name: Photomontages (advertisements)
+    source-text: "Photomontages | Applications that are within the Town Centre Boundaries"
+    source-url: https://www.ashfield.gov.uk/media/cw3m1dzz/validation-list-miscellaneous-2025-1.docx
+    suggested-id: computer-visualisations
+  - local-name: Details of pre-application discussion
+    source-text: "Details of any pre-application discussion with the Local Planning Authority and/or
+      Historic England"
+    source-url: https://www.ashfield.gov.uk/media/cw3m1dzz/validation-list-miscellaneous-2025-1.docx
+    suggested-id: ""
+  - local-name: Outline - Additional Plans / Details and Plans
+    source-text: "Details and Plans | For all matters which are to be considered. | See validation
+      requirements outlined in the ... Full/Major Applications Guide."
+    source-url: https://www.ashfield.gov.uk/media/cw3m1dzz/validation-list-miscellaneous-2025-1.docx
+    suggested-id: ""
+  - local-name: s73 - Plans, Block Plan and Additional Information
+    source-text: "Plans | All | Details to be submitted to support the proposed removal / variation of
+      condition(s)"
+    source-url: https://www.ashfield.gov.uk/media/cw3m1dzz/validation-list-miscellaneous-2025-1.docx
+    suggested-id: ""
+  - local-name: Discharge of conditions - Plans, Samples and Additional Information
+    source-text: "Samples | Where applicable | A sample of the proposed materials."
+    source-url: https://www.ashfield.gov.uk/media/cw3m1dzz/validation-list-miscellaneous-2025-1.docx
+    suggested-id: ""
+  - local-name: Article 4 Direction (conservation area) householder checklist
+    source-text: "Article 4 Direction in a Conservation Area ... No Fee - provided the development being
+      applied for is only as a result of the removal of permitted rights by the Article 4 Direction."
+    source-url: https://www.ashfield.gov.uk/media/cw3m1dzz/validation-list-miscellaneous-2025-1.docx
+    suggested-id: ""
+  - local-name: Householder prior approval (larger extensions) - Plans
+    source-text: "Local Requirements ... 1 Plans Existing and proposed elevations, site sections and
+      finished floor and site levels, existing and proposed floor plans"
+    source-url: https://www.ashfield.gov.uk/media/cw3m1dzz/validation-list-miscellaneous-2025-1.docx
+    suggested-id: ""
+  - local-name: Evidence (lawful development certificates)
+    source-text: "From the audit: LDC 'Evidence' is in the National table of the miscellaneous guide"
+    source-url: https://www.ashfield.gov.uk/media/cw3m1dzz/validation-list-miscellaneous-2025-1.docx
+    suggested-id: lawful-development-evidence

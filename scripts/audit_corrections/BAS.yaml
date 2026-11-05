@@ -1,0 +1,492 @@
+# Corrections for Bath and North East Somerset Council, from inputs/audit/bath-and-north-east-somerset-council.json.
+# B&NES has no downloadable local list: its 'Local requirements for planning applications' page
+# indexes a separate, undated web checklist for each application type. Grokbot linked only the
+# outline (all matters reserved) checklist and mostly extracted fragments of the Sustainable
+# Construction Checklist SPD. The full planning checklist lists 32 documents that applications
+# "may need to include", each with its own guidance page; the audit gives no item-by-item
+# triggers, so they are shown as officer discretion for the types whose checklist lists them.
+# Items marked "From the audit" use the audit's paraphrase, not the council's exact words.
+# Not covered: the checklists for the other application types (adverts, demolition in a
+# conservation area, s73, NMA, LDCs, discharge of conditions, PiP, prior approvals, trees) were
+# not mapped by Grokbot and their contents weren't listed by the audit (issue 10).
+local-authority: BAS
+
+validation-list:
+  url: https://www.bathnes.gov.uk/local-requirements-planning-applications
+  date: ""
+  date-basis: >-
+    audit: the local requirements index page and its checklists show no adoption or update date
+    (only 'Copyright 2026')
+
+drop-unmapped:
+  - local-name: Design Code / Masterplan / Parameter plans
+    reason: "wrong_trigger: jumbled two-column text about policy SCR6 from the Sustainable Construction Checklist"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: Table 8 (Water) of the Sustainable Construction Checklist, not a drainage strategy"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: Table 2.2 of the Sustainable Construction Checklist; heads of terms re-added below"
+  - local-name: Water efficiency / water usage statement
+    reason: "wrong_trigger: the Sustainable Construction Checklist's 110 l/p/d tick-box"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: the checklist's indoor-air-quality section; the real ventilation and extraction statement is re-added below"
+  - local-name: Validation checklist form (completed)
+    reason: "not_a_requirement: the fragment 'Type of application required to submit the Checklist 2'"
+
+requirements:
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      any:
+        - all:
+            - condition:
+                field: new-build
+                value: true
+                description: The proposal includes new-build residential development.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: The proposal creates one or more dwellings (including replacements,
+                  co-living, student accommodation, holiday lets and HMOs).
+        - all:
+            - condition:
+                field: new-build
+                value: true
+                description: The proposal includes new-build non-residential development.
+            - condition:
+                field: floorspace-non-residential
+                operator: ">="
+                value: 1000
+                description: 1,000 square metres or more of non-residential floorspace.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 5
+            description: Medium-scale or larger works to existing buildings (5 or more dwellings).
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 500
+            description: Medium-scale or larger works to existing buildings (500 square metres or
+              more).
+        - discretionary
+    policy: "Sustainable Construction Checklist SPD; Local Plan SCR6"
+    source-url: https://www.bathnes.gov.uk/policy-and-documents-library/sustainable-construction-checklist
+    must-include:
+      - item: Energy Summary Tool
+        level: must
+        required-if:
+          condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal is residential.
+    confidence: medium
+    notes: >-
+      From the audit (wrong_trigger): the Sustainable Construction Checklist is required for new-build
+      residential of 1+ dwellings (including replacements, co-living, student accommodation, holiday
+      lets and HMOs), major non-residential new build of 1,000 m2+, medium-scale or larger works to
+      existing buildings (5+ dwellings / 500 m2) and district heating proposals (shown as officer
+      discretion). There is no exemption for listed buildings. It should accompany Sustainability
+      Statements or Energy Strategies. The workbook's excerpt was scrambled table text.
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app]
+        - site:
+            in: [scheduled-monument, archaeological-priority-area]
+            description: The proposal might affect ancient monuments or sites of archaeological
+              importance.
+    source-text: >-
+      Archaeological assessment If your proposal might affect ancient monuments or sites of
+      archaeological importance you will be required to undertake an archaeological assessment as
+      part of the application.
+    source-url: https://www.bathnes.gov.uk/planning-permission-mineral-extraction-or-associated-development
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): this text is from the mineral extraction checklist, not full
+      planning. For full planning the council covers archaeology through the Heritage Statement.
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [full, outline, hh, lbc]
+            - discretionary
+        - all:
+            - application-type:
+                in: [mineral-app]
+            - condition:
+                field: protected-species
+                value: true
+                description: The site is known or suspected to have protected species (e.g. badgers,
+                  bats, certain reptiles and breeding birds).
+    source-text: >-
+      Householder applications may need to include: Biodiversity and Geological Conservation
+      Assessment; Flood risk assessment; Parking and Access Arrangements, as part of a Design and
+      Access Statement
+    source-url: https://www.bathnes.gov.uk/householder-application-checklist
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, missing_requirement): the workbook's text came from the mineral
+      extraction checklist (it cites the superseded 1994 Habitats Regulations). The council's
+      'Biodiversity and Geological Conservation Assessment' is listed on the full, outline,
+      householder and listed building consent checklists; for listed building consent, where work
+      affects areas such as vaults or roof space.
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - discretionary
+    source-text: "full planning applications may need to include the following supporting documents"
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): listed on the full and outline checklists."
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - discretionary
+    source-text: "full planning applications may need to include the following supporting documents"
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): listed on the full and outline checklists."
+
+  - id: bng-metric
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - discretionary
+    source-text: "full planning applications may need to include the following supporting documents"
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a 'Biodiversity Net Gain Assessment' is listed on the
+      full and outline checklists.
+
+  - id: environmental-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - condition:
+            field: eia-development
+            value: true
+            description: The development needs an Environmental Impact Assessment.
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): listed on the full and outline checklists."
+
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, hh]
+        - discretionary
+    source-text: "full planning applications may need to include the following supporting documents"
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): listed on the full, outline and householder
+      checklists. The full and outline checklists also list Flood Risk Sequential Test evidence.
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - all:
+            - application-type:
+                in: [full, outline]
+            - discretionary
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): listed on the full, outline and listed building consent
+      checklists.
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - discretionary
+    source-text: "full planning applications may need to include the following supporting documents"
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): listed on the full and outline checklists."
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - discretionary
+    source-text: "full planning applications may need to include the following supporting documents"
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): listed on the full and outline checklists."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - discretionary
+    source-text: "full planning applications may need to include the following supporting documents"
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): a 'Noise impact assessment' is listed on the full and outline checklists."
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - discretionary
+    source-text: "full planning applications may need to include the following supporting documents"
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): an 'Open space assessment' is listed on the full and outline checklists."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - discretionary
+    source-text: "full planning applications may need to include the following supporting documents"
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): listed on the full and outline checklists."
+
+  - id: sci
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - discretionary
+    source-text: "full planning applications may need to include the following supporting documents"
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): listed on the full and outline checklists."
+
+  - id: transport-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - discretionary
+    source-text: "full planning applications may need to include the following supporting documents"
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): listed on the full and outline checklists."
+
+  - id: travel-plan
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - discretionary
+    source-text: "full planning applications may need to include the following supporting documents"
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): a draft travel plan is listed on the full and outline checklists."
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - discretionary
+    source-text: "full planning applications may need to include the following supporting documents"
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): a 'Tree survey/Arboricultural statement' is listed on the full and outline checklists."
+
+  - id: viability-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - discretionary
+    source-text: "full planning applications may need to include the following supporting documents"
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): listed on the full and outline checklists."
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - discretionary
+    source-text: "full planning applications may need to include the following supporting documents"
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): a 'Waste Management Plan - Post Construction' is listed on the full and outline checklists."
+
+  - id: design-and-access-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - discretionary
+    source-text: >-
+      Householder applications may need to include: … Parking and Access Arrangements, as part of a
+      Design and Access Statement
+    source-url: https://www.bathnes.gov.uk/householder-application-checklist
+    must-include:
+      - item: Parking and access arrangements
+        level: must
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): the householder checklist's local item. The national
+      rules for a Design and Access Statement still apply to other application types.
+
+  - id: elevation-proposed
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [lbc]
+        - discretionary
+    source-url: https://www.bathnes.gov.uk/listed-building-consent-checklist
+    must-include:
+      - item: Elevation drawings at 1:10 or 1:20 for work that alters or installs architectural
+          features such as doors and windows
+        level: must
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a listed building consent checklist item. Elevations are
+      also needed under the national rules for other application types.
+
+  - id: section-proposed
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [lbc]
+        - discretionary
+    source-url: https://www.bathnes.gov.uk/listed-building-consent-checklist
+    must-include:
+      - item: Section drawings at 1:1, 1:2 or 1:5 for work that alters or installs architectural
+          features such as doors and windows
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): a listed building consent checklist item."
+
+unmapped:
+  - local-name: Accessibility Standards for Market Housing Proposals Checklist
+    source-text: "From the audit: listed on the full planning checklist ('may need to include')"
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    suggested-id: accessibility-statement
+  - local-name: Artificial Pitches Management Plan
+    source-text: "From the audit: listed on the full planning checklist ('may need to include')"
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    suggested-id: ""
+  - local-name: Building for a Healthy Life Assessment
+    source-text: "From the audit: listed on the full planning checklist ('may need to include')"
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    suggested-id: building-for-a-healthy-life
+  - local-name: Coal Mining Risk Assessment
+    source-text: "From the audit: listed on the full and outline checklists ('may need to include')"
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Embodied Carbon Assessment
+    source-text: "From the audit: listed on the full planning checklist ('may need to include')"
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    suggested-id: embodied-carbon-assessment
+  - local-name: Flood Risk Sequential Test Evidence
+    source-text: "From the audit: listed on the full and outline checklists ('may need to include')"
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    suggested-id: sequential-test
+  - local-name: Foul Sewage Assessment
+    source-text: "From the audit: listed on the full planning checklist ('may need to include')"
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    suggested-id: foul-sewage-assessment
+  - local-name: HMO Energy Performance Certificate
+    source-text: "From the audit: listed on the full planning checklist ('may need to include')"
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    suggested-id: ""
+  - local-name: Landscape and Visual Impact Assessment (LVIA)
+    source-text: "From the audit: listed on the full and outline checklists ('may need to include')"
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Purpose-Built Student Accommodation Statement
+    source-text: "From the audit: listed on the full and outline checklists ('may need to include')"
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    suggested-id: student-accommodation-statement
+  - local-name: Economic (Regeneration) statement
+    source-text: "From the audit: listed on the full planning checklist ('may need to include')"
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    suggested-id: regeneration-statement
+  - local-name: Ventilation and extraction statement
+    source-text: "From the audit: listed on the full and outline checklists ('may need to include')"
+    source-url: https://www.bathnes.gov.uk/full-planning-application
+    suggested-id: ventilation-extraction-statement
+  - local-name: Planning obligations / draft heads of terms
+    source-text: "From the audit: listed on the outline (all matters reserved) checklist"
+    source-url: https://www.bathnes.gov.uk/outline-application-all-matters-reserved
+    suggested-id: heads-of-terms
+  - local-name: Stone cleaning survey
+    source-text: >-
+      Any proposal to carry out stone cleaning and or/removal of paint should be accompanied by a
+      pre-cleaning survey
+    source-url: https://www.bathnes.gov.uk/listed-building-consent-checklist
+    suggested-id: ""
+  - local-name: Structural survey/report (listed buildings)
+    source-text: "From the audit: listed building consent, where the work affects structural integrity"
+    source-url: https://www.bathnes.gov.uk/listed-building-consent-checklist
+    suggested-id: structural-survey
+  - local-name: Damp Remediation Report
+    source-text: "From the audit: listed building consent, where the work remedies damp; from an independent specialist"
+    source-url: https://www.bathnes.gov.uk/listed-building-consent-checklist
+    suggested-id: ""
+
+low-confidence:
+  - id: heritage-statement
+    note: >-
+      Audit (missing_requirement, Amended): per the review, the demolition in a conservation area
+      checklist also lists a Heritage Statement, Planning Statement, BNG and tree survey; the
+      checklists for other types were not mapped.
+  - id: planning-statement
+    note: >-
+      Audit (missing_requirement, Amended): per the review, the demolition in a conservation area
+      checklist also lists this; the checklists for other types were not mapped.
+  - id: bng-metric
+    note: >-
+      Audit (missing_requirement, Amended): per the review, the demolition in a conservation area
+      checklist also lists BNG; the checklists for other types were not mapped.
+  - id: arboriculturist-report
+    note: >-
+      Audit (missing_requirement, Amended): per the review, the demolition in a conservation area
+      checklist also lists a tree survey; the checklists for other types were not mapped.

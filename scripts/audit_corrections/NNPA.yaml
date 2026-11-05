@@ -1,0 +1,398 @@
+# Corrections for Northumberland National Park Authority, from the authority's audit.
+# The Local Validation Checklist (cover December 2020, approved 25 January 2021, reviewed with no
+# changes on 21 September 2023) is still current, though the review's two-year period lapsed in
+# September 2025. The list is general: most items apply to any planning application, so the
+# workbook's guessed 'Full planning' rows are left for every type with the council's own trigger.
+# The three Householder rows were items that explicitly exclude householders. The authority's 18
+# per-type checklists were not read by Grokbot; the audit only summarises the Householder one.
+local-authority: NNPA
+
+submission-standards:
+  - item: Location plan drawn to an identified standard metric scale (typically 1:1250 or 1:2500),
+      showing the direction of North
+    level: should
+  - item: Elevations and plans drawn to a recognised scale (for example 1:50 or 1:100)
+    level: should
+
+drop:
+  - id: schedule-of-works
+    reason: >-
+      wrong_trigger: the excerpt is from the Structural Survey (LOCAL 23: 'includes a schedule of
+      works necessary to carry out the conversion'), not a listed-building requirement
+
+drop-unmapped:
+  - local-name: Drainage Strategy / SuDS
+    reason: "duplicate: the excerpt is the LOCAL 13 Foul Drainage Assessment, kept in the Foul Sewage row"
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_trigger: a fragment; LOCAL 05 Advertisement Consent Requirements is added below"
+  - local-name: Design Code / Masterplan / Parameter plans
+    reason: "not_a_requirement: the reference-list text of the Lighting Assessment (Dark Sky Park)"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: a fragment of the site plan description"
+
+requirements:
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - site:
+            in: [contaminated-land]
+            description: Land contamination can reasonably be expected to be found.
+    source-text: >-
+      LOCAL 14 Land Contamination Assessment When required? All applications where land
+      contamination can reasonably be expected to be found (nonhouseholder).
+    source-url: https://www.northumberlandnationalpark.org.uk/wp-content/uploads/2021/01/Local-Validation-Checklist-Final.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): the workbook filed it under Householder, but the source excludes
+      householder applications. The rules can't express 'not householder', so Full and Outline are
+      listed; other non-householder types may also apply.
+
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 6
+            description: The creation of six or more new dwellings.
+        - all:
+            - condition:
+                field: involves-change-of-use
+                value: true
+                description: The conversion of buildings to one or more units of affordable housing.
+            - condition:
+                field: outside-urban-area
+                value: true
+                description: The buildings are outside settlements.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the source also has a named-settlements limb, which the excerpt omits."
+
+  - id: air-quality-assessment
+    action: update
+    required-if: discretionary
+    notes: "The council's trigger (a materially adverse effect on local air quality, including industrial processes
+      with direct emissions) is shown as officer discretion."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: The development would potentially have a material impact on trees, including
+          their root protection zones.
+    notes: "The audit confirms this also applies to householder applications (Householder checklist)."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: Wildlife or biodiversity may be affected by the proposals.
+        - condition:
+            field: demolition
+            value: true
+            description: The proposal demolishes a building.
+        - condition:
+            field: roof-alteration
+            value: true
+            description: The proposal alters a roof.
+        - discretionary
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): the Householder checklist asks for a biodiversity survey
+      for demolition of a building, roof alteration, or removal of trees or vegetation (no field for
+      the last, so officer discretion).
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: One or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: A building of 100 square metres or more.
+            - site:
+                in: [conservation-area, world-heritage-site]
+                description: The site is in a Conservation Area or World Heritage Site.
+        - application-type:
+            in: [lbc]
+    source-text: >-
+      NATIONAL 05 Design & Access Statement When required? A Design and Access Statement is required
+      for applications consisting of the following: Applications for major development.
+    source-url: https://www.northumberlandnationalpark.org.uk/wp-content/uploads/2021/01/Local-Validation-Checklist-Final.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt stops after major development; the list also names 1+
+      dwellings or 100sqm+ buildings in a Conservation Area or World Heritage Site, and listed
+      building consent.
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: EIA development under the 2017 Regulations.
+    source-url: https://www.northumberlandnationalpark.org.uk/wp-content/uploads/2021/01/Local-Validation-Checklist-Final.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted Coal Mining Risk Assessment text. LOCAL 11 requires it for
+      EIA development."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: Development within Flood Zones 2 and 3.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more.
+        - all:
+            - condition:
+                field: involves-change-of-use
+                value: true
+                description: A change of use to a more vulnerable class.
+            - discretionary
+    source-text: "LOC12 Flood Risk Assessment (FRA) When required? For development proposals: Development
+      within Flood Zones 2 & 3:"
+    source-url: https://www.northumberlandnationalpark.org.uk/wp-content/uploads/2021/01/Local-Validation-Checklist-Final.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt is cut off; it omits sites of 1ha or more and changes of
+      use to a more vulnerable class. The audit confirms it applies to householder applications.
+
+  - id: section-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: Site levels are being changed as part of the application.
+        - discretionary
+    notes: "The council: where this would add to the understanding of the proposal, including where site levels are
+      being changed."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: Site levels are being changed as part of the application.
+        - discretionary
+    notes: "The council: where this would add to the understanding of the proposal, including where site levels are
+      being changed."
+
+  - id: elevation-existing
+    action: update
+    required-if:
+      condition:
+        field: external-alterations
+        value: true
+        description: External alterations are proposed.
+    source-text: >-
+      LOCAL 01 Elevations (Existing and Proposed) When required? Elevation plans should be submitted
+      for all applications where external alterations are proposed and where this adds to the
+      understanding of the proposal.
+
+  - id: elevation-proposed
+    action: update
+    required-if:
+      condition:
+        field: external-alterations
+        value: true
+        description: External alterations are proposed.
+    source-text: >-
+      LOCAL 01 Elevations (Existing and Proposed) When required? Elevation plans should be submitted
+      for all applications where external alterations are proposed and where this adds to the
+      understanding of the proposal.
+
+  - id: landscaping-plan
+    action: update
+    required-if: discretionary
+    notes: "Where landscaping would be a consideration or would contribute to the acceptability of the proposal
+      (council's wording)."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: New or additional external lighting is proposed.
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The application is likely to have an impact on noise or vibration sensitive
+              locations.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: A noise or vibration sensitive development in an area where noise or
+              vibration is likely to have an adverse impact.
+
+  - id: planning-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: departure-from-development-plan
+            value: true
+            description: The development is not in accordance with the development plan.
+    notes: "The council also strongly recommends one for other applications raising complex planning issues."
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: roof-alteration
+            value: true
+            description: There is an alteration to an existing roof.
+        - discretionary
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: roof-alteration
+            value: true
+            description: There is an alteration to an existing roof.
+        - discretionary
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: Existing and proposed site plans at a recognised metric scale (typically 1:100 or 1:200
+          for householder applications and 1:500 otherwise)
+        level: should
+    notes: "NATIONAL 03: 'In most cases'; the audit confirms it is on the Householder checklist."
+
+  - id: sci
+    action: update
+    required-if:
+      ref: major-development
+    must-include:
+      - item: The steps that have been taken to consult with the public on the proposal
+        level: must
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      ref: major-development
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Mast and antenna development by mobile phone network operators.
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    notes: "Major development that has the potential to generate significant vehicle movements (council's wording)."
+
+  - id: travel-plan
+    action: update
+    required-if:
+      ref: major-development
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+          scheduled-monument, park-and-garden]
+        description: The development potentially affects a designated or non-designated heritage
+          asset, or its setting.
+    source-text: >-
+      LOC15 Heritage Statement When required? A Heritage Statement is required for any planning or
+      listed building applications for development potentially affecting the preservation of any
+      designated or non-designated heritage asset, or their setting.
+    source-url: https://www.northumberlandnationalpark.org.uk/wp-content/uploads/2021/01/Local-Validation-Checklist-Final.pdf
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement): the workbook had it under Listed building consent only; LOC15
+      covers any planning or listed building application, householder and advertisement consent
+      (where heritage is a statutory consideration).
+
+  - id: bng-metric
+    action: add
+    required-if:
+      application-type:
+        in: [full]
+    source-url: https://www.northumberlandnationalpark.org.uk/wp-content/uploads/2021/01/Local-Validation-Checklist-Final.pdf
+    confidence: low
+    notes: >-
+      From the audit (other): national Biodiversity Net Gain requirements were added to the Full
+      Planning checklist in March 2025 (NAT06); the authority says local BNG documents are 'still
+      under review'.
+
+unmapped:
+  - local-name: Advertisement Consent Requirements
+    source-text: "LOCAL 05 Advertisement Consent Requirements - When required? All applications for
+      advertisement consent"
+    source-url: https://www.northumberlandnationalpark.org.uk/wp-content/uploads/2021/01/Local-Validation-Checklist-Final.pdf
+    suggested-id: advertisement-details
+  - local-name: Utilities Assessment
+    source-text: "From the audit: LOCAL 29, new buildings or changes of use of existing buildings"
+    source-url: https://www.northumberlandnationalpark.org.uk/wp-content/uploads/2021/01/Local-Validation-Checklist-Final.pdf
+    suggested-id: utilities-statement
+  - local-name: Window Section Plans
+    source-text: "The drawings of the window sections should be to a recognised scale appropriate to
+      demonstrate the proposed window details (for example a scale of 1:20 or 1:50)."
+    source-url: https://www.northumberlandnationalpark.org.uk/wp-content/uploads/2021/01/Local-Validation-Checklist-Final.pdf
+    suggested-id: window-details
+  - local-name: Odour Assessment (livestock buildings)
+    source-text: "From the audit: a separate Odour Assessment for livestock buildings on the Full Planning
+      checklist"
+    source-url: https://www.northumberlandnationalpark.org.uk/wp-content/uploads/2021/01/Local-Validation-Checklist-Final.pdf
+    suggested-id: odour-assessment
+
+low-confidence:
+  - id: floor-plan-existing
+    note: >-
+      Audit (missing_requirement): LOCAL 02 Floor Plans was folded into the elevations row; its own
+      trigger wasn't captured (the Householder checklist says 'required in most cases').
+  - id: floor-plan-proposed
+    note: >-
+      Audit (missing_requirement): LOCAL 02 Floor Plans was folded into the elevations row; its own
+      trigger wasn't captured (the Householder checklist says 'required in most cases').

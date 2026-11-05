@@ -1,0 +1,384 @@
+# Corrections for Tendring District Council, from inputs/audit/tendring-district-council.json.
+# The Local Validation List (footer 'Version: March 2026'; the filename says August 2026) is
+# current. It has an explicit application-type key for every section, which Grokbot ignored
+# (most rows 'INFERRED' under Full planning). Several rows came from the superseded pre-2024
+# 'DetailsofLocalRequirementspdfversion2.pdf'; the audit found no Air Quality, Lighting,
+# Ventilation/Extraction or Structural Survey requirement in the current list, so those are dropped.
+local-authority: TEN
+
+submission-standards:
+  - item: Drawings must include a scale bar to accurately reflect the scale that the plan is drawn to
+    level: must
+
+drop:
+  - id: air-quality-assessment
+    reason: "wrong_document: from the superseded pre-2024 list; the March 2026 list has no Air Quality requirement"
+  - id: lighting-assessment
+    reason: "wrong_document: from the superseded pre-2024 list; the March 2026 list has no Lighting requirement"
+  - id: design-and-access-statement
+    reason: "wrong_document: a fragment ('in the Design and Access Statement, if required') from the superseded list"
+  - id: environmental-statement
+    reason: "wrong_document: a fragment from the superseded list"
+  - id: arboriculturist-report
+    reason: "wrong_app_type: the row is the Works to trees 'Supporting Evidence for Trees' section (p40); re-added below as tree condition and structural damage evidence"
+
+drop-unmapped:
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_document: from the superseded list; the March 2026 list has no Ventilation/Extraction requirement"
+  - local-name: Structural Survey
+    reason: "wrong_document: from the superseded list (including abolished conservation area consent); the March 2026 list has no Structural Survey requirement"
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_app_type: an advertisement consent section (p44) filed under Full planning; re-added below"
+  - local-name: Foul Sewage / Utilities Statement
+    reason: "wrong_trigger: page-footer artefacts in the excerpt; re-added below without them"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: the excerpt gave contents, not the threshold; re-added below"
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_trigger: 'Plans and Parking Plans can be combined.'; re-added below with the trigger"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: 'other relevant planning obligations).'; re-added below as Legal Information"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 11
+        description: Residential development of 11 or more dwellings.
+    must-include:
+      - item: What is being proposed in relation to affordable housing
+        level: should
+      - item: A justification for the amount and type proposed and the location within the site
+        level: should
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): AHS p29 'All residential development of 11 or more dwellings'. It also
+      applies to outline, PiP and technical details consent applications.
+
+  - id: condition-of-trees
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [consent-under-tpo, notice-trees-in-con-area]
+        - discretionary
+    source-text: >-
+      Local List Requirements A full arboricultural report and survey shall be provided to
+      demonstrate: Evidence of disease and / or subsidence caused by the tree.
+    source-url: https://legacy.tendringdc.gov.uk/sites/default/files/documents/planning/FINAL%20VERSION%20-%20Local%20Validation%20List%20-%20August%202026.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): the Works to trees 'Supporting Evidence For Trees' section (p40)."
+
+  - id: structural-damage
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [consent-under-tpo, notice-trees-in-con-area]
+        - discretionary
+    source-text: >-
+      Local List Requirements A full arboricultural report and survey shall be provided to
+      demonstrate: Evidence of disease and / or subsidence caused by the tree.
+    source-url: https://legacy.tendringdc.gov.uk/sites/default/files/documents/planning/FINAL%20VERSION%20-%20Local%20Validation%20List%20-%20August%202026.pdf
+    confidence: medium
+    notes: "Where subsidence caused by the tree is given as a reason for the works (p40)."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: A net increase in dwellings.
+        - site:
+            in: [contaminated-land]
+            description: The site is recorded contaminated land.
+        - discretionary
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): a net increase in dwellings or commercial units (commercial units shown
+      as officer discretion), or recorded contaminated land. It also applies to outline, PiP and
+      technical details consent applications.
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: The site (in Flood Zone 1) is over 1 hectare.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: The site (in Flood Zone 1) is over 1 hectare.
+        - site:
+            in: [critical-drainage-area]
+            description: The site is in a critical drainage area.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt was a cross-reference. From the audit: Flood Zones 2/3, sites
+      over 1ha in Zone 1, and critical drainage areas. The key ticks it for householder and PiP too.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+              scheduled-monument, park-and-garden, archaeological-priority-area]
+            description: The proposal directly involves, or affects, a heritage asset or its setting.
+    source-text: >-
+      A Heritage Statement is required to support all applications for planning permission or listed
+      building consent, where the proposal directly involves, or affects the heritage asset or its
+      setting.
+    source-url: https://legacy.tendringdc.gov.uk/sites/default/files/documents/planning/FINAL%20VERSION%20-%20Local%20Validation%20List%20-%20August%202026.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_document / wrong_app_type): the Full planning row came from the superseded list;
+      this is the current list's wording (filed by the workbook under Outline and LBC). The key ticks
+      it for householder and PiP too.
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      application-type:
+        in: [outline-some, reserved-matters, technical-details-consent, approval-condition]
+    must-include:
+      - item: An appropriately scaled plan (1:50, 1:100 or 1:500) including a scale bar
+        level: must
+      - item: Existing hard and soft landscaping to remain
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): Landscaping Plan (p19) applies to 'Outline (some), RM, TDC, DoC'."
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: A roof would be created or altered by the proposed development.
+    must-include:
+      - item: Scale at 1:50 or 1:100, including the relevant scale bar
+        level: must
+    confidence: medium
+    notes: "From the audit (wrong_app_type): the key ticks the Roof Plan for householder applications too."
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: A roof would be created or altered by the proposed development.
+    must-include:
+      - item: The shape of the roof and its location
+        level: must
+      - item: Scale at 1:50 or 1:100, including the relevant scale bar
+        level: must
+    confidence: medium
+    notes: "From the audit (wrong_app_type): the key ticks the Roof Plan for householder applications too."
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 50
+            description: 50 or more dwellings.
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 1000
+            description: 1,000 square metres or more of floorspace.
+    must-include:
+      - item: Appropriate study parameters (area, scope and duration of study)
+        level: must
+      - item: Assessment of public transport, walking/cycling and road network capacity
+        level: must
+      - item: Road trip generation and trip distribution methodologies and/or assumptions
+        level: must
+      - item: Measures to promote sustainable travel
+        level: must
+      - item: Safety implications of the development
+        level: must
+      - item: Mitigation measures (where applicable)
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): TA p28 '50+ dwellings; and/or, 1000+ sqm floorspace'."
+
+  - id: site-plan
+    action: replace
+    required-if:
+      application-type:
+        in: [hh, reserved-matters, advertising, ldc]
+    source-url: https://legacy.tendringdc.gov.uk/sites/default/files/documents/planning/FINAL%20VERSION%20-%20Local%20Validation%20List%20-%20August%202026.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger / wrong_app_type): the workbook's excerpt was table-of-contents text and
+      PiP is not subject to block plans. From the audit, the key ticks the Block Plan / Site Layout
+      Plan for householder, reserved matters, advertisement (p42) and LDC applications; the audit
+      does not say which other types.
+
+  - id: elevation-existing
+    action: replace
+    required-if:
+      application-type:
+        in: [hh, reserved-matters, advertising, ldc]
+    source-url: https://legacy.tendringdc.gov.uk/sites/default/files/documents/planning/FINAL%20VERSION%20-%20Local%20Validation%20List%20-%20August%202026.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger / wrong_app_type): table-of-contents text; PiP is not subject to
+      elevations. From the audit, elevations are ticked for householder, reserved matters,
+      advertisement (p43) and LDC applications; other types not stated.
+
+  - id: elevation-proposed
+    action: replace
+    required-if:
+      application-type:
+        in: [hh, reserved-matters, advertising, ldc]
+    source-url: https://legacy.tendringdc.gov.uk/sites/default/files/documents/planning/FINAL%20VERSION%20-%20Local%20Validation%20List%20-%20August%202026.pdf
+    must-include:
+      - item: At least two key dimensions (in metric)
+        level: should
+    confidence: low
+    notes: >-
+      As for elevation-existing. The must-include item is from the council's drawing standards
+      ('Should include at least two key dimensions (in metric) on proposed elevations').
+
+  - id: floor-plan-existing
+    action: replace
+    required-if:
+      application-type:
+        in: [hh, reserved-matters, ldc]
+    source-url: https://legacy.tendringdc.gov.uk/sites/default/files/documents/planning/FINAL%20VERSION%20-%20Local%20Validation%20List%20-%20August%202026.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger / wrong_app_type): table-of-contents text filed under adverts and PiP.
+      From the audit, floor plans are ticked for householder, reserved matters and LDC
+      applications; other types not stated.
+
+  - id: floor-plan-proposed
+    action: replace
+    required-if:
+      application-type:
+        in: [hh, reserved-matters, ldc]
+    source-url: https://legacy.tendringdc.gov.uk/sites/default/files/documents/planning/FINAL%20VERSION%20-%20Local%20Validation%20List%20-%20August%202026.pdf
+    confidence: low
+    notes: "As for floor-plan-existing."
+
+  - id: section-proposed
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: upper-floor-extension
+            value: true
+            description: An additional upper floor.
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Rooflights or dormer windows.
+        - application-type:
+            in: [lbc]
+    source-url: https://legacy.tendringdc.gov.uk/sites/default/files/documents/planning/FINAL%20VERSION%20-%20Local%20Validation%20List%20-%20August%202026.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Internal Sections for an additional upper floor,
+      rooflights, dormer windows, or internal changes to a listed building. Ticked for householder
+      and reserved matters.
+
+  - id: waste-management-plan
+    action: update
+    source-text: space for bin storage for new housing/commercial schemes and/or if the development affects parking.
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the excerpt ran into a page footer about written dimensions; the bin
+      storage wording is kept but its section is unclear.
+
+unmapped:
+  - local-name: Advertisement drawings / illumination details
+    source-text: "Shall include details of materials, illumination, colour finishes."
+    source-url: https://legacy.tendringdc.gov.uk/sites/default/files/documents/planning/FINAL%20VERSION%20-%20Local%20Validation%20List%20-%20August%202026.pdf
+    suggested-id: advertisement-drawings
+  - local-name: Foul Drainage Assessment (FDA1 Form)
+    source-text: >-
+      a non-mains foul drainage system or 'unknown' (as may also be declared on the application
+      form), you MUST complete in full a FDA1 Form with your application in line with Policy PPL5
+      Section 2 Tendring District Local Plan 2022 Failure to complete this form will render the
+      application invalid.
+    source-url: https://legacy.tendringdc.gov.uk/sites/default/files/documents/planning/FINAL%20VERSION%20-%20Local%20Validation%20List%20-%20August%202026.pdf
+    suggested-id: foul-drainage-assessment
+  - local-name: Health Impact Assessment
+    source-text: "For all development for 50 or more dwellings, or for any applications proposing new takeaways"
+    source-url: https://legacy.tendringdc.gov.uk/sites/default/files/documents/planning/FINAL%20VERSION%20-%20Local%20Validation%20List%20-%20August%202026.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Parking Plan
+    source-text: "From the audit: all new dwellings and commercial/industrial units, and householder works removing or altering parking"
+    source-url: https://legacy.tendringdc.gov.uk/sites/default/files/documents/planning/FINAL%20VERSION%20-%20Local%20Validation%20List%20-%20August%202026.pdf
+    suggested-id: parking-plan
+  - local-name: Legal Information (planning obligations)
+    source-text: "From the audit: major development with a net increase in dwellings"
+    source-url: https://legacy.tendringdc.gov.uk/sites/default/files/documents/planning/FINAL%20VERSION%20-%20Local%20Validation%20List%20-%20August%202026.pdf
+    suggested-id: heads-of-terms
+  - local-name: Access Drawing
+    source-text: "From the audit: where an access is created or altered"
+    source-url: https://legacy.tendringdc.gov.uk/sites/default/files/documents/planning/FINAL%20VERSION%20-%20Local%20Validation%20List%20-%20August%202026.pdf
+    suggested-id: access-drawing
+  - local-name: Private and Public Space Plan
+    source-text: "From the audit: residential development over 11 units and sites over 1.5ha"
+    source-url: https://legacy.tendringdc.gov.uk/sites/default/files/documents/planning/FINAL%20VERSION%20-%20Local%20Validation%20List%20-%20August%202026.pdf
+    suggested-id: open-space-plan
+  - local-name: Confirmation of superfast broadband connection
+    source-text: "All applications for new dwellings and new non-residential buildings."
+    source-url: https://legacy.tendringdc.gov.uk/sites/default/files/documents/planning/FINAL%20VERSION%20-%20Local%20Validation%20List%20-%20August%202026.pdf
+    suggested-id: broadband-statement
+  - local-name: HMO Requirements
+    source-text: "From the audit: all HMO/bedsit creation: off-street parking per unit, bin storage, management plan, floor plans"
+    source-url: https://legacy.tendringdc.gov.uk/sites/default/files/documents/planning/FINAL%20VERSION%20-%20Local%20Validation%20List%20-%20August%202026.pdf
+    suggested-id: hmo-statement
+  - local-name: Site Location Plan / Sketch Plan showing the location of the Trees
+    source-text: "Site Location Plan/Sketch Plan showing the location of the Trees"
+    source-url: https://legacy.tendringdc.gov.uk/sites/default/files/documents/planning/FINAL%20VERSION%20-%20Local%20Validation%20List%20-%20August%202026.pdf
+    suggested-id: tree-works-plan
+  - local-name: Full Description / schedule of proposed changes
+    source-text: "From the audit: section 34 (pp45-46), for S73, non-material amendment and discharge of conditions applications"
+    source-url: https://legacy.tendringdc.gov.uk/sites/default/files/documents/planning/FINAL%20VERSION%20-%20Local%20Validation%20List%20-%20August%202026.pdf
+    suggested-id: schedule-of-changes
+  - local-name: Requirement for Deed of Variation Applications
+    source-text: "From the audit: sections 37/38 (pp49-50), applications to modify a S106 (over and under 5 years)"
+    source-url: https://legacy.tendringdc.gov.uk/sites/default/files/documents/planning/FINAL%20VERSION%20-%20Local%20Validation%20List%20-%20August%202026.pdf
+    suggested-id: deed-of-variation-information
+  - local-name: Evidence (lawful development certificates)
+    source-text: "From the audit: section 39 (p51), evidence for lawful development certificate applications"
+    source-url: https://legacy.tendringdc.gov.uk/sites/default/files/documents/planning/FINAL%20VERSION%20-%20Local%20Validation%20List%20-%20August%202026.pdf
+    suggested-id: lawful-development-evidence
+  - local-name: Requirements for Permission in Principle / Technical Details
+    source-text: "From the audit: sections 35 and 36 (pp47-48) of the March 2026 list"
+    source-url: https://legacy.tendringdc.gov.uk/sites/default/files/documents/planning/FINAL%20VERSION%20-%20Local%20Validation%20List%20-%20August%202026.pdf
+    suggested-id: ""
+
+low-confidence:
+  - id: biodiversity-survey-report
+    note: >-
+      Audit (not_a_requirement / wrong_app_type): the Ecology Table's BS42020 survey triggers were not
+      captured (the tab items only list designated-site types); the key ticks the Ecology Survey
+      for householder, reserved matters and PiP too.
+  - id: schedule-of-works
+    note: "Audit (wrong_document): the excerpt is from the superseded pre-2024 list; not confirmed in the March 2026 list."
+  - id: photos
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('alterations), using photographic, map, archival and fabric evidence.')."

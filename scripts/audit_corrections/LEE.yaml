@@ -1,0 +1,186 @@
+# Corrections for Lewes District Council, from the council's audit.
+# The audit could not fetch the 2021 list PDFs, so its findings come from the Cabinet decision
+# and Grokbot's own excerpts. Most workbook "triggers" are the Appendix's 'Justification'
+# sentences or run-together table columns. The list only covers the district outside the
+# South Downs National Park (the SDNPA has its own list).
+local-authority: LEE
+
+submission-standards:
+  - item: All plans drawn to a recognised scale, with a scale bar and the original paper size noted
+    level: must
+
+drop:
+  - id: section-existing
+    reason: "wrong_trigger: the excerpt is the Site Topographical Survey (42) and Air Quality text, not sections; re-added as unmapped below"
+  - id: section-proposed
+    reason: "wrong_trigger: as above"
+  - id: floor-plan-existing
+    reason: "wrong_trigger: the excerpt is the daylight 45-degree test running into Land Contamination text"
+  - id: floor-plan-proposed
+    reason: "wrong_trigger: as above"
+  - id: elevation-existing
+    reason: "wrong_trigger: as above"
+  - id: elevation-proposed
+    reason: "wrong_trigger: as above"
+
+drop-unmapped:
+  - local-name: Employment / Economic Statement
+    reason: "wrong_app_type: 'LDC' is Lewes District Council, not a lawful development certificate; the Full planning wording is re-added below"
+  - local-name: Agricultural Land Classification / Soils
+    reason: "wrong_trigger: the excerpt is the Soil Management Plan (34); re-added below under that name"
+  - local-name: Gypsy & Traveller information
+    reason: "wrong_trigger: run-together table text about affordable housing"
+  - local-name: Validation checklist form (completed)
+    reason: "wrong_trigger: the excerpt is the Sustainability checklist sentence (covered by sustainability-statement)"
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "wrong_trigger: a cut-off fragment of the Economic Statement entry"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_app_type: applies to any new development in the buffer, not just Full planning; re-added below"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      site:
+        in: [air-quality-management-area]
+        description: >-
+          The site is within or adjacent to an Air Quality Management Area and the proposal is
+          likely to increase traffic or odour.
+    source-text: >-
+      43) Air Quality Statement Justification – any proposal within or adjacent to any Air Quality
+      Management Area adopted by the Council that is likely to result in an increase in traffic and
+      or odour.
+    confidence: medium
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is Schedule 1 or Schedule 2 development needing an EIA.
+    source-text: >-
+      Required in connection with all development identified within Schedule 1 or 2 of the
+      regulations and which in accordance with Schedule…
+    source-url: https://www.lewes-eastbourne.gov.uk/media/2923/Local-Validation-List-2021-Lewes-District-Council/pdf/Local_Validation_List_2021_-_Lewes_District_Council.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was mostly NPPG reference IDs; the trigger is the part kept here."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: External lighting (commercial, recreational, security or floodlighting) is proposed or required.
+    must-include:
+      - item: Details of the external lighting
+        level: must
+      - item: The proposed hours when the lighting would be switched on
+        level: must
+    confidence: medium
+
+  - id: sustainability-statement
+    action: update
+    must-include:
+      - item: Baseline annual CO2 emissions and energy costs
+        level: should
+      - item: Fabric first approach
+        level: should
+      - item: Heating, ventilation and lighting details
+        level: should
+      - item: Low and zero carbon feasibility report (renewable energy technologies)
+        level: should
+      - item: Specification of energy efficient measures
+        level: should
+      - item: Improvement in CO2 over a Building Regulations baseline
+        level: should
+    notes: "Contents from the council's text ('The statement should build upon the Adopted Sustainability checklist and should include: …'); no trigger was captured."
+
+  - id: telecommunications-report
+    action: replace
+    source-url: https://www.lewes-eastbourne.gov.uk/media/2927/Appendix-Local-Validation-List-2021-Lewes-District-Council/pdf/Appendix_-_Local_Validation_List_2021_-_Lewes_District_Council.pdf
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook quoted the Planning Obligations (31) text. The list has a telecommunications entry, but its trigger was not captured."
+
+  - id: transport-assessment
+    action: replace
+    required-if: discretionary
+    source-text: need for a Transport Assessment or Statement and if needed, agree the scope.
+    source-url: https://www.lewes-eastbourne.gov.uk/media/2927/Appendix-Local-Validation-List-2021-Lewes-District-Council/pdf/Appendix_-_Local_Validation_List_2021_-_Lewes_District_Council.pdf
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook's excerpt ran into the Travel Plan (14) text; the trigger itself was not captured."
+
+  - id: viability-assessment
+    action: add
+    required-if: discretionary
+    source-text: Development proposals for new residential development where the required provision of Affordable Housing will not be met
+    source-url: https://www.lewes-eastbourne.gov.uk/media/2923/Local-Validation-List-2021-Lewes-District-Council/pdf/Local_Validation_List_2021_-_Lewes_District_Council.pdf
+    must-include:
+      - item: A full un-redacted viability assessment, provided at the time of submission
+        level: should
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement): residential development where the required affordable housing
+      will not be met. No field records that, so it is shown as officer discretion.
+
+unmapped:
+  - local-name: Economic Statement
+    source-text: "20) Economic Statement (including application of sequential testing where necessary) Justification – To demonstrate how new employment opportunities have been created, or the loss of employment floorspace justified."
+    source-url: https://www.lewes-eastbourne.gov.uk/media/2927/Appendix-Local-Validation-List-2021-Lewes-District-Council/pdf/Appendix_-_Local_Validation_List_2021_-_Lewes_District_Council.pdf
+    suggested-id: employment-statement
+  - local-name: Soil Management Plan
+    source-text: "34) Soil Management Plan Justification – Where there is the movement of top and/or subsoils as part of a development proposal and where significant land rise or fall is proposed."
+    source-url: https://www.lewes-eastbourne.gov.uk/media/2927/Appendix-Local-Validation-List-2021-Lewes-District-Council/pdf/Appendix_-_Local_Validation_List_2021_-_Lewes_District_Council.pdf
+    suggested-id: soil-management-plan
+  - local-name: Ashdown Forest 7km buffer information (Habitats Regulations)
+    source-text: "Development in the 7km Ashdown Forest buffer (including single dwellings) require us to make an appropriate assessment of the potential impact upon the Ashdown Forest so the applicant will need to provide us with a suitable amount of information to enable us to do this"
+    source-url: https://www.lewes-eastbourne.gov.uk/media/2923/Local-Validation-List-2021-Lewes-District-Council/pdf/Local_Validation_List_2021_-_Lewes_District_Council.pdf
+    suggested-id: habitats-regulations-assessment
+  - local-name: Drawing Revision List
+    source-text: "38) Drawing Revision List Justification - This applies where amendments and or changes are proposed to a previously approved scheme and should take the form of a table which should list all proposed drawing numbers and reference the drawing number which the proposed drawing is intended to replace."
+    source-url: https://www.lewes-eastbourne.gov.uk/media/2927/Appendix-Local-Validation-List-2021-Lewes-District-Council/pdf/Appendix_-_Local_Validation_List_2021_-_Lewes_District_Council.pdf
+    suggested-id: drawing-revision-list
+  - local-name: Site Topographical Survey
+    source-text: "42) Site Topographical Survey Justification – Required on all new dwellings and major applications"
+    source-url: https://www.lewes-eastbourne.gov.uk/media/2927/Appendix-Local-Validation-List-2021-Lewes-District-Council/pdf/Appendix_-_Local_Validation_List_2021_-_Lewes_District_Council.pdf
+    suggested-id: topographical-survey
+  - local-name: Agricultural / forestry workers' dwelling justification
+    source-text: "From the audit: new or loss of agricultural/forestry workers' housing, and removal of occupancy conditions (Appendix para 20)"
+    source-url: https://www.lewes-eastbourne.gov.uk/media/2923/Local-Validation-List-2021-Lewes-District-Council/pdf/Local_Validation_List_2021_-_Lewes_District_Council.pdf
+    suggested-id: rural-worker-dwelling-justification
+  - local-name: Agriculture and Forestry Diversification Plan
+    source-text: "From the audit: listed in the policy table; no trigger captured"
+    source-url: https://www.lewes-eastbourne.gov.uk/media/2923/Local-Validation-List-2021-Lewes-District-Council/pdf/Local_Validation_List_2021_-_Lewes_District_Council.pdf
+    suggested-id: ""
+
+low-confidence:
+  - id: "*"
+    note: >-
+      Audit (other): the list was agreed in June 2021 and is over 2 years old, so under DMPO 2015
+      art. 11(3)(c) the council may not be able to rely on it (a December 2022 draft joint list
+      with Eastbourne exists; adoption unconfirmed).
+  - id: affordable-housing-statement
+    note: "Audit (wrong_trigger): the excerpt is a run of policy references; the list's 'when required' column was not captured."
+  - id: archaeological-assessment
+    note: "Audit (wrong_trigger): the excerpt is the 'Justification' (purpose) sentence, not the trigger."
+  - id: biodiversity-survey-report
+    note: "Audit (wrong_trigger): the excerpt is the 'Justification' (purpose) sentence, not the trigger."
+  - id: cil-form
+    note: "Audit (wrong_trigger): the excerpt is the 'Justification' (purpose) sentence, not the trigger."
+  - id: daylight-sunlight-assessment
+    note: "Audit (wrong_trigger): the excerpt is the 'Justification' (purpose) sentence, not the trigger."
+  - id: land-contamination-assessment
+    note: "Audit (wrong_trigger): the excerpt is the 'Justification' (purpose) sentence, not the trigger."
+  - id: sci
+    note: "Audit (wrong_trigger): the excerpt is the 'Justification' (purpose) sentence, not the trigger."
+  - id: travel-plan
+    note: "Audit (wrong_trigger): the excerpt is the 'Justification' (purpose) sentence, not the trigger."
+  - id: heritage-statement
+    note: "Audit (wrong_trigger): the excerpt is a cut-off fragment ('in the heritage statement.')."
+  - id: landscaping-plan
+    note: "Audit (wrong_trigger): the excerpt is a cut-off fragment."
+  - id: recreation-facilities-assessment
+    note: "Audit (wrong_trigger): the excerpt is a cut-off fragment ('of proposed play space.')."
+  - id: waste-management-plan
+    note: "Audit (wrong_trigger): the excerpt is a cut-off fragment."

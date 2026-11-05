@@ -1,0 +1,564 @@
+# Corrections for Ribble Valley Borough Council, from the council's audit.
+# The workbook links the current Adopted Validation Checklist (adopted by Committee 29 May 2025;
+# the URL slug still says august-2023). The checklist applies items by trigger, not by
+# application type, so the guessed 'Full planning' rows are left for every type with the
+# council's own trigger. Coal mining was filed under exactly the types the source exempts, and
+# three rows were filed under s73 only because s73 is mentioned as an exception. About ten
+# document and seven plan requirements were missing; they are added below. A December 2025 note
+# on the planning page pauses the Sustainable Drainage Pro-Forma at validation, so it is not added.
+local-authority: RIB
+
+submission-standards:
+  - item: Plans provided at the stated scale including the paper size (e.g. 1:500 at A1), showing
+      the direction of north where appropriate
+    level: should
+  - item: Plans include the dimensions of the proposal annotated onto the plan
+    level: should
+  - item: Plans scaled to fit onto A4 or A3 paper wherever possible
+    level: should
+  - item: Documents containing commercially sensitive or personal information submitted twice, one
+      copy redacted for publication
+    level: should
+
+drop:
+  - id: design-and-access-statement
+    reason: "wrong_app_type: the excerpt says a DAS is NOT required for s73 applications"
+  - id: photos
+    reason: "wrong_trigger: the excerpt is Land Contamination Statement content (now a must-include item there)"
+
+drop-unmapped:
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_trigger: the excerpt is lighting / ecology text"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "wrong_trigger: the excerpt is Affordable Housing Statement content (now a must-include item there)"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "not_a_requirement: 'Whilst planning obligations are not a validation requirement...'"
+  - local-name: Self-build / custom build information
+    reason: "not_a_requirement: 'whilst not a validation requirement, the applicant will be required to submit a
+      Unilateral Undertaking'"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger / wrong_app_type: location plan guidance, filed under s73 because of a footnote"
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_trigger: the excerpt is the floor plans trigger"
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "wrong_app_type: the excerpt is the LBC 1:20 section-details requirement (now a must-include item in
+      section-proposed)"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if: discretionary
+    policy: Core Strategy Policy DMH1
+    must-include:
+      - item: How the required percentage of affordable housing will be achieved on site
+        level: must
+      - item: The tenure mix of the affordable units
+        level: must
+      - item: The types and size of the affordable units, including number of bedrooms and internal
+          space standards
+        level: must
+      - item: Details of the Registered Provider / Housing Association who will manage the affordable
+          units (if applicable)
+        level: must
+    notes: "For housing schemes which require affordable housing under Policy DMH1 (council's wording); no field for
+      that, so officer discretion."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: The proposal could impact trees or hedgerows within or adjacent to the site.
+    source-text: >-
+      Tree Survey / Arboricultural Impact Assessment When required? Proposals which have the
+      potential to impact on trees or hedgerows (either within the application site or adjacent to
+      the application site) shall be accompanied by an Arboricultural Impact Assessment (AIA).
+    notes: "Audit (wrong_app_type): the trigger also catches householder and other types."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: The proposal meets a protected species trigger (Appendix A, Table 1).
+        - site:
+            in: [priority-habitat]
+            description: The site includes a priority habitat (Appendix A, Table 2).
+    must-include:
+      - item: Information to assess the proposal against the three licensing tests of the Habitats
+          Regulations
+        level: must
+        required-if:
+          condition:
+            field: protected-species
+            value: true
+            description: The development affects European Protected Species and is likely to need a
+              Natural England licence.
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): the Appendix A tables set protected species triggers
+      (Table 1), priority habitats (Table 2) and survey timings (Table 3); the triggers here are the
+      audit's summary.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    must-include:
+      - item: A non-technical summary
+        level: must
+    notes: "Audit (wrong_trigger): the excerpt was a fragment."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3.
+        - discretionary
+    source-url: https://www.ribblevalley.gov.uk/downloads/file/3789/adopted-validation-checklist-august-2023
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt was 'a simple flood risk assessment.' From the audit: Flood
+      Zones 2/3, or Zone 1 sites meeting size or flood-risk conditions (not given, so officer
+      discretion). It catches householder applications too.
+
+  - id: floor-plan-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: building-works
+            value: true
+            description: The application includes new buildings or alterations to buildings.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: The application changes the use of any space within a building.
+    source-text: >-
+      Floor Plans (Existing and Proposed) When required? All applications which include new
+      buildings, alterations to buildings or changes to the use of any space within a building
+      Scale? Typically 1:50 or 1:100 Where existing buildings or walls are to be demolished these
+      should be clearly shown.
+    must-include:
+      - item: Scale typically 1:50 or 1:100
+        level: should
+      - item: Existing buildings or walls to be demolished clearly shown
+        level: should
+
+  - id: floor-plan-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: building-works
+            value: true
+            description: The application includes new buildings or alterations to buildings.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: The application changes the use of any space within a building.
+    source-text: >-
+      Floor Plans (Existing and Proposed) When required? All applications which include new
+      buildings, alterations to buildings or changes to the use of any space within a building
+      Scale? Typically 1:50 or 1:100 Where existing buildings or walls are to be demolished these
+      should be clearly shown.
+    must-include:
+      - item: Scale typically 1:50 or 1:100
+        level: should
+      - item: Existing buildings or walls to be demolished clearly shown
+        level: should
+
+  - id: elevation-existing
+    action: replace
+    source-url: https://www.ribblevalley.gov.uk/downloads/file/3789/adopted-validation-checklist-august-2023
+    must-include:
+      - item: Dimensions of the proposal annotated onto the plan
+        level: should
+    confidence: low
+    notes: "The workbook quoted the floor plans text; the elevations trigger ('Elevations (Existing and Proposed)
+      When required?') was cut off."
+
+  - id: elevation-proposed
+    action: replace
+    source-url: https://www.ribblevalley.gov.uk/downloads/file/3789/adopted-validation-checklist-august-2023
+    must-include:
+      - item: Dimensions of the proposal annotated onto the plan
+        level: should
+      - item: Where the elevation adjoins or is close to another building, the relationship between
+          the buildings and the positions of the openings on each property
+        level: should
+        source-text: Where a proposed elevation adjoins another building or is in close proximity, the
+          drawings should clearly show the relationship between the buildings and detail the
+          positions of the openings on each property.
+    confidence: low
+    notes: "The workbook quoted the floor plans text; the elevations trigger ('Elevations (Existing and Proposed)
+      When required?') was cut off."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, scheduled-monument, park-and-garden,
+              conservation-area, locally-listed-building]
+            description: The application involves a listed building, scheduled monument, registered
+              park or garden, the setting of a listed building, work in a conservation area or work to
+              a local heritage asset.
+    source-text: >-
+      Heritage Statement When required? For planning applications which involve a Listed Building,
+      Scheduled Monument, Registered Park or Garden, impact on the setting of a Listed Building,
+      involve work within a Conservation Area and/or involve work to a local heritage asset (e.g. as
+      identified by a local list or through the pre-application process).
+    source-url: https://www.ribblevalley.gov.uk/downloads/file/3789/adopted-validation-checklist-august-2023
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook had Listed building consent only; the trigger catches planning
+      applications, including householder."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: A use particularly sensitive to contamination (housing, schools, care homes,
+              hospitals, children's play areas, allotments).
+        - condition:
+            field: ground-disturbance
+            value: true
+            description: The development involves breaking into the ground.
+    must-include:
+      - item: Photographic evidence (colour site photos, dated, with a brief description of where they
+          were taken, aerial photographs, maps)
+        level: must
+      - item: Details of any evidence of contamination (e.g. stained ground, vegetation die back, raised
+          land levels)
+        level: must
+    notes: "The photographic evidence items were in the workbook's Photographs row."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: New external lighting near established residential properties, heritage assets,
+          protected wildlife areas or countryside areas.
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The development is expected to create noise.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise sensitive development is proposed.
+    must-include:
+      - item: The levels of noise expected to be created and methods for mitigating any impact
+        level: should
+      - item: Measures to protect noise sensitive development from noise
+        level: should
+        required-if:
+          condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise sensitive development is proposed.
+    confidence: low
+    notes: "The excerpt gives the contents, not the 'When required?' line; the trigger is read from the contents."
+
+  - id: planning-statement
+    action: update
+    required-if:
+      ref: major-development
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New roof details are proposed (new buildings).
+        - condition:
+            field: roof-alteration
+            value: true
+            description: New roof details are proposed.
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New roof details are proposed (new buildings).
+        - condition:
+            field: roof-alteration
+            value: true
+            description: New roof details are proposed.
+    must-include:
+      - item: The shape of the roof
+        level: must
+      - item: The roofing material, and vents and their location where necessary
+        level: must
+
+  - id: schedule-of-works
+    action: replace
+    required-if:
+      application-type:
+        in: [lbc]
+    source-text: detail, via a method statement, the means by which the retained structure is to be
+      safeguarded.
+    source-url: https://www.ribblevalley.gov.uk/downloads/file/3789/adopted-validation-checklist-august-2023
+    confidence: medium
+    notes: "Audit (wrong_app_type): the source requires the method statement for any Listed Building Consent
+      application, not Full planning."
+
+  - id: section-existing
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New buildings.
+        - condition:
+            field: footprint-increase
+            value: true
+            description: Extensions.
+        - condition:
+            field: height-change
+            value: true
+            description: Roof lifts.
+        - condition:
+            field: basement
+            value: true
+            description: Basements.
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: Changes to ground levels.
+        - application-type:
+            in: [lbc]
+        - discretionary
+    source-url: https://www.ribblevalley.gov.uk/downloads/file/3789/adopted-validation-checklist-august-2023
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Sectional Drawings for new buildings, extensions
+      including roof lifts and basements, decking (no field, so officer discretion), listed building
+      alterations and ground-level changes. The workbook's excerpt was the Site Levels Plans text
+      (finished floor levels in Flood Zones 2 or 3).
+
+  - id: section-proposed
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New buildings.
+        - condition:
+            field: footprint-increase
+            value: true
+            description: Extensions.
+        - condition:
+            field: height-change
+            value: true
+            description: Roof lifts.
+        - condition:
+            field: basement
+            value: true
+            description: Basements.
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: Changes to ground levels.
+        - application-type:
+            in: [lbc]
+        - discretionary
+    source-url: https://www.ribblevalley.gov.uk/downloads/file/3789/adopted-validation-checklist-august-2023
+    must-include:
+      - item: Section details (typically 1:20) of each elevation affected, showing eaves, guttering/rain
+          water goods, soffit/overhangs, window/door reveals and the proposed window/door framing
+          profiles/systems and materials
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+        source-text: >-
+          Listed Building Consent When required? Applications for Listed Building Consent where
+          elevational changes are proposed Scale? Typically 1:20 Section details shall be provided of
+          each elevation affected which clearly indicates eaves, guttering/rain water goods,
+          soffit/overhangs and window/door reveals and the proposed window/door framing
+          profiles/systems and materials
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Sectional Drawings for new buildings, extensions
+      including roof lifts and basements, decking (no field, so officer discretion), listed building
+      alterations and ground-level changes. The LBC section-details item was in the workbook's
+      street scene row.
+
+  - id: site-plan
+    action: replace
+    source-url: https://www.ribblevalley.gov.uk/downloads/file/3789/adopted-validation-checklist-august-2023
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger, missing_requirement): the workbook quoted flue and affordable housing
+      text. From the audit: Site Layout Plans (existing and proposed) are needed for every
+      application except s73/s73A, which the rules can't express.
+
+  - id: sci
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    notes: "Major development where there is likely to be significant public interest (council's wording)."
+
+  - id: travel-plan
+    action: replace
+    source-url: https://www.ribblevalley.gov.uk/downloads/file/3789/adopted-validation-checklist-august-2023
+    confidence: low
+    notes: "Audit (wrong_trigger): the excerpt was a Lancashire email address and the Tree Survey text; no trigger."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    must-include:
+      - item: Value of the land (2 or 3 different estate agents' valuations)
+        level: must
+      - item: Abnormal development costs
+        level: must
+      - item: Construction costs
+        level: must
+      - item: Price the Registered Provider will pay for the units (for affordable housing)
+        level: must
+      - item: Open market value of the dwellings / value of the development
+        level: must
+      - item: Developer return
+        level: must
+      - item: Details of the proposed obligations / specific elements of the scheme
+        level: must
+
+  - id: waste-management-plan
+    action: update
+    must-include:
+      - item: Details of the proposed facilities for the storage and collection of refuse
+        level: must
+      - item: Provision of recycling facilities
+        level: must
+
+  - id: protected-landscape-assessment
+    action: add
+    required-if:
+      all:
+        - ref: major-development
+        - site:
+            in: [area-of-outstanding-natural-beauty]
+            description: The site is in the AONB (National Landscape).
+    source-url: https://www.ribblevalley.gov.uk/downloads/file/3789/adopted-validation-checklist-august-2023
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): AONB Major Development Test. Whether a proposal is
+      major development here is a matter for the council (its nature, scale and setting), not only
+      the national thresholds.
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Main town centre uses outside centres.
+        - discretionary
+    source-url: https://www.ribblevalley.gov.uk/downloads/file/3789/adopted-validation-checklist-august-2023
+    confidence: medium
+    notes: "From the audit (missing_requirement): Retail Sequential Test and Impact Assessment, above floorspace
+      thresholds the audit doesn't give."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: A telecommunications application.
+    source-url: https://www.ribblevalley.gov.uk/downloads/file/3789/adopted-validation-checklist-august-2023
+    confidence: medium
+    notes: "From the audit (missing_requirement): Telecommunications Development, all telecoms applications."
+
+  - id: renewables-decommissioning-report
+    action: add
+    required-if: discretionary
+    source-url: https://www.ribblevalley.gov.uk/downloads/file/3789/adopted-validation-checklist-august-2023
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): Wind Energy Applications need a decommissioning bond for
+      single turbines over 40m or multiple turbines. There is no turbine field, so it is shown as
+      officer discretion.
+
+unmapped:
+  - local-name: Green Belt Calculations
+    source-text: "From the audit: replacement buildings and extensions in the Green Belt"
+    source-url: https://www.ribblevalley.gov.uk/downloads/file/3789/adopted-validation-checklist-august-2023
+    suggested-id: green-belt-calculations
+  - local-name: Odour Assessment
+    source-text: "From the audit: odour-generating development near sensitive receptors, or sensitive
+      development near odour sources such as wastewater works"
+    source-url: https://www.ribblevalley.gov.uk/downloads/file/3789/adopted-validation-checklist-august-2023
+    suggested-id: odour-assessment
+  - local-name: Street Adoption Statement
+    source-text: "From the audit: new internal roads or connections to the public highway"
+    source-url: https://www.ribblevalley.gov.uk/downloads/file/3789/adopted-validation-checklist-august-2023
+    suggested-id: ""
+  - local-name: Tree Works Application
+    source-text: "From the audit: works to TPO trees or conservation area trees"
+    source-url: https://www.ribblevalley.gov.uk/downloads/file/3789/adopted-validation-checklist-august-2023
+    suggested-id: tree-works-plan
+  - local-name: Wind Energy Applications
+    source-text: "From the audit: shadow flicker within 10x turbine height; decommissioning bond for single
+      turbines over 40m or multiple turbines; community benefits at 250kW+; communications impacts"
+    source-url: https://www.ribblevalley.gov.uk/downloads/file/3789/adopted-validation-checklist-august-2023
+    suggested-id: ""
+  - local-name: Site Levels Plans
+    source-text: "From the audit: new buildings, extensions, decking, engineering operations"
+    source-url: https://www.ribblevalley.gov.uk/downloads/file/3789/adopted-validation-checklist-august-2023
+    suggested-id: levels-plan
+  - local-name: Streetscene Plan
+    source-text: "From the audit: new buildings or height increases fronting the highway or public realm next
+      to neighbours"
+    source-url: https://www.ribblevalley.gov.uk/downloads/file/3789/adopted-validation-checklist-august-2023
+    suggested-id: street-scene-elevations
+  - local-name: Major housing development plans
+    source-text: "From the audit: major applications where layout or appearance is considered"
+    source-url: https://www.ribblevalley.gov.uk/downloads/file/3789/adopted-validation-checklist-august-2023
+    suggested-id: ""
+  - local-name: Access Ramp Details
+    source-text: "From the audit: new external ramp"
+    source-url: https://www.ribblevalley.gov.uk/downloads/file/3789/adopted-validation-checklist-august-2023
+    suggested-id: ""
+  - local-name: Shopfront Details
+    source-text: "From the audit: new or altered shopfront"
+    source-url: https://www.ribblevalley.gov.uk/downloads/file/3789/adopted-validation-checklist-august-2023
+    suggested-id: shopfront-details
+
+low-confidence:
+  - id: archaeological-assessment
+    note: "Audit (wrong_trigger): the excerpt ('an appropriate desk-based assessment...') gives no trigger."
+  - id: transport-assessment
+    note: "Audit (wrong_trigger): the excerpt has no thresholds."

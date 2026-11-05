@@ -1,0 +1,372 @@
+# Corrections for Bassetlaw District Council, from the council's audit.
+# The workbook links the July 2018 'Validation Of Planning Application: Guidance Notes' PDF (Core
+# Strategy era), which is superseded. The current list is the council's 'Local validation
+# requirement' web page under the Bassetlaw Local Plan 2020-2038 (the build now uses it as the list
+# URL). Grokbot read both and mixed them. Rows that only the 2018 PDF supports are kept at low
+# confidence with a note; rows the audit confirms on the current page are corrected. The page lists
+# items by trigger, not by application type. Items marked "From the audit" use the audit's
+# paraphrase. The 2018 PDF's drawing rules (north point, paper size, 0-10m scale bar) are not used
+# as submission standards because the PDF is superseded.
+local-authority: BAE
+
+validation-list:
+  date: 2026-08-27
+  date-basis: "audit: web page 'Last Updated on Thursday, August 27, 2026'; no adoption date stated"
+
+drop:
+  - id: cil-form
+    reason: "not_a_requirement: the excerpt is a list of viability cost headings"
+  - id: environmental-statement
+    reason: "not_a_requirement: a passing reference ('might form part of an Environmental Statement')"
+  - id: recreation-facilities-assessment
+    reason: "wrong mapping: the excerpt is the Planning Obligations / Heads of Terms item (re-added under unmapped)"
+
+drop-unmapped:
+  - local-name: Gypsy & Traveller information
+    reason: "wrong_app_type: the excerpt is the Heritage Impact Assessment text (now in heritage-statement)"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advisory text"
+  - local-name: Design Code / Masterplan / Parameter plans
+    reason: "not_a_requirement: mislabelled; the 2018 PDF's illustrative layout and elevations plan wording"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "outdated_link: 2018 PDF wording; re-added below with the current page's wording"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: Residential development of 10 or more units.
+    confidence: medium
+    notes: "Audit (wrong_app_type): residential developments of 10+ units, including outline applications."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: The development directly affects existing trees within or adjacent to the site boundaries.
+    source-text: >-
+      Tree Survey If the development directly affects existing trees within or adjacent to the site
+      boundaries Where there are trees within the application site, or on adjacent land that could
+      influence or be affected by the development (including street trees), information will need to
+      be submitted on which trees are to be retained, which to be felled and on the means of
+      protecting trees during construction w…
+    source-url: &web https://www.bassetlaw.gov.uk/planning-and-building-control/planning-applications/development-management/local-validation-requirement/
+    must-include:
+      - item: Which trees are to be retained and which felled
+        level: must
+      - item: The means of protecting trees during construction works
+        level: must
+    confidence: medium
+    notes: >-
+      The workbook quoted the 2018 PDF; this is the current page's wording (which the workbook had put
+      in its Travel Plan row). Audit (wrong_app_type): the tree survey applies to any application
+      meeting the trigger.
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: greenfield-site
+            value: true
+            description: A greenfield site.
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: The site affects hedgerows, mature trees or woodland.
+        - discretionary
+    source-text: all major applications, greenfield sites, or sites affecting hedgerows, mature trees, woodland...
+    source-url: *web
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted 2018 text about standing advice and delivery rates.
+      The current Ecological Appraisal trigger also covers buildings with bats or barn owls (shown as
+      officer discretion).
+
+  - id: bng-metric
+    action: add
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The application is subject to mandatory biodiversity net gain.
+    source-url: *web
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Biodiversity Net Gain Statement for all applications
+      subject to mandatory BNG."
+
+  - id: construction-management-plan
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: *web
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Construction Traffic Management Plan for major development
+      or development likely to cause disruption, including demolition."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone, critical-drainage-area]
+            description: The site is in Flood Zone 2, 3 or 3b, or in a critical drainage area.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more in Flood Zone 1.
+        - discretionary
+    source-url: *web
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's 2018 excerpt dropped the Flood Zone 2/3/3b, critical
+      drainage area and SFRA future-risk triggers (the future-risk case is shown as officer
+      discretion). The 1 ha Flood Zone 1 case is from the 2018 excerpt.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, demolition-con-area]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+              scheduled-monument, park-and-garden]
+            description: The development affects a listed building's setting or another heritage asset.
+    source-text: >-
+      Heritage Statement: listed building consent, demolition in a conservation area, or development
+      affecting a listed building's setting or other heritage asset
+    source-url: *web
+    confidence: medium
+    notes: "Audit (missing_requirement): also for full planning (and any application) affecting a heritage
+      asset or its setting."
+
+  - id: landscaping-plan
+    action: replace
+    required-if:
+      application-type:
+        in: [reserved-matters]
+    source-text: Landscaping Proposals/Tree Survey and Report – If not approved at outline stage
+    source-url: https://www.bassetlaw.gov.uk/media/4914/validation-of-planning-application.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): 'If not approved at outline stage' makes this a reserved matters item.
+      The wording is from the 2018 PDF."
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: >-
+          The proposal includes external lighting, particularly near residential property, a listed
+          building, a conservation area or open countryside.
+    source-text: >-
+      Lighting assessment Proposals involving the provision of external lighting, particularly in the
+      vicinity of residential property, a listed building or a conservation area or open countryside,
+      must be accompanied by details of the external lighting and the proposed hours when the lighting
+      would be switched on.
+    source-url: https://www.bassetlaw.gov.uk/media/4914/validation-of-planning-application.pdf
+    must-include:
+      - item: Details of the external lighting
+        level: must
+      - item: The proposed hours when the lighting would be switched on
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): applies to external lighting near a listed building or conservation area,
+      not to listed building consent applications. The wording is from the 2018 PDF."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Noise-generating development.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise-sensitive development near major noise sources.
+    source-url: *web
+    confidence: medium
+    notes: "From the audit (missing_requirement): noise-generating development, or noise-sensitive development
+      near major noise sources."
+
+  - id: photos
+    action: update
+    required-if:
+      condition:
+        field: demolition
+        value: true
+        description: A building is proposed to be demolished.
+    confidence: low
+    notes: "Audit (wrong_trigger): the excerpt is garbled and from the superseded 2018 PDF; a photographic
+      survey of the interior and exterior of a building proposed for demolition."
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [s73]
+        - discretionary
+    source-text: >-
+      major development (including outline and reserved matters), HMOs, ... applications to remove or
+      vary conditions
+    source-url: *web
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook quoted the Sustainability Statement text. Other listed
+      cases (HMOs and those cut from the audit's quote) are shown as officer discretion.
+
+  - id: roof-plan-existing
+    action: add
+    source-url: *web
+    confidence: low
+    notes: "From the audit (missing_requirement): roof plans are on the current list; the audit gives no
+      trigger."
+
+  - id: roof-plan-proposed
+    action: add
+    source-url: *web
+    confidence: low
+    notes: "From the audit (missing_requirement): roof plans are on the current list; the audit gives no
+      trigger."
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      ref: major-development
+    policy: Bassetlaw Local Plan Policy ST50
+    confidence: medium
+    notes: "The current page: 'All major developments'. Audit (wrong_app_type): includes outline applications."
+
+  - id: telecommunications-report
+    action: replace
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Telecommunications development.
+    source-url: *web
+    must-include:
+      - item: ICNIRP declaration
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): the ICNIRP declaration for telecoms; the workbook quoted the
+      2018 PDF."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if: discretionary
+    policy: Bassetlaw Local Plan Policy ST11
+    source-text: >-
+      Retail & Leisure Impact Assessment Relevant thresholds are set out in Policy ST11 of the Bassetlaw
+      Local Plan 2020-2038 … The assessment should detail likely effects on the viability and
+      vitality of existing centres and on any planned investment.
+    source-url: *web
+    must-include:
+      - item: Likely effects on the viability and vitality of existing centres and on any planned investment
+        level: should
+    confidence: medium
+    notes: "From the audit (missing_requirement): the thresholds are in Policy ST11, not the list, so they are
+      shown as officer discretion."
+
+  - id: transport-assessment
+    action: replace
+    required-if: discretionary
+    policy: Bassetlaw Local Plan Policy ST52
+    source-url: *web
+    confidence: medium
+    notes: "Audit (wrong_app_type): the thresholds are in Policy ST52 (shown as officer discretion); the
+      workbook quoted the 2018 PDF."
+
+  - id: travel-plan
+    action: replace
+    required-if: discretionary
+    policy: Bassetlaw Local Plan Policy ST52
+    source-url: *web
+    confidence: medium
+    notes: "Audit (wrong_app_type): the thresholds are in Policy ST52; the workbook's excerpt was the Tree
+      Survey text."
+
+  - id: waste-management-plan
+    action: update
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 1
+        description: The application is for additional dwellings.
+    confidence: low
+    notes: "From the superseded 2018 PDF ('All applications for additional dwellings should include details
+      of where refuse storage is to take place'); check the current page."
+
+unmapped:
+  - local-name: Planning Obligations / Draft Heads of Terms
+    source-text: >-
+      Planning Obligations/Draft Heads of Terms All applications which propose development which
+      trigger any requirement for planning obligations in accordance with Bassetlaw Local Plan
+      policies.
+    source-url: *web
+    suggested-id: planning-obligations-heads-of-terms
+  - local-name: Health Impact Assessment
+    source-text: "From the audit: 50+ dwellings"
+    source-url: *web
+    suggested-id: health-impact-assessment
+  - local-name: Landscape and Visual Impact Assessment
+    source-text: "From the audit: sensitive or highly visible locations, large renewables, minerals/waste"
+    source-url: *web
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Marketing and Viability Information
+    source-text: "From the audit: loss of uses protected by the development plan"
+    source-url: *web
+    suggested-id: marketing-evidence
+  - local-name: Recreational Impact Assessment (Clumber Park SSSI)
+    source-text: >-
+      Recreational Impact Assessment 50 or more dwellings falling within the 10 km impact zone of
+      Clumber Park SSSI A site-specific assessment of recreational pressure.
+    source-url: *web
+    suggested-id: recreational-impact-assessment
+
+low-confidence:
+  - id: site-plan
+    note: "From the superseded 2018 PDF; check the current page."
+  - id: land-contamination-assessment
+    note: "From the superseded 2018 PDF (previously-developed sites where contamination is suspected); check
+      the current page."
+  - id: section-existing
+    note: "The excerpt is a 2018 PDF fragment. The audit lists section drawings on the current page without
+      a trigger."
+  - id: section-proposed
+    note: "The excerpt is a 2018 PDF fragment. The audit lists section drawings on the current page without
+      a trigger."
+  - id: floor-plan-existing
+    note: "The excerpt is a 2018 PDF fragment about sloping sites."
+  - id: floor-plan-proposed
+    note: "The excerpt is a 2018 PDF fragment about sloping sites."
+  - id: elevation-existing
+    note: "The excerpt is a 2018 PDF fragment about sloping sites."
+  - id: elevation-proposed
+    note: "The excerpt is a 2018 PDF fragment about sloping sites."
+  - id: viability-assessment
+    note: "The excerpt is a 2018 PDF fragment with no trigger."
+  - id: design-and-access-statement
+    note: "From the superseded 2018 PDF ('if required'); check the current page."

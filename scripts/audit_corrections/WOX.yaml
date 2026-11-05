@@ -1,0 +1,292 @@
+# Corrections for West Oxfordshire District Council, from the audit of West Oxfordshire.
+# The audit could not fetch any WODC checklist PDF, so contents were not checked. WODC publishes a
+# separate validation checklist for each application type; the workbook mixes 2022/2023 and 2026
+# versions, copies the s73 checklist rows into Listed building consent, and files householder and
+# guidance-page items under Full planning. This file drops the clearly wrong rows and structures
+# the triggers the excerpts state plainly.
+local-authority: WOX
+
+validation-list:
+  date: 2026-07
+  date-basis: "audit: filename suffix '20-07-26' suggests 20 July 2026; the PDF text could not be checked"
+
+submission-standards:
+  - item: All plans and drawings include the paper size, the address of the proposal, a metric scale
+      and a title; plans show the direction of north
+    level: must
+  - item: All drawings include a title, drawing number, confirmation of the scale and a scale bar
+    level: must
+  - item: Drawings supplied in a scalable format, ideally as PDF documents, and not in draft format
+    level: should
+  - item: Where a document on the Local Requirements list is not provided, a written statement 
+      explaining why it is not required
+    level: must
+
+drop:
+  - id: bng-metric
+    sheets: [Listed building consent]
+    reason: "wrong_document: copied from the s73 checklist, not an LBC checklist"
+  - id: site-plan
+    sheets: [Listed building consent]
+    reason: "wrong_document: copied from the s73 checklist"
+  - id: cil-form
+    sheets: [Listed building consent]
+    reason: "wrong_document: copied from the s73 checklist"
+  - id: section-existing
+    sheets: [Listed building consent]
+    reason: "wrong_document: copied from the s73 checklist"
+  - id: section-proposed
+    sheets: [Listed building consent]
+    reason: "wrong_document: copied from the s73 checklist"
+  - id: floor-plan-existing
+    sheets: [Listed building consent, Full planning]
+    reason: "wrong_document: LBC rows copied from the s73 checklist; the Full planning excerpt is window/joinery
+      detail text"
+  - id: floor-plan-proposed
+    sheets: [Listed building consent, Full planning]
+    reason: "as above"
+  - id: elevation-existing
+    sheets: [Listed building consent, Full planning]
+    reason: "as above"
+  - id: elevation-proposed
+    sheets: [Listed building consent, Full planning]
+    reason: "as above"
+  - id: planning-statement
+    sheets: [Listed building consent]
+    reason: "wrong_document: copied from the s73 checklist"
+  - id: roof-plan-existing
+    sheets: [Listed building consent]
+    reason: "wrong_document: copied from the s73 checklist"
+  - id: roof-plan-proposed
+    sheets: [Listed building consent]
+    reason: "wrong_document: copied from the s73 checklist"
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is Tree Protection Plan / Arboricultural Method Statement text"
+
+drop-unmapped:
+  - local-name: Self-build / custom build information
+    reason: "not_a_requirement: a note about CIL exemptions ('CIL e.g. self-build.')"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: part of the site plan's content description"
+  - local-name: Cycle parking details
+    reason: "not_a_requirement: design guidance from the Sustainability Standards Checklist"
+  - local-name: Water efficiency / water usage statement
+    reason: "not_a_requirement: design guidance from the Sustainability Standards Checklist"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: fragment about the pre-application process"
+
+requirements:
+  - id: archaeological-assessment
+    action: update
+    must-include:
+      - item: Desk Based Assessment carried out in accordance with the CIfA Codes, regulations, 
+          Standards and guidance
+        level: must
+
+  - id: biodiversity-survey-report
+    action: update
+    must-include:
+      - item: >-
+          An Ecological Impact Assessment (EcIA) collating the results of a Preliminary Ecological
+          Appraisal and individual habitat and species surveys
+        level: must
+      - item: Recommendations for avoidance, mitigation, compensation and ecological enhancement 
+          measures
+        level: must
+    notes: "The excerpt's trigger is cut off ('... Protected species; or Priority species')."
+
+  - id: cil-form
+    action: update
+    required-if:
+      condition:
+        field: floorspace
+        operator: ">"
+        value: 0
+        description: The proposal creates floor space of any kind or size.
+    source-text: >-
+      If your proposal creates floor space of any kind/size, the following form must be submitted to
+      validate the application: CIL additional information
+
+  - id: elevation-existing
+    action: update
+    must-include:
+      - item: Scale 1:50 or 1:100
+        level: must
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: EIA development (the Council's screening opinion decides for Schedule 2 
+          development).
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-text: "to submit a fire statement where: The application is for a material change in use of
+      a relevant building and the material change of use would result in …"
+    source-url: 
+      https://www.westoxon.gov.uk/media/jtsfgtmn/full-planning-permission-validation-checklist-wodc-20-07-26-af.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): in the Full planning checklist this is a planning-application
+      requirement for relevant buildings (Article 9A), not a prior approval item. The excerpt is cut
+      off, so the rule uses the national definition of a relevant building.
+
+  - id: floor-plan-existing
+    action: update
+    must-include:
+      - item: Scale 1:50 or 1:100
+        level: must
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: A roof is being altered and the change cannot be adequately shown on the 
+          elevation plans.
+    must-include:
+      - item: Scale 1:50 or 1:100
+        level: must
+    notes: "Trigger from the s73 checklist ('Where any roof is being altered and the change cannot be
+      adequately shown on the elevation plans'), which the workbook put in its site plan row."
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: A roof is being altered and the change cannot be adequately shown on the 
+          elevation plans.
+    must-include:
+      - item: Scale 1:50 or 1:100
+        level: must
+    notes: "Trigger from the s73 checklist ('Where any roof is being altered and the change cannot be
+      adequately shown on the elevation plans'), which the workbook put in its site plan row."
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The development is on a steep incline or decline, or site levels are to be 
+          altered.
+    must-include:
+      - item: Existing and proposed site levels and finished floor levels, related to a defined 
+          datum point
+        level: must
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The development is on a steep incline or decline, or site levels are to be 
+          altered.
+    must-include:
+      - item: Existing and proposed site levels and finished floor levels, related to a defined 
+          datum point
+        level: must
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: Scale 1:200 or 1:500
+        level: must
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      application-type:
+        in: [full, hh]
+    source-text: >-
+      For major applications use your own report template For minor applications (including
+      householder) use the report template below
+    source-url: 
+      https://www.westoxon.gov.uk/planning-and-building/planning-permission/make-a-planning-application/planning-application-supporting-information/sustainability-standards-checklist/
+    must-include:
+      - item: Minor applications (including householder) use the council's Sustainability Statement 
+          Template for Minor Applications; major applications use their own report
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement, wrong_app_type): required for full and minor/householder
+      applications; the planning page says full applications 'must submit a sustainable
+      construction statement'. The workbook's excerpt was a list of document names.
+
+  - id: town-centre-impact-assessment
+    action: replace
+    source-text: Retail Impact Assessment
+    source-url: 
+      https://www.westoxon.gov.uk/media/jtsfgtmn/full-planning-permission-validation-checklist-wodc-20-07-26-af.pdf
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook's trigger ('Desirable for a variation of an existing legal
+      agreement') bled from another row; the real trigger is not known."
+
+unmapped:
+  - local-name: Biodiversity Self-Assessment Form
+    source-text: "Biodiversity - A self-assessment form for all applications"
+    source-url: 
+      https://www.westoxon.gov.uk/planning-and-building/planning-permission/make-a-planning-application/planning-application-supporting-information/
+    suggested-id: biodiversity-checklist
+  - local-name: Health Impact Assessment
+    source-text: "Healthy place shaping: Major applications must provide, at a minimum, a Health Impact
+      Assessment"
+    source-url: 
+      https://www.westoxon.gov.uk/media/jtsfgtmn/full-planning-permission-validation-checklist-wodc-20-07-26-af.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Window / joinery details
+    source-text: "These should include elevations at metric scale of 1:5, horizontal and vertical sections
+      at a scale 1:5, and glazing bar profiles/ sections at a scale of 1:1."
+    source-url: 
+      https://www.westoxon.gov.uk/media/oyagfnem/householder-planning-permission-wodc-20-07-26-af.pdf
+    suggested-id: joinery-details
+
+low-confidence:
+  - id: "*"
+    note: >-
+      Audit (other, outdated_link): WODC publishes a separate checklist for each application type,
+      and the workbook mixes 2022/2023 and 2026 versions; none could be fetched to check.
+  - id: arboriculturist-report
+    note: "Audit (wrong_app_type, wrong_trigger): the row comes from the householder checklist and its
+      excerpt is a list of document names, with no trigger."
+  - id: heritage-statement
+    note: "Audit (wrong_trigger): the excerpt is the fragment 'to the Heritage Statement requirement.'"
+  - id: planning-statement
+    note: "Audit (wrong_trigger): the excerpt ('countryside Supporting Planning Statement') states no
+      trigger."
+  - id: waste-management-plan
+    note: "Audit (wrong_trigger): the excerpt is Site Waste Management Plan guidance from the Sustainability
+      Standards Checklist, not a refuse-storage requirement."
+

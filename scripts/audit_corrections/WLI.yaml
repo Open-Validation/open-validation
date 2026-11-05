@@ -1,0 +1,474 @@
+# Corrections for West Lindsey District Council, from inputs/audit/west-lindsey-district-council.json.
+# West Lindsey shares the joint Central Lincolnshire Local Validation Lists with City of Lincoln
+# (LIC) and North Kesteven (NKE); the three corrections files apply the same rules. The audit found
+# the 2024 lists in force for West Lindsey from 1 July 2024, with revised 2026 lists consulted on
+# (May-June 2026) but not yet adopted. City of Lincoln's audit later found the 2026 lists adopted on
+# 24 August 2026, so the list may need updating. Most Category 2 and 3 local items were missing
+# from the workbook; where the audit names an item without its trigger it is added with no rule.
+local-authority: WLI
+
+submission-standards:
+  - item: All plans and drawings drawn to the identified scale, with a linear scale bar; plans show
+      the direction of north
+    level: must
+  - item: Plans annotate key dimensions, as a minimum the external length, width and height (eaves
+      and ridge) of buildings and structures, and the separation distances between the buildings
+      and structures closest to the site boundary and the boundary itself
+    level: must
+
+drop:
+  - id: bng-metric
+    sheets: [Householder]
+    reason: "wrong_app_type: householder development is exempt from statutory BNG (audit issue 6); the
+      row is the exemption statement (see Biodiversity Gain Statement under unmapped)"
+  - id: floor-plan-existing
+    sheets: [Listed building consent]
+    reason: "wrong_trigger: the excerpt is the window and door / detailed drawings row (1:20 and 1:5)"
+  - id: floor-plan-proposed
+    sheets: [Listed building consent]
+    reason: "wrong_trigger: as above"
+  - id: elevation-existing
+    sheets: [Listed building consent]
+    reason: "wrong_trigger: as above"
+  - id: elevation-proposed
+    sheets: [Listed building consent]
+    reason: "wrong_trigger: as above"
+
+drop-unmapped:
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: a fragment of the block plan drawing description, not a highways
+      requirement"
+  - local-name: Structural Survey
+    reason: "wrong_trigger: 'combined with Structural Survey' belongs to the Demolition Justification
+      Statement row (added under unmapped)"
+
+requirements:
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: The proposal creates 10 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: The site is 0.5 hectares or more.
+    policy: CLLP S22
+    source-url:
+      https://www.central-lincs.org.uk/sites/default/files/1320973/2026-08/Full%20Applications%20Validation%20List%202026.pdf
+    confidence: low
+    notes: >-
+      From City of Lincoln's audit of the shared list (outdated_link): the 2026 Full list adds an
+      Affordable Housing Statement ('Affordable Housing Statement - CLLP S22') for 10+ dwellings,
+      0.5 ha or more, or 5+ dwellings in designated rural areas of North Kesteven (that last
+      branch is North Kesteven's only). West Lindsey's audit found the 2024 lists still in force,
+      so this applies once the 2026 lists are adopted.
+
+  - id: air-quality-assessment
+    action: add
+    policy: CLLP S69
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): an Odour / Air Quality Assessment is a
+      Category 3 item in the Full Applications list. No trigger is given.
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: There are trees within or adjacent to the site.
+    policy: CLLP S66
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Tree Survey and Arboricultural Method Statement where
+      trees are within or adjacent to the site (Full Applications list, Category 2). The audit
+      only cites the Full list.
+
+  - id: archaeological-assessment
+    action: update
+    policy: CLLP S57
+
+  - id: biodiversity-survey-report
+    action: add
+    policy: CLLP S60
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): an Ecological Impact Assessment (CLLP S60) is a
+      Category 2 item in the Full Applications list. No trigger is given.
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - condition:
+            field: biodiversity-gain-condition
+            value: true
+            description: The development is subject to the biodiversity gain condition (not exempt).
+    policy: CLLP S61
+    source-text: >-
+      Biodiversity Net Gain mandatory requirements Where an applicant believes the development would
+      be subject to the biodiversity gain condition, the application must be accompanied by minimum
+      information set out in Article 7 of The Town and Country Planning (Development Management
+      Procedure) (England) Order 2015 …
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    must-include:
+      - item: Metric condition sheets
+        level: must
+      - item: Post-development habitat map
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (not_a_requirement): the workbook's excerpt started with fee text. From the audit
+      (missing_requirement): BNG metric with condition sheets and post-development habitat map
+      (S61, unless exempt).
+
+  - id: cil-form
+    action: update
+    source-text: >-
+      Community Infrastructure Levy (CIL) Form All planning applications which include CIL liable
+      development must complete: CIL Additional Information Form
+    confidence: medium
+    notes: "Audit (not_a_requirement): the workbook's excerpt ran on into the fee and BNG rows."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - all:
+            - application-type:
+                in: [full, outline]
+            - ref: major-development
+        - all:
+            - application-type:
+                in: [hh, full, outline]
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: The proposal consists of one or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: The proposal consists of a building or buildings with a floor
+                      space of 100 square metres or more.
+    source-text: >-
+      Design and Access Statement … Required for the following: … Applications for major
+      development … Applications for development in a conservation area, where the proposed
+      development consists of one or more dwellings; or a building or buildings with a floor space
+      of 100 square metres or more. [Listed building consent list:] Design and Access Statement
+      Required for all listed building consents
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpts ran into the Site Location Plan row. Rebuilt
+      from the Full, Outline, Householder and Listed Building lists' own wording.
+
+  - id: elevation-existing
+    action: update
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: must
+    notes: "The Householder list: 'Existing and Proposed Elevations … 1:50 or 1:100 scale'."
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: must
+    notes: "The Householder list: 'Existing and Proposed Elevations … 1:50 or 1:100 scale'."
+
+  - id: energy-statement
+    action: add
+    policy: CLLP S6-S8
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): an Energy Statement and completed Energy Efficiency
+      Checklist (CLLP S6-S8) is a Category 2 item in the Full Applications list. No trigger is
+      given.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - condition:
+            field: eia-development
+            value: true
+            description: The development falls within Schedule 1, or within Schedule 2 and is
+              likely to have a significant environmental effect.
+    source-text: >-
+      Environmental Statement (EIA Schedule 1 and 2) Town & Country Planning Environmental Impact
+      Assessment Regulations This will be necessary for all development within Schedule 1; or
+      schedule 2 developments that are likely to have a significant environmental effect.
+    confidence: medium
+    notes: "Audit (other): a national requirement under the EIA Regulations 2017, listed by the council."
+
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3 (including minor development and change
+              of use).
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare (Flood Zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare (Flood Zone 1).
+        - site:
+            in: [critical-drainage-area]
+            description: The site is in a critical drainage area in Flood Zone 1.
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    must-include:
+      - item: Sequential and exception test evidence
+        level: must
+        required-if:
+          site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3.
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Flood Zone 2/3 including
+      minor development and change of use; over 1 ha in Zone 1; Zone 1 critical drainage areas,
+      with sequential/exception test evidence (Category 3).
+
+  - id: floor-plan-existing
+    action: update
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: must
+    notes: "The Householder list: 'Existing and Proposed Floor Plan … 1:50 or 1:100 scale'."
+
+  - id: floor-plan-proposed
+    action: update
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: must
+    notes: "The Householder list: 'Existing and Proposed Floor Plan … 1:50 or 1:100 scale'."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, scheduled-monument,
+              locally-listed-building]
+            description: The proposal affects a heritage asset or its setting.
+    source-text: >-
+      Heritage Statement … In determining applications, local planning authorities should require
+      an applicant to describe the significance of any heritage assets affected, including any
+      contribution made by their setting.
+    confidence: medium
+    notes: >-
+      The list asks for a Heritage Statement where heritage assets are affected. Audit (other): it
+      is a national (NPPF) requirement rather than a Category 2 local item.
+
+  - id: land-contamination-assessment
+    action: add
+    policy: CLLP S56, S83
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a Contaminated Land Assessment is a Category 3
+      item in the Full Applications list. No trigger is given.
+
+  - id: lighting-assessment
+    action: add
+    policy: CLLP NS55, S53
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): an External Lighting Assessment is a Category 3
+      item in the Full Applications list. No trigger is given.
+
+  - id: noise-assessment
+    action: add
+    policy: CLLP S14, S53
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a Noise Assessment is a Category 3 item in the
+      Full Applications list. No trigger is given.
+
+  - id: proposed-habitat-plan
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - condition:
+            field: biodiversity-gain-condition
+            value: true
+            description: The development is subject to the biodiversity gain condition (not exempt).
+    policy: CLLP S61
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a post-development habitat map with the BNG metric (S61,
+      unless exempt)."
+
+  - id: recreation-facilities-assessment
+    action: add
+    policy: CLLP S51
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): an Open Space Assessment/Audit (CLLP S51) is a
+      Category 2 item in the Full Applications list. No trigger is given.
+
+  - id: site-plan
+    action: update
+    source-text: "…and Proposed Block Plan 2 1:200 or 1:500 scale"
+    must-include:
+      - item: Scale of 1:200 or 1:500
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt ran several drawing rows together."
+
+  - id: town-centre-impact-assessment
+    action: add
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a Town Centre / Retail Impact / Sequential Assessment
+      (CLLP S29-S35) is a Category 2 item in the Full Applications list. No trigger is given.
+
+  - id: transport-assessment
+    action: add
+    policy: CLLP S47, S49
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a Transport Statement/Assessment is a Category 2 item
+      in the Full Applications list. No trigger is given.
+
+  - id: travel-plan
+    action: add
+    policy: CLLP S29, S47, S49
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a Travel Plan is a Category 2 item in the Full
+      Applications list. No trigger is given.
+
+unmapped:
+  - local-name: Biodiversity Gain Statement
+    source-text: >-
+      Where applicants consider that the development would not be subject to the general
+      biodiversity gain condition, a statement to set out what exemption(s) or transitional
+      provision(s) apply to the development.
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Householder%20Applications%20Validation%20List.pdf
+    suggested-id: biodiversity-gain-statement
+  - local-name: Window and door details / detailed drawings (listed building consent)
+    source-text: >-
+      Existing and Proposed window and door details including sections Minimum scale of 1:20
+      (elevations) and 1:5 (sections) showing for example details of cills, frames, glazing bars,
+      mullions and opening lights including relationship to the existing structure Where these
+      form part of the description of development
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Listed%20Building%20Consent%20Applications%20Validation%20List.pdf
+    suggested-id: joinery-details
+  - local-name: Demolition Justification Statement
+    source-text: "Demolition Justification Statement - CLLP S11 (can be combined with a Structural Survey)"
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    suggested-id: demolition-justification-statement
+  - local-name: Drainage Statement
+    source-text: "From the audit: all major proposals (CLLP S21)"
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    suggested-id: drainage-strategy
+  - local-name: Agricultural Land Classification survey
+    source-text: "From the audit: Category 2 item (CLLP S14/S67), no trigger given"
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    suggested-id: agricultural-land-classification
+  - local-name: Green Wedge Assessment
+    source-text: "From the audit: Category 2 item (CLLP S63), no trigger given"
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    suggested-id: green-wedge-assessment
+  - local-name: Minerals Assessment
+    source-text: "From the audit: sites in mineral safeguarding areas (LCCMWLP M11)"
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    suggested-id: minerals-assessment
+  - local-name: Aviation / defence and communications, Shadow Flicker and Glint and Glare assessments
+    source-text: "From the audit: renewable energy proposals (CLLP S14/S53)"
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    suggested-id: renewable-energy-impact-assessment
+  - local-name: Agricultural Workers Dwelling justification and rural land-based needs assessment
+    source-text: "From the audit: Category 2 item (CLLP S5), no trigger given"
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    suggested-id: rural-workers-dwelling-justification
+  - local-name: Affordable Housing / First Homes / Exception Site needs assessment
+    source-text: "From the audit: Category 2 item (CLLP S4/S22), no trigger given"
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    suggested-id: housing-needs-assessment
+  - local-name: Custom and Self-build Plot Passports or Design Code
+    source-text: "From the audit: Category 2 item (CLLP NS24), no trigger given"
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    suggested-id: self-build-plot-passport
+  - local-name: Health Impact Assessment
+    source-text: "From the audit: Category 2 item (CLLP S54), no trigger given"
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Marketing Report
+    source-text: "From the audit: loss of business, commercial or tourism uses"
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    suggested-id: marketing-report
+  - local-name: Alternative Employment Sites Assessment
+    source-text: "From the audit: Category 2 item (CLLP S28-S34), no trigger given"
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    suggested-id: employment-land-assessment
+  - local-name: Landscape and Visual Impact Assessment
+    source-text: "From the audit: Category 3 item (CLLP S62), no trigger given"
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Groundwater Risk Assessment
+    source-text: "From the audit: Category 3 item (CLLP S21/S56), no trigger given"
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    suggested-id: groundwater-risk-assessment
+  - local-name: Dust Assessment
+    source-text: "From the audit: Category 3 item, no trigger given"
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    suggested-id: dust-assessment
+  - local-name: Unexploded Ordnance / Land Quality
+    source-text: "From the audit: Category 3 item (CLLP S84), no trigger given"
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    suggested-id: unexploded-ordnance-assessment
+  - local-name: S106 Heads of Terms
+    source-text: "From the audit: Category 3 item (CLLP S22/S45), no trigger given"
+    source-url: https://www.n-kesteven.gov.uk/sites/default/files/2024-05/Full%20Applications%20Validation%20List.pdf
+    suggested-id: heads-of-terms
+
+low-confidence:
+  - id: archaeological-assessment
+    note: >-
+      Audit (wrong_trigger): the excerpt starts mid-sentence ('an appropriate desk-based assessment
+      and, where necessary, a field evaluation'); the list's Archaeological Assessment row (CLLP
+      S57) gives the trigger, which the audit doesn't quote.

@@ -1,0 +1,215 @@
+# Corrections for Tandridge District Council, from inputs/audit/tandridge-district-council.json.
+# The audit couldn't read the 2025 Planning checklist (contents_checked: false). Householder rows
+# come from the 2025 Householder checklist; many Full planning, advert and prior approval rows
+# come from the superseded 2015 list (LDF/CSP references, 2012 NPPF paragraph numbers, D1/D2).
+# Kept light: obvious junk dropped, misplacements fixed, clear wording structured.
+local-authority: TAN
+
+validation-list:
+  date: 2025-09-01
+  date-basis: "audit: the 2025 checklist states 'Revised 1 September 2025'; 'Issued April 2023' is the RICS viability guidance it cites"
+
+submission-standards:
+  - item: All drawings except the location plan show all key dimensions in metric (length, width and height of any element, and distances from its corners to the boundaries)
+    level: must
+  - item: Drawings at a recognised scale, with a scale bar
+    level: must
+  - item: "No 'Do not scale', 'Scale at own risk', 'Not to scale' or similar negative wording on plans"
+    level: must
+  - item: Each drawing has a title, e.g. proposed/existing elevation/floor plans
+    level: must
+
+drop:
+  - id: arboriculturist-report
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: the 2015 trigger refers to change-of-use planning applications with new hardstanding, not prior approvals"
+  - id: heritage-statement
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: the 2015 trigger excludes proposals that involve a change of use only"
+  - id: waste-management-plan
+    sheets: [Householder]
+    reason: "duplicate: the fragment is the floor plans note on annex waste storage (now a floor-plan-proposed must-include item)"
+  - id: schedule-of-works
+    reason: "wrong_trigger: the Householder row is Arboricultural Method Statement text and the Full planning row is a conversion method statement (see unmapped)"
+
+drop-unmapped:
+  - local-name: Validation checklist form (completed)
+    reason: "wrong_trigger: the excerpt is the Biodiversity Checklist sentence (duplicate)"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: the text only invites contact"
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_trigger: fragment ('hours of illumination.') of the lighting assessment item, misplaced under Full planning"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "duplicate: fragment of the flood risk assessment item (now a must-include item)"
+  - local-name: "Agricultural / rural workers' dwelling appraisal"
+    reason: "wrong_trigger: this is the marketing test for removing an agricultural occupancy condition; re-added below under that name"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "garbled table text; re-added below with the council's trigger wording"
+
+requirements:
+  - id: arboriculturist-report
+    action: update
+    must-include:
+      - item: Tree survey schedule, tree survey plan and tree retention and removal plan, in accordance with the latest revision of BS 5837
+        level: must
+      - item: Identifies trees on site and within 15m of the site boundary
+        level: must
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if: discretionary
+    notes: >-
+      Applications where the completion of the Biodiversity Checklist indicates that a survey must be
+      completed (council's wording). Where a preliminary ecological report recommends further
+      surveys, these must be completed or their omission justified.
+
+  - id: construction-management-plan
+    action: update
+    must-include:
+      - item: Control of construction noise and vibration during hours of noisy activities
+        level: must
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - condition:
+                field: floorspace
+                operator: ">="
+                value: 100
+                description: The proposal consists of a building with a floorspace of 100 square metres or more.
+    source-text: >-
+      Applications (except applications to amend the conditions attached to a planning permission)
+      within a Conservation Area where the proposal consists of a building with a floorspace of 100
+      square metres or more.
+    source-url: https://www.tandridge.gov.uk/Portals/0/Documents/Planning%20and%20building/Planning%20applications%20and%20enforcement/Validation%202034/Householder-Local-Validation-Requirements-and-Checklist-2025.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the Householder CIL row had this DAS trigger merged into it, and the
+      DAS rows themselves were garbled. Major development is the national DAS rule.
+
+  - id: elevation-existing
+    action: update
+    must-include:
+      - item: For replacement dwellings or buildings in the Green Belt, all the elevations of the existing dwelling/building being replaced
+        level: must
+        required-if:
+          site:
+            in: [green-belt]
+            description: Replacement of one or more dwellings or buildings within the Green Belt.
+        source-text: "Applications for the replacement of one or more dwellings or buildings Within the Green Belt A scale drawing showing the all the elevations and floor pla…"
+
+  - id: flood-risk-assessment
+    action: update
+    must-include:
+      - item: Where necessary, the sequential and exception test
+        level: must
+      - item: A surface water drainage assessment including Sustainable Drainage Systems (SuDS)
+        level: should
+
+  - id: floor-plan-existing
+    action: update
+    must-include:
+      - item: For replacement dwellings or buildings in the Green Belt, all the floor plans of the existing dwelling/building being replaced
+        level: must
+        required-if:
+          site:
+            in: [green-belt]
+            description: Replacement of one or more dwellings or buildings within the Green Belt.
+        source-text: "all the elevations and floor plans of any existing dwelling/building on the site being replaced."
+
+  - id: floor-plan-proposed
+    action: update
+    must-include:
+      - item: For an annex, the proposed waste storage arrangements
+        level: must
+        source-text: "(All applications for an annex should show proposed waste storage arrangements)."
+
+  - id: heritage-statement
+    action: update
+    must-include:
+      - item: An analysis and assessment of the special interest of the heritage assets, including any contribution made by their setting
+        level: must
+    notes: "Audit (wrong_app_type): listed building consent shows no heritage statement in the workbook; the 2025 checklist wasn't read to confirm its trigger."
+
+  - id: landscaping-plan
+    action: update
+    required-if: discretionary
+    must-include:
+      - item: Long-term management plans/arrangements for new public realm
+        level: must
+    notes: "Required for development creating new public realm or private space, or resulting in the loss of existing landscaping (council's wording)."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: external-lighting
+            value: true
+            description: The proposal includes lighting.
+        - condition:
+            field: illuminated
+            value: true
+            description: The advertisement is illuminated.
+    must-include:
+      - item: The number, type, location and intensity of the installation, including hours of illumination
+        level: must
+    confidence: low
+    notes: "Audit (wrong_document): this wording cites 2015-list references (LDF BE1, NPPF para 125); check the 2025 checklist."
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: plant-equipment
+            value: true
+            description: Proposals for external plant equipment.
+        - discretionary
+    notes: "The excerpt lists external plant equipment as the first case; the rest of the list wasn't captured."
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - discretionary
+    notes: "Existing and proposed roof plans (where relevant)."
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - discretionary
+    notes: "Existing and proposed roof plans (where relevant)."
+
+unmapped:
+  - local-name: Marketing evidence (removal of agricultural occupancy condition)
+    source-text: "This should include evidence to show that the agricultural workers dwelling has been listed for sale at a realistic price for a minimum of 12 months with its occupancy status to other relevant interests in the locality."
+    source-url: https://www.tandridge.gov.uk/Portals/0/Documents/Planning%20and%20building/Planning%20applications%20and%20enforcement/Making%20and%20submitting%20a%20planning%20application/Planning%20application%20forms/Planning-Local-Validation-Requirements-and-Checklist-2025.pdf?ver=WmyWXjH8vduWTRTyy4hJXA%3D%3D
+    suggested-id: marketing-report
+  - local-name: SAMM / SANG (Ashdown Forest SPA mitigation)
+    source-text: "All new residential development (including camp sites, caravan/gypsy and traveller pitches, hotels, holiday accommodation, residential care homes, annexes) that falls within 7km of the zone of influence of the Ashdown Forest Special Protection Area (SPA). … Any net increase in residential units within the 7km Ashdown Forest mitigation zone."
+    source-url: https://www.tandridge.gov.uk/Portals/0/Documents/Planning%20and%20building/Planning%20applications%20and%20enforcement/Making%20and%20submitting%20a%20planning%20application/Planning%20application%20forms/Planning-Local-Validation-Requirements-and-Checklist-2025.pdf?ver=WmyWXjH8vduWTRTyy4hJXA%3D%3D
+    suggested-id: habitats-regulations-assessment
+  - local-name: Conversion method statement
+    source-text: "The conversion method statement should set out the specific works required to convert the building."
+    source-url: https://www.tandridge.gov.uk/Portals/0/Documents/Planning%20and%20building/Planning%20applications%20and%20enforcement/Making%20and%20submitting%20a%20planning%20application/Planning%20application%20forms/Planning-Local-Validation-Requirements-and-Checklist-2025.pdf?ver=WmyWXjH8vduWTRTyy4hJXA%3D%3D
+    suggested-id: structural-survey
+
+low-confidence:
+  - id: planning-statement
+    note: "Audit (wrong_trigger): the Full planning excerpt is garbled table text with URL fragments and 2015-list references."
+  - id: travel-plan
+    note: "Audit (wrong_trigger, wrong_document): the excerpt is garbled and cites the 2010 'Travel Plans Good Practice Guide' from the 2015 list."
+  - id: cil-form
+    note: "Audit (wrong_trigger): the Householder excerpt merges the CIL form ('All applications') with the national DAS trigger; the Full planning row cites the 2015 list ('LDF CSP11')."

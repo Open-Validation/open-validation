@@ -1,0 +1,151 @@
+# Corrections for Rutland County Council, from inputs/audit/rutland-county-council.json.
+# Rutland has no formal local validation list; its requirements are the per-application-type
+# 'Supporting documents' tables on the 'Apply for planning permission' page (undated). Grokbot
+# marked the page unreadable and captured nothing, so every requirement below is from the audit's
+# summary of those tables, not the council's exact words.
+local-authority: RUT
+
+requirements:
+  - id: site-plan
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [hh, full, ldc, pa-extension]
+        - all:
+            - application-type:
+                in: [lbc]
+            - condition:
+                field: external-alterations
+                value: true
+                description: The listed building works include external works.
+    source-url: https://www.rutland.gov.uk/planning-building-control/planning/apply-planning-permission
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a block plan is always required for householder and
+      full applications, larger home extension prior approvals and lawful development
+      certificates, and for listed building consent where there are external works.
+
+  - id: elevation-existing
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [hh, full, ldc, pa-extension]
+        - all:
+            - application-type:
+                in: [approval-condition]
+            - discretionary
+    source-url: https://www.rutland.gov.uk/planning-building-control/planning/apply-planning-permission
+    confidence: medium
+    notes: "From the audit (missing_requirement): always for householder, full, larger home extension and
+      LDC; for discharge of conditions as specific to the condition."
+
+  - id: elevation-proposed
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [hh, full, ldc, pa-extension]
+        - all:
+            - application-type:
+                in: [approval-condition]
+            - discretionary
+    source-url: https://www.rutland.gov.uk/planning-building-control/planning/apply-planning-permission
+    confidence: medium
+    notes: "From the audit (missing_requirement): always for householder, full, larger home extension and
+      LDC; for discharge of conditions as specific to the condition."
+
+  - id: floor-plan-existing
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [hh, full, ldc, pa-extension]
+        - all:
+            - application-type:
+                in: [approval-condition]
+            - discretionary
+    source-url: https://www.rutland.gov.uk/planning-building-control/planning/apply-planning-permission
+    confidence: medium
+    notes: "From the audit (missing_requirement): always for householder, full, larger home extension and
+      LDC; for discharge of conditions as specific to the condition."
+
+  - id: floor-plan-proposed
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [hh, full, ldc, pa-extension]
+        - all:
+            - application-type:
+                in: [approval-condition]
+            - discretionary
+    source-url: https://www.rutland.gov.uk/planning-building-control/planning/apply-planning-permission
+    confidence: medium
+    notes: "From the audit (missing_requirement): always for householder, full, larger home extension and
+      LDC; for discharge of conditions as specific to the condition."
+
+  - id: design-and-access-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: One or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: Buildings (or a householder floor area increase) of 100 m2 or more.
+        - all:
+            - application-type:
+                in: [lbc, approval-condition]
+            - discretionary
+    source-url: https://www.rutland.gov.uk/planning-building-control/planning/apply-planning-permission
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): householder only where the floor area increase is over
+      100 m2 in a conservation area; full applications for buildings of 100 m2+, one or more
+      dwellings in a conservation area, and major applications; listed building consent depending
+      on complexity; discharge of conditions as specific to the condition.
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      application-type:
+        in: [lbc]
+    source-url: https://www.rutland.gov.uk/planning-building-control/planning/apply-planning-permission
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Heritage Impact Assessment for listed building consent."
+
+  - id: section-proposed
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - all:
+            - application-type:
+                in: [approval-condition]
+            - discretionary
+    source-url: https://www.rutland.gov.uk/planning-building-control/planning/apply-planning-permission
+    must-include:
+      - item: Sectional drawings for windows and doors
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): sectional drawings for windows and doors are always
+      required for listed building consent (per the 2026 'Cross Sections and Drawings Required for
+      Window and Doors' guidance); for discharge of conditions as specific to the condition.

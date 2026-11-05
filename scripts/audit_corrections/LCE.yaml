@@ -1,0 +1,488 @@
+# Corrections for Leicester City Council, from inputs/audit/leicester-city-council.json.
+# The link is the current list ('Leicester local validation list - July 2025', footer 7th July
+# 2025); the build takes the date from the audit. The list is a matrix of development types
+# (householder sub-types, non-householder buildings, change of use, dwellings, energy, plant, shop
+# fronts, adverts, LBC, LDC, prior notifications) with essential/conditional items, which Grokbot
+# flattened into Full planning. Items marked "From the audit" use the audit's paraphrase.
+local-authority: LCE
+
+submission-standards:
+  - item: A scale bar on plans, so measurements can be taken from electronic versions
+    level: should
+
+drop:
+  - id: waste-management-plan
+    sheets: [Householder]
+    reason: "wrong_app_type: the list excludes householder applications ('excluding householder applications which are majors by virtue of the site area')"
+  - id: floor-plan-existing
+    sheets: [Advertisement consent]
+    reason: "wrong_app_type: the advert entry asks for elevations (with cross section), not floor plans"
+  - id: floor-plan-proposed
+    sheets: [Advertisement consent]
+    reason: "wrong_app_type: as above"
+  - id: section-existing
+    reason: "wrong_trigger: the excerpt is the advert entry ('Elevations – Existing and Proposed, including cross section'); see section-proposed"
+  - id: fire-statement
+    reason: "not_a_requirement: quotes the national checklist line ('Submission of a Fire Safety Statement (where required)'); national rules apply"
+
+drop-unmapped:
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "duplicate: the same excerpt as the Ecological Survey row (biodiversity-survey-report)"
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_app_type: 'hours of illumination;' is Lighting Assessment text"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: encouragement to seek pre-application advice"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: a fragment of drawing contents"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "duplicate: part of the Flood Risk Assessment entry (now a must-include item)"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: the 5 sq m threshold applies to driveways only; re-added below with both thresholds"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: s73 deed-of-variation text; re-added below with the list's threshold"
+
+requirements:
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: The development is likely to affect protected species or species of
+              principal importance (for householder applications, a reasonable likelihood of bats).
+        - application-type:
+            in: [outline]
+    source-text: >-
+      Where a proposed development is likely to affect species protected under the Wildlife and
+      Countryside Act 1981 (as amended), the Conservation of Habitats and Species Regulations 2010 ,
+      the Protection of Badgers Act 1992, and / or species of principal importance listed under
+      Section 41 of the Natural Environment and Rural Communities Act 2006, the applicant must …
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/appendix-1-local-validation-criteria-for-biodiversity.pdf
+    confidence: medium
+    notes: >-
+      Householder: 'most likely protected species survey to be required for Householder applications
+      where a reasonable likelihood of bat presence exists' (a Preliminary Roost Assessment and Bat
+      Emergence Survey). From the audit: protected species information is always expected for
+      outline applications.
+
+  - id: waste-management-plan
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    confidence: medium
+    notes: >-
+      For major applications 'and those that will have an impact on the generation of waste'
+      (officer discretion). Householder applications that are major only by site area are excluded,
+      which the rule can't express.
+
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 15
+            description: 15 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: A residential site of 0.5 hectares or more.
+    must-include:
+      - item: For all proposed affordable and market housing, the number of residential units
+        level: should
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook had no threshold; from the audit, 15+ dwellings or 0.5 ha+."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development would be subject to the general biodiversity gain condition.
+    confidence: medium
+    notes: "From the audit: for outline applications, the BNG assessment and metric are essential unless de minimis."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: Land with any historically contaminative uses, or naturally occurring
+          contamination.
+    source-text: >-
+      Contamination Assessment – development on land with any historically contaminative uses or
+      where the site has any naturally occupying contamination
+    confidence: medium
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "The list says that in most cases the impact will be clear from the drawings and a formal assessment will not be necessary."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - condition:
+                field: floorspace
+                operator: ">"
+                value: 100
+                description: New floorspace over 100 square metres.
+        - application-type:
+            in: [lbc]
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+    confidence: low
+    notes: >-
+      Audit (not_a_requirement, missing_requirement): the workbook quoted the national checklist
+      line. From the audit: the householder criteria ask for a DAS in a conservation area with new
+      floorspace over 100 sq m, and it is essential for listed building consent. The other
+      development-type sections were not detailed; the national rules still apply.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is EIA development under the 2017 EIA Regulations.
+    confidence: medium
+
+  - id: section-proposed
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [advertising]
+        - discretionary
+    source-text: >-
+      Elevations – Existing and Proposed, including cross section Where hoarding is proposed – photo
+      montage of proposed and all existing hoarding(s) (Level 0 AVR)
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+    must-include:
+      - item: Cross-sections of existing (if to be replaced) and proposed windows or doors, at a
+          standardised metric scale (preferably 1:50 or 1:20) with critical dimensions
+        level: should
+        source-text: >-
+          These should be drawn to a standardised metric scale preferably 1:50 or 1:20, include
+          critical dimensions and should show a cross section(s) of existing (if to be replaced) and
+          any proposed windows or doors.
+    confidence: low
+    notes: >-
+      A cross section is part of the advertisement entry; from the audit, householder and listed
+      building works may need window and door cross-section details (shown as officer discretion).
+
+  - id: elevation-existing
+    action: update
+    must-include:
+      - item: A standardised metric scale, preferably 1:50 or 1:100
+        level: should
+      - item: Critical external dimensions in figures (height/width/length etc)
+        level: should
+    confidence: medium
+    notes: "The workbook only has the advertisement entry; the elevation standards are the list's own wording."
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: A standardised metric scale, preferably 1:50 or 1:100
+        level: should
+      - item: Critical external dimensions in figures (height/width/length etc)
+        level: should
+      - item: The proposed works shown clearly in relation to what is already there
+        level: should
+    confidence: medium
+    notes: "The workbook only has the advertisement entry; the elevation standards are the list's own wording."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2, 3a or 3b.
+        - condition:
+            field: near-watercourse
+            value: true
+            description: The site is next to an Ordinary Watercourse.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: A site of 1 hectare or more in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: A site of 1 hectare or more in Flood Zone 1.
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+    must-include:
+      - item: Sequential and exception tests, where appropriate
+        level: must
+        source-text: "The FRA must include sequential and exception tests, where appropriate."
+      - item: Finished floor levels, on the council's Flood Risk template
+        level: must
+        required-if:
+          application-type:
+            in: [hh]
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was cut off at 'is required: 1.'. Triggers from
+      the audit: Flood Zones 2, 3a or 3b or an Ordinary Watercourse, or Flood Zone 1 sites of 1 ha or
+      more.
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - discretionary
+    confidence: medium
+    notes: "From the audit: essential for listed building consent; a householder criteria-based item."
+
+  - id: lighting-assessment
+    action: update
+    must-include:
+      - item: A statement setting out why a lighting scheme is required, the proposed users, and the
+          frequency and length of use (hours of illumination)
+        level: must
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: Residential development.
+    confidence: medium
+    notes: "Open Space Assessment for major residential developments."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: New or extended main town centre uses not in an existing centre and not in
+          accordance with an up-to-date Local Plan.
+    confidence: medium
+
+  - id: sci
+    action: update
+    required-if:
+      any:
+        - all:
+            - condition:
+                field: floorspace-non-residential
+                operator: ">="
+                value: 1500
+                description: Industrial or commercial development of 1,500 square metres or more.
+            - discretionary
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 100
+            description: Residential development of 100 dwellings or more.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 3
+            description: Residential development on a site of 3 hectares or more.
+        - all:
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: New educational or institutional sites or extensions.
+            - condition:
+                field: floorspace
+                operator: ">="
+                value: 1000
+                description: 1,000 square metres or more.
+        - discretionary
+    confidence: medium
+    notes: >-
+      'In or adjacent to residential areas' (for industrial/commercial) and 'major infrastructure
+      proposals' are shown as officer discretion. Large-scale majors also need a statement on
+      compliance (excerpt cut off).
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Where the justification is based on a financial case."
+
+  - id: photos
+    action: replace
+    required-if:
+      application-type:
+        in: [consent-under-tpo]
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): photographs (and a justification statement) are essential only for
+      works to TPO trees, not trees in a conservation area.
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees on or near the site boundary.
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): householder criteria-based item."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: A noisy use (Noise Impact Assessment).
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: A noise-sensitive use (Noise Levels Assessment).
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement)."
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Sustainability Design and Construction Statement for major development."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: departure-from-development-plan
+            value: true
+            description: The proposal is not policy-compliant.
+        - all:
+            - condition:
+                field: involves-change-of-use
+                value: true
+                description: A complex change of use.
+            - discretionary
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): non-policy-compliant or complex change of use."
+
+  - id: roof-plan-proposed
+    action: add
+    required-if: discretionary
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): roof plans for complex householder roofs, and conditionally for listed building consent."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      application-type:
+        in: [pa-ecomms-network]
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): ICNIRP declaration and Justification Statement for telecoms prior notifications."
+
+unmapped:
+  - local-name: Drainage Strategy / SuDS
+    source-text: "new surfacing exceeds 200 m2 or a driveway exceeds 5 m2"
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+    suggested-id: drainage-strategy
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    source-text: "From the audit: 10+ units or over 1,000 sq m"
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+    suggested-id: heads-of-terms
+  - local-name: Building for a Healthy Life Assessment
+    source-text: "Building for a Healthy Life Assessment – For developments of 10 dwellings or more"
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+    suggested-id: building-for-a-healthy-life
+  - local-name: Accurate Visual Representations (AVRs)
+    source-text: "From the audit: major development in the Central Development Area, conservation areas or affecting heritage/townscape"
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+    suggested-id: computer-visualisations
+  - local-name: M4(2) / M4(3) Compliance Statement
+    source-text: "From the audit: M4(2) essential for dwellings; M4(3) for care homes"
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+    suggested-id: accessibility-statement
+  - local-name: Floorspace Schedule
+    source-text: "From the audit: on the council template, for any residential development"
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+    suggested-id: floorspace-schedule
+  - local-name: Masterplan
+    source-text: "From the audit: major development / 10+ dwellings"
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+    suggested-id: masterplan
+  - local-name: Odour Attenuation Scheme and Technical Specification
+    source-text: "From the audit: plant, noisy uses and ventilation flues"
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+    suggested-id: ventilation-extraction-statement
+  - local-name: Playing Field Statement
+    source-text: "From the audit: listed in sections 2a-2k; no trigger given"
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+    suggested-id: ""
+  - local-name: Marketing Information
+    source-text: "From the audit: a use not in line with the development plan"
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+    suggested-id: marketing-evidence
+  - local-name: Statement of Student Need and draft Student Management Plan
+    source-text: "Student Management Plan – For developments proposing student accommodation."
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+    suggested-id: student-housing-management-plan
+  - local-name: Visual Impact Assessment
+    source-text: "From the audit: listed in sections 2a-2k; no trigger given"
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Material specifications and samples; External Wall Insulation details
+    source-text: >-
+      From the audit: material specifications and samples; for external wall insulation, the
+      material/colour finish and footway/alleyway widths
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+    suggested-id: ""
+  - local-name: Roller shutter details (shop fronts)
+    source-text: "From the audit: shop fronts"
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+    suggested-id: ""
+  - local-name: Method Statement (demolition prior notification)
+    source-text: "From the audit: demolition prior notification, with a demolition site plan; also conditional for listed building consent"
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+    suggested-id: ""
+  - local-name: Justification Statement (works to TPO trees)
+    source-text: "From the audit: essential, with photographs, for works to TPO trees"
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+    suggested-id: ""
+  - local-name: Marked-up amended drawings (s73 / NMA)
+    source-text: >-
+      In addition, amended plans and documents should be fully annotated to indicate specific
+      detailed amendments and a version of each amended plan should show the amendments superimposed
+      over the original version to enable ease of comparison.
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+    suggested-id: ""
+  - local-name: Statement of Interest and evidence (lawful development certificates)
+    source-text: >-
+      This could include plans to a recognised scale, statutory declarations, council tax or
+      electoral records, utility bills, relevant invoices/ receipts, photographic evidence and any
+      other factual information that could support the application.
+    source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+    suggested-id: lawful-development-evidence

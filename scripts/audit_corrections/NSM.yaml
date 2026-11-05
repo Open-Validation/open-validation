@@ -1,0 +1,557 @@
+# Corrections for North Somerset Council, from the council's audit.
+# The audit read the current list, the Local List of Planning Application Requirements Parts 1 and 2
+# (adopted 12 December 2023; reviewed in December 2025, when the council decided no change was
+# needed). Part 1 has 37 numbered items and Part 2 the plans and drawings. Grokbot missed about 13
+# Part 1 items and most Part 2 drawings, read several exclusion lists as inclusions, and cut off most
+# thresholds. Items marked "From the audit" use the audit's paraphrase; quoted words are the council's.
+local-authority: NSM
+
+validation-list:
+  date: 2023-12-12
+  date-basis: "audit: PDF 'Adopted 12 December 2023'; the council page says it was reviewed in December 2025
+    and no change was required, so the list is still current"
+
+drop:
+  - id: biodiversity-survey-report
+    sheets: [Householder]
+    reason: "wrong_trigger: the excerpt is the Coal Mining Risk Assessment trigger, which exempts householder
+      development (re-added below as the Ecological Impact Assessment)"
+  - id: schedule-of-works
+    reason: "wrong_trigger: the Arboricultural Method Statement sentence from the Tree Survey item (now a
+      must-include there); the list has no schedule of works item"
+  - id: waste-management-plan
+    reason: "wrong_trigger: the Coal Mining Risk Assessment list of insignificant groundworks; not an item in
+      the list"
+
+drop-unmapped:
+  - local-name: Validation checklist form (completed)
+    reason: "wrong_trigger: this is the Ecological checklist, with defined exclusions; re-added below"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: runs into the Heritage Statement text; re-added below with thresholds"
+  - local-name: Landscape and Visual Impact Assessment
+    reason: "wrong_trigger: the excerpt is the Land Contamination text; re-added below"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: only limb 2 of 4; re-added below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: Residential or mixed-use development providing 10 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: A site area of 0.5ha or more.
+    confidence: medium
+    notes: "Not needed where the development is for 100% affordable housing."
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      site:
+        in: [archaeological-priority-area, scheduled-monument]
+        description: Development within an archaeological site or a Scheduled Monument site.
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook filed it under adverts from the Ecological checklist's
+      exclusion list. From the audit: required for development within an archaeological site or
+      Scheduled Monument site."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees (stem diameter over 75mm at 1.5m) within or adjacent to the site, including
+          trees overhanging it or within 12 times their stem diameter of the boundary.
+    must-include:
+      - item: A Tree Protection Plan
+        level: must
+      - item: An Arboricultural Method Statement, where working is required for any reason within the
+          trees' Root Protection Area (RPA)
+        level: must
+        source-text: >-
+          an Arboricultural Method Statement where working is required for any reason within the trees
+          Root Protection Area (RPA).
+    confidence: medium
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: Protected habitats or species may be harmed.
+        - discretionary
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): an Ecological Impact Assessment where the ecological
+      checklist indicates one, or protected habitats or species may be harmed. A Preliminary Bat Roost
+      Assessment is also needed where the checklist confirms one.
+
+  - id: cil-form
+    action: replace
+    required-if:
+      application-type:
+        in: [full, hh, reserved-matters, ldc, mod-discharge-s106, prior-approval,
+          technical-details-consent]
+    source-text: Not required for outline, minerals or waste applications
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): CIL Form 1, for full, householder, reserved matters, LDC,
+      S106 modification, prior approval and technical details applications."
+
+  - id: elevation-existing
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: building-works
+            value: true
+            description: New buildings or extensions.
+        - condition:
+            field: external-alterations
+            value: true
+            description: External alterations.
+        - application-type:
+            in: [advertising]
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Part 2 elevations, for new buildings, extensions, external
+      alterations and advertisements."
+
+  - id: elevation-proposed
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: building-works
+            value: true
+            description: New buildings or extensions.
+        - condition:
+            field: external-alterations
+            value: true
+            description: External alterations.
+        - application-type:
+            in: [advertising]
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Part 2 elevations, for new buildings, extensions, external
+      alterations and advertisements."
+
+  - id: floor-plan-existing
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: building-works
+            value: true
+            description: Extensions, replacement dwellings and replacement buildings in the Green Belt.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: A change of use.
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Part 2 item 6, for extensions, replacement dwellings, Green
+      Belt replacements and changes of use."
+
+  - id: floor-plan-proposed
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: building-works
+            value: true
+            description: New buildings and extensions to existing buildings.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: A change of use.
+    source-text: >-
+      Floor plans - proposed Required for all new buildings, extensions to existing buildings and
+      proposals for a change of use.
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    must-include:
+      - item: Wheelchair turning areas
+        level: must
+        required-if:
+          condition:
+            field: housing-type
+            value: older-people
+            description: Retirement or supported independent living housing.
+    confidence: medium
+    notes: "Audit (wrong_app_type): 'change of use' means change-of-use planning applications, not prior
+      approvals."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: New residential units (including conversions).
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 500
+            description: Non-residential development over 500m2.
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    confidence: medium
+    notes: "From the audit (wrong_trigger): the workbook's 'Energy Statement Required for: 1.' was cut off and
+      mapped to sustainability-statement."
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      ref: major-development
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Sustainability Statement for major development. The
+      workbook row was the Energy Statement (now energy-statement)."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: Schedule 1 or Schedule 2 EIA development.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: 1ha or more in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: 1ha or more in Flood Zone 1.
+        - site:
+            in: [flood-risk-zone]
+            description: Flood Zone 2 or 3.
+        - site:
+            in: [surface-water-flood-risk]
+            description: At risk from other sources of flooding.
+        - discretionary
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    confidence: medium
+    notes: "From the audit (wrong_trigger): 1ha+ in FZ1, FZ2/3, other flood sources, and future flood risk
+      shown in the SFRA (officer discretion)."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, conservation-area, park-and-garden]
+            description: A listed building or its curtilage, a conservation area, or a registered park
+              or garden.
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    confidence: medium
+    notes: "From the audit (wrong_trigger): LBC, a listed building or curtilage, a conservation area, a
+      registered park or garden, and assets on the Historic Environment Record (not expressed in the
+      rule)."
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Works that would affect trees or hedges within or adjoining the site (unless
+              shown on the site layout plan).
+        - discretionary
+    notes: "'The proposal involves a lot of new planting' is shown as officer discretion."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: Known or suspected contamination issues with land, and/or previous potentially
+          contaminative uses.
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: floodlighting
+        value: true
+        description: Floodlighting (excluding small scale domestic lighting).
+    source-text: >-
+      Lighting Assessment Required for all applications for floodlighting (excluding small scale
+      domestic lighting).
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      condition:
+        field: noise-sensitive-use
+        value: true
+        description: Noise sensitive development (e.g. residential, schools and hospitals) adjacent to
+          major road/transport infrastructure and other significant sources of noise.
+    confidence: low
+    notes: "The second limb of the trigger is cut off in the workbook excerpt ('or 2.')."
+
+  - id: recreation-facilities-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - condition:
+                field: loss-of-open-space
+                value: true
+                description: Major development (10+ dwellings or 1,000m2) causing loss of open space.
+        - all:
+            - site:
+                in: [open-space]
+                description: The site is a playing field.
+            - condition:
+                field: loss-of-open-space
+                value: true
+                description: Any loss of a playing field.
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    confidence: medium
+    notes: "From the audit (wrong_trigger): the workbook's trigger was cut off at '1.'."
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: Major or complex roof alterations.
+    source-text: Roof plans (existing and proposed) Required for major or complex roof alterations.
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: Major or complex roof alterations.
+    source-text: Roof plans (existing and proposed) Required for major or complex roof alterations.
+
+  - id: section-existing
+    action: add
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: Sloping or uneven sites, or significant changes in levels.
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Part 2 item 11, sections and levels."
+
+  - id: section-proposed
+    action: add
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: Sloping or uneven sites, or significant changes in levels.
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Part 2 item 11, sections and levels."
+
+  - id: site-plan
+    action: add
+    required-if:
+      always: true
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a layout plan, existing and proposed, is always required
+      (Part 2 item 2)."
+
+  - id: telecommunications-report
+    action: replace
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: All telecoms development.
+    source-text: Telecommunication Information Required for all telecoms development
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): not a change of use prior approval item."
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: retail-floorspace
+            operator: ">"
+            value: 2500
+            description: Retail development over 2,500sqm (gross).
+        - all:
+            - condition:
+                field: out-of-centre-town-centre-use
+                value: true
+                description: Retail outside a defined centre.
+            - condition:
+                field: retail-floorspace
+                operator: ">="
+                value: 200
+                description: 200m2 or more of retail floorspace.
+        - discretionary
+    source-text: Retail Impact Assessment Required for all retail development over 2,500sqm (gross).
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    confidence: low
+    notes: >-
+      Retail Impact Assessment over 2,500sqm. From the audit (missing_requirement): a Retail
+      Sequential Test for retail of 200m2+ outside a defined centre, over 500m2 in a district centre,
+      over 300m2 in a local centre, or additions in a retail park; the centre thresholds can't be
+      expressed, so they are shown as officer discretion. The Retail Park Justification is a separate
+      item (unmapped).
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    notes: "Required for all major development where there are likely to be significant transport
+      implications."
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    notes: "Required for all developments which generate significant amounts of movement."
+
+unmapped:
+  - local-name: Ecological checklist
+    source-text: >-
+      Ecological checklist Required for all planning applications except for applications for:
+      Advertisement Consent … The checklist must be completed in full and correctly in order for the
+      application to be valid.
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    suggested-id: biodiversity-checklist
+  - local-name: Coal Mining Risk Assessment
+    source-text: >-
+      Required for all development in Development High Risk Areas, excluding those on the Exemptions
+      List e.g.: Householder development
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Health Impact Assessment
+    source-text: "Health Impact assessments Required for all large-scale major developments as follows: …
+      (From the audit: 200+ dwellings or 4ha; non-residential 10,000m2 or 2ha)"
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Landscape and visual impact assessment
+    source-text: "From the audit: major development with buildings outside settlement boundaries, or
+      structures significantly taller than their surroundings"
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Sustainable drainage
+    source-text: "From the audit: major development; a requirement in a 'made' Neighbourhood Plan; minor
+      development in flood-prone areas or FZ2/3; minor development increasing flood risk; excluding
+      householder"
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    suggested-id: drainage-strategy
+  - local-name: Accessible Housing Statement
+    source-text: "From the audit: 6+ new residential units, including conversions and changes of use"
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    suggested-id: accessibility-statement
+  - local-name: Amendments Proposed Statement
+    source-text: "From the audit: non-material or minor material amendments"
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    suggested-id: amendments-statement
+  - local-name: Employment Led Statement
+    source-text: "From the audit: 10+ dwellings in the J21 Enterprise Area, or 50+ elsewhere in
+      Weston-super-Mare"
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    suggested-id: employment-statement
+  - local-name: Flood Warning Evacuation Plan
+    source-text: "From the audit: hazardous substances consent, and FRA sites that are major,
+      vulnerable-persons housing, flats without upper-floor access, camping or caravan sites, or hotels and
+      hostels"
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    suggested-id: flood-evacuation-plan
+  - local-name: Flood Risk Exception Test
+    source-text: "From the audit: highly vulnerable development in FZ2, essential infrastructure in FZ3a/3b,
+      more vulnerable development in FZ3a"
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    suggested-id: flood-sequential-exception-test
+  - local-name: Foul Sewerage and Utilities Assessment
+    source-text: "From the audit: 100+ dwellings or 10,000m2"
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    suggested-id: utilities-statement
+  - local-name: Groundwater protection details
+    source-text: "From the audit: Source Protection Zone sites with non-mains drainage, contaminating
+      non-residential uses, contaminated land; excluding householder"
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    suggested-id: groundwater-protection
+  - local-name: Historic Park and Garden Landscape Assessment
+    source-text: "From the audit: listed as Part 1 item; trigger not given"
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    suggested-id: ""
+  - local-name: Retail Park Justification
+    source-text: >-
+      Retail Park Justification Required for proposals that provide additional retail floor space
+      (including mixed use with retail as part of the scheme) within a defined retail park.
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    suggested-id: ""
+  - local-name: Vehicle tracking plan
+    source-text: "From the audit: 10+ dwellings"
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    suggested-id: vehicle-tracking-plan
+  - local-name: Joinery details
+    source-text: "From the audit: new or replacement windows or doors on heritage buildings in a
+      conservation area, and internal joinery for listed building consent"
+    source-url:
+      https://n-somerset.gov.uk/sites/default/files/2025-12/local%20list%20of%20planning%20application%20requirements%20-%20parts%201%20and%202.pdf
+    suggested-id: joinery-details

@@ -1,0 +1,366 @@
+# Corrections for Waverley Borough Council, from inputs/audit/waverley-borough-council.json.
+# The audit compared the workbook with Waverley's Validation Checklist V12 (approved November
+# 2022, last updated July 2023), the same document. The workbook read the checklist's X-matrix
+# column headers as triggers, and turned Climate Change and Sustainability Checklist questions
+# into separate requirements. Item numbers below are V12's own. Waverley is abolished on
+# 1 April 2027; a West Surrey Council list is expected after that (audit issue 9).
+local-authority: WAE
+
+submission-standards:
+  - item: All drawings include a scale bar
+    level: must
+  - item: Drawings, documents and photographs in PDF format
+    level: should
+  - item: No single file larger than 10 MB
+    level: must
+  - item: Files named to RIBA conventions or Plain English alternatives, including the format (e.g. 
+      'Floor Plans as Existing.pdf')
+    level: should
+
+drop:
+  - id: transport-assessment
+    sheets: [Householder, Listed building consent, Lawful development cert, Change of use - prior 
+          approval, Variation of condition s73, Discharge of conditions]
+    reason: "wrong_app_type: the 'application types' were X-matrix column headings, not triggers"
+  - id: flood-risk-assessment
+    sheets: [Listed building consent, Lawful development cert, Change of use - prior approval, 
+          Discharge of conditions]
+    reason: "wrong_app_type: the 'application types' were X-matrix column headings, not triggers"
+  - id: arboriculturist-report
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: taken from the matrix legend text ('X - Mandatory Listed Building Consent')"
+  - id: lighting-assessment
+    sheets: [Householder]
+    reason: "wrong_app_type: a Climate Change and Sustainability Checklist question, not a requirement"
+
+drop-unmapped:
+  - local-name: Electric vehicle charging details
+    reason: "wrong_app_type: a Climate Change and Sustainability Checklist question, not a standalone
+      document"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_app_type: a checklist question; the real item 29 Ventilation/Extraction Statement is
+      re-added below"
+  - local-name: Water efficiency / water usage statement
+    reason: "wrong_app_type: a Climate Change and Sustainability Checklist question, not a standalone
+      document"
+  - local-name: Validation checklist form (completed)
+    reason: "duplicate: repeats the Biodiversity Checklist row word for word"
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "wrong_trigger: the excerpt is a cross-reference; re-added below with the council's requirement
+      wording"
+
+requirements:
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline]
+        - discretionary
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): the Listed Building Consent row came from the matrix legend, and the
+      Tree Survey and Arboricultural Implications item is missing from Full planning and Outline.
+      The matrix marks it 'possibly required dependent on the proposal'; the trigger itself needs
+      re-reading in the list (item 22).
+
+  - id: cil-form
+    action: update
+    required-if:
+      always: true
+    notes: "Audit (wrong_app_type): CIL Form 1 is required for all applications irrespective of CIL liability,
+      not only Full planning."
+
+  - id: biodiversity-survey-report
+    action: update
+    must-include:
+      - item: Undertaken by an appropriately qualified and experienced person
+        level: must
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    notes: "'where one is required' (council's wording)."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-text: >-
+      Fire statements must be submitted on a form published by the Secretary of State (or a form to
+      similar effect) and contain the particulars specified or referred to in the form, which
+      includes information about the principles, concepts and approach relating to fire safety
+      that have been applied to each building in the development the site layout.
+    source-url: 
+      https://www.waverley.gov.uk/portals/0/documents/services/planning-and-building/planning-applications-and-enforcement/planning%20applications/validation%20lists/validation%20v12.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt leaves out the threshold (two or more dwellings or educational
+      accommodation in buildings of 18m+ or 7+ storeys)."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: External lighting would be provided or made necessary by the development.
+    source-text: Applications or advertisements where external lighting would be provided or made 
+      necessary by the development.
+    notes: "Applies to applications and advertisements alike (council's wording). The householder row
+      was a checklist question and was dropped."
+
+  - id: photos
+    action: update
+    must-include:
+      - item: Photographs no larger than 15cm x 10cm
+        level: must
+    confidence: low
+    notes: "Audit (wrong_trigger): the excerpt is a size rule, not a trigger; when photographs are needed
+      must be re-read in the list."
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      application-type:
+        in: [hh, advertising, full, outline, reserved-matters, technical-details-consent]
+    source-text: >-
+      Climate Change and Sustainability Checklist – Householder Applications, Applications for
+      Advertisement Consent, Minor Shopfront and Fenestration applications.
+    source-url: 
+      https://www.waverley.gov.uk/portals/0/documents/services/planning-and-building/planning-applications-and-enforcement/planning%20applications/validation%20lists/validation%20v12.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, wrong_trigger): item 36, the Climate Change and Sustainability
+      Checklist. A short version for householder, advertisement, minor shopfront and fenestration
+      applications; the full version is 'required for full, outline, reserved matters and technical
+      details consent applications'.
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      any:
+        - all:
+            - site:
+                in: [designated-rural-area]
+                description: The site is in a designated rural area.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 6
+                description: A net gain of 6 or more dwellings.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 11
+            description: A net gain of 11 or more dwellings.
+        - condition:
+            field: housing-floorspace
+            operator: ">"
+            value: 1000
+            description: More than 1,000 square metres of housing floorspace.
+    source-url: 
+      https://www.waverley.gov.uk/portals/0/documents/services/planning-and-building/planning-applications-and-enforcement/planning%20applications/validation%20lists/validation%20v12.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 16, net 6+ dwellings in designated rural areas,
+      11+ elsewhere, or >1,000 sqm."
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: The site is in or next to an Air Quality Management Area.
+        - condition:
+            field: biomass-or-chp
+            value: true
+            description: The proposal includes combined heat and power or biomass.
+    source-url: 
+      https://www.waverley.gov.uk/portals/0/documents/services/planning-and-building/planning-applications-and-enforcement/planning%20applications/validation%20lists/validation%20v12.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 18, in or next to an AQMA, or CHP/biomass."
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if: discretionary
+    source-url: 
+      https://www.waverley.gov.uk/portals/0/documents/services/planning-and-building/planning-applications-and-enforcement/planning%20applications/validation%20lists/validation%20v12.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 12, where light to adjoining properties could be
+      harmed."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      condition:
+        field: new-build
+        value: true
+        description: The proposal includes new buildings.
+    source-url: 
+      https://www.waverley.gov.uk/portals/0/documents/services/planning-and-building/planning-applications-and-enforcement/planning%20applications/validation%20lists/validation%20v12.pdf
+    must-include:
+      - item: SAP Dwelling Emission Rate (DER) compared with the Target Emission Rate (TER)
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 38, new buildings, SAP DER vs TER."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if: discretionary
+    source-url: 
+      https://www.waverley.gov.uk/portals/0/documents/services/planning-and-building/planning-applications-and-enforcement/planning%20applications/validation%20lists/validation%20v12.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): item 17 Land Contamination Assessment is listed, but
+      the audit gives no trigger."
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if: discretionary
+    source-url: 
+      https://www.waverley.gov.uk/portals/0/documents/services/planning-and-building/planning-applications-and-enforcement/planning%20applications/validation%20lists/validation%20v12.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): item 27 Open Space Assessment is listed, but the audit
+      gives no trigger."
+
+  - id: sci
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more dwellings.
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 1000
+            description: 1,000 square metres or more of floorspace.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare.
+    source-url: 
+      https://www.waverley.gov.uk/portals/0/documents/services/planning-and-building/planning-applications-and-enforcement/planning%20applications/validation%20lists/validation%20v12.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 25, 10+ dwellings, 1,000 sqm+, or sites over 1
+      ha."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Main town centre uses outside centres.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: 1,000 square metres or more of main town centre uses.
+    source-url: 
+      https://www.waverley.gov.uk/portals/0/documents/services/planning-and-building/planning-applications-and-enforcement/planning%20applications/validation%20lists/validation%20v12.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 30 Town Centre Uses, main town centre uses outside
+      centres, 1,000 sqm+."
+
+  - id: viability-assessment
+    action: add
+    required-if: discretionary
+    source-url: 
+      https://www.waverley.gov.uk/portals/0/documents/services/planning-and-building/planning-applications-and-enforcement/planning%20applications/validation%20lists/validation%20v12.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 33 Financial Appraisal, where policy exceptions
+      are sought on viability grounds."
+
+unmapped:
+  - local-name: Biodiversity Checklist
+    source-text: "A completed version of this Biodiversity Checklist must be submitted with each planning
+      application."
+    source-url: "https://www.waverley.gov.uk/Portals/0/Documents/services/planning-and-building/planning-applications-and-enforcement/planning
+      applications/Other validation docs/BiodivReview3.pdf?ver=5dgRxi3Ekkrpd6MKEqLS-g%3d%3d"
+    suggested-id: biodiversity-checklist
+  - local-name: Ventilation / Extraction Statement
+    source-text: "From the audit: item 29, significant retail, business, industrial and leisure uses (E(b),
+      A4, A5, E(g), B2); never householder or advertisement applications"
+    source-url: 
+      https://www.waverley.gov.uk/portals/0/documents/services/planning-and-building/planning-applications-and-enforcement/planning%20applications/validation%20lists/validation%20v12.pdf
+    suggested-id: ventilation-extraction-details
+  - local-name: Street Scene Elevation
+    source-text: "From the audit: item 5g, infill/replacement dwellings and extensions raising the ridgeline
+      where there are immediate neighbours, unless 20m+ apart"
+    source-url: 
+      https://www.waverley.gov.uk/portals/0/documents/services/planning-and-building/planning-applications-and-enforcement/planning%20applications/validation%20lists/validation%20v12.pdf
+    suggested-id: street-scene-elevations
+  - local-name: Housing Space Standards Statement
+    source-text: "From the audit: item 13, all new housing"
+    source-url: 
+      https://www.waverley.gov.uk/portals/0/documents/services/planning-and-building/planning-applications-and-enforcement/planning%20applications/validation%20lists/validation%20v12.pdf
+    suggested-id: space-standards-statement
+  - local-name: Extensions to Dwellings in the Green Belt
+    source-text: "From the audit: item 15, Green Belt extensions outside settlement boundaries, with %
+      floor area increase since 31 Dec 1968"
+    source-url: 
+      https://www.waverley.gov.uk/portals/0/documents/services/planning-and-building/planning-applications-and-enforcement/planning%20applications/validation%20lists/validation%20v12.pdf
+    suggested-id: green-belt-statement
+  - local-name: Infrastructure Statement
+    source-text: "From the audit: item 28, major applications"
+    source-url: 
+      https://www.waverley.gov.uk/portals/0/documents/services/planning-and-building/planning-applications-and-enforcement/planning%20applications/validation%20lists/validation%20v12.pdf
+    suggested-id: infrastructure-statement
+  - local-name: Rural Workers' Dwelling assessment
+    source-text: "From the audit: item 31a"
+    source-url: 
+      https://www.waverley.gov.uk/portals/0/documents/services/planning-and-building/planning-applications-and-enforcement/planning%20applications/validation%20lists/validation%20v12.pdf
+    suggested-id: rural-worker-statement
+  - local-name: Agricultural Land assessment
+    source-text: "From the audit: item 31b, loss of best and most versatile agricultural land"
+    source-url: 
+      https://www.waverley.gov.uk/portals/0/documents/services/planning-and-building/planning-applications-and-enforcement/planning%20applications/validation%20lists/validation%20v12.pdf
+    suggested-id: agricultural-land-assessment
+  - local-name: Marketing Viability Appraisal
+    source-text: "From the audit: item 32, on the Council proforma, 9+ months marketing"
+    source-url: 
+      https://www.waverley.gov.uk/portals/0/documents/services/planning-and-building/planning-applications-and-enforcement/planning%20applications/validation%20lists/validation%20v12.pdf
+    suggested-id: marketing-evidence
+
+low-confidence:
+  - id: transport-assessment
+    note: "Audit (wrong_trigger): the excerpt is a run of X-matrix column headers and gives no trigger;
+      re-read the Transport Assessment item in V12."
+  - id: flood-risk-assessment
+    note: "Audit (wrong_trigger): the excerpt is a run of X-matrix column headers and gives no trigger;
+      re-read the FRA item in V12."
+

@@ -1,0 +1,375 @@
+# Corrections for Thanet District Council, from inputs/audit/thanet-district-council.json.
+# The audit could not fetch Thanet's checklists (contents_checked: false), so its issues are
+# about the workbook's own excerpts, which come from the council's type-specific checklists:
+# 002 Householder and Listed Building Consent, and 003 Full and Outline Planning Permission.
+# The workbook put every item from the Full and Outline checklist under Outline only (audit
+# issue 1), so those requirements are restored to Full planning here.
+local-authority: THA
+
+validation-list:
+  url: 
+    https://www.thanet.gov.uk/wp-content/uploads/2018/03/003-Full-and-Outline-Planning-Permission-Validation-Checklist.pdf
+  date: 2018-03
+  date-basis: "URL upload folder (2018/03), not document text; the audit says the real adoption date is
+    unknown and may be earlier"
+
+submission-standards:
+  - item: All plans include a scale bar, the scale and the paper size
+    level: should
+  - item: Plans for full and outline applications also include the site address and drawing number
+    level: should
+
+drop:
+  - id: viability-assessment
+    reason: "wrong_trigger: this is the Functional and viability Assessment for rural worker dwellings,
+      not a financial viability assessment (re-added as unmapped)"
+  - id: waste-management-plan
+    reason: "wrong_trigger: the excerpt is Transport Assessment and functional assessment text; there
+      is no waste storage requirement"
+
+drop-unmapped:
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "wrong_trigger: the excerpt is the Noise Impact Assessment trigger (re-added below with its
+      own trigger)"
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_trigger: the excerpt runs on into Structural survey and Heritage Statement (re-added
+      below)"
+  - local-name: Structural Survey
+    reason: "wrong_app_type / wrong_trigger: a listed-building item whose excerpt runs on into the Heritage
+      Statement (re-added below)"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: the excerpt runs on into the Transport Assessment (re-added below)"
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "wrong_trigger: the 'When required?' cell is empty and the excerpt runs into roof plan text
+      (re-added below)"
+
+requirements:
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: >-
+              The development will affect trees covered by a Tree Preservation Order or in a
+              Conservation Area, or trees on or next to the site, including street trees.
+    source-text: >-
+      Tree Survey/Arboricultural Survey When required? When the development will affect any trees
+      covered by a Tree Preservation Order or within a Conservation Area, or if the proposal is
+      likely to affect trees within the application site or adjacent to the site including street
+      trees.
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [hh, lbc]
+        - all:
+            - application-type:
+                in: [full, outline]
+            - ref: major-development
+    confidence: low
+    notes: >-
+      Full and Outline: any major development (10 houses or 1000 or more square metres of
+      floorspace). Audit (wrong_app_type): the 'All Applications' entry comes from the combined
+      Householder and Listed Building Consent checklist; national rules only require a DAS for
+      householder works in conservation areas or World Heritage Sites, so the householder part
+      needs checking.
+
+  - id: elevation-existing
+    action: update
+    required-if:
+      application-type:
+        in: [hh, lbc, full, outline]
+    source-text: Existing Elevations – Scale 1:100 or 1:50 When required? Where alterations and/or 
+      extensions to an existing building are proposed.
+    notes: "Audit (wrong_app_type): the Full and Outline checklist item was placed under Outline only."
+
+  - id: elevation-proposed
+    action: update
+    required-if:
+      application-type:
+        in: [hh, lbc, full, outline]
+    notes: "Audit (wrong_app_type): the Full and Outline checklist item was placed under Outline only."
+
+  - id: floor-plan-existing
+    action: update
+    required-if:
+      application-type:
+        in: [hh, lbc, full, outline]
+    notes: "Audit (wrong_app_type): the Full and Outline checklist item was placed under Outline only."
+
+  - id: floor-plan-proposed
+    action: update
+    required-if:
+      application-type:
+        in: [hh, lbc, full, outline]
+    notes: "Audit (wrong_app_type): the Full and Outline checklist item was placed under Outline only."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      application-type:
+        in: [full, outline]
+    confidence: low
+    notes: "Audit (wrong_trigger): the excerpt never says when an FRA is required; it runs into the Foul
+      and Surface Water and Contaminated Land headings."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - all:
+            - application-type:
+                in: [hh]
+            - site:
+                in: [listed-building]
+                description: The works affect a listed building.
+        - all:
+            - application-type:
+                in: [full, outline]
+            - site:
+                in: [conservation-area]
+                description: The site is in a Conservation Area.
+            - condition:
+                field: demolition
+                value: true
+                description: The proposal demolishes a building or structure.
+    source-text: >-
+      Householder and Listed Building Consent: Heritage Statement When required? All Applications
+      What information is A Heritage Statement is required, identifying the significance of the
+      heritage … asset and impact of proposals in accordance with the advice in NPPF including any
+      archaeological impacts, and listing details of property.
+
+
+      Full and Outline: Heritage Statement When required? Where demolition of a building/structure
+      in a Conservation Area is proposed What information is Assessment of the contribution of the
+      building to the character and … appearance of the Conservation Area.
+    source-url: 
+      https://www.thanet.gov.uk/wp-content/uploads/2018/03/003-Full-and-Outline-Planning-Permission-Validation-Checklist.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the 'All Applications ... listing details of property' entry applies
+      to listed buildings, not to all householder work. The Full and Outline item was placed under
+      Outline only.
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - site:
+            in: [contaminated-land]
+            description: >-
+              Redevelopment of former petrol filling sites, commercial garages, landfill sites and
+              other brownfield sites where contamination is known or suspected.
+    source-text: >-
+      Contaminated Land Assessment When required? For redevelopment of former petrol filling sites;
+      commercial garages; landfill sites and other brownfield sites where contamination is known
+      or suspected What information is Desk based study.
+    must-include:
+      - item: Desk based study
+        level: must
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: >-
+              Class B2 industrial uses proposed within 10 metres of a boundary with residential
+              property, and waste management facilities.
+    source-text: >-
+      Noise Impact Assessment When required? For industrial uses falling within class B2 (general
+      industrial uses) and that are proposed within 10 metres of a boundary with residential
+      property and waste management facilities.
+    source-url: 
+      https://www.thanet.gov.uk/wp-content/uploads/2018/03/003-Full-and-Outline-Planning-Permission-Validation-Checklist.pdf
+    must-include:
+      - item: >-
+          The impact of the use on the amenity of existing residential properties, or for new
+          residential development the likely impact on the amenity of the occupiers, including any
+          mitigation proposals
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the noise trigger was in the workbook's rural workers row; the noise
+      row held its content and the LVIA text."
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, lbc, full, outline]
+        - condition:
+            field: roof-alteration
+            value: true
+            description: A roof is being altered.
+    must-include:
+      - item: Scale 1:100 or 1:50
+        level: must
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, lbc, full, outline]
+        - condition:
+            field: roof-alteration
+            value: true
+            description: A roof is being altered.
+    must-include:
+      - item: Scale 1:100 or 1:50
+        level: must
+
+  - id: section-existing
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, lbc, full, outline]
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: A change in level is proposed, e.g. on a sloping site.
+    source-text: >-
+      Site Sections– Scale 1:100 or 1:50 When required? When a change in level is proposed eg on a
+      sloping site What information is These should show existing and proposed site levels, and
+      finished floor … levels, with levels related to a defined datum point.
+    must-include:
+      - item: Existing and proposed site levels and finished floor levels, related to a defined 
+          datum point
+        level: should
+      - item: Scale 1:100 or 1:50
+        level: must
+    notes: "Audit (wrong_trigger): the workbook's excerpts ran on into the Parking Plan and Heritage Statement
+      items (cut here)."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, lbc, full, outline]
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: A change in level is proposed, e.g. on a sloping site.
+    source-text: >-
+      Site Sections– Scale 1:100 or 1:50 When required? When a change in level is proposed eg on a
+      sloping site What information is These should show existing and proposed site levels, and
+      finished floor … levels, with levels related to a defined datum point.
+    must-include:
+      - item: Existing and proposed site levels and finished floor levels, related to a defined 
+          datum point
+        level: should
+      - item: Scale 1:100 or 1:50
+        level: must
+    notes: "Audit (wrong_trigger): the workbook's excerpts ran on into the Parking Plan and Heritage Statement
+      items (cut here)."
+
+  - id: site-plan
+    action: update
+    required-if:
+      application-type:
+        in: [hh, lbc, full, outline]
+    must-include:
+      - item: Scale 1:500 or 1:200
+        level: must
+      - item: The proposed development in relation to the site boundaries and other existing 
+          buildings on the site
+        level: must
+      - item: Neighbouring properties
+        level: must
+        required-if:
+          application-type:
+            in: [hh, lbc]
+      - item: Details of all proposed parking
+        level: should
+        required-if:
+          application-type:
+            in: [full, outline]
+    notes: >-
+      Householder and LBC: all applications other than alterations to roof or fenestration. Full
+      and Outline: all applications excluding change of use where no external alterations are
+      proposed (council's wording).
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 100
+                description: Residential development of 100 dwellings or more.
+            - discretionary
+    source-text: >-
+      Transport Assessment When required? Residential development of 100 dwellings; … more; and
+      waste management facilities What information is Transport implications of the proposal,
+      including access to the site by … different modes and impact on any nearby trunk road
+    source-url: 
+      https://www.thanet.gov.uk/wp-content/uploads/2018/03/003-Full-and-Outline-Planning-Permission-Validation-Checklist.pdf
+    must-include:
+      - item: Transport implications of the proposal, including access to the site by different 
+          modes and impact on any nearby trunk road
+        level: must
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the trigger was cut off after the first threshold; the other
+      thresholds (floorspace and waste management facilities) appear only in part, so they are
+      shown as officer discretion. 'or more' after 100 dwellings is lost in the excerpt.
+
+unmapped:
+  - local-name: Functional and viability Assessment (rural worker dwellings)
+    source-text: "Functional and viability Assessment When required? When the proposal includes an isolated
+      dwelling in the countryside for agricultural; equestrian or other rural based enterprises business"
+    source-url: 
+      https://www.thanet.gov.uk/wp-content/uploads/2018/03/003-Full-and-Outline-Planning-Permission-Validation-Checklist.pdf
+    suggested-id: rural-worker-statement
+  - local-name: Parking Plan
+    source-text: "Parking Plan– Scale 1:100 When required? When the proposals involve the conversion of
+      a garage to living space or building over a parking space"
+    source-url: 
+      https://www.thanet.gov.uk/wp-content/uploads/2018/03/002-Householder-and-Listed-Building-Consent-%E2%80%93-Validation-Checklist.pdf
+    suggested-id: parking-plan
+  - local-name: Structural survey (listed buildings)
+    source-text: "Structural survey When required? When the proposal involves substantial or complete
+      demolition of a listed building."
+    source-url: 
+      https://www.thanet.gov.uk/wp-content/uploads/2018/03/002-Householder-and-Listed-Building-Consent-%E2%80%93-Validation-Checklist.pdf
+    suggested-id: structural-survey
+  - local-name: Ventilation / Extraction Details
+    source-text: "Ventilation/Extraction Details When required? For proposed new restaurants; hot food
+      takeaways and public houses and other premises selling/serving hot food when installing ventilation/extraction
+      units"
+    source-url: 
+      https://www.thanet.gov.uk/wp-content/uploads/2018/03/003-Full-and-Outline-Planning-Permission-Validation-Checklist.pdf
+    suggested-id: ventilation-extraction-details
+  - local-name: Existing and Proposed Street Scene
+    source-text: "… and Proposed Street Scene – Scale 1:100"
+    source-url: 
+      https://www.thanet.gov.uk/wp-content/uploads/2018/03/003-Full-and-Outline-Planning-Permission-Validation-Checklist.pdf
+    suggested-id: street-scene-elevations
+  - local-name: Foul and Surface Water Assessment
+    source-text: "Foul and Surface Water Assessment When required? For all major development other than
+      changes of use where there will be no material change in foul or surface water discharges"
+    source-url: 
+      https://www.thanet.gov.uk/wp-content/uploads/2018/03/003-Full-and-Outline-Planning-Permission-Validation-Checklist.pdf
+    suggested-id: drainage-strategy
+

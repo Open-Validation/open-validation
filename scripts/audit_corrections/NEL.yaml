@@ -1,0 +1,408 @@
+# Corrections for North East Lincolnshire Council, from the council's audit.
+# The council has no single local list: its 'Planning application checklist' hub page (updated
+# 17 Aug 2026) links 13 type-specific checklists. Grokbot read only the Major checklist
+# (01.07.2025) and, for the Flood Risk Assessment row, the Full checklist, and filed the Major
+# items under 'Full planning'. Here the Major-checklist items are scoped to major development.
+# The other checklists (Listed Building Consent, Advertisement, Outline, Reserved Matters,
+# Lawful Development Certificates, Change of Use, Variation, NMA, and the minor Full checklist)
+# were not read by the workbook or itemised by the audit, so they still need a manual read.
+# The Householder checklist (15.05.2026) items come from the audit's summary.
+local-authority: NEL
+
+validation-list:
+  url: https://www.nelincs.gov.uk/planning-and-building-control/planning-applications/planning-application-checklist/
+  date: 2026-05-15
+  date-basis: >-
+    audit: the checklist set has mixed dates; Householder, Variation and NMA checklists reissued
+    15.05.2026, Major and Full checklists dated 01.07.2025 (file names). The hub page's 17 Aug
+    2026 date is a page update, not a list date
+
+submission-standards:
+  - item: Drawing title, drawing number and scale clearly stated on every plan
+    level: must
+  - item: A north point clearly shown, with enough road names and/or adjoining buildings to identify
+      the site
+    level: must
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: the row holds Arboricultural Method Statement text (now in arboriculturist-report)"
+
+drop-unmapped:
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_trigger: lighting-scheme text from the Major checklist, not advertisement content (now in lighting-assessment)"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "the excerpt is cut off; replaced below with the full sentence from the council tab"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      ref: major-development
+    confidence: low
+    notes: "Audit (wrong_app_type, wrong_trigger): a Major checklist item; the excerpt is cut off and gives
+      no trigger."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      ref: major-development
+    must-include:
+      - item: A tree protection plan (TPP) setting out the form and location of the tree protection fencing,
+          informed by BS5837:2012
+        level: must
+        source-text: "This document must include the tree protection plan (TPP) which sets out the form
+          and location of the tree protection fencing informed by BS5837 – 2012."
+      - item: An arboricultural method statement (AMS) detailing how the site will be developed in its
+          phases, with materials and construction processes in relation to trees
+        level: must
+        source-text: "Arboricultural method statement (AMS): This document must not only detail how the
+          site will be developed in its constituent phases it will also give details of materials and
+          construction processes in relation to trees."
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): a Major checklist item. The AMS text was filed under 'Schedule of works'
+      in the workbook (audit wrong_trigger). The excerpt lists contents but not when the report is
+      needed.
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      ref: major-development
+    confidence: low
+    notes: "Audit (wrong_app_type, wrong_trigger): a Major checklist item; the excerpt is cut off and gives
+      no trigger."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    confidence: medium
+    notes: "Major checklist item (audit wrong_app_type). Needed wherever there are features of wildlife
+      interest on or next to the site, which is a judgement, so shown as discretionary."
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    confidence: low
+    notes: "Audit (wrong_app_type, wrong_trigger): a Major checklist item; the excerpt is cut off, but refers
+      to effects on the daylight and sunlight of adjacent properties."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment (EIA Regulations Schedule 1,
+          or Schedule 2 with likely significant effects).
+    source-text: >-
+      An Environmental Impact Assessment will be required for all applications as defined in Schedule 1
+      of the Town & Country Planning (Environmental Impact Assessment) (England and Wales) of the
+      Regulations and for major applications over a certain size (these are defined under Schedule 2 of
+      the above-mentioned regulations) where the development would impact on a sensitive area such as a
+      SSSI or where there are likely to be significant impacts on the environment.
+    source-url: https://www.nelincs.gov.uk/assets/uploads/2025/07/Major-Application-Checklist-01.07.2025.docx
+    confidence: medium
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      site:
+        in: [flood-risk-zone]
+        description: The site is in a flood risk area on the Environment Agency maps and/or the council's
+          strategic flood risk maps.
+    source-text: >-
+      Flood Risk Assessment Required when the application site falls within a flood risk area on the
+      Environment Agencies maps and/or our local strategic flood risk maps.
+    source-url: https://www.nelincs.gov.uk/assets/uploads/2025/07/Full-Application-Checklist-01.07.2025.docx
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement): the 15.05.2026 Householder checklist asks for a Flood Risk Form on
+      the same trigger ('Flood Risk Form ... falls within a flood risk area on the Environment Agency
+      maps and/or our local strategic flood risk maps'), so no application type is given.
+
+  - id: floor-plan-existing
+    action: update
+    must-include:
+      - item: At a scale of 1:100 or 1:50
+        level: must
+    source-text: Existing and proposed floor plans must be at a scale of 1:100 or 1:50.
+    confidence: medium
+
+  - id: floor-plan-proposed
+    action: update
+    must-include:
+      - item: At a scale of 1:100 or 1:50
+        level: must
+    source-text: Existing and proposed floor plans must be at a scale of 1:100 or 1:50.
+    confidence: medium
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      site:
+        in: [conservation-area, listed-building, listed-building-setting, scheduled-monument,
+          park-and-garden, archaeological-priority-area, locally-listed-building]
+        description: The proposal affects a designated heritage asset (listed building, conservation area,
+          registered park and garden, scheduled monument) or its setting, or a non-designated asset
+          (known archaeology, locally listed or other historic buildings).
+    source-text: >-
+      … *Designated heritage assets include: Listed Buildings Conservation Areas Registered Parks and
+      Gardens Scheduled Monuments **Undesignated heritage assets include: Known archaeological sites and
+      archaeological areas (the potential for archaeology on a site should also be assessed) Locally
+      listed buildings Unlisted historic buildings (not within a conservation area) Historic farm
+      buildings and complexes Historic shop fronts
+    source-url: https://www.nelincs.gov.uk/assets/uploads/2025/07/Major-Application-Checklist-01.07.2025.docx
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): the 15.05.2026 Householder checklist asks for a Heritage
+      Assessment where the site affects a conservation area or its setting, a listed building or its
+      setting, a scheduled monument, archaeology or non-designated assets. The asset list is from the
+      Major checklist. Unlisted historic buildings, farm buildings and shop fronts have no designation
+      field.
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      ref: major-development
+    must-include:
+      - item: Details of future management regimes and management responsibilities
+        level: must
+    confidence: medium
+    notes: "Major checklist item (audit wrong_app_type)."
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      ref: major-development
+    source-text: It shall also be accompanied by details of light luminance levels, technical 
+      specifications and lighting pools.
+    source-url: https://www.nelincs.gov.uk/assets/uploads/2025/07/Major-Application-Checklist-01.07.2025.docx
+    must-include:
+      - item: Light luminance levels
+        level: must
+      - item: Technical specifications
+        level: must
+      - item: Lighting pools
+        level: must
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook filed this lighting-scheme text from the Major checklist
+      under 'Advertisement drawings'. The sentence that says when a lighting scheme is needed is cut
+      off.
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - any:
+            - condition:
+                field: noise-sensitive-use
+                value: true
+                description: A sensitive use (e.g. housing) next to a noise-producing site such as an
+                  industrial use.
+            - discretionary
+    confidence: low
+    notes: "Major checklist item (audit wrong_app_type). The excerpt gives only the 'also required' cases
+      (next to noise-producing sites or environmentally sensitive sites such as an SSSI); the main trigger
+      is cut off."
+
+  - id: photos
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    confidence: low
+    notes: "Audit (wrong_app_type, wrong_trigger): a Major checklist item; the excerpt is cut off ('site and
+      photographs where necessary')."
+
+  - id: planning-statement
+    action: update
+    required-if:
+      ref: major-development
+    must-include:
+      - item: A regeneration section
+        level: must
+    confidence: low
+    notes: "Major checklist item (audit wrong_app_type). The excerpt is cut off, so when a Planning Statement
+      itself is needed is not stated."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      ref: major-development
+    confidence: low
+    notes: "Audit (wrong_app_type, wrong_trigger): a Major checklist item; the excerpt ('Children's play areas
+      f.') is a fragment."
+
+  - id: sci
+    action: update
+    required-if:
+      ref: major-development
+    confidence: low
+    notes: "Audit (wrong_app_type, wrong_trigger): a Major checklist item; the excerpt is cut off."
+
+  - id: section-existing
+    action: replace
+    required-if:
+      condition:
+        field: shopfront
+        value: true
+        description: The proposal includes shop fronts or roller shutters.
+    source-text: Existing and proposed sections will be required to a recognised scale for applications 
+      which include shop fronts and roller shutters.
+    source-url: https://www.nelincs.gov.uk/assets/uploads/2025/07/Full-Application-Checklist-01.07.2025.docx
+    must-include:
+      - item: To a recognised scale
+        level: must
+    confidence: medium
+
+  - id: section-proposed
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: shopfront
+            value: true
+            description: The proposal includes shop fronts or roller shutters.
+        - all:
+            - application-type:
+                in: [hh]
+            - condition:
+                field: new-vehicle-access
+                value: true
+                description: A dropped kerb is proposed.
+    source-text: Existing and proposed sections will be required to a recognised scale for applications 
+      which include shop fronts and roller shutters.
+    source-url: https://www.nelincs.gov.uk/assets/uploads/2025/07/Full-Application-Checklist-01.07.2025.docx
+    must-include:
+      - item: To a recognised scale
+        level: must
+      - item: A section through the dropped kerb
+        level: must
+        required-if:
+          condition:
+            field: new-vehicle-access
+            value: true
+            description: A dropped kerb is proposed.
+    confidence: medium
+    notes: "From the audit (missing_requirement): the 15.05.2026 Householder checklist asks for a dropped
+      kerb section to a recognised scale where a dropped kerb is proposed."
+
+  - id: site-plan
+    action: replace
+    required-if:
+      application-type:
+        in: [hh, full]
+    source-text: >-
+      A site plan to a scale of 1:500 or 1:200 clearly showing the proposed works to scale, a north
+      point, all adjoining land and/or buildings and named roads.
+    source-url: https://www.nelincs.gov.uk/assets/uploads/2025/07/Full-Application-Checklist-01.07.2025.docx
+    must-include:
+      - item: At a scale of 1:500 or 1:200
+        level: must
+      - item: The proposed works, a north point, all adjoining land and/or buildings, and named roads
+        level: must
+      - item: An existing block plan as well as the proposed one
+        level: must
+        required-if:
+          all:
+            - application-type:
+                in: [hh]
+            - condition:
+                field: new-vehicle-access
+                value: true
+                description: A new access is proposed.
+    confidence: medium
+    notes: >-
+      The workbook excerpt ('on the block plan.') was a fragment; the text above is the Full
+      checklist's. From the audit (missing_requirement): the Householder checklist asks for an
+      existing block plan where a new access is proposed.
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      ref: major-development
+    must-include:
+      - item: How sustainability measures have been incorporated into the proposal
+        level: must
+    confidence: medium
+    notes: "The Major checklist says 'for all applications'; whether the minor Full checklist asks for it
+      too was not checked (audit wrong_app_type)."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      ref: major-development
+    confidence: low
+    notes: "Audit (wrong_trigger): the floorspace threshold is cut off ('square metres a Retail Impact
+      Assessment must be submitted'). A Major checklist item."
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      ref: major-development
+    confidence: low
+    notes: "Audit (wrong_trigger): the excerpt ('In all other cases, a Transport Statement will suffice')
+      loses the threshold for a full Transport Assessment. A Major checklist item."
+
+  - id: travel-plan
+    action: update
+    required-if:
+      ref: major-development
+    confidence: medium
+    notes: "Audit (wrong_app_type): a Major checklist item, for developments with jobs, shopping, leisure,
+      services, school facilities or housing."
+
+  - id: waste-management-plan
+    action: update
+    required-if:
+      ref: major-development
+    confidence: low
+    notes: "Audit (wrong_app_type, wrong_trigger): a Major checklist item; the excerpt is cut off."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - any:
+            - condition:
+                field: sensitive-end-use
+                value: true
+                description: A vulnerable end use (e.g. housing) is introduced to the land.
+            - condition:
+                field: involves-change-of-use
+                value: true
+                description: A significant change of use of land or buildings that could be affected by
+                  contamination.
+            - discretionary
+    confidence: low
+    notes: "Major checklist item (audit wrong_app_type). The council says a survey is 'more likely to be
+      needed' in these cases, so it is not a firm trigger."
+
+unmapped:
+  - local-name: Habitats Regulations Assessment (Humber Estuary)
+    source-text: >-
+      If the site is on open land within 2km of the Humber Estuary SSSI (Site of Special Scientific
+      Interest), SPA (Special Protection Areas), SAC (Special Area of Conservation), and Ramsar site, or
+      within the designated boundaries, then a Habitat Regulations Assessment will be required and a
+      wintering birds survey must be included.
+    source-url: https://www.nelincs.gov.uk/assets/uploads/2025/07/Major-Application-Checklist-01.07.2025.docx
+    suggested-id: habitats-regulations-assessment
+
+low-confidence:
+  - id: elevation-existing
+    note: "Audit (wrong_document): only the Major and Full checklists were read; the other type-specific
+      checklists may set different drawing rules."
+  - id: elevation-proposed
+    note: "Audit (wrong_document): only the Major and Full checklists were read; the other type-specific
+      checklists may set different drawing rules."

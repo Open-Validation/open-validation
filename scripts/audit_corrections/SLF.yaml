@@ -1,0 +1,250 @@
+# Corrections for Salford City Council, from inputs/audit/salford-city-council.json.
+# Salford's list is a set of undated 'Local information requirements' web pages (21 items).
+# The workbook captured only a cut-off flood sequential-test fragment and a garbled biodiversity
+# fragment on the council tab. The audit lists the rest; where it quotes the council's pages the
+# words are used as source-text, otherwise items are marked "From the audit". The audit (issue 7)
+# says Salford's local requirements apply to any application type that meets the trigger, so no
+# application types are given below.
+local-authority: SLF
+
+drop-unmapped:
+  - local-name: Sequential / Exception Test (flood)
+    reason: >-
+      wrong_trigger: the excerpt opens with a cut-off fragment ('main application)'); re-added
+      below with the clean wording
+
+requirements:
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: Operational development on a site of 1 hectare or more (Flood Zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Operational development on a site of 1 hectare or more (Flood Zone 1).
+        - all:
+            - site:
+                in: [critical-drainage-area]
+                description: The site is in a Critical Drainage Area.
+            - any:
+                - condition:
+                    field: site-area-residential
+                    operator: ">"
+                    value: 0.5
+                    description: The site is over 0.5 hectares.
+                - condition:
+                    field: site-area-non-residential
+                    operator: ">"
+                    value: 0.5
+                    description: The site is over 0.5 hectares.
+    source-text: >-
+      Any operational development of 1ha or above in Low Flood Risk Zone 1 … Development proposals
+      on sites over 0.5 hectares in size located within Critical Drainage Areas
+    source-url: https://www.salford.gov.uk/planning-building-and-regeneration/planning-applications/apply-for-planning-permission/validation-checklist/local-information-requirements/flood-risk-assessment/
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): any development in Flood Zone 3 or Flood Zone 2; any
+      operational development of 1ha or more in Flood Zone 1; sites over 0.5ha in Critical
+      Drainage Areas. Householder schemes in Flood Zones 2 and 3 are included (audit issue 7).
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Development could affect existing trees, including trees on adjacent land or
+          highways.
+    source-text: >-
+      All applications where development could affect existing trees. This includes trees on
+      adjacent land or highways.
+    source-url: https://www.salford.gov.uk/planning-building-and-regeneration/planning-applications/apply-for-planning-permission/validation-checklist/local-information-requirements/
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Tree survey. It applies to householder schemes too. If
+      unsure, at minimum submit a site plan for desktop review.
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      site:
+        in: [listed-building, conservation-area, locally-listed-building, park-and-garden,
+          archaeological-priority-area]
+        description: >-
+          The works alter a listed building or a locally listed heritage asset; are within or
+          affect the setting of a conservation area or a historic park or garden; or are in an
+          area of archaeological interest.
+    source-text: >-
+      Applications that involve alterations to a listed building … Applications within or
+      affecting the setting of a conservation area
+    source-url: https://www.salford.gov.uk/planning-building-and-regeneration/planning-applications/apply-for-planning-permission/validation-checklist/local-information-requirements/
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Heritage assessment, for alterations to a listed
+      building; development within or affecting the setting of a conservation area; alterations
+      to a locally listed heritage asset; development within or affecting the setting of a
+      historic park or garden; development in areas of archaeological interest. Listed building
+      consent triggers it (audit issue 7).
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [special-protection-area, special-area-of-conservation,
+              site-of-special-scientific-interest, local-wildlife-site]
+            description: >-
+              The site is within or adjacent to a European site (SPA or SAC), SSSI, Site of
+              Biological Importance, Local Nature Reserve, wildlife corridor area of search or
+              natural green space.
+        - condition:
+            field: demolition
+            value: true
+            description: The proposal involves the demolition of a building.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: The proposal involves the conversion of a building.
+        - discretionary
+    source-text: >-
+      European sites - special protection area of birds and special areas of conservation Sites of
+      special scientific interest Sites of biological importance Local nature reserve All
+      applications within or adjacent to a wildlife corridor area of search or natural green space
+      Any application involving: Works within the roof space of an existing building; The
+      demolition of a building; The conversion of a building...
+    source-url: https://www.salford.gov.uk/planning-building-and-regeneration/planning-applications/apply-for-planning-permission/validation-checklist/local-information-requirements/biodiversity-survey-and-reports/
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the tab text stopped at 'Any application involving:'. From the audit,
+      the other triggers are works in roof spaces; works to cellars, bridges, culverts, large
+      stone walls, caves or mines; quarry or derelict land; development next to a river, canal or
+      other water body; within 250m of a natural pond or reservoir; works to trees or scrub;
+      hedgerow or woodland; invasive species; lighting of churches or listed buildings;
+      floodlighting within 50m of woodland or water; non-householder development in priority
+      habitat; and Greater Manchester BAP habitats. These can't all be expressed as fields, so
+      they are covered by 'discretionary'. Applies to householder roof-space works and demolition.
+
+  - id: affordable-housing-statement
+    action: add
+    source-url: https://www.salford.gov.uk/planning-building-and-regeneration/planning-applications/apply-for-planning-permission/validation-checklist/local-information-requirements/
+    confidence: low
+    notes: "From the audit (missing_requirement): Affordable housing statement is listed; the audit gives
+      no trigger."
+
+  - id: air-quality-assessment
+    action: add
+    source-url: https://www.salford.gov.uk/planning-building-and-regeneration/planning-applications/apply-for-planning-permission/validation-checklist/local-information-requirements/
+    confidence: low
+    notes: "From the audit (missing_requirement): Air quality assessment is listed; the audit gives no trigger."
+
+  - id: bng-metric
+    action: add
+    source-url: https://www.salford.gov.uk/planning-building-and-regeneration/planning-applications/apply-for-planning-permission/validation-checklist/local-information-requirements/
+    confidence: low
+    notes: "From the audit (missing_requirement): Biodiversity net gain assessment is listed; the audit
+      gives no trigger."
+
+  - id: environmental-statement
+    action: add
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    source-url: https://www.salford.gov.uk/planning-building-and-regeneration/planning-applications/apply-for-planning-permission/validation-checklist/local-information-requirements/
+    confidence: low
+    notes: "From the audit (missing_requirement): Environmental impact assessment is listed; the audit
+      gives no further trigger."
+
+  - id: land-contamination-assessment
+    action: add
+    source-url: https://www.salford.gov.uk/planning-building-and-regeneration/planning-applications/apply-for-planning-permission/validation-checklist/local-information-requirements/
+    confidence: low
+    notes: "From the audit (missing_requirement): Land contamination assessment is listed; the audit gives
+      no trigger (Grokbot read the page but extracted nothing)."
+
+  - id: noise-assessment
+    action: add
+    source-url: https://www.salford.gov.uk/planning-building-and-regeneration/planning-applications/apply-for-planning-permission/validation-checklist/local-information-requirements/
+    confidence: low
+    notes: "From the audit (missing_requirement): Noise impact assessment is listed; the audit gives no
+      trigger."
+
+  - id: town-centre-impact-assessment
+    action: add
+    source-url: https://www.salford.gov.uk/planning-building-and-regeneration/planning-applications/apply-for-planning-permission/validation-checklist/local-information-requirements/
+    confidence: low
+    notes: "From the audit (missing_requirement): Town centre use sequential and impact assessments are
+      listed; the audit gives no trigger."
+
+  - id: transport-assessment
+    action: add
+    source-url: https://www.salford.gov.uk/planning-building-and-regeneration/planning-applications/apply-for-planning-permission/validation-checklist/local-information-requirements/
+    confidence: low
+    notes: "From the audit (missing_requirement): Transport assessments/statements and travel plans are
+      listed; the audit gives no trigger."
+
+  - id: travel-plan
+    action: add
+    source-url: https://www.salford.gov.uk/planning-building-and-regeneration/planning-applications/apply-for-planning-permission/validation-checklist/local-information-requirements/
+    confidence: low
+    notes: "From the audit (missing_requirement): Transport assessments/statements and travel plans are
+      listed; the audit gives no trigger."
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if: discretionary
+    source-url: https://www.salford.gov.uk/planning-building-and-regeneration/planning-applications/apply-for-planning-permission/validation-checklist/
+    confidence: low
+    notes: >-
+      From the audit (other): the validation checklist page warns that further documents not on
+      the list may be requested, naming daylight/sunlight assessments (also agricultural land use
+      assessments, wind studies and odour impact assessments).
+
+unmapped:
+  - local-name: Sequential / Exception Test (flood)
+    source-text: "Sequential test For Flood Zones 2 or 3 only – not necessary for developments wholly
+      in Flood Zone 1."
+    source-url: https://www.salford.gov.uk/planning-building-and-regeneration/planning-applications/apply-for-planning-permission/validation-checklist/local-information-requirements/flood-risk-assessment/
+    suggested-id: sequential-test
+  - local-name: Coal mining risk assessment
+    source-text: "From the audit: listed on the Local information requirements page; no trigger given"
+    source-url: https://www.salford.gov.uk/planning-building-and-regeneration/planning-applications/apply-for-planning-permission/validation-checklist/local-information-requirements/
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Crime impact statement
+    source-text: "From the audit: listed on the Local information requirements page; no trigger given"
+    source-url: https://www.salford.gov.uk/planning-building-and-regeneration/planning-applications/apply-for-planning-permission/validation-checklist/local-information-requirements/
+    suggested-id: crime-prevention-statement
+  - local-name: Drainage strategy
+    source-text: "From the audit: listed on the Local information requirements page; no trigger given"
+    source-url: https://www.salford.gov.uk/planning-building-and-regeneration/planning-applications/apply-for-planning-permission/validation-checklist/local-information-requirements/
+    suggested-id: drainage-strategy
+  - local-name: Green belt justification statement
+    source-text: "From the audit: listed on the Local information requirements page; no trigger given"
+    source-url: https://www.salford.gov.uk/planning-building-and-regeneration/planning-applications/apply-for-planning-permission/validation-checklist/local-information-requirements/
+    suggested-id: green-belt-statement
+  - local-name: Loss of employment land assessment
+    source-text: "From the audit: listed on the Local information requirements page; no trigger given"
+    source-url: https://www.salford.gov.uk/planning-building-and-regeneration/planning-applications/apply-for-planning-permission/validation-checklist/local-information-requirements/
+    suggested-id: employment-statement
+  - local-name: Planning obligations pro forma statement
+    source-text: "From the audit: listed on the Local information requirements page; no trigger given"
+    source-url: https://www.salford.gov.uk/planning-building-and-regeneration/planning-applications/apply-for-planning-permission/validation-checklist/local-information-requirements/
+    suggested-id: planning-obligations-statement
+  - local-name: Sports and open space impact assessment
+    source-text: "From the audit: listed on the Local information requirements page; no trigger given"
+    source-url: https://www.salford.gov.uk/planning-building-and-regeneration/planning-applications/apply-for-planning-permission/validation-checklist/local-information-requirements/
+    suggested-id: open-space-assessment
+  - local-name: VU City 3D model
+    source-text: "From the audit: listed on the Local information requirements page; no trigger given"
+    source-url: https://www.salford.gov.uk/planning-building-and-regeneration/planning-applications/apply-for-planning-permission/validation-checklist/local-information-requirements/
+    suggested-id: 3d-model

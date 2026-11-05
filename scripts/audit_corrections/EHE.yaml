@@ -1,0 +1,403 @@
+# Corrections for East Hertfordshire District Council, from the council's audit.
+# The current list is the Joint Validation Checklist for Hertfordshire County Council and the
+# Herts district/borough councils, 'Version 3 (EHDC) 5th December 2024'. Items are tagged HCC,
+# EHDC or 'HCC & EHDC'; HCC-only items (minerals and waste) do not apply to East Herts.
+# The workbook mixed in the superseded 'Local List 2021 - Final'; rows that quote only the 2021
+# list are marked low. Items marked "From the audit" use the audit's paraphrase of the 2024
+# list (codes L1-L57), not the council's exact words. The build takes the date (2024-12-05)
+# from the audit.
+local-authority: EHE
+
+submission-standards:
+  - item: All documents in PDF format
+    level: must
+  - item: Each drawing or plan submitted as an individual PDF
+    level: must
+  - item: All plans have a linear scale bar
+    level: must
+  - item: All plans have a unique drawing number and indicate the page size
+    level: must
+  - item: No 'do not scale' disclaimer, and no applicant's name, on plans
+    level: must
+
+drop-unmapped:
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "duplicate: same fragment as the Agricultural Land Classification row"
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "wrong_app_type: the advert row contradicts its own exclusion; re-added below once"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: the excerpt is equestrian and financial-exception text from other items"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: both rows quote DAS or roof-plan text, not a vehicle access trigger"
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "wrong_trigger: the excerpt is transport text"
+  - local-name: Minerals / Waste specific statements (county matters)
+    reason: "wrong_app_type: an HCC-only (county) item, not a district requirement"
+  - local-name: Odour / Dust / Vibration assessment
+    reason: "not_a_requirement: a cross-reference fragment ('please see Dust Assessment L1(A)')"
+  - local-name: Self-build / custom build information
+    reason: "wrong_trigger: the excerpt is Health Impact Assessment and equestrian text"
+
+requirements:
+  - id: affordable-housing-statement
+    action: add
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2025-11/2025_11%20Joint%20Validation%20Checklist%20Herts%20CC%20EHDC.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): L2 Affordable Housing Statement; the audit gives no
+      trigger."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      ref: major-development
+    source-text: Air Quality Impact Assessment … When Required What information is required All major 
+      applications.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt began with policy-driver headers; the trigger is all major
+      applications."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-text: >-
+      A survey and assessment is required if any of the following apply: … Major applications, Specified
+      proposals within the “Ecology Consultation Area” (see below) or When …
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2025-11/2025_11%20Joint%20Validation%20Checklist%20Herts%20CC%20EHDC.pdf
+    confidence: medium
+    notes: >-
+      From the audit: L11 Ecology also applies to householder works (roofspace or attached extensions
+      in the Ecology Consultation Area). The Ecology Consultation Area has no field, so those cases
+      are shown as officer judgement.
+
+  - id: bng-metric
+    action: update
+    must-include:
+      - item: A BNG report explaining the existing biodiversity on the site, including condition surveys,
+          and the proposed approach to achieving at least a 10% net gain
+        level: must
+        source-text: "All schemes submitting a statutory biodiversity metric (as opposed to a Small Sites
+          Metric) must include a BNG report to explain the existing biodiversity on the site, including
+          condition surveys, as well as the proposed approach to achieving at least a 10% net gain."
+    confidence: medium
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if: discretionary
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2025-11/2025_11%20Joint%20Validation%20Checklist%20Herts%20CC%20EHDC.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): L9, where there is a potential adverse impact on
+      neighbours' light."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+    source-text: "Design and Access Statement Required for: All major developments;"
+    source-url: https://eastherts.fra1.digitaloceanspaces.com/s3fs-public/2019-12/National%20Validation%20List%20for%20Planning%20and%20Listed%20Building%20Consent%20Applications.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): a DAS is required for all listed building consent applications, not only
+      majors. The Full planning excerpt was Agricultural Holdings Certificate text. The quoted list is
+      cut off after its first item, so other national cases may also apply.
+
+  - id: floor-plan-existing
+    action: update
+    must-include:
+      - item: Annotated to show the extent of the existing and proposed use within the land or building
+        level: must
+        required-if:
+          condition:
+            field: involves-change-of-use
+            value: true
+            description: The application is for a change of use.
+        source-text: "Applications for change of use need to be accompanied by floor plans annotated to
+          indicate the extent of the existing and proposed use within the land or building."
+    confidence: low
+    notes: "The workbook excerpt was Fire Statement text. The must-include item is from the council's drawing
+      standards."
+
+  - id: floor-plan-proposed
+    action: update
+    must-include:
+      - item: Annotated to show the extent of the existing and proposed use within the land or building
+        level: must
+        required-if:
+          condition:
+            field: involves-change-of-use
+            value: true
+            description: The application is for a change of use.
+        source-text: "Applications for change of use need to be accompanied by floor plans annotated to
+          indicate the extent of the existing and proposed use within the land or building."
+    confidence: low
+    notes: "The workbook excerpt was Fire Statement text. The must-include item is from the council's drawing
+      standards."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: The site may be contaminated.
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: The proposal introduces a sensitive end use.
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2025-11/2025_11%20Joint%20Validation%20Checklist%20Herts%20CC%20EHDC.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): L16, possible contamination or a sensitive end use."
+
+  - id: landscaping-plan
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-text: >-
+      Major applications or where there is a potential adverse impact on the character and distinctive
+      features of the District’s landscape from the proposed development
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2025-11/2025_11%20Joint%20Validation%20Checklist%20Herts%20CC%20EHDC.pdf
+    policy: East Herts District Plan 2018 DES2, DES3
+    confidence: medium
+
+  - id: lighting-assessment
+    action: add
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2025-11/2025_11%20Joint%20Validation%20Checklist%20Herts%20CC%20EHDC.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): L19 Lighting Statement/Scheme; the audit gives no
+      trigger."
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: plant-equipment
+            value: true
+            description: Plant such as air source heat pumps near noise-sensitive neighbours.
+        - discretionary
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2025-11/2025_11%20Joint%20Validation%20Checklist%20Herts%20CC%20EHDC.pdf
+    confidence: low
+    notes: "Audit (outdated_link): the workbook quoted the superseded 2021 list. From the audit: L21
+      Noise/Vibration, including air source heat pumps near noise-sensitive neighbours."
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 2
+            description: Significant minor applications of 2 or more dwellings.
+        - site:
+            in: [green-belt]
+            description: The site is in the Hertfordshire Green Belt.
+        - discretionary
+    source-text: >-
+      All major applications and significant minor applications (2 or more dwellings, or large
+      commercial) All applications in the Hertfordshire Green Belt must provide a Green Belt Statement
+      as part of the Planning Statement.
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2025-11/2025_11%20Joint%20Validation%20Checklist%20Herts%20CC%20EHDC.pdf
+    must-include:
+      - item: A Green Belt Statement
+        level: must
+        required-if:
+          site:
+            in: [green-belt]
+            description: The site is in the Hertfordshire Green Belt.
+    confidence: medium
+    notes: "'Large commercial' has no threshold, so it is shown as officer judgement (audit: major-only items
+      had been guessed into Full planning)."
+
+  - id: recreation-facilities-assessment
+    action: replace
+    required-if:
+      condition:
+        field: loss-of-open-space
+        value: true
+        description: The proposal would lose open space or playing fields.
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2025-11/2025_11%20Joint%20Validation%20Checklist%20Herts%20CC%20EHDC.pdf
+    confidence: low
+    notes: >-
+      The workbook excerpt (Playing Field Assessment) quoted Heads of Terms text. From the audit
+      (missing_requirement): L40 Loss of Open Space; neither gives the exact trigger.
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: roof-alteration
+            value: true
+            description: The proposal alters the roof of a building.
+        - discretionary
+    must-include:
+      - item: At a scale of 1:50 or 1:100
+        level: must
+    confidence: low
+    notes: "From the superseded 2021 list: all applications as necessary to describe the development, and all
+      applications proposing alterations to the roof (audit outdated_link)."
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: roof-alteration
+            value: true
+            description: The proposal alters the roof of a building.
+        - discretionary
+    must-include:
+      - item: At a scale of 1:50 or 1:100
+        level: must
+    confidence: low
+    notes: "From the superseded 2021 list: all applications as necessary to describe the development, and all
+      applications proposing alterations to the roof (audit outdated_link)."
+
+  - id: section-existing
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      Site Sections- Existing and Proposed All applications as necessary to describe the development
+      (except where the application is made pursuant to Section 73) All plans should be drawn to a scale
+      of 1:50 or 1:100.
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2021-11/Local List 2021 - Final.pdf
+    must-include:
+      - item: At a scale of 1:50 or 1:100
+        level: must
+    confidence: low
+    notes: "Audit (wrong_app_type): the workbook put this under s73, which the text excludes. The wording is
+      from the superseded 2021 list."
+
+  - id: section-proposed
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      Site Sections- Existing and Proposed All applications as necessary to describe the development
+      (except where the application is made pursuant to Section 73) All plans should be drawn to a scale
+      of 1:50 or 1:100.
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2021-11/Local List 2021 - Final.pdf
+    must-include:
+      - item: At a scale of 1:50 or 1:100
+        level: must
+    confidence: low
+    notes: "Audit (wrong_app_type): the workbook put this under s73, which the text excludes. The wording is
+      from the superseded 2021 list."
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      application-type:
+        in: [full, outline, reserved-matters, s73, lbc, change-of-use]
+    source-text: Sustainability Statement/Appraisal (EHDC) … All applications except householders, 
+      certificates of lawfulness
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2025-11/2025_11%20Joint%20Validation%20Checklist%20Herts%20CC%20EHDC.pdf
+    policy: East Herts District Plan 2018 CC1, CC2, CC3, WAT4
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): L33 excludes householder applications and certificates of lawfulness,
+      where the workbook had placed it. 'All except' can't be written as a rule, so the main types are
+      listed; the excerpt is cut off and may list more exclusions. From the audit: L48 Carbon Reduction
+      Template for new dwellings or increases in non-residential floorspace.
+
+  - id: town-centre-impact-assessment
+    action: add
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2025-11/2025_11%20Joint%20Validation%20Checklist%20Herts%20CC%20EHDC.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): L27 Retail/Leisure Impact Assessment; the audit gives no
+      threshold."
+
+  - id: viability-assessment
+    action: add
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2025-11/2025_11%20Joint%20Validation%20Checklist%20Herts%20CC%20EHDC.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): L53 Viability Assessment; the audit gives no trigger."
+
+  - id: waste-management-plan
+    action: replace
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2025-11/2025_11%20Joint%20Validation%20Checklist%20Herts%20CC%20EHDC.pdf
+    confidence: low
+    notes: "The workbook excerpt was sustainability-checklist text from the superseded 2021 list. From the
+      audit (missing_requirement): L29 Site Waste Management Plan; no trigger given."
+
+unmapped:
+  - local-name: Biodiversity Questionnaire
+    source-text: "A biodiversity questionnaire is required for all applications except for applications for
+      advertisement consent, A completed and signed East Herts Council biodiversity questionnaire."
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2021-11/Local List 2021 - Final.pdf
+    suggested-id: biodiversity-checklist
+  - local-name: Air Quality Neutral Assessment
+    source-text: "From the audit: L1(A), minor development in or near an AQMA"
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2025-11/2025_11%20Joint%20Validation%20Checklist%20Herts%20CC%20EHDC.pdf
+    suggested-id: air-quality-neutral-assessment
+  - local-name: Geo-diverse Assessment
+    source-text: "From the audit: L13, no trigger given"
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2025-11/2025_11%20Joint%20Validation%20Checklist%20Herts%20CC%20EHDC.pdf
+    suggested-id: geodiversity-assessment
+  - local-name: Phasing Plan
+    source-text: "From the audit: L23, no trigger given"
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2025-11/2025_11%20Joint%20Validation%20Checklist%20Herts%20CC%20EHDC.pdf
+    suggested-id: phasing-plan
+  - local-name: Rights of Way
+    source-text: "From the audit: L28, no trigger given"
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2025-11/2025_11%20Joint%20Validation%20Checklist%20Herts%20CC%20EHDC.pdf
+    suggested-id: public-rights-of-way-statement
+  - local-name: Loss of Employment
+    source-text: "From the audit: L38, no trigger given"
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2025-11/2025_11%20Joint%20Validation%20Checklist%20Herts%20CC%20EHDC.pdf
+    suggested-id: marketing-evidence
+  - local-name: Loss of Agricultural/Employment Use in Rural Area
+    source-text: "From the audit: L39, no trigger given"
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2025-11/2025_11%20Joint%20Validation%20Checklist%20Herts%20CC%20EHDC.pdf
+    suggested-id: marketing-evidence
+  - local-name: Rural Exception Site Needs Assessment
+    source-text: "From the audit: L41, no trigger given"
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2025-11/2025_11%20Joint%20Validation%20Checklist%20Herts%20CC%20EHDC.pdf
+    suggested-id: housing-needs-assessment
+  - local-name: Sequential Test for Main Town Centre Uses
+    source-text: "From the audit: L42, no trigger given"
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2025-11/2025_11%20Joint%20Validation%20Checklist%20Herts%20CC%20EHDC.pdf
+    suggested-id: sequential-test
+  - local-name: Source Protection Zones
+    source-text: "From the audit: L43, no trigger given"
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2025-11/2025_11%20Joint%20Validation%20Checklist%20Herts%20CC%20EHDC.pdf
+    suggested-id: 
+  - local-name: Carbon Reduction Template
+    source-text: "From the audit: L48, new dwellings or an increase in non-residential floorspace"
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2025-11/2025_11%20Joint%20Validation%20Checklist%20Herts%20CC%20EHDC.pdf
+    suggested-id: 
+  - local-name: Community Use Agreement
+    source-text: "From the audit: L50, no trigger given"
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2025-11/2025_11%20Joint%20Validation%20Checklist%20Herts%20CC%20EHDC.pdf
+    suggested-id: 
+  - local-name: Equestrian Needs Assessment
+    source-text: "From the audit: L52, no trigger given"
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2025-11/2025_11%20Joint%20Validation%20Checklist%20Herts%20CC%20EHDC.pdf
+    suggested-id: 
+  - local-name: Harlow and Gilston Garden Town Vision Assurance Statement and Sustainability Checklist
+    source-text: "From the audit: L56 and L57, major applications in the HGGT area"
+    source-url: https://cdn-eastherts.onwebcurl.com/s3fs-public/2025-11/2025_11%20Joint%20Validation%20Checklist%20Herts%20CC%20EHDC.pdf
+    suggested-id: 
+
+low-confidence:
+  - id: transport-assessment
+    note: >-
+      The excerpt's trigger ('All applications for new development for 1 or more residential dwellings
+      or an increase in non-residential floorspace') follows sustainability policies (CC1-CC3, WAT4,
+      Sustainability SPD) and matches the audit's L48 Carbon Reduction Template trigger, so it may
+      belong to that item rather than to the Transport Assessment.
+  - id: flood-risk-assessment
+    note: "From the audit: L12 Flood Risk Assessment is conditional and also applies to householder
+      applications; the excerpt gives contents, not the trigger."
+  - id: elevation-existing
+    note: "The workbook excerpt was Fire Statement text; the drawing is national."
+  - id: elevation-proposed
+    note: "The workbook excerpt was Fire Statement text; the drawing is national."

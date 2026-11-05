@@ -1,0 +1,481 @@
+# Corrections for Nottingham City Council, from inputs/audit/nottingham-city-council.json.
+# Nottingham publishes four undated checklists (Householder; Full/Outline/Reserved Matters; Listed
+# Building/Conservation Area Consent; Advertisement), c.2010-2013. In the Full/Outline/RM
+# checklist every workbook excerpt is shifted by one row (each item got the last line of the
+# previous item's trigger), and Full planning was left out although the checklist covers it.
+# Below, items are rebuilt from the triggers the audit quotes or summarises, for full, outline
+# and reserved matters (plus householder / LBC where those checklists list the item). The parent
+# 'Validation Requirements for Planning Applications' document (definitions, TA/Travel Plan
+# thresholds, landfill and telecoms items) is not linked or captured (audit issue 4).
+local-authority: NGM
+
+validation-list:
+  date: 2012
+  date-basis: >-
+    audit: the checklists carry no date; their content (EIA Regs 1999, Use Classes A3/A4/B1/D2,
+    Conservation Area Consent) points to roughly 2010-2013. The workbook's 2012-11-01 was PDF
+    CreationDate metadata
+
+drop:
+  - id: planning-statement
+    reason: "not_a_requirement: advice that a comprehensive planning statement may cover several items"
+  - id: telecommunications-report
+    reason: "wrong_document: only a cross-reference to the separate Validation Requirements document"
+  - id: photos
+    sheets: [Advertisement consent]
+    reason: "not_a_requirement: photographs are 'Optional to illustrate the proposed signage'"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: the sentence saying a document may be needed if pre-application advice says so"
+  - local-name: Advertisement drawings / illumination details
+    reason: "duplicate: the same source row as lighting-assessment"
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "wrong_trigger: this is the Biodiversity Survey and Report (now biodiversity-survey-report)"
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_trigger: the excerpt is the end of the Open Space trigger; re-added below"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: the excerpt mixes the S106 trigger with the next item's name; re-added below"
+  - local-name: Structural Survey
+    reason: "wrong_trigger: the full-checklist excerpt is the SCI trigger; re-added below with the right triggers"
+  - local-name: Foul Sewage / Utilities Statement
+    reason: "wrong_trigger: the excerpt ('2 and 3') is the end of the Flood Risk trigger; re-added below"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: the excerpt ('site boundaries') is the end of the Tree Survey trigger; re-added below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 25
+                description: Development involving 25 residential dwellings or more.
+            - all:
+                - application-type:
+                    in: [outline]
+                - condition:
+                    field: site-area-residential
+                    operator: ">="
+                    value: 1
+                    description: Outline residential development on a site of 1 hectare or more.
+    source-text: >-
+      Development involving 25 residential dwellings or more; Outline applications for residential
+      development on sites of 1Ha or more
+    source-url: https://www.nottinghamcity.gov.uk/media/qkzik5s3/validation-checklist-full-outline-and-reserved-matters.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): the workbook's excerpt was the table header, and Full
+      planning was missing."
+
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - ref: major-development
+        - site:
+            in: [air-quality-management-area]
+            description: The site is in or adjoining an Air Quality Management Area.
+    source-url: https://www.nottinghamcity.gov.uk/media/qkzik5s3/validation-checklist-full-outline-and-reserved-matters.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): from the audit, major development in or adjoining AQMAs. The workbook's
+      excerpt was 'or more' (the end of the previous item)."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, reserved-matters]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: The development directly affects existing trees within or adjacent to the
+              site boundaries.
+    source-text: Tree Survey and Report Required if the development directly affects existing trees
+      within or adjacent to the site boundaries.
+    source-url: https://www.nottinghamcity.gov.uk/media/ldyewr3r/validation-checklist-householder-planning.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the full-checklist excerpt 'New and expanded school facilities' belongs
+      to the Travel Plan. The council's words are from the householder checklist; the full
+      checklist's trigger also ends 'site boundaries' (shifted into the Ventilation row).
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [hh]
+            - condition:
+                field: protected-species
+                value: true
+                description: There is a likelihood that protected species (particularly bats) will
+                  be affected.
+        - all:
+            - application-type:
+                in: [full, outline, reserved-matters]
+            - any:
+                - site:
+                    in: [site-of-special-scientific-interest, local-wildlife-site,
+                      ancient-woodland]
+                    description: The site is within, or its boundary is within 100m of, an SSSI,
+                      SINC, Local Nature Reserve or Ancient Woodland.
+                - ref: major-development
+                - all:
+                    - site:
+                        in: [listed-building]
+                        description: The building is listed.
+                    - condition:
+                        field: roof-alteration
+                        value: true
+                        description: Loft conversions or roof works.
+                - condition:
+                    field: demolition
+                    value: true
+                    description: Proposals involving demolition.
+    source-text: >-
+      Protected Species (Biodiversity) Survey and Report Required if there is a likelihood that
+      protected species (particularly bats) will be affected. … Biodiversity Survey and Report – All
+      developments within or with site boundaries within 100m of SSSIs, SINCS...
+    source-url: https://www.nottinghamcity.gov.uk/media/qkzik5s3/validation-checklist-full-outline-and-reserved-matters.pdf
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement): the full checklist's Biodiversity Survey and Report was mislabelled
+      'Biodiversity Checklist'. From the audit: within 100m of SSSI/SINC/LNR/Ancient Woodland, all
+      major developments, loft conversions/roof works to listed buildings, demolition. The
+      householder trigger is from the householder checklist.
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: Schedule 1 or Schedule 2 EIA development.
+    source-url: https://www.nottinghamcity.gov.uk/media/qkzik5s3/validation-checklist-full-outline-and-reserved-matters.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): 'All major developments' was the Energy Statement trigger; the ES applies
+      to Schedule 1/Schedule 2 EIA development."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, reserved-matters]
+        - any:
+            - site:
+                in: [flood-risk-zone]
+                description: The site is in Flood Zone 2 or 3.
+            - condition:
+                field: site-area-residential
+                operator: ">="
+                value: 1
+                description: The site is 1 hectare or more (Flood Zone 1).
+            - condition:
+                field: site-area-non-residential
+                operator: ">="
+                value: 1
+                description: The site is 1 hectare or more (Flood Zone 1).
+    source-text: Flood Risk Assessment Required if the property is located in a Flood Zone.
+    source-url: https://www.nottinghamcity.gov.uk/media/qkzik5s3/validation-checklist-full-outline-and-reserved-matters.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): from the audit, 1ha+ in Flood Zone 1 and any development in Flood Zones
+      2/3 (full checklist). The council's words above are from the householder checklist.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, demolition-con-area]
+        - all:
+            - application-type:
+                in: [hh]
+            - any:
+                - site:
+                    in: [listed-building]
+                    description: Erecting a building or enclosure in the grounds of a listed
+                      building.
+                - all:
+                    - site:
+                        in: [archaeological-priority-area]
+                        description: The site is in an Archaeological Constraint Area.
+                    - condition:
+                        field: ground-disturbance
+                        value: true
+                        description: The works involve excavations.
+        - all:
+            - application-type:
+                in: [full, outline, reserved-matters]
+            - discretionary
+    source-text: >-
+      Heritage Statement Required for all Listed Building/Conservation Area Consent applications. …
+      Heritage Statement Required if you will be erecting a building or enclosure in the grounds of
+      a Listed Building, or undertaking excavations in an Archaeological Constraint area.
+    source-url: https://www.nottinghamcity.gov.uk/media/mgofyyvj/validation-checklist-listed-buildings.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the full checklist's heritage trigger is not captured; its last line is
+      'All applications for Conservation Area Consent' (shifted into the Land Contamination row), so
+      full/outline/reserved matters are shown as officer discretion. Audit (other): Conservation Area
+      Consent was abolished in 2013; it is now planning permission for relevant demolition, so the
+      demolition-con-area mapping is approximate.
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - any:
+            - condition:
+                field: previously-developed-land
+                value: true
+                description: All development on brownfield sites.
+            - site:
+                in: [near-landfill-site]
+                description: Development on or within 250m of an existing or known former landfill
+                  site.
+    source-text: >-
+      Land Contamination Assessment – All development on brownfield sites... Development on or
+      within 250m of an existing or known former landfill site
+    source-url: https://www.nottinghamcity.gov.uk/media/qkzik5s3/validation-checklist-full-outline-and-reserved-matters.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook gave the Heritage trigger. '...' marks a cut in the audit's
+      quote, so there may be further triggers."
+
+  - id: landscaping-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - ref: major-development
+    source-text: All full applications... for major developments
+    source-url: https://www.nottinghamcity.gov.uk/media/qkzik5s3/validation-checklist-full-outline-and-reserved-matters.pdf
+    confidence: low
+    notes: "Audit (wrong_app_type): Landscaping Details apply primarily to full applications for major development.
+      The audit's quote is cut ('...'), so the trigger may be wider."
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [advertising]
+            - condition:
+                field: illuminated
+                value: true
+                description: The advertisement is illuminated.
+        - all:
+            - application-type:
+                in: [full, outline, reserved-matters]
+            - discretionary
+    source-text: Lighting Assessment Required for all applications for illuminated advertisements.
+    source-url: https://www.nottinghamcity.gov.uk/media/32ugmk5y/validation-checklist-advertisement-consent.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the full checklist's lighting trigger isn't captured (its last line,
+      'public spaces', was shifted into the Noise row), so it is shown as officer discretion.
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - any:
+            - condition:
+                field: noise-generating-use
+                value: true
+                description: B2/B8, D2 or A4 uses.
+            - condition:
+                field: noise-sensitive-use
+                value: true
+                description: Residential development next to main roads or railways.
+    source-url: https://www.nottinghamcity.gov.uk/media/qkzik5s3/validation-checklist-full-outline-and-reserved-matters.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): from the audit, B2/B8, D2, A4 uses and residential next to main roads/railways
+      (pre-2020 use classes)."
+
+  - id: photos
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, demolition-con-area]
+        - all:
+            - application-type:
+                in: [full, outline, reserved-matters]
+            - discretionary
+    source-text: Photographs Required to record any parts of the existing buildings/structures
+      affected by the proposed works.
+    source-url: https://www.nottinghamcity.gov.uk/media/mgofyyvj/validation-checklist-listed-buildings.pdf
+    must-include:
+      - item: Photographs of any parts of the existing buildings/structures affected by the works
+        level: must
+        required-if:
+          application-type:
+            in: [lbc, demolition-con-area]
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the full checklist's 'All changes of use' excerpt belongs to Parking
+      Provision; the Photographs and Photomontages trigger there isn't captured, so it is shown as
+      officer discretion.
+
+  - id: recreation-facilities-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 12
+                description: Development of 12 or more dwellings.
+            - site:
+                in: [open-space]
+                description: Development on existing playing fields or in the Open Space Network.
+    source-text: All developments on existing playing fields
+    source-url: https://www.nottinghamcity.gov.uk/media/qkzik5s3/validation-checklist-full-outline-and-reserved-matters.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, missing_requirement): Open Space Assessment; from the audit, 12+
+      dwellings, the Open Space Network and playing fields. The workbook had mapped it to the
+      Parking row's excerpt.
+
+  - id: sci
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - ref: major-development
+    source-text: All large-scale major developments
+    source-url: https://www.nottinghamcity.gov.uk/media/qkzik5s3/validation-checklist-full-outline-and-reserved-matters.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the SCI trigger is 'All large-scale major developments' (shifted into
+      the Structural Survey row). Large-scale major is narrower than major development and is
+      defined in the separate Validation Requirements document, so the rule over-triggers.
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - ref: major-development
+    source-text: All major developments
+    source-url: https://www.nottinghamcity.gov.uk/media/qkzik5s3/validation-checklist-full-outline-and-reserved-matters.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): Energy Statement; 'All major developments' was its trigger (shifted into
+      the Environmental Statement row)."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      application-type:
+        in: [full, outline, reserved-matters]
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - any:
+            - condition:
+                field: school-expansion
+                value: true
+                description: New and expanded school facilities.
+            - discretionary
+    source-text: New and expanded school facilities
+    source-url: https://www.nottinghamcity.gov.uk/media/qkzik5s3/validation-checklist-full-outline-and-reserved-matters.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger, wrong_document): the trigger's last line is 'New and expanded school
+      facilities' (shifted into the Travel Plan row); the size thresholds are in the separate
+      Validation Requirements document, which wasn't captured, so they are shown as officer
+      discretion.
+
+  - id: travel-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - any:
+            - condition:
+                field: school-expansion
+                value: true
+                description: New and expanded school facilities.
+            - discretionary
+    source-text: New and expanded school facilities
+    source-url: https://www.nottinghamcity.gov.uk/media/qkzik5s3/validation-checklist-full-outline-and-reserved-matters.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger, wrong_document): the trigger's last line is 'New and expanded school
+      facilities' (shifted into the Tree Survey row); thresholds are in the separate Validation
+      Requirements document.
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - ref: major-development
+    source-text: Site Waste Management Plan – All major developments
+    source-url: https://www.nottinghamcity.gov.uk/media/qkzik5s3/validation-checklist-full-outline-and-reserved-matters.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement): the Site Waste Management Plan was mixed up with the S106 trigger."
+
+unmapped:
+  - local-name: Structural Survey
+    source-text: "Structural Survey Required for applications for structural alterations to, and/or demolition
+      or partial demolition of a listed building. … Structural Survey – Development involving structural
+      alterations through the conversion of a listed building..."
+    source-url: https://www.nottinghamcity.gov.uk/media/mgofyyvj/validation-checklist-listed-buildings.pdf
+    suggested-id: structural-survey
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    source-text: "Developments where a requirement for a Planning Obligation is highlighted in a development
+      brief or other published planning guidance document. From the audit: also 12+ dwellings or 0.5ha,
+      major retail/employment, student accommodation"
+    source-url: https://www.nottinghamcity.gov.uk/media/qkzik5s3/validation-checklist-full-outline-and-reserved-matters.pdf
+    suggested-id: heads-of-terms
+  - local-name: Parking Provision
+    source-text: "All changes of use (the audit found the workbook's excerpts shifted one row; read that way,
+      this, from the Photographs row, is the last line of the Parking Provision trigger)"
+    source-url: https://www.nottinghamcity.gov.uk/media/qkzik5s3/validation-checklist-full-outline-and-reserved-matters.pdf
+    suggested-id: parking-plan
+  - local-name: Foul Sewage/Utilities Assessment
+    source-text: "All major developments (the audit found the workbook's excerpts shifted one row; read that
+      way, this, from the Heritage Statement row, is the last line of the Foul Sewage/Utilities trigger)"
+    source-url: https://www.nottinghamcity.gov.uk/media/qkzik5s3/validation-checklist-full-outline-and-reserved-matters.pdf
+    suggested-id: foul-sewage-utilities-statement
+  - local-name: Ventilation/Extraction Statement
+    source-text: "From the audit: trigger not captured (the workbook's excerpt was the end of the Tree Survey
+      trigger)"
+    source-url: https://www.nottinghamcity.gov.uk/media/qkzik5s3/validation-checklist-full-outline-and-reserved-matters.pdf
+    suggested-id: ventilation-extraction-statement
+
+low-confidence:
+  - id: town-centre-impact-assessment
+    note: >-
+      Audit (wrong_trigger): the excerpt is shifted ('conservation area' is the end of the previous
+      item); the trigger's last line is '… conference facilities)' (shifted into the Transport
+      Assessment row). Re-read the checklist.

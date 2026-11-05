@@ -1,0 +1,228 @@
+# Corrections for East Staffordshire Borough Council, from the council's audit.
+# The audit could not fetch the 2026 Local Validation List (robots_disallowed), so contents
+# were not checked. Grokbot mixed rows from the 2026 list with rows from the superseded
+# Validation_Document_October_2023.pdf. This file stays light: junk and mismatched rows are
+# dropped, clear triggers from the excerpts are structured, and rows from the 2023 document
+# are flagged.
+local-authority: EST
+
+validation-list:
+  date: "2026"
+  date-basis: "footer text 'Local Validation List – Adopted 2026' in the extracted list; the earlier
+    2026-09-01 came from PDF metadata. Whether this list is formally current couldn't be confirmed"
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is tree method statement text"
+  - id: sustainability-statement
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: 'major change of use applications' are planning applications, not prior
+      approval"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: a table-of-contents fragment"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: the excerpt is the Retail Sequential Test; re-added below under that name"
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "wrong_trigger: the excerpt excludes agricultural workers' dwellings and Class Q"
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_app_type: also filed under Listed building consent; re-added once below"
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "wrong_app_type: filed under prior approval; re-added below"
+  - local-name: Structural Survey
+    reason: "wrong_app_type: filed under Outline because the text says 'outline any repairs'; re-added below"
+
+requirements:
+  - id: biodiversity-survey-report
+    action: replace
+    source-url: &list https://www.eaststaffsbc.gov.uk/sites/default/files/docs/planning/ESBC%20Local%20Validation%20List%202026.pdf
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook's excerpt was tree method statement text; the council's ecology
+      trigger was not captured."
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      ref: major-development
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the trigger is that of the 2023 document's combined 'Planning and
+      Sustainability Statement' ('All major applications, and major change of use applications').
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      ref: major-development
+    source-text: Planning and Sustainability Statement When is it required? All major applications,
+      and major change of use applications
+    source-url:
+      https://www.eaststaffsbc.gov.uk/sites/default/files/docs/planning/Validation_Document_October_2023.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook gave the older-persons specialised housing trigger, which
+      belongs to a housing need statement (now unmapped). The trigger here is from the superseded
+      October 2023 document.
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      site:
+        in: [air-quality-management-area]
+        description: The development is in or near an Air Quality Management Area.
+    confidence: low
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: Former industrial land or land with a contamination history.
+    confidence: low
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: Major development of more than local importance (EIA development).
+    confidence: low
+
+  - id: section-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: A split-level site.
+        - condition:
+            field: earthworks
+            value: true
+            description: Significant ground works are proposed.
+    confidence: low
+
+  - id: section-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: A split-level site.
+        - condition:
+            field: earthworks
+            value: true
+            description: Significant ground works are proposed.
+    confidence: low
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      site:
+        in: [conservation-area, listed-building, listed-building-setting, scheduled-monument,
+          park-and-garden, locally-listed-building]
+        description: Development within or adjacent to a conservation area or other heritage asset,
+          including their setting.
+    confidence: low
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: The application is for, or includes, external lighting (e.g. car parks,
+          ménage).
+    confidence: low
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The proposal affects the roof.
+    confidence: low
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The proposal affects the roof.
+    confidence: low
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more dwellings.
+        - site:
+            in: [open-space]
+            description: The proposal affects an existing area of public open space.
+    confidence: low
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    confidence: low
+    notes: "Developments that generate significant amounts of transport movement (council's wording)."
+
+unmapped:
+  - local-name: Retail Sequential Test
+    source-text: "Retail Sequential Test This is required when applications are proposing main tele uses outside
+      of town centres"
+    source-url: *list
+    suggested-id: sequential-test
+  - local-name: Advertisements - heritage statement
+    source-text: "Where sites are within a Conservation Areas or affects the setting of Listed Buildings, an applicant
+      may wish to provide a short statement to address impacts on heritage assets."
+    source-url: *list
+    suggested-id: ""
+  - local-name: Loss of Retail and Community Facilities – Marketing Evidence
+    source-text: "Loss of Retail and Community Facilities – Marketing Evidence When is it required? For those applications
+      involving either of the following: The loss of retail units falling within Class E(a) in town centres;"
+    source-url:
+      https://www.eaststaffsbc.gov.uk/sites/default/files/docs/planning/Validation_Document_October_2023.pdf
+    suggested-id: marketing-evidence
+  - local-name: Structural Survey
+    source-text: "Structural Survey When is it required? Applications where conversion of buildings is proposed
+      (on a case by case basis)."
+    source-url:
+      https://www.eaststaffsbc.gov.uk/sites/default/files/docs/planning/Validation_Document_October_2023.pdf
+    suggested-id: structural-survey
+  - local-name: Housing Needs Survey / housing need statement
+    source-text: "All major developments for specialised housing (schemes providing 10 units or more of accommodation,
+      this excludes student accommodation) which is provided for the purposes of meeting identified demands
+      for older people (as defined in the NPPF 2021)."
+    source-url:
+      https://www.eaststaffsbc.gov.uk/sites/default/files/docs/planning/Validation_Document_October_2023.pdf
+    suggested-id: housing-needs-statement
+  - local-name: Cannock Chase Special Area of Conservation Developer Contributions
+    source-text: "From the audit: listed on the council's 'what you need to submit' page as sometimes needed; the
+      trigger (for example new dwellings within the SAC zone of influence, SAMMM) was not captured"
+    source-url: *list
+    suggested-id: habitats-regulations-assessment
+
+low-confidence:
+  - id: archaeological-assessment
+    note: "Audit (wrong_document): this row comes from the superseded October 2023 document."
+  - id: bng-metric
+    note: "Audit (wrong_document): this row comes from the superseded October 2023 document."
+  - id: recreation-facilities-assessment
+    note: "Audit (wrong_document): this row comes from the superseded October 2023 document."
+  - id: town-centre-impact-assessment
+    note: "Audit (wrong_document, wrong_trigger): from the superseded October 2023 document, and the thresholds
+      are cut off at 'Uttoxeter – 750 sq'."
+  - id: travel-plan
+    note: "Audit (wrong_document): this row comes from the superseded October 2023 document."
+  - id: noise-assessment
+    note: "Audit (wrong_trigger, duplicate): the excerpt mixes page header text and is shared with the Ventilation
+      row; no trigger beyond 'Sometimes a noise impact assessment and/or odour assessment may be required'."

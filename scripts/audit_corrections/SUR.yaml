@@ -1,0 +1,293 @@
+# Corrections for Surrey Heath Borough Council, from the audit of Surrey Heath.
+# The audit confirmed Grokbot's link is the current 'Local Validation List 2025' (last revised
+# December 2024). Most workbook excerpts carry only an item heading and 'Local requirement.', some
+# come from the next item, and some tab items come from the superseded 2023 list. The list's own
+# Quick Summary matrix gives the application types; the audit summarised parts of it.
+# Items marked "From the audit" use the audit's paraphrase, not the council's exact words.
+local-authority: SUR
+
+validation-list:
+  date: 2024-12
+  date-basis: "audit: latest revision December 2024 (consultation 16 December 2024 to 10 January 2025); originally issued 1 April 2023"
+
+submission-standards:
+  - item: Each drawing has a unique drawing number reference
+    level: must
+
+drop:
+  - id: sustainability-statement
+    reason: "the row is the Energy Statement item; now under energy-statement"
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is tree text ('(AIA), Arboricultural Method Statement (AMS) and Tree Protection Plan.')"
+  - id: photos
+    reason: "the excerpt is about photographs and samples of materials, not site photographs (re-added as unmapped)"
+
+drop-unmapped:
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: the excerpt is the next item's heading; re-added below"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: the excerpt is Energy Statement text; re-added below"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: the excerpt is 'Discharge of a S106 Legal Agreement'; re-added below"
+  - local-name: Tall buildings / Wind microclimate assessment
+    reason: "not_a_requirement: only a clause of the LVIA trigger"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "not_a_requirement: the fragment 'calculate internal space standards.'"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: a note within the Site/Block Plan item"
+  - local-name: Structural Survey
+    reason: "wrong_trigger: page-break garble; re-added below"
+  - local-name: Crime prevention / Secured by Design statement
+    reason: "wrong_trigger: heading only; re-added below with the audit's trigger"
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "wrong_trigger: heading only; re-added below with the audit's trigger"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [outline, full]
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: A net gain of 10 or more units.
+    source-url: https://www.surreyheath.gov.uk/sites/default/files/2024-12/Local%20Validation%20List%202025.pdf
+    confidence: medium
+    notes: "From the audit (wrong_app_type, wrong_trigger): outline and full schemes with a net gain of 10+ units."
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [archaeological-priority-area]
+            description: The site is in an Area of High Archaeological Potential.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 0.4
+            description: The site is over 0.4 hectares.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 0.4
+            description: The site is over 0.4 hectares.
+    source-url: https://www.surreyheath.gov.uk/sites/default/files/2024-12/Local%20Validation%20List%202025.pdf
+    confidence: medium
+    notes: "From the audit (wrong_trigger): Areas of High Archaeological Potential or sites over 0.4 ha."
+
+  - id: bng-metric
+    action: update
+    must-include:
+      - item: Completed biodiversity metric spreadsheet, as an Excel file
+        level: must
+        source-text: A completed biodiversity metric spreadsheet (as excel file type)
+
+  - id: cil-form
+    action: replace
+    source-text: CIL Form 1 (Additional Information Requirement Form)
+    source-url: https://www.surreyheath.gov.uk/sites/default/files/2024-12/Local%20Validation%20List%202025.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the workbook's excerpt was page-break garble. From the
+      audit: CIL Form 1 is required 'always' for householder applications, and the matrix also lists
+      it for LDCs. The full rule for other types was not given.
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is within a conservation area.
+            - condition:
+                field: floorspace
+                operator: ">"
+                value: 100
+                description: The floor area of the proposal exceeds 100 square metres.
+    source-text: >-
+      A Design and Access Statement will only be required within a conservation area if the floor
+      area of the proposal (s) exceeds 100 sq metres …
+    source-url: https://www.surreyheath.gov.uk/sites/default/files/2024-12/Local%20Validation%20List%202025.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): the excerpt covers only the conservation area case; majors (including major outline) and Listed Building Consent also need one."
+
+  - id: energy-statement
+    action: add
+    source-text: Energy Statement Local Requirement.
+    source-url: https://www.surreyheath.gov.uk/sites/default/files/2024-12/Local%20Validation%20List%202025.pdf
+    confidence: low
+    notes: "The workbook mapped this Energy Statement item to sustainability-statement. The trigger is not given."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare.
+        - site:
+            in: [flood-risk-zone]
+            description: The proposal is in flood zone 2 or 3.
+    source-text: sites over 1 hectare... flood zones 2 or 3
+    source-url: https://www.surreyheath.gov.uk/sites/default/files/2024-12/Local%20Validation%20List%202025.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt came from the Site Levels item. The correct trigger is sites over 1 ha and all proposals in flood zones 2 or 3."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      site:
+        in: [listed-building, locally-listed-building, conservation-area, listed-building-setting]
+        description: The property is a statutory or locally listed building, is in a conservation area, or affects a heritage asset or its setting.
+    confidence: medium
+    notes: "The council's wording is general, not limited to Listed Building Consent."
+
+  - id: roof-plan-existing
+    action: update
+    must-include:
+      - item: Key features on the roof such as chimneys, parapets, railings and rooflights
+        level: must
+        source-text: Need to show key features on the roof such as chimney, parapet, railings, rooflights
+
+  - id: roof-plan-proposed
+    action: update
+    must-include:
+      - item: Key features on the roof such as chimneys, parapets, railings and rooflights
+        level: must
+        source-text: Need to show key features on the roof such as chimney, parapet, railings, rooflights
+
+  - id: telecommunications-report
+    action: add
+    source-url: https://www.surreyheath.gov.uk/sites/default/files/2024-12/Local%20Validation%20List%202025.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Telecommunications Report for telecoms applications."
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 2500
+            description: Over 2,500 square metres gross.
+        - discretionary
+    source-url: https://www.surreyheath.gov.uk/sites/default/files/2024-12/Local%20Validation%20List%202025.pdf
+    confidence: medium
+    notes: "From the audit (wrong_trigger): over 2,500 sqm gross, or outside Camberley Town Centre (no field for location; shown as officer discretion)."
+
+  - id: viability-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more units.
+        - discretionary
+    confidence: medium
+    notes: "From the audit (wrong_trigger): 10+ units providing affordable housing below the policy threshold."
+
+unmapped:
+  - local-name: Health Impact Assessment
+    source-text: "From the audit: 'Major developments'"
+    source-url: https://www.surreyheath.gov.uk/sites/default/files/2024-12/Local%20Validation%20List%202025.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Ventilation / Extraction details
+    source-text: "From the audit: 'Restaurants, pubs, takeaways; plant, machinery, air conditioning, air source heat pumps'"
+    source-url: https://www.surreyheath.gov.uk/sites/default/files/2024-12/Local%20Validation%20List%202025.pdf
+    suggested-id: ventilation-extraction-details
+  - local-name: Planning Obligations / S106 Heads of Terms
+    source-text: "From the audit: typically major, case by case"
+    source-url: https://www.surreyheath.gov.uk/sites/default/files/2024-12/Local%20Validation%20List%202025.pdf
+    suggested-id: heads-of-terms
+  - local-name: Structural Survey
+    source-text: "From the audit: residential prior approvals and listed building works"
+    source-url: https://www.surreyheath.gov.uk/sites/default/files/2024-12/Local%20Validation%20List%202025.pdf
+    suggested-id: structural-survey
+  - local-name: Crime Prevention Statement
+    source-text: "From the audit: majors"
+    source-url: https://www.surreyheath.gov.uk/sites/default/files/2024-12/Local%20Validation%20List%202025.pdf
+    suggested-id: crime-prevention-statement
+  - local-name: Marketing Exercise
+    source-text: "From the audit: changes of use"
+    source-url: https://www.surreyheath.gov.uk/sites/default/files/2024-12/Local%20Validation%20List%202025.pdf
+    suggested-id: marketing-evidence
+  - local-name: Schedule of materials / photographs of sample materials
+    source-text: >-
+      Photographs of sample materials, with manufacturers specifications, as relevant for minor
+      developments (Schedule of materials, with specification of material type, manufacturer, product
+      name, colour name, RAL number) Material samples are typically required for major developments,
+      to be submitted to the LPA.
+    source-url: https://www.surreyheath.gov.uk/sites/default/files/2024-12/Local%20Validation%20List%202025.pdf
+    suggested-id: materials-schedule
+  - local-name: Parking Management Plan
+    source-text: "From the audit: often for majors; some changes of use and minors"
+    source-url: https://www.surreyheath.gov.uk/sites/default/files/2024-12/Local%20Validation%20List%202025.pdf
+    suggested-id: parking-plan
+  - local-name: Phasing Plan
+    source-text: "From the audit: major/strategic developments over 50 dwellings"
+    source-url: https://www.surreyheath.gov.uk/sites/default/files/2024-12/Local%20Validation%20List%202025.pdf
+    suggested-id: phasing-plan
+  - local-name: Delivery and Servicing Management Plan
+    source-text: "From the audit: new dwellings and commercial proposals including changes of use"
+    source-url: https://www.surreyheath.gov.uk/sites/default/files/2024-12/Local%20Validation%20List%202025.pdf
+    suggested-id: delivery-servicing-plan
+  - local-name: Demolition Method Statement
+    source-text: "From the audit: demolition prior approvals; significant demolition near sensitive receptors"
+    source-url: https://www.surreyheath.gov.uk/sites/default/files/2024-12/Local%20Validation%20List%202025.pdf
+    suggested-id: demolition-method-statement
+  - local-name: Pollution Assessment
+    source-text: "From the audit: sites that may be affected by or cause pollution"
+    source-url: https://www.surreyheath.gov.uk/sites/default/files/2024-12/Local%20Validation%20List%202025.pdf
+    suggested-id: pollution-assessment
+  - local-name: Severe Weather Management Plan
+    source-text: "From the audit: major and potentially vulnerable development"
+    source-url: https://www.surreyheath.gov.uk/sites/default/files/2024-12/Local%20Validation%20List%202025.pdf
+    suggested-id: severe-weather-plan
+  - local-name: Site Connectivity Plan (Communications)
+    source-text: "From the audit: major residential and employment development"
+    source-url: https://www.surreyheath.gov.uk/sites/default/files/2024-12/Local%20Validation%20List%202025.pdf
+    suggested-id: site-connectivity-plan
+  - local-name: Utilities Assessment
+    source-text: "From the audit: foul sewage assessments and all majors"
+    source-url: https://www.surreyheath.gov.uk/sites/default/files/2024-12/Local%20Validation%20List%202025.pdf
+    suggested-id: utilities-statement
+
+low-confidence:
+  - id: land-contamination-assessment
+    note: "Audit (wrong_trigger): the excerpt is only the item heading and 'Local requirement.'; the trigger is not known."
+  - id: construction-management-plan
+    note: "Audit (wrong_trigger): the excerpt is only the item heading and 'Local requirement.'; the trigger is not known."
+  - id: lighting-assessment
+    note: "Audit (wrong_trigger): the excerpt is only the item heading and 'Local requirement.'; the trigger is not known."
+  - id: noise-assessment
+    note: "Audit (wrong_trigger): the excerpt is only the item heading and 'Local requirement.'; the trigger is not known."
+  - id: sci
+    note: "Audit (wrong_trigger): the excerpt is page-break garble mixing several item headings; the trigger is not known."
+  - id: site-plan
+    note: "Audit (wrong_app_type): the Householder matrix requires a site/block plan 'always', and the matrix lists it 'often' for LDCs; the excerpt is only a heading."

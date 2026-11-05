@@ -1,0 +1,608 @@
+# Corrections for London Borough of Enfield, from inputs/audit/london-borough-of-enfield.json.
+# The audit compared the workbook with Enfield's Local Validation Requirements of 28 September
+# 2026: one checklist for householders (asset 141101) and one for all other applications (asset
+# 141100). The council tab mixes in superseded 2023/2024 text, so no submission standards are
+# taken from it. Item numbers below are the 2026 checklist's own.
+local-authority: ENF
+
+drop:
+  - id: schedule-of-works
+    reason: "other: the excerpt is the Structural Method Statement / Survey (re-added as unmapped)"
+  - id: sustainability-statement
+    reason: "wrong_trigger: the row is the Energy Assessment (item 10); re-added as energy-statement"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: describes the optional pre-application service"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "other: this is the Noise and Ventilation Impact Assessment (now in noise-assessment)"
+  - local-name: Landscape and Visual Impact Assessment
+    reason: "other: the Householder row is a Heritage Statement cross-reference; the Full row is re-added
+      below as TVIA"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_trigger: this is the Epping Forest SAC Recreation Mitigation Strategy (re-added below)"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: the excerpt is Transport Assessment content (Healthy Streets), now in transport-assessment"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    notes: "Major developments, and any development that could have a significant impact on air quality
+      (council's wording)."
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [hh]
+            - site:
+                in: [scheduled-monument]
+                description: The site is within 50m of a Scheduled Monument.
+            - any:
+                - condition:
+                    field: basement
+                    value: true
+                    description: The proposal includes a new or extended basement.
+                - condition:
+                    field: ground-disturbance
+                    value: true
+                    description: The proposal involves other extensive groundworks.
+        - all:
+            - site:
+                in: [archaeological-priority-area]
+                description: The site is in an Archaeological Priority Area.
+            - any:
+                - condition:
+                    field: demolition
+                    value: true
+                    description: The proposal involves extensive demolition.
+                - condition:
+                    field: ground-disturbance
+                    value: true
+                    description: The proposal involves extensive groundworks.
+        - all:
+            - ref: major-development
+            - any:
+                - condition:
+                    field: site-area-residential
+                    operator: ">"
+                    value: 0.5
+                    description: The site is over 0.5 hectares.
+                - condition:
+                    field: site-area-non-residential
+                    operator: ">"
+                    value: 0.5
+                    description: The site is over 0.5 hectares.
+        - condition:
+            field: eia-development
+            value: true
+            description: The proposal needs EIA screening or scoping.
+        - discretionary
+    source-text: >-
+      Archaeological Assessment Proposals within 50m of Scheduled Monuments and include new
+      basements, extensions to basements or other extensive groundworks London Plan (2021) An
+      assessment of potential archaeological heritage should be provided.
+    source-url: 
+      https://www.enfield.gov.uk/__data/assets/pdf_file/0008/141101/Enfield-2026-Validation-Checklist-Householders-28-Sept-2026-Planning.pdf
+    confidence: medium
+    notes: >-
+      The householder trigger is the council's wording. From the audit (missing_requirement): item
+      2 on the non-householder list covers extensive demolition or groundworks within an
+      Archaeological Priority Area, heritage-asset sites (shown as officer discretion), majors over
+      0.5ha, and EIA screening/scoping.
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: There are trees or hedges on the site or within 15m of the works.
+        - any:
+            - site:
+                in: [conservation-area, tree-preservation-zone]
+                description: Trees or hedges in a Conservation Area or protected by a Tree 
+                  Preservation Order are to be removed or pruned.
+            - condition:
+                field: ground-disturbance
+                value: true
+                description: The proposal involves groundworks within 15m of trees.
+    source-url: 
+      https://www.enfield.gov.uk/__data/assets/pdf_file/0007/141100/Enfield-2026-Validation-Checklist-All-Applications-except-Householders-28-Sept-2026-Planning.pdf
+    must-include:
+      - item: Prepared by a suitably qualified arboriculturist
+        level: must
+      - item: In accordance with policy DMD80 and BS 5837:2012 Trees in relation to design, 
+          demolition and construction
+        level: must
+      - item: Tree Protection Plan, including the location of proposed new utility and drainage 
+          services
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement): item 24 Tree Assessment applies to non-householder applications
+      too: removal or pruning of trees or hedges in a Conservation Area or under a TPO, or
+      groundworks within 15m of trees. The workbook's excerpts were garbled table text; the
+      must-include items are the council's wording from them ("All reports must be prepared by a
+      suitably qualified arboriculturist and in accordance with policy DMD80 and British Standard
+      BS 5837:2012").
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [site-of-special-scientific-interest, special-protection-area, local-wildlife-site]
+            description: The development is within or affects a designated site or wildlife 
+              corridor.
+        - discretionary
+    source-url: 
+      https://www.enfield.gov.uk/__data/assets/pdf_file/0007/141100/Enfield-2026-Validation-Checklist-All-Applications-except-Householders-28-Sept-2026-Planning.pdf
+    confidence: medium
+    notes: "Audit (other): the workbook quoted BNG declaration text. From the audit: development within
+      or affecting designated sites or wildlife corridors."
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      application-type:
+        in: [full, outline]
+    source-text: >-
+      Biodiversity Net Gain (BNG) … Required for all applications* involving: Major development
+      (From 12th February 2024 onwards)
+    source-url: 
+      https://www.enfield.gov.uk/__data/assets/pdf_file/0007/141100/Enfield-2026-Validation-Checklist-All-Applications-except-Householders-28-Sept-2026-Planning.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted contents-page text; the council's wording above was
+      found in the workbook's Environmental Statement row. From the audit: major development from
+      12 Feb 2024 and minor development from 2 Apr 2024, subject to exemptions (householder
+      applications are exempt nationally).
+
+  - id: cil-form
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 100
+            description: The proposal creates 100 square metres or more of new floorspace.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates one or more new dwellings.
+    source-text: "Community Infrastructure Levy Information: 100m2 or more new floorspace, or one or more
+      new dwellings"
+    source-url: 
+      https://www.enfield.gov.uk/__data/assets/pdf_file/0007/141100/Enfield-2026-Validation-Checklist-All-Applications-except-Householders-28-Sept-2026-Planning.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was 'see where CIL charges apply.' (item 6)."
+
+  - id: construction-management-plan
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 250
+            description: Commercial, community or industrial extensions of 250 square metres or 
+              more.
+    notes: "Audit (other): in the source this is 'When Expected' content within the Planning Statement
+      guidance (Section Three), not a checklist item; the trigger is accurate."
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+    source-text: >-
+      Daylight / Sunlight Assessment Required only in exceptional cases, proposals that may have a
+      potentially adverse effect on the daylight and/or sunlight enjoyed by adjoining properties.
+    source-url: 
+      https://www.enfield.gov.uk/__data/assets/pdf_file/0008/141101/Enfield-2026-Validation-Checklist-Householders-28-Sept-2026-Planning.pdf
+    notes: "Audit (wrong_trigger): the Full-planning excerpt ran on into the Electronic Communications
+      section; the householder wording is used."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a Conservation Area.
+            - condition:
+                field: floorspace
+                operator: ">="
+                value: 100
+                description: The proposal creates 100 square metres or more of new floorspace.
+        - site:
+            in: [listed-building-setting, park-and-garden, scheduled-monument]
+            description: The proposal affects the setting of a Listed Building, historic park or 
+              garden, or Scheduled Monument.
+        - ref: major-development
+    source-url: 
+      https://www.enfield.gov.uk/__data/assets/pdf_file/0007/141100/Enfield-2026-Validation-Checklist-All-Applications-except-Householders-28-Sept-2026-Planning.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt stopped at 'Required for all applications: The Town and
+      Country Planning (Development'. From the audit: Section One item 4 limits it to Conservation
+      Areas with 100m2+ of new floorspace, or proposals affecting the setting of a Listed Building,
+      historic park/garden or Scheduled Monument, plus major development under national rules.
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates new residential units.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 0
+            description: The proposal creates new commercial units.
+        - ref: major-development
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 250
+            description: Extensions of 250 square metres or more.
+    source-url: 
+      https://www.enfield.gov.uk/__data/assets/pdf_file/0007/141100/Enfield-2026-Validation-Checklist-All-Applications-except-Householders-28-Sept-2026-Planning.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook mapped item 10 Energy Assessment to sustainability-statement
+      with the excerpt 'with their energy Statement.' From the audit: minor developments creating
+      new residential/commercial units, majors, and extensions of 250m2 or more.
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The project requires an Environmental Impact Assessment.
+    source-text: Projects requiring an Environmental Impact Assessment (EIA)
+    source-url: 
+      https://www.enfield.gov.uk/__data/assets/pdf_file/0007/141100/Enfield-2026-Validation-Checklist-All-Applications-except-Householders-28-Sept-2026-Planning.pdf
+    confidence: medium
+    notes: "The workbook's excerpt ran the Environmental Statement and BNG headings together (audit wrong_trigger)."
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    notes: "'The provision of one or more relevant buildings' (council's wording); the height, storey
+      and use limbs are the national definition of a relevant building."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: new-build
+                value: true
+                description: The proposal includes new buildings.
+            - condition:
+                field: basement
+                value: true
+                description: The proposal includes a new or extended basement.
+            - condition:
+                field: residential-extension
+                value: true
+                description: The proposal includes a ground level extension.
+            - condition:
+                field: involves-change-of-use
+                value: true
+                description: A change of use creating new residential or commercial units.
+        - any:
+            - site:
+                in: [flood-risk-zone]
+                description: The site is in a specified flood zone or at risk of surface water 
+                  flooding.
+            - condition:
+                field: near-watercourse
+                value: true
+                description: The development is within 8m of a watercourse.
+    source-text: >-
+      Flood Risk Assessment Proposals involving new buildings, basements, extensions to basements
+      or ground level extensions with the following constraints: Surface Water Flood Risk
+    source-url: 
+      https://www.enfield.gov.uk/__data/assets/pdf_file/0008/141101/Enfield-2026-Validation-Checklist-Householders-28-Sept-2026-Planning.pdf
+    confidence: low
+    notes: >-
+      The householder trigger is the council's wording (cut off after 'Surface Water Flood Risk').
+      From the audit (missing_requirement): item 14 also applies to non-householder applications,
+      including changes of use creating new residential/commercial units, sites in specified flood
+      zones or at surface water risk, and development within 8m of a watercourse. How the
+      proposal types and the flood constraints combine on the non-householder list needs checking.
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, conservation-area, locally-listed-building, 
+              scheduled-monument, park-and-garden]
+        description: The proposal has the potential to affect a heritage asset or its setting.
+    source-text: Heritage Statement Proposals that have the potential to affect a heritage asset or 
+      its setting.
+    source-url: 
+      https://www.enfield.gov.uk/__data/assets/pdf_file/0008/141101/Enfield-2026-Validation-Checklist-Householders-28-Sept-2026-Planning.pdf
+    confidence: medium
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: The site is potentially contaminated, such as former landfill, railway land or 
+          petrol stations.
+    source-url: 
+      https://www.enfield.gov.uk/__data/assets/pdf_file/0007/141100/Enfield-2026-Validation-Checklist-All-Applications-except-Householders-28-Sept-2026-Planning.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 7, proposals on potentially contaminated land,
+      such as former landfill, railway land or petrol stations."
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: plant-equipment
+            value: true
+            description: The proposal involves flues, air conditioning, plant, extraction or 
+              mechanical gates.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Residential or other noise-sensitive development close to existing noise 
+              sources.
+    source-text: >-
+      Noise And Ventilation Impact Assessment Proposals that may have a potentially adverse effect
+      on the noise nuisance (e.g., involving the installation of flues, air conditioning, plant,
+      extraction and mechanical gates).
+    source-url: 
+      https://www.enfield.gov.uk/__data/assets/pdf_file/0008/141101/Enfield-2026-Validation-Checklist-Householders-28-Sept-2026-Planning.pdf
+    must-include:
+      - item: Prepared by a qualified acoustician, detailing Noise Exposure Categories and the 
+          associated impact and mitigation measures
+        level: should
+        source-text: >-
+          A noise assessment should be prepared by a qualified acoustician detailing - D14 Noise
+          Exposure Categories and associated impact and mitigation measures.
+    confidence: medium
+    notes: >-
+      Audit (other, missing_requirement): the workbook's householder 'Ventilation / Extraction'
+      row is this Noise and Ventilation Impact Assessment. Item 19 on the non-householder list
+      covers residential and other noise-sensitive development close to existing noise sources.
+
+  - id: photos
+    action: update
+    must-include:
+      - item: Photographs of the existing building and its relationship with neighbouring buildings
+        level: must
+    notes: "Audit (other): in the source this is 'When Expected: All proposals' content within the Planning
+      Statement guidance, not a checklist item."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      condition:
+        field: loss-of-use
+        value: true
+        description: The proposal involves the loss of open space.
+    must-include:
+      - item: Details of existing open space in the vicinity of the site
+        level: must
+    notes: "Audit (other): in the source this is 'When Expected' content within the Planning Statement
+      guidance, not a checklist item."
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The proposal involves building work or alterations to the roof(s) of buildings.
+    must-include:
+      - item: Scale 1:50 or 1:100
+        level: must
+    confidence: medium
+    notes: "Audit (missing_requirement): Section Two plans item 4 also applies to non-householder applications."
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The proposal involves building work or alterations to the roof(s) of buildings.
+    must-include:
+      - item: Scale 1:50 or 1:100
+        level: must
+    confidence: medium
+    notes: "Audit (missing_requirement): Section Two plans item 4 also applies to non-householder applications."
+
+  - id: sci
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 250
+            description: Commercial, community or industrial extensions of 250 square metres or 
+              more.
+    notes: "Audit (other): the Statement of Community Engagement is 'When Expected' content within the
+      Planning Statement guidance, not a checklist item; the trigger is accurate."
+
+  - id: site-plan
+    action: replace
+    source-text: >-
+      Existing and Proposed Block Plan - Scale 1:100, 1:200 or 1:500 clearly showing all the site
+      boundaries and the direction of North All applications involving building work, …
+      alterations to buildings or display of … advertisements
+    source-url: 
+      https://www.enfield.gov.uk/__data/assets/pdf_file/0007/141100/Enfield-2026-Validation-Checklist-All-Applications-except-Householders-28-Sept-2026-Planning.pdf
+    must-include:
+      - item: Scale 1:100, 1:200 or 1:500
+        level: must
+      - item: All the site boundaries clearly shown
+        level: must
+      - item: Direction of North
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the 2026 list applies Section Two plans to all application types
+      involving building work, alterations or advertisements, not only Householder and
+      Advertisement consent.
+
+  - id: telecommunications-report
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [pa-ecomms-network]
+        - condition:
+            field: telecommunications-development
+            value: true
+            description: Mast and antenna development by Electronic Communications Code Operators or
+              mobile network operators.
+    source-text: >-
+      Electronic Communications Code Operators Supplementary Information Proposals for mast and
+      antenna development by Electronic Communications Code Operators and mobile phone network
+      operators in England
+    source-url: 
+      https://www.enfield.gov.uk/__data/assets/pdf_file/0007/141100/Enfield-2026-Validation-Checklist-All-Applications-except-Householders-28-Sept-2026-Planning.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): the workbook's excerpt was 'Radiation Protection (ICNIRP).';
+      the council's wording above was found in the workbook's daylight row."
+
+  - id: transport-assessment
+    action: add
+    required-if:
+      ref: major-development
+    source-url: 
+      https://www.enfield.gov.uk/__data/assets/pdf_file/0007/141100/Enfield-2026-Validation-Checklist-All-Applications-except-Householders-28-Sept-2026-Planning.pdf
+    must-include:
+      - item: A Healthy Streets Assessment
+        level: must
+        required-if:
+          condition:
+            field: dwelling-count
+            operator: ">="
+            value: 50
+            description: A major development creating 50 or more new residential units.
+        source-text: >-
+          For major developments creating 50+ new residential units, the report shall also include:
+          a Healthy Streets Assessment
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 23 Transport Assessment for major developments,
+      with extra items where a major creates 50+ residential units."
+
+  - id: viability-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: 
+      https://www.enfield.gov.uk/__data/assets/pdf_file/0007/141100/Enfield-2026-Validation-Checklist-All-Applications-except-Householders-28-Sept-2026-Planning.pdf
+    must-include:
+      - item: An un-redacted affordable housing financial viability assessment
+        level: should
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt was 'in the viability appraisal.' From the audit: majors,
+      affordable housing triggers, enabling development, and cases relying on viability. The
+      must-include item is the council's wording ("You should send an un-redacted affordable
+      housing financial viability assessment").
+
+unmapped:
+  - local-name: Highway Safety Impact Assessment
+    source-text: "From the audit: item 15, minor developments creating new residential and/or commercial
+      units, changes of use, and commercial/community/industrial extensions"
+    source-url: 
+      https://www.enfield.gov.uk/__data/assets/pdf_file/0007/141100/Enfield-2026-Validation-Checklist-All-Applications-except-Householders-28-Sept-2026-Planning.pdf
+    suggested-id: highways-access-details
+  - local-name: Sustainable Drainage Strategy (SuDS) - non-householder
+    source-text: "From the audit: item 21, major developments, commercial/industrial changes of use or
+      new buildings, new residential buildings, basement extensions and ground-level extensions"
+    source-url: 
+      https://www.enfield.gov.uk/__data/assets/pdf_file/0007/141100/Enfield-2026-Validation-Checklist-All-Applications-except-Householders-28-Sept-2026-Planning.pdf
+    suggested-id: drainage-strategy
+  - local-name: Tall Building Statement
+    source-text: "All applications for tall buildings, those over 6 storeys or 18m in height"
+    source-url: 
+      https://www.enfield.gov.uk/__data/assets/pdf_file/0007/141100/Enfield-2026-Validation-Checklist-All-Applications-except-Householders-28-Sept-2026-Planning.pdf
+    suggested-id: tall-building-statement
+  - local-name: Marketing Assessment
+    source-text: "From the audit: item 22, loss of public houses, community facilities, Class E commercial
+      space or industrial uses, or change of use of Listed Buildings"
+    source-url: 
+      https://www.enfield.gov.uk/__data/assets/pdf_file/0007/141100/Enfield-2026-Validation-Checklist-All-Applications-except-Householders-28-Sept-2026-Planning.pdf
+    suggested-id: marketing-evidence
+  - local-name: Epping Forest SAC Recreation Mitigation Strategy (SAMM/SANG payment and SAC 
+      agreement form)
+    source-text: "Proposals creating new residential* units within the identified Zone of Influence"
+    source-url: 
+      https://www.enfield.gov.uk/__data/assets/pdf_file/0007/141100/Enfield-2026-Validation-Checklist-All-Applications-except-Householders-28-Sept-2026-Planning.pdf
+    suggested-id: habitats-regulations-assessment
+  - local-name: Structural Method Statement / Survey
+    source-text: "Structural Method Statement / Survey When Expected: Required for all applications involving
+      substantial works where the retained structure is changing significantly, there is a basement, or
+      the development is affecting the foundations."
+    source-url: 
+      https://www.enfield.gov.uk/__data/assets/pdf_file/0007/141100/Enfield-2026-Validation-Checklist-All-Applications-except-Householders-28-Sept-2026-Planning.pdf
+    suggested-id: structural-survey
+  - local-name: Townscape and Visual Impact Assessment (TVIA)
+    source-text: "A Townscape and Visual Impact Assessment (TVIA) - which must assess measured from ground
+      to the floor level the proposed development from relevant local and strategic designated of the
+      uppermost storey views, and should analyse the historic and emerging pattern of development to establish
+      important undesignated local views"
+    source-url: 
+      https://www.enfield.gov.uk/__data/assets/pdf_file/0007/141100/Enfield-2026-Validation-Checklist-All-Applications-except-Householders-28-Sept-2026-Planning.pdf
+    suggested-id: views-analysis
+
+low-confidence:
+  - id: planning-statement
+    note: "Audit (wrong_trigger): both excerpts are contents-page boilerplate; the trigger needs re-reading
+      in Section Three of the list."
+  - id: lighting-assessment
+    note: "The excerpt describes the content of a lighting assessment but not when it is needed."
+

@@ -1,0 +1,389 @@
+# Corrections for Derbyshire County Council, from inputs/audit/derbyshire-county-council.json.
+# A county council: its Local List of Information Requirements (Revision 4, items LR1-LR35) is
+# for minerals, waste and County Council (Regulation 3) development, through Validation
+# Checklist Forms A (outline/full), B (s73/73A) and C (reserved matters). So every requirement
+# here is scoped to mineral-app, waste-dev and reg-3. Where the list gives no clearer trigger,
+# the rule is "county application + officer discretion". Items marked "From the audit" use the
+# audit's paraphrase.
+local-authority: DBY
+
+validation-list:
+  date: "2018"
+  date-basis: >-
+    audit: Revision 4 has no date in its text; it says the list was 'adopted in 2011 and was last
+    reviewed in 2018' and cites 2021 documents (the earlier 2022-02 date was PDF metadata)
+
+submission-standards:
+  - item: All drawings and plans at an identified standard metric scale, with a drawing reference number
+      and title clearly annotated
+    level: should
+
+drop-unmapped:
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: the excerpt is heritage text; re-added below with the LR32 trigger"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: a fragment of the block plan guidance"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: a fragment of the block plan guidance"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "not_a_requirement: not a heading in the county list; the excerpt is air quality text"
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_app_type: misplaced LR23 Lighting Assessment text (now in lighting-assessment)"
+  - local-name: Odour / Dust / Vibration assessment
+    reason: "wrong_trigger: quotes the acoustician qualification; dust and odour are re-added below"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if: &dby-county-discretion
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - discretionary
+    must-include:
+      - item: The air quality of the area
+        level: must
+      - item: The scale and nature of emissions from the proposal
+        level: must
+      - item: The potential impact on people and the environment in the area
+        level: must
+      - item: The proposed measures to prevent or minimise those impacts
+        level: must
+      - item: A focus on the issues specific to the proposal, such as dust, odour, traffic pollution and
+          bio-aerosols
+        level: must
+    confidence: low
+    notes: &dby-scope-note >-
+      Audit (wrong_app_type): the list applies to minerals, waste and County Council development,
+      not only full planning. The excerpt gives no trigger, so it is shown as officer discretion.
+
+  - id: arboriculturist-report
+    action: update
+    required-if: *dby-county-discretion
+    must-include:
+      - item: The location of existing trees on the site, including species, size, condition and spread
+        level: must
+    confidence: low
+    notes: *dby-scope-note
+
+  - id: site-plan
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: low
+    notes: >-
+      Audit (not_a_requirement): the excerpt quotes only the exception ('Exceptions where block
+      plans are not necessary should be agreed at pre-application discussions'). Scoped to county
+      applications (audit: wrong_app_type).
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - ref: major-development
+    confidence: medium
+    notes: >-
+      The council's list asks for a DAS for major development (only the parts relevant to County
+      Matter applications are included).
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if: *dby-county-discretion
+    must-include:
+      - item: Surveys ordinarily no more than two years old
+        level: should
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the excerpt is a fragment ('Ecological surveys should ordinarily be no
+      more than two years old'). Scoped to county applications; shown as officer discretion.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: eia-development
+            value: true
+            description: The proposal is likely to have significant effects on the environment and meets
+              the EIA Regulations thresholds or criteria.
+    confidence: medium
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building 18 metres or more in height.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building of seven or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains two or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt omits the trigger. From the audit (LR32.1): buildings with
+      2+ dwellings or educational accommodation that are 18m+ or 7+ storeys.
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - site:
+            in: [flood-risk-zone]
+            description: Development proposals in areas at risk of flooding.
+    confidence: medium
+    notes: "The excerpt states the trigger. Scoped to county applications (audit: wrong_app_type)."
+
+  - id: landscaping-plan
+    action: update
+    required-if: *dby-county-discretion
+    must-include:
+      - item: Existing vegetation, including trees, hedgerows and shrubs, to be removed and to be retained
+        level: must
+    confidence: low
+    notes: *dby-scope-note
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: external-lighting
+            value: true
+            description: Proposals including external lighting.
+    source-text: Proposals including external lighting
+    source-url: &dby-url https://www.derbyshire.gov.uk/site-elements/documents/pdf/environment/planning/planning-applications/making-a-planning-application/planappforms/local-list-of-information-requirements-and-validation-checklists.pdf
+    must-include:
+      - item: The type of lighting, including its height above ground and power rating
+        level: must
+      - item: Drawings showing the spread of the light and how it will be kept from extending beyond the
+          site
+        level: should
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): LR23 Lighting Assessment. Part of its text was misfiled under listed
+      building consent.
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - site:
+            in: [open-space]
+            description: Development affecting school playing field provision.
+    must-include:
+      - item: Existing and proposed summer and winter sports pitch layouts
+        level: should
+      - item: A justification of why the proposed development and location is required
+        level: should
+    confidence: low
+    notes: "The excerpt's trigger is cut off ('...upon school playing field provision'). Scoped to county applications."
+
+  - id: photos
+    action: update
+    required-if: *dby-county-discretion
+    must-include:
+      - item: The date the photographs were taken, clearly annotated
+        level: should
+    confidence: low
+    notes: *dby-scope-note
+
+  - id: sci
+    action: update
+    required-if: *dby-county-discretion
+    confidence: low
+    notes: *dby-scope-note
+
+  - id: transport-assessment
+    action: update
+    required-if: *dby-county-discretion
+    confidence: medium
+    notes: >-
+      The list sets out the matters taken into account in deciding whether a Transport Assessment or
+      Statement is needed. Scoped to county applications.
+
+  - id: travel-plan
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: school-expansion
+                value: true
+                description: Significant extensions to, or new, schools.
+            - discretionary
+    confidence: medium
+    notes: >-
+      The excerpt gives the schools case. From the audit (wrong_trigger): also applications with a
+      Transport Assessment or Statement (shown as officer discretion).
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - site:
+                in: [world-heritage-site, scheduled-monument, listed-building, listed-building-setting,
+                  conservation-area, locally-listed-building, archaeological-priority-area]
+                description: Development directly affecting designated or non-designated heritage assets or
+                  their setting, or features of archaeological interest.
+            - discretionary
+    source-text: >-
+      All applications for development that would directly affect designated and non-designated
+      heritage assets or affect the setting of such assets, or has the potential to impact on
+      features of archaeological interest. 3.173 Heritage assets include World Heritage Sites
+      (Derwent Valley Mills World Heritage Site), Scheduled Ancient Monuments, Listed Buildings and
+      Conservation Areas as examples.
+    source-url: *dby-url
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook put this under listed building consent, which a county
+      council does not determine.
+
+  - id: planning-statement
+    action: add
+    required-if: *dby-county-discretion
+    source-url: *dby-url
+    confidence: medium
+    notes: "From the audit (missing_requirement): LR2 Planning/Supporting Statement, for most applications without an ES."
+
+  - id: water-impact-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: ground-disturbance
+                value: true
+                description: Ground disturbance that could affect water.
+            - discretionary
+    source-url: *dby-url
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): LR11 Hydrology/Hydrogeology Statement, for ground
+      disturbance affecting water or polluting processes (shown as officer discretion).
+
+  - id: land-contamination-assessment
+    action: add
+    required-if: *dby-county-discretion
+    source-url: *dby-url
+    confidence: low
+    notes: "From the audit (missing_requirement): LR12 Contaminated Land Assessment; the audit gives no trigger."
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: ground-disturbance
+            value: true
+            description: The proposal involves ground excavations.
+    source-url: *dby-url
+    confidence: medium
+    notes: "From the audit (missing_requirement): LR24 Waste Management Statement, for ground excavations."
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [mineral-app, waste-dev]
+        - all:
+            - application-type:
+                in: [reg-3]
+            - discretionary
+    source-url: *dby-url
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): LR31 Climate Change / Energy / Sustainability Statement,
+      for all minerals and waste development; for County Council development, proportionate to scale.
+
+unmapped:
+  - local-name: Health Impact Assessment (LR32)
+    source-text: "From the audit: development with potential to affect human health"
+    source-url: https://www.derbyshire.gov.uk/site-elements/documents/pdf/environment/planning/planning-applications/making-a-planning-application/planappforms/local-list-of-information-requirements-and-validation-checklists.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Geological Interest Assessment (LR7.3)
+    source-text: "From the audit: listed in the county list; no trigger given"
+    source-url: https://www.derbyshire.gov.uk/site-elements/documents/pdf/environment/planning/planning-applications/making-a-planning-application/planappforms/local-list-of-information-requirements-and-validation-checklists.pdf
+    suggested-id: ""
+  - local-name: Green and Blue Infrastructure (LR10)
+    source-text: "From the audit: listed in the county list; no trigger given"
+    source-url: https://www.derbyshire.gov.uk/site-elements/documents/pdf/environment/planning/planning-applications/making-a-planning-application/planappforms/local-list-of-information-requirements-and-validation-checklists.pdf
+    suggested-id: ""
+  - local-name: Public Rights of Way (LR16)
+    source-text: "From the audit: diversion, extinguishment or closure of a public right of way"
+    source-url: https://www.derbyshire.gov.uk/site-elements/documents/pdf/environment/planning/planning-applications/making-a-planning-application/planappforms/local-list-of-information-requirements-and-validation-checklists.pdf
+    suggested-id: public-rights-of-way-statement
+  - local-name: Dust Assessment (LR18)
+    source-text: "From the audit: listed in the county list; no trigger given"
+    source-url: https://www.derbyshire.gov.uk/site-elements/documents/pdf/environment/planning/planning-applications/making-a-planning-application/planappforms/local-list-of-information-requirements-and-validation-checklists.pdf
+    suggested-id: dust-assessment
+  - local-name: Odour Assessment (LR20)
+    source-text: "From the audit: waste, composting, anaerobic digestion, MBT and remediation proposals"
+    source-url: https://www.derbyshire.gov.uk/site-elements/documents/pdf/environment/planning/planning-applications/making-a-planning-application/planappforms/local-list-of-information-requirements-and-validation-checklists.pdf
+    suggested-id: odour-assessment
+  - local-name: Bioaerosol Assessment (LR21)
+    source-text: "From the audit: composting and anaerobic digestion proposals"
+    source-url: https://www.derbyshire.gov.uk/site-elements/documents/pdf/environment/planning/planning-applications/making-a-planning-application/planappforms/local-list-of-information-requirements-and-validation-checklists.pdf
+    suggested-id: bioaerosol-assessment
+  - local-name: Community Use Statement (LR26)
+    source-text: "From the audit: mainly schools"
+    source-url: https://www.derbyshire.gov.uk/site-elements/documents/pdf/environment/planning/planning-applications/making-a-planning-application/planappforms/local-list-of-information-requirements-and-validation-checklists.pdf
+    suggested-id: community-use-statement
+  - local-name: Ground Stability / Mining Risk Assessment (LR28)
+    source-text: "From the audit: sites in a Coal Authority Development High Risk Area"
+    source-url: https://www.derbyshire.gov.uk/site-elements/documents/pdf/environment/planning/planning-applications/making-a-planning-application/planappforms/local-list-of-information-requirements-and-validation-checklists.pdf
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Soil Assessment (LR29)
+    source-text: "From the audit: significant loss of agricultural land"
+    source-url: https://www.derbyshire.gov.uk/site-elements/documents/pdf/environment/planning/planning-applications/making-a-planning-application/planappforms/local-list-of-information-requirements-and-validation-checklists.pdf
+    suggested-id: agricultural-land-classification
+  - local-name: Economic Statement (LR30)
+    source-text: "From the audit: listed in the county list; no trigger given"
+    source-url: https://www.derbyshire.gov.uk/site-elements/documents/pdf/environment/planning/planning-applications/making-a-planning-application/planappforms/local-list-of-information-requirements-and-validation-checklists.pdf
+    suggested-id: employment-statement
+  - local-name: Cumulative Impact Assessment (LR33)
+    source-text: "From the audit: listed in the county list; no trigger given"
+    source-url: https://www.derbyshire.gov.uk/site-elements/documents/pdf/environment/planning/planning-applications/making-a-planning-application/planappforms/local-list-of-information-requirements-and-validation-checklists.pdf
+    suggested-id: ""
+  - local-name: Completed validation checklist (LR35)
+    source-text: "PLANNING SERVICES LOCAL LIST OF INFORMATION REQUIREMENTS 3.250 A completed checklist relevant to
+      the type of application being submitted."
+    source-url: https://www.derbyshire.gov.uk/site-elements/documents/pdf/environment/planning/planning-applications/making-a-planning-application/planappforms/local-list-of-information-requirements-and-validation-checklists.pdf
+    suggested-id: validation-checklist

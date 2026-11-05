@@ -1,0 +1,437 @@
+# Corrections for Royal Borough of Kensington and Chelsea, from the council's audit.
+# Grokbot captured no requirements (it wrongly marked the list unreadable). The audit read the
+# RBKC Local Validation List (10 March 2023) and summarised its Section Two local requirements.
+# Everything below is the audit's paraphrase, so there is no source-text; triggers follow the
+# audit's summary and should be checked against the list.
+local-authority: KEC
+
+requirements:
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Noise-generating development, including noisy changes of use.
+        - condition:
+            field: plant-equipment
+            value: true
+            description: The proposal includes plant, including air conditioning and air source heat pumps.
+        - condition:
+            field: basement
+            value: true
+            description: The proposal includes a new or enlarged basement.
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Acoustic report for noise-generating development, plant
+      including air conditioning and air source heat pumps, and noisy changes of use; basements
+      also need a noise report (Notes 3, 4, 6, 14, 22).
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      condition:
+        field: housing-floorspace
+        operator: ">"
+        value: 650
+        description: The proposal includes more than 650 square metres (GIA) of residential floorspace.
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Affordable housing details for residential over 650 sqm
+      GIA or any proposal including affordable housing.
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    confidence: medium
+    notes: "From the audit (missing_requirement): Air quality assessment for major and large-scale development."
+
+  - id: archaeological-assessment
+    action: add
+    required-if:
+      site:
+        in: [archaeological-priority-area]
+        description: The site is in an Archaeological Priority Area.
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    confidence: medium
+    notes: "From the audit (missing_requirement): Archaeological assessment in Archaeological Priority Areas."
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if: discretionary
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Biodiversity survey and report for development affecting
+      protected species or habitats, including refurbishments affecting bats or swifts.
+
+  - id: sci
+    action: add
+    required-if:
+      always: true
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    confidence: medium
+    notes: "From the audit (missing_requirement): Community engagement strategy for all developments, proportionate to the scheme."
+
+  - id: cil-form
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 100
+            description: The proposal creates 100 square metres or more of floorspace.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates one or more dwellings.
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    confidence: medium
+    notes: "From the audit (missing_requirement): CIL liability form for 100 sqm+ or 1+ dwellings."
+
+  - id: construction-management-plan
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: basement
+            value: true
+            description: The proposal includes a new or enlarged basement.
+        - condition:
+            field: structural-demolition
+            value: true
+            description: The proposal involves substantial demolition.
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Construction traffic management plan for majors,
+      basements and substantial demolition. The separate Construction method statement for
+      basements is listed as unmapped.
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if: discretionary
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    confidence: medium
+    notes: "From the audit (missing_requirement): Daylight/sunlight assessment where there is a material impact on neighbouring light."
+
+  - id: design-and-access-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: The proposal creates one or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: The proposal creates 100 square metres or more of floorspace.
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): required for listed building consent and in conservation
+      areas for 1+ dwellings or 100 sqm+, but not for s73 applications or pure changes of use. The
+      major-development branch is the national rule, not something the audit quotes.
+
+  - id: energy-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    confidence: medium
+    notes: "From the audit (missing_requirement): Energy strategy for major development."
+
+  - id: fire-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - any:
+                - condition:
+                    field: building-height
+                    operator: ">="
+                    value: 18
+                    description: A building is 18 metres or more tall.
+                - condition:
+                    field: storey-count
+                    operator: ">="
+                    value: 7
+                    description: A building has 7 or more storeys.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 2
+                    description: The building contains 2 or more dwellings.
+                - condition:
+                    field: educational-accommodation
+                    value: true
+                    description: The building contains educational accommodation.
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Fire statement for majors and Gateway One developments.
+      The Gateway One branch uses the national definition of a relevant building.
+
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more.
+        - site:
+            in: [flood-risk-zone, critical-drainage-area]
+            description: The site is in flood zone 2 or 3, or in a Critical Drainage Area.
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    confidence: medium
+    notes: "From the audit (missing_requirement): 1ha+ in flood zone 1, all new development in flood zones 2/3, and Critical Drainage Areas."
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, conservation-area]
+            description: The works affect a listed building or a conservation area, including substantial demolition in a conservation area.
+    must-include:
+      - item: Schedule of works
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+      - item: Justification for the works
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+      - item: Photographs
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+      - item: Specification of materials
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Heritage statement for listed building consent,
+      substantial demolition in conservation areas, and works affecting listed buildings or
+      conservation areas. For listed building consent it must include a schedule of works,
+      justification, photographs and a materials specification (Note 3 etc.).
+
+  - id: land-contamination-assessment
+    action: add
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    confidence: low
+    notes: "From the audit (missing_requirement): Land contamination assessment is listed, but the audit gives no trigger."
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [advertising]
+            - condition:
+                field: illuminated
+                value: true
+                description: The advertisement is illuminated.
+        - discretionary
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): Lighting information is listed without a trigger;
+      lighting details are needed for illuminated advertisements.
+
+  - id: photos
+    action: add
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    confidence: low
+    notes: "From the audit (missing_requirement): Photographs are listed, but the audit gives no trigger."
+
+  - id: planning-statement
+    action: add
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    confidence: low
+    notes: "From the audit (missing_requirement): Planning statement is listed, but the audit gives no trigger."
+
+  - id: landscaping-plan
+    action: add
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    confidence: low
+    notes: "From the audit (missing_requirement): Planting and landscaping details are listed, but the audit gives no trigger."
+
+  - id: section-proposed
+    action: add
+    required-if:
+      condition:
+        field: basement
+        value: true
+        description: The proposal includes a new or enlarged basement.
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    confidence: low
+    notes: "From the audit (missing_requirement): basements need sections (application-type notes). Sections may be needed in other cases the audit doesn't list."
+
+  - id: site-plan
+    action: add
+    must-include:
+      - item: Householder site plans at a scale of 1:200
+        level: must
+        required-if:
+          application-type:
+            in: [hh]
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    confidence: low
+    notes: "From the audit (missing_requirement): householder site plans at 1:200. The audit gives no other site plan rules."
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    confidence: medium
+    notes: "From the audit (missing_requirement): Site waste management plan for major development."
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    confidence: medium
+    notes: "From the audit (missing_requirement): Sustainability statement for major development."
+
+  - id: town-centre-impact-assessment
+    action: add
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): Town centre impact assessment for leisure/tourism over
+      2,500 sqm or retail over 400 sqm outside centres. There is no field yet for use-specific
+      floorspace or out-of-centre location, so no rule is given.
+
+  - id: transport-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 30
+            description: The proposal creates 30 or more homes.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 1000
+            description: The proposal creates more than 1,000 square metres of commercial floorspace.
+        - discretionary
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    confidence: medium
+    notes: "From the audit (missing_requirement): Transport assessment, e.g. 30+ homes or commercial over 1,000 sqm (the audit's 'e.g.' suggests other cases too)."
+
+  - id: travel-plan
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 80
+            description: The proposal creates 80 or more homes.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 2500
+            description: The proposal creates more than 2,500 square metres of commercial floorspace.
+        - discretionary
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    confidence: medium
+    notes: "From the audit (missing_requirement): Travel plan, e.g. 80+ homes, commercial over 2,500 sqm, hotels with 50+ beds."
+
+  - id: arboriculturist-report
+    action: add
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    confidence: low
+    notes: "From the audit (missing_requirement): Tree survey/arboricultural implications are listed, but the audit gives no trigger."
+
+unmapped:
+  - local-name: Construction method statement
+    source-text: "From the audit: new or enlarged basements"
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    suggested-id: construction-method-statement
+  - local-name: Digital 3D model
+    source-text: "From the audit: developments with significant townscape impacts"
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    suggested-id: digital-3d-model
+  - local-name: Floorspace / accommodation schedule
+    source-text: "From the audit: new residential units or deconversions"
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    suggested-id: accommodation-schedule
+  - local-name: Marketing and use viability information
+    source-text: "From the audit: loss of community, hotel, office, pub, employment or shop uses"
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    suggested-id: marketing-evidence
+  - local-name: Parking and access arrangements
+    source-text: "From the audit: listed without a trigger"
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    suggested-id: parking-details
+  - local-name: Planning obligations / draft heads of terms
+    source-text: "From the audit: listed without a trigger"
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    suggested-id: heads-of-terms
+  - local-name: Servicing management plan
+    source-text: "From the audit: listed without a trigger"
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    suggested-id: delivery-servicing-plan
+  - local-name: Waste storage and collection details
+    source-text: "From the audit: listed without a trigger"
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    suggested-id: refuse-storage-details
+  - local-name: Sustainable drainage (SuDS) strategy
+    source-text: "From the audit: all applications"
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    suggested-id: drainage-strategy
+  - local-name: Tall buildings impact assessment
+    source-text: "From the audit: listed without a trigger"
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    suggested-id: tall-buildings-assessment
+  - local-name: Townscape and visual impact assessment
+    source-text: "From the audit: major development"
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    suggested-id: townscape-visual-impact-assessment
+  - local-name: Ventilation / extraction details
+    source-text: "From the audit: cafes, restaurants, pubs, takeaways and other commercial cooking"
+    source-url: https://www.rbkc.gov.uk/media/document/rbkc-local-validation-list
+    suggested-id: ventilation-extraction-details

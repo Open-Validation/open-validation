@@ -1,0 +1,198 @@
+# Corrections for Walsall Metropolitan Borough Council, from inputs/audit/walsall-metropolitan-borough-council.json.
+# Grokbot's link is the current minor/major checklist (Version 2.0, uploaded 2026-05), but both
+# Version 2.0 PDFs are robots-blocked, so the audit couldn't check the contents (every file stays
+# low confidence). The Householder rows come from the superseded 2023 householder checklist and need
+# re-extracting from Householder Version 2.0. Clear triggers in the excerpts are structured below.
+local-authority: WLL
+
+validation-list:
+  url: https://go.walsall.gov.uk/sites/default/files/2026-05/Full%20Planning%20Application%20Validation%20Checklist%20Version%202.0.pdf
+  date: 2026-05
+  date-basis: "upload folder in the URL path (Version 2.0); the audit couldn't read a date in the document"
+
+submission-standards:
+  - item: Plans should be scaled to fit onto A4 or A3 size paper
+    level: should
+  - item: Plans with a disclaimer stating 'Do Not Scale' will not be accepted
+    level: must
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is Arboricultural Method Statement / Tree Protection Plan text
+      (now a must-include item in arboriculturist-report), not a listed building schedule of works"
+
+drop-unmapped:
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "wrong_trigger: a bullet from the list of developments that trigger the Cannock Chase SAC HRA form"
+  - local-name: Gypsy & Traveller information
+    reason: "wrong_trigger: a bullet from the list of developments that trigger the Cannock Chase SAC HRA form"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: encouragement to seek advice"
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_app_type: filed under Householder, which the excerpt excludes; re-added below"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "two rows from one Cannock Chase SAC requirement; merged below"
+
+requirements:
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees on or adjacent to the site.
+    must-include:
+      - item: A tree survey in table and plan form (BS 5837:2012) showing the condition, location and
+          constraints of all trees on and adjacent to the site
+        level: must
+      - item: An Arboricultural Method Statement and Tree/hedge Protection Plan detailing the measures
+          to protect all trees proposed to be retained, with schedules of any necessary facilitative
+          tree work
+        level: should
+    notes: >-
+      The must-include items are the council's wording; the AMS/TPP text was in the workbook's
+      'Schedule of works' rows (audit: wrong_trigger).
+
+  - id: elevation-existing
+    action: update
+    must-include:
+      - item: Elevations clearly and logically labelled (for example front or rear elevation), with
+          titles that refer to their content
+        level: must
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: Elevations clearly and logically labelled (for example front or rear elevation), with
+          titles that refer to their content
+        level: must
+      - item: Existing and proposed eaves and ridge heights clearly annotated
+        level: must
+        required-if:
+          condition:
+            field: roof-alteration
+            value: true
+            description: The proposal involves a change to the main roof.
+    notes: "The eaves and ridge item is from the superseded 2023 householder checklist."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site area is 1 hectare or more in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site area is 1 hectare or more in Flood Zone 1.
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3.
+    notes: >-
+      Audit (wrong_trigger): the excerpt omits development in Flood Zones 2 and 3, the core trigger.
+      Not verified against Version 2.0 because the PDF is blocked.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+          scheduled-monument, park-and-garden]
+        description: The proposal directly involves or affects a heritage asset, or is within its
+          setting.
+    source-text: >-
+      A Heritage Statement is required with all development proposals requiring planning permission
+      or listed building consent, when the proposal directly involves or affects, or is within the
+      setting of a heritage asset, or where the significance of a heritage asset is affected.
+    source-url: https://go.walsall.gov.uk/sites/default/files/2024-02/Validation%20-%20Guidance%20-%20Heritage%20Statements.pdf
+    confidence: medium
+    notes: >-
+      From the council's Heritage Statements guidance note. The Householder row's excerpt was a
+      fragment ('Link back to a simple checklist Heritage Statement - LHV14').
+
+  - id: landscaping-plan
+    action: update
+    must-include:
+      - item: Details of proposed plant species, taking account of local biodiversity and habitat
+          requirements
+        level: should
+      - item: All proposed external hard surfaces
+        level: should
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: site-level-change
+        operator: ">"
+        value: 300
+        description: The proposal changes site levels by over 0.3 metres.
+    notes: >-
+      From the superseded 2023 householder checklist ('Show any proposed changes to site levels
+      over 0.3 metres within the application site'); the Full planning excerpt is a fragment.
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: site-level-change
+        operator: ">"
+        value: 300
+        description: The proposal changes site levels by over 0.3 metres.
+    notes: >-
+      From the superseded 2023 householder checklist ('Show any proposed changes to site levels
+      over 0.3 metres within the application site'); the Full planning excerpt is a fragment.
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      condition:
+        field: town-centre-use-floorspace
+        operator: ">"
+        value: 200
+        description: The resulting gross floorspace for main town centre uses exceeds 200 square metres.
+    notes: "The excerpt starts mid-sentence, so the location part of the trigger may be missing."
+
+unmapped:
+  - local-name: Coal Mining Risk Assessment
+    source-text: "A Coal Mining Risk Assessment is required for Applications (excluding householder and
+      exemptions (as defined on the list published on the Coal Authority website) which fall within the
+      Development High Risk Areas as defined by The Coal Authority and held by the Local Planning
+      Authority."
+    source-url: https://go.walsall.gov.uk/sites/default/files/2026-05/Full%20Planning%20Application%20Validation%20Checklist%20Version%202.0.pdf
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Habitats Regulations Assessment (Cannock Chase SAC)
+    source-text: "A Habitat Regulations Assessment will be required for the following development:
+      Development which lies within 15km zone of influence of Cannock Chase SAC which would lead to a net
+      increase (1 or more) of dwellings. … complete the habitat regulation assessment (HRA) form published
+      alongside this checklist: o any housing development. o tourist accommodation, including caravan
+      sites. o conversion of buildings into dwellings. o agricultural workers dwellings. o houses of
+      multiple occupancy (HMOs). o care homes that fall under use Class C3. o prior approval applications
+      for the creation of dwellings. o Gypsy, Traveller and travelling snowpersons' accommodation (except
+      showman's yards with no accommodation attached). o new horse/pony trekking centers, livery yards or
+      significant extensions to existing ones"
+    source-url: https://go.walsall.gov.uk/sites/default/files/2026-05/Full%20Planning%20Application%20Validation%20Checklist%20Version%202.0.pdf
+    suggested-id: habitats-regulations-assessment
+
+low-confidence:
+  - id: bng-metric
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('of 10% biodiversity net gain.')."
+  - id: design-and-access-statement
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('application NV6 Design and Access Statement
+      NV7 Local Validation.')."
+  - id: environmental-statement
+    note: "Audit (wrong_trigger): the excerpt is about EIA screening, not a trigger."
+  - id: lighting-assessment
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('a sensitive lighting plan.')."
+  - id: site-plan
+    note: "Audit (wrong_trigger): the excerpts are fragments ('plan and block plan.')."
+  - id: photos
+    note: "Audit (outdated_link): from the superseded 2023 householder checklist. The Version 2.0 minor and
+      major checklist asks for 'Up-to-date site photographs annotated with descriptions'."
+  - id: biodiversity-survey-report
+    note: "The excerpt covers Great Crested Newt surveys for householder sites with or next to a pond; no
+      wider trigger was captured."

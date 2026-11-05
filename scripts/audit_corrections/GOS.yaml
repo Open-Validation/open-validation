@@ -1,0 +1,374 @@
+# Corrections for Gosport Borough Council, from the Gosport audit.
+# The audit compared the workbook with the live "List of documents required by GBC LPA" page
+# (reviewed and readopted Autumn 2022). The workbook missed the page's whole "Supporting
+# documents and thresholds" table; those items are added below from the audit's summary of the
+# table ("From the audit"), not the council's exact words.
+local-authority: GOS
+
+submission-standards:
+  - item: All plans to an identified metric scale (normally 1:50 or 1:100), stating the original 
+      paper size
+    level: must
+  - item: Plans show a north point, identify which direction each elevation faces, and are named in 
+      a logical manner
+    level: must
+  - item: All plans clearly labelled with a unique drawing number
+    level: must
+  - item: Drawings of new built development include a scale bar and key dimensions (distance from 
+      the site boundaries and size of the extension/building)
+    level: must
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: website navigation menu text"
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "wrong_trigger: starts mid-sentence and drops the scope; re-added below"
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_trigger / wrong_app_type: fragment placed under Full planning; re-added below"
+
+requirements:
+  - id: cil-form
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 100
+            description: The proposal erects more than 100 square metres of new floorspace.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates any number of new dwellings.
+    confidence: medium
+    notes: "Audit (wrong_app_type): the form applies to all planning applications (including householder,
+      outline, reserved matters and s73) meeting the threshold."
+
+  - id: design-and-access-statement
+    action: update
+    source-text: A Design and Access Statement (if the threshold for submission is met)
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook excerpt merged the Design and Access Statement, Flood Risk
+      Assessment and Fire Statement sentences. The council only says "if the threshold for
+      submission is met", i.e. the national thresholds apply.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt is a fragment shared with the Appropriate Assessment row."
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: A change of levels is proposed, or the site slopes.
+    confidence: medium
+    notes: "The council's text: only required where a change is proposed or the site slopes."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: A change of levels is proposed, or the site slopes.
+    confidence: medium
+    notes: "The council's text: only required where a change is proposed or the site slopes."
+
+  - id: fire-statement
+    action: add
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: The building would be 18 metres or more in height.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: The building would be seven storeys or more.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The development comprises two or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The development comprises educational accommodation.
+    source-text: >-
+      From 1st August 2021, any planning application for a development comprising two or more
+      dwellings or educational accommodation in a building that would exceed either seven storeys
+      or 18 metres in height must be accompanied by a Fire Statement.
+    source-url: https://www.gosport.gov.uk/article/1237/List-of-documents-required-by-GBC-LPA
+    confidence: medium
+    notes: "The council's sentence was in the workbook's Design and Access Statement and FRA rows. The
+      thresholds follow the national rule (18m or 7 storeys or more)."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - any:
+            - site:
+                in: [flood-risk-zone]
+                description: The site is in Flood Zone 2 or 3.
+            - condition:
+                field: site-area-residential
+                operator: ">"
+                value: 1
+                description: The site is over 1 hectare in Flood Zone 1.
+            - condition:
+                field: site-area-non-residential
+                operator: ">"
+                value: 1
+                description: The site is over 1 hectare in Flood Zone 1.
+            - discretionary
+    source-text: "Flood Zones 2 and 3; sites over 1 ha in Flood Zone 1; sites flagged in the SFRA as future
+      flood risk"
+    source-url: https://www.gosport.gov.uk/article/1237/List-of-documents-required-by-GBC-LPA
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook gave the Fire Statement trigger. Sites flagged in the
+      SFRA as future flood risk are shown as officer discretion."
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: Residential development of 10 or more dwellings.
+    source-url: https://www.gosport.gov.uk/article/1237/List-of-documents-required-by-GBC-LPA
+    confidence: medium
+    notes: "From the audit (missing_requirement): Affordable Housing Statement / Viability Assessment
+      for full/outline residential schemes of 10+ dwellings."
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      application-type:
+        in: [full, outline, hh]
+    source-url: https://www.gosport.gov.uk/article/1237/List-of-documents-required-by-GBC-LPA
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Biodiversity Checklist or Survey for all full, outline
+      and householder applications."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - site:
+            in: [contaminated-land, near-landfill-site]
+            description: The site is within 250 m of a landfill, has had previous contaminating 
+              uses, or has known contamination.
+    source-url: https://www.gosport.gov.uk/article/1237/List-of-documents-required-by-GBC-LPA
+    confidence: medium
+    notes: "From the audit (missing_requirement): full/outline applications within 250 m of landfill,
+      on sites with previous contaminating uses, or with known contamination."
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - all:
+            - application-type:
+                in: [full, outline, hh]
+            - site:
+                in: [listed-building, listed-building-setting, conservation-area, 
+                      locally-listed-building]
+                description: The proposal affects a heritage asset.
+    source-text: "Full, outline and householder applications; Listed Building Consent"
+    source-url: https://www.gosport.gov.uk/article/1237/List-of-documents-required-by-GBC-LPA
+    confidence: medium
+    notes: "From the audit (missing_requirement): full, outline, householder and LBC applications affecting
+      heritage assets."
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - ref: major-development
+    source-url: https://www.gosport.gov.uk/article/1237/List-of-documents-required-by-GBC-LPA
+    confidence: medium
+    notes: "From the audit (missing_requirement): full/outline, major applications only."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - any:
+            - condition:
+                field: noise-generating-use
+                value: true
+                description: The proposal is for a noise-generating use.
+            - condition:
+                field: noise-sensitive-use
+                value: true
+                description: The proposal is for a noise-sensitive use.
+    source-url: https://www.gosport.gov.uk/article/1237/List-of-documents-required-by-GBC-LPA
+    confidence: medium
+    notes: "From the audit (missing_requirement): full/outline applications for noise-generating or noise-sensitive
+      uses."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 1000
+            description: Retail floorspace over 1,000 square metres.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 2500
+            description: Office or leisure floorspace over 2,500 square metres.
+    source-url: https://www.gosport.gov.uk/article/1237/List-of-documents-required-by-GBC-LPA
+    confidence: medium
+    notes: "From the audit (missing_requirement): Retail Impact Assessment for retail over 1,000 sqm;
+      Impact Assessment for office/leisure over 2,500 sqm."
+
+  - id: transport-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 50
+            description: 50 or more C3 dwellings (Transport Statement; Transport Assessment from 
+              80).
+        - discretionary
+    source-url: https://www.gosport.gov.uk/article/1237/List-of-documents-required-by-GBC-LPA
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Transport Statement at thresholds such as C3 50
+      dwellings or A1 food 250 sqm; Transport Assessment at C3 80 dwellings, B1 2,500 sqm, A1 food
+      800 sqm. Thresholds for other uses are shown as officer discretion.
+
+  - id: travel-plan
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 80
+            description: 80 or more C3 dwellings.
+        - discretionary
+    source-url: https://www.gosport.gov.uk/article/1237/List-of-documents-required-by-GBC-LPA
+    confidence: medium
+    notes: "From the audit (missing_requirement): a (draft) Travel Plan with the Transport Assessment,
+      at thresholds such as C3 80 dwellings, B1 2,500 sqm, A1 food 800 sqm."
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [full, outline]
+            - condition:
+                field: trees-on-or-near-site
+                value: true
+                description: Trees may be lost or affected by the development.
+        - application-type:
+            in: [consent-under-tpo]
+    source-text: "Full and outline applications; works to protected trees"
+    source-url: https://www.gosport.gov.uk/article/1237/List-of-documents-required-by-GBC-LPA
+    confidence: medium
+    notes: "From the audit (missing_requirement): Tree Survey / AIA where trees may be lost or affected."
+
+  - id: roof-plan-proposed
+    action: add
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: A roof is created or altered.
+    source-text: "Roof plans: required for any roof created or altered"
+    source-url: https://www.gosport.gov.uk/article/1237/List-of-documents-required-by-GBC-LPA
+    confidence: medium
+    notes: "Audit (missing_requirement)."
+
+  - id: site-plan
+    action: add
+    source-url: https://www.gosport.gov.uk/article/1237/List-of-documents-required-by-GBC-LPA
+    must-include:
+      - item: Scale of 1:200 or 1:500
+        level: must
+      - item: Boundary treatments
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): the block plan must be at 1:200/1:500 with boundary
+      treatments."
+
+  - id: elevation-proposed
+    action: add
+    source-url: https://www.gosport.gov.uk/article/1237/List-of-documents-required-by-GBC-LPA
+    must-include:
+      - item: Neighbouring elevations, unless the buildings are more than 30 m apart
+        level: must
+        source-text: "Neighbouring elevations are required unless buildings are more than 30 m apart"
+    confidence: medium
+    notes: "Audit (missing_requirement)."
+
+  - id: location-plan
+    action: add
+    source-url: https://www.gosport.gov.uk/article/1237/List-of-documents-required-by-GBC-LPA
+    must-include:
+      - item: Ordnance Survey licence number
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): the site location plan must show two named roads and
+      an OS licence number."
+
+unmapped:
+  - local-name: Ventilation/Extraction (Impact) Report
+    source-text: "Full applications; reserved matters for siting, appearance and layout"
+    source-url: https://www.gosport.gov.uk/article/1237/List-of-documents-required-by-GBC-LPA
+    suggested-id: ventilation-extraction-details
+  - local-name: Nitrogen Budget (nutrient neutrality)
+    source-text: "Applications for new residential or other overnight accommodation should be accompanied
+      by Nitrogen Budget calculated in accordance with Natural England guidance"
+    source-url: https://www.gosport.gov.uk/article/1237/List-of-documents-required-by-GBC-LPA
+    suggested-id: nutrient-budget
+  - local-name: Street scene elevations
+    source-text: "Street scenes may be needed for Major and Minor developments … wider street scenes showing
+      the development as proposed in context will be required."
+    source-url: https://www.gosport.gov.uk/article/1237/List-of-documents-required-by-GBC-LPA
+    suggested-id: street-scene
+  - local-name: Advertisement details
+    source-text: "From the audit: advertisement consent applications need details of lettering, materials,
+      colours, projection and illumination; the list says '…colours of illumination must be shown.'"
+    source-url: https://www.gosport.gov.uk/article/1237/List-of-documents-required-by-GBC-LPA
+    suggested-id: advertisement-details
+

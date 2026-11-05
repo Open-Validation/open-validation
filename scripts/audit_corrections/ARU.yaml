@@ -1,0 +1,231 @@
+# Corrections for Arun District Council, from inputs/audit/arun-district-council.json.
+# The audit could not fetch Arun's lists (shared web budget exhausted), so contents were not
+# checked: these corrections only fix what Grokbot's own extracted text shows is wrong.
+local-authority: ARU
+
+validation-list:
+  url: https://www.arun.gov.uk/download.cfm?doc=docm93jijm4n20185.pdf&ver=26434
+  date: 2024-10-17
+  date-basis: "audit: document text 'Planning application validation requirements wef 17/10/2024' (type
+    checklists dated 01/05/24; conditions list 31/07/25)"
+
+submission-standards:
+  - item: Plans in PDF format only, scanned to actual document size (not fit to page) so they can be
+      accurately scaled
+    level: must
+  - item: Each plan submitted as an individual PDF, not combined into one document
+    level: should
+  - item: All plans drawn to an identified scale and showing a north point
+    level: must
+  - item: Supporting documents should not contain signatures, phone numbers or email addresses 
+      (redact them before submitting)
+    level: should
+
+drop:
+  - id: design-and-access-statement
+    sheets: [Variation of condition s73]
+    reason: "wrong_app_type: the source says the DAS does not apply to s73 applications"
+  - id: design-and-access-statement
+    sheets: [Householder]
+    reason: "wrong_app_type: the row comes from the Listed Building Requirements List, not the Householder
+      list"
+  - id: schedule-of-works
+    sheets: [Householder]
+    reason: "wrong_app_type: the row comes from the Listed Building Requirements List"
+  - id: schedule-of-works
+    sheets: [Full planning]
+    reason: "wrong_trigger: the excerpt is the arboricultural method statement sentence"
+  - id: photos
+    sheets: [Householder]
+    reason: "duplicate: the excerpt is the street scene drawings rule, kept under Street scene elevations"
+  - id: floor-plan-existing
+    sheets: [Advertisement consent]
+    reason: "the advert excerpt asks for existing elevations only, not floor plans"
+  - id: floor-plan-proposed
+    sheets: [Advertisement consent]
+    reason: "the advert excerpt asks for existing elevations only, not floor plans"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: a signpost to the pre-application service"
+  - local-name: Character / Conservation area appraisal reference
+    reason: "not_a_requirement: a cross-reference inside the heritage statement entry"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "duplicate: the same excerpt as the Flood Risk Assessment row"
+  - local-name: Structural Survey
+    reason: "wrong_app_type / wrong_trigger: the Householder row is from the listed building list and
+      the Full planning row is telecoms text; the tree row is now structural-damage and the listed building
+      row is re-added below"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_trigger: fragment; replaced below with the full sentence"
+
+requirements:
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees within the site or on land next to it that could be affected.
+    source-text: >-
+      A tree survey and arboricultural report is required where there are trees within the
+      application site or on land adjacent to it that could be affected by the proposed development.
+    confidence: low
+    notes: "The trigger is the council's wording from the main list; the audit could not check it."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: The proposal is for 10 or more dwellings.
+        - discretionary
+    confidence: low
+    notes: >-
+      Main list: "A survey is needed for applications for 10 or more dwellings." The Householder
+      list asks for it "where protected species or species of principle importance are likely to be
+      present" (the start of that sentence is cut off), shown as officer discretion.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    confidence: low
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    confidence: low
+    notes: "Council's wording: \"where appropriate a viability appraisal will need to be submitted.\""
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: roof-alteration
+            value: true
+            description: The proposal changes an existing roof or adds a new roof.
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal includes new buildings.
+    confidence: low
+    notes: "Council's wording: \"Roof plans are required when there is a change to an existing roof and
+      on all new buildings.\""
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: roof-alteration
+            value: true
+            description: The proposal changes an existing roof or adds a new roof.
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal includes new buildings.
+    confidence: low
+    notes: "Council's wording: \"Roof plans are required when there is a change to an existing roof and
+      on all new buildings.\""
+
+  - id: section-existing
+    action: update
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [hh]
+            - condition:
+                field: site-level-change
+                operator: ">"
+                value: 150
+                description: Site levels change by more than 150mm.
+        - application-type:
+            in: [lbc]
+    confidence: low
+    notes: "Householder list: \"For all applications where there is a change of site levels of more than
+      150mm.\" The listed building list gives no trigger."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [hh]
+            - condition:
+                field: site-level-change
+                operator: ">"
+                value: 150
+                description: Site levels change by more than 150mm.
+        - application-type:
+            in: [lbc]
+    confidence: low
+    notes: "Householder list: \"For all applications where there is a change of site levels of more than
+      150mm.\" The listed building list gives no trigger."
+
+  - id: structural-damage
+    action: add
+    required-if:
+      application-type:
+        in: [consent-under-tpo]
+    source-text: >-
+      structural damage, a structural report from a suitably qualified specialist usually a
+      structural engineer or chartered surveyor needs to be provided as well as an arboricultural
+      report supporting the tree work proposals and options for the avoidance or remediation of
+      indirect tree related damage.
+    source-url: https://www.arun.gov.uk/download.cfm?doc=docm93jijm4n18413.pdf&ver=26435
+    confidence: low
+    notes: >-
+      From the works-to-trees list (workbook row 'Structural Survey'). The start of the sentence is
+      cut off; it applies where tree work is proposed because of alleged structural damage.
+
+unmapped:
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    source-text: >-
+      Depending on the level of impact, sites within the Arun Valley Impact Risk Zone, Singleton and
+      Cocking Tunnels buffer zone or within Pagham Harbour buffer zones (principally zone A) may
+      require a shadow Habitats Regulation Assessment.
+    source-url: https://www.arun.gov.uk/download.cfm?doc=docm93jijm4n18414.pdf&ver=26431
+    suggested-id: habitats-regulations-assessment
+  - local-name: Pagham Harbour Access Management Contribution legal agreement
+    source-text: >-
+      Where a development results in a net gain of residential units and is located in the Pagham
+      Harbour buffer zones A & B, there is a requirement for a financial contribution for Pagham
+      Harbour access management.
+    source-url: https://www.arun.gov.uk/download.cfm?doc=docm93jijm4n20185.pdf&ver=26434
+    suggested-id: habitat-mitigation-contribution
+  - local-name: Structural Survey (listed building)
+    source-text: Structural survey.
+    source-url: https://www.arun.gov.uk/download.cfm?doc=docm93jijm4n18417.pdf&ver=26433
+    suggested-id: structural-survey
+
+low-confidence:
+  - id: "*"
+    note: >-
+      Audit (other): completeness not verified. The main list's item numbers run to at least 45 but
+      only about 22 were mapped, so local requirements (e.g. noise, contamination, lighting, air
+      quality, affordable housing) may be missing. The Full planning rows were 'INFERRED'; the main
+      list's 'Types of application' column should be re-read.
+  - id: transport-assessment
+    note: "Audit (wrong_trigger): the excerpt is garbled ('E(g) Offices not in E( c ) between 1500 and
+      ...'); the thresholds need re-reading."
+  - id: fire-statement
+    note: "Audit (wrong_trigger): the excerpt is garbled with URL fragments and gives no trigger."
+  - id: recreation-facilities-assessment
+    note: "Audit (wrong_trigger): the open space excerpt is garbled with page headers and gives no trigger."
+  - id: landscaping-plan
+    note: "Audit (wrong_trigger): 'is required? landscaping strategy must be submitted.' gives no usable
+      trigger."
+  - id: photos
+    note: "Audit (wrong_trigger): the Full planning excerpt ('when. (e.g. photographs and aerial images).
+      3.') has no usable trigger."
+

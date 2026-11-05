@@ -1,0 +1,1456 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>open-validation explorer</title>
+<meta name="description" content="Local planning validation requirements for English councils: map, tables and a checklist for your site. Draft data - always check the council's own list.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.github.com; base-uri 'self'; form-action 'none'">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js" integrity="sha384-+pxiN6T7yvpryuJmE1gM9PX7yQit15auDb+ZwwvJOd/4be2Cie5/IuVXgQb/S9du" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i" crossorigin="anonymous"></script>
+<style>
+/* ===== Colours and type (see docs/STYLE.md) ===== */
+:root {
+  --bg: #0B1F3A; --surface: #112B4E; --grid: rgba(255,255,255,0.06); --line: rgba(255,255,255,0.6);
+  --line-soft: rgba(255,255,255,0.25); --text: #F2F6FB; --text-muted: #A8BEDB; --accent: #7FB2F0;
+  --check: #F2B705;
+  --status-incorrect: #B388FF; --status-unverified: #EF5350; --status-human: #FB8C00;
+  --status-council: #43A047; --status-updated: #AED581; --status-out: #3A4A60;
+  --sans: "IBM Plex Sans", system-ui, sans-serif; --mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+* { box-sizing: border-box; }
+html { color-scheme: dark; }
+body {
+  margin: 0; color: var(--text); font: 15px/1.5 var(--sans); background-color: var(--bg);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px; overflow-x: hidden;
+}
+a { color: var(--accent); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.mono { font-family: var(--mono); font-size: 13px; }
+.muted { color: var(--text-muted); }
+h1, h2, h3 { font-weight: 600; line-height: 1.2; margin: 0; }
+h2 { font-size: 22px; margin-bottom: 12px; }
+h3 { font-size: 17px; }
+
+/* ===== Layout ===== */
+header.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand h1 { font-size: 20px; letter-spacing: 0.02em; }
+.brand small { color: var(--text-muted); }
+.wrap { max-width: 1280px; margin: 0 auto; padding: 0 16px; }
+.pickbar { display: grid; grid-template-columns: minmax(0,2fr) minmax(0,2fr) minmax(0,1.5fr); gap: 12px; padding: 16px 0 8px; }
+@media (max-width: 760px) { .pickbar { grid-template-columns: 1fr; } }
+label.field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--text-muted); position: relative; }
+.input, select.input { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; color: var(--text); width: 100%; }
+.suggest { position: absolute; top: 100%; left: 0; right: 0; z-index: 30; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; margin-top: 4px; max-height: 280px; overflow-y: auto; padding: 4px; list-style: none; }
+.suggest li { padding: 7px 9px; border-radius: 6px; cursor: pointer; color: var(--text); }
+.suggest li[aria-selected="true"], .suggest li:hover { background: rgba(127,178,240,0.18); }
+.btn { background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 7px 14px; cursor: pointer; color: var(--text); }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 600; }
+.btn.small { padding: 4px 10px; font-size: 13px; }
+.btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+
+/* ===== Application types and the site-details filter ===== */
+.typerows { display: flex; flex-direction: column; gap: 6px; }
+.typerow { display: flex; gap: 6px; align-items: center; }
+.typerow select { flex: 1; min-width: 0; }
+.iconbtn { background: transparent; border: 1px solid var(--line-soft); color: var(--text); border-radius: 8px; width: 36px; height: 36px; cursor: pointer; flex: none; font-size: 16px; }
+.iconbtn:hover { border-color: var(--accent); }
+.addtype { align-self: flex-start; margin-top: 2px; }
+.filterbar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.chip-ans { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--accent); color: var(--text); background: rgba(127,178,240,0.12); border-radius: 999px; padding: 2px 4px 2px 10px; font-size: 13px; }
+.chip-ans button { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; padding: 0 4px; }
+dialog.filter { width: min(640px, calc(100vw - 24px)); max-height: min(86vh, 900px); padding: 0; overflow: hidden; }
+dialog.filter[open] { display: flex; flex-direction: column; }
+.fhead { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.fhead h2 { margin: 0; font-size: 20px; }
+.fbody { padding: 4px 16px 10px; margin-top: 8px; overflow-y: auto; border-top: 1px solid var(--line-soft); }
+.ffoot { display: flex; gap: 8px; justify-content: space-between; padding: 12px 16px; border-top: 1px solid var(--line); }
+.qrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line-soft); }
+.qrow .q { font-weight: 600; } .qrow .q small { display: block; font-weight: 400; color: var(--text-muted); font-size: 12px; }
+.qrow.answered .q { color: var(--accent); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+.seg button { background: transparent; border: none; color: var(--text); padding: 5px 12px; cursor: pointer; font-size: 13px; }
+.seg button + button { border-left: 1px solid var(--line-soft); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--bg); font-weight: 600; }
+.qrow input, .qrow select { width: 110px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px; color: var(--text); }
+.inlineq { display: inline-flex; align-items: center; gap: 4px; margin-right: 8px; }
+.inlineq .seg button { padding: 2px 10px; }
+.typetags { font-size: 12px; color: var(--text-muted); }
+.tag { display: inline-block; border: 1px solid var(--line-soft); border-radius: 999px; padding: 0 8px; font-size: 12px; line-height: 1.6; color: var(--text); background: transparent; margin: 1px 0; white-space: nowrap; }
+button.tag { cursor: pointer; } button.tag:hover { border-color: var(--accent); }
+.tags { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0 2px; }
+
+/* ===== Tabs ===== */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+.tab { background: transparent; border: 1px solid transparent; border-bottom: none; border-radius: 8px 8px 0 0; padding: 9px 14px; cursor: pointer; color: var(--text-muted); white-space: nowrap; }
+.tab[aria-selected="true"] { color: var(--text); border-color: var(--line); background: var(--bg); margin-bottom: -1px; font-weight: 600; }
+.panel { padding: 16px 0 32px; min-height: 50vh; }
+
+/* ===== Status colours ===== */
+.st-incorrect { --c: var(--status-incorrect); } .st-unverified { --c: var(--status-unverified); }
+.st-human-verified { --c: var(--status-human); } .st-council-verified { --c: var(--status-council); }
+.st-council-updated { --c: var(--status-updated); } .st-out { --c: var(--status-out); }
+.badge { display: inline-block; border-radius: 999px; padding: 1px 9px; font-size: 12px; font-weight: 600; background: var(--c, var(--line-soft)); color: var(--bg); white-space: nowrap; }
+.badge.st-out { color: var(--text); border: 1px solid var(--line); }
+.badge.plain { background: transparent; color: var(--text); border: 1px solid var(--line-soft); }
+.badge.local { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+.badge.national { background: transparent; color: var(--text-muted); border: 1px solid var(--line-soft); }
+body.patterns .badge.st-human-verified, body.patterns td.tint.st-human-verified { background-image: radial-gradient(rgba(11,31,58,.55) 1.2px, transparent 1.4px); background-size: 6px 6px; }
+body.patterns .badge.st-council-verified, body.patterns td.tint.st-council-verified { background-image: repeating-linear-gradient(45deg, rgba(11,31,58,.5) 0 1.5px, transparent 1.5px 6px); }
+body.patterns .badge.st-council-updated, body.patterns td.tint.st-council-updated { background-image: repeating-linear-gradient(45deg, rgba(11,31,58,.45) 0 1.5px, transparent 1.5px 6px), repeating-linear-gradient(-45deg, rgba(11,31,58,.45) 0 1.5px, transparent 1.5px 6px); }
+body.patterns .badge.st-incorrect, body.patterns td.tint.st-incorrect { background-image: repeating-linear-gradient(0deg, rgba(11,31,58,.5) 0 1.5px, transparent 1.5px 5px); }
+
+/* ===== Map ===== */
+.mapgrid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; }
+@media (max-width: 900px) { .mapgrid { grid-template-columns: 1fr; } }
+.mapbox { position: relative; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: rgba(11,31,58,0.6); }
+#map { width: 100%; height: 640px; display: block; touch-action: none; }
+@media (max-width: 760px) { #map { height: 460px; } }
+#map path.lpa { stroke: rgba(255,255,255,0.55); stroke-width: 0.6; vector-effect: non-scaling-stroke; cursor: pointer; }
+#map path.lpa.out { stroke: var(--line); }
+#map path.lpa:hover, #map path.lpa:focus { stroke: #fff; stroke-width: 2; outline: none; }
+#map path.lpa.dim { opacity: 0.18; }
+#map path.lpa.selected { stroke: #fff; stroke-width: 3; }
+.mapctl { position: absolute; top: 10px; right: 10px; display: flex; flex-direction: column; gap: 6px; }
+.mapctl .btn { background: var(--surface); width: 40px; height: 40px; padding: 0; border-radius: 10px; font-size: 18px; }
+.mapctl .btn.reset { font-size: 12px; }
+.tooltip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 13px; max-width: 260px; z-index: 5; }
+.legend { border: 1px solid var(--line); border-radius: 12px; padding: 14px; background: var(--surface); align-self: start; }
+.legend ul { list-style: none; margin: 10px 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.legend li button { width: 100%; display: grid; grid-template-columns: 20px 1fr auto; gap: 8px; align-items: start; text-align: left; background: transparent; border: 1px solid transparent; border-radius: 8px; padding: 6px; cursor: pointer; color: var(--text); }
+.legend li button[aria-pressed="true"] { border-color: var(--accent); }
+.legend .swatch { width: 18px; height: 18px; border-radius: 4px; background: var(--c); border: 1px solid var(--line-soft); margin-top: 2px; }
+.legend .count { font-family: var(--mono); font-size: 13px; }
+.legend small { display: block; color: var(--text-muted); font-size: 12px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.chip { border-radius: 999px; padding: 4px 10px; font-size: 13px; cursor: pointer; border: 1px solid var(--line-soft); background: var(--c); color: var(--bg); font-weight: 600; }
+.chip.st-out { color: var(--text); }
+.attribution { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+
+/* ===== Cards and results ===== */
+.card { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 14px 16px; margin-bottom: 12px; }
+.council-panel h2 { margin: 0 0 8px; }
+.council-panel .kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 14px; margin: 0 0 8px; }
+.kv dt { color: var(--text-muted); font-size: 13px; padding-top: 1px; } .kv dd { margin: 0; }
+.council-panel details.std summary { cursor: pointer; font-weight: 600; }
+.council-panel details.std ul { margin: 4px 0 0; padding-left: 18px; }
+.council-panel .actions { margin: 10px 0 0; }
+@media (max-width: 600px) { .council-panel h2 { font-size: 19px; } .card { padding: 12px 14px; } }
+.warn { color: var(--check); }
+.result { border-left: 4px solid var(--line-soft); position: relative; }
+.result.required { border-left: 4px solid var(--accent); }
+.result.check { border: 1px dashed var(--check); border-left: 4px dashed var(--check); }
+.result.notreq { background: transparent; border-color: var(--line-soft); color: var(--text-muted); }
+.result header { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.result .title { display: flex; gap: 10px; align-items: center; }
+.icon { width: 22px; height: 22px; flex: none; }
+.result .trigger { margin: 6px 0; }
+.result details summary { cursor: pointer; color: var(--text-muted); }
+.result ul.must { margin: 6px 0; padding-left: 0; list-style: none; }
+.result ul.must li { padding: 2px 0 2px 24px; position: relative; }
+.result ul.must li::before { content: "☐"; position: absolute; left: 2px; color: var(--accent); }
+.result ul.must li.advised::before { content: "○"; color: var(--text-muted); }
+.result ul.must li.unknown::before { content: "?"; color: var(--check); font-weight: 600; }
+.result .meta { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; margin-top: 8px; align-items: center; }
+.settle { display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px; }
+.settle button { background: transparent; border: 1px dashed var(--check); color: var(--text); border-radius: 999px; padding: 2px 9px; cursor: pointer; font-size: 13px; }
+.group-title { display: flex; align-items: center; gap: 10px; margin: 18px 0 10px; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+blockquote { margin: 6px 0; padding: 6px 10px; border-left: 2px solid var(--line-soft); color: var(--text-muted); white-space: pre-wrap; }
+
+/* ===== Tables ===== */
+.tablewrap { overflow: auto; max-height: 75vh; border: 1px solid var(--line); border-radius: 12px; }
+table.grid { border-collapse: separate; border-spacing: 0; min-width: 100%; font-size: 14px; }
+table.grid th, table.grid td { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 7px 9px; vertical-align: top; text-align: left; background: var(--surface); }
+table.grid th { position: sticky; top: 0; z-index: 2; background: var(--bg); font-weight: 600; white-space: nowrap; cursor: pointer; }
+table.grid th[aria-sort="ascending"]::after { content: " ▲"; font-size: 10px; } table.grid th[aria-sort="descending"]::after { content: " ▼"; font-size: 10px; }
+table.grid td { position: relative; }   /* keeps the hidden screen-reader labels inside their cell */
+table.grid td:first-child, table.grid th:first-child { position: sticky; left: 0; z-index: 1; }
+table.grid th:first-child { z-index: 3; }
+table.grid td.tint { background: linear-gradient(color-mix(in srgb, var(--c) 20%, transparent), color-mix(in srgb, var(--c) 20%, transparent)), var(--surface); box-shadow: inset 3px 0 0 var(--c); }
+table.grid td.tint.st-incorrect::before { content: "✕ "; color: var(--status-incorrect); font-weight: 600; }
+table.grid td.pending { outline: 2px dashed var(--text); outline-offset: -4px; }
+body.reviewing table.grid td.cell { cursor: pointer; }
+table.grid td .clip { display: block; max-width: 340px; }
+table.grid td.wide .clip { max-width: 460px; }
+table.grid td button.linkish { background: none; border: none; color: var(--accent); cursor: pointer; padding: 0; text-align: left; text-decoration: underline; }
+.counts { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px; }
+.progress { height: 6px; background: var(--line-soft); border-radius: 999px; overflow: hidden; margin: 8px 0; }
+.progress div { height: 100%; background: var(--accent); width: 0; transition: width .2s; }
+
+/* ===== Browse files ===== */
+.browse { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 16px; }
+@media (max-width: 760px) { .browse { grid-template-columns: minmax(0, 1fr); } }
+.browse nav, .browse p.mono, .tree li button { min-width: 0; overflow-wrap: anywhere; }
+.tree { list-style: none; padding: 0; margin: 0; font-family: var(--mono); font-size: 13px; }
+.tree li button { background: none; border: none; color: var(--text); cursor: pointer; padding: 3px 4px; text-align: left; width: 100%; border-radius: 4px; }
+.tree li button[aria-current="true"] { background: rgba(127,178,240,0.18); }
+pre.yaml { margin: 0; padding: 14px; overflow: auto; font-family: var(--mono); font-size: 13px; line-height: 1.55; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; white-space: pre-wrap; }
+pre.yaml .k { color: var(--accent); } pre.yaml .s { color: #C5E1A5; } pre.yaml .n { color: #FFCC80; } pre.yaml .c { color: var(--text-muted); } pre.yaml .d { color: var(--text-muted); }
+
+/* ===== Review mode ===== */
+.switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; }
+.switch input { width: 40px; height: 22px; appearance: none; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); position: relative; cursor: pointer; }
+.switch input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--text-muted); transition: left .15s; }
+.switch input:checked { background: var(--accent); border-color: var(--accent); } .switch input:checked::after { left: 20px; background: var(--bg); }
+.menu { position: fixed; z-index: 60; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; width: min(320px, calc(100vw - 32px)); }
+.menu .opts { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
+.menu .opts button { display: flex; gap: 8px; align-items: center; background: transparent; border: 1px solid var(--line-soft); border-radius: 8px; padding: 6px 8px; cursor: pointer; color: var(--text); text-align: left; }
+.menu .opts button[aria-pressed="true"] { border-color: var(--text); }
+.menu .swatch { width: 14px; height: 14px; border-radius: 3px; background: var(--c); flex: none; }
+.menu label { display: block; font-size: 13px; color: var(--text-muted); margin-top: 6px; }
+.menu .row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.reviewbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; background: var(--surface); border-top: 1px solid var(--line); padding: 10px 16px; display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; }
+dialog { background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: 12px; max-width: min(560px, calc(100vw - 32px)); padding: 18px; }
+dialog::backdrop { background: rgba(5,15,30,0.7); }
+dialog ol { padding-left: 20px; }
+
+/* ===== States and footer ===== */
+.empty { text-align: center; padding: 40px 16px; color: var(--text-muted); }
+.empty svg { width: 160px; height: auto; margin-bottom: 12px; }
+.error { border: 1px solid var(--status-unverified); border-radius: 12px; padding: 12px 14px; margin: 12px 0; }
+footer.foot { border-top: 1px solid var(--line); padding: 16px; color: var(--text-muted); font-size: 13px; text-align: center; margin-bottom: 64px; }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="3" y="3" width="18" height="18"/><path d="M3 9h18M9 21V9M14 14h4M14 17h4"/></svg>
+    <div><h1>open-validation</h1><small>Local planning validation requirements, England</small></div>
+  </div>
+  <label class="switch" title="Review mode, for maintainers: mark cells as checked">
+    <input type="checkbox" id="reviewToggle" aria-describedby="reviewHelp"> Review
+    <span id="reviewHelp" class="sr-only">Review mode lets maintainers mark table cells as checked.</span>
+  </label>
+</header>
+
+<div class="wrap">
+  <div class="pickbar">
+    <label class="field">Council
+      <input id="councilInput" class="input" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="councilList" placeholder="Search by name or code, e.g. Shrop or SHR" autocomplete="off">
+      <ul id="councilList" class="suggest" role="listbox" hidden></ul>
+    </label>
+    <div class="field" role="group" aria-labelledby="typeLabel"><span id="typeLabel">Application type</span>
+      <div id="typeRows" class="typerows"></div>
+      <button class="btn small addtype" id="addType" type="button">+ Add another type</button>
+    </div>
+    <label class="field">Search requirements
+      <input id="filterInput" class="input" type="search" placeholder="e.g. tree, flood, heritage">
+    </label>
+  </div>
+
+  <nav class="tabs" role="tablist" aria-label="Views">
+    <button class="tab" role="tab" data-tab="map" id="tab-map">Map</button>
+    <button class="tab" role="tab" data-tab="councils" id="tab-councils">Councils</button>
+    <button class="tab" role="tab" data-tab="results" id="tab-results">Results</button>
+    <button class="tab" role="tab" data-tab="table" id="tab-table">Table</button>
+    <button class="tab" role="tab" data-tab="browse" id="tab-browse">Browse files</button>
+  </nav>
+  <main class="panel" id="panel" role="tabpanel" aria-live="polite"></main>
+</div>
+
+<footer class="foot">
+  <strong>Draft data.</strong> Collected by AI from council lists and checked cell by cell by volunteers.
+  Always check the council's own validation list before you submit an application.
+  Independent project; not a council or government service. Data CC BY 4.0, code MIT -
+  <a href="https://github.com/Open-Validation/open-validation">source on GitHub</a>.
+</footer>
+
+<div id="reviewbar" class="reviewbar" hidden></div>
+<div id="tooltip" class="tooltip" hidden></div>
+
+<dialog id="dialog"></dialog>
+<dialog id="filterDialog" class="filter" aria-labelledby="filterTitle"></dialog>
+
+<script>
+"use strict";
+// ======================================================================
+// Settings
+// ======================================================================
+var OWNER = "Open-Validation", REPO = "open-validation", BRANCH = "main";
+var ROOT = "..";                                   // the repo root, relative to docs/
+var SPEC = ROOT + "/specification/planning-requirement";
+var GH_BLOB = "https://github.com/" + OWNER + "/" + REPO + "/blob/" + BRANCH + "/";
+var GH_NEW_ISSUE = "https://github.com/" + OWNER + "/" + REPO + "/issues/new";
+var API = "https://api.github.com/repos/" + OWNER + "/" + REPO;
+
+var STATUSES = ["incorrect", "unverified", "human-verified", "council-verified", "council-updated"];
+var STATUS_LABEL = { "incorrect": "Incorrect", "unverified": "Unverified", "human-verified": "Human verified",
+  "council-verified": "Council verified", "council-updated": "Council updated", "out": "Not covered yet" };
+var STATUS_HELP = {
+  "out": "We don't have this council's requirements yet, or it is outside England.",
+  "incorrect": "Someone checked it and found it wrong; a note says what.",
+  "unverified": "Collected by AI; nobody has checked it against the council's list yet.",
+  "human-verified": "A person compared it with the council's current list.",
+  "council-verified": "Someone at the council confirmed it is correct.",
+  "council-updated": "The council changed it itself and now maintains it." };
+var REQ_CELLS = ["requirement", "application-type", "required-if", "must-include", "policy", "source-text", "source-url"];
+var LPA_CELLS = ["validation-list-url", "validation-list-date", "validation-list-status", "submission-standards", "contact", "joint-list"];
+var NEEDS_EVIDENCE = ["council-verified", "council-updated"];
+var MHCLG_FIELDS = {
+  "dwelling-count": { label: "New homes", kind: "number" },
+  "site-area-residential": { label: "Residential site (ha)", kind: "number" },
+  "site-area-non-residential": { label: "Non-residential site (ha)", kind: "number" },
+  "floorspace-non-residential": { label: "Non-residential m²", kind: "number" },
+  "floorspace": { label: "Floorspace m²", kind: "number" },
+  "housing-floorspace": { label: "Housing m²", kind: "number" },
+  "housing-type": { label: "Housing type", kind: "text" },
+  "major-development": { label: "Major development", kind: "boolean" }
+};
+
+// ======================================================================
+// State
+// ======================================================================
+var S = {
+  lpas: [], lpaByCode: {}, types: [], typeById: {}, reqs: {}, nationalTypes: {}, nationalFiles: {},
+  fields: {}, defs: {}, geo: null, index: null, tree: undefined,
+  councils: {}, lpaYaml: {}, confirmed: {},
+  lpa: "", chosen: [], tab: "", q: "", site: {},
+  highlight: "", patterns: false, review: false, pending: [], sort: {}, statusFilter: "", browseFile: ""
+};
+
+// ======================================================================
+// Small helpers
+// ======================================================================
+function $(sel, el) { return (el || document).querySelector(sel); }
+function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+function h(html) { var t = document.createElement("template"); t.innerHTML = html.trim(); return t.content.firstChild; }
+function tidy(id) { return String(id || "").replace(/-/g, " ").replace(/^./, function (c) { return c.toUpperCase(); }); }
+function today() { return new Date().toISOString().slice(0, 10); }
+function store(kind, key, value) { try { window[kind].setItem(key, JSON.stringify(value)); } catch (e) {} }
+function recall(kind, key) { try { return JSON.parse(window[kind].getItem(key)); } catch (e) { return null; } }
+
+// A ten-line CSV parser (handles quotes and commas inside quotes).
+function parseCSV(text) {
+  var rows = [], row = [], cell = "", q = false;
+  for (var i = 0; i < text.length; i++) {
+    var c = text[i];
+    if (q) { if (c === '"' && text[i + 1] === '"') { cell += '"'; i++; } else if (c === '"') q = false; else cell += c; }
+    else if (c === '"') q = true; else if (c === ",") { row.push(cell); cell = ""; }
+    else if (c === "\n" || c === "\r") { if (c === "\r" && text[i + 1] === "\n") i++; row.push(cell); rows.push(row); row = []; cell = ""; }
+    else cell += c;
+  }
+  if (cell || row.length) { row.push(cell); rows.push(row); }
+  var head = rows.shift() || [];
+  return rows.filter(function (r) { return r.length > 1 || r[0]; }).map(function (r) { var o = {}; head.forEach(function (k, j) { o[k] = r[j] == null ? "" : r[j]; }); return o; });
+}
+function fetchText(url) { return fetch(url).then(function (r) { if (!r.ok) throw new Error(r.status + " " + url); return r.text(); }); }
+function fetchCSV(url) { return fetchText(url).then(parseCSV); }
+function fetchYAML(url) { return fetchText(url).then(function (t) { return jsyaml.load(t, { schema: jsyaml.CORE_SCHEMA }); }); }   // CORE_SCHEMA keeps dates as text
+
+// ======================================================================
+// ===== EVALUATOR START (keep identical in docs/index.html and docs/evaluate.test.html) =====
+// Three-valued rule evaluator for MHCLG-style required-if rules.
+// Returns true, false or "unknown".
+//   rule: a required-if value (object, "discretionary", or undefined)
+//   site: { field: value } from the site pills; booleans are true/false, numbers are numbers,
+//         designations are true/false; anything unset is missing
+//   appType: { id: "hh", parent: "", children: ["..."] } or null when no type is chosen
+//   definitions: { "major-development": { any: [...] } }
+var UNKNOWN = "unknown";
+
+function evalAll(items, site, appType, defs) {
+  var anyUnknown = false;
+  for (var i = 0; i < items.length; i++) {
+    var r = evaluate(items[i], site, appType, defs);
+    if (r === false) return false;
+    if (r === UNKNOWN) anyUnknown = true;
+  }
+  return anyUnknown ? UNKNOWN : true;
+}
+
+function evalAny(items, site, appType, defs) {
+  var anyUnknown = false;
+  for (var i = 0; i < items.length; i++) {
+    var r = evaluate(items[i], site, appType, defs);
+    if (r === true) return true;
+    if (r === UNKNOWN) anyUnknown = true;
+  }
+  return anyUnknown ? UNKNOWN : false;
+}
+
+function isSet(v) { return v !== undefined && v !== null && v !== ""; }
+
+function compare(actual, op, expected) {
+  if (typeof expected === "number" || (op && op !== "==")) {
+    var a = Number(actual), e = Number(expected);
+    if (isNaN(a) || isNaN(e)) return UNKNOWN;
+    switch (op || "==") {
+      case ">=": return a >= e;
+      case ">": return a > e;
+      case "<=": return a <= e;
+      case "<": return a < e;
+      default: return a === e;
+    }
+  }
+  if (typeof expected === "boolean") return Boolean(actual) === expected;
+  return String(actual) === String(expected);
+}
+
+function typeMatches(list, appType) {
+  if (!appType || !appType.id) return UNKNOWN;
+  // A chosen child also gets its parent's rules; a chosen parent includes its children.
+  var wanted = [appType.id].concat(appType.parent ? [appType.parent] : [], appType.children || []);
+  for (var i = 0; i < wanted.length; i++) if (list.indexOf(wanted[i]) !== -1) return true;
+  return false;
+}
+
+function evaluate(rule, site, appType, defs) {
+  if (rule === undefined || rule === null || rule === "discretionary") return UNKNOWN;
+  if (Array.isArray(rule)) return evalAll(rule, site, appType, defs);
+  if (typeof rule !== "object") { console.warn("Unrecognised rule", rule); return UNKNOWN; }
+  var parts = [];
+  for (var key in rule) {
+    if (!Object.prototype.hasOwnProperty.call(rule, key) || key === "description") continue;
+    var v = rule[key];
+    if (key === "all") parts.push(evalAll(v || [], site, appType, defs));
+    else if (key === "any") parts.push(evalAny(v || [], site, appType, defs));
+    else if (key === "always") parts.push(v === true ? true : UNKNOWN);
+    else if (key === "application-type") parts.push(typeMatches((v && v["in"]) || [], appType));
+    else if (key === "condition") {
+      var c = v || {};
+      parts.push(isSet(site[c.field]) ? compare(site[c.field], c.operator, c.value) : UNKNOWN);
+    } else if (key === "site") {
+      var list = (v && v["in"]) || [], allNo = list.length > 0, hit = false;
+      for (var i = 0; i < list.length; i++) {
+        if (site[list[i]] === true) hit = true;
+        if (site[list[i]] !== false) allNo = false;
+      }
+      parts.push(hit ? true : (allNo ? false : UNKNOWN));
+    } else if (key === "ref") {
+      if (v === "major-development" && isSet(site["major-development"])) parts.push(site["major-development"] === true);
+      else if (defs && defs[v]) parts.push(evaluate(defs[v], site, appType, defs));
+      else { console.warn("Unknown definition", v); parts.push(UNKNOWN); }
+    } else { console.warn("Unrecognised rule key", key); parts.push(UNKNOWN); }
+  }
+  return combineAll(parts);
+}
+
+// Three-valued AND over results that are already worked out.
+function combineAll(results) {
+  if (!results.length) return UNKNOWN;
+  if (results.indexOf(false) !== -1) return false;
+  return results.indexOf(UNKNOWN) !== -1 ? UNKNOWN : true;
+}
+// ===== EVALUATOR END =====
+
+// ======================================================================
+// Reading rules: plain English, fields used, unset fields
+// ======================================================================
+var OPS = { ">=": "at least", ">": "more than", "<=": "at most", "<": "less than", "==": "is" };
+function fieldLabel(f) { var x = S.fields[f] || MHCLG_FIELDS[f]; return (x && x.label) || tidy(f); }
+function describe(rule) {
+  if (rule == null) return "";
+  if (rule === "discretionary") return "at the council's discretion";
+  if (Array.isArray(rule)) return rule.map(describe).filter(Boolean).join(" and ");
+  var out = [];
+  Object.keys(rule).forEach(function (k) {
+    var v = rule[k];
+    if (k === "all") out.push((v || []).map(describe).filter(Boolean).join(" and "));
+    else if (k === "any") { var parts = (v || []).map(describe).filter(Boolean); out.push(parts.length > 1 ? "any of: " + parts.join("; or ") : parts.join("")); }
+    else if (k === "always") out.push("always");
+    else if (k === "application-type") out.push("for " + ((v && v["in"]) || []).map(typeName).join(", ") + " applications");
+    else if (k === "condition") out.push(v.description ? lower(v.description) : fieldLabel(v.field).toLowerCase() + " " + (OPS[v.operator] || "is") + " " + v.value);
+    else if (k === "site") out.push(v.description ? lower(v.description) : "site is in: " + ((v && v["in"]) || []).map(fieldLabel).join(", "));
+    else if (k === "ref") out.push(v === "major-development" ? "major development" : tidy(v));
+  });
+  return out.filter(Boolean).join(" and ");
+}
+// "The site is in…." -> "the site is in…" (keeps acronyms such as "SSSI" as they are)
+function lower(t) { t = String(t).trim().replace(/\.$/, ""); return /^[A-Z][a-z]/.test(t) ? t.charAt(0).toLowerCase() + t.slice(1) : t; }
+function typeName(id) { var t = S.typeById[id]; return t ? t.name.replace(/ planning application$| base type$/i, "") : id; }
+
+// "Applies to" tags, worked out from a rule (never stored separately, so they can't drift):
+// [{ key, text }] e.g. Listed building, Green Belt, Major development, New homes ≥ 10
+var OP_SIGN = { ">=": "≥", ">": ">", "<=": "≤", "<": "<", "==": "=" };
+function appliesTo(rule) {
+  var tags = [], seen = {};
+  function add(key, text) { if (!seen[key + text]) { seen[key + text] = 1; tags.push({ key: key, text: text }); } }
+  (function walk(x) {
+    if (x === "discretionary") return add("discretionary", "Council's discretion");
+    if (Array.isArray(x)) return x.forEach(walk);
+    if (!x || typeof x !== "object") return;
+    if (x.always === true) add("always", "All applications");
+    if (x.ref === "major-development") add("major-development", "Major development");
+    if (x.site && x.site["in"]) x.site["in"].forEach(function (f) { add(f, fieldLabel(f)); });
+    if (x.condition && x.condition.field) {
+      var c = x.condition, label = fieldLabel(c.field);
+      if (c.value === true && !c.operator) add(c.field, label);
+      else if (c.value === false && !c.operator) add(c.field, "Not: " + label);
+      else if (typeof c.value === "number" || c.operator) add(c.field, label + " " + (OP_SIGN[c.operator] || "=") + " " + c.value);
+      else add(c.field, label + ": " + tidy(c.value));
+    }
+    Object.keys(x).forEach(function (k) { if (k !== "condition" && k !== "site" && k !== "application-type") walk(x[k]); });
+  })(rule);
+  return tags;
+}
+function tagsHTML(rule, clickable) {
+  var t = appliesTo(rule);
+  if (rule === undefined) return '<span class="muted">see wording</span>';
+  if (!t.length) return '<span class="tag">Any site</span>';
+  return t.map(function (x) { return clickable ? '<button type="button" class="tag" data-tag="' + esc(x.key) + '" title="Show only requirements that depend on this">' + esc(x.text) + "</button>" : '<span class="tag">' + esc(x.text) + "</span>"; }).join(" ");
+}
+
+// Every field a rule mentions: { field: count }
+function ruleFields(rule, acc) {
+  acc = acc || {};
+  (function walk(x) {
+    if (Array.isArray(x)) return x.forEach(walk);
+    if (!x || typeof x !== "object") return;
+    if (x.condition && x.condition.field) acc[x.condition.field] = (acc[x.condition.field] || 0) + 1;
+    if (x.site && x.site["in"]) x.site["in"].forEach(function (f) { acc[f] = (acc[f] || 0) + 1; });
+    if (x.ref === "major-development") acc["major-development"] = (acc["major-development"] || 0) + 1;
+    Object.keys(x).forEach(function (k) { if (k !== "condition" && k !== "site") walk(x[k]); });
+  })(rule);
+  return acc;
+}
+// Fields still unset that would settle an unknown rule.
+function unsetFields(rule) {
+  return Object.keys(ruleFields(rule)).filter(function (f) { return !isSet(S.site[f]); });
+}
+function fieldKind(f) {
+  var x = S.fields[f] || MHCLG_FIELDS[f];
+  if (x && x.kind) return x.kind === "designation" ? "boolean" : x.kind;
+  return "boolean";
+}
+// The application types you chose (several are allowed: a project can need more than one consent)
+function typeObj(id) {
+  if (!id) return null;
+  var t = S.typeById[id] || {};
+  return { id: id, parent: t.parent || "", children: S.types.filter(function (x) { return x.parent === id; }).map(function (x) { return x.reference; }) };
+}
+function appTypeObj() { return typeObj(S.chosen[0]); }
+// Evaluate a rule for every chosen type: required if it's required for any of them.
+// Returns { result, types: [ids it's required or possibly required for] }.
+function evalForTypes(rule) {
+  if (!S.chosen.length) return { result: evaluate(rule, S.site, null, S.defs), types: [] };
+  var res = S.chosen.map(function (id) { return evaluate(rule, S.site, typeObj(id), S.defs); });
+  var result = res.indexOf(true) !== -1 ? true : res.indexOf(UNKNOWN) !== -1 ? UNKNOWN : false;
+  return { result: result, types: S.chosen.filter(function (id, i) { return res[i] === true || (result !== true && res[i] === UNKNOWN); }) };
+}
+
+// ======================================================================
+// Loading data
+// ======================================================================
+function loadBase() {
+  return Promise.all([
+    fetchCSV(ROOT + "/data/lpa.csv"),
+    fetchCSV(ROOT + "/data/planning-application-type.csv"),
+    fetchCSV(ROOT + "/data/planning-requirement.csv"),
+    fetchCSV(ROOT + "/data/national-planning-requirement.csv"),
+    fetchCSV(ROOT + "/data/new-field.csv"),
+    fetchYAML(SPEC + "/definition/major-development.yaml").catch(function () { return {}; }),
+    fetch("map/uk-lpa.geojson").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
+    fetchCSV(ROOT + "/data/other-planning-authority.csv").catch(function () { return []; })
+  ]).then(function (res) {
+    S.corps = res[7];   // development corporations: separate planning authorities inside or next to councils
+    S.lpas = res[0]; S.lpas.forEach(function (r) { S.lpaByCode[r.code] = r; });
+    S.types = res[1].filter(function (t) { return !t["end-date"]; });
+    S.types.forEach(function (t) { S.typeById[t.reference] = t; });
+    res[2].forEach(function (r) { if (!r["end-date"]) S.reqs[r.reference] = r; });
+    res[3].forEach(function (r) { if (!r["end-date"]) (S.nationalTypes[r["planning-requirement"]] = S.nationalTypes[r["planning-requirement"]] || []).push(r["application-type"]); });
+    res[4].forEach(function (r) { S.fields[r.field] = { label: r.label, kind: r.kind, description: r.description }; });
+    S.defs = (res[5] && res[5].definition) || {};
+    S.geo = res[6] ? rewindForD3(res[6]) : null;
+    // National requirement files that have their own rules
+    return Promise.all(["site-plan", "application-form", "design-and-access-statement", "air-quality-assessment", "affordable-housing-statement"].map(function (id) {
+      return fetchYAML(SPEC + "/" + id + ".yaml").then(function (d) { S.nationalFiles[id] = d; }).catch(function () {});
+    }));
+  });
+}
+
+// Which files does a council have? 1) GitHub's file list (once per session), 2) our own index
+// data/local-planning-requirement.csv, 3) try every requirement id.
+function githubTree() {
+  if (S.tree !== undefined) return Promise.resolve(S.tree);
+  var cached = recall("sessionStorage", "ov-tree");
+  if (cached) { S.tree = cached; return Promise.resolve(cached); }
+  return fetch(API + "/git/trees/" + BRANCH + "?recursive=1").then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (j) {
+      S.tree = j && j.tree ? j.tree.map(function (x) { return x.path; }).filter(function (p) { return p.indexOf("specification/planning-requirement/") === 0; }) : null;
+      if (S.tree) store("sessionStorage", "ov-tree", S.tree);
+      return S.tree;
+    }).catch(function () { S.tree = null; return null; });
+}
+function localIndex() {
+  if (S.index) return Promise.resolve(S.index);
+  return fetchCSV(ROOT + "/data/local-planning-requirement.csv").then(function (rows) {
+    S.index = {}; rows.forEach(function (r) { (S.index[r["local-authority"]] = S.index[r["local-authority"]] || {})[r["planning-requirement"]] = true; });
+    return S.index;
+  }).catch(function () { S.index = {}; return S.index; });
+}
+function fileIds(code) {
+  var prefix = "specification/planning-requirement/" + code + "/";
+  return githubTree().then(function (tree) {
+    if (tree && tree.indexOf(prefix + "_lpa.yaml") !== -1) {
+      return tree.filter(function (p) { return p.indexOf(prefix) === 0 && /\.yaml$/.test(p) && !/_lpa\.yaml$/.test(p); })
+        .map(function (p) { return p.slice(prefix.length, -5); });
+    }
+    return localIndex().then(function (idx) {
+      if (idx[code]) return Object.keys(idx[code]);
+      // Last resort: try every id (slow, but works anywhere)
+      return Promise.all(Object.keys(S.reqs).map(function (id) {
+        return fetch(SPEC + "/" + code + "/" + id + ".yaml", { method: "HEAD" }).then(function (r) { return r.ok ? id : null; }).catch(function () { return null; });
+      })).then(function (ids) { return ids.filter(Boolean); });
+    });
+  });
+}
+function loadLpaYaml(code) {
+  if (S.lpaYaml[code]) return Promise.resolve(S.lpaYaml[code]);
+  return fetchYAML(SPEC + "/" + code + "/_lpa.yaml").then(function (d) { S.lpaYaml[code] = d || {}; return S.lpaYaml[code]; });
+}
+function loadCouncil(code) {
+  if (S.councils[code]) return Promise.resolve(S.councils[code]);
+  return Promise.all([loadLpaYaml(code), fileIds(code)]).then(function (res) {
+    return Promise.all(res[1].map(function (id) {
+      return fetchYAML(SPEC + "/" + code + "/" + id + ".yaml").then(function (d) { return { id: id, data: d || {} }; }).catch(function () { return null; });
+    })).then(function (files) {
+      S.councils[code] = { lpa: res[0], files: files.filter(Boolean).sort(function (a, b) { return reqName(a.id).localeCompare(reqName(b.id)); }) };
+      return S.councils[code];
+    });
+  });
+}
+// Development corporations next to (or inside) a council, and the councils next to one
+function corpByName(name) { name = String(name || "").replace(/\s+LPA$/, ""); return (S.corps || []).find(function (c) { return c.name === name; }); }
+function corpsNear(code) { return (S.corps || []).filter(function (c) { return c.borders.split(";").indexOf(code) !== -1; }); }
+function councilNames(codes) { return codes.split(";").filter(Boolean).map(function (c) { return (S.lpaByCode[c] || {}).name || c; }); }
+function reqName(id) { return (S.reqs[id] && S.reqs[id].name) || tidy(id); }
+
+// ======================================================================
+// Statuses
+// ======================================================================
+function mapStatus(code, nation) {
+  if ((nation && nation !== "England") || !code) return "out";
+  var r = S.lpaByCode[code];
+  if (!r || r.coverage !== "covered") return "out";
+  return r["review-status"] || "unverified";
+}
+function badge(status, extra) {
+  return '<span class="badge st-' + status + '">' + esc(STATUS_LABEL[status] || status) + (extra ? " " + esc(extra) : "") + "</span>";
+}
+function pendingFor(code, file, cell) {
+  for (var i = 0; i < S.pending.length; i++) { var m = S.pending[i]; if (m.lpa === code && m.file === file && m.cell === cell) return m; }
+  return null;
+}
+function cellStatus(data, code, file, cell) {
+  var p = pendingFor(code, file, cell);
+  if (p) return { status: p.status, pending: true, mark: p };
+  var m = ((data && data["field-status"]) || {})[cell];
+  return { status: (m && m.status) || "unverified", mark: m };
+}
+function cellValue(data, cell) {
+  var vl = data["validation-list"] || {};
+  switch (cell) {
+    case "requirement": return data.reference;
+    case "application-type": var t = []; (function walk(x) { if (Array.isArray(x)) x.forEach(walk); else if (x && typeof x === "object") Object.keys(x).forEach(function (k) { if (k === "application-type" && x[k] && x[k]["in"]) t = t.concat(x[k]["in"]); else walk(x[k]); }); })(data["required-if"]); return t;
+    case "validation-list-url": return vl.url;
+    case "validation-list-date": return vl.date;
+    case "validation-list-status": return vl.status;
+    default: return data[cell];
+  }
+}
+function isEmpty(v) { return v == null || v === "" || (Array.isArray(v) && !v.length) || (typeof v === "object" && !Array.isArray(v) && !Object.keys(v).length); }
+
+// ======================================================================
+// URL hash: everything you chose is in the address, so a link reproduces the view
+// ======================================================================
+function writeHash(replace) {
+  var p = [];
+  if (S.lpa) p.push("lpa=" + encodeURIComponent(S.lpa));
+  if (S.chosen.length) p.push("type=" + S.chosen.map(encodeURIComponent).join(","));
+  if (S.tab) p.push("tab=" + S.tab);
+  if (S.q) p.push("q=" + encodeURIComponent(S.q));
+  Object.keys(S.site).sort().forEach(function (f) {
+    var v = S.site[f]; if (!isSet(v)) return;
+    p.push(encodeURIComponent(f) + "=" + encodeURIComponent(v === true ? "yes" : v === false ? "no" : v));
+  });
+  var hash = "#" + p.join("&");
+  if (location.hash !== hash) { if (replace) history.replaceState(null, "", hash); else history.pushState(null, "", hash); }
+}
+function readHash() {
+  var p = {}; location.hash.replace(/^#/, "").split("&").forEach(function (kv) { if (!kv) return; var i = kv.indexOf("="); p[decodeURIComponent(kv.slice(0, i))] = decodeURIComponent(kv.slice(i + 1)); });
+  S.lpa = S.lpaByCode[p.lpa] ? p.lpa : ""; S.chosen = String(p.type || "").split(",").filter(function (t, i, a) { return S.typeById[t] && a.indexOf(t) === i; }); S.q = p.q || "";
+  S.tab = ["map", "councils", "results", "table", "browse"].indexOf(p.tab) !== -1 ? p.tab : (S.lpa ? "results" : "map");
+  S.site = {};
+  Object.keys(p).forEach(function (k) {
+    if (["lpa", "type", "tab", "q"].indexOf(k) !== -1) return;
+    var v = p[k]; S.site[k] = v === "yes" ? true : v === "no" ? false : (fieldKind(k) === "number" ? Number(v) : v);
+  });
+}
+
+// ======================================================================
+// Top bar: council search, type dropdown, filter
+// ======================================================================
+function setupPickers() {
+  var input = $("#councilInput"), list = $("#councilList"), active = -1;
+  function matches(q) {
+    q = q.trim().toLowerCase(); if (!q) return [];
+    return S.lpas.filter(function (r) { return r.name.toLowerCase().indexOf(q) !== -1 || r.code.toLowerCase().indexOf(q) === 0; })
+      .sort(function (a, b) { return (a.code.toLowerCase() === q ? -1 : 0) - (b.code.toLowerCase() === q ? -1 : 0) || a.name.localeCompare(b.name); }).slice(0, 12);
+  }
+  function show() {
+    var m = matches(input.value); active = -1;
+    list.innerHTML = m.map(function (r, i) { return '<li role="option" id="opt-' + i + '" data-code="' + esc(r.code) + '">' + esc(r.name) + ' <span class="muted mono">' + esc(r.code) + "</span></li>"; }).join("");
+    list.hidden = !m.length; input.setAttribute("aria-expanded", String(!!m.length));
+  }
+  input.addEventListener("input", show);
+  input.addEventListener("keydown", function (e) {
+    var items = list.querySelectorAll("li");
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); if (!items.length) return; active = (active + (e.key === "ArrowDown" ? 1 : -1) + items.length) % items.length; items.forEach(function (li, i) { li.setAttribute("aria-selected", String(i === active)); }); input.setAttribute("aria-activedescendant", "opt-" + active); }
+    else if (e.key === "Enter") { e.preventDefault(); var li = items[active] || items[0]; if (li) selectCouncil(li.dataset.code); }
+    else if (e.key === "Escape") { list.hidden = true; }
+  });
+  list.addEventListener("mousedown", function (e) { var li = e.target.closest("li"); if (li) { e.preventDefault(); selectCouncil(li.dataset.code); } });
+  input.addEventListener("blur", function () { setTimeout(function () { list.hidden = true; input.setAttribute("aria-expanded", "false"); }, 150); });
+
+  // Application types grouped by parent (Prior approval > pa-storey ...), used by every type row
+  var parents = S.types.filter(function (t) { return !t.parent; });
+  var solo = parents.filter(function (p) { return !S.types.some(function (c) { return c.parent === p.reference; }); });
+  var html = '<optgroup label="Application types">' + solo.map(function (t) { return '<option value="' + t.reference + '">' + esc(t.name) + "</option>"; }).join("") + "</optgroup>";
+  parents.filter(function (p) { return solo.indexOf(p) === -1; }).forEach(function (p) {
+    html += '<optgroup label="' + esc(p.name) + '"><option value="' + p.reference + '">' + esc(p.name) + " (all)</option>" +
+      S.types.filter(function (c) { return c.parent === p.reference; }).map(function (c) { return '<option value="' + c.reference + '">&nbsp;&nbsp;' + esc(c.name) + "</option>"; }).join("") + "</optgroup>";
+  });
+  S.typeOptions = html;
+  var rows = $("#typeRows");
+  rows.addEventListener("change", function (e) {
+    var sel = e.target.closest("select"); if (!sel) return;
+    var i = Number(sel.dataset.i), v = sel.value;
+    if (!v) S.chosen.splice(i, 1); else if (S.chosen.indexOf(v) === -1 || S.chosen.indexOf(v) === i) S.chosen[i] = v;
+    S.chosen = S.chosen.filter(Boolean); writeHash(); render();
+  });
+  rows.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-remove]"); if (!b) return;
+    S.chosen.splice(Number(b.dataset.remove), 1); S.addingType = false; writeHash(); render();
+  });
+  $("#addType").addEventListener("click", function () { S.addingType = true; renderTypeRows(); var last = rows.querySelector("select:last-of-type, .typerow:last-child select"); if (last) last.focus(); });
+  var f = $("#filterInput"), timer;
+  f.addEventListener("input", function () { clearTimeout(timer); timer = setTimeout(function () { S.q = f.value.trim(); writeHash(true); renderPanel(); }, 200); });
+}
+function syncPickers() {
+  $("#councilInput").value = S.lpa ? S.lpaByCode[S.lpa].name : "";
+  $("#filterInput").value = S.q; renderTypeRows();
+}
+// One drop-down per chosen type, plus an empty one when adding another; ✕ removes a type
+function renderTypeRows() {
+  var list = S.chosen.slice(); if (!list.length || S.addingType) list.push("");
+  $("#typeRows").innerHTML = list.map(function (t, i) {
+    return '<div class="typerow"><select class="input" data-i="' + i + '" aria-label="Application type ' + (i + 1) + '">' +
+      '<option value="">' + (i === 0 ? "Any application type" : "Choose another type…") + "</option>" + S.typeOptions + "</select>" +
+      (t || i > 0 ? '<button class="iconbtn" type="button" data-remove="' + i + '" aria-label="Remove ' + esc(t ? typeName(t) : "this type") + '">✕</button>' : "") + "</div>";
+  }).join("");
+  $("#typeRows").querySelectorAll("select").forEach(function (sel, i) { sel.value = list[i]; });
+  $("#addType").hidden = !S.chosen.length || S.addingType;
+  S.addingType = false;
+}
+function selectCouncil(code) {
+  S.lpa = code || ""; $("#councilList").hidden = true;
+  if (S.lpa && (S.tab === "map" || S.tab === "councils" || !S.tab)) S.tab = "results";
+  writeHash(); render();
+}
+
+// ======================================================================
+// Site details: a Filter pop-up (pros see everything first, then narrow it down)
+// ======================================================================
+function currentRules() {
+  var rules = [];
+  if (S.lpa && S.councils[S.lpa]) S.councils[S.lpa].files.forEach(function (f) {
+    rules.push(f.data["required-if"]); (f.data["must-include"] || []).forEach(function (m) { rules.push(m["required-if"]); });
+  });
+  Object.keys(S.nationalFiles).forEach(function (id) { rules.push(S.nationalFiles[id]["required-if"]); });
+  return rules;
+}
+// Every site question that matters here, most important first: { field: number of rules using it }
+function siteQuestions() {
+  var counts = {};
+  currentRules().forEach(function (r) { Object.keys(ruleFields(r)).forEach(function (f) { counts[f] = (counts[f] || 0) + 1; }); });
+  if (counts["major-development"]) Object.keys(ruleFields(S.defs["major-development"])).forEach(function (f) { counts[f] = (counts[f] || 0) + 1; });
+  Object.keys(S.site).forEach(function (f) { if (!counts[f]) counts[f] = 0; });
+  return Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a] || fieldLabel(a).localeCompare(fieldLabel(b)); }).map(function (f) { return { field: f, count: counts[f] }; });
+}
+function answerText(f) { var v = S.site[f]; return v === true ? "yes" : v === false ? "no" : fieldKind(f) === "text" ? tidy(v) : String(v); }
+// The bar above the results: Filter button, your answers as removable chips, Clear
+function filterBarHTML() {
+  var set = Object.keys(S.site).filter(function (f) { return isSet(S.site[f]); });
+  return '<div class="filterbar"><button class="btn primary" id="openFilter" type="button">Filter' + (set.length ? " (" + set.length + ")" : "") + "</button>" +
+    set.map(function (f) { return '<span class="chip-ans">' + esc(fieldLabel(f)) + ": " + esc(answerText(f)) + '<button type="button" data-unset="' + esc(f) + '" aria-label="Remove ' + esc(fieldLabel(f)) + '">✕</button></span>'; }).join("") +
+    (set.length ? '<button class="btn small" id="clearSite" type="button">Clear</button>' : "") + "</div>";
+}
+function setAnswer(f, v) {
+  if (v === undefined || v === "" || (typeof v === "number" && isNaN(v))) delete S.site[f]; else S.site[f] = v;
+  writeHash(true); renderPanel();
+}
+function questionRow(q) {
+  var f = q.field, kind = fieldKind(f), v = S.site[f], label = esc(fieldLabel(f));
+  var desc = (S.fields[f] && S.fields[f].description) || (MHCLG_FIELDS[f] ? "" : "");
+  var control;
+  if (kind === "number") control = '<input type="number" min="0" step="any" inputmode="decimal" data-q="' + esc(f) + '" value="' + (isSet(v) ? esc(v) : "") + '" aria-label="' + label + '">';
+  else if (kind === "text") control = '<select data-q="' + esc(f) + '" aria-label="' + label + '">' + ["", "student", "shared", "older-people", "general"].map(function (o) { return '<option value="' + o + '"' + (v === o ? " selected" : "") + ">" + (o ? tidy(o) : "not set") + "</option>"; }).join("") + "</select>";
+  else control = '<span class="seg" role="group" aria-label="' + label + '">' + [["yes", true], ["no", false]].map(function (o) {
+    return '<button type="button" data-q="' + esc(f) + '" data-val="' + o[0] + '" aria-pressed="' + (v === o[1]) + '">' + (o[1] ? "Yes" : "No") + "</button>"; }).join("") + "</span>";
+  return '<div class="qrow' + (isSet(v) ? " answered" : "") + '" data-row="' + esc(f) + '"><span class="q">' + label +
+    "<small>" + (q.count ? "affects " + q.count + " requirement" + (q.count === 1 ? "" : "s") : "") + (desc ? (q.count ? " · " : "") + esc(desc) : "") + "</small></span>" + control + "</div>";
+}
+function openFilter(focusField) {
+  var dlg = $("#filterDialog");
+  function stillToCheck() { var items = buildResults(S.lpa ? S.councils[S.lpa] : null); return items.filter(function (i) { return i.result === UNKNOWN; }).length; }
+  function draw(keepFocus) {
+    var q = (dlg.querySelector("#fsearch") || {}).value || "";
+    var list = siteQuestions().filter(function (x) { return !q || (fieldLabel(x.field) + " " + x.field).toLowerCase().indexOf(q.toLowerCase()) !== -1; });
+    dlg.querySelector(".fbody").innerHTML = list.map(questionRow).join("") || '<p class="muted">No questions match.</p>';
+    dlg.querySelector("#fcount").textContent = stillToCheck() + " requirement(s) still to check. Answer what you know; the results update behind this.";
+  }
+  dlg.innerHTML = '<div class="fhead"><h2 id="filterTitle">Site details</h2><button class="iconbtn" type="button" id="fclose" aria-label="Close">✕</button></div>' +
+    '<div style="padding:10px 16px 0"><p class="muted" id="fcount" style="margin:0 0 8px"></p><input class="input" id="fsearch" type="search" placeholder="Search questions, e.g. tree, flood, homes"></div>' +
+    '<div class="fbody"></div><div class="ffoot"><button class="btn" type="button" id="fclear">Clear all</button><button class="btn primary" type="button" id="fdone">Done</button></div>';
+  draw();
+  dlg.showModal();
+  $("#fclose").onclick = $("#fdone").onclick = function () { dlg.close(); };
+  $("#fclear").onclick = function () { S.site = {}; writeHash(true); renderPanel(); draw(); };
+  $("#fsearch").addEventListener("input", function () { draw(); });
+  dlg.querySelector(".fbody").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-q]"); if (!b) return;
+    var f = b.dataset.q, val = b.dataset.val === "yes";
+    setAnswer(f, S.site[f] === val ? undefined : val);   // tap the chosen answer again to clear it
+    draw(); var again = dlg.querySelector('button[data-q="' + f + '"][data-val="' + b.dataset.val + '"]'); if (again) again.focus();
+  });
+  dlg.querySelector(".fbody").addEventListener("change", function (e) {
+    var c = e.target.closest("[data-q]"); if (!c) return;
+    setAnswer(c.dataset.q, c.type === "number" ? (c.value === "" ? undefined : Number(c.value)) : c.value || undefined);
+    draw(); var again = dlg.querySelector('[data-q="' + c.dataset.q + '"]'); if (again) again.focus();
+  });
+  if (focusField) { var row = dlg.querySelector('[data-row="' + focusField + '"]'); if (row) { row.scrollIntoView({ block: "center" }); (row.querySelector("input,select,button") || row).focus(); } }
+  else $("#fsearch").focus();
+}
+
+// ======================================================================
+// Tabs
+// ======================================================================
+function render() { syncPickers(); renderTabs(); renderPanel(); renderReviewBar(); }
+function renderTabs() {
+  document.querySelectorAll(".tab").forEach(function (t) { t.setAttribute("aria-selected", String(t.dataset.tab === S.tab)); t.tabIndex = t.dataset.tab === S.tab ? 0 : -1; });
+}
+function renderPanel() {
+  var panel = $("#panel");
+  panel.setAttribute("aria-labelledby", "tab-" + S.tab);
+  if (S.tab === "map") return renderMap(panel);
+  if (S.tab === "councils") return renderCouncils(panel);
+  if (!S.lpa) { if (S.tab === "results") return renderResults(panel, null); panel.innerHTML = emptyState("Choose a council to see its " + (S.tab === "table" ? "table" : "files") + "."); return; }
+  if (!S.councils[S.lpa]) {
+    panel.innerHTML = loadingState("Loading " + esc(S.lpaByCode[S.lpa].name) + "…");
+    loadCouncil(S.lpa).then(function () { renderPanel(); })
+      .catch(function (e) { panel.innerHTML = '<div class="error">Couldn\'t load this council\'s files (' + esc(e.message) + "). Check your connection and try again.</div>"; });
+    return;
+  }
+  if (S.tab === "results") return renderResults(panel, S.councils[S.lpa]);
+  if (S.tab === "table") return renderTable(panel, S.councils[S.lpa]);
+  if (S.tab === "browse") return renderBrowse(panel, S.councils[S.lpa]);
+}
+function setupTabs() {
+  var tabs = $(".tabs");
+  tabs.addEventListener("click", function (e) { var t = e.target.closest(".tab"); if (!t) return; S.tab = t.dataset.tab; writeHash(); render(); });
+  tabs.addEventListener("keydown", function (e) {
+    if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+    var all = Array.prototype.slice.call(document.querySelectorAll(".tab")), i = all.findIndex(function (t) { return t.dataset.tab === S.tab; });
+    var next = all[(i + (e.key === "ArrowRight" ? 1 : all.length - 1)) % all.length]; S.tab = next.dataset.tab; writeHash(); render(); next.focus();
+  });
+}
+
+// ======================================================================
+// Illustrations (thin white linework)
+// ======================================================================
+var SVG_BOARD = '<svg viewBox="0 0 160 110" fill="none" stroke="#F2F6FB" stroke-width="1.2" aria-hidden="true"><rect x="10" y="8" width="140" height="94" rx="3"/><path d="M30 8v-4M130 8v-4"/><rect x="24" y="22" width="62" height="46"/><path d="M24 50h22v18M46 50l18-14 22 14M64 36v32"/><path d="M98 24h38M98 32h30M98 40h34M98 56h38M98 64h24"/><circle cx="118" cy="84" r="8"/><path d="M118 76v16M110 84h16"/></svg>';
+var SVG_STACK = '<svg viewBox="0 0 160 110" fill="none" stroke="#F2F6FB" stroke-width="1.2" aria-hidden="true"><rect x="40" y="26" width="70" height="76" rx="2"/><path d="M46 20h70v76M52 14h70v76"/><path d="M50 40h50M50 50h40M50 60h46M50 70h30"/></svg>';
+function emptyState(msg) { return '<div class="empty">' + SVG_BOARD + "<p>" + msg + "</p></div>"; }
+function loadingState(msg) { return '<div class="empty" role="status">' + SVG_STACK + "<p>" + msg + "</p></div>"; }
+
+// ======================================================================
+// Map
+// ======================================================================
+function legendCounts() {
+  var c = { out: 0, outUK: 0, outEngland: 0 }; STATUSES.forEach(function (s) { c[s] = 0; });
+  S.lpas.forEach(function (r) { var s = mapStatus(r.code, "England"); c[s]++; if (s === "out") c.outEngland++; });
+  if (S.geo) S.geo.features.forEach(function (f) { if (f.properties.nation !== "England") { c.out++; c.outUK++; } });
+  return c;
+}
+function renderMap(panel) {
+  var counts = legendCounts();
+  var legend = '<aside class="legend" aria-label="Map key"><h3>Verification progress</h3><ul>' +
+    ["out"].concat(STATUSES).map(function (s) {
+      var n = counts[s], extra = s === "out" ? "England " + counts.outEngland + ", rest of the UK " + counts.outUK : "";
+      return '<li><button class="st-' + s + '" data-status="' + s + '" aria-pressed="' + (S.highlight === s) + '"><span class="swatch"></span><span>' + esc(STATUS_LABEL[s]) +
+        "<small>" + esc(STATUS_HELP[s]) + (extra ? "<br>" + extra : "") + '</small></span><span class="count">' + n + "</span></button></li>";
+    }).join("") + '</ul><label class="switch"><input type="checkbox" id="patternsToggle"' + (S.patterns ? " checked" : "") + "> Patterns</label>" +
+    '<p class="muted" style="font-size:13px;margin:10px 0 0">Click a status to highlight those councils. <button class="linkish btn small" id="listView">List view</button></p></aside>';
+  var noShape = S.lpas.filter(function (r) { return !S.geo || !S.geo.features.some(function (f) { return f.properties.code === r.code; }); });
+  panel.innerHTML = '<div class="mapgrid"><div><div class="mapbox"><svg id="map" role="img" aria-label="Map of UK councils coloured by verification status"></svg>' +
+    '<div class="mapctl"><button class="btn" id="zoomIn" aria-label="Zoom in">+</button><button class="btn" id="zoomOut" aria-label="Zoom out">−</button><button class="btn reset" id="zoomReset" aria-label="Reset map">Reset</button></div></div>' +
+    '<p class="attribution">Contains OS data © Crown copyright and database right ' + new Date().getFullYear() + '. Boundaries: Office for National Statistics, Open Geography Portal (Open Government Licence).</p>' +
+    (noShape.length ? '<h3 style="margin-top:12px">Councils not drawn on the map</h3><p class="muted" style="margin:4px 0">County councils (minerals and waste) and others that overlap or have no boundary.</p><div class="chips">' +
+      noShape.map(function (r) { var s = mapStatus(r.code, "England"); return '<button class="chip st-' + s + '" data-code="' + esc(r.code) + '" title="' + esc(STATUS_LABEL[s]) + '">' + esc(r.name) + "</button>"; }).join("") + "</div>" : "") +
+    "</div>" + legend + "</div>";
+  panel.querySelectorAll(".legend button[data-status]").forEach(function (b) { b.addEventListener("click", function () { S.highlight = S.highlight === b.dataset.status ? "" : b.dataset.status; renderMap(panel); }); });
+  $("#patternsToggle").addEventListener("change", function (e) { S.patterns = e.target.checked; document.body.classList.toggle("patterns", S.patterns); renderMap(panel); });
+  $("#listView").addEventListener("click", function () { S.tab = "councils"; writeHash(); render(); });
+  panel.querySelectorAll(".chip").forEach(function (c) { c.addEventListener("click", function () { selectCouncil(c.dataset.code); }); });
+  if (!S.geo) { $("#map").outerHTML = '<div class="empty">' + SVG_BOARD + "<p>The map isn't built yet (docs/map/uk-lpa.geojson). Use the Councils tab or the search box.</p></div>"; return; }
+  drawMap();
+}
+var PATTERN_DEFS = '<defs>' +
+  '<pattern id="p-human-verified" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" fill="#FB8C00"/><circle cx="3" cy="3" r="1.2" fill="#0B1F3A" opacity=".6"/></pattern>' +
+  '<pattern id="p-council-verified" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#43A047"/><rect width="1.6" height="6" fill="#0B1F3A" opacity=".55"/></pattern>' +
+  '<pattern id="p-council-updated" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#AED581"/><rect width="1.4" height="6" fill="#0B1F3A" opacity=".5"/><rect width="6" height="1.4" fill="#0B1F3A" opacity=".5"/></pattern>' +
+  '<pattern id="p-incorrect" width="6" height="5" patternUnits="userSpaceOnUse"><rect width="6" height="5" fill="#B388FF"/><rect width="6" height="1.4" fill="#0B1F3A" opacity=".55"/></pattern></defs>';
+var FILL = { "out": "#3A4A60", "incorrect": "#B388FF", "unverified": "#EF5350", "human-verified": "#FB8C00", "council-verified": "#43A047", "council-updated": "#AED581" };
+var mapZoom = null;
+// The map file follows the GeoJSON standard (outer rings anticlockwise). d3 wants the opposite
+// (outer rings clockwise), otherwise it fills everything *outside* each council. Flip them once.
+function rewindForD3(geo) {
+  function area(r) { var a = 0; for (var i = 0, j = r.length - 1; i < r.length; j = i++) a += (r[i][0] - r[j][0]) * (r[i][1] + r[j][1]); return a; } // > 0 means clockwise (x east, y north)
+  function fix(poly) { poly.forEach(function (ring, k) { var cw = area(ring) > 0; if ((k === 0) !== cw) ring.reverse(); }); }
+  geo.features.forEach(function (f) {
+    var g = f.geometry; if (!g) return;
+    if (g.type === "Polygon") fix(g.coordinates); else if (g.type === "MultiPolygon") g.coordinates.forEach(fix);
+  });
+  return geo;
+}
+function drawMap() {
+  var svgEl = $("#map"), w = svgEl.clientWidth || 800, hgt = svgEl.clientHeight || 600;
+  var svg = d3.select(svgEl).attr("viewBox", "0 0 " + w + " " + hgt);
+  svg.html(PATTERN_DEFS);
+  var proj = d3.geoMercator().fitExtent([[10, 10], [w - 10, hgt - 10]], S.geo), path = d3.geoPath(proj);
+  var g = svg.append("g");
+  var tip = $("#tooltip");
+  g.selectAll("path").data(S.geo.features).join("path")
+    .attr("d", path)
+    .attr("class", function (f) { var s = mapStatus(f.properties.code, f.properties.nation); return "lpa st-" + s + (s === "out" ? " out" : "") + (S.highlight && S.highlight !== s ? " dim" : "") + (f.properties.code && f.properties.code === S.lpa ? " selected" : ""); })
+    .attr("fill", function (f) { var s = mapStatus(f.properties.code, f.properties.nation); return S.patterns && s !== "out" && s !== "unverified" ? "url(#p-" + s + ")" : FILL[s]; })
+    .attr("tabindex", function (f) { return f.properties.code ? 0 : -1; })
+    .attr("role", "button")
+    .attr("aria-label", function (f) { return f.properties.name + ": " + tipText(f).replace(/<[^>]+>/g, " "); })
+    .on("mousemove", function (e, f) { tip.innerHTML = "<strong>" + esc(f.properties.name) + "</strong><br>" + tipText(f); tip.hidden = false; var box = svgEl.getBoundingClientRect(); tip.style.left = Math.min(e.clientX + 14, box.right - 240) + "px"; tip.style.top = (e.clientY + 14 + window.scrollY) + "px"; tip.style.position = "absolute"; })
+    .on("mouseleave", function () { tip.hidden = true; })
+    .on("click", function (e, f) {
+      if (!f.properties.code) { tip.innerHTML = "<strong>" + esc(f.properties.name) + "</strong><br>" + tipText(f); tip.hidden = false; tip.style.left = e.clientX + "px"; tip.style.top = (e.clientY + window.scrollY) + "px"; return; }
+      tip.hidden = true; selectCouncil(f.properties.code);
+    })
+    .on("keydown", function (e, f) { if ((e.key === "Enter" || e.key === " ") && f.properties.code) { e.preventDefault(); selectCouncil(f.properties.code); } });
+  mapZoom = d3.zoom().scaleExtent([1, 60]).translateExtent([[-w, -hgt], [2 * w, 2 * hgt]]).on("zoom", function (e) { g.attr("transform", e.transform); });
+  svg.call(mapZoom);
+  $("#zoomIn").onclick = function () { svg.transition().duration(250).call(mapZoom.scaleBy, 1.8); };
+  $("#zoomOut").onclick = function () { svg.transition().duration(250).call(mapZoom.scaleBy, 1 / 1.8); };
+  $("#zoomReset").onclick = function () { svg.transition().duration(400).call(mapZoom.transform, d3.zoomIdentity); };
+  // Zoom to the chosen council
+  var chosen = S.lpa && S.geo.features.find(function (f) { return f.properties.code === S.lpa; });
+  if (chosen) {
+    var b = path.bounds(chosen), k = Math.min(40, 0.6 / Math.max((b[1][0] - b[0][0]) / w, (b[1][1] - b[0][1]) / hgt));
+    svg.call(mapZoom.transform, d3.zoomIdentity.translate(w / 2, hgt / 2).scale(k).translate(-(b[0][0] + b[1][0]) / 2, -(b[0][1] + b[1][1]) / 2));
+  }
+}
+function tipText(f) {
+  var p = f.properties, s = mapStatus(p.code, p.nation);
+  if (p.nation && p.nation !== "England") return "Not covered yet: outside England (MHCLG's data standard covers England only)";
+  var corp = corpByName(p.name);
+  if (!p.code && corp) return "Not covered yet. Planning applications here are decided by " + esc(corp.name) +
+    ", a separate planning authority" + (corp.borders ? " next to " + esc(councilNames(corp.borders).join(", ")) : "") + ", not the surrounding council.";
+  var r = S.lpaByCode[p.code]; if (!r) return "Not covered yet";
+  var files = S.councils[p.code] ? S.councils[p.code].files.length + " requirement files" : "";
+  var near = corpsNear(p.code);
+  return (s === "out" ? "Not covered yet: we don't have its requirements yet" : "Status: " + STATUS_LABEL[s]) +
+    (near.length ? "<br>Next to: " + near.map(function (c) { return esc(c.name); }).join(", ") : "") +
+    (r["list-date"] ? "<br>List date: " + esc(r["list-date"]) : "") + (files ? "<br>" + files : "");
+}
+
+// ======================================================================
+// Councils tab (one row per council)
+// ======================================================================
+function renderCouncils(panel) {
+  var codes = S.lpas.map(function (r) { return r.code; });
+  var missing = codes.filter(function (c) { return !S.lpaYaml[c]; });
+  var cols = [["name", "Council"], ["region", "Region"], ["type", "Type"], ["status", "Status"], ["validation-list-url", "Validation list"],
+    ["validation-list-date", "List date"], ["validation-list-status", "List status"], ["submission-standards", "Submission standards"],
+    ["contact", "Contact"], ["joint-list", "Joint list"], ["issues", "Issues open"]];
+  var rows = S.lpas.map(function (r) {
+    var y = S.lpaYaml[r.code] || {}, vl = y["validation-list"] || {}, status = mapStatus(r.code, "England");
+    return { code: r.code, status: status, y: y, cells: {
+      name: r.name, region: r.region, type: r.type, status: STATUS_LABEL[status],
+      "validation-list-url": vl.url || r["validation-list-url"], "validation-list-date": String(vl.date || r["list-date"] || ""),
+      "validation-list-status": vl.status || r["list-status"], "submission-standards": (y["submission-standards"] || []).length ? (y["submission-standards"] || []).length + " rules" : "",
+      contact: y.contact ? Object.keys(y.contact).join(", ") : "", "joint-list": ((y["joint-list"] || {}).partners || []).join(", "), issues: r["issues-open"] } };
+  });
+  var html = '<div class="toolbar"><div><h2 style="margin:0">Councils</h2><p class="muted" style="margin:4px 0 0">' + S.lpas.length + " English councils. Cells are tinted by how far they've been checked.</p></div>" + statusFilterHTML() + "</div>";
+  if (missing.length) html += '<div id="loadwrap"><p class="muted">Loading council details… <span id="loadn">0</span> of ' + missing.length + '</p><div class="progress"><div id="loadbar"></div></div></div>';
+  html += countsHTML(rows.reduce(function (acc, row) { LPA_CELLS.forEach(function (c) { if (!isEmpty(cellValue(row.y, c)) && row.y["local-authority"]) { var st = cellStatus(row.y, row.code, "_lpa", c).status; acc[st] = (acc[st] || 0) + 1; } }); return acc; }, {}));
+  html += tableHTML(cols, sortRows(rows, "councils", cols), function (row, key) {
+    if (key === "name") return '<td><span class="badge st-' + row.status + '">' + esc(STATUS_LABEL[row.status]) + '</span><br><button class="linkish" data-select="' + esc(row.code) + '">' + esc(row.cells.name) + '</button> <span class="mono muted">' + esc(row.code) + "</span></td>";
+    if (LPA_CELLS.indexOf(key) !== -1 && row.y["local-authority"]) return cellTD(row.y, row.code, "_lpa", key, key === "validation-list-url" && row.cells[key] ? '<a href="' + esc(row.cells[key]) + '" rel="noopener" target="_blank">Open list</a>' : esc(row.cells[key]));
+    if (key === "validation-list-url" && row.cells[key]) return '<td><a href="' + esc(row.cells[key]) + '" rel="noopener" target="_blank">Open list</a></td>';
+    return "<td>" + esc(row.cells[key]) + "</td>";
+  }, "councils");
+  panel.innerHTML = html;
+  bindTable(panel, "councils", function () { renderCouncils(panel); });
+  panel.querySelectorAll("[data-select]").forEach(function (b) { b.addEventListener("click", function () { selectCouncil(b.dataset.select); }); });
+  if (missing.length && !S.loadingCouncils) loadAllLpaYaml(missing, panel);
+}
+function loadAllLpaYaml(codes, panel) {
+  S.loadingCouncils = true; var done = 0, i = 0;
+  function next() {
+    var batch = codes.slice(i, i + 20); i += 20;
+    if (!batch.length) { S.loadingCouncils = false; if (S.tab === "councils") renderCouncils(panel); return; }
+    Promise.all(batch.map(function (c) { return loadLpaYaml(c).catch(function () { S.lpaYaml[c] = {}; }); })).then(function () {
+      done += batch.length; var n = $("#loadn"), bar = $("#loadbar"); if (n) n.textContent = done; if (bar) bar.style.width = (100 * done / codes.length) + "%"; next();
+    });
+  }
+  next();
+}
+
+// ======================================================================
+// Table tab (one row per requirement file of the chosen council)
+// ======================================================================
+function renderTable(panel, council) {
+  var cols = [["requirement", "Requirement"], ["application-type", "Application types"], ["applies", "Applies to"], ["required-if", "When required"], ["must-include", "Must show"],
+    ["policy", "Policy"], ["source-text", "Council's wording"], ["source-url", "Source"]];
+  var rows = filtered(council.files).map(function (f) {
+    var d = f.data, types = cellValue(d, "application-type");
+    return { code: S.lpa, file: f.id, d: d, status: rowStatus(d, S.lpa, f.id, REQ_CELLS), cells: {
+      requirement: reqName(f.id), "application-type": types.length ? types.map(typeName).join(", ") : (d["required-if"] ? "" : ""),
+      applies: appliesTo(d["required-if"]).map(function (t) { return t.text; }).join(", "),
+      "required-if": d["required-if"] ? describe(d["required-if"]) : "", "must-include": (d["must-include"] || []).map(function (m) { return m.item; }).join("; "),
+      policy: d.policy || "", "source-text": d["source-text"] || "", "source-url": d["source-url"] || "" } };
+  }).filter(function (r) { return !S.statusFilter || REQ_CELLS.some(function (c) { return !isEmpty(cellValue(r.d, c)) && cellStatus(r.d, r.code, r.file, c).status === S.statusFilter; }); })
+    .filter(function (r) { return !S.tagFilter || appliesTo(r.d["required-if"]).some(function (t) { return t.key === S.tagFilter; }); });
+  var counts = {}; council.files.forEach(function (f) { REQ_CELLS.forEach(function (c) { if (!isEmpty(cellValue(f.data, c))) { var s = cellStatus(f.data, S.lpa, f.id, c).status; counts[s] = (counts[s] || 0) + 1; } }); });
+  var html = '<div class="toolbar"><div><h2 style="margin:0">' + esc(S.lpaByCode[S.lpa].name) + '</h2><p class="muted" style="margin:4px 0 0">' + council.files.length + " requirement files. Every cell is tinted by its review status" + (S.review ? "; tap a cell to mark it." : ".") + "</p></div>" + statusFilterHTML() + "</div>" + countsHTML(counts) +
+    (S.tagFilter ? '<p class="filterbar">Showing requirements that apply to: <span class="chip-ans">' + esc(fieldLabel(S.tagFilter === "always" ? "All applications" : S.tagFilter === "discretionary" ? "Council's discretion" : S.tagFilter)) +
+      '<button type="button" id="clearTag" aria-label="Show all requirements">✕</button></span></p>' : "");
+  html += tableHTML(cols, sortRows(rows, "table", cols), function (row, key) {
+    if (key === "applies") return "<td>" + tagsHTML(row.d["required-if"], true) + "</td>";   // worked out from the rule, so not a cell of its own
+    if (key === "requirement") return cellTD(row.d, row.code, row.file, key, badge(row.status) + "<br><strong>" + esc(row.cells.requirement) + '</strong> <span class="mono muted">' + esc(row.file) + "</span>");
+    if (key === "source-url") return cellTD(row.d, row.code, row.file, key, row.cells[key] ? '<a href="' + esc(row.cells[key]) + '" target="_blank" rel="noopener">Council list</a>' : "");
+    if (key === "source-text") { var t = row.cells[key]; var first = t.split("\n")[0]; return cellTD(row.d, row.code, row.file, key, t ? (t.length > 120 || t.indexOf("\n") !== -1 ? "<details><summary>" + esc(first.slice(0, 120)) + "…</summary>" + esc(t) + "</details>" : esc(t)) : "", "wide"); }
+    if (key === "application-type") return cellTD(row.d, row.code, row.file, key, esc(row.cells[key] || (row.d["required-if"] ? "" : "")), "", !row.cells[key] && "all types");
+    return cellTD(row.d, row.code, row.file, key, esc(row.cells[key]), key === "required-if" ? "wide" : "");
+  }, "table");
+  panel.innerHTML = html;
+  bindTable(panel, "table", function () { renderTable(panel, council); });
+  panel.querySelectorAll("button[data-tag]").forEach(function (b) { b.addEventListener("click", function (e) { e.stopPropagation(); S.tagFilter = b.dataset.tag; renderTable(panel, council); }); });
+  var ct = $("#clearTag"); if (ct) ct.addEventListener("click", function () { S.tagFilter = ""; renderTable(panel, council); });
+}
+function rowStatus(d, code, file, cells) {
+  var order = STATUSES, low = "council-updated", any = false;
+  cells.forEach(function (c) { if (isEmpty(cellValue(d, c))) return; any = true; var s = cellStatus(d, code, file, c).status; if (order.indexOf(s) < order.indexOf(low)) low = s; });
+  return any ? low : "unverified";
+}
+function cellTD(data, code, file, cell, inner, cls, emptyText) {
+  var v = cellValue(data, cell);
+  if (isEmpty(v)) return '<td class="cell' + (cls ? " " + cls : "") + '"><span class="muted">' + (emptyText || "") + "</span></td>";
+  var st = cellStatus(data, code, file, cell);
+  var label = STATUS_LABEL[st.status] + (st.pending ? " (pending)" : "") + (st.mark && st.mark.note ? ": " + st.mark.note : "");
+  return '<td class="cell tint st-' + st.status + (st.pending ? " pending" : "") + (cls ? " " + cls : "") + '" title="' + esc(label) + '" data-lpa="' + esc(code) + '" data-file="' + esc(file) + '" data-cell="' + esc(cell) + '"' + (S.review ? ' tabindex="0"' : "") + '><span class="sr-only">' + esc(label) + ': </span><span class="clip">' + inner + "</span></td>";
+}
+function tableHTML(cols, rows, cellFn, id) {
+  var sort = S.sort[id] || {};
+  return '<div class="tablewrap"><table class="grid"><thead><tr>' + cols.map(function (c) { return '<th scope="col" data-sort="' + c[0] + '" tabindex="0"' + (sort.key === c[0] ? ' aria-sort="' + (sort.dir > 0 ? "ascending" : "descending") + '"' : "") + ">" + esc(c[1]) + "</th>"; }).join("") +
+    "</tr></thead><tbody>" + rows.map(function (r) { return "<tr>" + cols.map(function (c) { return cellFn(r, c[0]); }).join("") + "</tr>"; }).join("") + "</tbody></table></div>" +
+    (rows.length ? "" : '<p class="muted">Nothing matches.</p>');
+}
+function sortRows(rows, id, cols) {
+  var s = S.sort[id]; if (!s) return rows;
+  return rows.slice().sort(function (a, b) { var x = String(a.cells[s.key] || ""), y = String(b.cells[s.key] || ""); return x.localeCompare(y, undefined, { numeric: true }) * s.dir; });
+}
+function bindTable(panel, id, rerender) {
+  panel.querySelectorAll("th[data-sort]").forEach(function (th) {
+    function go() { var cur = S.sort[id] || {}; S.sort[id] = { key: th.dataset.sort, dir: cur.key === th.dataset.sort ? -cur.dir : 1 }; rerender(); }
+    th.addEventListener("click", go); th.addEventListener("keydown", function (e) { if (e.key === "Enter") go(); });
+  });
+  var f = panel.querySelector("#statusFilter"); if (f) f.addEventListener("change", function () { S.statusFilter = f.value; rerender(); });
+}
+function statusFilterHTML() {
+  return '<label class="field" style="flex-direction:row;align-items:center;gap:8px">Show <select id="statusFilter" class="input" style="width:auto"><option value="">all rows</option>' +
+    STATUSES.map(function (s) { return '<option value="' + s + '"' + (S.statusFilter === s ? " selected" : "") + ">rows with " + STATUS_LABEL[s].toLowerCase() + " cells</option>"; }).join("") + "</select></label>";
+}
+function countsHTML(counts) {
+  var total = Object.keys(counts).reduce(function (a, k) { return a + counts[k]; }, 0);
+  if (!total) return "";
+  return '<p class="counts">Cells: ' + STATUSES.filter(function (s) { return counts[s]; }).map(function (s) { return badge(s, String(counts[s])); }).join(" ") + "</p>";
+}
+
+// ======================================================================
+// Results tab
+// ======================================================================
+function filtered(files) {
+  if (!S.q) return files;
+  var q = S.q.toLowerCase();
+  return files.filter(function (f) { var r = S.reqs[f.id] || {}; return (f.id + " " + (r.name || "") + " " + (r.synonyms || "")).toLowerCase().indexOf(q) !== -1; });
+}
+function nationalRule(id) {
+  var nf = S.nationalFiles[id];
+  if (nf && nf["required-if"]) return nf["required-if"];
+  if (S.nationalTypes[id]) return { "application-type": { "in": S.nationalTypes[id] } };
+  return null;
+}
+function buildResults(council) {
+  var items = [], seen = {};
+  if (council) council.files.forEach(function (f) {
+    var nat = nationalRule(f.id);
+    items.push({ id: f.id, data: f.data, local: true, national: !!nat, rule: f.data["required-if"], natRule: nat });
+    seen[f.id] = true;
+  });
+  Object.keys(S.reqs).forEach(function (id) {
+    var nat = nationalRule(id); if (!nat || seen[id]) return;
+    items.push({ id: id, data: S.nationalFiles[id] || { reference: id }, local: false, national: true, rule: nat });
+  });
+  return filtered(items).map(function (it) {
+    // local and national rules together: required if either says so, for any chosen type
+    var e = evalForTypes(it.local && it.national ? { any: [it.rule === undefined ? "discretionary" : it.rule, it.natRule] } : it.rule);
+    var r = e.result; it.forTypes = e.types;
+    // A low-confidence file whose only rule is the application type: the trigger wasn't structured yet.
+    var onlyType = it.local && it.data.confidence === "low" && it.rule && Object.keys(ruleFields(it.rule)).length === 0 && JSON.stringify(it.rule).indexOf('"always"') === -1;
+    if (r === true && onlyType && !it.national) { r = UNKNOWN; it.why = "The trigger hasn't been structured yet: read the council's wording."; }
+    it.result = r; return it;
+  });
+}
+function renderResults(panel, council) {
+  var items = buildResults(council);
+  var groups = { req: items.filter(function (i) { return i.result === true; }), chk: items.filter(function (i) { return i.result === UNKNOWN; }), not: items.filter(function (i) { return i.result === false; }) };
+  var html = council ? councilPanel(council) : '<div class="card"><h2>National requirements</h2><p class="muted" style="margin:0">Choose a council above to add its local requirements. ' + (S.chosen.length ? "" : "Choose an application type to narrow the list.") + "</p></div>";
+  html += '<div class="toolbar">' + filterBarHTML() + '<button class="btn" id="copyChecklist"' + (groups.req.length ? "" : " disabled") + ">Copy checklist</button></div>" +
+    '<p class="muted" style="margin:-4px 0 8px">' + groups.req.length + " required, " + groups.chk.length + " to check, " + groups.not.length + " not required" +
+    (groups.chk.length ? ". Use Filter, or answer the questions on the cards, to settle the ones to check." : ".") + "</p>";
+  html += groupHTML("Required", "required", groups.req, true) + groupHTML("Check", "check", groups.chk, true) + groupHTML("Not required", "notreq", groups.not, false);
+  panel.innerHTML = html;
+  // Filter bar, answer chips and the quick questions on Check cards
+  var of = $("#openFilter"); if (of) of.addEventListener("click", function () { openFilter(); });
+  var cs = $("#clearSite"); if (cs) cs.addEventListener("click", function () { S.site = {}; writeHash(); renderPanel(); });
+  panel.querySelectorAll("[data-unset]").forEach(function (b) { b.addEventListener("click", function () { setAnswer(b.dataset.unset, undefined); }); });
+  panel.querySelectorAll("[data-answer]").forEach(function (b) { b.addEventListener("click", function () { setAnswer(b.dataset.answer, b.dataset.val === "yes"); }); });
+  panel.querySelectorAll("[data-ask]").forEach(function (b) { b.addEventListener("click", function () { openFilter(b.dataset.ask); }); });
+  panel.querySelectorAll("[data-feedback]").forEach(function (b) { b.addEventListener("click", function () { openFeedback(b.dataset.feedback, b.dataset.id); }); });
+  var cc = $("#copyChecklist"); if (cc) cc.addEventListener("click", function () { copyChecklist(groups.req, council); });
+  var officer = $("#officer"); if (officer) officer.addEventListener("click", function () { window.open(issueURL("council.yml", "Council: " + S.lpa + " ", { council: S.lpa, list: ((council.lpa["validation-list"] || {}).url) || "" }), "_blank", "noopener"); });
+  if (council) loadConfirmed(S.lpa);
+}
+function groupHTML(title, cls, items, open) {
+  if (!items.length) return "";
+  var icon = cls === "required" ? '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#7FB2F0"/><path d="M7 12.5l3.2 3.2L17 9" stroke="#0B1F3A" stroke-width="2.2" fill="none"/></svg>'
+    : cls === "check" ? '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="#F2B705" stroke-width="1.6" stroke-dasharray="3 2"/><text x="12" y="16.5" text-anchor="middle" font-size="13" font-weight="600" fill="#F2B705">?</text></svg>'
+    : '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="#A8BEDB" stroke-width="1.4"/><path d="M8 12h8" stroke="#A8BEDB" stroke-width="1.6"/></svg>';
+  var body = items.map(function (it) { return cardHTML(it, cls, icon); }).join("");
+  return open ? '<div class="group-title">' + icon + "<h3>" + title + " (" + items.length + ")</h3></div>" + body
+    : '<details><summary class="group-title" style="cursor:pointer">' + icon + "<h3 style=\"display:inline\">" + title + " (" + items.length + ")</h3></summary>" + body + "</details>";
+}
+function cardHTML(it, cls, icon) {
+  var d = it.data, trig = [];
+  if (it.local) trig.push(it.rule === undefined ? "The council doesn't say when: check its wording." : it.rule === "discretionary" ? "At the council's discretion." : capital(describe(it.rule)) + ".");
+  if (it.national) trig.push("National: " + (describe(it.natRule || it.rule) || "see the national rules") + ".");
+  var settle = it.result === UNKNOWN ? unsetFields(it.local ? { any: [it.rule, it.natRule] } : it.rule).slice(0, 6) : [];
+  var must = (d["must-include"] || []).map(function (m) {
+    var r = m["required-if"] ? evalForTypes(m["required-if"]).result : true;
+    if (r === false) return "";
+    return '<li class="' + (m.level === "should" ? "advised" : "") + (r === UNKNOWN ? " unknown" : "") + '">' + esc(m.item) + (m.level === "should" ? ' <span class="muted">(advised)</span>' : "") + (r === UNKNOWN ? ' <span class="warn">Check: ' + esc(describe(m["required-if"])) + "</span>" : "") + "</li>";
+  }).join("");
+  var path = it.local ? "specification/planning-requirement/" + S.lpa + "/" + it.id + ".yaml" : "specification/planning-requirement/" + it.id + ".yaml";
+  var status = it.local ? rowStatus(d, S.lpa, it.id, REQ_CELLS) : "";
+  var conf = S.confirmed[S.lpa] && S.confirmed[S.lpa][it.id];
+  return '<article class="card result ' + cls + '"><header><div class="title">' + icon + "<h3>" + esc(reqName(it.id)) + '</h3></div><div class="meta" style="margin:0">' +
+    (it.local ? '<span class="badge local">Local</span>' : "") + (it.national ? '<span class="badge national">National</span>' : "") +
+    (it.local ? badge(status) + ' <span class="badge plain">Confidence: ' + esc(d.confidence || "?") + "</span>" : "") + "</div></header>" +
+    (it.local ? '<div class="tags"><span class="typetags">Applies to:</span> ' + tagsHTML(it.rule, false) + "</div>" : "") +
+    (S.chosen.length > 1 && it.forTypes && it.forTypes.length ? '<p class="typetags">For: ' + it.forTypes.map(function (t) { return esc(typeName(t)); }).join(", ") + "</p>" : "") +
+    '<p class="trigger">' + trig.map(esc).join("<br>") + "</p>" +
+    (it.why ? '<p class="warn">' + esc(it.why) + "</p>" : "") +
+    (settle.length ? '<p class="settle">' + settle.slice(0, 3).map(function (f) {
+      var label = esc(fieldLabel(f));
+      if (fieldKind(f) === "boolean") return '<span class="inlineq">' + label + '? <span class="seg" role="group" aria-label="' + label + '">' +
+        '<button type="button" data-answer="' + esc(f) + '" data-val="yes">Yes</button><button type="button" data-answer="' + esc(f) + '" data-val="no">No</button></span></span>';
+      return '<button type="button" data-ask="' + esc(f) + '">Set ' + label + "</button>";
+    }).join("") + (settle.length > 3 ? '<button type="button" data-ask="' + esc(settle[3]) + '">More…</button>' : "") + "</p>" : "") +
+    (must ? "<strong>What it must show</strong><ul class=\"must\">" + must + "</ul>" : "") +
+    (d["source-text"] ? "<details><summary>The council's wording</summary><blockquote>" + esc(d["source-text"]) + "</blockquote></details>" : "") +
+    (d.notes ? '<details><summary>Notes</summary><p class="muted">' + esc(d.notes) + "</p></details>" : "") +
+    '<div class="meta">' + (d.policy ? "<span>Policy: " + esc(d.policy) + "</span>" : "") +
+    (d["source-url"] ? '<a href="' + esc(d["source-url"]) + '" target="_blank" rel="noopener">Council\'s list</a>' : "") +
+    '<a class="mono" href="' + GH_BLOB + esc(path) + '" target="_blank" rel="noopener">' + esc(it.id) + ".yaml</a>" +
+    (it.local ? '<span>Checked against the council\'s site? <button class="btn small" data-feedback="matches" data-id="' + esc(it.id) + '">Matches</button> <button class="btn small" data-feedback="nomatch" data-id="' + esc(it.id) + '">Doesn\'t match</button>' + (conf ? ' <span class="muted">' + conf + " confirmed</span>" : "") + "</span>" : "") +
+    "</div></article>";
+}
+function capital(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+// "Next to" / "Borders" lines for development corporations (see data/other-planning-authority.csv)
+function corpRows() {
+  var self = (S.corps || []).find(function (c) { return c.code === S.lpa; });
+  var out = "";
+  if (self && self.borders) out += "<dt>Borders</dt><dd>" + self.borders.split(";").map(function (c) {
+    return '<button class="linkish btn small" data-select="' + esc(c) + '">' + esc((S.lpaByCode[c] || {}).name || c) + "</button>"; }).join(" ") +
+    ' <span class="muted">(applications in its area go to it, not these councils)</span></dd>';
+  corpsNear(S.lpa).forEach(function (c) {
+    out += "<dt>Next to</dt><dd>" + (c.code ? '<button class="linkish btn small" data-select="' + esc(c.code) + '">' + esc(c.name) + "</button>" : esc(c.name)) +
+      ' <span class="muted">decides planning applications in its own area' + (c.code ? "" : " (not covered here yet)") + "; check which authority your site is in.</span></dd>";
+  });
+  return out;
+}
+function councilPanel(council) {
+  var y = council.lpa, vl = y["validation-list"] || {}, audit = y.audit || {}, r = S.lpaByCode[S.lpa], status = mapStatus(S.lpa, "England");
+  var old = vl.date && String(vl.date) < new Date(Date.now() - 730 * 864e5).toISOString().slice(0, 10);
+  var stds = y["submission-standards"] || [];
+  var std = stds.map(function (s) { return "<li>" + esc(s.item) + (s.level === "should" ? ' <span class="muted">(advised)</span>' : "") + "</li>"; }).join("");
+  var partners = (y["joint-list"] || {}).partners || [];
+  var issues = audit["issues-open"] == null ? "" : ", " + audit["issues-open"] + " issue" + (audit["issues-open"] === 1 ? "" : "s") + " found";
+  // Compact: one short row each for the list and the audit; standards fold away on small screens
+  return '<section class="card council-panel" aria-label="Council"><h2>' + esc(r.name) + ' <span class="mono muted" style="font-size:14px">' + esc(S.lpa) + "</span> " + badge(status) + "</h2>" +
+    '<dl class="kv"><dt>List</dt><dd>' + (vl.url ? '<a href="' + esc(vl.url) + '" target="_blank" rel="noopener">Open the council\'s list</a>' : "Not found") +
+    (vl.date ? " · " + '<span' + (old ? ' class="warn" title="More than 2 years old: the NPPF expects a review every 2 years"' : "") + ">" + esc(vl.date) + (old ? " ⚠ over 2 years old" : "") + "</span>" : "") +
+    (vl.status && vl.status !== "outdated" ? ' · <span class="muted">' + esc(vl.status) + "</span>" : "") + "</dd>" +
+    "<dt>Audit</dt><dd>" + esc(audit.status || "not-audited") + esc(issues) + (audit["contents-checked"] === false ? ' <span class="muted">(couldn\'t read the list)</span>' : "") + "</dd>" +
+    corpRows() +
+    (partners.length ? "<dt>Shared list</dt><dd>" + partners.map(function (p) { return '<button class="linkish btn small" data-select="' + esc(p) + '">' + esc((S.lpaByCode[p] || {}).name || p) + "</button>"; }).join(" ") + "</dd>" : "") + "</dl>" +
+    (stds.length ? '<details class="std"' + (window.innerWidth > 600 ? " open" : "") + "><summary>Submission standards (" + stds.length + ")</summary><ul>" + std + "</ul></details>" : '<p class="muted" style="margin:0">No submission standards recorded.</p>') +
+    '<p class="actions"><button class="btn small" id="officer">I work for this council</button></p></section>';
+}
+
+// ======================================================================
+// Feedback for everyone: pre-filled GitHub issues (no accounts of our own)
+// ======================================================================
+function issueURL(template, title, fields) {
+  var p = ["template=" + encodeURIComponent(template), "title=" + encodeURIComponent(title)];
+  Object.keys(fields || {}).forEach(function (k) { p.push(encodeURIComponent(k) + "=" + encodeURIComponent(fields[k])); });
+  return GH_NEW_ISSUE + "?" + p.join("&");
+}
+function siteText() { return Object.keys(S.site).map(function (f) { return fieldLabel(f) + ": " + (S.site[f] === true ? "yes" : S.site[f] === false ? "no" : S.site[f]); }).join("\n") + (S.chosen.length ? "\nApplication type: " + S.chosen.map(typeName).join(", ") : ""); }
+function openFeedback(kind, id) {
+  var council = S.councils[S.lpa], list = ((council.lpa["validation-list"] || {}).url) || "";
+  var file = "specification/planning-requirement/" + S.lpa + "/" + id + ".yaml";
+  var url = kind === "matches"
+    ? issueURL("confirmed.yml", "Confirmed: " + S.lpa + " " + id, { council: S.lpa, requirement: id, file: file, list: list, site: siteText() })
+    : issueURL("correction.yml", "Correction: " + S.lpa + " " + id, { council: S.lpa, requirement: id, file: file, list: list, site: siteText() });
+  window.open(url, "_blank", "noopener");
+}
+function loadConfirmed(code) {
+  if (S.confirmed[code] !== undefined) return;
+  var cached = recall("sessionStorage", "ov-confirmed-" + code);
+  if (cached) { S.confirmed[code] = cached; return; }
+  S.confirmed[code] = {};
+  var q = encodeURIComponent("repo:" + OWNER + "/" + REPO + " label:confirmed in:title " + code);
+  fetch("https://api.github.com/search/issues?per_page=100&q=" + q).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+    if (!j || !j.items) return;   // rate-limited or offline: skip quietly
+    var counts = {};
+    j.items.forEach(function (i) { var m = /^Confirmed:\s*(\S+)\s+(\S+)/.exec(i.title); if (m && m[1] === code) counts[m[2]] = (counts[m[2]] || 0) + 1; });
+    S.confirmed[code] = counts; store("sessionStorage", "ov-confirmed-" + code, counts);
+    if (Object.keys(counts).length && S.tab === "results" && S.lpa === code) renderPanel();
+  }).catch(function () {});
+}
+
+// ======================================================================
+// Copy checklist
+// ======================================================================
+function copyChecklist(items, council) {
+  var list = council ? ((council.lpa["validation-list"] || {}).url || "") : "";
+  var dlg = $("#dialog");
+  dlg.innerHTML = '<h2>Copy checklist</h2><p>This list is draft data. Before you rely on it, compare it with the council\'s own validation list' + (list ? ': <a href="' + esc(list) + '" target="_blank" rel="noopener">open the list</a>' : "") + ".</p>" +
+    '<label style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" id="checkedList"> I\'ve checked this list against the council\'s own validation list</label>' +
+    '<div class="row" style="display:flex;gap:8px;margin-top:14px"><button class="btn primary" id="doCopy" disabled>Copy</button><button class="btn" id="cancelCopy">Cancel</button></div><p id="copyMsg" class="muted"></p>';
+  dlg.showModal();
+  $("#checkedList").addEventListener("change", function (e) { $("#doCopy").disabled = !e.target.checked; });
+  $("#cancelCopy").addEventListener("click", function () { dlg.close(); });
+  $("#doCopy").addEventListener("click", function () {
+    var lines = ["Validation checklist" + (S.lpa ? " - " + S.lpaByCode[S.lpa].name : "") + (S.chosen.length ? " - " + S.chosen.map(typeName).join(", ") : ""), "(open-validation draft data; checked against the council's list)", ""];
+    items.forEach(function (it) {
+      lines.push("[ ] " + reqName(it.id));
+      (it.data["must-include"] || []).forEach(function (m) { var r = m["required-if"] ? evalForTypes(m["required-if"]).result : true; if (r !== false) lines.push("    - " + m.item + (m.level === "should" ? " (advised)" : "") + (r === UNKNOWN ? " (check)" : "")); });
+    });
+    var std = council ? council.lpa["submission-standards"] || [] : [];
+    if (std.length) { lines.push("", "Submission standards:"); std.forEach(function (s) { lines.push("- " + s.item + (s.level === "should" ? " (advised)" : "")); }); }
+    if (list) lines.push("", "Council's list: " + list);
+    var text = lines.join("\n");
+    (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(function () { $("#copyMsg").textContent = "Copied."; setTimeout(function () { dlg.close(); }, 700); })
+      .catch(function () { $("#copyMsg").innerHTML = '<textarea class="input" rows="8" readonly>' + esc(text) + "</textarea>"; });
+  });
+}
+
+// ======================================================================
+// Browse files tab
+// ======================================================================
+function renderBrowse(panel, council) {
+  var files = filtered(council.files).filter(function (f) { return !S.chosen.length || !cellValue(f.data, "application-type").length || S.chosen.some(function (t) { return evaluate({ "application-type": { "in": cellValue(f.data, "application-type") } }, {}, typeObj(t), {}) !== false; }); });
+  var names = ["_lpa"].concat(files.map(function (f) { return f.id; }));
+  if (names.indexOf(S.browseFile) === -1) S.browseFile = "_lpa";
+  panel.innerHTML = '<div class="browse"><nav aria-label="Files"><p class="mono muted" style="margin:0 0 6px">specification/planning-requirement/' + esc(S.lpa) + '/</p><ul class="tree">' +
+    names.map(function (n) { return '<li><button data-file="' + esc(n) + '"' + (n === S.browseFile ? ' aria-current="true"' : "") + ">" + esc(n) + ".yaml</button></li>"; }).join("") + '</ul></nav><div id="yamlview">' + loadingState("Loading…") + "</div></div>";
+  panel.querySelectorAll("[data-file]").forEach(function (b) { b.addEventListener("click", function () { S.browseFile = b.dataset.file; renderBrowse(panel, council); }); });
+  var path = "specification/planning-requirement/" + S.lpa + "/" + S.browseFile + ".yaml";
+  fetchText(ROOT + "/" + path).then(function (t) {
+    $("#yamlview").innerHTML = '<p style="margin:0 0 8px"><a class="mono" href="' + GH_BLOB + esc(path) + '" target="_blank" rel="noopener">' + esc(path) + "</a></p><pre class=\"yaml\">" + highlightYAML(t) + "</pre>";
+  }).catch(function () { $("#yamlview").innerHTML = '<div class="error">Couldn\'t load ' + esc(path) + ".</div>"; });
+}
+function highlightYAML(text) {
+  return text.split("\n").map(function (line) {
+    var m = /^(\s*-?\s*)([\w-]+)(:)(.*)$/.exec(line);
+    if (/^\s*#/.test(line)) return '<span class="c">' + esc(line) + "</span>";
+    if (!m) return /^\s*-\s/.test(line) ? esc(line).replace(/^(\s*-\s)(.*)$/, '$1<span class="s">$2</span>') : '<span class="s">' + esc(line) + "</span>";
+    var v = m[4], vh = /^\s*(-?\d+(\.\d+)?|true|false)\s*$/.test(v) ? '<span class="n">' + esc(v) + "</span>" : '<span class="s">' + esc(v) + "</span>";
+    return esc(m[1]) + '<span class="k">' + esc(m[2]) + "</span>" + m[3] + vh;
+  }).join("\n");
+}
+
+// ======================================================================
+// Review mode (maintainers): mark cells, then submit as a pull request
+// ======================================================================
+function loadPending() { S.pending = recall("localStorage", "ov-pending") || []; }
+function savePending() { store("localStorage", "ov-pending", S.pending); renderReviewBar(); }
+function reviewer() { return recall("localStorage", "ov-reviewer") || ""; }
+function token() { try { return sessionStorage.getItem("ov-token") || ""; } catch (e) { return ""; } }
+function setupReview() {
+  var t = $("#reviewToggle");
+  t.checked = S.review = !!recall("sessionStorage", "ov-review");
+  document.body.classList.toggle("reviewing", S.review);
+  t.addEventListener("change", function () {
+    if (t.checked && !reviewer()) { t.checked = false; return reviewSetup(function () { t.checked = true; S.review = true; store("sessionStorage", "ov-review", true); document.body.classList.add("reviewing"); render(); }); }
+    S.review = t.checked; store("sessionStorage", "ov-review", S.review); document.body.classList.toggle("reviewing", S.review); render();
+  });
+  document.addEventListener("click", function (e) { if (!S.review) return; var td = e.target.closest("td.cell[data-cell]"); if (td && !e.target.closest("a,button")) { if (e.target.closest("summary")) e.preventDefault(); openCellMenu(td); } });
+  document.addEventListener("keydown", function (e) { if (!S.review || e.key !== "Enter") return; var td = e.target.closest && e.target.closest("td.cell[data-cell]"); if (td) { e.preventDefault(); openCellMenu(td); } });
+}
+function reviewSetup(done) {
+  var dlg = $("#dialog");
+  dlg.innerHTML = '<h2>Review mode</h2><p>Review mode lets maintainers mark table cells as checked. Your marks are sent as a pull request; nothing changes until it is merged.</p>' +
+    '<label class="field">Your name (recorded with each mark)<input class="input" id="revName" value="' + esc(reviewer()) + '"></label>' +
+    '<label class="field" style="margin-top:10px">GitHub token (optional, recommended)<input class="input" id="revToken" type="password" autocomplete="off" placeholder="github_pat_…"></label>' +
+    '<details style="margin-top:8px"><summary>How to make a token</summary><ol><li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub → Fine-grained tokens → Generate new token</a>.</li>' +
+    "<li>Repository access: <strong>Only select repositories</strong> → <span class=\"mono\">" + OWNER + "/" + REPO + "</span>.</li><li>Permissions: <strong>Contents</strong> and <strong>Pull requests</strong> set to <em>Read and write</em>. Nothing else.</li><li>Copy the token and paste it here.</li></ol>" +
+    '<p class="muted">The token stays in this tab only (it is forgotten when you close it), is sent only to api.github.com, and is never logged or put in a link. Without a token, Submit opens a pre-filled GitHub issue instead.</p></details>' +
+    '<p id="revMsg" class="muted"></p><div style="display:flex;gap:8px;margin-top:12px"><button class="btn primary" id="revOK">Start reviewing</button><button class="btn" id="revCancel">Cancel</button></div>';
+  dlg.showModal();
+  $("#revCancel").addEventListener("click", function () { dlg.close(); });
+  $("#revOK").addEventListener("click", function () {
+    var name = $("#revName").value.trim(), tok = $("#revToken").value.trim();
+    if (!name) { $("#revMsg").textContent = "Please give your name."; return; }
+    store("localStorage", "ov-reviewer", name);
+    if (tok) { try { sessionStorage.setItem("ov-token", tok); } catch (e) {} }
+    if (!tok) { dlg.close(); return done(); }
+    $("#revMsg").textContent = "Checking your token…";
+    gh("GET", "").then(function (repo) {
+      var canPush = repo.permissions && repo.permissions.push;
+      store("sessionStorage", "ov-canpush", !!canPush);
+      $("#revMsg").textContent = canPush ? "You can edit this repo: your marks merge automatically if they cover 50 cells or fewer for one council." : "You don't have edit rights: your marks will be reviewed by a maintainer.";
+      setTimeout(function () { dlg.close(); done(); }, 1400);
+    }).catch(function (e) { $("#revMsg").textContent = "That token didn't work (" + e.message + "). You can leave it blank and submit by issue instead."; try { sessionStorage.removeItem("ov-token"); } catch (x) {} });
+  });
+}
+function openCellMenu(td) {
+  closeMenu();
+  var code = td.dataset.lpa, file = td.dataset.file, cell = td.dataset.cell;
+  var data = file === "_lpa" ? S.lpaYaml[code] : (S.councils[code].files.find(function (f) { return f.id === file; }) || {}).data;
+  var cur = cellStatus(data, code, file, cell);
+  var menu = h('<div class="menu" role="dialog" aria-label="Mark this cell"><strong>' + esc(file === "_lpa" ? "Council details" : reqName(file)) + '</strong><br><span class="muted mono">' + esc(cell) + "</span>" +
+    '<div class="opts">' + STATUSES.map(function (s) { return '<button data-status="' + s + '" class="st-' + s + '" aria-pressed="' + (cur.status === s) + '"><span class="swatch"></span>' + STATUS_LABEL[s] + "</button>"; }).join("") + "</div>" +
+    '<label>Evidence (needed for the council statuses)<input class="input" id="mEvidence" placeholder="link to the issue or PR, or a note of the email"></label>' +
+    '<label>Note (needed for Incorrect: what\'s wrong)<input class="input" id="mNote"></label>' +
+    '<p class="warn" id="mMsg" style="font-size:13px;margin:6px 0 0"></p>' +
+    '<div class="row"><button class="btn small primary" id="mApply">Mark this cell</button><button class="btn small" id="mRow">Mark the whole row</button><button class="btn small" id="mAll">Mark every cell for this council</button><button class="btn small" id="mClose">Close</button></div></div>');
+  document.body.appendChild(menu);
+  var r = td.getBoundingClientRect(); menu.style.top = Math.max(8, Math.min(r.bottom + 6, window.innerHeight - menu.offsetHeight - 8)) + "px"; menu.style.left = Math.max(8, Math.min(r.left, window.innerWidth - menu.offsetWidth - 8)) + "px";
+  var chosen = cur.status;
+  menu.querySelectorAll(".opts button").forEach(function (b) { b.addEventListener("click", function () { chosen = b.dataset.status; menu.querySelectorAll(".opts button").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); }); }); });
+  function targets(scope) {
+    if (scope === "cell") return [[code, file, cell, data]];
+    var out = [];
+    var files = scope === "row" ? [[file, data]] : [["_lpa", S.lpaYaml[code]]].concat((S.councils[code] ? S.councils[code].files : []).map(function (f) { return [f.id, f.data]; }));
+    files.forEach(function (fd) { (fd[0] === "_lpa" ? LPA_CELLS : REQ_CELLS).forEach(function (c) { if (fd[1] && !isEmpty(cellValue(fd[1], c))) out.push([code, fd[0], c, fd[1]]); }); });
+    return out;
+  }
+  function apply(scope) {
+    var ev = $("#mEvidence").value.trim(), note = $("#mNote").value.trim();
+    if (NEEDS_EVIDENCE.indexOf(chosen) !== -1 && !ev) { $("#mMsg").textContent = "This status needs evidence."; return; }
+    if (chosen === "incorrect" && !note) { $("#mMsg").textContent = "Say what's wrong in the note."; return; }
+    targets(scope).forEach(function (t) {
+      S.pending = S.pending.filter(function (m) { return !(m.lpa === t[0] && m.file === t[1] && m.cell === t[2]); });
+      var saved = ((t[3] && t[3]["field-status"]) || {})[t[2]];
+      if ((saved && saved.status) === chosen || (!saved && chosen === "unverified")) return;   // no change
+      var m = { lpa: t[0], file: t[1], cell: t[2], status: chosen, by: reviewer(), date: today() };
+      if (ev) m.evidence = ev; if (note) m.note = note;
+      S.pending.push(m);
+    });
+    savePending(); closeMenu(); renderPanel();
+  }
+  $("#mApply").addEventListener("click", function () { apply("cell"); });
+  $("#mRow").addEventListener("click", function () { apply("row"); });
+  $("#mAll").addEventListener("click", function () { apply("all"); });
+  $("#mClose").addEventListener("click", closeMenu);
+  menu.addEventListener("keydown", function (e) { if (e.key === "Escape") { closeMenu(); td.focus(); } });
+  menu.querySelector(".opts button").focus();
+}
+function closeMenu() { var m = $(".menu"); if (m) m.remove(); }
+function renderReviewBar() {
+  var bar = $("#reviewbar");
+  if (!S.pending.length) { bar.hidden = true; return; }
+  var councils = {}; S.pending.forEach(function (m) { councils[m.lpa] = true; });
+  bar.hidden = false;
+  bar.innerHTML = "<span><strong>" + S.pending.length + " cell" + (S.pending.length === 1 ? "" : "s") + " marked</strong> (" + Object.keys(councils).join(", ") + ")</span>" +
+    '<button class="btn primary" id="submitMarks">Submit</button><button class="btn" id="discardMarks">Discard</button><span id="submitMsg" class="muted"></span>';
+  $("#discardMarks").onclick = function () { if (confirm("Discard " + S.pending.length + " marks?")) { S.pending = []; savePending(); renderPanel(); } };
+  $("#submitMarks").onclick = submitMarks;
+}
+function gh(method, path, body) {
+  return fetch(/^https:/.test(path) ? path : API + path, { method: method, headers: { "Authorization": "Bearer " + token(), "Accept": "application/vnd.github+json" }, body: body ? JSON.stringify(body) : undefined })
+    .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.message || r.status); return j; }); });
+}
+function submitMarks() {
+  var marks = S.pending.map(function (m) { var o = { lpa: m.lpa, file: m.file, cell: m.cell, status: m.status, by: m.by, date: m.date }; if (m.evidence) o.evidence = m.evidence; if (m.note) o.note = m.note; return o; });
+  var yamlText = jsyaml.dump(marks, { lineWidth: 100 });
+  var councils = Object.keys(marks.reduce(function (a, m) { a[m.lpa] = 1; return a; }, {}));
+  var title = "Cell marks: " + councils.join(", ") + " (" + marks.length + " cell" + (marks.length === 1 ? "" : "s") + ")";
+  var msg = $("#submitMsg");
+  if (!token()) {   // Anyone: a pre-filled issue that a maintainer saves into reviews/pending/
+    window.open(issueURL("cell-marks.yml", title, { marks: yamlText }), "_blank", "noopener");
+    msg.textContent = "Opened a GitHub issue with your marks. Submit it there; then you can discard them here.";
+    return;
+  }
+  msg.textContent = "Submitting…";
+  var stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\..*/, "").replace("T", "-"), login;
+  gh("GET", "https://api.github.com/user").then(function (u) {
+    login = u.login; var branch = "review/" + login + "-" + stamp;
+    return gh("GET", "/git/ref/heads/" + BRANCH).then(function (ref) {
+      return gh("POST", "/git/refs", { ref: "refs/heads/" + branch, sha: ref.object.sha });
+    }).then(function () {
+      var content = btoa(unescape(encodeURIComponent(yamlText)));
+      return gh("PUT", "/contents/reviews/pending/" + stamp + "-" + login + ".yaml", { message: title, content: content, branch: branch });
+    }).then(function () {
+      return gh("POST", "/pulls", { title: title, head: branch, base: BRANCH, body: "Cell marks submitted from the explorer's review mode by @" + login + ".\n\nThe `apply-reviews` workflow applies them to this pull request so the diff shows exactly which cells change." });
+    });
+  }).then(function (pr) {
+    S.pending = []; savePending(); renderPanel();
+    var bar = $("#reviewbar"); bar.hidden = false; bar.innerHTML = 'Submitted: <a href="' + esc(pr.html_url) + '" target="_blank" rel="noopener">pull request #' + pr.number + "</a>. The map and tables update once it's merged. <button class=\"btn small\" id=\"okBar\">OK</button>";
+    $("#okBar").onclick = function () { bar.hidden = true; };
+  }).catch(function (e) { msg.textContent = "Couldn't submit (" + e.message + "). Your marks are kept; try again, or remove the token to submit by issue."; });
+}
+
+// ======================================================================
+// Start
+// ======================================================================
+function start() {
+  var panel = $("#panel");
+  panel.innerHTML = loadingState("Loading…");
+  if (!window.jsyaml) { panel.innerHTML = '<div class="error">Couldn\'t load the YAML reader from cdn.jsdelivr.net. Check your connection or any content blocker.</div>'; return; }
+  loadBase().then(function () {
+    loadPending(); readHash(); setupPickers(); setupTabs(); setupReview();
+    document.body.classList.toggle("patterns", S.patterns);
+    window.addEventListener("hashchange", function () { readHash(); render(); });
+    window.addEventListener("popstate", function () { readHash(); render(); });
+    document.addEventListener("click", function (e) { var b = e.target.closest("[data-select]"); if (b && !b.closest("table")) selectCouncil(b.dataset.select); });
+    window.addEventListener("resize", function () { if (S.tab === "map" && S.geo) { clearTimeout(S.rt); S.rt = setTimeout(drawMap, 200); } });
+    writeHash(true); render();
+  }).catch(function (e) {
+    panel.innerHTML = '<div class="error">Couldn\'t load the data (' + esc(e.message) + '). If you opened this file directly, run <span class="mono">python -m http.server</span> in the repo folder and open <span class="mono">http://localhost:8000/docs/</span>.</div>';
+  });
+}
+start();
+</script>
+</body>
+</html>

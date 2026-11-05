@@ -1,0 +1,501 @@
+# Corrections for Torbay Council, from inputs/audit/torbay-council.json.
+# Grokbot linked the superseded 2023 list; the council now publishes the 'Local Validation List
+# November 2024' (v3 docx; the build takes this link and date from the audit). The audit checked
+# contents against the August 2024 PDF, because the November 2024 docx couldn't be machine-read.
+# The list has about 80 numbered local requirements (sections 3.1-3.14 and a section 4.2 of local
+# prior approval items); the workbook captured a fraction, with several rows quoting text from a
+# different item. Items the audit names without a trigger are added at low confidence (no
+# required-if) or listed as unmapped.
+local-authority: TOB
+
+drop:
+  - id: cil-form
+    sheets: [Householder]
+    reason: "wrong_app_type: the excerpt itself excludes householder applications"
+  - id: planning-statement
+    sheets: [Full planning]
+    reason: "wrong_trigger: the Full planning excerpt is Parking Statement / Transport Assessment text"
+  - id: schedule-of-works
+    reason: >-
+      wrong_trigger: the Full planning row is Tree Protection Plan / Arboricultural Method Statement
+      text and the demolition row is the 3.12.3 Demolition Method Statement (both now unmapped)
+
+drop-unmapped:
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "wrong_trigger: reuses the Agricultural Land Classification text; the list has no such requirement"
+  - local-name: Agricultural Land Classification / Soils
+    reason: "wrong_trigger: omits the 5 ha / 20 ha threshold; re-added below"
+  - local-name: Drainage Strategy / SuDS
+    reason: "duplicate: the Flood Risk Assessment (including surface water drainage strategy) text"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: the retail sequential test sentence; flood (3.6.2) and retail tests re-added below"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_app_type: 3.1.14 legal practitioner contact details for S106 modification; re-added below"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: text saying local requirements may sometimes not be needed"
+  - local-name: Minerals / Waste specific statements (county matters)
+    reason: "the 3.13.1 Waste Audit and 5 Year Management Plan; now the waste-management-plan requirement"
+
+requirements:
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      all:
+        - ref: major-development
+        - site:
+            in: [air-quality-management-area]
+            description: The site is within, or within 500m of, an Air Quality Management Area.
+    source-text: >-
+      3.11.1 Air Quality Assessment For major development proposals within an Air Quality
+      Management Area (AQMA), or within 500m of an AQMA
+    source-url: https://www.torbay.gov.uk/media/20032/local-validation-list-2023.docx
+    confidence: medium
+    notes: "Audit (wrong_app_type): major development only, not all Full planning. Section 4.2 also lists air
+      quality for prior approvals."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees on the site or in close proximity to the site boundary.
+    notes: "Audit (wrong_app_type): the tree survey applies to all application types."
+
+  - id: archaeological-assessment
+    action: add
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    confidence: low
+    notes: "From the audit (missing_requirement): 3.2.2 Archaeological desk-based assessment; the audit gives
+      no trigger."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if: discretionary
+    notes: >-
+      Needed where the completed Wildlife & Geology Trigger Table indicates it, which depends on
+      the form's answers, so shown as officer discretion. The trigger table itself is unmapped below.
+
+  - id: cil-form
+    action: replace
+    required-if:
+      application-type:
+        in: [full, outline, reserved-matters]
+    source-text: >-
+      3.14.1 Community Infrastructure Levy – Planning Application Additional Information Requirement
+      Form All applications for built development, including changes of use or creation of floor
+      space, with the exception of: Householder Applications
+    source-url: https://www.torbay.gov.uk/media/20032/local-validation-list-2023.docx
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): not householder (nor listed building consent or demolition in a
+      conservation area). 'Built development, including changes of use or creation of floor space'
+      can't be expressed, so the main planning types are listed.
+
+  - id: coastal-change-assessment
+    action: add
+    required-if:
+      site:
+        in: [coastal-erosion-zone]
+        description: The development is within a Coastal Change Management Area.
+    source-text: 3.1.15 Coastal Change Vulnerability Assessment (CCVA) For all development within a
+      Coastal Change Management Area.
+    source-url: https://www.torbay.gov.uk/media/20032/local-validation-list-2023.docx
+    confidence: medium
+    notes: "Audit (missing_requirement): 3.1.15; its wording was in the workbook's S106 row."
+
+  - id: daylight-sunlight-assessment
+    action: replace
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted the 3.10.1 Lighting Assessment text; the matching
+      item is 3.10.3 Shading diagrams / sun path, whose trigger the audit doesn't give. Section 4.2
+      lists shading diagrams for prior approvals.
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, park-and-garden, scheduled-monument]
+            description: Development or works to, or within the curtilage of, a listed building, a
+              Registered Park & Garden or a Scheduled Monument.
+    source-text: >-
+      3.2.5 Design and Access Statement In addition to applications where a D&A Statement is a
+      national requirement, the following developments will also require a Design and Access
+      Statement: development or works to, or within the curtilage of, a listed building, a
+      Registered Park & Garden or a Scheduled Monument
+    source-url: https://www.torbay.gov.uk/media/20032/local-validation-list-2023.docx
+    confidence: medium
+    notes: >-
+      The council's list keeps the national requirement and adds the heritage cases; the national
+      branch is shown as major development and listed building consent (other national cases,
+      such as conservation areas, still apply). Not limited to listed building consent.
+
+  - id: elevation-existing
+    action: replace
+    required-if:
+      application-type:
+        in: [prior-approval]
+    source-text: 4.2.1 Elevations (all sides) drawn to an identified scale Where development extends
+      floor space.
+    source-url: https://www.torbay.gov.uk/media/20032/local-validation-list-2023.docx
+    confidence: low
+    notes: "Audit (missing_requirement): the excerpt is section 4.2, local prior approval items, not a general
+      Full planning item. 'Where development extends floor space' can't be expressed."
+  - id: elevation-proposed
+    action: replace
+    required-if:
+      application-type:
+        in: [prior-approval]
+    source-text: 4.2.1 Elevations (all sides) drawn to an identified scale Where development extends
+      floor space.
+    source-url: https://www.torbay.gov.uk/media/20032/local-validation-list-2023.docx
+    must-include:
+      - item: Elevations of all sides, drawn to an identified scale
+        level: must
+    confidence: low
+    notes: "Audit (missing_requirement): the excerpt is section 4.2, local prior approval items. 'Where development
+      extends floor space' can't be expressed."
+  - id: floor-plan-existing
+    action: replace
+    required-if:
+      application-type:
+        in: [prior-approval]
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    confidence: low
+    notes: "From the audit: section 4.2 local prior approval items include floor plans; the workbook's excerpt
+      was the 4.2.1 elevations text."
+  - id: floor-plan-proposed
+    action: replace
+    required-if:
+      application-type:
+        in: [prior-approval]
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    confidence: low
+    notes: "From the audit: section 4.2 local prior approval items include floor plans; the workbook's excerpt
+      was the 4.2.1 elevations text."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    confidence: medium
+    notes: "From the audit (missing_requirement, wrong_trigger): 3.7.2 Energy Statement, for major development."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-text: "4.2.25 Fire Statements For an application for planning permission for development which
+      involves: the provision of one or more relevant buildings"
+    source-url: https://www.torbay.gov.uk/media/20032/local-validation-list-2023.docx
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt is cut off; 'relevant buildings' are defined by the DMPO (18m+ or
+      7+ storeys with 2+ dwellings or educational accommodation)."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      application-type:
+        in: [hh, full, outline, reserved-matters, demolition-con-area, prior-approval]
+    source-text: >-
+      3.6.1 Flood Risk Assessment (including surface water drainage strategy) All applications for
+      householder planning permission/full/outline/reserved matters planning permission/relevant
+      demolition in a conservation area. … 4.1.4 Flood Risk Assessment: All applications. Usually
+      required given Torbay's Critical Drainage Area status
+    source-url: https://www.torbay.gov.uk/media/20032/local-validation-list-2023.docx
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, missing_requirement): the Full planning row dumped the checklist index;
+      section 4.1.4 adds prior approvals, as Torbay is a Critical Drainage Area.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, ldc-proposed-work-lb]
+        - site:
+            in: [conservation-area, listed-building, listed-building-setting, scheduled-monument,
+              park-and-garden]
+            description: The development/works will affect a heritage asset or its setting, such as a
+              conservation area, listed building, scheduled monument or historic park and garden.
+    source-text: >-
+      3.2.1 Statement of Heritage Significance Where the development/works will affect a heritage
+      asset or its setting, such as a conservation area, listed building, scheduled monument or
+      historic park and garden
+    source-url: https://www.torbay.gov.uk/media/20032/local-validation-list-2023.docx
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): applies to householder and full applications too. The workbook's
+      'Lawful development cert' row is from the Certificate of Lawfulness of Proposed Works to a
+      listed building checklist (ldc-proposed-work-lb), not a general lawful development
+      certificate.
+
+  - id: land-contamination-assessment
+    action: add
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    confidence: low
+    notes: "From the audit (missing_requirement): 3.8.2/3.8.3 contaminated land risk assessment and intrusive
+      investigation (also a section 4.2 prior approval item); the audit gives no trigger."
+
+  - id: landscaping-plan
+    action: replace
+    required-if:
+      application-type:
+        in: [hedgerow-removal]
+    source-text: Plan 2.7 Landscaping Plans
+    source-url: https://www.torbay.gov.uk/media/20152/application-for-hedgerow-removal-notice-checklist.docx
+    confidence: low
+    notes: "Audit (wrong_app_type): the row comes from the hedgerow removal notice checklist, not Full planning."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: Development that will alter light levels with the potential to adversely affect
+          nearby buildings or open spaces, sensitive habitats or protected species, or intrinsically
+          dark landscapes.
+    notes: "Audit (wrong_app_type): applies to all application types; section 4.2 lists it for prior approvals."
+
+  - id: noise-assessment
+    action: add
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    confidence: low
+    notes: "From the audit (missing_requirement): 3.10.2 Noise Impact Assessment (also a section 4.2 prior
+      approval item); the audit gives no trigger."
+
+  - id: recreation-facilities-assessment
+    action: add
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    confidence: low
+    notes: "From the audit (missing_requirement): 3.9.1 Open Space, Sports and Recreation Assessment; the audit
+      gives no trigger."
+
+  - id: sci
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: departure-from-development-plan
+            value: true
+            description: The proposal is contrary to the development plan.
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    confidence: medium
+    notes: "From the audit (missing_requirement): 3.1.2 Statement of Community Involvement, for major development
+      or proposals contrary to the plan."
+
+  - id: site-plan
+    action: replace
+    required-if:
+      application-type:
+        in: [hedgerow-removal]
+    source-text: 2.7 Existing Site Plan 2.7 Proposed Site Plan 2.7 Landscaping Plans
+    source-url: https://www.torbay.gov.uk/media/20152/application-for-hedgerow-removal-notice-checklist.docx
+    confidence: low
+    notes: "Audit (wrong_app_type): the row comes from the hedgerow removal notice checklist, not Full planning."
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      ref: major-development
+    notes: "3.7.1 Torbay Sustainability Checklist, for all major planning applications."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: The proposal is for telecommunications development.
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    confidence: low
+    notes: "From the audit (missing_requirement): 3.1.13 Telecommunications Statement; the audit gives no
+      trigger beyond the item's name."
+
+  - id: transport-assessment
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      3.5.2 Transport Statement or Transport Assessment Where the proposed development exceeds the
+      relevant threshold in Appendix B of Guidance on Transport Assessment (DfT, 2007)
+    source-url: https://www.torbay.gov.uk/media/20032/local-validation-list-2023.docx
+    confidence: low
+    notes: >-
+      The threshold is in an external DfT table that isn't in the list, so it is shown as officer
+      discretion. The workbook's excerpt opened with the Parking Statement text. Section 4.2 lists a
+      transport statement for prior approvals.
+
+  - id: travel-plan
+    action: add
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    confidence: low
+    notes: "From the audit (missing_requirement): 3.5.3 Travel Plan; the audit gives no trigger."
+
+  - id: viability-assessment
+    action: add
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    confidence: low
+    notes: "From the audit (missing_requirement): 3.1.9 Independent Viability Assessment; the audit gives no
+      trigger."
+
+  - id: waste-management-plan
+    action: add
+    required-if: discretionary
+    source-text: >-
+      3.13.1 Waste Audit and 5 Year Management Plan For development proposals likely to generate
+      significant volumes of waste during the works during construction and/or operation The audit
+      should be proportionate to the scale of the proposal, number of visitors and likely waste
+      generation.
+    source-url: https://www.torbay.gov.uk/media/20032/local-validation-list-2023.docx
+    confidence: medium
+    notes: "'Likely to generate significant volumes of waste' is a judgement. Grokbot had filed this as a minerals/waste
+      statement."
+
+unmapped:
+  - local-name: Wildlife & Geology Trigger Table
+    source-text: "3.3.1 Wildlife & Geology Trigger Table: All applications … 4.2.13 Wildlife & Geology Trigger
+      Table: All applications"
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    suggested-id: wildlife-trigger-list
+  - local-name: Agricultural Land Classification and Soil Statement
+    source-text: "3.8.7 Agricultural Land Classification and Soil Statement: Applications of 5 ha or more, or
+      cumulative loss of 20 ha or more"
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    suggested-id: agricultural-land-classification
+  - local-name: Flooding sequential test
+    source-text: "From the audit: 3.6.2, new dwellings in Flood Zones 2 and 3"
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    suggested-id: sequential-test
+  - local-name: Sequential test (main town centre uses)
+    source-text: "However, a sequential test assessment must be carried out for all main town centre uses."
+    source-url: https://www.torbay.gov.uk/media/20032/local-validation-list-2023.docx
+    suggested-id: retail-sequential-test
+  - local-name: Contact details of applicant's legal practitioner (S106)
+    source-text: "3.1.14 Contact details of applicant's legal practitioner: Applications to modify or discharge
+      a S106 planning obligation"
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    suggested-id: ""
+  - local-name: Tree Protection Plan / Arboricultural Method Statement
+    source-text: "& Arboricultural Method Statement (as applicable) For development proposals that will affect
+      trees The Council's Arboricultural Officer will be consulted to determine whether this information
+      is required."
+    source-url: https://www.torbay.gov.uk/media/20032/local-validation-list-2023.docx
+    suggested-id: tree-protection-plan
+  - local-name: Demolition Method Statement
+    source-text: "3.12.3 Demolition Method Statement"
+    source-url: https://www.torbay.gov.uk/media/20150/application-for-planning-permission-for-relevant-demolition-in-a-conservation-area-checklist.docx
+    suggested-id: demolition-method-statement
+  - local-name: Joinery Details
+    source-text: "3.2.4 Joinery Details Where the proposed development/works includes replacement windows and/or
+      doors which would affect a heritage asset or its setting"
+    source-url: https://www.torbay.gov.uk/media/20032/local-validation-list-2023.docx
+    suggested-id: joinery-details
+  - local-name: Green Infrastructure Statement
+    source-text: "From the audit: 3.1.7, all major development"
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    suggested-id: green-infrastructure-statement
+  - local-name: Employment Statement / Economic Impact Assessment
+    source-text: "From the audit: 3.1.8, major development except residential under 30 dwellings, or loss of
+      employment or tourist accommodation"
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    suggested-id: employment-statement
+  - local-name: Infrastructure Assessment
+    source-text: "From the audit: 3.1.10, foul/utilities, major development"
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    suggested-id: infrastructure-statement
+  - local-name: Crime Prevention Statement
+    source-text: "From the audit: 3.1.16, major residential/commercial, education, HMOs, ATMs, vulnerable
+      C2/C3b"
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    suggested-id: crime-prevention-statement
+  - local-name: Bat and Bird Screening Checklist
+    source-text: "From the audit: 3.3.3, householder, demolition in a conservation area and full applications"
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    suggested-id: biodiversity-checklist
+  - local-name: Devon BNG Statement / BNG exemption evidence
+    source-text: "From the audit: 3.3.4 Devon BNG Statement and 3.3.13 BNG exemption evidence; no trigger given"
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    suggested-id: biodiversity-gain-plan
+  - local-name: Foul Drainage Assessment
+    source-text: "From the audit: 3.6.3, non-mains foul drainage"
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    suggested-id: foul-drainage-assessment
+  - local-name: Geological survey
+    source-text: "From the audit: 3.8.1; no trigger given"
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    suggested-id: ""
+  - local-name: Mineral Resource Impact Assessment
+    source-text: "From the audit: 3.8.6, major development in a Mineral Safeguarding Area"
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    suggested-id: minerals-assessment
+  - local-name: Mineral Extraction Impact Assessment / Restoration and Aftercare Scheme
+    source-text: "From the audit: 3.8.5 Mineral Extraction Impact Assessment and 3.8.8 Restoration and Aftercare
+      Scheme (minerals applications)"
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    suggested-id: restoration-aftercare-scheme
+  - local-name: Waste Planning Statement
+    source-text: "3.13.2 Waste Planning Statement: All waste applications"
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    suggested-id: minerals-waste-statement
+  - local-name: Ventilation and extraction details
+    source-text: "From the audit: 3.11.4 (also a section 4.2 prior approval item); no trigger given"
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    suggested-id: ventilation-extraction-details
+  - local-name: Pollution Prevention Plan
+    source-text: "3.12.1 Pollution Prevention Plans: Demolition or major development within 250 m of the Lyme
+      Bay and Torbay SAC"
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    suggested-id: pollution-management-statement
+  - local-name: Structural Survey
+    source-text: "From the audit: 3.12.2; no trigger given"
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    suggested-id: structural-survey
+  - local-name: Impact Assessment of the Change of Use (prior approval)
+    source-text: "From the audit: section 4.2 local prior approval item, for key shopping areas / employment
+      areas"
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    suggested-id: ""
+  - local-name: Advertisement Consent – Highways Statement
+    source-text: "From the audit: 3.5.4, where the advertisement site is within the highway boundary"
+    source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+    suggested-id: ""
+
+low-confidence:
+  - id: town-centre-impact-assessment
+    note: "The excerpt ('all main town centre uses.') is a fragment with no trigger; re-read the list."
+  - id: planning-statement
+    note: >-
+      Only the application statements for s73 (3.1.3), discharge of conditions (3.1.4) and
+      non-material amendments (3.1.5) are captured. The 3.1.1 Planning Statement for other
+      applications is on the checklists, but its trigger wasn't captured.

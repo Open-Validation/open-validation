@@ -1,0 +1,388 @@
+# Corrections for Tamworth Borough Council, from the council's audit.
+# The list is the July 2024 Planning Application Validation Checklist (Table One national,
+# Table Two local requirements, Table Three matrix by application type). Grokbot put every
+# local item under Full planning with fragmentary triggers; the triggers below come from
+# Table Two's 'When is this required?' column as the audit reports it.
+local-authority: TAW
+
+submission-standards:
+  - item: Floor plans, elevations and roof plans drawn to scale (1:50 or 1:100), with title,
+      drawing number and scale bar
+    level: should
+
+drop:
+  - id: fire-statement
+    reason: "not_a_requirement: Table One national item, not a local requirement"
+  - id: environmental-statement
+    reason: "not_a_requirement: Table One national item, not a local requirement"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: a sentence from the Design Code item"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: a fragment of the national site/block plan content"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "not_a_requirement: part of the Flood Risk Assessment item"
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_document: the excerpt is from 2.9 External Lighting Scheme (now in lighting-assessment)"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: a mitigation sentence; re-added below with the threshold"
+  - local-name: Design Code / Masterplan / Parameter plans
+    reason: "wrong_trigger: merges 2.7 and 2.16; re-added below as two items"
+  - local-name: Structural Survey
+    reason: "wrong_trigger: misstates 2.24; re-added below"
+  - local-name: Cycle parking details
+    reason: "wrong_trigger: omits the trigger and the EV charging element; re-added below"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: omits 'sites above 0.5ha'; re-added below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: The site is for 10 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: The site area is 0.5 hectares or more.
+    confidence: medium
+    notes: "Trigger from the council's text (2.1). The workbook guessed Full planning only."
+
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-text: >-
+      2.2 Air Quality Assessment All Major Developments Where proposals might lead to a significant
+      deterioration in air … quality, or national air quality objectives will be exceeded, an …
+      Air Quality Assessment must be provided in accordance with Policy SU5.
+    source-url: &list
+      https://www.tamworth.gov.uk/sites/default/files/planning_docs/Planning-Application-Validation-Checklist.pdf
+    policy: Local Plan Policy SU5
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt ran on into 2.3 Biodiversity text, cut here."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [site-of-special-scientific-interest, local-wildlife-site]
+            description: The development is on or next to a designated nature conservation site,
+              including Local Wildlife Sites.
+        - condition:
+            field: protected-species
+            value: true
+            description: Buildings with bat roost potential are affected.
+        - discretionary
+    confidence: medium
+    notes: >-
+      Trigger from the council's text (2.3). Disturbance of wildlife habitats, including
+      semi-natural open space, is shown as officer discretion.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [consent-under-tpo, notice-trees-in-con-area]
+        - site:
+            in: [tree-preservation-zone]
+            description: Works to fell a protected tree (TPO or tree in a Conservation Area).
+        - discretionary
+    policy: Local Plan Policy SU2
+    must-include:
+      - item: Tree Survey obtained from an arboricultural specialist
+        level: must
+      - item: The distribution of trees on site and the works proposed
+        level: must
+    confidence: medium
+    notes: >-
+      The council's 2.26 trigger is works to fell a protected tree (TPO or tree in a Conservation
+      Area). The Full planning row gives no trigger, so other development is shown as officer
+      discretion.
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: Land with possible contamination, such as former petrol stations, landfill
+              and industrial sites.
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: A vulnerable end use such as housing.
+    source-text: "with possible land contamination should include: Site Investigation/Detailed
+      Investigation"
+    source-url: *list
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt omits the trigger. From the audit: former
+      petrol stations, landfill and industrial sites, and vulnerable end uses such as housing.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [flood-risk-zone]
+            description: New built development in Flood Zone 2 or 3.
+        - discretionary
+    source-url: *list
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt ('where one is required under the NPPF') omits
+      the triggers. From the audit: all major development, specified Flood Zone 1 sites (shown as
+      officer discretion) and all new built development in Flood Zones 2/3. The Flood Risk
+      sequential test / exception test is part of this item.
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: floodlighting
+                value: true
+                description: The proposal includes floodlighting.
+            - condition:
+                field: external-lighting
+                value: true
+                description: The proposal includes external lighting.
+        - any:
+            - condition:
+                field: outside-urban-area
+                value: true
+                description: The site is outside the urban boundary.
+            - site:
+                in: [conservation-area, listed-building, listed-building-setting]
+                description: In or next to a Conservation Area, or on or next to a Listed Building.
+            - discretionary
+    source-text: >-
+      floodlighting or external lighting … adjacent to a residential property, outside the urban
+      boundary, in/adjacent to a Conservation Area, on/adjacent to a Listed Building, town centres
+    source-url: *list
+    must-include:
+      - item: A polar luminance diagram based on vertical luminance at the nearest sensitive
+          premises
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_document): the workbook used a bat-corridor sentence as the
+      trigger, and filed the polar luminance diagram text under an advertisement row. Sites next
+      to a residential property and in town centres are shown as officer discretion. The scheme
+      may also need to take account of ecological constraints, e.g. bat commuting corridors.
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Retail development in an edge- or out-of-centre location.
+        - condition:
+            field: retail-floorspace
+            operator: ">="
+            value: 500
+            description: 500 square metres or more of retail floorspace.
+    source-text: Retail Impact Test A retail impact assessment will be required in accordance with
+      planning practice guidance.
+    source-url: *list
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt omits the 500 sqm edge- or out-of-centre
+      threshold. Whether 500 sqm itself is included needs checking.
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt gives no trigger. From the audit: schemes not
+      meeting policy requirements such as affordable housing.
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt is cut off; developments generating significant amounts of
+      movement are shown as officer discretion."
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt is cut off; developments generating significant amounts of
+      movement are shown as officer discretion."
+
+  - id: bng-metric
+    action: add
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the biodiversity gain condition.
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): 2.4 Biodiversity Net Gain Information, all applications
+      with exceptions."
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+              scheduled-monument]
+            description: The proposal affects a designated heritage asset or its setting, a
+              conservation area, a locally listed building or a scheduled monument.
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement, wrong_app_type): 2.13 Heritage Statement; it applies to listed
+      building consent too."
+
+  - id: archaeological-assessment
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [archaeological-priority-area]
+            description: The site is on or next to archaeological assets.
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): 2.13 Archaeology Assessment for major development or sites
+      on or next to archaeological assets."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The proposal would generate significant noise or vibration.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: A noise-sensitive use near noise sources.
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): 2.18 Noise Impact Assessment."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: *list
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): 2.19 Planning Statement including a Statement of
+      Community Involvement, for all major development, leisure/visitor facilities and the loss of
+      community facilities (the last two shown as officer discretion).
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): 2.20 Renewable Energy Statement, for major applications and
+      all renewable energy applications (shown as officer discretion)."
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: Residential development.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 0
+            description: Commercial development.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: A change of use.
+    source-url: *list
+    confidence: low
+    notes: "From the audit (missing_requirement): 2.23 Site Waste Management, for residential or commercial
+      development, including changes of use. How far this reaches needs checking."
+
+  - id: photos
+    action: add
+    required-if: discretionary
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): 2.29 Photos, where plans are not practical."
+
+unmapped:
+  - local-name: Health Impact Assessment
+    source-text: "From the audit: 50+ dwellings or 5,000 sqm+ non-residential floorspace"
+    source-url:
+      https://www.tamworth.gov.uk/sites/default/files/planning_docs/Planning-Application-Validation-Checklist-Table2.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Masterplan
+    source-text: "a masterplan for the whole site will be required to be … submitted as part of any planning
+      application, in accordance with the Masterplanning requirements within Appendix 8 of the Local
+      Plan. (From the audit: sites of 5ha+ or 150+ dwellings; Policy EN5)"
+    source-url: *list
+    suggested-id: masterplan
+  - local-name: Design Code
+    source-text: "From the audit: 2.7 Design Code, large-scale major development; devised through pre-application
+      engagement with the Council and potentially an external design review"
+    source-url: *list
+    suggested-id: design-code
+  - local-name: Structural Survey
+    source-text: "From the audit: 2.24, demolition or conversion of a listed building, and conversion of agricultural
+      buildings"
+    source-url: *list
+    suggested-id: structural-survey
+  - local-name: Cycle parking and electric vehicle charging points
+    source-text: "Proposals for new dwellings and/or new or changes to employment premises."
+    source-url: *list
+    suggested-id: parking-plan
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    source-text: "of Terms Section 106 All Major Developments. (From the audit: also sites above 0.5ha)"
+    source-url:
+      https://www.tamworth.gov.uk/sites/default/files/planning_docs/Planning-Application-Validation-Checklist-Table2.pdf
+    suggested-id: planning-obligations-statement
+  - local-name: Building for a Healthy Life Assessment
+    source-text: "An assessment should be submitted showing how the development accords with the criteria set
+      out within the Building for a Healthy Life design tool kit (From the audit: 2.5, all major developments)"
+    source-url: *list
+    suggested-id: building-for-healthy-life-assessment
+  - local-name: Coal Risk Assessment
+    source-text: "From the audit: 2.6, sites in a Coal Mining referral area"
+    source-url: *list
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Minerals Statement
+    source-text: "From the audit: 2.17, major applications in Mineral Safeguarding and Consultation Areas"
+    source-url: *list
+    suggested-id: minerals-statement
+  - local-name: Secured by Design Assessment
+    source-text: "From the audit: 2.21, all major applications"
+    source-url: *list
+    suggested-id: crime-prevention-statement

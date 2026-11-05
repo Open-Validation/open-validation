@@ -1,0 +1,435 @@
+# Corrections for Derby City Council, from the council's audit.
+# The workbook links the current Local List of Validation Requirements (LLVR, October 2025). The
+# LLVR names the application types for almost every item, but Grokbot filed most rows under Full
+# planning by guess ('INFERRED'), had many garbled triggers, and missed about ten local items.
+# Types and triggers below come from the LLVR wording the audit quotes. The council's planning
+# page also says BNG guidance changed on 6 August 2026; the audit doesn't say how.
+local-authority: DER
+
+validation-list:
+  date: 2025-10
+  date-basis: "audit: document text 'Local List of Validation Requirements (LLVR) October 2025'"
+
+submission-standards:
+  - item: Elevations, floor plans and sections produced to a recognised metric scale
+    level: should
+  - item: Scale bars included on drawings
+    level: should
+
+drop:
+  - id: schedule-of-works
+    reason: "duplicate: part of the Heritage Statement guidance (now a must-include item there)"
+  - id: design-and-access-statement
+    reason: >-
+      not_a_requirement: the excerpt is a cross-reference in the Heritage Statement guidance; the
+      national rules for a Design and Access Statement still apply
+
+drop-unmapped:
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "duplicate: the same LLVR item as the Employment row (Loss of Employment Land Statement)"
+  - local-name: Employment / Economic Statement
+    reason: "wrong_trigger: garbled lighting text; replaced below with the LLVR wording"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: the excerpt is archaeology and landscape text; replaced below"
+  - local-name: Highways / access details (visibility splays)
+    reason: "duplicate: the same fragment as the Parking provision row (Parking and Access)"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 15
+            description: 15 or more units are proposed.
+    policy: DCLP1 Policy CP7
+    source-text: Full and Outline applications.
+    source-url:
+      https://www.derby.gov.uk/media/derbycitycouncil/contentassets/documents/environmentandplanning/planning/developmentcontrol/local-list-validation-requirements2025.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): the excerpt was a table header; Full applications and the
+      threshold (from the audit: where 15 or more units are proposed) were missing."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      application-type:
+        in: [full, outline]
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): the LLVR applies it to Full and Outline applications; the workbook
+      had Outline only. The excerpt is a table header and gives no trigger.
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: The application affects trees.
+    source-url:
+      https://www.derby.gov.uk/media/derbycitycouncil/contentassets/documents/environmentandplanning/planning/developmentcontrol/local-list-validation-requirements2025.pdf
+    must-include:
+      - item: Prepared by a qualified and experienced arboriculturist
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the excerpt read only 'and experienced
+      arboriculturist.' From the audit: the LLVR applies it to 'any application' affecting trees,
+      including householder.
+
+  - id: archaeological-assessment
+    action: update
+    required-if: discretionary
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the excerpt is a jumbled run of words; the audit says
+      the requirement is city-wide (any application type) but gives no clear trigger. The excerpt
+      mentions sites on or adjacent to a heritage asset of archaeological interest and a full
+      Historic Environment Record search.
+
+  - id: bng-metric
+    action: update
+    must-include:
+      - item: The BNG Metric submitted as an xlsx file (not xlsm or PDF)
+        level: must
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the excerpt is only the file-format rule and omits the exemptions
+      (householder, de minimis, self-build, etc.). Audit (other): the council's planning page says
+      BNG legislation changes took effect on 6 August 2026 and its 'Updated BNG guidance' updates
+      the LLVR; that update is not reflected here.
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - any:
+            - condition:
+                field: protected-species
+                value: true
+                description: The proposal may affect protected species.
+            - discretionary
+    must-include:
+      - item: Information on the protected species, any potential impacts on them and any mitigation
+          proposals
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the LLVR's Biodiversity & Geological Survey is for 'Full, Outline and
+      Reserved Matters applications'. Only the protected-species trigger was captured.
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is Schedule 1 or Schedule 2 EIA development.
+    source-url:
+      https://www.derby.gov.uk/media/derbycitycouncil/contentassets/documents/environmentandplanning/planning/developmentcontrol/local-list-validation-requirements2025.pdf
+    confidence: medium
+    notes: "Audit (not_a_requirement): the excerpt was boilerplate, not the EIA Schedule 1/2 trigger."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, hh]
+        - any:
+            - site:
+                in: [flood-risk-zone]
+                description: The site is in Flood Zone 2 or 3.
+            - condition:
+                field: near-watercourse
+                value: true
+                description: The site is within 20 metres of a watercourse.
+    source-text: "Full and Outline applications, (including householder development)"
+    source-url:
+      https://www.derby.gov.uk/media/derbycitycouncil/contentassets/documents/environmentandplanning/planning/developmentcontrol/local-list-validation-requirements2025.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook had Full planning only. From the audit: sites in Flood
+      Zones 2/3 or within 20m of a watercourse, including householder development.
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      application-type:
+        in: [full, outline, lbc]
+    must-include:
+      - item: A list of Heritage Assets that are to be assessed
+        level: should
+      - item: A schedule of works to the heritage asset(s) and a method statement where appropriate
+        level: should
+        source-text: should include a schedule of works to the heritage asset(s) and a method
+          statement where appropriate.
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, duplicate): the LLVR names Full, Outline and Listed Building
+      applications; the workbook had it missing from Full. The schedule of works row was part of
+      this guidance.
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - site:
+            in: [contaminated-land]
+            description: There are concerns over potential land contamination risks to human health
+              or controlled waters.
+    must-include:
+      - item: An assessment of the risks in accordance with the Land Contamination Risk Management
+          (LCRM) framework
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): 'Full and Outline applications including Changes of Use'."
+
+  - id: landscaping-plan
+    action: update
+    required-if: discretionary
+    notes: "The council says landscape plans 'could be required' to preserve or enhance the setting of designated
+      heritage assets."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - condition:
+            field: external-lighting
+            value: true
+            description: External lighting would be provided or made necessary by the development.
+    must-include:
+      - item: Details of the external lighting
+        level: must
+      - item: The proposed hours when the lighting would be in use
+        level: must
+      - item: A schedule of the equipment, including performance details such as colour temperature
+          and colour rendering, height, mounting and orientation
+        level: must
+        required-if: discretionary
+        source-text: Where lighting proposals may impact upon 'sensitive receptor's … a schedule of
+          the equipment, including performance details such as colour temperature and colour
+          rendering, height, mounting and orientation
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): a Full and Outline item. The equipment schedule wording (for
+      'sensitive receptors') was found in the workbook's garbled employment row.
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [full, outline]
+            - condition:
+                field: noise-sensitive-use
+                value: true
+                description: A noise-sensitive development.
+        - condition:
+            field: plant-equipment
+            value: true
+            description: A domestic air source heat pump or wind turbine installation.
+    source-text: a simplified noise assessment called an MCS-020 Noise.
+    source-url:
+      https://www.derby.gov.uk/media/derbycitycouncil/contentassets/documents/environmentandplanning/planning/developmentcontrol/local-list-validation-requirements2025.pdf
+    must-include:
+      - item: A simplified MCS-020 noise assessment for domestic air source heat pumps or wind turbines
+        level: must
+        required-if:
+          condition:
+            field: plant-equipment
+            value: true
+            description: A domestic air source heat pump or wind turbine installation.
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the excerpt cites only the MCS-020 heat-pump note
+      ('any proposals for domestic installations', including householder). The general
+      noise-sensitive trigger is the audit's summary; its exact wording wasn't captured.
+
+  - id: photos
+    action: replace
+    required-if: discretionary
+    source-text: Photographs and Photomontages Any application, as necessary to fully illustrate the
+      proposal
+    source-url:
+      https://www.derby.gov.uk/media/derbycitycouncil/contentassets/documents/environmentandplanning/planning/developmentcontrol/local-list-validation-requirements2025.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): 'any application', not Outline only."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: Land levels change across the site or between nearby properties.
+    notes: "The council's wording gives the trigger: sites where land levels change across the site or between
+      nearby properties."
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: Land levels change across the site or between nearby properties.
+    notes: "The council's wording gives the trigger: sites where land levels change across the site or between
+      nearby properties."
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: A retail or leisure use outside the centre hierarchy.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 1000
+            description: Above 1,000 square metres.
+    policy: DCLP1 Policy CP12 and CP13
+    source-url:
+      https://www.derby.gov.uk/media/derbycitycouncil/contentassets/documents/environmentandplanning/planning/developmentcontrol/local-list-validation-requirements2025.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, missing_requirement): the excerpt was header text. From the audit: a
+      retail/leisure impact assessment above 1,000 sqm outside the centre hierarchy.
+
+  - id: travel-plan
+    action: update
+    required-if:
+      application-type:
+        in: [full, outline]
+    must-include:
+      - item: Targets and arrangements for monitoring
+        level: must
+    confidence: low
+    notes: "Audit (wrong_app_type): the Draft Travel Plan is a Full and Outline item. The trigger wasn't captured."
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - ref: major-development
+        - discretionary
+    source-text: Site Waste Management Plan - Full, outline and reserved matters applications.
+    source-url:
+      https://www.derby.gov.uk/media/derbycitycouncil/contentassets/documents/environmentandplanning/planning/developmentcontrol/local-list-validation-requirements2025.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): a Site Waste Management Plan for major industrial or
+      commercial development in sensitive locations, not bin storage; it was missing from Full.
+      'Industrial or commercial' and 'sensitive locations' are shown as officer discretion.
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      application-type:
+        in: [full, reserved-matters]
+    source-text: Climate Change Statement and Assessment Tool - Full and Reserved Matters applications
+    source-url:
+      https://www.derby.gov.uk/media/derbycitycouncil/contentassets/documents/environmentandplanning/planning/developmentcontrol/local-list-validation-requirements2025.pdf
+    must-include:
+      - item: The completed Derbyshire climate change assessment tool
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Climate Change Statement using the Derbyshire tool."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      application-type:
+        in: [full, outline]
+    source-url:
+      https://www.derby.gov.uk/media/derbycitycouncil/contentassets/documents/environmentandplanning/planning/developmentcontrol/local-list-validation-requirements2025.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Planning Statement (Full and Outline)."
+
+  - id: sci
+    action: add
+    required-if:
+      application-type:
+        in: [full, outline]
+    source-url:
+      https://www.derby.gov.uk/media/derbycitycouncil/contentassets/documents/environmentandplanning/planning/developmentcontrol/local-list-validation-requirements2025.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Statement of Community Involvement (Full and Outline); it
+      appeared only as a URL fragment in the workbook."
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - site:
+            in: [open-space]
+            description: The proposal affects public open space.
+    source-url:
+      https://www.derby.gov.uk/media/derbycitycouncil/contentassets/documents/environmentandplanning/planning/developmentcontrol/local-list-validation-requirements2025.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Open Space Assessment, Full and Outline affecting public open
+      space."
+
+  - id: transport-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - ref: major-development
+    source-url:
+      https://www.derby.gov.uk/media/derbycitycouncil/contentassets/documents/environmentandplanning/planning/developmentcontrol/local-list-validation-requirements2025.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Transport Assessment, Full and Outline major development."
+
+unmapped:
+  - local-name: Loss of Employment Land Statement
+    source-text: "Loss of Employment Land Statement - All proposals resulting in the loss of existing
+      employment land or buildings."
+    source-url:
+      https://www.derby.gov.uk/media/derbycitycouncil/contentassets/documents/environmentandplanning/planning/developmentcontrol/local-list-validation-requirements2025.pdf
+    suggested-id: employment-statement
+  - local-name: Health Impact Assessment (EIA development)
+    source-text: "All planning applications requiring an EIA."
+    source-url:
+      https://www.derby.gov.uk/media/derbycitycouncil/contentassets/documents/environmentandplanning/planning/developmentcontrol/local-list-validation-requirements2025.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Aerodrome Safeguarding Assessment
+    source-text: "From the audit: development in aerodrome safeguarding areas affecting protected surfaces,
+      lighting, solar, reflections or bird hazard (CDLPR E30)"
+    source-url:
+      https://www.derby.gov.uk/media/derbycitycouncil/contentassets/documents/environmentandplanning/planning/developmentcontrol/local-list-validation-requirements2025.pdf
+    suggested-id: aerodrome-safeguarding-statement
+  - local-name: Regeneration Statement
+    source-text: "From the audit: Full and Outline applications"
+    source-url:
+      https://www.derby.gov.uk/media/derbycitycouncil/contentassets/documents/environmentandplanning/planning/developmentcontrol/local-list-validation-requirements2025.pdf
+    suggested-id: regeneration-statement
+  - local-name: Residential commencement and delivery information
+    source-text: "From the audit: any application including residential development"
+    source-url:
+      https://www.derby.gov.uk/media/derbycitycouncil/contentassets/documents/environmentandplanning/planning/developmentcontrol/local-list-validation-requirements2025.pdf
+    suggested-id: ""
+  - local-name: Great Crested Newts survey
+    source-text: "From the audit: any application affecting great crested newts"
+    source-url:
+      https://www.derby.gov.uk/media/derbycitycouncil/contentassets/documents/environmentandplanning/planning/developmentcontrol/local-list-validation-requirements2025.pdf
+    suggested-id: great-crested-newt-assessment

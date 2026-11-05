@@ -1,0 +1,699 @@
+# Corrections for Hertfordshire County Council, from the council's audit.
+# The audit read the County Council's Local List (June 2024; a user uploaded it because the site
+# blocks fetching). The County Council only determines minerals and waste applications and its own
+# development (Regulation 3), so the list's requirements are scoped here to mineral-app, waste-dev and
+# reg-3. The list applies itself to every planning application (outline, full, reserved matters,
+# s73). The workbook filed most items under Full planning, with preamble or borrowed trigger text.
+# Ten local requirements (mostly minerals and waste items) were missing and are added as unmapped.
+local-authority: HRT
+
+submission-standards:
+  - item: Files submitted in PDF format and labelled appropriately
+    level: should
+  - item: Scale of plans and paper size no larger than is required to illustrate the proposals
+    level: should
+
+drop:
+  - id: photos
+    reason: "not_a_requirement: 'Photomontages and other visualisations may be required' is a sentence from
+      the LVIA item (L16)"
+  - id: environmental-statement
+    reason: "wrong_trigger: a sentence about copies; the list says EIA content is outside its scope"
+
+drop-unmapped:
+  - local-name: "Agricultural / rural workers' dwelling appraisal"
+    reason: "not_a_requirement: not in the document; reuses an L25 Restoration sentence"
+  - local-name: Agricultural Land Classification / Soils
+    reason: "wrong_trigger: an L25 Restoration sentence; Restoration and Soils Management are added below"
+  - local-name: Design Code / Masterplan / Parameter plans
+    reason: "not_a_requirement: a clause from the Planning Statement content text"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: pre-application discussion is 'strongly recommended'"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "duplicate: the tail of the L8 Daylight and Sunlight trigger"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "duplicate: copies the Planning Statement trigger; Heads of Terms go in the Planning Statement
+      where relevant (added there)"
+  - local-name: Advertisement drawings / illumination details
+    reason: "other: this is L18 Lighting Statement/Scheme (now lighting-assessment)"
+  - local-name: Ground investigation / Geotechnical / Basement Impact Assessment
+    reason: "other: this is L14 Hydrological/Hydrogeological Assessment (now water-impact-assessment)"
+  - local-name: Minerals / Waste specific statements (county matters)
+    reason: "other: this is L5 Bird Strike Management Plan, with a mid-sentence trigger; re-added below"
+  - local-name: Odour / Dust / Vibration assessment
+    reason: "wrong_trigger: only a 'Dust Assessment' cross-reference; Dust Assessment re-added below and
+      Noise/Vibration in noise-assessment"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "other: this is L21 Odour Assessment; re-added below under its own name"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: preamble only; L30 Surface Water Drainage Strategy re-added below"
+
+requirements:
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [mineral-app, waste-dev]
+        - all:
+            - application-type:
+                in: [reg-3]
+            - any:
+                - ref: major-development
+                - site:
+                    in: [air-quality-management-area]
+                    description: The site lies within or adjoining an Air Quality Management Area.
+                - discretionary
+    source-text: >-
+      Air Quality Impact Assessment … When Required All major applications; when the site lies within or
+      adjoining an Air Quality Management Area (excluding householders) or where proposals will have a
+      significant adverse impact on air quality; all minerals and waste applications.
+    source-url: https://www.hertfordshire.gov.uk/media-library/documents/environment-and-planning/planning/planning-applications-decisions/validation-checklist-june-24-pdf-550kb.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, wrong_trigger): not householder (the County Council does not determine
+      householder applications). From the audit: L1 also covers HGV traffic, permitted emissions and a
+      new school close to an existing source of air pollution, shown here as discretionary.
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Trees within, on the boundary or in close proximity to the site that could be affected.
+    source-url: https://www.hertfordshire.gov.uk/media-library/documents/environment-and-planning/planning/planning-applications-decisions/validation-checklist-june-24-pdf-550kb.pdf
+    must-include:
+      - item: Survey in line with BS5837:2012 'Trees in relation to design, demolition and construction'
+        level: should
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook kept only the preamble. From the audit: L34 is needed for
+      'trees within, on the boundary or in close proximity to the site that could be affected'."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - site:
+                in: [archaeological-priority-area]
+                description: Operational development in an Area of Archaeological Significance.
+            - discretionary
+    notes: "Development affecting a site with, or with potential for, heritage assets with archaeological
+      interest is shown as discretionary."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - ref: major-development
+            - condition:
+                field: protected-species
+                value: true
+                description: The proposal could negatively affect protected species.
+            - site:
+                in: [priority-habitat]
+                description: The proposal could negatively affect protected or priority habitats.
+            - discretionary
+    source-text: >-
+      Major applications and when proposals could result in a new loss to biodiversity, negatively
+      affected protected habitats or species or priority habitats or species
+    source-url: https://www.hertfordshire.gov.uk/media-library/documents/environment-and-planning/planning/planning-applications-decisions/validation-checklist-june-24-pdf-550kb.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook carried L4 Biodiversity 'What Information' text. A loss to
+      biodiversity is shown as discretionary."
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - discretionary
+    notes: "Audit (wrong_trigger): cut off; needed where there is a potential adverse impact on daylight or
+      sunlight enjoyed by neighbours, including gardens or amenity space."
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - ref: major-development
+            - all:
+                - site:
+                    in: [conservation-area]
+                    description: The site is in a Conservation Area.
+                - any:
+                    - condition:
+                        field: dwelling-count
+                        operator: ">="
+                        value: 1
+                        description: The proposal provides one or more dwelling houses.
+                    - condition:
+                        field: floorspace
+                        operator: ">="
+                        value: 100
+                        description: The floorspace created is 100 square metres or more.
+    notes: "Audit (wrong_trigger): the excerpt is cut mid-word; the rest of the trigger was not captured."
+
+  - id: elevation-existing
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: new-build
+                value: true
+                description: The proposal includes new buildings.
+            - condition:
+                field: external-alterations
+                value: true
+                description: The proposal includes external changes.
+    confidence: medium
+    notes: "From the audit (wrong_trigger): N9 elevations are needed for all applications except change of
+      use or lawfulness certificates with no external changes, and s73."
+
+  - id: elevation-proposed
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: new-build
+                value: true
+                description: The proposal includes new buildings.
+            - condition:
+                field: external-alterations
+                value: true
+                description: The proposal includes external changes.
+    confidence: medium
+    notes: "From the audit (wrong_trigger): N9 elevations are needed for all applications except change of
+      use or lawfulness certificates with no external changes, and s73."
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [reg-3]
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A new or existing building of 18 metres or more in height.
+            - all:
+                - condition:
+                    field: storey-count
+                    operator: ">="
+                    value: 7
+                    description: A building of seven or more storeys.
+                - any:
+                    - condition:
+                        field: dwelling-count
+                        operator: ">="
+                        value: 2
+                        description: It contains two or more dwellings.
+                    - condition:
+                        field: educational-accommodation
+                        value: true
+                        description: It contains educational accommodation.
+    notes: "Scoped to the County Council's own development (Regulation 3), the only type where it can apply."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: site-area-residential
+                operator: ">="
+                value: 1
+                description: The site is 1 hectare or greater.
+            - condition:
+                field: site-area-non-residential
+                operator: ">="
+                value: 1
+                description: The site is 1 hectare or greater.
+            - site:
+                in: [flood-risk-zone]
+                description: Operational development or a change to a more vulnerable use in Flood Zone 2 or 3.
+            - condition:
+                field: near-watercourse
+                value: true
+                description: Culverting, or works within 20 metres of the bank of a main river.
+    source-text: >-
+      Flood Risk Assessment … When Required All development proposals of 1 hectare or greater in Flood
+      Zones 1, 2 and 3;
+    source-url: https://www.hertfordshire.gov.uk/media-library/documents/environment-and-planning/planning/planning-applications-decisions/validation-checklist-june-24-pdf-550kb.pdf
+    must-include:
+      - item: Rainfall data from FEH22 (FSR and FEH1999 data are not accepted)
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook kept only the first clause. From the audit: also operational
+      development under 1 ha in Flood Zones 2 and 3, changes of use to highly or more vulnerable uses
+      in Flood Zones 2 and 3, water-compatible to less vulnerable in Flood Zone 3, and culverting or
+      works within 20 m of a main river bank. The FEH22 item is from the L30 footnote.
+
+  - id: floor-plan-existing
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: low
+    notes: "The workbook's excerpt was the elevations preamble; the list's floor plan trigger was not captured."
+
+  - id: floor-plan-proposed
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    must-include:
+      - item: For change of use, floor plans annotated to show the extent of the existing and proposed use
+          within the land or building
+        level: must
+        required-if:
+          condition:
+            field: involves-change-of-use
+            value: true
+            description: The application is for a change of use.
+        source-text: >-
+          Applications for change of use need to be accompanied by floor plans annotated to indicate the
+          extent of the existing and proposed use within the land or building.
+    confidence: low
+    notes: "The workbook's excerpt was the elevations preamble; the list's floor plan trigger was not captured."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - all:
+            - application-type:
+                in: [mineral-app, waste-dev, reg-3]
+            - site:
+                in: [listed-building, listed-building-setting, conservation-area, scheduled-monument,
+                  park-and-garden, world-heritage-site]
+                description: Development affecting Listed Buildings, Conservation Areas, Scheduled Monuments,
+                  Historic Parks and Gardens or World Heritage Sites.
+    source-text: >-
+      Heritage Statement … When Required All applications for listed building consent and for
+      developments affecting the historic environment (Listed Buildings, Conservation Areas, Scheduled
+      Monuments, Historic Parks and Gardens, World Heritage Sites).
+    source-url: https://www.hertfordshire.gov.uk/media-library/documents/environment-and-planning/planning/planning-applications-decisions/validation-checklist-june-24-pdf-550kb.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): not only listed building consent; also development affecting the
+      historic environment."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - site:
+            in: [contaminated-land]
+            description: Reason to suspect contamination of the site or neighbouring land from previous
+              operations (former industrial uses, landfill sites or mineral tips).
+    must-include:
+      - item: Landfill gas risk assessment
+        level: must
+        required-if:
+          site:
+            in: [near-landfill-site]
+            description: The site is on or within 250 metres of a former landfill site.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt drops 'former mineral tips' and the landfill gas risk
+      assessment for sites on or within 250 m of a former landfill (audit's summary)."
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - discretionary
+    notes: >-
+      Needed for 'All planning applications that include some form of landscaping'; there is no field
+      for that. From the audit: 'Applications for full planning permission (apart from change of use)
+      should be accompanied by a fully detailed scheme'.
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: external-lighting
+            value: true
+            description: The application involves exterior lighting, or exterior lighting will be required.
+    source-text: Planning applications involving exterior lighting or where exterior lighting will be required
+    source-url: https://www.hertfordshire.gov.uk/media-library/documents/environment-and-planning/planning/planning-applications-decisions/validation-checklist-june-24-pdf-550kb.pdf
+    must-include:
+      - item: Hours of illumination
+        level: should
+      - item: Drawings showing the spread of the light and how light is kept from extending beyond the site
+        level: should
+        source-text: >-
+          hours of illumination) and should be accompanied by drawings to demonstrate the spread of the
+          light and the means of ensuring that the light does not extend beyond the site to the detriment
+          of the amenity of neighbouring properties.
+    confidence: medium
+    notes: "Audit (other, wrong_trigger): L18 Lighting Statement/Scheme was mislabelled as advertisement
+      drawings and carried 'What Information' text."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: noise-generating-use
+                value: true
+                description: New development that could create noise affecting noise-sensitive uses.
+            - condition:
+                field: noise-sensitive-use
+                value: true
+                description: Noise-sensitive development next to an existing noisy use.
+            - application-type:
+                in: [mineral-app]
+            - discretionary
+    source-text: >-
+      Minerals and road developments, all land-filling and land raising applications; reworking or
+      reclamation of former landfill sites; recycling of inert waste ...
+    source-url: https://www.hertfordshire.gov.uk/media-library/documents/environment-and-planning/planning/planning-applications-decisions/validation-checklist-june-24-pdf-550kb.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): L20 Noise and/or Vibration Statement. The minerals, landfill,
+      landraising and inert recycling cases apply where the proposal is likely to raise noise above
+      background levels; the waste cases are shown as discretionary.
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3, lbc]
+    source-text: >-
+      Planning Statement … When Required Outline, reserved matters and full applications, listed
+      building consent applications.
+    source-url: https://www.hertfordshire.gov.uk/media-library/documents/environment-and-planning/planning/planning-applications-decisions/validation-checklist-june-24-pdf-550kb.pdf
+    must-include:
+      - item: A Green Belt Statement, setting out very special circumstances where the proposal is contrary
+          to Green Belt policy
+        level: must
+        required-if:
+          site:
+            in: [green-belt]
+            description: The site is in the Hertfordshire Green Belt.
+        source-text: >-
+          All applications in the Hertfordshire Green Belt must provide a Green Belt Statement as part of
+          the Planning Statement.
+      - item: S106 Heads of Terms
+        level: should
+        required-if: discretionary
+        source-text: S106 Heads of Terms should be included where relevant.
+    confidence: medium
+    notes: "Audit (missing_requirement, duplicate): the Green Belt Statement and Heads of Terms belong in the
+      Planning Statement. Outline, full and reserved matters are shown as the County's own application types."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: loss-of-open-space
+            value: true
+            description: The development may result in the loss or degradation of designated playing field space.
+    notes: "Audit (other): this is L24 Playing Field Assessment."
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: roof-alteration
+                value: true
+                description: The proposal changes a roof.
+            - condition:
+                field: new-build
+                value: true
+                description: The proposal includes new buildings.
+    confidence: medium
+    notes: "From the audit (wrong_trigger): N10 roof plans are needed for changes to roofs or new buildings,
+      except s73."
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: roof-alteration
+                value: true
+                description: The proposal changes a roof.
+            - condition:
+                field: new-build
+                value: true
+                description: The proposal includes new buildings.
+    confidence: medium
+    notes: "From the audit (wrong_trigger): N10 roof plans are needed for changes to roofs or new buildings,
+      except s73."
+
+  - id: sci
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - ref: major-development
+            - discretionary
+    notes: "Audit (wrong_app_type): 'including minerals and waste and school proposals'. Significant effects on
+      the local community are shown as discretionary."
+
+  - id: section-existing
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - ref: major-development
+    confidence: medium
+    notes: "From the audit (wrong_trigger): N11 sections and site levels are needed for all major applications."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - ref: major-development
+    confidence: medium
+    notes: "From the audit (wrong_trigger): N11 sections and site levels are needed for all major applications."
+
+  - id: site-plan
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    source-text: >-
+      At a scale of either 1:200 or 1:500 with a scale bar, accurately showing; direction of north,
+      proposed development in relation to the site boundaries and other existing buildings on site, all
+      neighbouring buildings, roads and footpaths on land adjoining the site including access
+      arrangements and all public rights of way crossing or adjoining the site.
+    must-include:
+      - item: Scale of 1:200 or 1:500, with a scale bar
+        level: must
+      - item: All public rights of way crossing or adjoining the site
+        level: must
+    confidence: medium
+    notes: "From the audit (wrong_trigger): N5 site plans are needed for all applications."
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    source-text: >-
+      Sustainability Statement/Appraisal … When Required All applications except householders,
+      certificates of lawfulness.
+    source-url: https://www.hertfordshire.gov.uk/media-library/documents/environment-and-planning/planning/planning-applications-decisions/validation-checklist-june-24-pdf-550kb.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook filed it under the only two types the list excludes."
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: parking-spaces
+                operator: ">"
+                value: 0
+                description: Additional parking is proposed.
+            - discretionary
+    source-text: >-
+      All applications where there is likely to be a significant impact upon the existing transport
+      network, and/or where additional parking is proposed. … All applications where the use of HGVs is
+      required will require a Transport Assessment (TA).
+    source-url: https://www.hertfordshire.gov.uk/media-library/documents/environment-and-planning/planning/planning-applications-decisions/validation-checklist-june-24-pdf-550kb.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): the HGV clause is the main trigger for minerals and waste;
+      there is no field for HGV use or significant transport impact, so they are shown as discretionary."
+
+  - id: travel-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [reg-3]
+        - condition:
+            field: pupil-increase
+            operator: ">"
+            value: 0
+            description: A new school, or a school expanding the number of pupils.
+    source-text: For new schools or where schools will be expanding the number of pupils.
+    source-url: https://www.hertfordshire.gov.uk/media-library/documents/environment-and-planning/planning/planning-applications-decisions/validation-checklist-june-24-pdf-550kb.pdf
+    must-include:
+      - item: How new pupils will reach the site by public transport or hired coaches
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook carried the Transport Assessment trigger. The must-include
+      item is the audit's summary."
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [reg-3]
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 500
+            description: Over 500 square metres of new building development.
+    source-text: >-
+      Site Waste Management Plan … When Required Regulation 3 applications with over 500m2 of new building
+      development.
+    source-url: https://www.hertfordshire.gov.uk/media-library/documents/environment-and-planning/planning/planning-applications-decisions/validation-checklist-june-24-pdf-550kb.pdf
+    must-include:
+      - item: Estimates of waste arising
+        level: must
+      - item: Recordings of waste managed
+        level: must
+      - item: List of waste carriers
+        level: must
+      - item: Proportion of wastes re-used, recycled and disposed
+        level: must
+    confidence: medium
+    notes: "Audit (other): this is L27 Site Waste Management Plan (construction waste), not bin storage."
+
+  - id: water-impact-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev]
+        - discretionary
+    source-text: >-
+      Hydrological/Hydrogeological Assessment … When Required For minerals and/or waste related
+      development proposals, where dewatering is proposed or proposals affect the water table.
+    source-url: https://www.hertfordshire.gov.uk/media-library/documents/environment-and-planning/planning/planning-applications-decisions/validation-checklist-june-24-pdf-550kb.pdf
+    confidence: medium
+    notes: "Audit (other): L14 was mislabelled as ground investigation. Dewatering or effects on the water
+      table have no field, so they are shown as discretionary."
+
+unmapped:
+  - local-name: Restoration Strategy and Aftercare (L25)
+    source-text: "Where proposals involve the disturbance of the ground for the extraction of minerals or waste
+      disposal."
+    source-url: https://www.hertfordshire.gov.uk/media-library/documents/environment-and-planning/planning/planning-applications-decisions/validation-checklist-june-24-pdf-550kb.pdf
+    suggested-id: restoration-aftercare-scheme
+  - local-name: Phasing Plan (L22)
+    source-text: "All applications for mineral extraction and landfill."
+    source-url: https://www.hertfordshire.gov.uk/media-library/documents/environment-and-planning/planning/planning-applications-decisions/validation-checklist-june-24-pdf-550kb.pdf
+    suggested-id: phasing-plan
+  - local-name: Borehole or Trial Pit Analysis (L6)
+    source-text: "For all mineral extraction proposals."
+    source-url: https://www.hertfordshire.gov.uk/media-library/documents/environment-and-planning/planning/planning-applications-decisions/validation-checklist-june-24-pdf-550kb.pdf
+    suggested-id: borehole-trial-pit-analysis
+  - local-name: Climate Change Statement (L7)
+    source-text: "For mineral extraction and waste proposals."
+    source-url: https://www.hertfordshire.gov.uk/media-library/documents/environment-and-planning/planning/planning-applications-decisions/validation-checklist-june-24-pdf-550kb.pdf
+    suggested-id: climate-change-statement
+  - local-name: Mineral Resources Assessment (L19)
+    source-text: "Regulation 3 and waste applications on areas of significant mineral resources or within the
+      County Council's Mineral Consultation Area"
+    source-url: https://www.hertfordshire.gov.uk/media-library/documents/environment-and-planning/planning/planning-applications-decisions/validation-checklist-june-24-pdf-550kb.pdf
+    suggested-id: mineral-resource-assessment
+  - local-name: Bio-aerosol Assessment (L3)
+    source-text: "Proposals involving the handling, storage or treatment of biodegradable wastes, particularly
+      composting within 250 metres of sensitive land uses such as dwellings."
+    source-url: https://www.hertfordshire.gov.uk/media-library/documents/environment-and-planning/planning/planning-applications-decisions/validation-checklist-june-24-pdf-550kb.pdf
+    suggested-id: bioaerosol-risk-assessment
+  - local-name: Soils Management and Handling Strategy (L28)
+    source-text: "For mineral applications where significant development of agricultural land is involved."
+    source-url: https://www.hertfordshire.gov.uk/media-library/documents/environment-and-planning/planning/planning-applications-decisions/validation-checklist-june-24-pdf-550kb.pdf
+    suggested-id: soil-management-plan
+  - local-name: Rights of Way (L26)
+    source-text: "Where a public right of way traverses or passes close by the application site or involves
+      the temporary diversion or closure of part of a route"
+    source-url: https://www.hertfordshire.gov.uk/media-library/documents/environment-and-planning/planning/planning-applications-decisions/validation-checklist-june-24-pdf-550kb.pdf
+    suggested-id: public-rights-of-way-statement
+  - local-name: Geo-Diverse Assessment (L12)
+    source-text: "Developments that pose a risk to a designated site of geological/geomorphological importance
+      or a notable geological/geomorphological feature within the application site."
+    source-url: https://www.hertfordshire.gov.uk/media-library/documents/environment-and-planning/planning/planning-applications-decisions/validation-checklist-june-24-pdf-550kb.pdf
+    suggested-id: geodiversity-assessment
+  - local-name: Surface Water Drainage Strategy and LLFA pro-forma (L30, Appendix 1)
+    source-text: "Major applications and all development likely to significantly increase or change patterns of
+      surface water run-off … this pro-forma must be completed in full and be submitted with any planning
+      application which seeks permission for 'major' development"
+    source-url: https://www.hertfordshire.gov.uk/media-library/documents/environment-and-planning/planning/planning-applications-decisions/validation-checklist-june-24-pdf-550kb.pdf
+    suggested-id: drainage-strategy
+  - local-name: Bird Strike Management Plan (L5)
+    source-text: "disposal and restoration schemes with major tree planting or nature reserves which would be
+      attractive to birds falling within 13 kilometres of Civil Airports and Ministry of Defence Airfields."
+    source-url: https://www.hertfordshire.gov.uk/media-library/documents/environment-and-planning/planning/planning-applications-decisions/validation-checklist-june-24-pdf-550kb.pdf
+    suggested-id: bird-strike-management-plan
+  - local-name: Dust Assessment (L9)
+    source-text: "For developments with the potential to generate dust and applications involving major
+      construction works where dust is likely to be an issue."
+    source-url: https://www.hertfordshire.gov.uk/media-library/documents/environment-and-planning/planning/planning-applications-decisions/validation-checklist-june-24-pdf-550kb.pdf
+    suggested-id: dust-assessment
+  - local-name: Odour Assessment (L21)
+    source-text: "Odour Assessment … When Required All developments that involve processes that generate odours
+      that may impact local amenity."
+    source-url: https://www.hertfordshire.gov.uk/media-library/documents/environment-and-planning/planning/planning-applications-decisions/validation-checklist-june-24-pdf-550kb.pdf
+    suggested-id: odour-assessment
+

@@ -1,0 +1,530 @@
+# Corrections for Southend-on-Sea City Council, from inputs/audit/southend-on-sea-borough-council.json.
+# The workbook link is the current 'Local List of Planning Validation Requirements July 2023'
+# (L1-L33 local items, N1-N7 national items); the build reads 'July 2023' from the audit (Grokbot's
+# March 2023 was the consultation draft's PDF metadata). Grokbot placed every row under Full
+# planning ('INFERRED') and missed about 14 local items; many excerpts are column headers or text
+# from other items. Items marked "From the audit" use its paraphrase of the list.
+# Note (audit, other): the council has been Southend-on-Sea City Council since 2022; the list is
+# linked from https://www.southend.gov.uk/make-planning-application/make-planning-application-2.
+local-authority: SOS
+
+submission-standards:
+  - item: All plans drawn to an identified standard metric scale, titled according to their content,
+      labelled with the original size of the document and scale (e.g. 1:100 @ A1), on a white
+      background with dark, preferably black, ink
+    level: must
+  - item: A linear scale bar on all plans
+    level: must
+  - item: Amended plans clearly identify the changes from the original proposal and come with a list
+      of all submitted and superseded drawing numbers
+    level: should
+
+drop-unmapped:
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "wrong_trigger: the excerpt is the cut-off Biodiversity Survey and Report entry; added below as biodiversity-survey-report"
+  - local-name: Foul Sewage / Utilities Statement
+    reason: "wrong_trigger: trigger omitted; re-added below"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: threshold omitted; re-added below"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: a fragment of the block plan contents; now under site-plan"
+
+requirements:
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [consent-under-tpo, notice-trees-in-con-area]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: >-
+              There are trees within or adjacent to the site that could influence or be affected by
+              the proposed development.
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    source-text: >-
+      Arboricultural/ Tree Survey … All tree work applications and any application where there are
+      trees, within or adjacent to a site that could influence or be affected by the proposed
+      development.
+    confidence: medium
+    notes: "Audit (wrong_app_type): L9 applies to all tree work applications and any application type with trees, including householder."
+
+  - id: biodiversity-survey-report
+    action: add
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the Biodiversity Survey and Report entry is cut off at 'Where the
+      development will affect', so the trigger was not captured.
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the biodiversity gain condition (not exempt).
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): L10b says all major applications from 1 November 2023 and all
+      developments from 1 April 2024, unless exempted. Those dates predate the legislation (statutory
+      BNG started 12 February 2024 for majors and 2 April 2024 for small sites).
+
+  - id: site-plan
+    action: replace
+    required-if:
+      condition:
+        field: footprint-increase
+        value: true
+        description: The proposal changes the footprint.
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    source-text: "All applications except where there is no proposed change to the footprint"
+    must-include:
+      - item: Public highway, visibility splays, landscaping, car parking and open areas around
+          buildings
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, wrong_trigger): L1 Block plan applies to all applications, householder
+      included, unless the footprint does not change. The must-include item is a fragment of the
+      block plan contents the workbook had filed as a visibility splay requirement; its start is cut
+      off.
+
+  - id: cil-form
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: A new dwelling of any size.
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 100
+            description: 100 square metres or more of new floorspace.
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was a table-of-contents line."
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: Contamination of the existing site is known or suspected.
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    source-text: Where contamination of an existing site is known or suspected.
+    confidence: medium
+
+  - id: design-and-access-statement
+    action: replace
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    confidence: low
+    notes: >-
+      Audit (other, wrong_trigger): DAS is N4, a national-list item, not a local requirement, and the
+      workbook's excerpt was column headers. The audit notes N4 applies to listed building consent;
+      the national rules apply.
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: EIA development (Schedule 1 or 2 of the 2017 EIA Regulations).
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    confidence: medium
+    notes: "Audit (wrong_app_type, other): N6 is a national item for any EIA development, not only outline applications."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 2
+            description: The building contains 2 or more dwellings.
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    source-text: >-
+      Fire statements support the consideration of information on fire safety issues relevant to
+      land use planning matters e.g. where fire safety issues relate to site layout and access.
+    confidence: medium
+    notes: "Audit (wrong_trigger, other): N7 is a national item; from the audit, 18m+ or 7+ storeys with 2+ dwellings."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      site:
+        in: [flood-risk-zone]
+        description: The site is in flood zone 2 or 3 (including minor development and change of use).
+    must-include:
+      - item: The risks of all forms of flooding to and from the development, and how they will be
+          managed, taking climate change into account
+        level: should
+    confidence: medium
+    notes: "Audit (wrong_app_type): L15 covers Flood Zones 2 or 3 'including minor development and change of use', householder included."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building]
+            description: The proposal affects a heritage asset.
+    must-include:
+      - item: Detailed schedule of the proposed work
+        level: should
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): L18 applies to listed building consent and to other applications,
+      householder included. The workbook's excerpt is content, not the trigger, so the heritage-asset
+      branch needs checking.
+
+  - id: lighting-assessment
+    action: update
+    must-include:
+      - item: Details of the proposed lighting scheme
+        level: should
+      - item: How the proposal will not have an adverse impact on amenity or wildlife
+        level: should
+    confidence: low
+    notes: "The workbook's excerpt is what the assessment should include; the trigger was not captured."
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: A significant impact on residential amenity (e.g. bars or nightclubs).
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: A noise-sensitive use near noise sources.
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook used the Lighting Assessment text. From the audit: L20's trigger."
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: New development creating additional residential units.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 0
+            description: New development creating additional commercial units.
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook used L23 waste text. From the audit: L26 applies to all new development creating additional residential and/or commercial units."
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Outside the Town Centre Primary Shopping Area.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 2500
+            description: Over 2,500 square metres.
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    source-text: >-
+      guides main town centre uses firstly to town centre locations, then edge of centre
+      locations, and if neither are available, to out of centre locations, with a preference for
+      accessible sites which are well connected to the town centre.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt omits the trigger, '>2,500 sqm outside the Town Centre Primary Shopping Area'."
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 20
+            description: 20 or more dwellings (Transport Statement 20-49; Transport Assessment 50+).
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 2500
+            description: 2,500 square metres or more of business floorspace (Transport Assessment).
+        - discretionary
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    source-text: >-
+      Transport Statement (including Travel Plan Statement) … A transport statement will be required
+      for development with relatively small transport implications as set out in Appendix 1.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the L30 Transport Assessment (significant transport implications) was
+      missing. From the audit, Appendix 1 thresholds include residential Transport Statement 20-49
+      dwellings, Transport Assessment 50+ dwellings, 100+ hotel bedrooms and 2,500+ sqm business.
+      The rest of Appendix 1 is shown as officer discretion.
+
+  - id: travel-plan
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 20
+            description: 20 or more dwellings (Travel Plan Statement with a Transport Statement; Travel Plan with a Transport Assessment from 50).
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 2500
+            description: 2,500 square metres or more of business floorspace.
+        - discretionary
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    confidence: medium
+    notes: >-
+      Audit (duplicate, wrong_trigger): the workbook repeated the Transport Statement row. L29
+      Transport Statement includes a Travel Plan Statement and L30 Transport Assessment includes a
+      Travel Plan, so the same Appendix 1 thresholds apply.
+
+  - id: viability-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 10
+            description: Over 10 units.
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 1000
+            description: Over 1,000 square metres.
+    must-include:
+      - item: A financial viability assessment using the residual valuation method, fully supported
+          with the relevant evidence
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt omits 'over 10 units or 1,000 sqm'."
+
+  - id: elevation-existing
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal includes a new building.
+        - condition:
+            field: external-alterations
+            value: true
+            description: The proposal alters the exterior of an existing building.
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    source-text: >-
+      All applications proposing new building or alterations to the exterior of existing buildings
+      (except outline applications where ‘appearance’ is reserved).
+    confidence: medium
+    notes: "Audit (wrong_app_type): L2 is not an outline requirement; outline applications with appearance reserved are excluded (not expressible here)."
+
+  - id: elevation-proposed
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal includes a new building.
+        - condition:
+            field: external-alterations
+            value: true
+            description: The proposal alters the exterior of an existing building.
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    source-text: >-
+      All applications proposing new building or alterations to the exterior of existing buildings
+      (except outline applications where ‘appearance’ is reserved).
+    confidence: medium
+    notes: "Audit (wrong_app_type): L2 is not an outline requirement; outline applications with appearance reserved are excluded (not expressible here)."
+
+  - id: floor-plan-existing
+    action: replace
+    required-if:
+      condition:
+        field: building-works
+        value: true
+        description: The proposal creates new or amended floorspace.
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    confidence: low
+    notes: "Audit (missing_requirement, wrong_app_type): L3 Floor plans, for new or amended floorspace (the audit's summary); the workbook only had it jointly with elevations under Outline."
+
+  - id: floor-plan-proposed
+    action: replace
+    required-if:
+      condition:
+        field: building-works
+        value: true
+        description: The proposal creates new or amended floorspace.
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    confidence: low
+    notes: "Audit (missing_requirement, wrong_app_type): L3 Floor plans, for new or amended floorspace (the audit's summary); the workbook only had it jointly with elevations under Outline."
+
+  - id: roof-plan-existing
+    action: add
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: Any creation or alteration of a roof.
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    confidence: medium
+    notes: "From the audit (missing_requirement): L4 Roof plans."
+
+  - id: roof-plan-proposed
+    action: add
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: Any creation or alteration of a roof.
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    confidence: medium
+    notes: "From the audit (missing_requirement): L4 Roof plans."
+
+  - id: section-existing
+    action: add
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal changes ground levels or the site slopes.
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    confidence: medium
+    notes: "From the audit (missing_requirement): L5 Sections."
+
+  - id: section-proposed
+    action: add
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal changes ground levels or the site slopes.
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    confidence: medium
+    notes: "From the audit (missing_requirement): L5 Sections."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): L7 Supporting Planning Statement for major development
+      and key policy issues such as loss of employment, affordable housing, loss of retail or open
+      space.
+
+  - id: air-quality-assessment
+    action: add
+    required-if: discretionary
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    confidence: medium
+    notes: "From the audit (missing_requirement): L8, where there is a significant air quality impact or pollutants."
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: Residential development.
+        - discretionary
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    confidence: medium
+    notes: "From the audit (missing_requirement): L14, potential harm to neighbours' light, and major residential development."
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    confidence: medium
+    notes: "From the audit (missing_requirement): L23 Recycling/Waste Management Strategy for all major development."
+
+  - id: sci
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    confidence: medium
+    notes: "From the audit (missing_requirement): L24, major or controversial applications."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Telecommunications development.
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    confidence: medium
+    notes: "From the audit (missing_requirement, wrong_app_type): L28 Telecommunications supplementary information."
+
+unmapped:
+  - local-name: Foul Sewage / Utilities Statement
+    source-text: >-
+      From the audit: all major development. The list adds: "disposal of foul sewage effluent other
+      than to the public sewer, then a full assessment will be required."
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    suggested-id: foul-sewage-utilities-statement
+  - local-name: Health Impact Assessment
+    source-text: "From the audit: '>100 residential units and/or 10,000 sqm commercial'"
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    suggested-id: health-impact-assessment
+  - local-name: Car Parking Management Strategy
+    source-text: "From the audit: L11, 50 or more parking spaces"
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    suggested-id: parking-management-plan
+  - local-name: Habitats Regulations Assessment Report
+    source-text: "From the audit: L21, any application that might significantly affect Benfleet and Southend Marshes or another protected site"
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    suggested-id: habitats-regulations-assessment
+  - local-name: Ventilation / Extraction System Details
+    source-text: "From the audit: L31, where ventilation, air conditioning, extraction or refrigeration equipment is proposed"
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    suggested-id: ventilation-extraction-details
+  - local-name: Agricultural Land Impact Assessment
+    source-text: "From the audit: L33, best and most versatile agricultural land shown on the proposals map"
+    source-url: https://www.southend.gov.uk/downloads/file/5405/local-validation-list-document-2023
+    suggested-id: agricultural-land-classification

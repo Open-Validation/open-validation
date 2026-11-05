@@ -1,0 +1,398 @@
+# Corrections for Great Yarmouth Borough Council, from inputs/audit/great-yarmouth-borough-council.json.
+# The local list is a set of per-application-type web pages, re-published on 22 August 2024 with
+# no changes (hub page article/2443). The workbook's rows come from those pages. Many full-page
+# items only appear in the workbook under Reserved matters; the rules below drop that type limit
+# where the trigger applies generally. Items marked "From the audit" use the audit's paraphrase.
+local-authority: GRY
+
+drop-unmapped:
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_app_type / duplicate: the lighting strategy trigger, now in lighting-assessment"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: foul/non-mains drainage text; the drainage strategy is re-added below"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: retail impact text; the flood sequential test is re-added below"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger / duplicate: reuses the air quality text; re-added below"
+  - local-name: Crime prevention / Secured by Design statement
+    reason: "not_a_requirement: a list of guidance links"
+
+requirements:
+  - id: site-plan
+    action: add
+    required-if:
+      always: true
+    source-text: >-
+      Site plan All applications At an identified standard metric scale (usually to a scale 1:500 or
+      1:200) including a north point, the proposed development (including any new boundary
+      treatments or hard surfacing) in relation to the site boundaries and other existing buildings
+      on the site, any affected public rights of way and the position of any existing trees on site.
+    source-url: https://www.great-yarmouth.gov.uk/article/8485/Householder-development
+    must-include:
+      - item: An identified standard metric scale (usually 1:500 or 1:200)
+        level: must
+      - item: A north point
+        level: must
+      - item: The proposed development, including any new boundary treatments or hard surfacing, in
+          relation to the site boundaries and other existing buildings on the site
+        level: must
+      - item: Any affected public rights of way
+        level: must
+      - item: The position of any existing trees on site
+        level: must
+    confidence: medium
+    notes: "From the council's householder and full planning pages (captured in the council tab)."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: Development likely to affect European and nationally protected species, or where a
+              protected species is reasonably likely to be present and affected.
+        - site:
+            in: [special-area-of-conservation, special-protection-area, site-of-special-scientific-interest,
+              priority-habitat]
+            description: Development likely to affect internationally and nationally designated sites or
+              priority habitats.
+    confidence: medium
+    notes: "The excerpts state the triggers (ecological impact assessment / PEA and protected species survey)."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, conservation-area, scheduled-monument,
+          park-and-garden, locally-listed-building, archaeological-priority-area]
+        description: Development which affects or may affect listed buildings and their settings,
+          conservation areas, scheduled monuments, registered parks and gardens, non-designated heritage
+          assets, or areas of archaeological interest.
+    confidence: medium
+    notes: "The excerpts state the triggers."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees on site or on adjacent land which may be affected (directly or indirectly).
+    must-include:
+      - item: Where trees are to be retained, measures to protect the trees and their root protection areas
+          during construction, to BS 5837:2012
+        level: must
+    confidence: medium
+    notes: >-
+      The excerpt states the trigger. The tree protection item was in the workbook's householder
+      landscaping row.
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: minor-development
+            value: true
+            description: Minor developments (1-9 dwellings or up to 0.49 hectares).
+    confidence: medium
+    notes: >-
+      Landscape proposals: major applications (excluding outline applications where landscaping is
+      reserved) and all minor developments; the excerpt is cut off there. From the audit: on the Full
+      planning page too, not only reserved matters.
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: external-lighting
+            value: true
+            description: All development where external lighting is proposed (unless agreement to conditions
+              is made clear in the application).
+        - all:
+            - application-type:
+                in: [advertising]
+            - condition:
+                field: illuminated
+                value: true
+                description: An illuminated advert.
+            - site:
+                in: [rural-area]
+                description: In the countryside.
+    must-include:
+      - item: Location, number and design of the proposed external lighting
+        level: must
+      - item: Manufacturer's product details, including illumination levels and beam orientation
+        level: must
+      - item: Times of operation
+        level: must
+      - item: Measures to prevent light spill/pollution
+        level: must
+    confidence: medium
+    notes: >-
+      The excerpt states the trigger. Not needed where agreement to accepting relevant conditions is
+      made clear in the application (for example in a covering letter or planning statement).
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: Developments of 1-9 dwellings.
+        - condition:
+            field: departure-from-development-plan
+            value: true
+            description: Departures from the development plan.
+    source-url: &gry-full https://www.great-yarmouth.gov.uk/article/8482/Full-planning-application
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, missing_requirement): the workbook quoted lighting text under Householder.
+      From the audit: a planning statement for major applications, 1-9 dwellings, and departures.
+
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: Major housing applications of 10 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: Residential development on a site of 0.5 hectares or more.
+        - all:
+            - application-type:
+                in: [reserved-matters]
+            - discretionary
+    confidence: low
+    notes: >-
+      The excerpts state the triggers. Sites in affordable housing sub-market 3 (policy CS4/UCS4) are
+      excluded below 15 dwellings (audit), which the rule can't express. For reserved matters, only
+      where the outline permission included an obligation to provide affordable housing on site.
+
+  - id: air-quality-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: >-
+      'Required when a proposal ... has the potential to cause significant levels of air pollution or
+      odour or any potential air quality matters for future occupants' (council's wording).
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: Development subject to the statutory biodiversity gain condition.
+    confidence: low
+    notes: >-
+      Audit (other): the council page dates from June 2022 and limits its BNG statement to the Filby,
+      Rollesby and Winterton-on-Sea neighbourhood plan areas, saying statutory BNG was 'expected in
+      late 2023'; mandatory BNG now applies to eligible development.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: All applications where an environmental impact assessment is required.
+    confidence: medium
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Where viability forms all or part of the justification for non-compliance with the policy (council's wording)."
+
+  - id: waste-management-plan
+    action: update
+    must-include:
+      - item: The likely waste streams associated with the proposal
+        level: must
+      - item: The location and design of any bin storage areas, including collection points and proximity for
+          collection by refuse vehicles
+        level: must
+    notes: "The excerpts list the contents of the refuse and waste management statement, not its trigger."
+
+  - id: construction-management-plan
+    action: update
+    required-if: discretionary
+    must-include:
+      - item: Hours of working
+        level: should
+      - item: Points of access
+        level: should
+      - item: Methods of construction
+        level: should
+    confidence: medium
+    notes: >-
+      'Large scale and other developments where construction operations are likely to have a
+      significant and long-term impact on local amenity' (council's wording). From the audit: on the
+      Full planning page too.
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: Contamination is known or suspected on the site or on adjacent land.
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: The proposed use would be particularly vulnerable to the presence of contamination.
+    confidence: medium
+    notes: "The excerpt states the trigger. From the audit: on the Full planning page too."
+
+  - id: section-existing
+    action: update
+    required-if: &gry-slope
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: Physical works on sloping sites with existing gradients steeper than 1 in 14.
+    confidence: medium
+    notes: &gry-slope-note "Topographical survey/cross section; the excerpt states the trigger. On the Full planning page too (audit)."
+
+  - id: section-proposed
+    action: update
+    required-if: *gry-slope
+    confidence: medium
+    notes: *gry-slope-note
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: Development of 1 hectare or greater in flood zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Development of 1 hectare or greater in flood zone 1.
+        - site:
+            in: [flood-risk-zone, critical-drainage-area]
+            description: Flood zones 2 and 3, or land the Environment Agency identifies as having critical
+              drainage problems.
+        - discretionary
+    confidence: medium
+    notes: >-
+      The excerpt states the triggers (7 in all, per the audit). Land at risk in the council's SFRA,
+      and extensions, new development or changes of use which increase flood vulnerability, are
+      shown as officer discretion.
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise sensitive uses within close proximity to existing noise generating uses.
+        - discretionary
+    confidence: medium
+    notes: "The excerpt gives case A; the later cases were cut off and are shown as officer discretion."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [reserved-matters]
+        - discretionary
+    confidence: low
+    notes: >-
+      An open space statement for reserved matters where the outline permission included an
+      obligation to provide open space on site. This is a provision statement rather than a surplus
+      assessment, so the id is a loose fit.
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: >-
+      'Required for all developments exceeding the thresholds set out in Appendix A of Norfolk County
+      Council: Safe, sustainable development' (not given here). The workbook put it under prior
+      approval; the source page is the change of use planning application page.
+
+  - id: coastal-change-assessment
+    action: add
+    required-if:
+      site:
+        in: [coastal-erosion-zone]
+        description: In the Coastal Change Management Area, or within 30m inland of it.
+    source-url: *gry-full
+    confidence: medium
+    notes: "From the audit (missing_requirement): Coastal erosion vulnerability assessment."
+
+unmapped:
+  - local-name: Drainage strategy
+    source-text: "From the audit: all major developments"
+    source-url: https://www.great-yarmouth.gov.uk/article/8482/Full-planning-application
+    suggested-id: drainage-strategy
+  - local-name: Flood sequential test
+    source-text: "From the audit: all applications in SFRA / Environment Agency flood zones, except changes of
+      use and minor development"
+    source-url: https://www.great-yarmouth.gov.uk/article/8482/Full-planning-application
+    suggested-id: flood-sequential-test
+  - local-name: Ventilation / extraction details
+    source-text: "From the audit: commercial kitchen extract, air conditioning, heat pumps and refrigeration"
+    source-url: https://www.great-yarmouth.gov.uk/article/8482/Full-planning-application
+    suggested-id: ventilation-extraction-details
+  - local-name: Shadow Habitats Regulations Assessment
+    source-text: "Residential development of 10 or more units between 400m to 2.5km from the above designated
+      sites."
+    source-url: https://www.great-yarmouth.gov.uk/article/8482/Full-planning-application
+    suggested-id: habitats-regulations-assessment
+  - local-name: Electric charging plan
+    source-text: "From the audit: new dwellings and new floorspace"
+    source-url: https://www.great-yarmouth.gov.uk/article/8482/Full-planning-application
+    suggested-id: ev-charging-plan
+  - local-name: HMO details statement
+    source-text: "From the audit: new houses in multiple occupation"
+    source-url: https://www.great-yarmouth.gov.uk/article/8482/Full-planning-application
+    suggested-id: ""
+  - local-name: Mineral resource safeguarding assessment
+    source-text: "From the audit: non-exempt development in mineral safeguarding areas"
+    source-url: https://www.great-yarmouth.gov.uk/article/8482/Full-planning-application
+    suggested-id: minerals-assessment
+  - local-name: Rural workers dwelling needs assessment
+    source-text: "From the audit: all new rural workers' dwellings"
+    source-url: https://www.great-yarmouth.gov.uk/article/8482/Full-planning-application
+    suggested-id: agricultural-appraisal
+  - local-name: Telecommunications site connectivity plan
+    source-text: "From the audit: listed on the Full planning page; no trigger given"
+    source-url: https://www.great-yarmouth.gov.uk/article/8482/Full-planning-application
+    suggested-id: ""
+  - local-name: Tier 1 groundwater risk screening
+    source-text: "From the audit: new or extended cemeteries"
+    source-url: https://www.great-yarmouth.gov.uk/article/8482/Full-planning-application
+    suggested-id: ""
+  - local-name: Utilities assessment
+    source-text: "From the audit: 10+ dwellings or 1,000 sqm+"
+    source-url: https://www.great-yarmouth.gov.uk/article/8482/Full-planning-application
+    suggested-id: ""
+
+low-confidence:
+  - id: archaeological-assessment
+    note: "Audit (wrong_trigger, duplicate): the excerpt is a fragment combined with the Design and Access Statement text; no trigger."
+  - id: design-and-access-statement
+    note: "Audit (duplicate): the excerpt is the archaeology / heritage statement text; no trigger. The national rules apply."
+  - id: town-centre-impact-assessment
+    note: "The excerpt says what the retail impact assessment must show, not when it is needed."

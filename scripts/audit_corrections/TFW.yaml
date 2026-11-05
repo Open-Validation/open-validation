@@ -1,0 +1,462 @@
+# Corrections for Telford & Wrekin Council, from the council's audit.
+# The audit read the current Telford & Wrekin Local Validation List (April 2026 version; first adopted
+# April 2022). Section 2 has a checklist for each application type and Section 5 gives each
+# document's threshold/trigger. Grokbot captured only a few Section 5 items and none of the
+# per-type checklists, so most items below are added from the audit's paraphrase ("From the audit").
+# Where the audit names only the checklists an item appears in, the application types are listed
+# and confidence is low.
+local-authority: TFW
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advice about pre-application, not a validation requirement"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: pre-application process text"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: FRA content text with a page header; the SuDS Proforma is re-added below"
+  - local-name: Structural Survey
+    reason: "wrong_trigger: a content fragment; re-added below with the trigger"
+
+requirements:
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): major development or rural exception sites (shown as
+      officer discretion)."
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): major development, or development likely to affect air
+      quality."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [consent-under-tpo, hedgerow-removal]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Development that could affect trees.
+    source-text: Photographs Tree Report Tree replacement details
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the Trees 1 checklist asks for a Tree Report (with photographs and tree
+      replacement details); the Tree Survey/Arboricultural Implications item applies to Trees 3
+      (hedgerow removal) and to development checklists, including householder (with a shadowing
+      plan). The development trigger isn't given in the audit.
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: The proposal could affect protected species.
+        - discretionary
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): an Ecological Survey and Report where there is a possible
+      impact on wildlife or habitats; in the householder, full, outline, LBC, demolition, prior approval
+      and hedgerow checklists."
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the statutory biodiversity gain condition (not
+          householder, de minimis or self-build).
+    source-text: >-
+      If the development would require Biodiversity Net Gain the application submission must include
+      the following to be considered valid: The completed biodiversity metric tool(s) showing the
+      calculation of the pre-development biodiversity values …
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    must-include:
+      - item: The completed biodiversity metric tool(s) showing the calculation of the pre-development
+          biodiversity values, including any loss or degradation of onsite habitats
+        level: must
+      - item: Plan(s) showing the onsite habitats existing on the date the pre-development biodiversity
+          value was calculated
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt was cut off and left out the exemptions."
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [listed-building]
+            description: The development is a listed building.
+        - all:
+            - site:
+                in: [conservation-area, world-heritage-site]
+                description: Within a conservation area or World Heritage Site.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: One or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: Floor space created of 100 square metres or more.
+    confidence: medium
+    notes: "The council's page restates the national rule (audit: a national, not local, requirement)."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment (EIA Regulations 2017).
+    notes: "A national requirement (audit, not_a_requirement)."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains two or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-text: >-
+      Relevant buildings are those which: contain two or more dwellings or educational accommodation
+      and meet the height condition of 18m or more in height, or 7 or more sto…
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    confidence: medium
+    notes: "Also development of, or within the curtilage of, an existing relevant building. Page headers
+      removed from the excerpt."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: All development in Flood Zones 2 and 3.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: Zone 1 sites of 1ha or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Zone 1 sites of 1ha or more.
+        - site:
+            in: [critical-drainage-area]
+            description: Zone 1 sites in a critical drainage area.
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    confidence: medium
+    notes: "From the audit (wrong_trigger): the workbook's excerpt was a fragment. Also in the householder
+      checklists; a Minor Development Flood Risk Assessment Proforma is available."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      application-type:
+        in: [hh, full, outline, reserved-matters, lbc, advertising, demolition-con-area]
+    confidence: low
+    notes: "From the audit (missing_requirement): in the householder, full, outline, listed building,
+      advertisement and relevant demolition checklists. The excerpt describes format, not when it is
+      needed."
+
+  - id: landscaping-plan
+    action: update
+    required-if: discretionary
+    notes: "Where developments could have a significant impact on landscape character or the character and
+      appearance of an area."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: Known or suspected contamination.
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): known or suspected contamination."
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters, advertising]
+        - condition:
+            field: external-lighting
+            value: true
+            description: External lighting would be provided or made necessary, for publicly accessible
+              developments, or in the vicinity of residential property, a listed building or a
+              conservation area, or open countryside.
+    source-text: >-
+      Lighting Assessment Threshold/trigger To be provided where external lighting would be provided or
+      made necessary by the development where proposals involve the provision of publicly accessible
+      developments, in the vicinity of residential property, a listed building or a conservation area,
+      or open countryside.
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): not in the listed building consent checklist; in the full, outline and
+      advertisement checklists."
+
+  - id: noise-assessment
+    action: update
+    required-if: discretionary
+    notes: "'A noise impact assessment may be required.' Also in the change of use prior approval checklist."
+
+  - id: photos
+    action: update
+    required-if:
+      application-type:
+        in: [consent-under-tpo, hedgerow-removal, hh, advertising, lbc, demolition-con-area]
+    confidence: low
+    notes: "From the audit: Photographs/Photomontages are in the Trees 1 and 3, householder, advertisement,
+      listed building and relevant demolition checklists."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc, demolition-con-area]
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): all major applications; also in the listed building and
+      relevant demolition checklists."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: loss-of-open-space
+            value: true
+            description: The development will result in the loss of open space.
+        - discretionary
+    notes: "Also where the provision of open space is required by Local Plan policy (officer discretion)."
+
+  - id: schedule-of-works
+    action: update
+    required-if:
+      application-type:
+        in: [lbc]
+    confidence: low
+    notes: "Audit (wrong_app_type): relates mainly to listed building or demolition works, not general full
+      planning."
+
+  - id: sci
+    action: add
+    required-if: discretionary
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): where pre-application consultation took place."
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal involves changes in levels.
+    source-text: >-
+      Include cross section(s) through the proposed building(s); and Include existing and finished
+      ground levels where the proposal involves changes in levels including the way in which a proposal
+      sits within the site and in particular the relative levels between existing and proposed
+      buildings.
+    must-include:
+      - item: Existing and finished ground levels, including the relative levels between existing and
+          proposed buildings
+        level: must
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal involves changes in levels.
+    source-text: >-
+      Include cross section(s) through the proposed building(s); and Include existing and finished
+      ground levels where the proposal involves changes in levels including the way in which a proposal
+      sits within the site and in particular the relative levels between existing and proposed
+      buildings.
+    must-include:
+      - item: Cross section(s) through the proposed building(s)
+        level: must
+      - item: Existing and finished ground levels, including the relative levels between existing and
+          proposed buildings
+        level: must
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: An identified standard metric scale, usually 1:500 or 1:200
+        level: must
+      - item: A North point
+        level: must
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Masts and antennas.
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Telecommunication Development Supplementary Information."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 0
+            description: The application proposes a town centre use.
+        - condition:
+            field: loss-of-use
+            value: true
+            description: The application proposes the loss of a town centre use.
+    confidence: low
+    notes: "Only 'where required by the Local Plan', which the rule can't express."
+
+  - id: transport-assessment
+    action: add
+    required-if: discretionary
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): development with significant transport implications."
+
+  - id: travel-plan
+    action: add
+    required-if: discretionary
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): development with significant transport implications."
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: New residential development needing bin collection.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 0
+            description: New commercial development needing bin collection.
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Site Waste Management Plan for new residential or
+      commercial development needing bin collection."
+
+unmapped:
+  - local-name: SuDS Proforma
+    source-text: To be provided with proposals for residential or employment development.
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    suggested-id: drainage-strategy
+  - local-name: Structural Survey
+    source-text: "From the audit: substantial demolition, conversion, or TPO works for structural reasons"
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    suggested-id: structural-survey
+  - local-name: Climate Change Checklist
+    source-text: >-
+      The Climate Change Checklist should be completed and provided with your application. (From the
+      audit: change of use and/or new development)
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    suggested-id: sustainability-checklist
+  - local-name: Coal Mining Risk Assessment
+    source-text: all non-householder applications within the Coal Mining Referral Areas
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Nationally Described Space Standard Compliance Template
+    source-text: To be provided where new dwellings are proposed
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    suggested-id: space-standards-statement
+  - local-name: Economic Statement
+    source-text: "From the audit: loss or creation of non-residential uses, or major development"
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    suggested-id: employment-statement
+  - local-name: Foul Sewage and Utilities Assessment
+    source-text: "From the audit: foul drainage not going to the public sewer, or trade waste"
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    suggested-id: utilities-statement
+  - local-name: Homes for All Compliance Template
+    source-text: "From the audit: all major residential development"
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    suggested-id: ""
+  - local-name: Landfill Statement
+    source-text: "From the audit: landfilling or landraising with waste"
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    suggested-id: ""
+  - local-name: Land Stability Declaration Form and Report
+    source-text: "From the audit: Ironbridge Gorge zones 3, 4 or 5, significant excavation needing retaining
+      structures, or known stability issues (also householder)"
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    suggested-id: land-stability-report
+  - local-name: Parking Provision
+    source-text: "From the audit: development needing parking, or changes to it"
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    suggested-id: parking-plan
+  - local-name: Private Amenity Space Standards Compliance Template
+    source-text: "From the audit: major development"
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    suggested-id: ""
+  - local-name: Self-Build/Custom-Build House Form
+    source-text: "From the audit: where new dwellings are proposed"
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    suggested-id: ""
+  - local-name: Other Technical Information Relating to Heritage Assets
+    source-text: "From the audit: householder in a conservation area or with LBC, listed building consent,
+      relevant demolition, advertisement with LBC"
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    suggested-id: ""
+  - local-name: Tree replacement details
+    source-text: Photographs Tree Report Tree replacement details
+    source-url: https://www.telford.gov.uk/media/cwxd0g43/local-validation-list-2026-report-final.pdf
+    suggested-id: ""

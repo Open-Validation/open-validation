@@ -1,0 +1,286 @@
+# Corrections for East Riding of Yorkshire Council, from inputs/audit/east-riding-of-yorkshire-council.json.
+# Grokbot's link is the current 'Validation Checklist 2025' (April 2025; the build takes that date
+# from the audit). The audit could not read the PDF (robots_disallowed), so it checked only the
+# council's web pages: contents_checked is false and this file is kept light. Grokbot mixed in
+# the superseded 'Validation Checklist August 2021'; rows sourced only from it are flagged.
+# Many workbook excerpts are boilerplate (table of contents, 'Top 10 reasons for invalid
+# applications'), not triggers.
+local-authority: ERY
+
+submission-standards:
+  - item: Plans to a recognised scale and include a scale bar
+    level: must
+  - item: Site plan with a clearly marked north point and the scale to which it is drawn
+    level: must
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: guidance on whether changes are material amendments"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "not_a_requirement: 'it is good practice to submit... a unilateral undertaking' is advice"
+  - local-name: Self-build / custom build information
+    reason: "wrong_trigger: the excerpt is the Biodiversity Net Gain self-build exemption; added as
+      bng-metric below"
+  - local-name: Design Code / Masterplan / Parameter plans
+    reason: "wrong_trigger: a fragment; re-added below as the Design Code compliance checklist"
+
+requirements:
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [special-protection-area, special-area-of-conservation,
+              site-of-special-scientific-interest, local-wildlife-site]
+            description: Development within or close to a designated site (SPA, SAC, Ramsar, SSSI, Local
+              Nature Reserve or Local Wildlife Site).
+        - condition:
+            field: protected-species
+            value: true
+            description: Development likely to affect protected species.
+    source-text: >-
+      Biodiversity Survey For development within or close to a designated site (SPA, SAC, Ramsar,
+      SSSI, Local Nature Reserve or Local Wildlife Site) – check the constraints map For development
+      likely to affect protected species, eg.
+    source-url: https://www.eastriding.gov.uk/download/validation-checklist/
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was the fragment 'to affect protected species,
+      eg.'; the trigger above is from the council tab. The council's householder guidance also
+      names it (Item G).
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Works within 15m of a tree with a trunk diameter of 75mm or more.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt is a BS5837 footnote. From the audit: Item R
+      tree survey for works within 15m of a tree with a diameter of 75mm or more (named in the
+      householder guidance).
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building]
+            description: Work to a listed building or within the curtilage of a listed building.
+    source-text: Heritage Statement For work to a listed building or within the curtilage of a listed
+      building
+    source-url: https://www.eastriding.gov.uk/download/validation-checklist/
+    must-include:
+      - item: Detail proportionate to the significance of the heritage asset and the extent and impact
+          of the work on it
+        level: should
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): also required for householder works to listed buildings (Item J). The
+      Full planning excerpt came only from the superseded 2021 list.
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: The site is known to be contaminated, or contamination is likely because of its
+          existing or previous use.
+    confidence: low
+    notes: "Audit (wrong_document): this row is sourced only from the superseded August 2021 list; check it
+      against the 2025 checklist."
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: Changes in levels will directly affect neighbouring properties and land.
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: Changes in levels will directly affect neighbouring properties and land.
+
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: Residential development of 10 dwellings or more.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: Residential sites of 0.5 hectares or more.
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: Development of 10 or more dwellings.
+        - condition:
+            field: housing-floorspace
+            operator: ">"
+            value: 1000
+            description: More than 1000 sq m gross internal floor area of new dwellings, extensions,
+              conversions, garages or other ancillary residential buildings.
+        - condition:
+            field: loss-of-open-space
+            value: true
+            description: Development that will lead to a loss of open space.
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    notes: "The council's triggers (significant freight or HGV movements, abnormal loads, inadequate local
+      transport infrastructure) have no fields, so they are shown as officer discretion."
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    notes: "Any application needing a Transport Assessment under the Sustainable Transport SPD thresholds,
+      or with significant transport implications."
+
+  - id: roof-plan-existing
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: new-build
+                value: true
+                description: New buildings.
+            - condition:
+                field: roof-alteration
+                value: true
+                description: Alterations or extensions that include works to the roof.
+        - discretionary
+    source-text: >-
+      Roof plans For applications for new buildings and for alterations or extensions that include
+      works to the roof, where the roof construction is complex. 12 A roof plan with a scale bar can
+      be at a smaller scale than the floor plans and elevational drawings, but should not normally be
+      less than 1:200.
+    source-url: https://www.eastriding.gov.uk/download/validation-checklist/
+    must-include:
+      - item: Scale bar; scale not normally less than 1:200
+        level: should
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook quoted the 'Top 10 reasons' list. The trigger is from the
+      council tab; 'where the roof construction is complex' is shown as officer discretion."
+
+  - id: roof-plan-proposed
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: new-build
+                value: true
+                description: New buildings.
+            - condition:
+                field: roof-alteration
+                value: true
+                description: Alterations or extensions that include works to the roof.
+        - discretionary
+    source-text: >-
+      Roof plans For applications for new buildings and for alterations or extensions that include
+      works to the roof, where the roof construction is complex. 12 A roof plan with a scale bar can
+      be at a smaller scale than the floor plans and elevational drawings, but should not normally be
+      less than 1:200.
+    source-url: https://www.eastriding.gov.uk/download/validation-checklist/
+    must-include:
+      - item: Scale bar; scale not normally less than 1:200
+        level: should
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook quoted the 'Top 10 reasons' list. The trigger is from the
+      council tab; 'where the roof construction is complex' is shown as officer discretion."
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: Scale bar, at 1:50 or 1:100 (1:200 may be acceptable for larger agricultural or industrial
+          buildings)
+        level: must
+      - item: Proposed building materials, and the disposition of each where a mixture is proposed
+        level: must
+      - item: Detailing, and the style, materials and finish of windows, doors and other openings
+        level: must
+
+  - id: floor-plan-proposed
+    action: update
+    must-include:
+      - item: Scale bar, at 1:50 or 1:100, showing all floors of the finished development including attics
+          and basements
+        level: must
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: Scale bar, at 1:500, 1:200 or 1:100
+        level: should
+      - item: North point
+        level: must
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook's excerpt ('pay online 9 Block plan error') is the 'Top 10
+      reasons' list. The items are from the council's drawing standards."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: floodlighting
+        value: true
+        description: Proposals for floodlighting.
+    confidence: low
+    notes: "Audit (wrong_trigger): the excerpt is a fragment ('Proposals for The details should include:
+      floodlighting, such as for'); the trigger is read from it."
+
+  - id: bng-metric
+    action: add
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the statutory biodiversity gain condition.
+    source-url: https://www.eastriding.gov.uk/download/validation-checklist/
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook's 'Self-build / custom build' row quotes the Biodiversity
+      Gain (Irreplaceable Habitat) Regulations and the BNG self-build exemption criteria."
+
+unmapped:
+  - local-name: Design Code compliance checklist
+    source-text: "From the audit: required for all development except changes of use with no material change
+      in external appearance, and prior approvals where design is not a consideration; outline
+      applications need the outline compliance checklists. Also required for householder applications."
+    source-url: https://www.eastriding.gov.uk/download/validation-checklist/
+    suggested-id: design-code
+
+low-confidence:
+  - id: flood-risk-assessment
+    note: "Audit (wrong_trigger): the excerpt is the 'Top 10 reasons for invalid applications' list, not the
+      trigger. Householder guidance names it (Item H)."
+  - id: fire-statement
+    note: "Audit (wrong_trigger): the excerpt is the table of contents and introduction, not the trigger."
+  - id: environmental-statement
+    note: "Audit (wrong_trigger): the excerpt is advice on submitting EIA chapters on CD, not a trigger."
+  - id: design-and-access-statement
+    note: "Audit (wrong_trigger): the excerpt ('Design and Access Statement if specified') is not a trigger."
+  - id: town-centre-impact-assessment
+    note: "Audit (wrong_trigger, wrong_document): a fragment ('Proposals for all main town centre uses The
+      application must be accompanied by: 28') from the superseded 2021 list."

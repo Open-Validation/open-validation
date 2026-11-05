@@ -1,0 +1,606 @@
+# Corrections for Broadland District Council, from the audit of Broadland.
+# Broadland and South Norfolk share one joint validation list: a Non Householder Local Validation
+# List (making-a-planning-application-2025-amends.pdf) and a Householder Local Validation List
+# (making-a-planning-application-householder.pdf), introduced January 2025. SNO.yaml applies the
+# same rules; the only difference is the Retail Impact Assessment threshold, which the list sets
+# separately for each council. The workbook placed ~30 rows under Full planning with 'INFERRED'
+# application types; where a rule is given below it applies to every application type that meets it.
+local-authority: BRO
+
+validation-list:
+  url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+  date: 2025-01
+  date-basis: "Apply page: 'From January 2025 we are introducing a Local Validation List'; the PDF itself
+    is undated (the workbook's 2025-03-01 came from PDF metadata). A separate Householder Local Validation
+    List (making-a-planning-application-householder.pdf) also applies."
+
+submission-standards:
+  - item: Location plans at 1:1250 (urban area) or 1:2500 (rural area), with the north arrow clearly
+      indicated; the application site and access to the highway outlined in red and any adjoining land
+      in the same ownership outlined in blue
+    level: must
+  - item: Block plans at 1:200 or 1:500, with the scale clearly shown and the north arrow clearly indicated
+    level: must
+
+drop:
+  - id: site-plan
+    reason: "wrong_trigger: both excerpts are fragments ('arrow shown Block plan Elevations'; 'wall, then a
+      site plan is required ...'); the block plan is a national requirement and its scale rule is under
+      submission-standards"
+
+drop-unmapped:
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "not_a_requirement: Apply-page glossary text defining outline and full applications"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: pre-application advice is optional"
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "duplicate: same 'Biodiversity survey and report' item as biodiversity-survey-report"
+  - local-name: Cycle parking details
+    reason: "duplicate: quotes the landscaping sentence about refuse and cycle stores"
+  - local-name: Drainage Strategy / SuDS
+    reason: "duplicate: the householder row repeats the flood risk text (porosity test added below); the
+      Full row repeats the Foul Drainage Assessment text kept under Foul Sewage / Utilities Statement"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_trigger: the excerpt starts with Footpath Diversion text; replaced below"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: the excerpt is retail sequential test text; replaced below"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: the excerpt is BNG planning-obligation text, not a heads of terms requirement"
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_trigger: the excerpt runs into Marketing Evidence; illumination is covered by
+      lighting-assessment"
+
+requirements:
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: The proposal is for 10 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: The residential site is 0.5 hectares or more.
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): major housing of 10+ dwellings or 0.5ha+, and exception
+      sites. Exception sites have no field, so check them by hand."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: traffic-movements-peak-hour
+            operator: ">"
+            value: 100
+            description: The development is expected to generate more than 100 traffic movements an hour
+              at peak times.
+        - condition:
+            field: traffic-movements-daily
+            operator: ">"
+            value: 1000
+            description: The development is expected to generate more than 1,000 traffic movements over
+              24 hours.
+    source-text: Applications should also be submitted with an air quality assessment where developments
+      are expected to generate more than 100 traffic movements an hour at peak times or more than 1,000
+      movements over 24 hours.
+    confidence: medium
+    notes: "The trigger is stated in the excerpt; it applies to any application type that meets it."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Groundworks within 2 metres of the crown spread of any significant tree on the site,
+          or trees with a stem diameter of 75mm or more (at 1.5m) within 15 metres of new building works.
+    source-text: Arboricultural implications assessment (AIA) An Arboricultural survey will be required
+      where the proposal involves groundworks that are within 2 metres of the crown spread of any
+      significant trees on the site.
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-householder.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger, missing_requirement): the Full planning excerpt was a fragment ('works to
+      BS 5837:2012.'). From the audit: a Tree survey is also needed for trees with a stem diameter of 75mm+
+      within 15m of new building works, and the item applies to householder, listed building and outline
+      applications too."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: Impacts on a protected species are likely.
+        - site:
+            in: [priority-habitat]
+            description: Impacts on a Biodiversity Action Plan (BAP) habitat are likely.
+        - condition:
+            field: loss-of-habitat-features
+            value: true
+            description: The proposal involves the loss of a tree or trees, removal of a hedge or the
+              filling in of any natural pond or ditch.
+    source-text: |-
+      Ecology Impact Assessment Where impacts upon a protected species or Biodiversity Action Plan (BAP) habitat are likely to result from a development, surveys must be provided to support a planning application and where necessary include proposals for long term mitigation of the protected species or BAP habitat within the site.
+
+      Householder: Ecology survey A basic ecology survey will be required for any proposal that involves the loss of a tree/s, removal of a hedge or the filling in of any natural pond or ditch.
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+    must-include:
+      - item: Proposals for long term mitigation of the protected species or BAP habitat within the site,
+          where necessary
+        level: must
+    confidence: medium
+    notes: "The householder list's basic ecology survey trigger and the non-householder list's
+      protected species / BAP habitat trigger, combined."
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the statutory biodiversity gain condition.
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt was a fragment. From the audit: gain condition statement,
+      statutory or small sites metric, draft Biodiversity Gain Plan and draft HMMP, for major applications
+      made after 12/2/2024 and minor applications after 2/4/2024."
+
+  - id: cil-form
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates one or more new dwellings.
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 100
+            description: Non-exempt development of more than 100 square metres.
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+    confidence: medium
+    notes: "Audit (not_a_requirement): the excerpt only described the levy. From the audit: the CIL form
+      is needed for new dwellings or non-exempt development over 100 sq m."
+
+  - id: construction-management-plan
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Construction Environmental Management Plan for major
+      development."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [site-of-special-scientific-interest]
+            description: The development is within a Site of Special Scientific Interest.
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - condition:
+                field: floorspace
+                operator: ">"
+                value: 100
+                description: A building bigger than 100 square metres.
+        - site:
+            in: [listed-building]
+            description: The development affects a listed building.
+    source-text: Design and Access Statement are required where the proposed development is within a
+      site of special scientific interest, is for a building bigger than 100 sq m in a Conservation area
+      or where the proposed development affects a Listed Building.
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-householder.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the Full planning excerpt was a fragment ('... should one be required.').
+      The rule is the householder list's wording; national rules for other applications still apply."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment under the EIA Regulations.
+    confidence: medium
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      any:
+        - all:
+            - any:
+                - condition:
+                    field: building-height
+                    operator: ">="
+                    value: 18
+                    description: A building is 18 metres or more in height.
+                - condition:
+                    field: storey-count
+                    operator: ">="
+                    value: 7
+                    description: A building has 7 or more storeys.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 2
+                    description: The building contains two or more dwellings.
+                - condition:
+                    field: educational-accommodation
+                    value: true
+                    description: The building contains educational accommodation.
+        - condition:
+            field: battery-energy-storage
+            value: true
+            description: The proposal includes battery energy storage.
+    source-text: How any policies relating to fire safety in relevant local development documents have
+      been taken into account When is it needed? any building which contains two or more dwellings or
+      educational accommodation; and meets the height condition of 18m or more in storey height, or 7 or
+      more storeys.
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+    confidence: medium
+    notes: "The battery storage branch is from the South Norfolk audit of the same joint list ('and any
+      battery storage')."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      site:
+        in: [flood-risk-zone]
+        description: The site is within an area at risk of flooding.
+    source-text: Flood risk assessment and drainage strategy If the site is within an area at risk of
+      flooding a Flood Risk Assessment (FRA) will be required to demonstrate how flood risk from all
+      sources of flooding to the development itself and flood risk to others will be managed now and in
+      the future, taking climate change into account
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-householder.pdf
+    must-include:
+      - item: How flood risk from all sources to the development itself, and to others, will be managed
+          now and in the future, taking climate change into account
+        level: must
+    confidence: medium
+    notes: "The Full planning excerpt gave no trigger; the householder list's trigger is used for all
+      types."
+
+  - id: floor-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: building-works
+        value: true
+        description: The application is for the erection, rebuilding or alteration of a building.
+    source-text: Floor plans are required showing the existing and proposed layout of the development and
+      the nature of the proposed uses (required on all applications that are for erection, rebuilding or
+      alteration of a building).
+    must-include:
+      - item: The nature of the proposed uses
+        level: must
+    confidence: medium
+
+  - id: floor-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: building-works
+        value: true
+        description: The application is for the erection, rebuilding or alteration of a building.
+    source-text: Floor plans are required showing the existing and proposed layout of the development and
+      the nature of the proposed uses (required on all applications that are for erection, rebuilding or
+      alteration of a building).
+    must-include:
+      - item: The nature of the proposed uses
+        level: must
+    confidence: medium
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building-setting, conservation-area, park-and-garden, locally-listed-building]
+            description: The application affects the setting of a listed building, a conservation area, a
+              registered park and garden or a non-designated heritage asset.
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): all listed building consent applications, and
+      applications affecting the setting of listed buildings, conservation areas, registered parks and
+      gardens or non-designated heritage assets."
+
+  - id: landscaping-plan
+    action: update
+    required-if: discretionary
+    source-text: of the landscape proposals and where necessary screened to offset their appearance When
+      is it needed ? All applications which are likely to have a significant impact on landscape character
+      and will incur visual impact;
+    confidence: medium
+    notes: "Needed for applications likely to have a significant impact on landscape character (wording
+      from the joint list as captured for South Norfolk)."
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: floodlighting
+            value: true
+            description: The proposal includes floodlighting.
+        - condition:
+            field: illuminated
+            value: true
+            description: An illuminated advert is proposed.
+    source-text: where an illuminated advert is proposed.
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): floodlighting or illuminated adverts. The quoted words
+      were captured in the workbook's advertisement row."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise-sensitive development near a noise source.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Development likely to affect neighbours through noise.
+        - condition:
+            field: plant-equipment
+            value: true
+            description: Air source heat pumps that are not permitted development.
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): noise-sensitive development near noise sources,
+      development affecting neighbours, and (South Norfolk audit of the same list) air source heat pumps
+      that are not permitted development."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: departure-from-development-plan
+            value: true
+            description: The proposal is a departure from the development plan.
+        - discretionary
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): major, sensitive or controversial development, and
+      departures. 'Sensitive or controversial' is shown as officer discretion."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [open-space]
+            description: The application affects playing field land.
+        - discretionary
+    source-text: Playing fields Assessment Sport England recommends that planning applications affecting
+      playing field land should provide sport specific information in line with their checklist
+      requirements.
+    confidence: medium
+    notes: "The South Norfolk audit of the same list adds an open space assessment where a proposal
+      exceeds the Open Space SPD thresholds; those thresholds aren't given, so that part is officer
+      discretion."
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 500
+            description: 500 or more dwellings.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 50000
+            description: More than 50,000 square metres of non-residential floorspace.
+    confidence: low
+    notes: "From the South Norfolk audit of the same joint list (wrong_trigger): an energy statement is
+      needed for 500+ dwellings or more than 50,000 sq m non-residential. The excerpt gives no trigger;
+      check the thresholds against the list."
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: A radio mast or aerials above 10 metres.
+    must-include:
+      - item: A short statement setting out why the mast is required
+        level: should
+      - item: Technical information about the visual appearance of the mast and its likely impact on the
+          surrounding area
+        level: should
+    confidence: medium
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Retail, leisure or office development outside a town centre.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 2500
+            description: More than 2,500 square metres of retail, leisure or office floorspace.
+    source-text: Where the sequential test is not met, the impact assessment shall fully address the
+      requirements of the NPPF taking into account the likely impacts of the proposed development on the
+      vitality and viability of town centres.
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Retail Impact Assessment, Broadland threshold: out-of-centre
+      retail, leisure or office over 2,500 sq m. South Norfolk has its own thresholds in the same list."
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 100
+            description: More than 100 dwellings.
+        - condition:
+            field: retail-floorspace
+            operator: ">"
+            value: 800
+            description: More than 800 square metres of food retail floorspace.
+        - discretionary
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+    confidence: low
+    notes: "Audit (wrong_trigger): the excerpt was a fragment ('with any Transport Assessment required.').
+      From the audit: the list has a gross floor area threshold table by use class, e.g. food retail over
+      800 sq m and dwellings over 100 units. Only those two thresholds are known; the rest are officer
+      discretion until the table is checked."
+
+  - id: viability-assessment
+    action: replace
+    required-if: discretionary
+    source-text: supported by a viability assessment, where viability forms all or part of the
+      justification for non-compliance with the policy (see Viability Assessment).
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook spread this across nine application types from a garbled
+      matrix fragment. It is needed only where the applicant makes an economic viability case for a
+      non-policy-compliant proposal."
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters, change-of-use]
+        - any:
+            - condition:
+                field: new-build
+                value: true
+                description: The proposal includes new buildings.
+            - condition:
+                field: involves-change-of-use
+                value: true
+                description: The proposal involves a change of use.
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+    confidence: low
+    notes: "Audit (duplicate, missing_requirement): the workbook row quoted the landscaping sentence about
+      refuse stores. From the audit: a Site Waste Management Plan for new buildings or change of use,
+      except householder. 'Not householder' is shown as a list of application types."
+
+unmapped:
+  - local-name: Porosity test
+    source-text: A porosity test may be required for any proposal involving soakaways or where an area of
+      hard surfacing is being proposed.
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-householder.pdf
+    suggested-id: drainage-strategy
+  - local-name: Habitats Regulations Assessment (HRA) and GIRAMS mitigation
+    source-text: For all applications for new dwellings, in addition to addressing the nutrient neutrality
+      advice from Natural England, it will also be necessary to undertake a Habitat Regulation Assessment
+      (HRA) and to secure a financial contribution to offset impacts on protected habitat sites, either
+      through a unilateral agreement or a Section 106 agreement, in accordance with the Norfolk Green
+      Infrastructure and Recreational impact Avoidance and Mitigation Strategy .
+    source-url: https://www.southnorfolkandbroadland.gov.uk/planning/planning-applications/apply
+    suggested-id: habitats-regulations-assessment
+  - local-name: Footpath Diversion
+    source-text: Where a development affects a definitive right of way
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+    suggested-id: footpath-diversion
+  - local-name: Flood Risk Sequential Assessment
+    source-text: "From the audit: minor extensions under 250 sq m and more/less vulnerable uses in Flood
+      Zones 2/3"
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+    suggested-id: flood-sequential-test
+  - local-name: Statement of Community Involvement
+    source-text: "From the audit: major, sensitive or controversial development, departures"
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+    suggested-id: statement-of-community-involvement
+  - local-name: Building for a Healthy Life Assessment
+    source-text: "From the audit: major housing (10+ dwellings)"
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+    suggested-id: building-for-a-healthy-life
+  - local-name: Delivery Statement
+    source-text: "From the audit: 100+ dwellings"
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+    suggested-id: delivery-statement
+  - local-name: Electric Charging Plan
+    source-text: "From the audit: new dwellings"
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+    suggested-id: ev-charging-plan
+  - local-name: Topographical Survey / Cross Section
+    source-text: "From the audit: slopes steeper than 1 in 14 or level changes"
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+    suggested-id: topographical-survey
+  - local-name: Vehicle Tracking / Swept Path Analysis
+    source-text: "From the audit: 10+ dwellings"
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+    suggested-id: swept-path-analysis
+  - local-name: Self / Custom Build statement
+    source-text: "From the audit: listed in the non-householder list; no trigger given"
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+    suggested-id: self-build-statement
+  - local-name: Utilities Assessment
+    source-text: "From the audit: major development"
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+    suggested-id: utilities-statement
+  - local-name: Draft Biodiversity Gain Plan and Habitat Management and Monitoring Plan
+    source-text: "From the audit: BNG Draft Gain Plan and Habitat Management and Monitoring Plan"
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+    suggested-id: biodiversity-gain-plan
+  - local-name: Structural Survey
+    source-text: "From the audit (South Norfolk, same joint list): listed building demolition, countryside
+      barn conversions"
+    source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+    suggested-id: structural-survey
+
+low-confidence:
+  - id: land-contamination-assessment
+    note: "Audit (wrong_trigger): the excerpt omits the list's sensitive-end-use and 10-dwelling
+      screening/desk-study thresholds; the audit doesn't give them exactly, so re-read the list."
+  - id: travel-plan
+    note: "Audit (wrong_trigger): the excerpt refers to a thresholds table ('see thresholds') that the
+      workbook didn't capture; re-read the list."
+  - id: archaeological-assessment
+    note: "Audit (wrong_app_type): the list has a Y/? matrix by application type that the workbook didn't
+      capture, and the excerpt gives no trigger; re-read the list."
+
+new-fields:
+  - field: traffic-movements-peak-hour
+    kind: number
+    label: Peak-hour traffic movements
+    description: Traffic movements an hour the development is expected to generate at peak times.
+  - field: traffic-movements-daily
+    kind: number
+    label: Daily traffic movements
+    description: Traffic movements over 24 hours the development is expected to generate.
+  - field: loss-of-habitat-features
+    kind: boolean
+    label: Loss of trees, hedges, ponds or ditches
+    description: The proposal involves the loss of trees, removal of a hedge, or filling in a natural pond
+      or ditch.
+  - field: battery-energy-storage
+    kind: boolean
+    label: Battery energy storage
+    description: The proposal includes a battery energy storage system.

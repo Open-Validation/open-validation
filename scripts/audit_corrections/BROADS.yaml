@@ -1,0 +1,249 @@
+# Corrections for the Broads Authority, from the authority's audit.
+# Grokbot linked Validation Checklist 1, which covers only the national requirements, and captured
+# nothing. The local list is Validation Checklist 2, 'Additional local requirements that may be
+# needed to validate a planning application' (the build already uses it as the list URL). The audit
+# summarises its main items (about 40, many of them Development Management policy statements
+# required for all development). Everything below is the audit's paraphrase ("From the audit"),
+# not the authority's exact words, so the checklist still needs a manual read.
+local-authority: BROADS
+
+validation-list:
+  date: null
+  date-basis: >-
+    audit review: Checklist 2 shows no date; the 'last reviewed 01/08/2024' date was withdrawn (only
+    Checklist 1 is dated, 03/04/2025)
+
+requirements:
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: near-watercourse
+            value: true
+            description: Householder or minor development within 100m of a pond or other waterbody.
+        - discretionary
+    source-url: https://broads-authority.gov.uk/planning/planning-permission/validation-checklist-2
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a biodiversity survey for agricultural building
+      conversions, householder or minor development within 100m of a pond or waterbody, and all
+      bridge structures. The conversion and bridge cases are shown as officer discretion.
+
+  - id: design-and-access-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - all:
+            - site:
+                in: [conservation-area, world-heritage-site]
+                description: The site is in a conservation area or World Heritage Site.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: The proposal creates one or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: The proposal creates 100 square metres or more of floorspace.
+    source-url: https://broads-authority.gov.uk/planning/planning-permission/validation-checklist-2
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): major development, listed building consent, and
+      development in a conservation area or World Heritage Site of 1+ dwelling or 100 sq m+.
+
+  - id: energy-statement
+    action: add
+    required-if:
+      always: true
+    policy: DM14
+    source-url: https://broads-authority.gov.uk/planning/planning-permission/validation-checklist-2
+    must-include:
+      - item: A renewables statement
+        level: must
+        required-if:
+          any:
+            - condition:
+                field: dwelling-count
+                operator: ">"
+                value: 10
+                description: The proposal creates more than 10 dwellings.
+            - condition:
+                field: floorspace
+                operator: ">"
+                value: 1000
+                description: The proposal creates more than 1,000 square metres of floorspace.
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a DM14 energy demand reduction statement for all
+      development, with a renewables statement for more than 10 dwellings or more than 1,000 sq m.
+
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: The site is more than 1 hectare (in Flood Zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: The site is more than 1 hectare (in Flood Zone 1).
+        - site:
+            in: [critical-drainage-area]
+            description: The site is in a critical drainage area.
+    source-url: https://broads-authority.gov.uk/planning/planning-permission/validation-checklist-2
+    confidence: medium
+    notes: "From the audit (missing_requirement): Flood Zones 2 and 3, more than 1 ha in Flood Zone 1, and
+      critical drainage areas."
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      site:
+        in: [scheduled-monument]
+        description: The site is near a Scheduled Ancient Monument.
+    source-url: https://broads-authority.gov.uk/planning/planning-permission/validation-checklist-2
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a heritage statement is always needed near a Scheduled
+      Ancient Monument. The audit gives no other heritage triggers; check the checklist.
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      all:
+        - condition:
+            field: external-lighting
+            value: true
+            description: The proposal includes external lighting.
+        - site:
+            in: [dark-sky-area]
+            description: The site is in Dark Sky Zone Category 1.
+    policy: DM22
+    source-url: https://broads-authority.gov.uk/planning/planning-permission/validation-checklist-2
+    confidence: medium
+    notes: "From the audit (missing_requirement): a DM22 lighting justification in Dark Sky Zone Category 1."
+
+  - id: photos
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: demolition
+            value: true
+            description: The proposal involves demolition.
+        - site:
+            in: [conservation-area, listed-building, listed-building-setting]
+            description: The development affects a conservation area or listed building.
+    source-url: https://broads-authority.gov.uk/planning/planning-permission/validation-checklist-2
+    confidence: medium
+    notes: "From the audit (missing_requirement): photographs and photomontages for demolition, or
+      development affecting a conservation area or listed building."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: The proposal is for telecommunications development.
+    source-url: https://broads-authority.gov.uk/planning/planning-permission/validation-checklist-2
+    must-include:
+      - item: ICNIRP declaration
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): telecoms ICNIRP declaration."
+
+unmapped:
+  - local-name: Biodiversity enhancement statement
+    source-text: "From the audit: DM13 biodiversity enhancement statement (all development)"
+    source-url: https://broads-authority.gov.uk/planning/planning-permission/validation-checklist-2
+    suggested-id: biodiversity-enhancement-statement
+  - local-name: Climate change checklist
+    source-text: "From the audit: DM9 climate change checklist (new build, replacement, change of use)"
+    source-url: https://broads-authority.gov.uk/planning/planning-permission/validation-checklist-2
+    suggested-id: climate-change-checklist
+  - local-name: Landscape statement
+    source-text: "From the audit: DM16 landscape statement (all development)"
+    source-url: https://broads-authority.gov.uk/planning/planning-permission/validation-checklist-2
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Green infrastructure statement
+    source-text: "From the audit: DM8 green infrastructure statement (all development)"
+    source-url: https://broads-authority.gov.uk/planning/planning-permission/validation-checklist-2
+    suggested-id: green-infrastructure-statement
+  - local-name: Healthy places statement
+    source-text: "From the audit: DM45 healthy places statement (new housing, commercial and recreational
+      development)"
+    source-url: https://broads-authority.gov.uk/planning/planning-permission/validation-checklist-2
+    suggested-id: health-impact-assessment
+  - local-name: Water safety plan
+    source-text: "From the audit: DM46 water safety plan (proposals increasing water access, or new quay
+      heading or raised levels)"
+    source-url: https://broads-authority.gov.uk/planning/planning-permission/validation-checklist-2
+    suggested-id: water-safety-plan
+  - local-name: Water efficiency statement
+    source-text: "From the audit: DM4 water efficiency statement (all new, replacement or converted dwellings
+      and non-residential buildings; BREEAM Water Calculator for non-residential)"
+    source-url: https://broads-authority.gov.uk/planning/planning-permission/validation-checklist-2
+    suggested-id: water-efficiency-statement
+  - local-name: Peat soils statement
+    source-text: "From the audit: DM10 peat soils statement (development on peat)"
+    source-url: https://broads-authority.gov.uk/planning/planning-permission/validation-checklist-2
+    suggested-id: peat-soils-statement
+  - local-name: Land raising and excavated material statements
+    source-text: "From the audit: DM17 land raising and DM18 excavated material statements"
+    source-url: https://broads-authority.gov.uk/planning/planning-permission/validation-checklist-2
+    suggested-id: excavated-material-statement
+  - local-name: Riverbank stabilisation and mooring checklists
+    source-text: "From the audit: DM32 riverbank stabilisation and DM33 mooring checklists"
+    source-url: https://broads-authority.gov.uk/planning/planning-permission/validation-checklist-2
+    suggested-id: moorings-riverbank-checklist
+  - local-name: Residential moorings management plan
+    source-text: "From the audit: DM37 residential moorings management plan"
+    source-url: https://broads-authority.gov.uk/planning/planning-permission/validation-checklist-2
+    suggested-id: management-plan
+  - local-name: Rural workers' dwellings evidence
+    source-text: "From the audit: DM38 rural workers' dwellings evidence"
+    source-url: https://broads-authority.gov.uk/planning/planning-permission/validation-checklist-2
+    suggested-id: rural-workers-dwelling-appraisal
+  - local-name: Visitor and community facilities statement
+    source-text: "From the audit: DM44 visitor and community facilities statement"
+    source-url: https://broads-authority.gov.uk/planning/planning-permission/validation-checklist-2
+    suggested-id: community-facilities-statement
+  - local-name: Open space statements
+    source-text: "From the audit: DM7 open space statements"
+    source-url: https://broads-authority.gov.uk/planning/planning-permission/validation-checklist-2
+    suggested-id: open-space-statement
+  - local-name: Conversions statement
+    source-text: "From the audit: DM48 conversions statement"
+    source-url: https://broads-authority.gov.uk/planning/planning-permission/validation-checklist-2
+    suggested-id: conversions-statement
+  - local-name: Structural survey
+    source-text: "From the audit: structural survey (conversion, rebuild, demolition)"
+    source-url: https://broads-authority.gov.uk/planning/planning-permission/validation-checklist-2
+    suggested-id: structural-survey
+  - local-name: Ventilation and extraction details
+    source-text: "From the audit: ventilation and extraction details (A3/A4/A5/B1/B2 uses)"
+    source-url: https://broads-authority.gov.uk/planning/planning-permission/validation-checklist-2
+    suggested-id: ventilation-extraction-details
+
+new-fields:
+  - field: dark-sky-area
+    kind: designation
+    label: Dark sky area
+    description: >-
+      Site is in a designated dark sky area, such as an International Dark Sky Reserve or Park or a
+      planning authority's dark sky zone.

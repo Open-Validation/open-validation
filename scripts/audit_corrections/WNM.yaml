@@ -1,0 +1,471 @@
+# Corrections for Royal Borough of Windsor and Maidenhead, from
+# inputs/audit/royal-borough-of-windsor-and-maidenhead.json.
+# The audit compared the workbook with RBWM's National and Local Validation Requirements
+# (adopted 5 February 2026; the build already takes that date from the audit). Many workbook
+# excerpts come from a neighbouring item. Items marked "From the audit" use the audit's
+# paraphrase of the PDF, not the council's exact words.
+local-authority: WNM
+
+submission-standards:
+  - item: Drawings to a recognised metric scale; the wording "do not scale" must not be used
+    level: must
+  - item: A scale bar on drawings, for digital measuring (the council does not print paper copies)
+    level: must
+  - item: A unique drawing number reference
+    level: must
+  - item: Drawings fit onto A4 or A3 paper wherever possible
+    level: should
+
+drop:
+  - id: schedule-of-works
+    reason: "other: the row holds arboricultural text ('Assessment, Arboricultural Method Statement and Tree Protection Plan'), not a listed building schedule of works"
+  - id: travel-plan
+    reason: "duplicate: the source has a single 'Transport Assessment and Travel Plan' item (kept as transport-assessment)"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: a recommendation"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: the excerpt is lighting and heritage text (re-added below)"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "wrong_trigger: merged with Site Connectivity and telecoms text (re-added below)"
+  - local-name: Self-build / custom build information
+    reason: "wrong_trigger: the excerpt is the Phasing Plan trigger merged with the Planning Statement trigger (both re-added below)"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 10
+                description: A net gain of 10 or more units.
+            - condition:
+                field: housing-floorspace
+                operator: ">"
+                value: 1000
+                description: Over 1,000 square metres of residential floorspace.
+            - all:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 5
+                    description: 5 to 9 dwellings in designated rural areas.
+                - discretionary
+    policy: BLP Policy HO3
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the workbook quoted the Marketing Exercise policy
+      references and put it under Full only. From the audit: net gain of 10+ units or over 1,000 sqm
+      of residential floorspace, or 5-9 dwellings in designated rural areas; outline and full.
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    must-include:
+      - item: Emissions Mitigation Assessment
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): Air Quality Assessment including an Emissions Mitigation Assessment, for major applications."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      application-type:
+        in: [hh, full, outline]
+    must-include:
+      - item: Arboricultural Method Statement
+        level: must
+      - item: Tree Protection Plan
+        level: must
+    confidence: low
+    notes: >-
+      The excerpt is interleaved with page numbers but says the item covers 'householder
+      applications, minors and majors'. The Arboricultural Method Statement and Tree Protection
+      Plan wording was in the workbook's 'Schedule of works' row. The trigger wasn't captured.
+
+  - id: archaeological-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [archaeological-priority-area]
+            description: The site is in an Area of High Archaeological Potential.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 0.4
+            description: The site is over 0.4 hectares.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 0.4
+            description: The site is over 0.4 hectares.
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Archaeological Desk Based Assessment in an Area of High Archaeological Potential or over 0.4 ha."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [site-of-special-scientific-interest, local-wildlife-site, special-protection-area]
+            description: The site is within or abuts a designated nature conservation site.
+        - discretionary
+    policy: BLP Policy NR2
+    source-text: All applications, including householder
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the workbook quoted demolition and waste storage text.
+      From the audit: a Habitats Survey / Ecology Report where protected species may be affected
+      (shown as officer discretion) or the site is within or abuts a designated nature
+      conservation site, for all applications including householder.
+
+  - id: bng-metric
+    action: replace
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook's excerpt was the S106 Heads of Terms text. BNG is the national requirement."
+
+  - id: cil-form
+    action: update
+    confidence: medium
+    notes: "Audit (wrong_app_type): the PDF gives 'Always' as the application types, including householder."
+
+  - id: construction-management-plan
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): CEMP for major residential and commercial development, including change of use."
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: Street scene elevations, for major and minor development fronting a highway
+        level: must
+        required-if: discretionary
+    notes: "From the audit (missing_requirement): Street Scene Elevations for all major and minor development fronting a highway."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    confidence: medium
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      site:
+        in: [flood-risk-zone]
+        description: The site is in Flood Zone 2 or 3.
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the Site Levels trigger (now in section-proposed). The FRA is in the national requirements table, with Flood Zone triggers."
+
+  - id: floor-plan-proposed
+    action: update
+    must-include:
+      - item: The use of each room annotated
+        level: must
+      - item: Floor area calculations for proposals in the Green Belt (original size, existing and proposed), on the plans or in a supporting document
+        level: must
+        required-if:
+          site:
+            in: [green-belt]
+            description: The site is in the Green Belt.
+        source-text: "Floor area calculations are required for proposals in the Green Belt (either annotated on the plans or in a supporting document) and should detail the original size, and existing and proposed calculations."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: Contamination is suspected.
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Contaminated Land Assessment where contamination is suspected."
+
+  - id: landscaping-plan
+    action: add
+    required-if:
+      application-type:
+        in: [full, outline]
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Landscaping Scheme for major and minor development, excluding change of use."
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: New or replacement external lighting (not for advertisement consent).
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt carried a misplaced heritage bullet. From the audit: new or replacement external lighting, excluding advertisement consent."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: A sensitive use near noise sources.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: A noise-generating proposal.
+        - condition:
+            field: plant-equipment
+            value: true
+            description: The proposal includes plant.
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): sensitive uses near noise sources and noise-generating proposals such as plant."
+
+  - id: planning-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - ref: major-development
+    confidence: medium
+    notes: "All major applications, including full or outline (council's wording)."
+
+  - id: sci
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-text: "The Statement of Community Engagement will need to demonstrate how the applicant has complied with RBWM’s Statement of…"
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    must-include:
+      - item: How the applicant has complied with RBWM's Statement of Community Involvement
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt ran into the Utilities Assessment heading. From the audit: typically for majors."
+
+  - id: section-existing
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: basement
+            value: true
+            description: The proposal includes a basement.
+        - discretionary
+    source-text: "where operational development is proposed which would change land levels, and for all basement and swimming pool proposals."
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Cross Sections for majors, level changes, engineering
+      works and all basements, including householder. The wording above was in the workbook's FRA
+      row; level changes, engineering works and swimming pools are shown as officer discretion.
+
+  - id: section-proposed
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: basement
+            value: true
+            description: The proposal includes a basement.
+        - discretionary
+    source-text: "where operational development is proposed which would change land levels, and for all basement and swimming pool proposals."
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    must-include:
+      - item: Site levels and finished floor levels
+        level: must
+        required-if:
+          any:
+            - ref: major-development
+            - site:
+                in: [flood-risk-zone]
+                description: The site is in Flood Zone 2 or 3.
+            - condition:
+                field: basement
+                value: true
+                description: The proposal includes a basement.
+            - discretionary
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Cross Sections (majors, level changes, engineering works,
+      all basements) and Site Levels and Finished Floor Levels (all majors, land not reasonably
+      level, Flood Zones 2/3, swimming pools and basements), including householder.
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: New dwellings, including conversions and replacements.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 100
+            description: Commercial development over 100 square metres.
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Sustainability/Energy Statement for new dwellings (including conversions and replacements) and commercial over 100 sqm."
+
+  - id: telecommunications-report
+    action: add
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Telecommunications Report is listed, but the audit gives no trigger."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 2500
+            description: Retail or leisure development over 2,500 square metres.
+        - discretionary
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Retail Impact Assessment for retail/leisure over 2,500 sqm, or out-of-centre retail, leisure or office (shown as officer discretion)."
+
+  - id: transport-assessment
+    action: update
+    must-include:
+      - item: A draft travel plan, if required
+        level: must
+    confidence: low
+    notes: "Audit (duplicate): the source has one 'Transport Assessment and Travel Plan' item; its trigger wasn't captured."
+
+  - id: viability-assessment
+    action: add
+    required-if: discretionary
+    policy: BLP Policy HO3
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Financial Viability Assessment where the HO3 affordable housing requirement is not met."
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: New residential development (excluding replacement dwellings).
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 0
+            description: Commercial development.
+    source-text: There is a requirement to make appropriate arrangements and/or space for the storage and collection of recycling and refuse on site.
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Waste Management, Storage and Collection Strategy for all
+      new residential (excluding replacement dwellings) and commercial development. The wording
+      above was in the workbook's ecology row.
+
+unmapped:
+  - local-name: Health Impact Assessment
+    source-text: "From the audit: major developments"
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Accessible and Adaptable Dwellings (M4(2)) and Wheelchair Accessible (M4(3)) Details
+    source-text: "From the audit: all applications for 20 or more dwellings"
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    suggested-id: accessible-housing-statement
+  - local-name: Self/Custom Build Statement
+    source-text: "From the audit: any application that includes a self or custom build element; must follow the RBWM Self Build Guidance Note (BLP HO1/HO2)"
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    suggested-id: self-build-statement
+  - local-name: Phasing Plan
+    source-text: "Any self build development of more than one unit."
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    suggested-id: phasing-plan
+  - local-name: Marketing Exercise
+    source-text: "From the audit: loss of a protected use under BLP ED3/QP5/TR7/IF6, 12 months' marketing"
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    suggested-id: marketing-report
+  - local-name: Rural Workers Needs Assessment
+    source-text: "From the audit: agricultural dwellings in countryside/Green Belt"
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    suggested-id: rural-workers-dwelling-appraisal
+  - local-name: Parking Management Plan
+    source-text: "From the audit: all majors; some minors and changes of use"
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    suggested-id: parking-management-plan
+  - local-name: Delivery and Servicing Management Plan
+    source-text: "From the audit: majors in town centres"
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    suggested-id: delivery-servicing-plan
+  - local-name: Demolition Method Statement
+    source-text: "From the audit: demolition prior approvals; demolition close to highway or homes"
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    suggested-id: demolition-method-statement
+  - local-name: Landscape and Visual Impact Assessment
+    source-text: "From the audit: over 50 dwellings; non-residential in Green Belt/countryside; tall buildings"
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Pollution Assessment
+    source-text: "From the audit: listed without a trigger"
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    suggested-id: ""
+  - local-name: Ventilation / Extraction Details
+    source-text: "From the audit: restaurants, pubs, takeaways; plant, air conditioning and air source heat pumps (including householder)"
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    suggested-id: ventilation-extraction-statement
+  - local-name: Crime Prevention Statement
+    source-text: "From the audit: major development"
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    suggested-id: crime-prevention-statement
+  - local-name: Drainage Assessment / SuDS Strategy
+    source-text: "From the audit: all new and replacement dwellings; major non-residential"
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    suggested-id: drainage-strategy
+  - local-name: Structural Survey
+    source-text: "From the audit: substantial demolition with change of use; significant works to listed building fabric; prior approval to residential"
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    suggested-id: structural-survey
+  - local-name: Utilities Assessment
+    source-text: "From the audit: all majors"
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    suggested-id: utilities-statement
+  - local-name: Other application types (prior approval, NMA, conditions, trees, S106)
+    source-text: "From the audit: PDF pp.40-42 set local requirements for prior approvals (Class A larger home extensions: written description with dimensions, site plan, adjoining addresses; Class AA additional storeys: scaled plans and elevations; Parts 3, 4, 6, 11, 16, 20 class-specific documents), non-material amendments (approved vs proposed comparison plans, supporting statement), discharge of conditions, works to trees (sketch map, tree type and condition, accurate pruning specification; percentage reductions not accepted) and S106 modification (obligation, reasons, land interest, map)"
+    source-url: https://www.rbwm.gov.uk/sites/default/files/2026-03/planning_national_and_local_validation_requirements_policy_20260304.pdf
+    suggested-id: ""
+
+low-confidence:
+  - id: heritage-statement
+    note: "Audit (wrong_trigger): the workbook's excerpt is a fragment ('...should include: 10'); the trigger wasn't captured."
+  - id: roof-plan-existing
+    note: "Audit (wrong_trigger): the workbook's excerpt is a fragment ('only existing roof plan will be required.')."
+  - id: roof-plan-proposed
+    note: "Audit (wrong_trigger): the workbook's excerpt is a fragment ('only existing roof plan will be required.')."
+  - id: design-and-access-statement
+    note: "Audit (wrong_trigger): the LBC excerpt is merged with the Crown land statement."

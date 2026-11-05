@@ -1,0 +1,820 @@
+# Corrections for London Borough of Southwark, from inputs/audit/london-borough-of-southwark.json.
+# Southwark's local list is 12 per-application-type checklist web pages (index last updated
+# 29 October 2026). Grokbot read only the full planning checklist (updated 16 October 2026) and
+# captured about a quarter of it. The audit also read the householder and listed building consent
+# checklists; the other ten were not checked, so their requirements are still missing.
+# Items marked "From the audit" use the audit's paraphrase of the checklists, not the council's
+# exact words. The workbook's 'INFERRED' rows all come from the full planning page.
+local-authority: SWK
+
+drop:
+  - id: sustainability-statement
+    reason: "wrong_trigger: the excerpt is the energy statement content (now in energy-statement)"
+
+drop-unmapped:
+  - local-name: Self-build / custom build information
+    reason: "wrong_trigger: the self-build verification form is the self-build exemption inside the BNG
+      item, not a free-standing requirement"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "wrong_trigger: the excerpt is the Schedule of accommodation (re-added below)"
+  - local-name: Cycle parking details
+    reason: "wrong_trigger: the excerpt is store dimensions; re-added below with the trigger"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: content mixed with BS4142 noise text; re-added below with the trigger"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "not_a_requirement: the excerpt includes S106 legal fee text; re-added below without it"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - ref: major-development
+    confidence: medium
+    notes: "'You must submit an air quality assessment for all major applications.' From the audit: an
+      Air Quality Neutral assessment is needed for minor applications unless exempt (unmapped item)."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Trees on or near the site are pruned or removed, or excavation or service 
+              runs are near trees.
+    policy: Southwark Plan 2022 policies P59, P61
+    must-include:
+      - item: Prepared by a named project arboricultural consultant
+        level: must
+      - item: Tree retention and removal plans
+        level: should
+      - item: Root protection areas shown on the proposed layout plans
+        level: should
+      - item: Compliance with BS5837, BS3998 and BS8545 and Trees and Design Action Group (TDAG) 
+          guidance
+        level: should
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt is content only. From the audit: 'Tree survey: Required
+      where trees are pruned or removed...', on or near the site, or excavation or service runs near trees.
+      The householder checklist also lists a tree survey."
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full]
+        - any:
+            - all:
+                - condition:
+                    field: ground-disturbance
+                    value: true
+                    description: Groundworks are proposed.
+                - site:
+                    in: [archaeological-priority-area]
+                    description: The site is in an archaeological priority area.
+            - condition:
+                field: basement
+                value: true
+                description: New basements or basement extensions.
+            - condition:
+                field: earthworks
+                value: true
+                description: Other extensive groundworks.
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, missing_requirement): an archaeological desk-based assessment for
+      groundworks in an archaeological priority area, or new basements, basement extensions or other
+      extensive groundworks (householder and full). The full checklist also asks for an
+      archaeological evaluation report: "The completed archaeological evaluation report must detail
+      the results of the work."
+
+  - id: cil-form
+    action: update
+    required-if:
+      always: true
+    confidence: medium
+    notes: "'You must submit CIL information for all application types.' (CIL additional questions form)"
+
+  - id: construction-management-plan
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - ref: major-development
+    confidence: medium
+    notes: "'You must submit a Demolition/Construction Management Plan (D/CEMP) with all major planning
+      applications.'"
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - application-type:
+                in: [hh, full]
+            - site:
+                in: [conservation-area]
+                description: The property is in, or on the border of, a conservation area.
+    confidence: medium
+    notes: "'If you submit a planning application for a property in a conservation area, you must write
+      a design and access statement.' The householder checklist says 'home in, or on the border of, a
+      conservation area' (audit). Major development is the national requirement."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: The development is likely to affect bats or their roost, foraging or 
+              commuting habitats.
+        - condition:
+            field: demolition
+            value: true
+            description: Building modification or demolition, especially of roof voids.
+        - discretionary
+    must-include:
+      - item: Prepared by a qualified ecologist
+        level: must
+    confidence: medium
+    notes: >-
+      The excerpt is the bat survey. From the audit (missing_requirement): an Ecological impact
+      assessment is needed for tree works, mature or defective trees, derelict or allotment land,
+      railway land, and building modification or demolition (especially roof voids); the cases
+      other than demolition are shown as officer discretion.
+
+  - id: energy-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - ref: major-development
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    must-include:
+      - item: How carbon reduction has been achieved on-site
+        level: should
+      - item: An assessment of the energy and heat sources considered
+        level: should
+      - item: "An assessment against the London Plan 'be lean, be clean, be green and be seen' targets,
+          as percentages in a table"
+        level: should
+      - item: An energy statement compiled against Part L of the Building Regulations 2021
+        level: should
+    confidence: medium
+    notes: "The workbook mapped this to sustainability-statement with content only. Audit (wrong_app_type):
+      the energy statement is in the checklist's major applications section."
+
+  - id: section-existing
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: Ground level changes (patios, decking, steps).
+        - condition:
+            field: basement
+            value: true
+            description: Basement works.
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Altering ceiling or roof heights, a roof extension or loft conversion.
+    confidence: medium
+    notes: "Audit (wrong_trigger, missing_requirement): the excerpt is basement drawing content. From
+      the audit: cross-sections for ground level changes and basement or loft conversions; the householder
+      checklist adds altering ceiling or roof heights and roof extensions; the LBC checklist needs drawings
+      including cross-sections."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: Ground level changes (patios, decking, steps).
+        - condition:
+            field: basement
+            value: true
+            description: Basement works.
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Altering ceiling or roof heights, a roof extension or loft conversion.
+    must-include:
+      - item: Basement floor plan and section, with the basement ceiling height, access points and 
+          roof lights
+        level: should
+        required-if:
+          condition:
+            field: basement
+            value: true
+            description: The proposal includes basement works.
+    policy: Southwark Plan 2022 policies P14, P68
+    confidence: medium
+    notes: "Audit (wrong_trigger, missing_requirement): the excerpt is basement drawing content. From
+      the audit: cross-sections for ground level changes and basement or loft conversions; the householder
+      checklist adds altering ceiling or roof heights and roof extensions; the LBC checklist needs drawings
+      including cross-sections."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: external-lighting
+            value: true
+            description: External lighting is proposed.
+        - discretionary
+    must-include:
+      - item: Layout plan with beam orientation
+        level: must
+      - item: Schedule of the equipment in the design
+        level: must
+      - item: Hours of operation
+        level: must
+      - item: Light levels and spillage
+        level: must
+      - item: The size of the lights or light fittings
+        level: must
+      - item: The distance from the edge of the sign to the kerb edge
+        level: must
+        required-if:
+          application-type:
+            in: [advertising]
+      - item: How the proposal will impact biodiversity
+        level: must
+    confidence: medium
+    notes: "'Submit a lighting assessment for all applications: where external lighting is proposed involving
+      works to areas with public access'. Works to areas with public access are shown as officer discretion.
+      The excerpt is cut off after the biodiversity item."
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Main town centre uses outside town and local centres.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 1000
+            description: Buildings over 1,000 sq m.
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt was garbled. From the audit: 'Town centre impact assessment:
+      buildings over 1,000 sq m...' providing main town centre uses outside centres (major applications
+      section)."
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - ref: major-development
+    confidence: medium
+    notes: "'You must submit a transport assessment with all major applications.'"
+
+  - id: viability-assessment
+    action: replace
+    required-if: discretionary
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    confidence: medium
+    notes: "Audit (wrong_trigger, not_a_requirement): the excerpt was affordable housing payment-in-lieu
+      rates. From the audit: 'Viability appraisal: Required where affordable housing is required...',
+      a payment in lieu is due, or policy is set aside for viability."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      site:
+        in: [conservation-area, listed-building, listed-building-setting, park-and-garden, 
+              scheduled-monument]
+        description: The property is in or close to a conservation area, a listed building, a 
+          historic park or garden or a scheduled ancient monument.
+    source-text: >-
+      Heritage statement You must provide a heritage statement if your property is in or close to: a
+      conservation area a listed building a historic park or garden a scheduled ancient monument
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    confidence: medium
+    notes: "Audit (wrong_app_type): the excerpt is from the full planning page; it also applies to full
+      planning, and to householder applications for listed buildings."
+
+  - id: fire-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: 18 m or more.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: Educational accommodation.
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): Fire statement (London Plan D12(B)) and Fire safety
+      Gateway 1 form (2+ dwellings, educational accommodation, 18 m+ or 7+ storeys)."
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The major development includes housing.
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): Affordable housing statement for majors with housing.
+      An Affordable housing contribution is needed for any scheme creating 1 or more homes (unmapped item)."
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full]
+        - discretionary
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): where the development may affect light to neighbouring
+      windows; householder: where an extension or outbuilding might affect neighbours' sunlight."
+
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: Flood zone 2 or 3, including minor works and change of use.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: Flood zone 1 sites over 1 ha.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: Flood zone 1 sites over 1 ha.
+        - condition:
+            field: basement
+            value: true
+            description: Basement extensions.
+        - all:
+            - ref: major-development
+            - site:
+                in: [critical-drainage-area]
+                description: The site is in a critical drainage area.
+        - discretionary
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): Flood Zone 2/3 including minor works and change of use,
+      Zone 1 >1 ha, basement extensions, majors in critical drainage areas, and Zone 1 with a notified
+      critical drainage problem (shown as officer discretion)."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: Brownfield or known contaminated land.
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): brownfield or known contaminated land."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise-sensitive development.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: A noisy use.
+        - condition:
+            field: plant-equipment
+            value: true
+            description: Significant plant, or (householder) an air conditioning unit or air source 
+              heat pump.
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): noise-sensitive development, noisy uses and significant
+      plant; householder: noisy development such as an air conditioning unit or air source heat pump."
+
+  - id: photos
+    action: add
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [full]
+            - any:
+                - ref: major-development
+                - site:
+                    in: [listed-building-setting, conservation-area]
+                    description: The setting of a listed building or a conservation area.
+                - condition:
+                    field: demolition
+                    value: true
+                    description: The proposal involves demolition.
+        - all:
+            - application-type:
+                in: [lbc]
+            - discretionary
+    must-include:
+      - item: Photographic condition study of the windows and doors
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): photographs for all majors, listed building or conservation
+      area setting, and demolition (full); a 'Photographic condition study (windows and doors)' where
+      windows or doors are to be replaced (LBC)."
+
+  - id: schedule-of-works
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [lbc]
+        - discretionary
+    source-text: Detailed schedule of works and specifications
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-listed-building-consent
+    confidence: medium
+    notes: "From the audit (missing_requirement): for extensive restoration or alteration (LBC checklist)."
+
+  - id: roof-plan-existing
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - any:
+            - condition:
+                field: residential-extension
+                value: true
+                description: An extension or a new outbuilding.
+            - condition:
+                field: roof-alteration
+                value: true
+                description: Roof lights or other roof changes.
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-householder-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): householder roof plans for an extension, roof lights
+      or new outbuildings."
+
+  - id: roof-plan-proposed
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - any:
+            - condition:
+                field: residential-extension
+                value: true
+                description: An extension or a new outbuilding.
+            - condition:
+                field: roof-alteration
+                value: true
+                description: Roof lights or other roof changes.
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-householder-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): householder roof plans for an extension, roof lights
+      or new outbuildings."
+
+  - id: waste-management-plan
+    action: add
+    required-if: discretionary
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    confidence: low
+    notes: "From the audit (missing_requirement): a Refuse storage and collection strategy where residential
+      or commercial waste is generated."
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if:
+      condition:
+        field: loss-of-use
+        value: true
+        description: Redevelopment of existing sport and leisure facilities.
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): Sport and leisure facilities assessment for redevelopment
+      of existing facilities."
+
+  - id: environmental-statement
+    action: add
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: EIA development.
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): Environmental Statement for EIA development (major applications
+      section)."
+
+  - id: landscaping-plan
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - ref: major-development
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): Landscaping details for all majors."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - ref: major-development
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): Planning statement for all majors."
+
+  - id: sci
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more homes.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: 1,000 sq m or more of non-residential floorspace.
+        - discretionary
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): an Engagement summary for 10+ homes, 1,000 sq m+ non-residential,
+      and council-owned projects (shown as officer discretion)."
+
+unmapped:
+  - local-name: Schedule of accommodation
+    source-text: >-
+      You should confirm whether each unit and room meets the minimum required standards set out in our
+      residential design guidance. From the audit: 1 or more new units, house-to-flat conversions, all
+      majors.
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: schedule-of-accommodation
+  - local-name: Cycle parking information
+    source-text: >-
+      From the audit: extra bedrooms, subdividing a home or converting to an HMO (householder: changing
+      or adding cycle parking). The council's wording: "For long-stay cycle stores, you must show the
+      placement of all stand types, including: dimensions of the store distance between parking stands
+      aisle widths access point width floor to ceiling height clear headroom width of store door"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: cycle-parking-details
+  - local-name: Ventilation / extraction details
+    source-text: >-
+      From the audit: non-residential schemes installing ventilation or extraction. The council's
+      wording: "Submit information to: show that where mechanical ventilation is proposed, it is
+      necessary show that you have considered options for passive design and ventilation include odour
+      abatement techniques and acoustic noise characteristics"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: ventilation-extraction-details
+  - local-name: Draft heads of terms
+    source-text: >-
+      Submit a draft heads of terms for Section 106 (S106) agreement if the scale of your development
+      promises: affordable housing employment local infrastructure improvements
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: planning-obligations-heads-of-terms
+  - local-name: Fire safety strategy / Reasonable exception form
+    source-text: >-
+      From the audit: all application types (London Plan D12(A)); the reasonable exception form only
+      if there are no new dwellings or units, no new lift, no change to external materials and no
+      change to communal evacuation areas
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: fire-safety-strategy
+  - local-name: Basement impact assessment
+    source-text: "From the audit: new, altered or extended basements (householder and full)"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: basement-impact-assessment
+  - local-name: Levels / spot level and gradient plan
+    source-text: "From the audit: ground levels change relative to neighbours (householder and full)"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: levels-plan
+  - local-name: SuDS pro forma
+    source-text: "Sustainable drainage systems (SuDS) pro forma Submit a completed SuDS form. From the
+      audit: in the major applications section."
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: drainage-strategy
+  - local-name: 3D model
+    source-text: "3D model: Required for all major applications"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: 3d-model
+  - local-name: Affordable housing contribution
+    source-text: "From the audit: any scheme creating 1 or more homes, with exemptions"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: affordable-housing-contribution
+  - local-name: Air quality neutral assessment
+    source-text: "From the audit: minor applications unless exempt"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: air-quality-neutral
+  - local-name: Air quality positive assessment
+    source-text: "From the audit: masterplans, large EIA development briefs, schemes referable to the
+      Mayor"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: air-quality-positive
+  - local-name: Accessibility drawings
+    source-text: "From the audit: ramp, gradient or Blue Badge parking"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: accessibility-statement
+  - local-name: Affordable workspace strategy
+    source-text: "From the audit: more than 500 sq m of employment space"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: affordable-workspace-strategy
+  - local-name: BREEAM pre-assessment
+    source-text: "From the audit: non-residential over 500 sq m, including refurbishment or change of
+      use"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: breeam-pre-assessment
+  - local-name: Business relocation strategy
+    source-text: "From the audit: development that may displace small or independent shops"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: business-relocation-strategy
+  - local-name: Delivery and servicing management plan
+    source-text: "From the audit: all majors; minors in sensitive areas if an officer asks"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: delivery-servicing-plan
+  - local-name: Foul sewage and utilities assessment
+    source-text: "From the audit: connection to foul or surface water sewers"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: foul-sewage-utilities-statement
+  - local-name: Marketing statement
+    source-text: "From the audit: loss of retail, employment, pub, community, cultural or health uses,
+      with 2 years' marketing"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: marketing-evidence
+  - local-name: Navigational risk assessment
+    source-text: "From the audit: development on the tidal Thames, a pier or jetty"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: navigational-risk-assessment
+  - local-name: Vehicle parking drawings
+    source-text: "From the audit: new or re-provided parking"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: parking-plan
+  - local-name: Be Seen monitoring spreadsheet
+    source-text: "From the audit: all major applications"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: carbon-emission-reporting
+  - local-name: Circular economy statement and Whole life-cycle carbon assessment
+    source-text: "From the audit: major applications referable to the Mayor"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: circular-economy-statement
+  - local-name: EINA
+    source-text: "From the audit: majors with 10+ homes or 1,000 sq m+"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: equalities-impact-assessment
+  - local-name: Educational needs assessment
+    source-text: "From the audit: EIA / Schedule 1 or 2 development"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: educational-needs-assessment
+  - local-name: Industrial specification requirements
+    source-text: "From the audit: majors with industrial floorspace"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: ""
+  - local-name: Jobs and training specification
+    source-text: "From the audit: more than 1,000 sq m; training and local jobs at 2,500 sq m+ non-residential"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: employment-skills-plan
+  - local-name: Micro-climate assessment
+    source-text: "From the audit: tall buildings over 30 m, or 25 m in the Thames Special Policy Area"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: wind-microclimate-assessment
+  - local-name: Movement plan drawing and Trip generation report
+    source-text: "From the audit: all major applications"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: ""
+  - local-name: Old Kent Road schedule of development form
+    source-text: "From the audit: Old Kent Road Opportunity Area"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: ""
+  - local-name: Staffing and management plan / Student management plan
+    source-text: "From the audit: supported housing or hostels; student accommodation"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: student-housing-management-plan
+  - local-name: Urban greening factor with calculator
+    source-text: "From the audit: listed in the major applications section"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: urban-greening-factor
+  - local-name: Townscape visual impact assessment
+    source-text: "From the audit: protected or local views, World Heritage Sites"
+    source-url: 
+      https://www.southwark.gov.uk/planning-environment-and-building-control/planning/planning-checklists-full-planning-application
+    suggested-id: landscape-visual-impact-assessment
+
+low-confidence:
+  - id: bng-metric
+    note: "Audit (wrong_app_type): from the full planning checklist ('for all small site planning applications');
+      the other application types' checklists were not read."
+

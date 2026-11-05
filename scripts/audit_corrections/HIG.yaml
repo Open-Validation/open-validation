@@ -1,0 +1,504 @@
+# Corrections for High Peak Borough Council, from inputs/audit/high-peak-borough-council.json.
+# The council's only published list is 'Validation guidance - National and Local Lists' V04,
+# adopted March 2016 (still the only list linked from the council's page, last modified
+# 25 September 2026). The audit warns (other, Confirmed) that it cites the EIA Regulations 2011,
+# draft Local Plan 'Modification' thresholds and the old A1/A3-A5 use classes, so some triggers
+# may no longer match policy. Grokbot captured about half of the ~30 local items and many excerpts
+# came from adjacent rows. Items marked "From the audit" use its paraphrase of the list.
+local-authority: HIG
+
+submission-standards:
+  - item: Plans and drawings drawn to a recognised metric scale, with a scale bar, key dimensions, the
+      direction of North, and the original paper size and scale clearly marked
+    level: must
+
+drop:
+  - id: design-and-access-statement
+    reason: "not_a_requirement: national/statutory (Article 9 DMPO); the excerpt is the national content list"
+  - id: environmental-statement
+    reason: "not_a_requirement: national/statutory; the excerpt is EIA schedule text running into the FRA row"
+  - id: roof-plan-existing
+    reason: "not_a_requirement: the row is the fragment 'plans and roof plans.'"
+  - id: roof-plan-proposed
+    reason: "not_a_requirement: as above"
+  - id: floor-plan-existing
+    reason: "not_a_requirement: national plan standards (prior approval floor plans), not a local requirement"
+  - id: floor-plan-proposed
+    reason: "not_a_requirement: as above"
+  - id: elevation-existing
+    reason: "not_a_requirement: as above"
+  - id: elevation-proposed
+    reason: "not_a_requirement: as above"
+
+drop-unmapped:
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_app_type: the list excludes householder applications; re-added below"
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_trigger: a bare fragment of the lighting assessment row"
+  - local-name: Employment / Economic Statement
+    reason: "wrong_trigger: the excerpt is lighting text; re-added below with the audit's trigger"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_trigger: the excerpt ran into occupancy-condition text; re-added below without it"
+
+requirements:
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: >-
+              Contamination is known or suspected, or the development is in the vicinity of such
+              land and ground works are proposed.
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: >-
+              Vulnerable development (a sensitive end use such as housing, schools, allotments or
+              playing fields).
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    source-text: >-
+      Land Contamination Assessment All applications where contamination is known or suspected or
+      the development is in the vicinity of such land and ground works are proposed … Vulnerable
+      developments are those with a sensitive end use and include housing, schools, allotments,
+      playing fields etc For minor vulnerable development: where no contamination is suspected an
+      environmental screening report is required.
+    must-include:
+      - item: An environmental screening report, for minor vulnerable development where no
+          contamination is suspected
+        level: must
+        required-if:
+          condition:
+            field: sensitive-end-use
+            value: true
+            description: Vulnerable development (a sensitive end use).
+    confidence: medium
+    notes: >-
+      Audit (not_a_requirement): the workbook's excerpt began with an officer's email address,
+      removed here. The 'INFERRED' Full planning placement was wrong: the list applies it by trigger.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare.
+        - all:
+            - site:
+                in: [flood-risk-zone]
+                description: The site is in flood zone 2 or 3.
+            - any:
+                - condition:
+                    field: new-build
+                    value: true
+                    description: The proposal includes new buildings.
+                - condition:
+                    field: involves-change-of-use
+                    value: true
+                    description: The proposal is a change of use.
+                - condition:
+                    field: footprint-increase
+                    value: true
+                    description: The proposal extends the ground cover.
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    policy: High Peak Local Plan Policy EQ10
+    source-text: >-
+      Flood Risk Assessment All development over 1 hectare in Flood Zone 1, and all applications
+      for new buildings, changes of use, or extended ground cover, in Flood Zones 2 and 3, require
+      the preparation of a Flood Risk Assessment (FRA)
+    confidence: medium
+    notes: "The 'INFERRED' Full planning placement was wrong (audit, wrong_app_type): the list applies it by trigger."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+          scheduled-monument, park-and-garden]
+        description: The application affects a heritage asset.
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    source-text: >-
+      A Heritage Statement is required for all applications affecting a heritage asset (see local
+      list for content).
+    confidence: medium
+    notes: "The 'INFERRED' Full planning placement was wrong (audit, wrong_app_type); the excerpt's email-address prefix is removed."
+
+  - id: recreation-facilities-assessment
+    action: replace
+    required-if:
+      condition:
+        field: loss-of-open-space
+        value: true
+        description: >-
+          The proposal involves any loss of public or private open space, including playing
+          fields, recreation grounds and allotments.
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    source-text: >-
+      any loss of public or private open space including playing fields, recreation grounds and
+      allotments
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was land contamination text."
+
+  - id: photos
+    action: replace
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was archaeology text ('with accompanying
+      photographs ...'). The list's own trigger for photographs was not captured.
+
+  - id: sci
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 200
+            description: 200 dwellings or more.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 4
+            description: More than 4 hectares of residential development.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 10000
+            description: 10,000 square metres of commercial or industrial floorspace.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 2
+            description: More than 2 hectares of commercial land.
+        - discretionary
+    confidence: medium
+    notes: >-
+      Strategic major applications, as the list defines them. Wind farms of at least two turbines
+      and turbines over 15 metres tall can't be expressed with existing fields, so they are shown
+      as officer discretion.
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    policy: Saved Local Plan Policy TC10
+    source-text: >-
+      Transport Assessment or Transport Statement All major applications where there are likely to
+      be significant transport implications … Derbyshire County Council will advise during the
+      pre-application process whether a Transport Assessment or Transport Statement will be
+      required, depending on the sensitivity of the area, the scale of the development
+    confidence: medium
+
+  - id: travel-plan
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 2500
+            description: 2,500 square metres or more of non-residential floorspace.
+        - discretionary
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was Heads of Terms / affordable housing text.
+      From the audit: developments generating significant movements, e.g. 2,500 sq m+
+      non-residential.
+
+  - id: viability-assessment
+    action: replace
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    source-text: >-
+      The draft Head(s) of Terms should be supported by a Viability Assessment and identify: the
+      basis on which affordable housing will be secured where it forms part of an application
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's Viability excerpt was Heritage Statement text. The
+      wording above was in the workbook's Travel Plan row; Heads of Terms are needed for major
+      applications (10+ dwellings or 1,000 sq m+), so a viability assessment supports those.
+
+  - id: section-existing
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: The application involves a change of floor level.
+        - condition:
+            field: new-build
+            value: true
+            description: The application involves new buildings.
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    source-text: >-
+      … and proposed site sections and finished floor and site levels All applications involving a
+      change of floor level and all applications involving new buildings
+    confidence: medium
+    notes: "Audit (wrong_app_type): filed under Listed building consent, but the list applies it to any change of floor level or new building."
+
+  - id: section-proposed
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: The application involves a change of floor level.
+        - condition:
+            field: new-build
+            value: true
+            description: The application involves new buildings.
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    source-text: >-
+      … and proposed site sections and finished floor and site levels All applications involving a
+      change of floor level and all applications involving new buildings
+    must-include:
+      - item: Finished floor and site levels
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): filed under Listed building consent, but the list applies it to any change of floor level or new building."
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: external-lighting
+            value: true
+            description: External lighting would be provided or made necessary by the development.
+        - any:
+            - site:
+                in: [listed-building, listed-building-setting, conservation-area]
+                description: In the vicinity of a listed building or a conservation area.
+            - condition:
+                field: outside-urban-area
+                value: true
+                description: In open countryside.
+            - discretionary
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    source-text: >-
+      Proposals involving the provision of publicly accessible developments, in the vicinity of
+      residential property, a listed building or a conservation area, or open countryside, where
+      external lighting would be provided or made necessary by the … Details of external lighting,
+      hours of operation and a plan showing levels of illumination and extent of light spillage.
+    must-include:
+      - item: Details of external lighting
+        level: must
+      - item: Hours of operation
+        level: must
+      - item: A plan showing levels of illumination and extent of light spillage
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): filed under Listed building consent, but the list applies it by
+      trigger. 'In the vicinity of residential property' and 'publicly accessible developments'
+      can't be expressed with existing fields, so they are shown as officer discretion.
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      any:
+        - all:
+            - condition:
+                field: settlement-population
+                operator: "<"
+                value: 3000
+                description: The site is in a settlement of under 3,000 people.
+            - any:
+                - condition:
+                    field: site-area-residential
+                    operator: ">="
+                    value: 0.17
+                    description: The site is 0.17 hectares or more.
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 5
+                    description: The proposal creates 5 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: The site is 0.5 hectares or more.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 15
+            description: The proposal creates 15 or more dwellings.
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    confidence: medium
+    notes: "From the audit (missing_requirement): settlements under 3,000 population, 0.17 ha or 5+ dwellings; elsewhere 0.5 ha or 15+ dwellings."
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      site:
+        in: [air-quality-management-area]
+        description: The site is within or adjacent to an Air Quality Management Area.
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    confidence: medium
+    notes: "From the audit (missing_requirement): within or adjacent to an AQMA."
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 5
+            description: The proposal creates 5 or more dwellings.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 500
+            description: 500 square metres or more of non-residential floorspace.
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    confidence: medium
+    notes: "From the audit (missing_requirement): Energy/Sustainability Statement for 5+ dwellings or 500 sq m+ non-residential."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise-sensitive development.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Noise-generating development.
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    confidence: medium
+    notes: "From the audit (missing_requirement): noise-sensitive or noise-generating development."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Telecommunications masts that are not permitted development.
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    confidence: medium
+    notes: "From the audit (missing_requirement): telecommunications provision, for masts outside permitted development."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Retail or leisure development outside a town centre.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 2500
+            description: Over 2,500 square metres of retail or leisure floorspace.
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    confidence: medium
+    notes: "From the audit (missing_requirement): town centre sequential and impact tests for retail/leisure over 2,500 sq m outside centres."
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: Major development of 10 or more dwellings.
+        - discretionary
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    confidence: medium
+    notes: "From the audit (missing_requirement): waste management / storage and collection plan for major (10+ dwellings) and most new development."
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: There are trees in or adjacent to the site.
+        - site:
+            in: [tree-preservation-zone]
+            description: Trees protected by a TPO.
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): trees in or adjacent to the site, TPO or conservation
+      area trees, and protected hedgerows (hedgerows can't be expressed with existing fields).
+
+  - id: landscaping-plan
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    confidence: medium
+    notes: "From the audit (missing_requirement): landscaping scheme for all major applications."
+
+unmapped:
+  - local-name: Coal Mining Risk Assessment
+    source-text: >-
+      Coal Mining Risk Assessment All non householder applications which fall within the Coal Mining
+      Reporting Area … risk assessments are required for developments in high risk areas only.
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Loss of Employment Statement
+    source-text: "From the audit: where employment floorspace or land is lost"
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    suggested-id: employment-statement
+  - local-name: Habitats Regulations Assessment information
+    source-text: "… project level Habitats Regulation Assessment"
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    suggested-id: habitats-regulations-assessment
+  - local-name: Agricultural worker / rural enterprise dwelling appraisal
+    source-text: "From the audit: new agricultural dwellings; removal of occupancy conditions"
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    suggested-id: rural-workers-dwelling-appraisal
+  - local-name: Building for Life 12 assessment
+    source-text: "From the audit: all major housing"
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    suggested-id: building-for-life-assessment
+  - local-name: Mineral Water Assessment
+    source-text: "From the audit: proposals affecting Buxton natural mineral water"
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    suggested-id: hydrogeological-assessment
+  - local-name: Parking information
+    source-text: "From the audit: applications affecting parking"
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    suggested-id: parking-plan
+  - local-name: Foul Sewage and Utilities Assessment
+    source-text: "From the audit: strategic applications"
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    suggested-id: foul-sewage-utilities-statement
+  - local-name: Ventilation and Extraction Statement
+    source-text: "From the audit: A3/A4/A5 uses"
+    source-url: https://www.highpeak.gov.uk/media/269/Validation-guidance---National-and-local-list/pdf/Validation_checlist_-_National_and_local_list_HPBC.pdf?m=1471341638693
+    suggested-id: ventilation-extraction-details
+
+new-fields:
+  - field: settlement-population
+    kind: number
+    label: Settlement population
+    description: Population of the settlement the site is in (some councils set lower affordable housing thresholds for small settlements).

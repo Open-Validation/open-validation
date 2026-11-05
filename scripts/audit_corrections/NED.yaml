@@ -1,0 +1,208 @@
+# Corrections for North East Derbyshire District Council, from the council's audit.
+# The audit could not fetch Grokbot's PDF (contents not checked). Grokbot's file is headed
+# 'Local Validation Checklist March 2025', the consultation version; the council adopted an
+# updated checklist on 3 July 2025, which the audit could not find. So this file stays light:
+# junk is dropped and the clearer triggers in the workbook's own excerpts are structured.
+local-authority: NED
+
+validation-list:
+  date: "2025-07-03"
+  date-basis: "audit: council decision 'Update to the adopted Local Validation Checklist', 3 July 2025.
+    The updated PDF was not found; the url is still the March 2025 consultation version"
+
+submission-standards:
+  - item: Floor plans, elevations and roof plans drawn to scale (1:50 or 1:100), with title,
+      drawing number and scale bar
+    level: should
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is tree AMS and landscape maintenance text"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: a fragment ('required unless pre-application advice indicates otherwise')"
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_document: the excerpt is External Lighting Scheme content (moved to lighting-assessment)"
+  - local-name: Landscape and Visual Impact Assessment
+    reason: "wrong_trigger / wrong_app_type: the excerpt is the Land Contamination trigger, under Minerals &
+      waste; re-added below without a trigger"
+
+requirements:
+  - id: lighting-assessment
+    action: replace
+    source-url: &list https://www.ne-derbyshire.gov.uk/documents/ne-validation-local-list-pdf-908kb/download
+    must-include:
+      - item: A polar luminance diagram based on vertical luminance at the nearest sensitive
+          premises
+        level: must
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook used the Environmental Statement trigger for the External
+      Lighting Scheme, because the table columns were read across. The council's lighting trigger
+      was not captured. The must-include item comes from the workbook's 'Advertisement drawings /
+      illumination details' row, which is lighting text.
+
+  - id: biodiversity-survey-report
+    action: replace
+    source-url: *list
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt repeats the Air Quality Assessment cell (2.4
+      and 2.5 were read across). The council's ecology trigger was not captured.
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 100
+            description: Major residential development of more than 100 houses.
+        - all:
+            - ref: major-development
+            - condition:
+                field: floorspace-non-residential
+                operator: ">="
+                value: 1000
+                description: Non-residential major development adding 1,000 square metres or more of
+                  floorspace.
+    confidence: low
+    notes: >-
+      The excerpt merges the 2.4 Air Quality and 2.5 Biodiversity headings; the audit reads the
+      trigger cell as the Air Quality one.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or greater.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or greater.
+        - site:
+            in: [critical-drainage-area]
+            description: The site is less than 1 hectare but has critical drainage problems.
+        - discretionary
+    source-url: *list
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the workbook's excerpt is scrambled across table
+      columns and was filed only under Change of use - prior approval. Read from it: 'The site is 1
+      hectare or greater; The site is less than 1 hectare but has critical drainage problems; The
+      site is less than 1 hectare and includes the change of use of development type to a more
+      vulnerable class' (the last shown as officer discretion), with the sequential and exception
+      tests where appropriate.
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: previously-developed-land
+            value: true
+            description: New development on previously developed land.
+        - site:
+            in: [contaminated-land]
+            description: Former petrol filling stations, farming sites, landfill sites and industrial
+              sites.
+    source-text: New developments on all previously developed land and on former petrol filling
+      stations, former farming sites, former landfill sites and former industrial sites.
+    confidence: low
+    notes: "Audit (wrong_app_type): the workbook filed this under Minerals & waste (county), which a district
+      does not determine."
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The development would generate significant levels of noise or vibration in
+              relation to residential and commercial properties.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: A noise-sensitive use in proximity to a known noise source.
+    confidence: low
+
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The development proposes housing.
+    policy: Local Plan Policy LC2
+    confidence: low
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is EIA development.
+    confidence: low
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    confidence: low
+    notes: "Needed where, on viability grounds, the scheme does not meet all policy requirements (council's
+      wording)."
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    confidence: low
+    notes: "The council's trigger refers to guidance in its 'What is required' column, which wasn't captured."
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    confidence: low
+    notes: "The council's trigger refers to guidance in its 'What is required' column, which wasn't captured."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The application is subject to the biodiversity gain condition (including s73
+          applications that alter the original BNG calculation).
+    confidence: low
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      site:
+        in: [open-space]
+        description: The application affects playing fields.
+    confidence: low
+
+unmapped:
+  - local-name: Landscape and Visual Impact Assessment
+    source-text: "From the audit: listed in the local list (2.17), but its trigger was not captured; the workbook's
+      excerpt is the Land Contamination trigger"
+    source-url: *list
+    suggested-id: landscape-visual-impact-assessment
+
+low-confidence:
+  - id: "*"
+    note: "Audit (outdated_link): the council adopted an update to its checklist on 3 July 2025 (minimum thresholds
+      for technical reports on majors, design codes and masterplans, Design Review, self-build and BNG).
+      The workbook's file is probably the March 2025 consultation version."

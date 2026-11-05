@@ -1,0 +1,445 @@
+# Corrections for Chorley Borough Council, from the audit of Chorley.
+# The workbook's link is current: 'Validation Criteria for Planning Applications', republished
+# December 2024 (8 national items, 41 numbered local items and Appendices A-C). The workbook put ~30
+# items under Full planning ('INFERRED'), so the list's own triggers are structured below; where a rule
+# is given it applies to every application type that meets it, including householder.
+local-authority: CHO
+
+submission-standards:
+  - item: Plans provided in digital format at the stated scale including the paper size (e.g. 1:500 at
+      A1), showing the direction of North where appropriate
+    level: must
+  - item: The dimensions of the proposal annotated onto the submitted plans
+    level: should
+
+drop:
+  - id: design-and-access-statement
+    reason: "wrong_app_type: both rows quote the exemption text saying a DAS is NOT required for s73 or
+      mining/engineering applications"
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is from the structural survey / rural building reuse item"
+
+drop-unmapped:
+  - local-name: Agricultural Land Classification / Soils
+    reason: "wrong_trigger: text from the Appendix B farm pro-forma, not a requirement"
+  - local-name: Minerals / Waste specific statements (county matters)
+    reason: "wrong_app_type: page-break fragment under Works to trees; the Mineral Resource Assessment is
+      re-added below"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "duplicate: the town-centre sequential test text (now in town-centre-impact-assessment)"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "not_a_requirement: the excerpt is about the legal fee; the real item is re-added below"
+  - local-name: Structural Survey
+    reason: "wrong_trigger: page-number debris ('accompanied by a Structural Survey 16 9.'); re-added below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    must-include:
+      - item: How the required percentage of affordable housing will be achieved on site
+        level: must
+      - item: The tenure of the proposed affordable units
+        level: must
+      - item: The number of bedrooms of the proposed affordable units
+        level: must
+    notes: "Needed for housing schemes which require an element of affordable housing."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: The development is in or near an Air Quality Management Area.
+        - discretionary
+    confidence: medium
+    notes: "Audit (wrong_trigger): the list also has traffic, parking and emission thresholds that the
+      workbook didn't capture; they are shown as officer discretion."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      site:
+        in: [archaeological-priority-area]
+        description: The development is in an area known to have archaeological interest.
+    must-include:
+      - item: A programme of archaeological work, including a scheme of investigation
+        level: must
+    confidence: medium
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: The proposal has the potential to impact on trees within or adjacent to the site.
+    confidence: medium
+    notes: "Applies to householder applications too (audit wrong_app_type)."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: The development might affect protected species.
+        - site:
+            in: [priority-habitat, local-wildlife-site, ancient-woodland]
+            description: The development might affect habitats, Biological Heritage Sites, Ancient Woodland
+              or woodland areas.
+        - condition:
+            field: near-watercourse
+            value: true
+            description: The development might affect any water body, pond, ditch or similar feature.
+    confidence: medium
+
+  - id: elevation-existing
+    action: update
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: must
+      - item: The proposed works shown clearly in relation to what is already there
+        level: must
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: must
+      - item: The proposed works shown clearly in relation to what is already there
+        level: must
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 500
+            description: Non-residential units of 500 square metres or more.
+        - all:
+            - ref: major-development
+            - application-type:
+                in: [outline]
+        - discretionary
+    source-url: https://chorley.gov.uk/downloads/file/1505/validation-checklist-refresh-2024
+    confidence: medium
+    notes: "From the audit (missing_requirement): Energy Efficiency/Resource Conservation Statement for
+      non-residential units of 500 sqm+, major outline schemes, and domestic microgeneration or wind
+      turbines (no field for the last, so it is shown as officer discretion)."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is EIA development (Schedule 1 in every case; Schedule 2 where
+          screened).
+    confidence: medium
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more in height.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains two or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    confidence: medium
+    notes: "'Required for all applications proposing relevant buildings'; the list doesn't restate the
+      definition, so the national definition of a relevant building is used."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3 (householder sites in a flood zone need a simple
+              FRA using the Standing Advice).
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more in Flood Zone 1.
+    source-text: "For householder applications located within a Flood Risk Zone, the planning application
+      shall be accompanied by… a simple flood risk assessment using the Standing Advice."
+    source-url: https://chorley.gov.uk/downloads/file/1505/validation-checklist-refresh-2024
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook gave only the householder Standing Advice line; the list
+      also requires an FRA for sites of 1ha+ in Flood Zone 1 and all development in Flood Zones 2 and 3."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+              scheduled-monument, park-and-garden]
+            description: The application involves heritage assets, including listed buildings and
+              conservation areas, or affects their setting.
+    source-text: Heritage Statement For planning applications which involve Heritage Assets, including but
+      not limited to, Listed Buildings, Conservation Areas or where the setting of heritage assets would be
+      affected, a Heritage Statement will be required.
+    source-url: https://chorley.gov.uk/downloads/file/1505/validation-checklist-refresh-2024
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook placed it under Listed building consent only."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: There is reason to suspect contamination of land, controlled waters, property or
+              ecological systems (e.g. former industrial uses or infilled ground).
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: A particularly sensitive end use, such as a day nursery or housing likely to be used
+              by families with children.
+    confidence: medium
+    notes: "A desk study or a Land Contamination Assessment."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: The application includes new external lighting.
+    confidence: medium
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      condition:
+        field: noise-generating-use
+        value: true
+        description: The proposal is likely to generate noise and is close to noise sensitive areas (e.g.
+          residential areas).
+    confidence: medium
+
+  - id: planning-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [s73, non-material-amendment]
+    must-include:
+      - item: Marked-up plans showing the changes
+        level: must
+        required-if:
+          application-type:
+            in: [s73]
+      - item: The original and amended plans
+        level: must
+        required-if:
+          application-type:
+            in: [non-material-amendment]
+    confidence: medium
+    notes: "'For major planning applications a Planning Statement will be required.' From the audit
+      (missing_requirement): S73 applications need a supporting statement and marked-up plans (item 38) and
+      S96A non-material amendments a statement with the original and amended plans (item 39)."
+
+  - id: sci
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    confidence: medium
+    notes: "'Larger/ major development'; 'larger' is shown as officer discretion."
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: A sloping site, or ground levels outside the extension would be modified.
+    source-text: particularly in the case of sloping sites it will be necessary to show how proposals relate
+      to existing ground levels or where ground levels outside the extension would be modified.
+    must-include:
+      - item: Scale of 1:50 or 1:100, with finished floor and site levels and a cross section through the
+          proposed building(s)
+        level: must
+    confidence: medium
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: A sloping site, or ground levels outside the extension would be modified.
+    source-text: particularly in the case of sloping sites it will be necessary to show how proposals relate
+      to existing ground levels or where ground levels outside the extension would be modified.
+    must-include:
+      - item: Scale of 1:50 or 1:100, with finished floor and site levels and a cross section through the
+          proposed building(s)
+        level: must
+    confidence: medium
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: The application incorporates telecommunications development.
+    confidence: medium
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: Main town centre uses that are not in an existing centre and not in accordance with an
+          up-to-date Local Plan.
+    source-text: Sequential Test and Impact Assessment A sequential assessment will be required for main
+      town centre uses that are not in an existing centre and are not in accordance with an up-to-date
+      Local Plan.
+    confidence: medium
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Where developments have the potential to have transport implications (Transport Statement or
+      Assessment depending on type and size)."
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "As transport-assessment."
+
+  - id: viability-assessment
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [mod-discharge-s106]
+        - discretionary
+    must-include:
+      - item: Value of the land (2 or 3 different estate agents' valuations)
+        level: must
+    confidence: medium
+    notes: "Needed where an application is contrary to policy for financial reasons (e.g. reduced affordable
+      housing). From the audit (missing_requirement): S106BA applications to modify affordable housing
+      obligations need viability information (item 40)."
+
+  - id: waste-management-plan
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New residential or commercial development.
+        - discretionary
+    confidence: medium
+    notes: "Also developments to existing properties that would result in inadequate refuse and recycling
+      storage and collection (officer discretion)."
+
+unmapped:
+  - local-name: Coal Mining Risk Assessment
+    source-text: All non-householder applications which fall within the Coal Mining Development Referral
+      Area
+    source-url: https://chorley.gov.uk/downloads/file/1505/validation-checklist-refresh-2024
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Mineral Resource Assessment
+    source-text: Proposals located with a mineral safeguarding area should be accompanied by a minerals
+      resource assessment.
+    source-url: https://chorley.gov.uk/downloads/file/1505/validation-checklist-refresh-2024
+    suggested-id: minerals-safeguarding-statement
+  - local-name: Structural Survey
+    source-text: "From the audit: reuse of rural buildings or demolition justified on structural grounds;
+      the retained structure is to be safeguarded via a method statement"
+    source-url: https://chorley.gov.uk/downloads/file/1505/validation-checklist-refresh-2024
+    suggested-id: structural-survey
+  - local-name: Section 106 information (solicitor details and evidence of title)
+    source-text: "From the audit: item 11 asks for solicitor details and evidence of title"
+    source-url: https://chorley.gov.uk/downloads/file/1505/validation-checklist-refresh-2024
+    suggested-id: heads-of-terms
+  - local-name: Proof of marketing statement
+    source-text: "From the audit: housing or non-B uses on employment sites, and loss of community uses in
+      rural areas"
+    source-url: https://chorley.gov.uk/downloads/file/1505/validation-checklist-refresh-2024
+    suggested-id: marketing-evidence
+  - local-name: Adoption statement
+    source-text: "From the audit: new roads, highway or sewer connections"
+    source-url: https://chorley.gov.uk/downloads/file/1505/validation-checklist-refresh-2024
+    suggested-id: adoption-statement
+  - local-name: Additional plans (materials, boundary treatment, landscaping, street scene)
+    source-text: "From the audit: certain proposals including new housing schemes"
+    source-url: https://chorley.gov.uk/downloads/file/1505/validation-checklist-refresh-2024
+    suggested-id: other-plans
+  - local-name: Access ramp details
+    source-text: "From the audit: new external access ramps"
+    source-url: https://chorley.gov.uk/downloads/file/1505/validation-checklist-refresh-2024
+    suggested-id: access-ramp-details
+  - local-name: Shopfront details
+    source-text: "From the audit: new shopfronts, with a section plan showing the projection"
+    source-url: https://chorley.gov.uk/downloads/file/1505/validation-checklist-refresh-2024
+    suggested-id: shopfront-details
+  - local-name: Parking plan (householder)
+    source-text: A parking plan should accompany such householder applications.
+    source-url: https://chorley.gov.uk/downloads/file/1505/validation-checklist-refresh-2024
+    suggested-id: parking-plan
+  - local-name: Outline application information
+    source-text: "The following information is required to accompany an outline planning application:"
+    source-url: https://chorley.gov.uk/downloads/file/1505/validation-checklist-refresh-2024
+    suggested-id: outline-information
+  - local-name: Tree works sketch plan (Appendix A)
+    source-text: For applications which relate to works to trees subject to a tree preservation order
+      (TPO)...
+    source-url: https://chorley.gov.uk/downloads/file/1505/validation-checklist-refresh-2024
+    suggested-id: tree-works-sketch-plan
+  - local-name: Demolition prior approval information
+    source-text: "From the audit: method, restoration, and bat and archaeology confirmation (item 36)"
+    source-url: https://chorley.gov.uk/downloads/file/1505/validation-checklist-refresh-2024
+    suggested-id: demolition-method-statement
+
+low-confidence:
+  - id: roof-plan-existing
+    note: "Audit (wrong_trigger): page-number debris ('...for equipment attached to the roof. 14 5.'); the
+      trigger wasn't captured."
+  - id: roof-plan-proposed
+    note: "As roof-plan-existing."
+  - id: cil-form
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('to provide a CIL contribution.')."
+  - id: site-plan
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('on the site plan, even if access is to be a
+      reserved matter.')."

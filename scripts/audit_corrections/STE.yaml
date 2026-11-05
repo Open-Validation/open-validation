@@ -1,0 +1,472 @@
+# Corrections for Stoke-on-Trent City Council, from the council's audit.
+# The workbook links the current Local Validation List (cover: November 2025). The list has
+# per-application-type tables (Householder, residential under/over 10 units, non-residential
+# under/over 1,000 sqm, change of use, works to trees, adverts, LBC) that Grokbot ignored, filing
+# almost everything under Full planning by guess ('INFERRED'). Those rows are left for every
+# type with the council's own Section 4 trigger, which carries the size tiers. Rows that are
+# Section 3 national requirements are dropped, as the audit advises, and rows filled with
+# neighbouring text are dropped or moved.
+local-authority: STE
+
+drop:
+  - id: site-plan
+    reason: "not_a_requirement: a Section 3 national requirement (3.4)"
+  - id: floor-plan-existing
+    reason: "not_a_requirement: a Section 3 national requirement (3.5)"
+  - id: floor-plan-proposed
+    reason: "not_a_requirement: a Section 3 national requirement (3.5)"
+  - id: elevation-existing
+    reason: "not_a_requirement: a Section 3 national requirement (3.6)"
+  - id: elevation-proposed
+    reason: "not_a_requirement: a Section 3 national requirement (3.6)"
+  - id: roof-plan-existing
+    reason: "not_a_requirement: a Section 3 national requirement (3.7)"
+  - id: roof-plan-proposed
+    reason: "not_a_requirement: a Section 3 national requirement (3.7)"
+  - id: section-existing
+    reason: "not_a_requirement: a Section 3 national requirement (3.8)"
+  - id: section-proposed
+    reason: "not_a_requirement: a Section 3 national requirement (3.8)"
+  - id: design-and-access-statement
+    reason: "not_a_requirement: a Section 3 national requirement (3.11); national rules still apply"
+  - id: fire-statement
+    reason: "not_a_requirement: a Section 3 national requirement (3.10); national rules still apply"
+  - id: bng-metric
+    reason: "not_a_requirement: a Section 3 national requirement (3.12); national rules still apply"
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is the 4.29 Ventilation / Extraction trigger"
+  - id: sustainability-statement
+    reason: "wrong mapping: the row is 4.8 Energy Statement (now energy-statement)"
+  - id: viability-assessment
+    sheets: [Works to trees]
+    reason: "wrong_app_type: picked up from text just before the '2.7 Work to Trees' heading"
+  - id: waste-management-plan
+    sheets: [Works to trees]
+    reason: "wrong_app_type: picked up from text just before the '2.7 Work to Trees' heading"
+
+drop-unmapped:
+  - local-name: Crime prevention / Secured by Design statement
+    reason: "wrong_trigger: the excerpt is the national BNG text; 4.5 Crime Impact Statement is added below"
+  - local-name: Ground investigation / Geotechnical / Basement Impact Assessment
+    reason: "not_a_requirement: not a Section 4 heading"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: content guidance ('All plans submitted should include Swept Path Analysis')"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advice text from the Air Quality section"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: the excerpt is the town-centre sequential test; 4.9 is added below"
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "not_a_requirement: a Section 3 national requirement (3.8)"
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_app_type: text next to the '2.9 Listed Building Consent' heading (the 4.15 Lighting Assessment)"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: >-
+      wrong_app_type: one row was filed under Works to trees with neighbouring text; re-added once
+      below with the council's wording
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 15
+        description: Development involving 15 or more residential units.
+    source-text: >-
+      4.1 Affordable Housing Statement When is it required? All applications for development
+      involving 15 or more residential units.
+    confidence: low
+    notes: >-
+      Audit (other): the list is inconsistent; Part Two says 15 or more units, but the Part One
+      tables include it for residential schemes of 10+ units.
+
+  - id: air-quality-assessment
+    action: update
+    required-if: discretionary
+    source-text: >-
+      4.2 Air Quality Assessment All development that is likely to cause significant levels of air
+      pollution or exposes future occupants to existing poor air quality.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt ran into 4.3 and 4.4. The audit says it also applies to small
+      schemes."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: There are trees within the site or on adjacent land (including highway) that
+              could be affected by the development.
+        - application-type:
+            in: [consent-under-tpo, notice-trees-in-con-area]
+    source-text: >-
+      4.28 Tree Survey (including All development where there are trees within the application site
+      or on adjacent land (including the Tree Protection Plan) and highway) that could be affected by
+      the development.
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement, wrong_app_type): 4.28 Tree Survey and Method Statement is
+      on the Householder table and is always required for works to trees (Section 2.7).
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      site:
+        in: [scheduled-monument, archaeological-priority-area]
+        description: On or adjoining a scheduled monument, or a site of known or suspected
+          archaeological interest.
+    source-text: >-
+      4.3 Archaeological Assessment When is it required? Any proposed development on or adjoining a
+      scheduled monument, or a site of known or suspected archaeological interest.
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): the excerpt ran into 4.4. Section 2.9 also lists it for listed
+      building consent."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [special-area-of-conservation, special-protection-area,
+              site-of-special-scientific-interest, local-wildlife-site]
+            description: Likely to affect a European, national or locally designated site.
+        - site:
+            in: [priority-habitat]
+            description: Other sites that support important habitats.
+        - condition:
+            field: protected-species
+            value: true
+            description: Likely to affect protected or priority species.
+    source-text: >-
+      4.6 Ecological Impact Assessment All development: Likely to affect a European, national or
+      locally designated site or other sites that support important habitats.
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): 4.6 is on the Householder, Works to trees and Listed
+      Building Consent tables too, and includes protected/priority species.
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: basement
+            value: true
+            description: Development is proposed at basement level.
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: The site includes differential ground levels.
+    source-text: >-
+      Daylight and sunlight assessment will be required where development is proposed at basement
+      level or where sites include differential ground levels.
+    confidence: low
+    notes: >-
+      Audit (not_a_requirement): daylight/sunlight is not a Section 4 heading, so this sentence may
+      be guidance inside another item. The excerpt ran into 4.14.
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: Residential development of 10 or more units.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: Residential site area of 0.5 hectares or more.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: Non-residential development of 1,000 square metres or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Non-residential site area of 1 hectare or more.
+    source-text: >-
+      Requirements 4.8 Energy Statement When is it required? All applications involving residential
+      development of 10 or more residential units (or site area of 0.5 or more hectares).
+    source-url: https://www.stoke.gov.uk/download/downloads/id/2872/planning_validation_list_-_printable_version.pdf
+    confidence: medium
+    notes: >-
+      The workbook mapped this row to sustainability-statement. Audit (wrong_app_type): it applies to
+      10+ units or 1,000 sqm / 1ha+ non-residential.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: An Environmental Statement is required (EIA development).
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: In Flood Zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: A Flood Zone 1 site over 1 hectare.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: A Flood Zone 1 site over 1 hectare.
+        - site:
+            in: [surface-water-flood-risk]
+            description: In an area at risk of surface-water flooding.
+        - all:
+            - site:
+                in: [critical-drainage-area]
+                description: In a Critical Drainage Area.
+            - any:
+                - condition:
+                    field: site-area-residential
+                    operator: ">"
+                    value: 0.5
+                    description: The site is over 0.5 hectares.
+                - condition:
+                    field: site-area-non-residential
+                    operator: ">"
+                    value: 0.5
+                    description: The site is over 0.5 hectares.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, missing_requirement): the excerpt gives only 'In flood zone 2 or 3'. From
+      the audit: also Zone 1 sites over 1ha, surface-water flood areas and Critical Drainage Areas
+      over 0.5ha; it is on the Householder table too.
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+          scheduled-monument, park-and-garden]
+        description: The development affects a designated or non-designated heritage asset or its
+          setting.
+    source-text: >-
+      4.11 Heritage Statement All development which affects a designated or non-designated heritage
+      asset or its setting.
+    confidence: medium
+    notes: "Audit (wrong_trigger, missing_requirement): the excerpt ran into 4.12. It is on the Householder and
+      Advertisement Consent tables too."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      any:
+        - all:
+            - condition:
+                field: sensitive-end-use
+                value: true
+                description: Introduces sensitive receptors, gardens or soft landscaping.
+            - condition:
+                field: previously-developed-land
+                value: true
+                description: On former commercial/industrial land and buildings.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more residential units.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: 1,000 square metres or more.
+        - condition:
+            field: previously-developed-land
+            value: true
+            description: Development on previously developed land.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt omits the 10+ units, 1,000 sqm+ and previously developed land
+      triggers (the audit's summary; their exact wording wasn't captured).
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: Residential development of 10 or more units.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: Residential site area of 0.5 hectares or more.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: Non-residential development of 1,000 square metres or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Non-residential site area of 1 hectare or more.
+    confidence: medium
+    notes: "Audit (wrong_app_type): 4.14 applies to 10+ units or 1,000 sqm / 1ha+ non-residential."
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: external-lighting
+                value: true
+                description: The development introduces artificial lighting.
+            - condition:
+                field: illuminated
+                value: true
+                description: Illuminated or digital-screen advertisements.
+        - discretionary
+    source-text: >-
+      4.15 Lighting Assessment All development involving proposals for illumination or use of
+      digital screens in sensitive locations.
+    source-url: https://www.stoke.gov.uk/download/downloads/id/2872/planning_validation_list_-_printable_version.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the LBC row was text next to the '2.9' heading; Section 2.8 requires
+      4.15 for illuminated or digital adverts in sensitive locations. The council's web page says
+      'sensitive context' normally means close to residential development or sites of nature
+      conservation value, or where protected or priority species may be affected; shown as officer
+      discretion.
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      condition:
+        field: noise-sensitive-use
+        value: true
+        description: A sensitive use (residential, care homes, medical or noise-sensitive uses) within
+          a town or city centre or a noise generative environment.
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [open-space]
+            description: Within or incorporating open space, allocated green space, or sports and
+              recreational buildings and land.
+        - condition:
+            field: loss-of-open-space
+            value: true
+            description: Resulting in the loss of open space, green space, sports or recreational land
+              or play space.
+
+  - id: planning-statement
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: Residential development of 10 or more units.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: Residential site area of 0.5 hectares or more.
+
+  - id: sci
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: Residential development of 10 or more units.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: Residential site area of 0.5 hectares or more.
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: Main town centre uses not in an existing centre or in accordance with an
+          up-to-date development plan.
+    notes: "The excerpt gives the sequential test trigger; the impact assessment threshold was not captured."
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    source-text: 4.25 Transport Assessment All development that would generate significant amounts of
+      movement.
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    source-text: 4.27 Travel Plan All development that requires a Transport Assessment or a Transport
+      Statement.
+    notes: "Needed wherever a Transport Assessment or Transport Statement is needed."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    source-text: >-
+      4.30 Viability Appraisal All development where the developer does not intend to fully comply
+      with policy requirements in respect of planning obligations and/or financial contributions.
+    source-url: https://www.stoke.gov.uk/download/downloads/id/2872/planning_validation_list_-_printable_version.pdf
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      application-type:
+        in: [waste-dev]
+    source-text: 4.31 Waste Management Scheme Details All development involving the processing,
+      transfer or deposition of waste.
+    source-url: https://www.stoke.gov.uk/download/downloads/id/2872/planning_validation_list_-_printable_version.pdf
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement, wrong_app_type): 4.31 appeared only as a mis-filed Works to trees
+      row; the Full planning row described bin storage (kept as an unmapped item).
+
+unmapped:
+  - local-name: Crime Impact Statement
+    source-text: "From the audit: 4.5, 10+ residential units, or 1,000 sqm/1ha+ non-residential"
+    source-url: https://www.stoke.gov.uk/download/downloads/id/2872/planning_validation_list_-_printable_version.pdf
+    suggested-id: crime-prevention-statement
+  - local-name: Flood Risk Sequential and Exception Test
+    source-text: "From the audit: 4.9 Flood Risk Sequential and Exception Test"
+    source-url: https://www.stoke.gov.uk/download/downloads/id/2872/planning_validation_list_-_printable_version.pdf
+    suggested-id: flood-sequential-test
+  - local-name: Playing Field Land Assessment
+    source-text: "From the audit: 4.20, development causing loss of, or prejudice to, playing field land"
+    source-url: https://www.stoke.gov.uk/download/downloads/id/2872/planning_validation_list_-_printable_version.pdf
+    suggested-id: playing-field-assessment
+  - local-name: Planning Obligations / Heads of Terms
+    source-text: "Planning Obligations / Heads of Terms When is it required? All applications for
+      development which will generate a requirement for planning obligations / financial contributions."
+    source-url: https://www.stoke.gov.uk/homepage/194/apply_for_planning_permission
+    suggested-id: heads-of-terms
+  - local-name: Waste storage details
+    source-text: "demonstrate sufficient waste storage facilities internally and externally for food waste
+      containers, as well as, recycling, residual, and, where required, organic containers."
+    source-url: https://www.stoke.gov.uk/homepage/194/apply_for_planning_permission
+    suggested-id: refuse-storage-details

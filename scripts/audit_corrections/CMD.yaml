@@ -1,0 +1,709 @@
+# Corrections for London Borough of Camden, from inputs/audit/london-borough-of-camden.json.
+# The audit compared the workbook with Camden's Local Area Requirements 2025 (LARs 2025);
+# Grokbot's Nov 2026 list could not be fetched. Items marked "From the audit" use the
+# audit's paraphrase of LARs 2025, not the council's exact words.
+local-authority: CMD
+
+validation-list:
+  url: https://www.camden.gov.uk/documents/d/guest/nov-2026-local-application-requirements-2026
+  date: 2026-11
+  date-basis: "URL slug 'nov-2026'; the audit could not read the document to confirm it"
+
+submission-standards:
+  - item: All drawings drawn to an identified scale, with a scale bar; plans include a north arrow
+    level: must
+  - item: Plans at a minimum scale of 1:50, or 1:100 if outside a conservation area and not a listed
+      building
+    level: must
+  - item: Plans proportionate to the nature and size of the proposal, and annotated where 
+      appropriate
+    level: should
+
+drop:
+  - id: floor-plan-existing
+    sheets: [Advertisement consent]
+    reason: "wrong_app_type: the excerpt is lawful development certificate evidence, not adverts"
+  - id: floor-plan-proposed
+    sheets: [Advertisement consent]
+    reason: "wrong_app_type: as above"
+  - id: elevation-existing
+    sheets: [Advertisement consent]
+    reason: "wrong_app_type: as above"
+  - id: elevation-proposed
+    sheets: [Advertisement consent]
+    reason: "wrong_app_type: as above"
+
+drop-unmapped:
+  - local-name: Character / Conservation area appraisal reference
+    reason: "not_a_requirement: a cross-reference inside the Heritage Statement entry"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: the excerpt is the Acoustic Report trigger (now in noise-assessment)"
+  - local-name: Crime prevention / Secured by Design statement
+    reason: "wrong_trigger: management plan text; replaced by Crime Impact Assessment below"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: thresholds missing; replaced below"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: garbled; replaced by SuDS Strategy and Drainage Report below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      any:
+        - all:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: The proposal includes at least one new dwelling.
+            - condition:
+                field: housing-floorspace
+                operator: ">="
+                value: 100
+                description: The total new housing floorspace is at least 100 square metres.
+        - condition:
+            field: housing-type
+            value: student
+            description: The proposal includes student accommodation.
+        - condition:
+            field: housing-type
+            value: shared
+            description: The proposal includes shared housing.
+        - condition:
+            field: housing-type
+            value: older-people
+            description: The proposal includes housing for older people.
+    source-url: https://prod-web-assets.camden.gov.uk/documents/d/guest/lars-2025
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): 1+ additional homes and 100sqm+ housing floorspace,
+      student, shared or older people's housing, and mixed-use schemes. The rule matches MHCLG's
+      own Camden example. Mixed-use schemes are also mentioned but no threshold is given.
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees within the site or on adjacent land, including street trees.
+    source-text: >-
+      Tree survey/ arboricultural assessment If there are trees within the application site or on
+      … You will need to provide information about species, spread, roots and position of trees
+      which trees you are proposing to fell
+    source-url: 
+      https://www.camden.gov.uk/documents/20142/12053822/LARs+2020+%28republished%29.pdf/ea1f2c0e-c643-0100-40c3-b1188a0badc3?t=1645193008819
+    must-include:
+      - item: Species, spread, roots and position of the trees
+        level: must
+      - item: Which trees you are proposing to fell
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's trigger was cut off; the correct trigger is trees within
+      the site or on adjacent land, including street trees. It also applies to householder works.
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      all:
+        - site:
+            in: [archaeological-priority-area]
+            description: The site is within an Area of Archaeological Potential.
+        - condition:
+            field: ground-disturbance
+            value: true
+            description: The proposal involves a new building or disturbance of the ground.
+    source-text: >-
+      Archaeological assessment If your proposals involve a new building or disturbance of ground
+      within an Area of Archaeological Potential
+    source-url: 
+      https://www.camden.gov.uk/documents/d/guest/nov-2026-local-application-requirements-2026
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's trigger ran on into Air Quality Assessment text."
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: biomass-or-chp
+            value: true
+            description: The proposal includes a biomass boiler or combined heat and power plant.
+        - condition:
+            field: earthworks
+            value: true
+            description: The proposal involves substantial earthworks or demolition.
+    source-text: >-
+      You must submit more detailed AQAs on the following types of development: major applications
+      where the occupants will be exposed to poor air quality where the development is located
+      along a busy road, diesel railway lines, or generally congested area
+    source-url: 
+      https://www.camden.gov.uk/documents/d/guest/nov-2026-local-application-requirements-2026
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): all major development, biomass/CHP, substantial
+      earthworks or demolition. The council's wording above was found in the workbook's
+      archaeology row.
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      site:
+        in: [site-of-special-scientific-interest, local-wildlife-site]
+        description: The site is within or adjoins a SSSI, SNCI, local nature reserve or habitat 
+          corridor.
+    source-url: https://prod-web-assets.camden.gov.uk/documents/d/guest/lars-2025
+    confidence: medium
+    notes: "From the audit (missing_requirement): sites within or adjoining SSSI/SNCI/LNR/habitat corridors
+      etc."
+
+  - id: cil-form
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 100
+            description: The proposal creates 100 square metres or more of floorspace.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates one or more dwellings.
+    source-url: https://prod-web-assets.camden.gov.uk/documents/d/guest/lars-2025
+    confidence: medium
+    notes: "From the audit (missing_requirement): CIL information for 100sqm+ or 1+ dwelling."
+
+  - id: construction-management-plan
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    policy: Camden Local Plan para 6.13
+    source-url: https://prod-web-assets.camden.gov.uk/documents/d/guest/lars-2025
+    confidence: medium
+    notes: "From the audit (missing_requirement): all majors and the other cases listed in Local Plan
+      para 6.13."
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: The proposal creates 10 or more new homes.
+        - discretionary
+    source-url: https://prod-web-assets.camden.gov.uk/documents/d/guest/lars-2025
+    confidence: medium
+    notes: "From the audit (missing_requirement): proposals affecting light to neighbours, and 10+ new
+      homes."
+
+  - id: design-and-access-statement
+    action: update
+    notes: >-
+      The workbook's excerpt is the Accessibility Statement wording ("often included within a
+      detailed Design and Access Statement"); the national rules for a Design and Access
+      Statement still apply.
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: Internal elevations
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+      - item: Elevation from the neighbour's side where a conservatory or rear extension rises above
+          the boundary wall
+        level: must
+        required-if:
+          condition:
+            field: residential-extension
+            value: true
+            description: The proposal extends or alters a house.
+      - item: Elevations of the whole property for roof extensions, terraces, dormers or window 
+          replacement
+        level: must
+        required-if:
+          condition:
+            field: residential-extension
+            value: true
+            description: The proposal extends or alters a house.
+      - item: Demolition shown on the existing elevations
+        level: must
+        required-if:
+          application-type:
+            in: [demolition-con-area]
+      - item: Drawings labelled 'as existing', 'as approved' and 'as proposed'
+        level: must
+        required-if:
+          application-type:
+            in: [s73, non-material-amendment]
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): Camden's LARs 2025 Section 1b sets drawing
+      requirements for specific projects (listed buildings, rear extensions, roof works,
+      demolition in a conservation area, amendments). These items are the audit's summary.
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - all:
+            - condition:
+                field: new-build
+                value: true
+                description: The proposal includes new-build dwellings.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: The proposal creates one or more dwellings.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 5
+            description: The proposal creates 5 or more dwellings.
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 500
+            description: The proposal creates 500 square metres or more of floorspace.
+    source-url: https://prod-web-assets.camden.gov.uk/documents/d/guest/lars-2025
+    confidence: low
+    notes: >-
+      From the audit (wrong_trigger): "Energy Statement for all new-build dwellings and 5+
+      dwellings or 500sqm+". The exact grouping of these thresholds needs checking in the list.
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    source-text: if an EIA is required.
+    source-url: 
+      https://www.camden.gov.uk/documents/d/guest/nov-2026-local-application-requirements-2026
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was a cut-off fragment."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-text: >-
+      Fire statements must be submitted on a form published by the Secretary of State (or a form to
+      similar effect) which includes information about: the principles, concepts and approach
+      relating to fire safety that have been applied to each building in the development
+    source-url: 
+      https://www.camden.gov.uk/documents/d/guest/nov-2026-local-application-requirements-2026
+    confidence: medium
+    notes: "Audit (wrong_trigger): a Fire Statement is only needed for relevant buildings (18m+ or 7+
+      storeys with 2+ dwellings or educational accommodation)."
+
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more.
+        - all:
+            - ref: major-development
+            - site:
+                in: [flood-risk-zone]
+                description: The site is in an area at risk of flooding.
+        - all:
+            - condition:
+                field: basement
+                value: true
+                description: The proposal includes a new or enlarged basement.
+            - site:
+                in: [critical-drainage-area]
+                description: The site is on a street at risk of flooding.
+    source-url: https://prod-web-assets.camden.gov.uk/documents/d/guest/lars-2025
+    confidence: medium
+    notes: "From the audit (missing_requirement): sites of 1ha+, majors in flood-risk areas, basements
+      on flood-risk streets."
+
+  - id: floor-plan-proposed
+    action: update
+    must-include:
+      - item: Existing and proposed floor plans at 1:100
+        level: must
+        required-if:
+          condition:
+            field: involves-change-of-use
+            value: true
+            description: The proposal changes the use of the building.
+      - item: Demolition shown on the existing plans
+        level: must
+        required-if:
+          application-type:
+            in: [demolition-con-area]
+    notes: "From the audit (missing_requirement): extra drawing requirements for change of use and demolition
+      in a conservation area."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, demolition-con-area]
+        - site:
+            in: [listed-building, conservation-area]
+            description: The works affect a listed building or a conservation area.
+    source-text: >-
+      Heritage Statement Listed building and conservation area appraisals All listed building
+      consent applications.
+    source-url: 
+      https://www.camden.gov.uk/documents/d/guest/nov-2026-local-application-requirements-2026
+    confidence: medium
+    notes: "Audit (missing_requirement): also for householder works affecting listed buildings or conservation
+      areas, and demolition in a conservation area."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: The site is known or suspected to be contaminated.
+    source-url: https://prod-web-assets.camden.gov.uk/documents/d/guest/lars-2025
+    confidence: medium
+    notes: "From the audit (missing_requirement): known or suspected contaminated sites."
+
+  - id: landscaping-plan
+    action: replace
+    required-if:
+      ref: major-development
+    source-url: 
+      https://www.camden.gov.uk/documents/d/guest/nov-2026-local-application-requirements-2026
+    must-include:
+      - item: Areas of hard and soft landscaping, annotated with materials
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): major applications only. The must-include item is from the council's
+      drawing standards."
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: The proposal includes external or flood lighting.
+    source-url: https://prod-web-assets.camden.gov.uk/documents/d/guest/lars-2025
+    confidence: medium
+    notes: "From the audit (missing_requirement): external or floodlighting."
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: plant-equipment
+            value: true
+            description: The proposal includes plant, ventilation, air extraction or conditioning 
+              equipment, or flues.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: A use likely to create significant noise (food, drink, entertainment, 
+              leisure, industrial, nurseries, places of worship, schools and colleges).
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: A noise-sensitive use in a noisy environment.
+        - condition:
+            field: traffic-aadt-increase
+            operator: ">"
+            value: 5
+            description: Road traffic movements greater than 5% of Annual Average Daily Traffic.
+        - discretionary
+    source-text: >-
+      Acoustic Report Applications where any of the following are proposed: plant, ventilation, air
+      extraction or conditioning equipment and flues • uses likely to create significant noise
+      such as food/ drink/ entertainment and leisure uses, industrial uses, day nurseries, places of
+      worship, schools and colleges • a noise-sensitive use located in noisy environment • uses
+      likely to generate a significant amount of traffic (defined as road traffic movements greater
+      than 5% of Annual Average Daily Traffic) • developments emitting low frequency noise (e.g.
+      electricity sub…
+    source-url: 
+      https://www.camden.gov.uk/documents/d/guest/nov-2026-local-application-requirements-2026
+    confidence: medium
+    notes: >-
+      Built from the Acoustic Report text, which the workbook had split between its noise and
+      ventilation rows. "Developments emitting low frequency noise" is cut off in the source, so
+      it is shown as officer discretion.
+
+  - id: photos
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, demolition-con-area]
+        - site:
+            in: [locally-listed-building, listed-building-setting]
+            description: The works affect a locally listed building or the setting of a listed 
+              building.
+    source-url: https://prod-web-assets.camden.gov.uk/documents/d/guest/lars-2025
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted computer-visualisation text. From the audit:
+      photographs are required for listed building consent, demolition in a conservation area,
+      locally listed buildings and setting cases.
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: https://www.camden.gov.uk/local-area-requirements
+    must-include:
+      - item: A description of how the proposed alteration differs from what was previously approved
+        level: must
+        required-if:
+          application-type:
+            in: [s73, non-material-amendment]
+      - item: A schedule of the differences, cross-referenced to the annotated plans
+        level: must
+        required-if:
+          application-type:
+            in: [s73, non-material-amendment]
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted page navigation. From the audit: required for all
+      major applications plus specified extra cases. The amendment items are the council's wording
+      ("a description of how the proposed alteration differs from what has previously been approved").
+
+  - id: schedule-of-works
+    action: replace
+    required-if:
+      application-type:
+        in: [lbc]
+    source-text: Schedule of works - Listed building consent applications
+    source-url: https://prod-web-assets.camden.gov.uk/documents/d/guest/lars-2025
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted tree-survey text and placed it under Full planning."
+
+  - id: section-proposed
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - condition:
+            field: basement
+            value: true
+            description: The proposal includes a new or enlarged basement.
+        - condition:
+            field: residential-extension
+            value: true
+            description: The proposal extends or alters a house (including roof works).
+    must-include:
+      - item: Sections where floors or ceilings are affected
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+      - item: Basement sections showing lightwells and distances to the boundaries
+        level: must
+        required-if:
+          condition:
+            field: basement
+            value: true
+            description: The proposal includes a new or enlarged basement.
+      - item: Roof sections for roof extensions and terraces
+        level: must
+        required-if:
+          condition:
+            field: residential-extension
+            value: true
+            description: The proposal extends or alters a house.
+      - item: 1:20 joinery details
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+    source-url: https://prod-web-assets.camden.gov.uk/documents/d/guest/lars-2025
+    confidence: low
+    notes: "From the audit (missing_requirement): LARs 2025 Section 1b drawing requirements; the triggers
+      are the audit's summary."
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      always: true
+    source-url: https://prod-web-assets.camden.gov.uk/documents/d/guest/lars-2025
+    must-include:
+      - item: BREEAM assessment
+        level: must
+        required-if:
+          condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 500
+            description: 500 square metres or more of non-residential floorspace.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was a fragment. From the audit: a Sustainability
+      Statement for all development, with BREEAM for non-domestic 500sqm+."
+
+  - id: telecommunications-report
+    action: add
+    source-url: https://prod-web-assets.camden.gov.uk/documents/d/guest/lars-2025
+    confidence: low
+    notes: "From the audit (missing_requirement): a Telecommunications Report is listed, but the audit
+      gives no trigger."
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-text: Transport Assessment including a Travel Plan - All major applications and 
+      applications with transport impacts
+    source-url: https://prod-web-assets.camden.gov.uk/documents/d/guest/lars-2025
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted policy references and tree-survey text."
+
+  - id: travel-plan
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-text: Transport Assessment including a Travel Plan - All major applications and 
+      applications with transport impacts
+    source-url: https://prod-web-assets.camden.gov.uk/documents/d/guest/lars-2025
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted policy references and tree-survey text."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    must-include:
+      - item: An un-redacted version, for publication with the other application documents
+        level: should
+    notes: "Needed if the proposed contribution or payment is below the policy requirement (council's
+      wording)."
+
+  - id: waste-management-plan
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    confidence: medium
+    notes: "The council asks for it for major applications and other applications that will affect the
+      generation of waste."
+
+unmapped:
+  - local-name: Basement Impact Assessment
+    source-text: "From the audit: Basement Impact Assessment - developments including new or enlarged
+      basements"
+    source-url: https://prod-web-assets.camden.gov.uk/documents/d/guest/lars-2025
+    suggested-id: basement-impact-assessment
+  - local-name: Drainage Report (basements)
+    source-text: "From the audit: a Drainage Report for all new or extended basements"
+    source-url: https://prod-web-assets.camden.gov.uk/documents/d/guest/lars-2025
+    suggested-id: drainage-strategy
+  - local-name: Sustainable Drainage Systems (SuDS) Strategy
+    source-text: "Sustainable Drainage Systems (SuDS) Strategy Major applications"
+    source-url: 
+      https://www.camden.gov.uk/documents/20142/12053822/LARs+2020+%28republished%29.pdf/ea1f2c0e-c643-0100-40c3-b1188a0badc3?t=1645193008819
+    suggested-id: drainage-strategy
+  - local-name: Student Housing Management Plan
+    source-text: "From the audit: all student accommodation"
+    source-url: https://prod-web-assets.camden.gov.uk/documents/d/guest/lars-2025
+    suggested-id: student-housing-management-plan
+  - local-name: Structural Report
+    source-text: "From the audit: structural alterations or substantial demolition of a listed building;
+      substantial demolition in a conservation area or of a locally listed building"
+    source-url: https://prod-web-assets.camden.gov.uk/documents/d/guest/lars-2025
+    suggested-id: structural-survey
+  - local-name: Delivery and Servicing Management Plan
+    source-text: "From the audit: major commercial development"
+    source-url: https://prod-web-assets.camden.gov.uk/documents/d/guest/lars-2025
+    suggested-id: delivery-servicing-plan
+  - local-name: Views analysis
+    source-text: "From the audit: sites in London View Management Framework corridors and identified views"
+    source-url: https://prod-web-assets.camden.gov.uk/documents/d/guest/lars-2025
+    suggested-id: views-analysis
+  - local-name: Employment and Training Strategy
+    source-text: "From the audit: major applications"
+    source-url: https://prod-web-assets.camden.gov.uk/documents/d/guest/lars-2025
+    suggested-id: employment-statement
+  - local-name: Regeneration statement
+    source-text: "From the audit: major applications"
+    source-url: https://prod-web-assets.camden.gov.uk/documents/d/guest/lars-2025
+    suggested-id: regeneration-statement
+  - local-name: Health Impact Assessment
+    source-text: "From the audit: rapid HIA for 10-99 net dwellings or 10,000sqm+; comprehensive HIA for
+      100+ dwellings"
+    source-url: https://prod-web-assets.camden.gov.uk/documents/d/guest/lars-2025
+    suggested-id: health-impact-assessment
+  - local-name: Crime Impact Assessment
+    source-text: "Crime Impact Assessment - Major applications"
+    source-url: https://prod-web-assets.camden.gov.uk/documents/d/guest/lars-2025
+    suggested-id: crime-prevention-statement
+  - local-name: Computer visualisations / renders
+    source-text: "Computer visualisations /renders Major applications"
+    source-url: 
+      https://www.camden.gov.uk/documents/d/guest/nov-2026-local-application-requirements-2026
+    suggested-id: computer-visualisations
+  - local-name: Evidence for certificates of lawfulness
+    source-text: "records such as: rent books evidence of Council tax and utility bills being paid builders
+      receipts for works bank details advertisements relating to a business invoices, tax returns and
+      dated photographs"
+    source-url: https://www.camden.gov.uk/local-area-requirements
+    suggested-id: lawful-development-evidence
+  - local-name: Mini cab use plan, Community use plan, Artwork Management Plan
+    source-text: "From the audit: listed in LARs 2025 without triggers"
+    source-url: https://prod-web-assets.camden.gov.uk/documents/d/guest/lars-2025
+    suggested-id: ""
+
+low-confidence:
+  - id: floor-plan-existing
+    note: "The workbook guessed the type; Camden's drawing rules depend on the kind of project (LARs 2025
+      Section 1b)."
+  - id: elevation-existing
+    note: "The workbook guessed the type; Camden's drawing rules depend on the kind of project (LARs 2025
+      Section 1b)."
+

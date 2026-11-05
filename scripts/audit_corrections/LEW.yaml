@@ -1,0 +1,525 @@
+# Corrections for London Borough of Lewisham, from the council's audit.
+# The adopted lists are the July 2022 checklists (in force from October 2022, in the
+# /validationpdfs2022/ folder). Grokbot mixed these with the September 2026 consultation drafts
+# (/planning-validation/ folder), and most rows cite the drafts, so every file is flagged.
+# Checklist 4 covers listed building consent and certificates of lawfulness for works to a listed
+# building (ldc-proposed-work-lb), not ordinary LDCs. The 'Change of use - prior approval' rows
+# come from the larger home extension (pa-extension), demolition (pa-demo-building) and telecoms
+# (pa-ecomms-network) prior notification checklists, and are retyped here.
+local-authority: LEW
+
+submission-standards:
+  - item: All plans and drawings include a scale bar showing a length of 1 metre and 10 metres
+    level: must
+  - item: Plans show the direction of north
+    level: must
+  - item: Drawings drawn to an identified metric scale, stating the paper size at which the scale 
+      applies (e.g. 1:200 at A3)
+    level: must
+  - item: Drawings include a title and drawing number (with the revision number as necessary)
+    level: must
+  - item: Drawings include key written dimensions
+    level: must
+
+drop:
+  - id: schedule-of-works
+    sheets: [Householder, Full planning]
+    reason: "wrong_trigger: the excerpt is the arboricultural method statement / tree protection plan
+      sentence"
+  - id: schedule-of-works
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: a demolition prior notification method statement, not a listed building schedule
+      of works"
+  - id: environmental-statement
+    sheets: [Variation of condition s73]
+    reason: "wrong_trigger: the S106 deed of variation row merged into the ES row"
+  - id: site-plan
+    sheets: [Full planning]
+    reason: "wrong_trigger: BNG / legal agreement text"
+  - id: landscaping-plan
+    sheets: [Householder]
+    reason: "wrong_app_type: not on the adopted 2022 householder list (draft only)"
+  - id: roof-plan-existing
+    sheets: [Householder]
+    reason: "wrong_app_type: not on the adopted 2022 householder list (draft only)"
+  - id: roof-plan-proposed
+    sheets: [Householder]
+    reason: "wrong_app_type: not on the adopted 2022 householder list (draft only)"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advice to seek pre-application advice"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: part of the Design and Access Statement description; the demolition HGV routing
+      item is re-added below"
+  - local-name: Ground investigation / Geotechnical / Basement Impact Assessment
+    reason: "wrong_app_type: Basement Impact Assessment is not on the adopted 2022 householder list; the
+      full planning row is content text"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: retail sequential test and marketing text"
+  - local-name: Employment / Economic Statement
+    reason: "not_a_requirement: a list of policy references"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "wrong label: the excerpt is Open Space Assessment content"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: Affordable Housing Statement text and SPD references; the deed of variation
+      item is re-added below"
+  - local-name: Health Impact Assessment
+    reason: "wrong_document: the draft 2026 trigger; re-added below with the adopted 2022 trigger"
+
+requirements:
+  - id: schedule-of-works
+    action: update
+    required-if:
+      application-type:
+        in: [lbc, ldc-proposed-work-lb]
+    notes: "Audit (wrong_app_type): checklist 4 is for listed building consent and certificates of lawfulness
+      for works to a listed building."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    source-url: 
+      https://lewisham.gov.uk/-/media/services/planning/planning---sela-lee-liam/validationpdfs2022/1-major-applications-local-list.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpts were the fragment 'subject to EIA but encouraged
+      for' and an S106 deed of variation line. The national EIA rule applies.
+
+  - id: site-plan
+    action: update
+    required-if:
+      application-type:
+        in: [hh, lbc, ldc-proposed-work-lb, advertising, pa-extension]
+    must-include:
+      - item: Existing and proposed block plans at 1:500
+        level: must
+        required-if:
+          application-type:
+            in: [hh, lbc, ldc-proposed-work-lb, advertising]
+      - item: The position of the proposed adverts in relation to the highway, footpath and street 
+          furniture
+        level: must
+        required-if:
+          application-type:
+            in: [advertising]
+      - item: The site, the proposed development and any existing enlargement of the original 
+          dwellinghouse to which it will be joined
+        level: must
+        required-if:
+          application-type:
+            in: [pa-extension]
+    notes: "Audit (wrong_app_type): the workbook's LDC and prior approval rows are from the listed building
+      works and larger home extension checklists. The major list's site plan rule was not captured."
+
+  - id: floor-plan-existing
+    action: update
+    must-include:
+      - item: Scale 1:50 or 1:100, including roof plans
+        level: must
+        required-if:
+          application-type:
+            in: [hh]
+      - item: Scale 1:50, including the roof, showing finished floor and site levels
+        level: must
+        required-if:
+          application-type:
+            in: [lbc, ldc-proposed-work-lb]
+      - item: Demolition plans at 1:50 where removal of walls, floors or staircases (or parts of 
+          them) is proposed
+        level: must
+        required-if:
+          application-type:
+            in: [lbc, ldc-proposed-work-lb]
+
+  - id: floor-plan-proposed
+    action: update
+    must-include:
+      - item: Scale 1:50 or 1:100, including roof plans
+        level: must
+        required-if:
+          application-type:
+            in: [hh]
+      - item: Scale 1:50, including the roof, showing finished floor and site levels
+        level: must
+        required-if:
+          application-type:
+            in: [lbc, ldc-proposed-work-lb]
+
+  - id: elevation-existing
+    action: update
+    must-include:
+      - item: Scale 1:50 or 1:100
+        level: must
+        required-if:
+          application-type:
+            in: [hh, advertising]
+      - item: External elevations at 1:50
+        level: must
+        required-if:
+          application-type:
+            in: [lbc, ldc-proposed-work-lb]
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: Scale 1:50 or 1:100
+        level: must
+        required-if:
+          application-type:
+            in: [hh, advertising]
+      - item: External elevations at 1:50
+        level: must
+        required-if:
+          application-type:
+            in: [lbc, ldc-proposed-work-lb]
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      application-type:
+        in: [pa-extension]
+    notes: "From the larger home extension prior notification checklist ('Proposed floor plans, elevations
+      and roof plan')."
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      application-type:
+        in: [pa-extension]
+    notes: "From the larger home extension prior notification checklist ('Proposed floor plans, elevations
+      and roof plan')."
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      application-type:
+        in: [pa-ecomms-network]
+    notes: "Audit (wrong_app_type): from the telecommunications prior notification checklist (13)."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      all:
+        - site:
+            in: [archaeological-priority-area]
+            description: The site is in an Archaeological Priority Area.
+        - any:
+            - condition:
+                field: basement
+                value: true
+                description: The proposal includes new or extended basements.
+            - condition:
+                field: ground-disturbance
+                value: true
+                description: The proposal involves excavation.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (flood zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (flood zone 1).
+        - site:
+            in: [flood-risk-zone, surface-water-flood-risk]
+            description: The site is in flood zone 2 or 3, or at surface water flood risk (for 
+              householders, where the ground floor footprint is altered).
+    source-text: >-
+      Sites of 1ha+ in Flood Zone 1; all proposals in Flood Zones 2 or 3 or at surface water flood
+      risk … [Householder] Flood Risk Assessment Form All proposals to alter the ground floor
+      floorprint, located in Flood Zone 2 or 3 or if the site is subject to Surface Water Flood Risk
+      as designated by the Environment Agency (even if in Flood Zone 1.
+    source-url: 
+      https://lewisham.gov.uk/-/media/services/planning/planning---sela-lee-liam/validationpdfs2022/1-major-applications-local-list.pdf
+    confidence: medium
+    notes: >-
+      Audit (other): the workbook used the draft 2026 trigger ('all major developments within Flood
+      Zone 1, 2, 3a and 3b'); the adopted 2022 list (item 21) needs an FRA in flood zone 1 only for
+      sites of 1ha or more.
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - application-type:
+                in: [lbc, ldc-proposed-work-lb]
+            - condition:
+                field: external-alterations
+                value: true
+                description: External works to a listed building are proposed.
+    source-text: For proposals where external works to a listed building are proposed, a design and 
+      access statement must be submitted.
+    source-url: 
+      https://lewisham.gov.uk/-/media/services/planning/planning-validation/4-listed-building-consent-and-certificate-of-lawfulness-for-works-to-a-listed-building.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the LDC row is from the listed building works checklist. The full
+      planning excerpt was a fragment; the major-development branch is the national rule.
+
+  - id: landscaping-plan
+    action: replace
+    required-if: discretionary
+    source-text: Landscaping Plan / Statement All relevant applications
+    source-url: 
+      https://lewisham.gov.uk/-/media/services/planning/planning-validation/2-planning-permission-for-minor-development.pdf
+    confidence: low
+    notes: >-
+      From the minor development checklist (draft 2026), wrongly placed under listed building consent.
+      The householder row was dropped (not on the adopted householder list).
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - any:
+                - condition:
+                    field: ground-disturbance
+                    value: true
+                    description: The proposal involves groundworks.
+                - discretionary
+        - application-type:
+            in: [pa-demo-building]
+    source-url: 
+      https://lewisham.gov.uk/-/media/services/planning/planning---sela-lee-liam/validationpdfs2022/1-major-applications-local-list.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): the adopted major list asks for a Site Contamination
+      Assessment for groundworks or works to potentially hazardous buildings (the latter shown as
+      discretionary). The demolition prior notification checklist asks for a ground contamination
+      assessment for the proposed restoration.
+
+  - id: biodiversity-survey-report
+    action: update
+    notes: >-
+      Audit (wrong_app_type): the 'bat survey if the building has potential to house bats' row is from
+      the demolition prior notification checklist (pa-demo-building), not change of use.
+
+  - id: viability-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: loss-of-use
+            value: true
+            description: The application proposes the loss of a public house (including a change of 
+              use).
+        - all:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: New housing of 2 or more dwellings.
+            - condition:
+                field: dwelling-count
+                operator: "<="
+                value: 9
+                description: New housing of 9 or fewer dwellings.
+    source-text: >-
+      Viability Statement Any application proposing a loss of a public house (including a change of
+      use) 41.Viability Assessment When needed: applications for new housing delivering between 2-9
+      dwelling…
+    source-url: 
+      https://lewisham.gov.uk/-/media/services/planning/planning-validation/2-planning-permission-for-minor-development.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): from the minor development checklist (draft 2026), not a change of use
+      prior approval. The full planning row was Affordable Housing Statement text.
+
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more residential dwellings (C3).
+        - condition:
+            field: housing-type
+            value: student
+            description: Non-conventional housing units such as unsecured student housing.
+        - discretionary
+    notes: "Also, where appropriate, specialist and supported accommodation (council's wording, draft
+      2026 major list)."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      ref: major-development
+    notes: "Audit (wrong_app_type): major development only."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [advertising]
+            - condition:
+                field: illuminated
+                value: true
+                description: The advert is illuminated (internally or externally).
+        - discretionary
+    must-include:
+      - item: A statement of compliance, with evidence, with the Institution of Lighting Engineers /
+          CIBSE guidance on reducing light pollution
+        level: must
+        required-if:
+          application-type:
+            in: [advertising]
+      - item: The proposed hours of operation of the illuminated elements
+        level: must
+        required-if:
+          application-type:
+            in: [advertising]
+    notes: "All applications for illuminated adverts (council's wording). The major list's lighting trigger
+      was not captured."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      all:
+        - ref: major-development
+        - any:
+            - condition:
+                field: noise-sensitive-use
+                value: true
+                description: Noise-sensitive uses near noise sources.
+            - condition:
+                field: plant-equipment
+                value: true
+                description: Noise-generating plant.
+    source-url: 
+      https://lewisham.gov.uk/-/media/services/planning/planning---sela-lee-liam/validationpdfs2022/1-major-applications-local-list.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Noise and Vibration Impact Assessment, adopted 2022
+      major list."
+
+  - id: construction-management-plan
+    action: add
+    required-if:
+      ref: major-development
+    source-url: 
+      https://lewisham.gov.uk/-/media/services/planning/planning---sela-lee-liam/validationpdfs2022/1-major-applications-local-list.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): an outline Construction Logistics and Environment Management
+      Plan for all applications on the adopted 2022 major list."
+
+  - id: planning-statement
+    action: update
+    must-include:
+      - item: Clear and convincing justification for why the amendment is necessary and why it is 
+          'minor-material' in the context of the permission as a whole
+        level: must
+        required-if:
+          application-type:
+            in: [s73]
+      - item: Clear and convincing justification for why the amendment is necessary and why it is 
+          'non-material' in the context of the permission as a whole
+        level: must
+        required-if:
+          application-type:
+            in: [non-material-amendment]
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      condition:
+        field: loss-of-use
+        value: true
+        description: The application proposes the loss of open space (as defined in the Lewisham 
+          Local Plan).
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      ref: major-development
+    notes: "The major list says 'All applications', meaning all major applications. Audit (wrong_trigger):
+      the excerpt also has London Plan HC1 heritage text mixed in."
+
+  - id: travel-plan
+    action: update
+    required-if:
+      ref: major-development
+    notes: "The (draft 2026) major list says 'All applications', meaning all major applications."
+
+unmapped:
+  - local-name: Health Impact Assessment
+    source-text: Health Impact Assessment - Development referable to the Mayor of London
+    source-url: 
+      https://lewisham.gov.uk/-/media/services/planning/planning---sela-lee-liam/validationpdfs2022/1-major-applications-local-list.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Circular Economy Statement
+    source-text: "From the audit: applications referable to the Mayor (adopted 2022 major list)"
+    source-url: 
+      https://lewisham.gov.uk/-/media/services/planning/planning---sela-lee-liam/validationpdfs2022/1-major-applications-local-list.pdf
+    suggested-id: circular-economy-statement
+  - local-name: Community Audit
+    source-text: "From the audit: redevelopment of non-residential buildings in community use"
+    source-url: 
+      https://lewisham.gov.uk/-/media/services/planning/planning---sela-lee-liam/validationpdfs2022/1-major-applications-local-list.pdf
+    suggested-id: community-use-statement
+  - local-name: Delivery and Servicing Plan (outline)
+    source-text: "From the audit: all applications (adopted 2022 major list)"
+    source-url: 
+      https://lewisham.gov.uk/-/media/services/planning/planning---sela-lee-liam/validationpdfs2022/1-major-applications-local-list.pdf
+    suggested-id: delivery-servicing-plan
+  - local-name: Materials and Architectural Details
+    source-text: "Materials and Architectural Details: All applications involving operational development"
+    source-url: 
+      https://lewisham.gov.uk/-/media/services/planning/planning---sela-lee-liam/validationpdfs2022/3-householder-application-for-planning-permission.pdf
+    suggested-id: materials-details
+  - local-name: Parking Design and Management Plan
+    source-text: "From the audit: where car, motorcycle or cycle parking is proposed"
+    source-url: 
+      https://lewisham.gov.uk/-/media/services/planning/planning---sela-lee-liam/validationpdfs2022/1-major-applications-local-list.pdf
+    suggested-id: parking-details
+  - local-name: River Impact Study
+    source-text: "From the audit: sites adjoining or near the Ravensbourne, Pool, Thames, Quaggy, Deptford
+      Creek or LLFA ordinary watercourses"
+    source-url: 
+      https://lewisham.gov.uk/-/media/services/planning/planning---sela-lee-liam/validationpdfs2022/1-major-applications-local-list.pdf
+    suggested-id: river-impact-study
+  - local-name: Schedule of Accommodation
+    source-text: "From the audit: residential, student or shared living development"
+    source-url: 
+      https://lewisham.gov.uk/-/media/services/planning/planning---sela-lee-liam/validationpdfs2022/1-major-applications-local-list.pdf
+    suggested-id: accommodation-schedule
+  - local-name: Urban Greening Factor Statement
+    source-text: "From the audit: all applications (adopted 2022 major list)"
+    source-url: 
+      https://lewisham.gov.uk/-/media/services/planning/planning---sela-lee-liam/validationpdfs2022/1-major-applications-local-list.pdf
+    suggested-id: urban-greening-factor
+  - local-name: Deed of Variation (S106)
+    source-text: For amendments which require a deed of variation to a S.106 Agreement.
+    source-url: 
+      https://lewisham.gov.uk/-/media/services/planning/planning-validation/8-minor-material-amendment-to-a-planning-permission-section-73--tcpa-1990.pdf
+    suggested-id: heads-of-terms
+  - local-name: HGV routing and swept path analysis (demolition prior notification)
+    source-text: HGV routing, swept path analysis and a site layout plan
+    source-url: 
+      https://lewisham.gov.uk/-/media/services/planning/planning-validation/12-prior-notification-of-proposed-demolition.pdf
+    suggested-id: construction-management-plan
+
+low-confidence:
+  - id: "*"
+    note: >-
+      Audit (wrong_document, other): most workbook excerpts come from the September 2026 consultation
+      drafts, not the adopted July 2022 checklists; draft-only triggers may not be in force.
+

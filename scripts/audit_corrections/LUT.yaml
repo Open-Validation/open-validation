@@ -1,0 +1,466 @@
+# Corrections for Luton Borough Council, from inputs/audit/luton-borough-council.json.
+# The audit read the Planning Application Requirements (PAR) v1.2, last updated January 2024 (the
+# document Grokbot used), and the separate householder validation checklist (v1.0, March 2025)
+# that Grokbot missed. Items marked "From the audit" use the audit's paraphrase.
+local-authority: LUT
+
+submission-standards:
+  - item: Drawings as single plans (not multiple pages), each attached separately as a PDF rather than
+      tif, jpeg, doc or xls files
+    level: should
+  - item: A scale bar, with the paper size the drawing can be scaled to
+    level: must
+    required-if:
+      ref: major-development
+  - item: Drawings titled with a description and drawing number (for example 'H001 Proposed first floor
+      plan')
+    level: should
+
+drop-unmapped:
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: the excerpt is viability text"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 11
+            description: 11 or more new residential units.
+        - condition:
+            field: housing-floorspace
+            operator: ">"
+            value: 1000
+            description: 10 or fewer new dwellings with a combined floorspace of more than 1,000 square
+              metres.
+    policy: LLP16
+    confidence: medium
+    notes: "The excerpt states the trigger. From the audit (wrong_app_type): it applies to major outline proposals too."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: The proposal is for a sensitive use.
+        - site:
+            in: [air-quality-management-area]
+            description: The site is in or near an Air Quality Management Area.
+        - discretionary
+    policy: LPP31, LLP32, LLP38
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt starts with policy references. From the audit: major
+      applications, sensitive uses, or sites in or near an AQMA. Schemes affecting air quality by the
+      nature of the uses or their transport generation (council's wording) are shown as officer
+      discretion.
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: storey-count
+            operator: ">"
+            value: 4
+            description: Buildings exceeding four storeys in height where adjoining other developed land or
+              public open spaces.
+        - discretionary
+    policy: LLP25
+    confidence: medium
+    notes: >-
+      The excerpt states the triggers. Overshadowing of other buildings or spaces within the same site,
+      and sites subject to significant shading, are shown as officer discretion.
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [open-space]
+            description: The application relates directly to an area of open space.
+        - discretionary
+    policy: LLP25, LLP27, LLP28, LLP29
+    confidence: medium
+    notes: >-
+      The excerpt states the trigger: all major development, and applications relating directly to
+      open space and/or areas of ecological sensitivity (shown as officer discretion). It is not only
+      for full planning.
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      ref: major-development
+    confidence: low
+    notes: >-
+      The workbook's excerpt is a fragment. From the audit (wrong_app_type): Energy and Sustainability
+      statements are among the major-application items.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment under the 2017 Regulations.
+    confidence: medium
+
+  - id: section-existing
+    action: update
+    required-if: &lut-sections
+      any:
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: The development involves a change in ground levels.
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Roof space works.
+        - condition:
+            field: footprint-increase
+            value: true
+            description: Ground floor extensions.
+        - discretionary
+    source-text: &lut-sections-text >-
+      Sections / Site levels Where development involves a change in ground levels (scale 1:50/100) or
+      if any of the elevations are obscured from view by existing structures.
+    must-include: &lut-sections-items
+      - item: Scale 1:50 or 1:100
+        level: must
+    confidence: medium
+    notes: &lut-sections-note >-
+      From the audit (other): the PAR says sections are 'always required for roof space works and
+      ground floor extensions', including householder applications. Elevations obscured by existing
+      structures are shown as officer discretion.
+
+  - id: section-proposed
+    action: update
+    required-if: *lut-sections
+    source-text: *lut-sections-text
+    must-include: *lut-sections-items
+    confidence: medium
+    notes: *lut-sections-note
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: The development is 18 metres in height.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: The development has seven or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: The development is for dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The development is for educational accommodation.
+    confidence: medium
+    notes: "The excerpt states the trigger."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: Development proposals of one hectare or greater.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Development proposals of one hectare or greater.
+        - site:
+            in: [flood-risk-zone]
+            description: New development located in flood zones 2 and 3.
+    policy: LLP25, LLP36, LLP37
+    confidence: medium
+    notes: "The excerpt states the trigger (audit wrong_trigger: it was hidden after policy references)."
+
+  - id: floor-plan-existing
+    action: update
+    must-include: &lut-floor
+      - item: All floor plans clearly labelled
+        level: must
+    notes: &lut-plans-note >-
+      The workbook guessed the application type, so none is given. From the audit (other): the
+      householder checklist also asks for existing and proposed elevations and floor plans.
+
+  - id: floor-plan-proposed
+    action: update
+    must-include: *lut-floor
+    notes: *lut-plans-note
+
+  - id: elevation-existing
+    action: update
+    notes: *lut-plans-note
+
+  - id: elevation-proposed
+    action: update
+    notes: *lut-plans-note
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      ref: major-development
+    must-include:
+      - item: Site survey
+        level: should
+      - item: Site analysis
+        level: should
+      - item: Plan(s) showing existing and proposed shrubs and trees, indicating which are to be retained
+          and which removed
+        level: should
+      - item: Landscape design proposals
+        level: should
+      - item: A planting plan
+        level: should
+      - item: Hard landscaping details, such as structures, surfaces and ancillary objects
+        level: should
+      - item: How retained vegetation will be protected during construction
+        level: should
+      - item: A maintenance and management plan
+        level: should
+    confidence: medium
+    notes: "From the audit (wrong_app_type): a major-application item. The contents are the council's list."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Retail and leisure development outside the identified centres on the Policies Map.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 1000
+            description: Over 1,000 square metres.
+    policy: LLP2, LLP21, LLP22, LLP23
+    confidence: medium
+    notes: "The excerpt states the trigger."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    policy: LLP16, LLP39
+    confidence: medium
+    notes: >-
+      Needed where on-site affordable housing and all necessary developer contributions are not
+      proposed to be met, and this is known at submission (council's wording).
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, demolition-con-area]
+        - site:
+            in: [conservation-area, listed-building, listed-building-setting, locally-listed-building]
+            description: Development within a conservation area, or within the setting of a statutory or
+              locally listed building.
+        - discretionary
+    policy: LLP25, LLP30
+    source-text: >-
+      Applications proposing development within a conservation area, within the setting of either a
+      statutory or locally listed building or directly adjacent to the River Lea shall be accompanied
+      by a Heritage Statement (HS) that is proportionate to the significance of the development and/or
+      the significance of the relevant heritage asset.
+    source-url: &lut-url https://www.luton.gov.uk/sites/default/files/2026-05/planning-application-requirements-2025.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): not only listed building consent; 'Also required for demolition in
+      conservation areas'. Sites directly adjacent to the River Lea are shown as officer discretion.
+
+  - id: recreation-facilities-assessment
+    action: replace
+    required-if:
+      all:
+        - site:
+            in: [open-space]
+            description: The change of use or development is on designated open space.
+        - condition:
+            field: loss-of-open-space
+            value: true
+            description: It results in a net loss of open space.
+    policy: LLP25, LLP27
+    source-text: >-
+      Open Space Assessment (Sequential Test) … Where a change of use/development is proposed on
+      designated open space and results in a net loss of open space, a sequential test to demonstrate
+      there are no suitable and available alternative sites will be required.
+    source-url: *lut-url
+    confidence: medium
+    notes: "Audit (wrong_app_type): a planning application requirement, not prior approval."
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees on or adjoining the site would be affected.
+    source-url: *lut-url
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement, other): trees on or adjoining the site affected; the
+      householder checklist also asks for a tree survey where trees are on or next to the site.
+
+  - id: archaeological-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [archaeological-priority-area]
+            description: A site of known or suspected archaeological significance.
+        - discretionary
+    source-url: *lut-url
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): an archaeological desktop study for sites of known or
+      suspected significance and land adjacent to the River Lea (shown as officer discretion).
+
+  - id: land-contamination-assessment
+    action: add
+    source-url: *lut-url
+    confidence: low
+    notes: "From the audit (missing_requirement): listed in the PAR; the audit gives no trigger."
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - condition:
+                field: minor-development
+                value: true
+                description: Minor (non-householder) development.
+            - site:
+                in: [conservation-area, listed-building-setting, open-space]
+                description: In a conservation area, near a listed building or near open space.
+    source-url: *lut-url
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): all major applications; minor non-householder
+      applications in conservation areas, near listed buildings or open space.
+
+  - id: noise-assessment
+    action: add
+    source-url: *lut-url
+    confidence: low
+    notes: "From the audit (missing_requirement): a Noise Impact Assessment is listed; the audit gives no trigger."
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: food-or-drink-use
+            value: true
+            description: A new food or drink outlet.
+    source-url: *lut-url
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Site Waste Management Plan for all major applications and new food/drink outlets."
+
+  - id: sci
+    action: add
+    required-if:
+      ref: major-development
+    source-url: *lut-url
+    confidence: medium
+    notes: "From the audit (missing_requirement): major applications."
+
+  - id: roof-plan-proposed
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Any roof created or altered.
+    confidence: low
+    notes: >-
+      From the audit (other): the householder validation checklist (v1.0, March 2025) asks for roof
+      plans where any roof is created or altered. The audit gives the checklist's file name
+      (validation-checklist-householder-application.pdf) but not its full link.
+
+unmapped:
+  - local-name: Accommodation Management Plan
+    source-text: "From the audit: C2 / sui generis specialist housing and student housing"
+    source-url: https://www.luton.gov.uk/sites/default/files/2026-05/planning-application-requirements-2025.pdf
+    suggested-id: management-plan
+  - local-name: Airport Safeguarding Zone Assessment
+    source-text: "From the audit: major development in the airport allocation, or any application in a public
+      safety zone"
+    source-url: https://www.luton.gov.uk/sites/default/files/2026-05/planning-application-requirements-2025.pdf
+    suggested-id: aerodrome-safeguarding-assessment
+  - local-name: Change of use to C2 children's residential institution statement
+    source-text: "From the audit: change of use to a C2 children's residential institution"
+    source-url: https://www.luton.gov.uk/sites/default/files/2026-05/planning-application-requirements-2025.pdf
+    suggested-id: ""
+  - local-name: Micro-Climate Assessment
+    source-text: "From the audit: buildings of 10 or more storeys"
+    source-url: https://www.luton.gov.uk/sites/default/files/2026-05/planning-application-requirements-2025.pdf
+    suggested-id: microclimate-assessment
+  - local-name: Occupation Statement (annexes)
+    source-text: "From the audit: residential annexes"
+    source-url: https://www.luton.gov.uk/sites/default/files/2026-05/planning-application-requirements-2025.pdf
+    suggested-id: ""
+  - local-name: Statement of Need (community facilities)
+    source-text: "From the audit: community facilities (Use Classes E, F1, F2 and sui generis)"
+    source-url: https://www.luton.gov.uk/sites/default/files/2026-05/planning-application-requirements-2025.pdf
+    suggested-id: community-facilities-statement
+  - local-name: Town Visual Impact Assessment
+    source-text: "From the audit: 2+ storeys above the prevailing height within 100m, or more than 7 storeys"
+    source-url: https://www.luton.gov.uk/sites/default/files/2026-05/planning-application-requirements-2025.pdf
+    suggested-id: townscape-visual-impact-assessment
+  - local-name: Works to protected trees - replacement scheme
+    source-text: "Applications for works to protected trees (including within a Conservation Area) which include
+      the felling of any tree(s) should include:A scheme for replacement semi-mature tree(s), including
+      size/girth, species, location and"
+    source-url: https://www.luton.gov.uk/sites/default/files/2026-05/planning-application-requirements-2025.pdf
+    suggested-id: ""
+  - local-name: Parking and access arrangements (householder)
+    source-text: "From the audit: householder checklist, where parking or access is affected"
+    suggested-id: parking-plan
+
+low-confidence:
+  - id: bng-metric
+    note: "Audit (wrong_trigger): the excerpt ('Developers must use the Biodiversity Metric tool') is not a trigger."
+  - id: transport-assessment
+    note: >-
+      Audit (wrong_trigger): the excerpt is a 'Further Guidance' footer run into the works to protected
+      trees text; the trigger was not captured.
+  - id: travel-plan
+    note: >-
+      Audit (wrong_trigger): the excerpt is a 'Further Guidance' footer run into the works to protected
+      trees text; the trigger was not captured.
+  - id: design-and-access-statement
+    note: >-
+      The excerpt says what a statement should contain, not when it is needed. From the audit (other):
+      the householder checklist asks for a DAS for householder works in a conservation area.

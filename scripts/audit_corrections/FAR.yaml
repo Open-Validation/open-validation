@@ -1,0 +1,536 @@
+# Corrections for Fareham Borough Council, from the council's audit.
+# The audit checked the current Local Information Requirements page (adopted 28 March 2025).
+# Every heading on the page states its application types; an asterisk marks "*major
+# applications". Rows taken from Sport England's guidance and Hampshire's biodiversity checklist
+# forms are not Fareham requirements. Items marked "From the audit" use the audit's paraphrase.
+local-authority: FAR
+
+drop:
+  - id: design-and-access-statement
+    reason: "not_a_requirement: incidental phrase ('in the design and access statement, if required.')"
+  - id: environmental-statement
+    reason: "not_a_requirement: incidental phrase ('This information might form part of an environmental
+      statement')"
+  - id: floor-plan-existing
+    reason: "not_a_requirement: a sentence about street sections, not a Fareham list item"
+  - id: floor-plan-proposed
+    reason: "not_a_requirement: as above"
+  - id: elevation-existing
+    reason: "not_a_requirement: as above"
+  - id: elevation-proposed
+    reason: "not_a_requirement: as above"
+  - id: viability-assessment
+    reason: "duplicate: from the Affordable Housing paragraph; now a must-include item there"
+  - id: sustainability-statement
+    reason: "wrong_trigger: the row was the Welborne-only Energy Strategy (now energy-statement); the
+      Climate Change Statement replaces it below"
+  - id: arboriculturist-report
+    sheets: [Works to trees]
+    reason: "wrong_app_type: the source requires it only for householder, full and outline applications"
+  - id: land-contamination-assessment
+    sheets: [Minerals & waste (county)]
+    reason: "wrong_app_type: Fareham is a district; the source applies it to major full/outline"
+  - id: archaeological-assessment
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: the source says 'Full planning application with listed building consent'"
+  - id: town-centre-impact-assessment
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: the source means change of use planning applications, not prior approvals"
+
+drop-unmapped:
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "wrong_document / duplicate: Hampshire's county checklist form, and Ecological Assessment
+      text (now in biodiversity-survey-report)"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_trigger / wrong_document: fragments and county checklist text; replaced below"
+  - local-name: Nutrient Neutrality statement / calculator
+    reason: "duplicate: part of the single Habitat Regulations Supporting Statement (below)"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: foul-sewage text; replaced below with the critical drainage area trigger"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 10
+                description: Residential development of 10 or more units.
+            - condition:
+                field: site-area-residential
+                operator: ">="
+                value: 0.5
+                description: A site of 0.5 hectares or more.
+            - discretionary
+    source-text: >-
+      Affordable Housing Statement Required for: Full planning applications Outline planning
+      applications In the event that the proposal is not fully policy compliant, then a viability
+      assessment must be submitted with the application.
+    must-include:
+      - item: A viability assessment, if the proposal is not fully policy compliant
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook had no threshold. From the audit: 10+ units, sites of
+      0.5 ha+, allocated housing sites, or larger parcels that could take 10+ units (the last two
+      are shown as officer discretion).
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: There are trees on the site that may be affected by the proposed 
+              development.
+        - site:
+            in: [tree-preservation-zone, conservation-area]
+            description: The trees are subject to a TPO or within a Conservation Area.
+    source-text: >-
+      Tree Survey / Arboricultural Assessment Required for the following types of applications:
+      Householder applications Full planning applications Outline planning applications When: There
+      are trees on the site that are subject to a TPO or within a Conservation Area and may be
+      affected by the proposed development.
+    confidence: medium
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - any:
+            - all:
+                - condition:
+                    field: ground-disturbance
+                    value: true
+                    description: The development involves the disturbance of ground on a previously 
+                      undeveloped site.
+                - any:
+                    - condition:
+                        field: site-area-residential
+                        operator: ">"
+                        value: 0.5
+                        description: The site is over 0.5 hectares.
+                    - condition:
+                        field: site-area-non-residential
+                        operator: ">"
+                        value: 0.5
+                        description: The site is over 0.5 hectares.
+            - site:
+                in: [archaeological-priority-area]
+                description: The site is within an area of archaeological significance on 
+                  Hampshire's Historic Environment Record.
+    source-text: >-
+      Archaeological Desk Based Assessment Required for the following types of applications: Full
+      planning applications Outline planning applications Full planning application with listed
+      building consent When: The development involves the disturbance of ground on previously
+      undeveloped sites of over 0.5 hectares or is within an area of archaeological significance as
+      shown on Hampshire County Council's Historic Environment Record .
+    confidence: medium
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline]
+        - any:
+            - site:
+                in: [site-of-special-scientific-interest]
+                description: The development may affect a nationally designated habitat.
+            - discretionary
+    source-text: >-
+      A biodiversity survey and report is likely to be needed where: any development that may affect
+      a nationally designated habitat.
+    source-url: https://www.fareham.gov.uk/planning/applications_and_advice/localrequireddocs.aspx
+    must-include:
+      - item: Any further survey that a phase 1 survey (preliminary ecological assessment) 
+          identifies as necessary
+        level: must
+        source-text: >-
+          If a phase 1 survey (also referred to as a preliminary ecological assessment) is
+          undertaken and identifies that a further survey is necessary, then this must be carried
+          out and submitted with the application.
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, wrong_trigger, wrong_document): Ecological Assessment applies to
+      householder, full and outline. The householder row quoted Hampshire's checklist form, not the
+      Fareham list. Other cases are shown as officer discretion.
+
+  - id: cil-form
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, s73, outline, reserved-matters]
+        - any:
+            - condition:
+                field: floorspace
+                operator: ">"
+                value: 100
+                description: Residential or retail development over 100 square metres (including 
+                  extensions and annexes).
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: Any new dwelling, even if less than 100 square metres.
+    source-text: >-
+      Community Infrastructure Levy Form 1 (Additional Information Form) Required for the following
+      types of applications: Householder planning applications Minor planning applications Major
+      planning applications Section 73 planning applications Outline planning applications Reserved
+      matters planning applications When: All residential or retail development over 100 square
+      metres (including extensions and annexes) All new dwellings even if less than 100 square
+      metres.
+    must-include:
+      - item: CIL Form 2 (Assumption of Liability), for any chargeable development
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): CIL Form 2 (Assumption of Liability) is also required
+      for any chargeable development, for the same application types."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      site:
+        in: [strategic-allocation]
+        description: The site is within the Welborne boundary.
+    source-text: "Energy Strategy Required for: All planning application(s) for Welborne."
+    source-url: https://www.fareham.gov.uk/planning/applications_and_advice/localrequireddocs.aspx
+    confidence: medium
+    notes: "Audit (wrong_trigger): the Energy Strategy is required only for Welborne applications; the
+      workbook showed it as a general requirement."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [hh]
+            - site:
+                in: [flood-risk-zone]
+                description: Ground-floor development in Flood Zone 2 or 3.
+        - all:
+            - application-type:
+                in: [full, outline]
+            - ref: major-development
+            - any:
+                - site:
+                    in: [flood-risk-zone]
+                    description: The site is in Flood Zone 2 or 3.
+                - condition:
+                    field: site-area-residential
+                    operator: ">="
+                    value: 1
+                    description: The site is 1 hectare or more.
+                - condition:
+                    field: site-area-non-residential
+                    operator: ">="
+                    value: 1
+                    description: The site is 1 hectare or more.
+    source-url: https://www.fareham.gov.uk/planning/applications_and_advice/localrequireddocs.aspx
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the workbook quoted a sentence about environmental
+      statements. From the audit: householder (ground-floor development in Flood Zones 2/3) and major
+      full/outline, with Flood Zone 2/3 and 1 ha triggers.
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, lbc]
+        - discretionary
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): applies to full, outline, full with LBC and LBC. The audit gives only
+      the application types, not the list's 'When' condition, so the trigger within those types is
+      shown as officer discretion.
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - ref: major-development
+        - site:
+            in: [contaminated-land, near-landfill-site]
+            description: >-
+              Within 250 metres of a currently licensed or historic landfill site, or former uses may
+              have contaminated the land, or the land is known to be contaminated.
+    source-text: >-
+      Contamination Assessment Required for the following types of *major applications: Full
+      planning applications Outline planning applications When: All sites within 250 metres of a
+      currently licensed or historic landfill site or where former uses may have contaminated land
+      and/or the land is known to be contaminated.
+    confidence: medium
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - ref: major-development
+    source-text: >-
+      Landscaping Scheme (Detailed) Required for the following types of *major applications: Full
+      planning applications Outline planning applications where landscaping to be considered
+      Applications may be accompanied by landscaping details and include proposals for long term
+      maintenance and landscape management.
+    must-include:
+      - item: Proposals for long term maintenance and landscape management
+        level: should
+    confidence: medium
+    notes: "Outline applications only where landscaping is to be considered."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - ref: major-development
+        - any:
+            - condition:
+                field: external-lighting
+                value: true
+                description: Significant external lighting is proposed (flood lighting, lit car 
+                  parking, new street lighting).
+            - discretionary
+    source-text: >-
+      Lighting Assessment Required for the following types of *major applications: Full planning
+      applications When: Significant external lighting is proposed, i.e. flood lighting, lit areas of
+      car parking, new street lighting Sites are next to areas of woodland.
+    confidence: medium
+    notes: "Sites next to areas of woodland are shown as officer discretion (no field for it)."
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - ref: major-development
+        - any:
+            - condition:
+                field: noise-generating-use
+                value: true
+                description: >-
+                  Noise generating development (such as Class B2) near noise sensitive areas
+                  (residential, Solent Waders and Brent Geese Strategy sites).
+            - condition:
+                field: noise-sensitive-use
+                value: true
+                description: Noise sensitive development (housing, nursing homes) near a potential 
+                  source of noise.
+    source-text: >-
+      Noise Assessment Required for the following types of *major applications: Full planning
+      applications Outline planning applications When: Noise generating development such as Class B2
+      Uses are located near to noise sensitive areas i.e. residential and Solent Waders and Brent
+      Geese Strategy Sites; and all noise sensitive developments e.g., housing, nursing home etc.,
+      located near to a potential sources of noise e.g. licensed premises, busy urban road,
+      motorway, industrial site.
+    confidence: medium
+    notes: "Audit (wrong_trigger): Noise Assessment applies only to major full/outline applications."
+
+  - id: planning-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - ref: major-development
+    confidence: medium
+
+  - id: recreation-facilities-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, change-of-use]
+        - site:
+            in: [open-space]
+            description: The site is existing public open space or playing fields.
+    source-url: https://www.fareham.gov.uk/planning/applications_and_advice/localrequireddocs.aspx
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement, wrong_document): the workbook quoted Sport England's guidance. From
+      the audit: an Open Space Assessment for full (including change of use) and outline applications
+      on existing public open space; the Playing Field Checklist also applies to outline applications.
+
+  - id: sci
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - any:
+            - application-type:
+                in: [full, outline]
+            - all:
+                - application-type:
+                    in: [reserved-matters]
+                - discretionary
+    source-text: >-
+      Community Consultation Statement Required for the following types of *major applications: Full
+      planning applications Outline planning applications Reserved matters where local interest in
+      them is known to exist or is reasonably foreseeable.
+    confidence: medium
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - ref: major-development
+    policy: "Fareham Local Plan CC2, CC3, CC4, NE1, NE2, NE6, NE9, NE10 and D4"
+    source-url: https://www.fareham.gov.uk/planning/applications_and_advice/localrequireddocs.aspx
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Climate Change Statement for major full, outline and
+      reserved matters applications."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, change-of-use]
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Main town centre uses proposed at edge of centre or out of centre 
+              locations.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 500
+            description: The floorspace exceeds 500 square metres.
+    source-text: >-
+      Retail Impact Assessment Required for the following types of applications where main town
+      centre uses are proposed and the floor exceeds 500 square metres: Full planning applications
+      (including change of use) Outline planning applications When: Where proposed at edge of
+      centres and out of centre locations
+    confidence: medium
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - ref: major-development
+        - discretionary
+    source-text: >-
+      Transport Assessment (TA) Required for the following types of *major applications: Full
+      planning applications Outline planning applications When: Where the development has
+      significant transport implications.
+    confidence: medium
+
+  - id: travel-plan
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - ref: major-development
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 100
+                description: Residential development of 100 units or more.
+            - discretionary
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt stops before the thresholds table. From the audit: residential
+      100 units; B1/B2 2,500 sqm; B8 5,000 sqm; retail 1,000 sqm; care 500 sqm or 5 bedrooms, and
+      others. The non-residential thresholds depend on the use class, so they are shown as officer
+      discretion.
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, change-of-use]
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: Detailed residential development.
+    source-url: https://www.fareham.gov.uk/planning/applications_and_advice/localrequireddocs.aspx
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Refuse and Recycling Plan for detailed residential
+      full applications (including change of use)."
+
+unmapped:
+  - local-name: Habitat Regulations Supporting Statement
+    source-text: >-
+      Net increase in overnight accommodation … Confirmation of whether a financial contribution is
+      proposed towards the Bird Aware Solent Strategy or whether a bespoke package of measures is
+      proposed; … The land uses and areas must be used to complete a Nutrient Budget using Natural
+      England's Nutrient Calculator.
+    source-url: https://www.fareham.gov.uk/planning/applications_and_advice/localrequireddocs.aspx
+    suggested-id: habitats-regulations-assessment
+  - local-name: Drainage Strategy
+    source-text: "Site within a critical drainage area (from the audit: all major applications, and householder,
+      full and outline applications in a critical drainage area)"
+    source-url: https://www.fareham.gov.uk/planning/applications_and_advice/localrequireddocs.aspx
+    suggested-id: drainage-strategy
+  - local-name: Access Statement
+    source-text: "From the audit: major full/outline applications where a Public Right of Way near the
+      site may be affected"
+    source-url: https://www.fareham.gov.uk/planning/applications_and_advice/localrequireddocs.aspx
+    suggested-id: access-statement
+  - local-name: Landscape Assessment and Enhancement Scheme
+    source-text: "From the audit: major full/outline/reserved matters applications on sites in areas of
+      special landscape quality"
+    source-url: https://www.fareham.gov.uk/planning/applications_and_advice/localrequireddocs.aspx
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Minerals Safeguarding Assessment
+    source-text: "From the audit: major full/outline applications within a Minerals Safeguarding Area"
+    source-url: https://www.fareham.gov.uk/planning/applications_and_advice/localrequireddocs.aspx
+    suggested-id: minerals-assessment
+  - local-name: Obligations Summary
+    source-text: "From the audit: full/outline applications where planning contributions are needed under
+      the Local Plan and Planning Obligations SPD"
+    source-url: https://www.fareham.gov.uk/planning/applications_and_advice/localrequireddocs.aspx
+    suggested-id: heads-of-terms
+  - local-name: Self and Custom Build Checklist
+    source-text: "From the audit: full/outline/reserved matters/change of use applications for a net increase
+      of 40+ dwellings"
+    source-url: https://www.fareham.gov.uk/planning/applications_and_advice/localrequireddocs.aspx
+    suggested-id: self-build-statement
+  - local-name: Self and Custom Build Statement and Biodiversity Information
+    source-text: "From the audit: sites of up to 9 dwellings / 0.5 ha made up only of self-build homes"
+    source-url: https://www.fareham.gov.uk/planning/applications_and_advice/localrequireddocs.aspx
+    suggested-id: self-build-statement
+  - local-name: Welborne requirements
+    source-text: >-
+      apply to residential, commercial and community applications within the Welborne boundary, in
+      addition to the above (from the audit: Compliance Statement, Comprehensive Masterplans,
+      Welborne Ecological Assessment, Employment and Training Plan, Welborne FRA with SuDS strategy,
+      Framework Travel Plan, Heritage Strategy, Infrastructure Delivery Plan, Landscaping Scheme
+      (Structural), Open Space and Green Infrastructure Strategy, Phasing Plan, Site Wide Viability
+      Assessment, Strategic Design Codes / Design Principles, Structuring Plan, Transport Framework
+      with Public Transport Plan, Waste Water Strategy)
+    source-url: https://www.fareham.gov.uk/planning/applications_and_advice/localrequireddocs.aspx
+    suggested-id: ""
+
+low-confidence:
+  - id: travel-plan
+    note: "The non-residential thresholds from the list's table are not encoded; check them against the
+      list."
+

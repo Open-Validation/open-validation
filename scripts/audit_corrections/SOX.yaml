@@ -1,0 +1,632 @@
+# Corrections for South Oxfordshire District Council, from the council's audit.
+# South Oxfordshire and Vale of White Horse share one Validation Guide (June 2024); VAL.yaml makes
+# the same corrections. Items the guide marks "SOUTH REQUIREMENT ONLY" (Energy Statement, Health
+# Impact Assessment) stay here; "VALE REQUIREMENT ONLY" (Nutrient Neutrality) is removed. Some
+# workbook rows came from the superseded January 2023 guide. The checklists for discharge of
+# conditions and tree works were not read by Grokbot or the audit.
+local-authority: SOX
+
+submission-standards:
+  - item: All plans submitted as separate single-page PDF files
+    level: must
+
+drop:
+  - id: site-plan
+    reason: "not_a_requirement: advert checklist heading for a national drawing, not a local requirement"
+  - id: floor-plan-existing
+    sheets: [Advertisement consent, Lawful development cert]
+    reason: "not_a_requirement: checklist heading text ('Local List Requirements In addition to the national
+      requirements...')"
+  - id: floor-plan-proposed
+    sheets: [Advertisement consent, Lawful development cert]
+    reason: "not_a_requirement: as above"
+  - id: elevation-existing
+    sheets: [Advertisement consent, Lawful development cert]
+    reason: "not_a_requirement: as above"
+  - id: elevation-proposed
+    sheets: [Advertisement consent, Lawful development cert]
+    reason: "not_a_requirement: as above"
+  - id: roof-plan-existing
+    sheets: [Lawful development cert]
+    reason: "not_a_requirement: as above"
+  - id: roof-plan-proposed
+    sheets: [Lawful development cert]
+    reason: "not_a_requirement: as above"
+  - id: photos
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: advisory heritage-statement guidance ('photographs and structural surveys
+      can often assist')"
+
+drop-unmapped:
+  - local-name: Nutrient Neutrality statement / calculator
+    reason: "wrong_app_type: 7.31 is VALE REQUIREMENT ONLY (River Lambourn SAC catchment)"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_trigger: reuses the 7.20 ecology trigger; the guide has no separate HRA item"
+  - local-name: Self-build / custom build information
+    reason: "wrong_trigger: the BNG self-build exemption criteria from 7.13 (noted in bng-metric)"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: the retail sequential test and town-centre impact text from 7.34"
+  - local-name: Pre-application advice / engagement details
+    reason: "wrong_trigger: runs into the 7.24 Economic Report heading (Economic Report re-added below)"
+  - local-name: Structural Survey
+    reason: "wrong_app_type: advisory heritage-statement guidance (now a must-include item in heritage-statement)"
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "outdated_link: one row came from the superseded 2023 guide; re-added below from the June
+      2024 guide"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: Housing proposals delivering a net gain of 10 units or more.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: The site has an area of 0.5 hectares or more.
+        - all:
+            - site:
+                in: [area-of-outstanding-natural-beauty]
+                description: The site is in an Area of Outstanding Natural Beauty.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 5
+                description: A net gain of 5 units or more.
+    source-text: >-
+      7.15.2 When is an affordable housing statement or plan required? - for all Use Class C3 housing
+      proposals delivering a net gain of 10 units or more, or where the site has an area of 0.5
+      hectares or more for Use Class C2 proposals delivering a net gain of 10 self-contained units or
+      more in Areas of Outstanding Natural Beauty (AONB) w…
+    must-include:
+      - item: A viability assessment, if fewer affordable units are proposed or the proposal does 
+          not meet development plan policy
+        level: must
+        source-text: >-
+          a viability assessment must be provided if less affordable units are proposed, and/or the
+          proposals do not meet the requirements of the development plan policy.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt is cut off. From the audit: 10+ units or 0.5ha; 5+ in an
+      AONB."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    source-text: >-
+      7.17.2 An air quality assessment is required: - For all major planning application proposals
+      where the development could result in significant vehicle movements through an Air Quality
+      Management Area (AQMA)
+    must-include:
+      - item: The existing air quality (baseline)
+        level: must
+      - item: A prediction of future air quality without the proposed development
+        level: must
+    confidence: medium
+    notes: "Applies to major outline as well as full applications. Whether vehicle movements through an
+      AQMA are significant is a judgement, so it is shown as officer discretion."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: There are trees within 15m of any part of the development.
+        - site:
+            in: [tree-preservation-zone, conservation-area]
+            description: Protected (TPO or conservation area) trees are affected.
+    source-text: >-
+      7.18.1 A tree survey or Arboricultural Assessment should identify the quantity, species,
+      position, and size of the tree(s) and provide a full and clear specification of the works
+      intended and any protection measures required for the retained trees. 7.18.2 An arboricultural
+      assessment is required when: - - there are any trees within 15m of any part of the development.
+    must-include:
+      - item: Quantity, species, position and size of the trees
+        level: must
+      - item: A full and clear specification of the works intended
+        level: must
+      - item: Protection measures required for the retained trees
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): trees within 15m or TPO/conservation area trees; applies
+      to householder work too."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [scheduled-monument, archaeological-priority-area]
+            description: >-
+              The site is within, or in the setting of, a Scheduled Ancient Monument, or within a
+              priority or archaeologically sensitive area.
+        - ref: major-development
+    source-text: >-
+      7.19.2 An Archaeological assessment is required: - if the site or part of the site is within, or
+      in the setting of, a Scheduled Ancient Monument or if the site is within a priority or in an
+      archaeologically sensitive area. the proposal is a major development application
+    confidence: medium
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - site:
+                in: [site-of-special-scientific-interest, special-protection-area, 
+                      special-area-of-conservation]
+                description: The site is within or adjacent to a SSSI, SAC or SPA.
+        - discretionary
+    source-text: >-
+      … affect important protected species or habitats if the proposal affects mature/overgrown
+      gardens, areas of rough grassland or derelict land, including brownfield, allotments on or
+      adjacent to the site where a development proposal may have possible impacts on wildlife and
+      biodiversity, in particular protected species such as bats – a survey is generally considered
+      necessary for demolition proposals, including small-scale householder extension and
+      refurbishment schemes where bats are known to be in…
+    source-url: 
+      https://www.southoxon.gov.uk/wp-content/uploads/sites/2/2024/06/2024-06-04-Final-Validation-Guide.pdf
+    confidence: medium
+    notes: >-
+      7.20.2: 'for all major planning application proposals if the site is within or adjacent to a
+      designated habitat site: Site of Special Scientific Interest (SSSI) - Special Area of
+      Conservation (SAC) - Special Protection Area (SPA)', and where there is a reasonable likelihood
+      of affecting protected species or habitats (shown as officer discretion). The workbook's Full
+      planning row came from the superseded 2023 guide.
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: Mandatory biodiversity net gain applies.
+    confidence: medium
+    notes: >-
+      If mandatory BNG does not apply, the guide says further explanation or evidence may be
+      required. For the self-build exemption it asks for evidence of no more than 9 dwellings, a site
+      no larger than 0.5ha, made up only of self-build or custom build dwellings.
+
+  - id: cil-form
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: Residential development.
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 100
+            description: The proposal (including outbuildings) exceeds 100 square metres (GIA).
+        - application-type:
+            in: [s73, non-material-amendment]
+    source-text: >-
+      … to complete a CIL Form 1 for all residential development applications and all householder
+      applications, including provision of outbuildings where the proposal exceeds 100 square metres
+      (GIA). … Revised CIL Form 1 and measurements plan
+    must-include:
+      - item: A revised CIL Form 1 and measurements plan
+        level: must
+        required-if:
+          application-type:
+            in: [s73, non-material-amendment]
+    confidence: medium
+
+  - id: elevation-proposed
+    action: update
+    source-text: >-
+      show all elevations in full unless otherwise agreed include proposed building materials, style,
+      and finish of the building along with window, door, and rainwater goods details include a unique
+      drawing reference to be used in any subsequent decision notice include original paper size (A4,
+      A3 etc) on drawings for printing and to be uploaded/ printed in colour
+    must-include:
+      - item: All elevations shown in full unless otherwise agreed
+        level: must
+      - item: Proposed building materials, style and finish, with window, door and rainwater goods 
+          details
+        level: must
+      - item: A unique drawing reference
+        level: must
+      - item: The original paper size (A4, A3 etc)
+        level: must
+    confidence: medium
+    notes: "From the guide's drawing requirements (June 2024)."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - all:
+            - condition:
+                field: new-build
+                value: true
+                description: New-build residential development.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: The proposal creates one or more dwellings.
+        - condition:
+            field: housing-floorspace
+            operator: ">="
+            value: 1000
+            description: C2 or HMO development of 1,000 sq m or more.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 1000
+            description: Non-residential development over 1,000 sq m.
+    policy: SOLP 2035 DES10
+    source-text: The policy requirement for this is set out in SOLP 2035 policy DES10.
+    source-url: 
+      https://www.southoxon.gov.uk/wp-content/uploads/sites/2/2024/06/2024-06-04-Final-Validation-Guide.pdf
+    confidence: medium
+    notes: "From the audit (wrong_trigger): 7.25 Energy Statement (SOUTH REQUIREMENT ONLY) for new-build
+      residential, C2/HMO 1,000 sq m+ and non-residential over 1,000 sq m."
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: 18m or more in height.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: Two or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: Educational accommodation.
+    source-text: >-
+      7.12.1 Measures to ensure the consideration of fire safety matters as part of the planning
+      process which should be submitted with applications for: - proposals that contain two or more
+      dwellings or educational accommodation and meet the height condition of 18m or more in height,
+      or 7 or more storeys.
+    must-include:
+      - item: Submitted on a form published by the Secretary of State (or a form to similar effect)
+        level: must
+    confidence: medium
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: Flood Zone 1 sites of 1 hectare or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Flood Zone 1 sites of 1 hectare or more.
+        - site:
+            in: [critical-drainage-area]
+            description: The site is in a critical drainage area.
+    source-url: 
+      https://www.southoxon.gov.uk/wp-content/uploads/sites/2/2024/06/2024-06-04-Final-Validation-Guide.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt was only the definition. From the audit: 7.26 triggers
+      are Flood Zones 2/3, Flood Zone 1 sites of 1ha+, and critical drainage areas; it applies to householder
+      work too."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, 
+                  locally-listed-building]
+            description: The proposal affects a heritage asset.
+    source-url: 
+      https://www.southoxon.gov.uk/wp-content/uploads/sites/2/2024/06/2024-06-04-Final-Validation-Guide.pdf
+    must-include:
+      - item: A structural impact assessment, where proposals include structural changes to a listed
+          building
+        level: should
+        required-if:
+          condition:
+            field: structural-alteration
+            value: true
+            description: The proposal includes structural changes to a listed building.
+        source-text: >-
+          where proposals include structural changes to a listed building, a structural impact
+          assessment should be included
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook placed the Heritage Statement under Full planning only, with
+      archaeology text. From the audit: 7.29 Heritage Statement is required for listed building
+      consent and proposals affecting heritage assets, including householder work.
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      ref: major-development
+    source-text: >-
+      7.27.2 Hard and soft landscape plans are required for: - All major planning application
+      proposals 7.27.3 Hard and soft landscape plan requirements: - - planting of trees and/or shrubs,
+      surface materials, boundary screen walls and fences
+    must-include:
+      - item: Planting of trees and/or shrubs
+        level: must
+      - item: Surface materials
+        level: must
+      - item: Boundary screen walls and fences
+        level: must
+    confidence: medium
+    notes: "Applies to major outline as well as full applications."
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise sensitive development near an existing noise source.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Noise generating development.
+        - discretionary
+    source-text: >-
+      7.14.2 When is an acoustic report or noise impact assessment required? - where noise is likely
+      to be a material consideration/ cause an impact for either noise sensitive development or noise
+      generating development
+    confidence: medium
+
+  - id: photos
+    action: update
+    required-if:
+      application-type:
+        in: [advertising, ldc-existing-use]
+    must-include:
+      - item: Photographs or photomontage of the proposed advertisements
+        level: must
+        required-if:
+          application-type:
+            in: [advertising]
+      - item: A photographic record
+        level: must
+        required-if:
+          application-type:
+            in: [ldc-existing-use]
+    confidence: medium
+    notes: "The photographic record is on the existing-use (CLUED) checklist only."
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: Alterations are proposed to the roof form.
+    source-text: >-
+      Existing and Proposed Roof Plan 7.9.1 These plans are required where alterations are proposed to
+      the roof form.
+    must-include:
+      - item: At a measurable scale of 1:100 or 1:50, with a scale bar
+        level: must
+      - item: The position of all ridges, valleys, dormer openings, rooflights and other features
+        level: must
+    confidence: medium
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: Alterations are proposed to the roof form.
+    source-text: >-
+      Existing and Proposed Roof Plan 7.9.1 These plans are required where alterations are proposed to
+      the roof form.
+    must-include:
+      - item: At a measurable scale of 1:100 or 1:50, with a scale bar
+        level: must
+      - item: The position of all ridges, valleys, dormer openings, rooflights and other features
+        level: must
+    confidence: medium
+
+  - id: sci
+    action: update
+    required-if:
+      ref: major-development
+    must-include:
+      - item: How pre-application consultation was undertaken, in accordance with Section 4 of the 
+          NPPF
+        level: must
+      - item: How the views of the local community and stakeholders were sought and considered
+        level: should
+    confidence: medium
+    notes: "Applies to major outline as well as full applications."
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: >-
+          Alterations to existing ground levels, for example a sloping site or clear level
+          differences across the site or with neighbouring properties.
+    source-text: >-
+      Site sections and finished floor and site levels (existing and proposed) 7.10.1 These plans are
+      required where alterations are being made to the existing ground levels, for example a sloping
+      site or where there are clear ground level differences across the site and/or between
+      neighbouring properties.
+    must-include:
+      - item: At an identifiable scale of 1:200, 1:100 or 1:50, with a scale bar
+        level: must
+      - item: A cross section through the building(s)
+        level: must
+    confidence: medium
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: >-
+          Alterations to existing ground levels, for example a sloping site or clear level
+          differences across the site or with neighbouring properties.
+    source-text: >-
+      Site sections and finished floor and site levels (existing and proposed) 7.10.1 These plans are
+      required where alterations are being made to the existing ground levels, for example a sloping
+      site or where there are clear ground level differences across the site and/or between
+      neighbouring properties.
+    must-include:
+      - item: At an identifiable scale of 1:200, 1:100 or 1:50, with a scale bar
+        level: must
+      - item: A cross section through the building(s)
+        level: must
+    confidence: medium
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      always: true
+    source-text: All new development, including conversions, refurbishments and residential 
+      extensions
+    source-url: 
+      https://www.southoxon.gov.uk/wp-content/uploads/sites/2/2024/06/2024-06-04-Final-Validation-Guide.pdf
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement): 7.37 Sustainable Design Measures Statement. The workbook's row was
+      the 7.25 Energy Statement text (now energy-statement).
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - discretionary
+        - all:
+            - condition:
+                field: out-of-centre-town-centre-use
+                value: true
+                description: Retail outside town centres and local centres (as defined in SOLP 2035 
+                  policy TC2).
+            - condition:
+                field: floorspace-non-residential
+                operator: ">="
+                value: 500
+                description: Proposals for 500sqm or more.
+    policy: SOLP 2035 TC2, TC3
+    source-text: >-
+      7.34.2 A retail impact assessment is required for: - - all major planning application proposals
+      for retail development in South Oxfordshire: - Outside of town centres and local centres (as
+      defined in policy TC2 of SOLP 2035), proposals for 500sqm or more
+    confidence: medium
+    notes: "Major retail development has no field of its own, so the major branch is shown as officer
+      discretion within major development."
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt is a definition only. From the audit: all majors or significant
+      highway implications."
+
+  - id: travel-plan
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt is a definition only. From the audit: all majors or significant
+      highway implications."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    source-text: >-
+      a viability assessment must be provided if less affordable units are proposed, and/or the
+      proposals do not meet the requirements of the development plan policy.
+    confidence: medium
+
+  - id: waste-management-plan
+    action: update
+    required-if: discretionary
+    source-text: >-
+      7.41.2 A waste management plan is required for: - All proposals and changes of use that are
+      likely to generate waste
+    must-include:
+      - item: Enclosed, adequately sized refuse and recycling bin storage
+        level: must
+    confidence: medium
+
+unmapped:
+  - local-name: Economic Report
+    source-text: >-
+      7.24.1 An Economic Report is required for: - all changes of use of employment land (either
+      current or last use) where no equivalent replacement employment is provided loss of public
+      houses to alternative uses loss of village shop or other community f…
+    source-url: 
+      https://www.southoxon.gov.uk/wp-content/uploads/sites/2/2024/06/2024-06-04-Final-Validation-Guide.pdf
+    suggested-id: employment-statement
+  - local-name: Agricultural, Rural or Occupational Worker Dwelling Justification
+    source-text: "From the audit: 7.16, new agricultural/forestry/equestrian worker dwellings in open
+      countryside; removal of occupancy conditions, with 12 months' marketing"
+    source-url: 
+      https://www.southoxon.gov.uk/wp-content/uploads/sites/2/2024/06/2024-06-04-Final-Validation-Guide.pdf
+    suggested-id: agricultural-worker-dwelling-statement
+  - local-name: Drainage and Water Report
+    source-text: "From the audit: 7.23, any application with surface water implications (new dwellings,
+      annexes, extensions needing new drainage) and all majors"
+    source-url: 
+      https://www.southoxon.gov.uk/wp-content/uploads/sites/2/2024/06/2024-06-04-Final-Validation-Guide.pdf
+    suggested-id: drainage-strategy
+  - local-name: Proposed Street Scene
+    source-text: >-
+      Whilst not always necessary in some cases a street scene accurately showing adjoining buildings
+      can be useful.
+    source-url: 
+      https://www.southoxon.gov.uk/wp-content/uploads/sites/2/2024/06/2024-06-04-Final-Validation-Guide.pdf
+    suggested-id: street-scene
+
+low-confidence:
+  - id: planning-statement
+    note: "Audit (wrong_trigger): the excerpt reads only 'an overarching Planning Statement.' (from the
+      affordable housing item); the guide's trigger wasn't captured."
+  - id: design-and-access-statement
+    note: "The excerpt is the national definition; from the audit, householder work needs one where floorspace
+      is 100 sq m+ in a designated area."
+

@@ -1,0 +1,571 @@
+# Corrections for Middlesbrough Borough Council, from inputs/audit/middlesbrough-borough-council.json.
+# Grokbot's link is Middlesbrough's only published validation checklist (the PDF loads at the
+# non-www host). The checklist is undated and old (it cites the 1995 GPDO). Extraction largely
+# failed: the Householder rows came from the Certificate of Lawfulness and telecoms sections, and
+# the real Householder, Full, Outline, LBC/CAC, change of use and tree sections were not captured.
+# Items marked "From the audit" use the audit's paraphrase of the checklist. Most of the checklist's
+# items are "may be required" with no fixed trigger, so they are shown as officer discretion.
+local-authority: MDB
+
+validation-list:
+  date: "2016"
+  date-basis: >-
+    audit: the checklist text has no adoption, publication or version date; 2016-06 is only the PDF
+    metadata (CreationDate), and the content is older (it cites the 1995 GPDO, with no BNG or fire
+    statement)
+
+drop-unmapped:
+  - local-name: Landscape and Visual Impact Assessment
+    reason: "wrong_app_type: 'Visual impact assessment where relevant' is from the telecoms prior notification
+      section; now in telecommunications-report"
+  - local-name: Lawful development evidence (statutory declarations etc.)
+    reason: "wrong_app_type: Certificate of Lawfulness text placed under Householder; re-added below"
+
+requirements:
+  - id: site-plan
+    action: add
+    required-if:
+      application-type:
+        in: [hh, full, lbc, demolition-con-area, change-of-use]
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    must-include:
+      - item: Site layout at 1:100 showing neighbouring buildings and windows
+        level: must
+        required-if:
+          application-type:
+            in: [hh]
+      - item: Two site survey plans at 1:200, of existing and proposed features
+        level: must
+        required-if:
+          application-type:
+            in: [full]
+      - item: Block plan at 1:500
+        level: must
+        required-if:
+          application-type:
+            in: [lbc, demolition-con-area, change-of-use]
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): required plans in Sections 1 (Householder), 2 (Full),
+      4 (Listed Building and Conservation Area Consent) and 5 (Change of use).
+
+  - id: floor-plan-existing
+    action: replace
+    required-if:
+      application-type:
+        in: [hh, full, lbc, demolition-con-area, change-of-use]
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    must-include:
+      - item: Floor plans at 1:100
+        level: must
+        required-if:
+          application-type:
+            in: [hh]
+      - item: Floor plans at 1:50
+        level: must
+        required-if:
+          application-type:
+            in: [full]
+      - item: Plans at 1:100 of each floor where works are proposed
+        level: must
+        required-if:
+          application-type:
+            in: [lbc, demolition-con-area]
+      - item: Floor plans at 1:100 (change of use with no external works) or 1:50 (change of use with
+          external works such as a flue or new windows)
+        level: must
+        required-if:
+          application-type:
+            in: [change-of-use]
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook's Householder row was Certificate of Lawfulness text
+      ("Existing and Proposed floor plans (for all applications involving use of a building) to a
+      scale not less than 1:100", which the checklist says "may" be included). From the audit
+      (missing_requirement): the scales above are from Sections 1, 2, 4, 5 and 6.
+
+  - id: floor-plan-proposed
+    action: replace
+    required-if:
+      application-type:
+        in: [hh, full, lbc, demolition-con-area, change-of-use]
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    must-include:
+      - item: Floor plans at 1:100
+        level: must
+        required-if:
+          application-type:
+            in: [hh]
+      - item: Floor plans at 1:50
+        level: must
+        required-if:
+          application-type:
+            in: [full]
+      - item: Plans at 1:100 of each floor where works are proposed
+        level: must
+        required-if:
+          application-type:
+            in: [lbc, demolition-con-area]
+      - item: Floor plans at 1:100 (change of use with no external works) or 1:50 (change of use with
+          external works such as a flue or new windows)
+        level: must
+        required-if:
+          application-type:
+            in: [change-of-use]
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook's Householder row was Certificate of Lawfulness text.
+      From the audit (missing_requirement): the scales above are from Sections 1, 2, 4, 5 and 6.
+
+  - id: elevation-existing
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [hh, full, lbc, demolition-con-area]
+        - all:
+            - application-type:
+                in: [change-of-use]
+            - condition:
+                field: external-alterations
+                value: true
+                description: The change of use includes external works (such as a flue or new windows).
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    must-include:
+      - item: Elevations at 1:50
+        level: must
+        required-if:
+          application-type:
+            in: [hh, change-of-use]
+      - item: Elevations at 1:100
+        level: must
+        required-if:
+          application-type:
+            in: [full, lbc, demolition-con-area]
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook's Householder row was Certificate of Lawfulness text.
+      From the audit (missing_requirement): Householder 1:50, Full 1:100, LBC/CAC 1:100 where
+      alterations are proposed, change of use with external works 1:50.
+
+  - id: elevation-proposed
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [hh, full, lbc, demolition-con-area]
+        - all:
+            - application-type:
+                in: [change-of-use]
+            - condition:
+                field: external-alterations
+                value: true
+                description: The change of use includes external works (such as a flue or new windows).
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    must-include:
+      - item: Elevations at 1:50
+        level: must
+        required-if:
+          application-type:
+            in: [hh, change-of-use]
+      - item: Elevations at 1:100
+        level: must
+        required-if:
+          application-type:
+            in: [full, lbc, demolition-con-area]
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook's Householder row was Certificate of Lawfulness text.
+      From the audit (missing_requirement): Householder 1:50, Full 1:100, LBC/CAC 1:100 where
+      alterations are proposed, change of use with external works 1:50.
+
+  - id: section-proposed
+    action: add
+    required-if:
+      application-type:
+        in: [hh, lbc, demolition-con-area]
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    must-include:
+      - item: Sections at 1:100
+        level: must
+        required-if:
+          application-type:
+            in: [hh]
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): Householder sections at 1:100; LBC/CAC "sections through
+      the building". The audit doesn't say whether existing sections are also needed.
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [hh]
+            - site:
+                in: [conservation-area]
+                description: The site is within a conservation area.
+        - all:
+            - application-type:
+                in: [outline, lbc, demolition-con-area]
+            - discretionary
+    source-text: Design Statement 'only if the site is within a conservation area'
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    must-include:
+      - item: Materials to be used
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted web page text with no trigger ("Our guidance will
+      explain whether a Design and Access Statement ... required"). From the audit: a Design
+      Statement with materials for householder sites in a conservation area; a Design Statement
+      listing all materials "may be required" for LBC/CAC, and a DAS for outline.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, lbc, demolition-con-area]
+        - discretionary
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted web page text. From the audit: a Heritage
+      Statement "may be required" under Listed Building/Conservation Area Consent, and a Listed
+      Building/Conservation Area appraisal under Full planning.
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, lbc, demolition-con-area, ldc]
+        - discretionary
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    must-include:
+      - item: Statement of grounds on which the Certificate is sought
+        level: must
+        required-if:
+          application-type:
+            in: [ldc]
+        source-text: Supporting Planning Statement (to include statement of grounds on which the
+          Certificate is sought)
+      - item: Justification for the works
+        level: must
+        required-if:
+          application-type:
+            in: [lbc, demolition-con-area]
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook's Householder row was Certificate of Lawfulness text.
+      From the audit: a Supporting Planning Statement "may be required" for Householder, Outline,
+      LBC/CAC (with justification) and Certificates of Lawfulness.
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - discretionary
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook's Householder row was from Section 8, Prior Notification
+      Procedure (Telecommunications) ("Acoustic report where relevant", now under
+      telecommunications-report). From the audit: a Noise Impact Assessment "may be required" for
+      full applications.
+
+  - id: telecommunications-report
+    action: replace
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: The proposal is a telecommunications prior notification.
+    source-text: >-
+      This should include existing masts, structures and other buildings within the search area. An
+      explanation if no alternatives considered Visual impact assessment where relevant Acoustic
+      report where relevant
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    must-include:
+      - item: ICNIRP declaration
+        level: must
+      - item: Area of search, including existing masts, structures and other buildings within it
+        level: must
+      - item: An explanation if no alternatives were considered
+        level: must
+      - item: Mast register check
+        level: must
+      - item: Consultation with schools and colleges, and the aerodrome, where relevant
+        level: must
+      - item: Technical justification
+        level: must
+      - item: Visual impact assessment where relevant
+        level: should
+      - item: Acoustic report where relevant
+        level: should
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): this is the Section 8 Prior Notification Procedure
+      (Telecommunications), not Householder. The ICNIRP, mast register, consultation and technical
+      justification items are from the audit (missing_requirement).
+
+  - id: transport-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - discretionary
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): 'may be required' for full and outline applications; the
+      checklist gives no fixed trigger and tells applicants to contact the planning department."
+
+  - id: travel-plan
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - discretionary
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Draft Travel Plan 'may be required' for full
+      applications; no fixed trigger."
+
+  - id: environmental-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - discretionary
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): 'may be required' for full and outline applications; no
+      fixed trigger."
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - discretionary
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Sustainability Appraisal (full) or Sustainability
+      Assessment (outline) 'may be required'; no fixed trigger."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - discretionary
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Retail Assessment 'may be required' for full
+      applications; no fixed trigger."
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - discretionary
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): 'may be required' for full applications; no fixed
+      trigger."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - discretionary
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): 'may be required' for full and outline applications; no
+      fixed trigger."
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - discretionary
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Nature Conservation/Ecological Assessment 'may be
+      required' for full applications; no fixed trigger."
+
+  - id: archaeological-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - discretionary
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Historical & Archaeological Assessment 'may be required'
+      for full applications; no fixed trigger."
+
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline]
+        - discretionary
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Drainage Strategy/Flood Risk Assessment (householder)
+      or Flood Impact Assessment (full, outline) 'may be required'; no fixed trigger."
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - discretionary
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): 'may be required' for full applications; no fixed
+      trigger."
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - discretionary
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): 'refuse disposal details' may be required for full
+      applications; no fixed trigger."
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [hh, full, outline]
+            - discretionary
+        - application-type:
+            in: [consent-under-tpo, notice-trees-in-con-area]
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    must-include:
+      - item: Tree species and details of the works
+        level: must
+        required-if:
+          application-type:
+            in: [consent-under-tpo, notice-trees-in-con-area]
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Tree Survey "may be required" for householder, full
+      and outline applications; Section 7 (Tree Applications) lists a tree survey with species and
+      details of the works, a dimensioned plan with each tree numbered, a statement of reasons and
+      photographs.
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - discretionary
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): 'may be required' for full applications; no fixed
+      trigger."
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - discretionary
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): 'may be required' for full applications; no fixed
+      trigger."
+
+  - id: photos
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [consent-under-tpo, notice-trees-in-con-area]
+        - all:
+            - application-type:
+                in: [lbc, demolition-con-area]
+            - discretionary
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): photographs for tree applications (Section 7), and
+      up-to-date photographs 'may be required' for LBC/CAC (Section 4)."
+
+unmapped:
+  - local-name: Lawful development evidence (Certificate of Lawfulness)
+    source-text: "Sworn affidavits(s) from people with personal knowledge of the existing use or works carried
+      out  Description of all uses of land within the site (if relevant)"
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    suggested-id: lawful-development-evidence
+  - local-name: Detailed plans (1:20), listed building and conservation area consent
+    source-text: "Detailed plans (1:20) for new doors, windows, shop-fronts, panelling, fireplaces, plaster
+      mouldings and decorative details"
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    suggested-id: joinery-details
+  - local-name: Maximum envelope plan (outline)
+    source-text: "a maximum envelope of the proposed buildings"
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    suggested-id: parameter-plans
+  - local-name: Structural Survey
+    source-text: "From the audit: may be required for full applications and for LBC/CAC"
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    suggested-id: structural-survey
+  - local-name: Utilities Statement
+    source-text: "From the audit: may be required for full and outline applications"
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    suggested-id: foul-sewage-utilities-statement
+  - local-name: Planning Obligations / Draft Heads of Terms
+    source-text: "From the audit: may be required for full and outline applications"
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    suggested-id: planning-obligations-heads-of-terms
+  - local-name: Regeneration Assessment
+    source-text: "From the audit: may be required for full and outline applications"
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    suggested-id: regeneration-statement
+  - local-name: Sound Insulation Assessment
+    source-text: "From the audit: may be required for full applications"
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    suggested-id: ""
+  - local-name: Ventilation / extraction details
+    source-text: "From the audit: may be required for full applications"
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    suggested-id: ventilation-extraction-details
+  - local-name: Highway access and car parking details (householder)
+    source-text: "From the audit: details of new or altered access to a public highway or right of way, and
+      existing and proposed car parking, may be required for householder applications"
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    suggested-id: highways-access-details
+  - local-name: Tree works plan and statement of reasons
+    source-text: "From the audit: Section 7 Tree Applications - a dimensioned plan with each tree numbered,
+      and a supporting statement of reasons"
+    source-url: https://middlesbrough.gov.uk/media/nbafjkb1/planning-application-validation_checklist.pdf
+    suggested-id: ""

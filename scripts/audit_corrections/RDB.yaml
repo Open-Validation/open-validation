@@ -1,0 +1,481 @@
+# Corrections for London Borough of Redbridge, from the council's audit.
+# The audit read the current Local Planning Application Requirements (LPAR, August 2026). The
+# LPAR is organised by scale (minor / major / GLA-referable), not by application type, so most
+# items here use ref: major-development rather than application types. Grokbot missed most of
+# its 42 local requirements; the audit's list of them is added below.
+local-authority: RDB
+
+submission-standards:
+  - item: All plans submitted as separate single-page PDF files; other file types or multi-page PDFs
+      are not accepted
+    level: must
+  - item: All other documents in PDF format (unless they need to be an Excel document)
+    level: should
+  - item: All drawings state the scale; a scale bar showing 1m and 10m lengths may be added
+    level: must
+  - item: All drawings clearly labelled as proposed or existing (or existing and pre-existing for 
+      retrospective applications)
+    level: must
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advice to seek pre-application advice or a private consultant"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: built from the Block Plan wording; the LPAR has no separate highways item"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: content text only; re-added below as Flues and Vents Assessment"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: SFRA link lists; re-added below with the audit's trigger"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: the fragment 'necessary) the Sequential Test, and;'"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: a redaction note; re-added below"
+  - local-name: Tall buildings / Wind microclimate assessment
+    reason: "wrong_trigger: content text; re-added below with the audit's trigger"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_trigger / wrong_app_type: a fragment under Full planning; re-added below"
+
+requirements:
+  - id: photos
+    action: add
+    required-if:
+      always: true
+    source-text: "Photographs of Site … All applications"
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement): a local requirement for all applications, including householder,
+      adverts and listed building consent."
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees within or adjacent to the site may be affected by the development.
+    source-text: All applications where trees within or adjacent to the site may be affected by the 
+      development.
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement): Arboriculture Impact Statement / Tree Survey."
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - condition:
+                field: external-lighting
+                value: true
+                description: The proposal includes external lighting.
+        - condition:
+            field: floodlighting
+            value: true
+            description: The proposal includes floodlighting.
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): major applications with external lighting, and all applications
+      with floodlighting."
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [green-belt]
+            description: The site is in the Green Belt or Metropolitan Open Land.
+        - discretionary
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Open Space, Sport and Recreation Assessment for Green
+      Belt, MOL or playing pitches (playing pitches shown as discretionary)."
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: Major residential development of 10 or more units.
+        - condition:
+            field: housing-floorspace
+            operator: ">="
+            value: 1000
+            description: Major residential development of 1,000 square metres or more.
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): major residential of 10+ units or 1,000 sq m."
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): all majors, with exceptions the audit doesn't list."
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      ref: major-development
+    source-text: "Energy and Sustainability … All major applications."
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    must-include:
+      - item: A detailed energy strategy showing how the zero carbon target will be met within the 
+          energy hierarchy
+        level: must
+        source-text: A detailed energy strategy is required to demonstrate how the zero carbon 
+          target will be met within the framework of the energy hierarchy.
+      - item: BREEAM assessment
+        level: must
+        required-if:
+          condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 0
+            description: Non-residential major development.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, missing_requirement): the workbook's excerpt was content text without the
+      'major applications' threshold. From the audit: a BREEAM Assessment for all non-residential majors.
+
+  - id: sci
+    action: add
+    required-if:
+      ref: major-development
+    source-text: "Community Involvement Statement … All major applications."
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement)."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-text: "Planning Statement … All major applications."
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement)."
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      all:
+        - ref: major-development
+        - any:
+            - site:
+                in: [site-of-special-scientific-interest, local-wildlife-site, 
+                      special-protection-area]
+                description: The site is on or near a designated site.
+            - discretionary
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Ecological and Biodiversity Assessment for majors on or
+      near designated sites, rivers, brownfield land or open space, or where protected species may be
+      present (the non-designation cases are shown as discretionary).
+
+  - id: landscaping-plan
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">"
+        value: 100
+        description: Major development of over 100 units.
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): majors over 100 units."
+
+  - id: transport-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 50
+            description: Major development of over 50 homes.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 1000
+            description: Over 1,000 square metres of commercial floorspace.
+        - discretionary
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Transport Impact Assessment for majors over 50 homes
+      or 1,000 sq m commercial, and non-majors with significant transport effects."
+
+  - id: travel-plan
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 50
+            description: Major development of over 50 homes.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 1000
+            description: Over 1,000 square metres of commercial floorspace.
+        - discretionary
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Green Travel Plan, same thresholds as the Transport
+      Impact Assessment."
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: Major or non-major change of use.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates new residential units.
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Waste / Site Waste Management Plan / Service Delivery
+      Plan for major and non-major change of use or new residential units."
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: A sensitive end use on land at risk of contamination.
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    confidence: medium
+    notes: "From the audit (wrong_trigger): sensitive end use on land at risk of contamination. The workbook
+      quoted CL:AIRE library text."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      ref: major-development
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    confidence: medium
+    notes: >-
+      From the audit (wrong_trigger): all major applications. Non-major applications, including
+      householder, need a Planning Fire Safety Strategy or Reasonable Exception Statement (unmapped).
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, locally-listed-building, 
+                  conservation-area]
+            description: The proposal directly affects, or affects the setting of, a listed 
+              building, registered park or garden, non-designated heritage asset or conservation 
+              area.
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    confidence: medium
+    notes: >-
+      From the audit (wrong_trigger, wrong_app_type): the workbook's excerpt was cut off. The LPAR also
+      applies it to listed building consent, with a Schedule of Works for listed buildings as a sub-item.
+
+  - id: design-and-access-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    confidence: low
+    notes: >-
+      From the audit (wrong_app_type): the LPAR applies the Design and Access Statement to listed
+      building consents. The major-development branch is the national rule; the audit gives no
+      other detail.
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      site:
+        in: [archaeological-priority-area]
+        description: The site is in an Archaeological Priority Area and likely to affect important 
+          archaeological remains.
+    source-text: All applications within Archaeological Priority Areas likely to affect important 
+      archaeological remains.
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted content text ('an appropriate desk based assessment
+      and, where necessary, a field evaluation')."
+
+  - id: daylight-sunlight-assessment
+    action: replace
+    required-if:
+      ref: major-development
+    source-text: All major applications.
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted a recalculation note without the 'major applications'
+      threshold."
+
+  - id: cil-form
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates a new dwelling.
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 100
+            description: The proposal creates 100 square metres (GIA) or more.
+    notes: "Audit (wrong_trigger): the trigger is 'new dwelling and/or 100 sq m (GIA) or more'."
+
+  - id: viability-assessment
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    notes: >-
+      All major applications where a policy requirement is not met (e.g. under 35% affordable housing,
+      under 50% on public/industrial land, or not a 60/40 tenure split) (council's wording).
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The proposal meets the thresholds for Schedule 1 or Schedule 2 development 
+          under the EIA Regulations 2017.
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: Scale of 1:200 or 1:500, stated on the plan
+        level: must
+      - item: Direction of north
+        level: must
+      - item: The proposed development in relation to the site boundaries and other existing 
+          buildings on site
+        level: must
+      - item: All neighbouring buildings, roads and footpaths on adjoining land, including access 
+          arrangements
+        level: must
+      - item: All public rights of way crossing or adjoining the site
+        level: must
+    notes: "Block plan contents from the council's wording (the LPAR lists the Block Plan for all applications)."
+
+  - id: noise-assessment
+    action: update
+    must-include:
+      - item: Prepared by a qualified acoustician, in line with British Standards and World Health 
+          Organisation guidelines
+        level: must
+        source-text: You must submit a noise impact assessment prepared by a qualified acoustician, 
+          and in line with British Standards and World Health Organisation guidelines.
+
+  - id: flood-risk-assessment
+    action: update
+    must-include:
+      - item: An assessment of flood risk from all sources of flooding, plus an allowance for 
+          climate change
+        level: must
+        source-text: "For all developments the FRA should include: an assessment of the flood risk from
+          all sources of flooding for your development, plus an allowance for climate change"
+
+unmapped:
+  - local-name: Fire Safety (non-major) - Planning Fire Safety Strategy or Reasonable Exception 
+      Statement
+    source-text: Non-major developments, including householder applications
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    suggested-id: fire-statement
+  - local-name: Basement Impact Assessment / Construction Method Statement for Basements
+    source-text: All applications that involve basement development
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    suggested-id: basement-impact-assessment
+  - local-name: Flues and Vents Assessment
+    source-text: "From the audit: any application proposing plant, flues, ventilation, extraction or air
+      conditioning in detail"
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    suggested-id: ventilation-extraction-details
+  - local-name: HMO Management Plan
+    source-text: "From the audit: conversions or changes of use to HMOs"
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    suggested-id: hmo-management-plan
+  - local-name: Community Use Statement
+    source-text: "From the audit: loss of a community use"
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    suggested-id: community-use-statement
+  - local-name: Student Housing Report
+    source-text: "From the audit: student accommodation"
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    suggested-id: student-housing-management-plan
+  - local-name: Affordable and Managed Workspace Management Plan
+    source-text: "From the audit: major office or commercial mixed use"
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    suggested-id: affordable-workspace-plan
+  - local-name: Air Quality Positive Statement
+    source-text: "From the audit: GLA-referable EIA-category majors"
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    suggested-id: air-quality-positive-statement
+  - local-name: Circular Economy Statement
+    source-text: "From the audit: GLA-referable majors"
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    suggested-id: circular-economy-statement
+  - local-name: Whole Life-Cycle Carbon Assessment
+    source-text: "From the audit: GLA-referable majors"
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    suggested-id: whole-life-carbon-assessment
+  - local-name: Green Infrastructure / Urban Greening Factor
+    source-text: "From the audit: all majors"
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    suggested-id: urban-greening-factor
+  - local-name: Health Impact Assessment
+    source-text: "From the audit: majors of 150+ dwellings"
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Sequential Test (Town Centre)
+    source-text: "From the audit: main town centre uses"
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    suggested-id: sequential-test
+  - local-name: Sustainable Drainage / Drainage Strategy
+    source-text: "From the audit: all majors plus smaller schemes meeting flood-risk criteria"
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    suggested-id: drainage-strategy
+  - local-name: S106 Heads of Terms
+    source-text: "From the audit: all majors"
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    suggested-id: heads-of-terms
+  - local-name: Tall Buildings Assessment
+    source-text: "From the audit: majors of 18m+ and/or over 6 storeys"
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    suggested-id: tall-buildings-assessment
+  - local-name: Habitats Regulations Assessment / Unilateral Undertaking (SAMMS and SANGS 
+      contributions)
+    source-text: >-
+      All non-major residential proposals within 0-6.2km Zone of Influence of Epping Forest Special
+      Area of Conservation (SAC) … Prior approval change of use to residential units
+    source-url: https://www.redbridge.gov.uk/media/htrnwuzu/validation-list_aug-2026.pdf
+    suggested-id: habitats-regulations-assessment
+
+low-confidence:
+  - id: bng-metric
+    note: "Audit (wrong_trigger): the excerpt is Environment Act text and link fragments, not the LPAR's
+      trigger."
+  - id: noise-assessment
+    note: "Audit (wrong_trigger): the excerpt is content text; the LPAR's trigger was not captured."
+  - id: flood-risk-assessment
+    note: "Audit (wrong_trigger): the excerpt is content text; the LPAR's trigger was not captured."
+

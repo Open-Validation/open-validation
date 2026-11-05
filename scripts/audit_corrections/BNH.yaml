@@ -1,0 +1,66 @@
+# Corrections for Brighton and Hove City Council, from the council's audit.
+# The audit could not fetch the council's pages (contents_checked false). It found that the
+# council now publishes local requirements per application type on a 'Local Requirements and
+# planning application Forms' hub (the build already uses that URL), which Grokbot did not read.
+# Grokbot's rows come from SPDs, guidance notes and a 2009 checklist, so keep this light.
+local-authority: BNH
+
+requirements:
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development meets the thresholds and criteria in the EIA Regulations 2017.
+    notes: >-
+      The excerpt states the trigger. Audit (other): this is a national statutory requirement under
+      the EIA Regulations 2017, not a local list item.
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    must-include:
+      - item: A full, un-redacted Viability Assessment at the time of submission
+        level: must
+        source-text: >-
+          the LPA requires the applicant to submit a full, un-redacted Viability Assessment at the
+          time of submission of the planning application.
+      - item: A redacted Viability Assessment
+        level: should
+        source-text: In addition a redacted Viability Assessment should also be submitted.
+    notes: >-
+      Required for all application types where the proposal does not meet policy requirements or
+      developer contributions and this is justified on viability grounds (council's wording).
+      Audit (wrong_app_type, other): it is not just for full planning, and the un-redacted /
+      redacted text sat under 'Submission rules'.
+
+  - id: affordable-housing-statement
+    action: add
+    source-url: https://www.brighton-hove.gov.uk/content/planning/planning-applications/affordable-housing-validation-requirements
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): Grokbot read the council's 'affordable housing validation
+      requirements' page but recorded no affordable housing requirement. The audit gives no trigger
+      or contents.
+
+low-confidence:
+  - id: site-plan
+    note: >-
+      Audit (wrong_trigger): the householder excerpt is navigation text ('to create a Site Plan
+      Summary of National and Local Requirements...'), not a trigger. The council has a 'Block plan
+      local requirements' page that the audit could not read.
+  - id: bng-metric
+    note: >-
+      Audit (wrong_trigger, wrong_document): the excerpt is a generic national BNG summary from the
+      SPD11 annexes, cut off mid-sentence, not the council's validation list.
+  - id: biodiversity-survey-report
+    note: >-
+      Audit (wrong_trigger, wrong_document): the excerpt is garbled and comes from a 2009 Biodiversity
+      Checklist; a 2022 'Full and Outline Apps' biodiversity checklist and the online wildlife
+      assessment check appear to replace it.
+  - id: "*"
+    note: >-
+      Audit (missing_requirement): the council has local requirements pages for reserved matters,
+      prior approval, adverts, agricultural development and a listed building checklist that
+      Grokbot did not capture, so other types may need requirements not shown here.

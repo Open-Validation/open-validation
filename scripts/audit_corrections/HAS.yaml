@@ -1,0 +1,559 @@
+# Corrections for Hastings Borough Council, from inputs/audit/hastings-borough-council.json.
+# The audit compared the workbook with the Hastings Validation Checklist (Version 26, September
+# 2026), the same document the workbook used. Most workbook excerpts were fragments or text from
+# other rows. The checklist does not split requirements by application type (audit issue 3), so
+# files keep no application type unless the council's trigger names one.
+local-authority: HAS
+
+submission-standards:
+  - item: All plans show the direction of north and a scale bar, and state the paper size and scale
+    level: must
+  - item: Drawings preferably printable on A3
+    level: should
+  - item: All drawings suitable for scanning and display electronically
+    level: must
+
+drop-unmapped:
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_trigger: the excerpt is the exemption from the Land Stability Declaration Form; Hastings
+      has no coal-mining requirement (replaced below)"
+  - local-name: Ground investigation / Geotechnical / Basement Impact Assessment
+    reason: "duplicate: the same Ground Investigation Report as land-contamination-assessment"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: the excerpt starts with a list of policy and guidance links (re-added below
+      with the council's trigger)"
+  - local-name: Self-build / custom build information
+    reason: "wrong_trigger: the excerpt starts with a list of policy and guidance links (re-added below)"
+  - local-name: Structural Survey
+    reason: "wrong_app_type: a Listed Building Consent requirement, not Full planning (re-added below)"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 1
+        description: >-
+          The proposal is residential development, including conversions or changes of use,
+          creating one or more net additional dwellings.
+    source-text: Any residential development… creating one or more net additional dwellings
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted viability text. The trigger includes conversions
+      and changes of use."
+
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      ref: major-development
+    source-text: All Major Developments
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was a fragment."
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - any:
+            - ref: major-development
+            - condition:
+                field: site-area-residential
+                operator: ">"
+                value: 0.2
+                description: The site is over 0.2 hectares.
+            - condition:
+                field: site-area-non-residential
+                operator: ">"
+                value: 0.2
+                description: The site is over 0.2 hectares.
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    must-include:
+      - item: Pre-development biodiversity metric
+        level: must
+      - item: Statement on any degradation of the site's habitats
+        level: must
+      - item: Details of any irreplaceable habitat
+        level: must
+      - item: Habitat plan
+        level: must
+    confidence: low
+    notes: >-
+      From the audit (wrong_trigger): major applications and small sites subject to the general BNG
+      condition. Householder, de minimis and sites of 0.2ha or below (applications on or after 6
+      August 2026) are exempt; the self/custom build exemption no longer applies. The must-include
+      items are the audit's summary of Section 5. The application types are inferred from the
+      householder exemption; de minimis has no field.
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: The proposal is a change of use.
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal is new build.
+        - condition:
+            field: residential-extension
+            value: true
+            description: The proposal is an extension.
+    source-text: >-
+      All sites have the potential to support protected species... This applies to changes of use,
+      new build and extension applications.
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    must-include:
+      - item: >-
+          Undertaken by an appropriately qualified and experienced person with current membership
+          of CIEEM or another recognised professional body
+        level: must
+        source-text: >-
+          Reports must be undertaken by an appropriately qualified and experienced person in this
+          field of work with current membership of CIEEM or other recognised professional body
+          covering this profession.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the workbook quoted the surveyor-membership text and
+      placed it under Full planning only; it applies to householder extensions too.
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt mixed in site-allocation and BNG text."
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal changes ground levels, or is next to changing ground levels.
+    must-include:
+      - item: Existing and proposed site sections and finished floor and site levels, at 1:50 or 
+          1:100 with a scale bar
+        level: must
+
+  - id: section-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: The proposal changes ground levels, or is next to changing ground levels.
+        - all:
+            - application-type:
+                in: [lbc]
+            - condition:
+                field: structural-alteration
+                value: true
+                description: The works remove internal walls or change floors, ceilings or stairs.
+    must-include:
+      - item: Existing and proposed site sections and finished floor and site levels, at 1:50 or 
+          1:100 with a scale bar
+        level: must
+        required-if:
+          condition:
+            field: change-in-ground-levels
+            value: true
+            description: The proposal changes ground levels, or is next to changing ground levels.
+      - item: Internal sections at 1:20 or 1:10
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+    confidence: medium
+    notes: >-
+      The ground-levels trigger is the workbook's excerpt. From the audit (missing_requirement):
+      listed building consent needs internal sections at 1:20 or 1:10 where internal walls are
+      removed or floors, ceilings or stairs change.
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      site:
+        in: [flood-risk-zone]
+        description: The site is in Flood Zone 2 or 3, or as shown in the flood map for planning.
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): applies to all development including householder and minor
+      development and changes of use, not just Full planning. Section 3 also asks for a
+      site-specific FRA for upward-extension prior approvals where the Environment Agency must be
+      consulted.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, 
+                  locally-listed-building, world-heritage-site]
+            description: The application affects a designated or non-designated heritage asset or 
+              its setting.
+        - ref: major-development
+    source-text: Required on all applications which affect designated and nondesignated heritage 
+      assets or their setting
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type, missing_requirement): heritage assets or their setting,
+      all major development, and all listed building consent applications; householders included.
+      The council also asks for a Historic Environment Record (HER) checklist (see unmapped).
+
+  - id: photos
+    action: replace
+    required-if:
+      application-type:
+        in: [lbc]
+    source-text: All LBC applications
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    must-include:
+      - item: Photographs labelled, with a photo location plan
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): site photographs are a Listed Building Consent requirement (Section
+      4); the workbook's excerpt was guidance on Heritage Statement content.
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The roof form, coverings, dormers, rooflights, solar panels, chimneys, parapets
+          or gutters are affected.
+    source-text: >-
+      Roof plans are required where roof form, coverings, dormers, rooflights, solar panels,
+      chimneys, parapets or gutters are affected.
+    must-include:
+      - item: Scale 1:100 or 1:200 with a scale bar
+        level: must
+      - item: Scale 1:50
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+    confidence: medium
+    notes: "The workbook's excerpt began with the page footer 'September 2026'. From the audit: roof plans
+      at 1:50 for listed building consent roof alterations."
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The roof form, coverings, dormers, rooflights, solar panels, chimneys, parapets
+          or gutters are affected.
+    source-text: >-
+      Roof plans are required where roof form, coverings, dormers, rooflights, solar panels,
+      chimneys, parapets or gutters are affected.
+    must-include:
+      - item: Scale 1:100 or 1:200 with a scale bar
+        level: must
+      - item: Scale 1:50
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+    confidence: medium
+    notes: "The workbook's excerpt began with the page footer 'September 2026'. From the audit: roof plans
+      at 1:50 for listed building consent roof alterations."
+
+  - id: viability-assessment
+    action: replace
+    required-if: discretionary
+    source-text: Any application where s106 planning obligations will not be met in full
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    must-include:
+      - item: An explanation of why policy obligations cannot be met
+        level: should
+      - item: Appraisal information, values, costs, affordable housing details and assumptions
+        level: should
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was a garbled merge of the affordable housing
+      table. The must-include items are the council's wording from the workbook's open-space row
+      ("it should explain why policy obligations cannot be met and include sufficient appraisal
+      information, values, costs, affordable housing details and assumptions").
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: The site is in the contaminated land zone, however minor the application.
+        - discretionary
+    source-text: >-
+      Land contamination PPG A GIR maybe required for development proposed not directly on but
+      within 250 metres of any contaminated land or historical land fill (please note that if a GIR
+      has been carried out for the site as part of a previous permission, a further ground
+      investigation report will be required).
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    confidence: medium
+    notes: >-
+      Audit (duplicate, wrong_trigger): the Ground Investigation Report is required on sites in the
+      contaminated land zone regardless of how minor the application is, and may be required
+      within 250m of contaminated land or landfill (shown as officer discretion).
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook placed it under prior approval and quoted the exemption
+      clause. Relevant buildings are 18m+ or 7+ storeys with 2+ dwellings or educational
+      accommodation; material change of use, outline and s73 applications are exempt.
+
+  - id: design-and-access-statement
+    action: add
+    required-if:
+      application-type:
+        in: [lbc]
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): all listed building consent applications (Section 4).
+      The national rules for other applications still apply."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Industrial uses next to housing, or restaurants and cafes with noisy 
+              extraction.
+        - condition:
+            field: plant-equipment
+            value: true
+            description: The proposal includes air conditioning or condenser units.
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): industrial uses next to housing, restaurants/cafes with
+      noisy extraction, air conditioning/condenser units."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): all major development."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      condition:
+        field: floorspace-non-residential
+        operator: ">"
+        value: 2500
+        description: Retail or leisure development over 2,500 square metres on an unallocated site.
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Retail or Leisure Impact Assessment for retail or leisure
+      over 2,500 sq m on an unallocated site."
+
+  - id: sci
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: departure-from-development-plan
+            value: true
+            description: The application is a departure from the development plan.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 1000
+            description: Over 1,000 square metres of non-residential floorspace.
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 10
+            description: Over 10 dwellings.
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): departures, over 1,000 sq m non-residential, over 10
+      dwellings."
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): all major development."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: The proposal includes a mobile phone base station.
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    must-include:
+      - item: ICNIRP compliance declaration
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): Telecommunications Statement and ICNIRP compliance for
+      mobile base stations."
+
+  - id: transport-assessment
+    action: add
+    required-if: discretionary
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): Transport Assessment/Statement by East Sussex County
+      Council's 2020 thresholds, which the audit does not give."
+
+  - id: travel-plan
+    action: add
+    required-if: discretionary
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): Travel Plan by East Sussex County Council's 2020 thresholds,
+      which the audit does not give."
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: There are trees on or next to the site.
+        - site:
+            in: [tree-preservation-zone]
+            description: Trees protected by a Tree Preservation Order are affected.
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    must-include:
+      - item: Tree survey, arboricultural impact assessment and method statement to BS5837
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement, wrong_app_type): trees on or next to the site, or TPO
+      trees; householders included."
+
+unmapped:
+  - local-name: Land Stability Declaration Form
+    source-text: "All applications where sites are located in an Article 4 Direction Cliff Stability Area"
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    suggested-id: land-stability-assessment
+  - local-name: Land Stability / Ground Condition Assessment
+    source-text: "From the audit: unstable land, cliffs, toe or head of slopes, retaining structures"
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    suggested-id: land-stability-assessment
+  - local-name: Drainage Strategy / SuDS
+    source-text: "A completed SuDS Strategy Form with supporting documents is required for development
+      proposals which could affect drainage on or around the site."
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    suggested-id: drainage-strategy
+  - local-name: Self-build / custom build information
+    source-text: "Applications for self/custom build … Self/custom build applications must identify the
+      initial occupiers and confirm consent to share their details with Planning Services."
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    suggested-id: self-build-statement
+  - local-name: Structural report and calculations (listed buildings)
+    source-text: "substantial demolition or excavation, or significant structural alteration"
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    suggested-id: structural-survey
+  - local-name: Historic Environment Record (HER) checklist
+    source-text: "They will all require:1) A Heritage statement AND 2) A Historic Environment Record (HER)
+      checklist"
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    suggested-id: her-checklist
+  - local-name: Economic Statement
+    source-text: "From the audit: new employment uses or loss of B-class/E(g) uses"
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    suggested-id: employment-statement
+  - local-name: Parking Plans
+    source-text: "From the audit: loss or gain of parking, more parking demand, access changes; include
+      cycle storage"
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    suggested-id: parking-plan
+  - local-name: Road Safety Audit Stage 1
+    source-text: "From the audit: major schemes with highway works or new access; some non-major"
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    suggested-id: road-safety-audit
+  - local-name: Sequential Test (main town centre uses)
+    source-text: "From the audit: main town centre uses outside centres"
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    suggested-id: sequential-test
+  - local-name: Site / Topographical Survey
+    source-text: "From the audit: new dwellings and all major development"
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    suggested-id: topographical-survey
+  - local-name: Ventilation / Extraction details
+    source-text: "From the audit: cafes, restaurants, takeaways, any on-site cooking"
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    suggested-id: ventilation-extraction-details
+  - local-name: Biodiversity Gain Plan (discharge of the BNG condition)
+    source-text: "From the audit: a Biodiversity Gain Plan / BNG Management and Monitoring Plan is needed
+      to discharge the BNG pre-commencement condition"
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    suggested-id: biodiversity-gain-plan
+  - local-name: Prior approval upward extensions information (Section 3)
+    source-text: "From the audit: Part 1 Class AA and Part 20 Classes A, AA, AB, AC and AD - a written
+      description, a scaled plan with north point, existing and proposed elevations, floor plans, the
+      addresses of flats, the developer's contact details, and a site-specific FRA where the EA must be
+      consulted"
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    suggested-id: ""
+  - local-name: Listed building consent details (joinery, ceilings, materials, drawing list)
+    source-text: "From the audit: joinery and architectural feature details (changes to joinery or decorative
+      features); existing and proposed ceiling plans (decorative ceilings or cornices); materials, fixings
+      and finishes specification (all LBC); a drawing and document list (all LBC)"
+    source-url: https://www.hastings.gov.uk/content/ValidationService/validation_checklist.pdf
+    suggested-id: ""
+
+low-confidence:
+  - id: site-plan
+    note: "Audit (wrong_trigger): the excerpt 'and proposed block plans are required.' is a cut-off fragment;
+      the trigger needs re-reading in the list."
+  - id: recreation-facilities-assessment
+    note: "Audit (wrong_trigger): the excerpt is planning obligations/viability boilerplate, not an open
+      space trigger; check whether the list asks for this at all."
+

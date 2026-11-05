@@ -1,0 +1,607 @@
+# Corrections for Wirral Borough Council, from inputs/audit/wirral-borough-council.json.
+# The workbook link is the current 'Development Management Validation Checklist', adopted May 2025
+# (57 numbered items); the build reads 'May 2025' from the audit. Grokbot's tab items came from the
+# forms-and-checklists web page, not the checklist; about 25 items were missed, many excerpts
+# belong to the neighbouring item, and the three Householder rows explicitly exclude householder
+# applications. "Except householder applications" is shown here as full, outline and reserved
+# matters. Items marked "From the audit" use its paraphrase of the checklist.
+local-authority: WRL
+
+drop:
+  - id: daylight-sunlight-assessment
+    reason: "not_a_requirement: not a separate item; part of the item 37 Microclimate Assessment content for tall buildings"
+
+drop-unmapped:
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "duplicate: quotes the item 5 Agricultural Land Classification trigger; re-added below"
+  - local-name: Crime prevention / Secured by Design statement
+    reason: "wrong_trigger: content text; re-added below with the trigger"
+  - local-name: Design Code / Masterplan / Parameter plans
+    reason: "wrong_trigger: merges the item 13 heading and drops the thresholds; re-added below"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: quotes the item 14 Digital Connectivity trigger; both re-added below"
+  - local-name: Gypsy & Traveller information
+    reason: "excerpt runs on into item 26; re-added below without it"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: web page text; re-added below"
+  - local-name: Landscape and Visual Impact Assessment
+    reason: "wrong_trigger: competence sentence; re-added below with the trigger"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: garbled mix of items 2 and 3; the checklist has no pre-application requirement"
+
+requirements:
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - any:
+            - site:
+                in: [contaminated-land]
+                description: >-
+                  The site is known to be, or suspected to be, affected by land contamination (such
+                  as previously developed land).
+            - condition:
+                field: sensitive-end-use
+                value: true
+                description: >-
+                  An end use vulnerable to land contamination, such as residential or nursery/school
+                  development.
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    source-text: >-
+      29 Land Contamination Assessment Any application (except householder applications) where the
+      application site is known to be, or suspected to be, affected by land contamination (such as
+      previously developed land), or where the application proposes an end use vulnerable to land
+      contamination such as residential development or nursery/school development. … A preliminary
+      risk assessment (PRA) must be undertaken and prepared by a suitably qualified and experienced
+      person
+    must-include:
+      - item: A preliminary risk assessment (PRA), prepared by a suitably qualified and experienced
+          person
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): item 29 excludes householder applications. The excerpt's two columns are separated above without changing the words."
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - discretionary
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    source-text: >-
+      45 Refuse and Recycling Management Strategy All applications (except householder
+      applications) where refuse and recycling storage will be required on site and/or where refuse
+      and recycling vehicle access will be required to the site.
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): item 45 excludes householder applications. 'Where refuse and recycling
+      storage or vehicle access will be required' can't be expressed with existing fields, so it is
+      shown as officer discretion. From the audit: item 57 Waste Management Assessment is also
+      missing; its trigger is not given.
+
+  - id: roof-plan-existing
+    action: replace
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type, duplicate): the workbook's excerpt ('...and proposed roof plans in
+      accordance with the above requirements') ran on into the item 45 refuse text, which excludes
+      householder applications. The roof plan trigger was not captured.
+
+  - id: roof-plan-proposed
+    action: replace
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type, duplicate): the workbook's excerpt ran on into the item 45 refuse text.
+      The roof plan trigger was not captured.
+
+  - id: affordable-housing-statement
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Needed where affordable housing is proposed or is otherwise required under national or local policy (council's wording); this can't be expressed with existing fields."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: The works could affect trees.
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was the fragment 'requirement for Arboricultural
+      1.' From the audit: needed for works where trees could be affected; the site plan is used to
+      screen applications (householder included) for this.
+
+  - id: archaeological-assessment
+    action: replace
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    source-text: >-
+      Archaeological desk-based assessments must be carried out by a suitably qualified historic
+      environment consultant.
+    must-include:
+      - item: Carried out by a suitably qualified historic environment consultant
+        level: must
+    confidence: low
+    notes: "Audit (wrong_trigger): the excerpt ran into the item 10 BNG trigger; the archaeology trigger was not captured."
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The application is subject to the biodiversity gain condition.
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    source-text: 10 Biodiversity Net Gain (BNG) All applications subject to the biodiversity gain condition.
+    confidence: medium
+
+  - id: site-plan
+    action: replace
+    required-if:
+      always: true
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    source-text: >-
+      the site plan provided will be used to screen the application for a requirement for
+      Arboricultural …
+    confidence: medium
+    notes: "Audit (wrong_trigger): from the audit, site plans are needed for all applications."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The project is listed in Schedule 1 of the EIA Regulations 2017.
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    source-text: >-
+      Environmental Statement (EIA) … All applications for development where the proposed project
+      is listed in Schedule 1 of the Town and Country Planning (Environmental Impact Assessment)
+      Regulations 2017 or any successor regulations.
+    confidence: medium
+
+  - id: section-existing
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New or replacement buildings.
+        - condition:
+            field: site-level-change
+            operator: ">="
+            value: 1000
+            description: Level changes of 1m or more.
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    source-text: level changes of 1m or more
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted drawing-standards text. From the audit: item 47 Section Drawings, for new or replacement buildings, or level changes of 1m or more."
+
+  - id: section-proposed
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New or replacement buildings.
+        - condition:
+            field: site-level-change
+            operator: ">="
+            value: 1000
+            description: Level changes of 1m or more.
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    source-text: level changes of 1m or more
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted drawing-standards text. From the audit: item 47 Section Drawings, for new or replacement buildings, or level changes of 1m or more."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains student accommodation.
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, duplicate): the workbook quoted the EIA Schedule 1 trigger. From the
+      audit: item 21, relevant buildings 18m+ or 7+ storeys with 2+ dwellings or student
+      accommodation; outline and s73 applications are exempt (not expressible here).
+
+  - id: floor-plan-existing
+    action: replace
+    required-if:
+      always: true
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    confidence: medium
+    notes: "Audit (wrong_trigger, duplicate): the workbook quoted the Accessible Housing text. From the audit: floor and elevation drawings for all applications."
+
+  - id: floor-plan-proposed
+    action: replace
+    required-if:
+      always: true
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    confidence: medium
+    notes: "Audit (wrong_trigger, duplicate): the workbook quoted the Accessible Housing text (kept as an unmapped item). From the audit: floor and elevation drawings for all applications."
+
+  - id: elevation-existing
+    action: replace
+    required-if:
+      always: true
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    confidence: medium
+    notes: "Audit (wrong_trigger): from the audit, floor and elevation drawings for all applications."
+
+  - id: elevation-proposed
+    action: replace
+    required-if:
+      always: true
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    confidence: medium
+    notes: "Audit (wrong_trigger): from the audit, floor and elevation drawings for all applications."
+
+  - id: photos
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, locally-listed-building]
+            description: Works to a listed building or a locally listed heritage asset.
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - condition:
+                field: new-build
+                value: true
+                description: The proposal includes new buildings.
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    source-text: Listed Building Consent applications … new buildings in conservation areas
+    confidence: medium
+    notes: >-
+      Audit (not_a_requirement, wrong_app_type): the workbook's row was PEA screening text. From the
+      audit: item 42 Photographic Survey for listed buildings, LBC, local-list assets and new
+      buildings in conservation areas.
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [green-belt]
+            description: Minor or other development within the Green Belt.
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    source-text: All major applications, and minor or other development within the Green Belt
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the Accessible Housing text."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: >-
+          Main town centre uses not in an existing centre or in accordance with the locational
+          policies of the Wirral Local Plan.
+    confidence: medium
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Electronic communications development.
+    must-include:
+      - item: For an addition to an existing mast or base station, a statement self-certifying that
+          the cumulative exposure, when operational, will not exceed International Commission
+          guidelines on non-ionising radiation protection
+        level: must
+    confidence: medium
+    notes: >-
+      Item 17 Electronic Communications Development Evidence Statement: 'All planning applications
+      for electronic communications development' (the heading was in the workbook's photographs row).
+      The other content items are cut off in the excerpt.
+
+  - id: travel-plan
+    action: replace
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    source-text: >-
+      The content of any Travel Plan should align with the guidance contained within National
+      Planning Practice Guidance: ‘What information should be included in Travel Plans?’
+    confidence: low
+    notes: "Audit (wrong_trigger): content text, running into the item 56 Viability trigger; the travel plan trigger was not captured."
+
+  - id: viability-assessment
+    action: replace
+    required-if: discretionary
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    source-text: >-
+      56 Viability Appraisal Any planning application where the applicant considers that they cannot
+      meet a policy compliant level of affordable housing or cannot meet any other national or local
+      policy requirement or Section 106 obligation on grounds of development viability.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's Viability row quoted the item 5 Agricultural Land Classification trigger; the right text was in its Travel Plan row."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [conservation-area, world-heritage-site]
+                description: The site is in a conservation area or World Heritage Site.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: The proposal creates one or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: The proposal creates 100 square metres or more of floorspace.
+        - application-type:
+            in: [lbc]
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    source-text: >-
+      Design and Access Statements accompanying applications for listed building consent must
+      include an explanation of the design principles and concepts that have been applied to the
+      proposed works, and how they have taken account of: (a) the special architectural or historic
+      importance of the building; (b) the particular physical features of the building that justify
+      its designation as a listed building; and (c) the building’s setting.
+    confidence: medium
+    notes: "Audit (missing_requirement): item 11 also covers all majors, and dwellings or 100 sqm+ in a conservation area or World Heritage Site; the workbook had it under Listed building consent only."
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, conservation-area]
+            description: The project affects a Grade I, Grade II* or Grade II listed building, or a conservation area.
+    source-url: https://www.wirral.gov.uk/planning-and-building/planning/planning-application-forms-and-checklists
+    source-text: >-
+      Heritage statements If your project affects a Grade I, Grade II* or Grade II listed building,
+      or a conservation area, you need to follow our Heritage Statement guidelines
+    confidence: medium
+    notes: >-
+      Audit (not_a_requirement, missing_requirement): buried in the web page's link text. From the
+      audit: item 28 Historic Environment Impact Assessment applies to listed building consent and
+      householder applications; its exact trigger is not given.
+
+  - id: air-quality-assessment
+    action: add
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    confidence: low
+    notes: "From the audit (missing_requirement): item 7 Air Quality Assessment; the audit gives no trigger."
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [site-of-special-scientific-interest, special-area-of-conservation, local-wildlife-site]
+            description: The site is near a designated site.
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Mature trees are affected.
+        - condition:
+            field: demolition
+            value: true
+            description: The proposal involves demolition.
+        - condition:
+            field: roof-alteration
+            value: true
+            description: The proposal involves a significant roof alteration.
+        - discretionary
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): item 16 Preliminary Ecological Appraisal for all majors,
+      and minor/householder schemes near designated sites, with habitat loss, mature trees,
+      demolition or significant roof alteration. Habitat loss is shown as officer discretion.
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [full, outline, reserved-matters]
+            - condition:
+                field: new-build
+                value: true
+                description: The proposal includes new buildings.
+        - discretionary
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 19, non-householder new buildings, and the Birkenhead Heat Network area (shown as officer discretion)."
+
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in flood zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: A flood zone 1 site of 1 hectare or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: A flood zone 1 site of 1 hectare or more.
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 22, FZ2/3 and FZ1 sites of 1ha+."
+
+  - id: landscaping-plan
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 31 Draft Landscape Plans for all majors."
+
+  - id: noise-assessment
+    action: add
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    confidence: low
+    notes: "From the audit (missing_requirement): item 40 Noise and Vibration Impact Assessment; the audit gives no trigger."
+
+  - id: sci
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 51, all majors."
+
+low-confidence:
+  - id: transport-assessment
+    note: "Audit (wrong_trigger): the workbook's excerpt is content text; the transport assessment trigger was not captured."
+
+unmapped:
+  - local-name: Agricultural / Rural Worker Needs Assessment
+    source-text: "From the audit: item 6; the trigger was not captured"
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    suggested-id: rural-workers-dwelling-appraisal
+  - local-name: Crime Impact Assessment
+    source-text: >-
+      The crime impact assessment must demonstrate how the development will achieve an appropriate
+      standard of security, based on the Secured by Design Initiative. From the audit: all major
+      applications.
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    suggested-id: crime-prevention-statement
+  - local-name: Design Code
+    source-text: >-
+      Outline Planning Applications for Largescale Major Developments comprising: … '200+ dwellings
+      (or 4ha+ ...), or other development of 10,000 sqm+ floorspace or 2ha+'
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    suggested-id: design-code
+  - local-name: Drainage Strategy (Surface Water and Foul)
+    source-text: "15 Drainage Strategy: 'All major applications'"
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    suggested-id: drainage-strategy
+  - local-name: Digital Connectivity Statement
+    source-text: >-
+      All applications proposing the development of new dwellings or business premises, whether
+      new-build or conversion.
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    suggested-id: ""
+  - local-name: Gypsy and Traveller Accommodation – Needs Assessment
+    source-text: >-
+      25 Gypsy and Traveller Accommodation – Needs Assessment All applications for permanent and/or
+      temporary pitches for Gypsies and Travellers or for Travelling Showpeople
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    suggested-id: gypsy-traveller-statement
+  - local-name: Health Impact Assessment
+    source-text: >-
+      Policy WD 18 requires a Health Impact Assessment to be submitted for applications for major
+      development, and other development likely to have a significant impact on health and
+      well-being. From the audit: 10+ dwellings, 1,000 sqm+ non-residential, hot-food takeaways,
+      pubs, education, health and community facilities.
+    source-url: https://www.wirral.gov.uk/planning-and-building/planning/planning-application-forms-and-checklists
+    suggested-id: health-impact-assessment
+  - local-name: Landscape and Visual Impact Assessment
+    source-text: >-
+      Landscape and Visual Impact Assessments must be carried out by a suitably qualified landscape
+      consultant … From the audit: majors in Areas of Special Landscape Value or Green Belt, and all
+      wind turbines.
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: 3D Model
+    source-text: "From the audit: item 1, tall buildings (8+ storeys)"
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    suggested-id: digital-3d-model
+  - local-name: 3D Visualisations
+    source-text: "From the audit: item 2, major new-build; non-householder new buildings affecting heritage assets or their settings"
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    suggested-id: computer-visualisations
+  - local-name: Flues and Mechanical Extract
+    source-text: "From the audit: item 23, hot-food takeaways and cooked-food uses"
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    suggested-id: ventilation-extraction-details
+  - local-name: Geological Impact Assessment
+    source-text: "From the audit: item 24, Local Geological Sites"
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    suggested-id: ""
+  - local-name: Landfill Gas Risk Assessment
+    source-text: "From the audit: item 30, new buildings or ground-floor extensions within 250m of landfill"
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    suggested-id: landfill-statement
+  - local-name: Marketing Statement – Employment Uses
+    source-text: "From the audit: item 35, Primarily Employment Areas"
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    suggested-id: marketing-evidence
+  - local-name: Masterplan Compliance Statement
+    source-text: "From the audit: item 36 (trigger not given)"
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    suggested-id: ""
+  - local-name: Minerals Assessment
+    source-text: "From the audit: item 38, Minerals Safeguarding Area"
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    suggested-id: minerals-assessment
+  - local-name: Nature Improvement Area Statement
+    source-text: "From the audit: item 39, NIA Focus Areas 1-7"
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    suggested-id: ""
+  - local-name: Social Value Statement including Employment and Skills Plan
+    source-text: >-
+      If your project is a Major development you will need to submit a Social Value Statement,
+      including an employment and skills plan.
+    source-url: https://www.wirral.gov.uk/planning-and-building/planning/planning-application-forms-and-checklists
+    suggested-id: employment-skills-plan
+  - local-name: Specialist Housing Needs Assessment
+    source-text: "From the audit: item 50 (trigger not given)"
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    suggested-id: ""
+  - local-name: Structural Survey
+    source-text: "From the audit: item 52, re-use of Green Belt buildings"
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    suggested-id: structural-survey
+  - local-name: Townscape and Visual Impact Assessment
+    source-text: "From the audit: item 53, tall buildings"
+    source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+    suggested-id: townscape-visual-impact-assessment

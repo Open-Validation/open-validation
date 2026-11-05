@@ -1,0 +1,449 @@
+# Corrections for Welwyn Hatfield Borough Council, from inputs/audit/welwyn-hatfield-borough-council.json.
+# The local list is a multi-page web checklist (List 1: full, outline, LBC-with-planning and
+# advert-with-planning; List 2: householder; Lists 4 and 5; national requirements pages), adopted
+# 7 December 2017. The build takes the List 1 introduction page and that date from the audit.
+# Grokbot captured about 12 of the 35 List 1 items and none of List 2. Items marked "From the
+# audit" use the audit's paraphrase; items the audit names without a trigger have no required-if.
+local-authority: WEW
+
+submission-standards:
+  - item: Plans correctly titled, with individual drawing numbers on each plan
+    level: should
+  - item: Plans annotated with either dimensions or a scale bar (horizontally and vertically), and
+      show the paper size
+    level: should
+  - item: Plans not marked 'Do Not Scale' or equivalent
+    level: should
+  - item: Plans proportionate to the nature and size of the proposal
+    level: should
+
+drop:
+  - id: site-plan
+    sheets: [Discharge of conditions, Non-material amendment]
+    reason: "wrong_app_type: the source exempts non-material amendments and submission of details; re-added
+      below for the other types"
+  - id: environmental-statement
+    reason: "wrong_trigger: the excerpt is FRA text, not an EIA requirement in the local list"
+  - id: floor-plan-existing
+    sheets: [Full planning, Advertisement consent]
+    reason: "wrong_trigger: the Full planning excerpt is the 3d bin store plan detail; the Advertisement
+      row is the elevations item"
+  - id: floor-plan-proposed
+    sheets: [Full planning, Advertisement consent]
+    reason: "wrong_trigger: as above"
+  - id: elevation-existing
+    sheets: [Full planning]
+    reason: "wrong_trigger: the excerpt is the 3d bin store plan detail ('The plan should include
+      elevations with dimensions')"
+  - id: elevation-proposed
+    sheets: [Full planning]
+    reason: "wrong_trigger: as above"
+  - id: sustainability-statement
+    reason: "wrong mapping: the excerpt is 3m Energy Statement; re-added as energy-statement below"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: introductory process text from the list introductions"
+
+requirements:
+  - id: site-plan
+    action: replace
+    required-if:
+      application-type:
+        in: [hh, full, outline, reserved-matters, lbc, advertising, demolition-con-area, s73]
+    source-text: >-
+      Site Plan/Block Plan Required for all applications, except non material amendments and
+      submission of details when it clear from the application which development the proposal
+      relates to: The site plan should be drawn at an identified standard metric scale (1:500 or
+      1:200).It should accurately show: the direction of North; the proposed development in relation
+      to the site boundaries and other existing buildings on site, with written dimensions including
+      those to the boundaries or include a bar sca…
+    source-url: https://www.welhat.gov.uk/planning-applications/validation-checklist-national-requirements/2
+    must-include:
+      - item: An identified standard metric scale (1:500 or 1:200)
+        level: must
+      - item: The direction of North
+        level: must
+      - item: The proposed development in relation to the site boundaries and other existing buildings
+          on site, with written dimensions including those to the boundaries, or a bar scale
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook placed this only under Discharge of conditions and
+      Non-material amendment, the two types the source exempts. The types listed are "all
+      applications" except those two.
+
+  - id: daylight-sunlight-assessment
+    action: replace
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    source-text: >-
+      3k Daylight and Sunlight Assessment Required for major applications where there is a potential
+      adverse impact upon the current levels of sunlight/daylight ... enjoyed by adjoining properties
+    source-url: https://www.welhat.gov.uk/planning-applications/validation-checklist-list-1/18
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the workbook quoted the 3j cycle parking trigger and
+      placed it under prior approval. Major applications with a potential adverse impact on the
+      daylight/sunlight of adjoining properties, including gardens and amenity space.
+
+  - id: elevation-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: building-works
+            value: true
+            description: The proposal involves building work or alterations to buildings.
+        - application-type:
+            in: [advertising]
+    notes: "The council's wording: required for all applications involving building work, alterations to
+      buildings or display of advertisements."
+
+  - id: elevation-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: building-works
+            value: true
+            description: The proposal involves building work or alterations to buildings.
+        - application-type:
+            in: [advertising]
+    notes: "The council's wording: required for all applications involving building work, alterations to
+      buildings or display of advertisements."
+
+  - id: floor-plan-existing
+    action: add
+    source-url: https://www.welhat.gov.uk/planning-applications/validation-checklist-list-1
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): List 2 (householder) requires existing and proposed
+      floor plans; the audit gives no trigger and the workbook's rows were the wrong items.
+
+  - id: floor-plan-proposed
+    action: add
+    source-url: https://www.welhat.gov.uk/planning-applications/validation-checklist-list-1
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): List 2 (householder) requires existing and proposed
+      floor plans; the audit gives no trigger and the workbook's rows were the wrong items.
+
+  - id: section-existing
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-works
+                value: true
+                description: The proposal involves building work or alterations to buildings.
+            - application-type:
+                in: [advertising]
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: The proposal includes or involves a change in ground levels.
+
+  - id: section-proposed
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-works
+                value: true
+                description: The proposal involves building work or alterations to buildings.
+            - application-type:
+                in: [advertising]
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: The proposal includes or involves a change in ground levels.
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The proposal involves alterations to the roof layout.
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The proposal involves alterations to the roof layout.
+
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 11
+            description: The proposal creates 11 or more new dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: The site is 0.5 hectares or more.
+    notes: "'a site of a site of' is the council's own typo (audit, claude_response)."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      any:
+        - all:
+            - site:
+                in: [archaeological-priority-area]
+                description: The site is within an Area of Archaeological Significance.
+            - condition:
+                field: ground-disturbance
+                value: true
+                description: The proposal involves a new building or the disturbance of ground.
+        - discretionary
+    notes: >-
+      The second limb ("where the development would have an impact on a site which has, or may
+      have, archaeological interest of over 0.5ha") is unclear about what the 0.5ha applies to, so
+      it is shown as officer discretion.
+
+  - id: energy-statement
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: The proposal creates 10 or more dwellings.
+    source-text: 3m Energy Statement Welwyn Hatfield District Plan 20015 – required for 10 or more
+      dwellings.
+    source-url: https://www.welhat.gov.uk/planning-applications/validation-checklist-list-1/19
+    confidence: medium
+    notes: "The workbook mapped this 'Energy / Sustainability Statement' row to sustainability-statement;
+      the excerpt is the Energy Statement item."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is one hectare or greater.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is one hectare or greater.
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in flood zone 2 or 3.
+    notes: "List 2 (householder) also includes an FRA (audit missing_requirement)."
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      application-type:
+        in: [full, outline]
+    notes: >-
+      The council's wording: a Landscape Strategy is "Required for all applications" in List 1
+      (planning permission and outline), with the level of detail varying with scale and location.
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: floodlighting
+            value: true
+            description: The proposal includes floodlighting.
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [park-and-garden]
+            description: The development affects a Registered Park & Garden or Locally Listed Park &
+              Garden.
+    notes: >-
+      From the audit (missing_requirement): List 1 item 22 (planning applications) and List 2
+      (householder) also require a Heritage Statement; the audit gives no trigger for those.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [tree-preservation-zone]
+            description: The proposal affects protected trees.
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - condition:
+                field: trees-on-or-near-site
+                value: true
+                description: The proposal affects trees in a conservation area.
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      any:
+        - all:
+            - site:
+                in: [air-quality-management-area]
+                description: The site is within or adjoining an Air Quality Management Area.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: The proposal includes housing.
+        - condition:
+            field: eia-development
+            value: true
+            description: The proposal needs an Environmental Statement.
+        - condition:
+            field: parking-spaces
+            operator: ">"
+            value: 300
+            description: The proposal includes more than 300 new car parking spaces.
+        - discretionary
+    source-url: https://www.welhat.gov.uk/planning-applications/validation-checklist-list-1/13
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): 3b Air Quality Assessment - housing within or adjoining
+      an AQMA; proposals needing an ES or Transport Assessment; schemes that increase congestion or
+      change traffic composition; coach/lorry parks; sensitive areas (shown as officer discretion);
+      "more than 300 new car parking spaces".
+
+  - id: biodiversity-survey-report
+    action: add
+    source-url: https://www.welhat.gov.uk/planning-applications/validation-checklist-list-1
+    confidence: low
+    notes: "From the audit (missing_requirement): List 1 item 14 and List 2 (householder) item 5; no trigger
+      given."
+
+  - id: land-contamination-assessment
+    action: add
+    source-url: https://www.welhat.gov.uk/planning-applications/validation-checklist-list-1
+    confidence: low
+    notes: "From the audit (missing_requirement): List 1 item 17 (Character Analysis and Contaminated Land);
+      no trigger given."
+
+  - id: noise-assessment
+    action: add
+    source-url: https://www.welhat.gov.uk/planning-applications/validation-checklist-list-1
+    confidence: low
+    notes: "From the audit (missing_requirement): List 1 item 26 Noise and vibration assessment; no trigger
+      given."
+
+  - id: recreation-facilities-assessment
+    action: add
+    source-url: https://www.welhat.gov.uk/planning-applications/validation-checklist-list-1
+    confidence: low
+    notes: "From the audit (missing_requirement): List 1 item 27 Open Space Assessment; no trigger given."
+
+  - id: planning-statement
+    action: add
+    source-url: https://www.welhat.gov.uk/planning-applications/validation-checklist-list-1
+    confidence: low
+    notes: "From the audit (missing_requirement): List 1 item 28 Planning Obligations and Statement; no
+      trigger given."
+
+  - id: town-centre-impact-assessment
+    action: add
+    source-url: https://www.welhat.gov.uk/planning-applications/validation-checklist-list-1
+    confidence: low
+    notes: "From the audit (missing_requirement): List 1 item 29 Retail Assessment; no trigger given."
+
+  - id: sci
+    action: add
+    source-url: https://www.welhat.gov.uk/planning-applications/validation-checklist-list-1
+    confidence: low
+    notes: "From the audit (missing_requirement): List 1 item 31 Statement of Community Involvement and
+      Justification; no trigger given."
+
+  - id: transport-assessment
+    action: add
+    source-url: https://www.welhat.gov.uk/planning-applications/validation-checklist-list-1
+    confidence: low
+    notes: "From the audit (missing_requirement): List 1 item 34 Transport Statements, Transport Assessments
+      and Green Travel Plans; no trigger given."
+
+  - id: travel-plan
+    action: add
+    source-url: https://www.welhat.gov.uk/planning-applications/validation-checklist-list-1
+    confidence: low
+    notes: "From the audit (missing_requirement): List 1 item 34 Transport Statements, Transport Assessments
+      and Green Travel Plans; no trigger given."
+
+unmapped:
+  - local-name: Parking Plan / Car Parking
+    source-text: "From the audit: List 1 items 11 and 15, and List 2 (householder) item 4; no trigger given"
+    source-url: https://www.welhat.gov.uk/planning-applications/validation-checklist-list-1
+    suggested-id: parking-plan
+  - local-name: Chalk Mining
+    source-text: "From the audit: List 1 item 16; no trigger given"
+    source-url: https://www.welhat.gov.uk/planning-applications/validation-checklist-list-1
+    suggested-id: ground-stability-assessment
+  - local-name: Character Analysis
+    source-text: "From the audit: List 1 item 17; no trigger given"
+    source-url: https://www.welhat.gov.uk/planning-applications/validation-checklist-list-1
+    suggested-id: ""
+  - local-name: Marketing Assessment
+    source-text: "From the audit: List 1 item 25; no trigger given"
+    source-url: https://www.welhat.gov.uk/planning-applications/validation-checklist-list-1
+    suggested-id: marketing-evidence
+  - local-name: Site Waste Management Plan
+    source-text: "From the audit: List 1 item 30; no trigger given"
+    source-url: https://www.welhat.gov.uk/planning-applications/validation-checklist-list-1
+    suggested-id: waste-management-plan
+  - local-name: Foul Sewage Assessment
+    source-text: "From the audit: List 1 item 33; no trigger given"
+    source-url: https://www.welhat.gov.uk/planning-applications/validation-checklist-list-1
+    suggested-id: foul-sewage-assessment
+  - local-name: Ventilation / Extraction Equipment
+    source-text: "From the audit: List 1 item 35; no trigger given"
+    source-url: https://www.welhat.gov.uk/planning-applications/validation-checklist-list-1
+    suggested-id: ventilation-extraction-details
+  - local-name: Water Usage
+    source-text: "From the audit: List 1 item 36; no trigger given"
+    source-url: https://www.welhat.gov.uk/planning-applications/validation-checklist-list-1
+    suggested-id: water-efficiency-statement
+  - local-name: Plant and Flue Drawings
+    source-text: "From the audit: List 1 item 8; no trigger given"
+    source-url: https://www.welhat.gov.uk/planning-applications/validation-checklist-list-1
+    suggested-id: plant-specification
+  - local-name: Shop Fronts or ATMs
+    source-text: "From the audit: List 1 item 9; no trigger given"
+    source-url: https://www.welhat.gov.uk/planning-applications/validation-checklist-list-1
+    suggested-id: shopfront-details
+  - local-name: Basements or Excavations
+    source-text: "From the audit: List 1 item 10; no trigger given"
+    source-url: https://www.welhat.gov.uk/planning-applications/validation-checklist-list-1
+    suggested-id: basement-impact-assessment
+  - local-name: Schedule of works and Statement of Justification (householder)
+    source-text: "From the audit: List 2 (Householder, and Householder plus LBC) item 8; no trigger given"
+    source-url: https://www.welhat.gov.uk/planning-applications/validation-checklist-list-1
+    suggested-id: ""
+
+low-confidence:
+  - id: waste-management-plan
+    note: >-
+      The workbook row is 3d Bin Stores / Recycling Facilities ("Required for all new development
+      which would result in the need for new or additional bin storage or recycling facilities"),
+      not a site waste management plan (List 1 item 30, see unmapped). Check the mapping.
+  - id: viability-assessment
+    note: "The workbook's excerpt is a fragment ('policy compliant, a viability statement will need to be
+      submitted'); re-read item 3a in List 1."

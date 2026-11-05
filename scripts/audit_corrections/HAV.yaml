@@ -1,0 +1,820 @@
+# Corrections for London Borough of Havering, from the audit of Havering.
+# Grokbot's link is Checklist 004 (all applications except householder; in use from 12 September
+# 2022, revised for BNG in 2024). Householder rows come from Checklist 001. The Outline and Reserved
+# matters rows come from the older Checklists 005 and 023, which Checklist 004 replaced, and many
+# triggers come from the neighbouring item. Items marked "From the audit" use the audit's
+# paraphrase, not the council's exact words.
+local-authority: HAV
+
+drop:
+  - id: site-plan
+    sheets: [Outline]
+    reason: "outdated_link: from the superseded Checklist 005; Checklist 004 covers outline applications"
+  - id: land-contamination-assessment
+    sheets: [Outline]
+    reason: "outdated_link: from the superseded Checklist 005"
+  - id: floor-plan-existing
+    sheets: [Full planning]
+    reason: "wrong_trigger: the excerpt is listed-building detailed drawing and photomontage text"
+  - id: floor-plan-proposed
+    sheets: [Full planning]
+    reason: "wrong_trigger: as above"
+  - id: elevation-existing
+    sheets: [Full planning]
+    reason: "wrong_trigger: as above"
+  - id: elevation-proposed
+    sheets: [Full planning]
+    reason: "wrong_trigger: as above"
+
+drop-unmapped:
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: a fragment of the site plan guidance"
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "duplicate: same excerpt as Photographs / Photomontages"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "duplicate: same excerpt as Daylight / Sunlight"
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "duplicate: same excerpt as Employment / Economic Statement"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "duplicate: part of the Accessibility Statement content"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: the town-centre sequential test, not a flood test (now under town-centre-impact-assessment)"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advice to talk to the Waste & Recycling Team"
+  - local-name: Structural Survey
+    reason: "wrong_trigger: boilerplate; re-added below"
+  - local-name: Ground investigation / Geotechnical / Basement Impact Assessment
+    reason: "the householder row has a content description; re-added below with the Checklist 004 trigger"
+  - local-name: Crime prevention / Secured by Design statement
+    reason: "wrong_trigger: garbled ('All strategicError!'); re-added below as the Safer Places Statement"
+  - local-name: Design Code / Masterplan / Parameter plans
+    reason: "wrong_app_type: garbled trigger; re-added below with the audit's trigger"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: 'is provided in the relevant section below'; re-added below"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: content list and tree text; re-added below with the audit's trigger"
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "outdated_link: from the superseded Checklists 005 and 023"
+  - local-name: Parking provision / Parking plan
+    reason: "outdated_link: the '200 spaces' text is the old Air Quality trigger from Checklist 005/023"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: Development with capacity to provide 10 or more homes.
+    must-include:
+      - item: Information on both the market housing and the affordable housing provision
+        level: should
+      - item: Proposed tenure, unit mix and the design, size and location of the on-site affordable 
+          housing
+        level: should
+    confidence: medium
+    notes: "The council's trigger is cut off at the site-area threshold."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      ref: major-development
+    confidence: medium
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees or hedges on or next to the site.
+    source-url: https://www.havering.gov.uk/downloads/file/5747/checklist-001
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's Householder and Full planning excerpts were the Regulation
+      4 boilerplate; the Outline rows came from the superseded Checklist 005."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      all:
+        - site:
+            in: [archaeological-priority-area]
+            description: The site is in an Archaeological Priority Area or Zone.
+        - condition:
+            field: ground-disturbance
+            value: true
+            description: Groundworks (for householders, a new basement, or groundworks in Tier 1 of 
+              the APA).
+    confidence: medium
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      Where the proposal may have an impact on wildlife and biodiversity especially where protected
+      species may be affected, including species that use buildings to roost and nest.
+    source-url: https://www.havering.gov.uk/downloads/file/5747/checklist-001
+    confidence: medium
+    notes: "The trigger was in the workbook's householder CIL row (audit wrong_trigger); the workbook's
+      own biodiversity excerpts had no trigger."
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      application-type:
+        in: [full, outline]
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    confidence: medium
+    notes: "Audit (wrong_trigger): Checklist 004 requires BNG for all major applications and, from 2 April
+      2024, all minor applications."
+
+  - id: cil-form
+    action: replace
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [full, outline, hh]
+            - condition:
+                field: floorspace
+                operator: ">="
+                value: 100
+                description: Proposed new build of 100 sqm or more (GIA).
+        - all:
+            - application-type:
+                in: [full, outline]
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: At least one new dwelling.
+        - application-type:
+            in: [reserved-matters]
+    source-text: >-
+      full/outline planning permission, with proposed new build of 100sqm+ (GIA); full/outline
+      planning permission, consisting of at least one new dwelling; the last reserved matters
+      following an outline planning permission
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    confidence: medium
+    notes: "Audit (wrong_trigger): the householder row quoted a biodiversity sentence; Checklist 001 asks
+      for the form for householder proposals creating 100 sqm or more (GIA). Reserved matters: the last
+      reserved matters only."
+
+  - id: construction-management-plan
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    confidence: medium
+    notes: "From the audit (missing_requirement): Construction Logistics Plan for all major development."
+
+  - id: daylight-sunlight-assessment
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      Any application where there is a potential adverse impact upon the current levels of
+      sunlight/daylight enjoyed by adjoining properties or building(s), including associated gardens
+      or amenity space
+    source-url: https://www.havering.gov.uk/downloads/file/5747/checklist-001
+    confidence: medium
+    notes: "Audit (wrong_trigger, outdated_link): the Full planning excerpt ran into the Design Code item,
+      and the Outline and Reserved matters rows came from the superseded Checklist 023."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [conservation-area]
+                description: Development within a conservation area or designated area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: The provision of one or more dwelling houses.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: Floor space created of 100 square metres or more.
+    source-text: >-
+      Major Development Development within conservation or designated areas involving: the provision
+      of one or more dwelling houses; the provision of building or buildings where the floor space
+      created by the development is 100 square metres or more.
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    confidence: medium
+    notes: "Checklist 001 (householder) asks for one in a Conservation Area where the proposal comprises
+      more than 100 square metres floor space."
+
+  - id: elevation-existing
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - any:
+            - condition:
+                field: new-build
+                value: true
+                description: New buildings are proposed.
+            - condition:
+                field: residential-extension
+                value: true
+                description: Extensions or external alterations.
+            - condition:
+                field: involves-change-of-use
+                value: true
+                description: Change of use or conversion of the property to residential.
+    confidence: medium
+
+  - id: elevation-proposed
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - any:
+            - condition:
+                field: new-build
+                value: true
+                description: New buildings are proposed.
+            - condition:
+                field: residential-extension
+                value: true
+                description: Extensions or external alterations.
+            - condition:
+                field: involves-change-of-use
+                value: true
+                description: Change of use or conversion of the property to residential.
+    confidence: medium
+
+  - id: energy-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-text: >-
+      Major development proposals should include a detailed energy strategy to demonstrate how the
+      zero-carbon target will be met within the framework of the energy hierarchy
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    confidence: medium
+    notes: "The workbook had this energy strategy text under sustainability-statement."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: EIA development.
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    confidence: medium
+    notes: "The workbook's excerpts were fragments or came from the superseded Checklists 005 and 023."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    confidence: medium
+    notes: >-
+      The excerpt is a garbled table (Article 9A: provision of, development of, or development in the
+      curtilage of a relevant building); the rule uses the national definition of a relevant
+      building. The London Plan fire statement for all major development is listed under unmapped.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: All development in Flood Zones 2 and 3, including those benefitting from 
+              defences.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: Sites of 1 hectare or greater in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Sites of 1 hectare or greater in Flood Zone 1.
+    source-text: >-
+      All development in Flood Zones 2 and 3 (including those benefitting from defences) … All
+      development on sites of 1 hectare or greater in Flood Zone 1
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the householder row quoted the structural survey sentence and the Outline
+      row the town-centre text; Checklist 001 also requires an FRA for all development in Flood Zones
+      2 and 3. The Checklist 004 text goes on to a basement case that is cut off.
+
+  - id: floor-plan-existing
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - any:
+            - condition:
+                field: new-build
+                value: true
+                description: New buildings are proposed.
+            - condition:
+                field: residential-extension
+                value: true
+                description: Extensions.
+            - condition:
+                field: involves-change-of-use
+                value: true
+                description: Change of use or conversion of the property to residential.
+    confidence: medium
+
+  - id: floor-plan-proposed
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - any:
+            - condition:
+                field: new-build
+                value: true
+                description: New buildings are proposed.
+            - condition:
+                field: residential-extension
+                value: true
+                description: Extensions.
+            - condition:
+                field: involves-change-of-use
+                value: true
+                description: Change of use or conversion of the property to residential.
+    confidence: medium
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, park-and-garden, scheduled-monument, conservation-area, 
+                  archaeological-priority-area]
+            description: >-
+              Within the curtilage of a listed building, registered park or scheduled monument, or in
+              a
+              conservation area or Archaeological Priority Area.
+        - all:
+            - ref: major-development
+            - site:
+                in: [conservation-area]
+                description: Major development within 50m of a conservation area.
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    must-include:
+      - item: The significance of the heritage asset affected, including any contribution made by 
+          its setting
+        level: must
+      - item: The principles of and justification for the proposed works
+        level: must
+      - item: The impact of the proposal on the significance of the heritage asset
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpts listed the contents, which are kept as
+      must-include items. From the audit: the trigger is the curtilage of a listed building, park or
+      scheduled monument, conservation areas or APAs, or major development within 50m of a
+      conservation area; the LBC checklist says 'Heritage Statement Always Required'.
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: Land known or suspected to be contaminated, or in a groundwater vulnerable 
+              area.
+        - discretionary
+    source-text: >-
+      Land Contamination Assessment If the proposal involves land which is known to be contaminated
+      or where contamination is suspected for all or part of the site or is for a proposed use that
+      would be particularly vulnerable to the presence of contamination, or in a groundwater
+      vulnerable area.
+    confidence: medium
+    notes: "A proposed use particularly vulnerable to contamination is shown as officer discretion."
+
+  - id: landscaping-plan
+    action: replace
+    required-if:
+      ref: major-development
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    must-include:
+      - item: Tree and plant species, sizes, numbers and planting densities
+        level: must
+      - item: Any hard landscape or boundary treatment, including materials
+        level: must
+      - item: Any features such as green walls and planted roofs
+        level: must
+      - item: Levels, gradients and any earthworks required
+        level: must
+      - item: Management and maintenance arrangements
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): not a minerals and waste item; the Landscaping Strategy is required for
+      all major development except change of use. The must-include items are the council's list of
+      what it should include.
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: external-lighting
+            value: true
+            description: External lighting is proposed.
+        - discretionary
+        - all:
+            - application-type:
+                in: [advertising]
+            - condition:
+                field: illuminated
+                value: true
+                description: Illuminated hoardings.
+    source-text: Required for all development where external lighting is proposed or where the 
+      proposal involves areas of public access.
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    confidence: medium
+    notes: >-
+      Areas of public access are shown as officer discretion. The advert checklist (012) asks for a
+      Lighting Assessment for all illuminated hoardings. The Outline row's excerpt was contaminated
+      land text.
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: New residential development adjoining a trunk road, motorway or railway 
+              land, or major residential development in a designated town centre.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Industrial (B2), food and drink, nightclub, or new recreational and 
+              sporting development.
+        - discretionary
+    source-text: >-
+      Examples of developments that require a Noise Impact Assessment are: All new residential
+      development that adjoins a trunk road, motorway or railway land. All major residential
+      development within designated town centres. All new development involving the following uses:
+      industrial (Class B2) food and drink (Class A3, A4, A5) and nightclub new recreational and
+      sporting development
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    confidence: medium
+    notes: "These are examples, so other cases are at officer discretion; Checklist 001 adds householder
+      applications raising disturbance for neighbours or in noise-sensitive locations."
+
+  - id: photos
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [listed-building, listed-building-setting, conservation-area]
+                description: The application affects the setting, character or appearance of a 
+                  listed building or conservation area.
+            - discretionary
+    confidence: medium
+    notes: "Required for all major applications; recommended for all applications involving external building
+      works; may be required where the setting of a listed building or conservation area is affected."
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - condition:
+                field: involves-change-of-use
+                value: true
+                description: A change of use.
+            - condition:
+                field: floorspace
+                operator: ">"
+                value: 1000
+                description: Over 1,000 sqm.
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the heads-of-terms text. From the audit: all major
+      development, including change of use over 1,000 sqm."
+
+  - id: recreation-facilities-assessment
+    action: replace
+    required-if:
+      condition:
+        field: loss-of-use
+        value: true
+        description: Loss of park land (including greens, recreation grounds and play space), a 
+          sports ground, allotment land or cemetery land.
+    source-text: >-
+      Open Space Assessment Development involving loss of: park land (including greens recreation
+      grounds and play space) sports ground allotment land cemetery land.
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    confidence: medium
+    notes: "Audit (wrong_trigger): the Full planning excerpt ran into the noise guidance; the Outline
+      row came from the superseded Checklist 005."
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - any:
+            - condition:
+                field: new-build
+                value: true
+                description: New buildings are proposed.
+            - condition:
+                field: residential-extension
+                value: true
+                description: Extensions.
+            - condition:
+                field: involves-change-of-use
+                value: true
+                description: Change of use or conversion of the property to residential.
+    confidence: medium
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - any:
+            - condition:
+                field: new-build
+                value: true
+                description: New buildings are proposed.
+            - condition:
+                field: residential-extension
+                value: true
+                description: Extensions.
+            - condition:
+                field: involves-change-of-use
+                value: true
+                description: Change of use or conversion of the property to residential.
+    confidence: medium
+
+  - id: schedule-of-works
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building]
+            description: Works to a listed building.
+    source-text: shall include a method statement.
+    source-url: https://www.havering.gov.uk/downloads/file/5747/checklist-001
+    must-include:
+      - item: A method statement
+        level: must
+    confidence: low
+    notes: "Audit (wrong_app_type): the workbook placed this under Householder and Full planning with
+      no listed-building qualifier. The excerpt is only a fragment."
+
+  - id: sci
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    confidence: medium
+    notes: "From the audit (missing_requirement): all major development. The council notes it can also
+      be provided in the Planning Statement."
+
+  - id: section-existing
+    action: update
+    must-include:
+      - item: Site levels, finished floor levels and roof levels annotated
+        level: must
+      - item: Levels given as AOD
+        level: should
+
+  - id: section-proposed
+    action: update
+    must-include:
+      - item: Site levels, finished floor levels and roof levels annotated
+        level: must
+      - item: Levels given as AOD
+        level: should
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - application-type:
+                in: [hh]
+            - discretionary
+    source-text: proposing extensive retrofit works to improve the environmental performance of the 
+      building
+    source-url: https://www.havering.gov.uk/downloads/file/5747/checklist-001
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement, wrong_trigger): a Sustainable Design and Construction
+      Statement for all major development; a householder needs one only for extensive retrofit works.
+      The workbook's Full planning excerpt was the energy strategy text (now energy-statement) and the
+      Outline rows came from the superseded Checklist 023.
+
+  - id: telecommunications-report
+    action: replace
+    required-if:
+      application-type:
+        in: [pa-ecomms-network]
+    source-text: Telecommunication Development – Supplementary Information All mast and antenna 
+      development by mobile phone network operators.
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    confidence: medium
+    notes: "Audit (wrong_app_type): mast and antenna development by operators, normally telecoms prior
+      approval (Checklist 020), not Full planning."
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 200
+            description: New or extended edge or out-of-centre uses of 200 sq m or more.
+        - discretionary
+    source-text: >-
+      Town Centre Impact Assessment and Sequential Test Required for all applications for new, or
+      extensions to existing, edge or out-of-centre uses that are not in accordance with the Local
+      Plan and where the development has a floorspace of 200 sq m or more.
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    confidence: medium
+    notes: "The location and Local Plan tests have no field, so they are shown as officer discretion.
+      The Outline row came from the superseded Checklist 005."
+
+  - id: transport-assessment
+    action: replace
+    required-if: discretionary
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    confidence: low
+    notes: "From the audit (missing_requirement): Transport Assessment/Statement at the DfT Appendix B
+      thresholds, which the audit does not list. The workbook's Outline row came from the superseded Checklist
+      005."
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: >-
+      The council's examples: all schools and nurseries; Higher and Further Education organisations
+      over 2,500m2; all major retail and leisure development; stadia of more than 1,500 seats (the
+      list is cut off at the start).
+
+  - id: viability-assessment
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: Residential or mixed-use development.
+        - discretionary
+    confidence: medium
+    notes: >-
+      Major residential or mixed-use applications where affordable housing falls below the policy
+      quantum, the tenure mix differs from policy, or the development departs from other policy
+      requirements because of viability (council's wording, split across the viability and waste rows).
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      ref: major-development
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt ran into the viability text; the Waste Management
+      Plan is for all major development."
+
+unmapped:
+  - local-name: Basement Impact Assessment
+    source-text: "Basement Impact Assessment Required where there is a new or extended basement."
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    suggested-id: basement-impact-assessment
+  - local-name: Structural Survey
+    source-text: "From the audit: 'Required for all applications where a basement is proposed'; also substantial
+      demolition or structural work to a listed or conservation-area building, and retained structures"
+    source-url: https://www.havering.gov.uk/downloads/file/5747/checklist-001
+    suggested-id: structural-survey
+  - local-name: Safer Places Statement
+    source-text: "From the audit: all major development"
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    suggested-id: crime-prevention-statement
+  - local-name: Design Code
+    source-text: "From the audit: outline or hybrid major applications where scale and/or layout are reserved"
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    suggested-id: design-code
+  - local-name: Sustainable Drainage Strategy
+    source-text: "From the audit: all major development"
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    suggested-id: drainage-strategy
+  - local-name: Ventilation / Extraction Statement
+    source-text: "From the audit: food preparation or substantial ventilation equipment (and s73 applications
+      relating to ventilation/extraction equipment)"
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    suggested-id: ventilation-extraction-details
+  - local-name: Detailed Drawings - Listed Building
+    source-text: "have an accurate scale bar have a unique reference number be drawn at a minimum scale
+      of 1:50 for existing and proposed internal elevations affected by proposed works be drawn at a minimum
+      scale of 1:20 for new or replacement architectural features"
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    suggested-id: detailed-drawings
+  - local-name: Fire Statement (London Plan)
+    source-text: "The Mayor of London requires that a Fire Statement is submitted for all major development."
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    suggested-id: london-plan-fire-statement
+  - local-name: 3D Massing Model (.FBX)
+    source-text: "A 3D Massing Model in .FBX file format (2013-2016) Required for all Majori applications.
+      The file should be less than 128mb, and all objects should be grouped onto one layer."
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    suggested-id: 3d-model
+  - local-name: Affordable Workspace Statement
+    source-text: "Affordable Workspace Statement: Required for industrial sites, major commercial and
+      mixed-use applications"
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    suggested-id: affordable-workspace-statement
+  - local-name: Circular Economy Statement
+    source-text: "From the audit: strategic applications"
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    suggested-id: circular-economy-statement
+  - local-name: Employment and Skills Plan
+    source-text: "From the audit: all major development"
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    suggested-id: employment-statement
+  - local-name: Flood defence details
+    source-text: "From the audit: development adjacent to the tideway"
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    suggested-id: flood-defence-details
+  - local-name: Food and Beverage Management Plan
+    source-text: "From the audit: restaurants, pubs and micro breweries"
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    suggested-id: food-beverage-management-plan
+  - local-name: Foul Sewerage and Utilities Assessment
+    source-text: "From the audit: major development connecting to or altering utilities"
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    suggested-id: foul-sewage-assessment
+  - local-name: Parking Design and Management Plan
+    source-text: "From the audit: new development providing parking"
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    suggested-id: parking-plan
+  - local-name: Servicing and Delivery Plan
+    source-text: "From the audit: strategic or non-residential development generating servicing"
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    suggested-id: delivery-servicing-plan
+  - local-name: Urban Greening Factor
+    source-text: "From the audit: all major development except B2/B8"
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    suggested-id: urban-greening-factor
+  - local-name: Landfill Statement
+    source-text: "From the audit: development involving the depositing of waste"
+    source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
+    suggested-id: landfill-waste-statement
+

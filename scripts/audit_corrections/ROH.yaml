@@ -1,0 +1,450 @@
+# Corrections for Rother District Council, from the council's audit.
+# The audit read the current Planning Validation Checklist (July 2021; reviewed with no changes,
+# content last amended November 2018, so it predates BNG and fire statements). The list gives
+# triggers by development type and location, not by application type, so the workbook's
+# 'Full planning' placement is removed where triggers are restructured. Householder is excluded
+# only from the ecology item and one noise category.
+local-authority: ROH
+
+submission-standards:
+  - item: A linear scale bar on all plans submitted electronically
+    level: must
+  - item: Each plan separately and correctly annotated when submitted via the Planning Portal
+    level: should
+  - item: One hard copy of all plans and documents for major applications, before validation
+    level: must
+
+drop:
+  - id: photos
+    reason: "wrong_trigger: the excerpt is the national listed building consent drawings requirement;
+      photographs are only 'very exceptionally' accepted instead of drawings"
+
+drop-unmapped:
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "not_a_requirement: introductory text about future DaSA standards"
+  - local-name: Self-build / custom build information
+    reason: "not_a_requirement: introductory text about future DaSA standards"
+  - local-name: Water efficiency / water usage statement
+    reason: "not_a_requirement: introductory text about future DaSA standards"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: a fragment of the site plan guidance"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "duplicate: the Viability Statement text"
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_trigger: mislabels Rother's Ground Stability Statement; re-added below"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: Flood Risk Assessment text; re-added below"
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "wrong_app_type: filed under prior approval; re-added below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: add
+    required-if: discretionary
+    source-url: 
+      https://rdcpublic.blob.core.windows.net/website-uploads/2021/07/Planning-Validation-Checklist-July-2021.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): where adopted policy requires affordable housing."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    source-url: 
+      https://rdcpublic.blob.core.windows.net/website-uploads/2021/07/Planning-Validation-Checklist-July-2021.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): major developments in North East Bexhill. There is no
+      field for that location, so it is shown as discretionary."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      all:
+        - site:
+            in: [contaminated-land]
+            description: Contamination is known or suspected on the site or nearby land.
+        - condition:
+            field: ground-disturbance
+            value: true
+            description: Ground works are proposed.
+    source-url: 
+      https://rdcpublic.blob.core.windows.net/website-uploads/2021/07/Planning-Validation-Checklist-July-2021.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): sites where contamination is known or suspected, or
+      nearby land, where ground works are proposed."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: plant-equipment
+            value: true
+            description: Any plant installation.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Noisy activities near noise-sensitive uses.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise-sensitive development near major roads or transport (not 
+              householder).
+    source-url: 
+      https://rdcpublic.blob.core.windows.net/website-uploads/2021/07/Planning-Validation-Checklist-July-2021.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): all plant installations, noisy activities near sensitive
+      uses, and noise-sensitive development near major roads or transport, excluding householder."
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if:
+      condition:
+        field: loss-of-use
+        value: true
+        description: Major development (10+ dwellings or 1,000 sqm+) that loses open space, or any 
+          loss of a playing field.
+    source-url: 
+      https://rdcpublic.blob.core.windows.net/website-uploads/2021/07/Planning-Validation-Checklist-July-2021.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Open Space Assessment."
+
+  - id: sci
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 50
+            description: Major proposals of over 50 dwellings.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: Major proposals of 1,000 square metres of commercial floorspace.
+    source-url: 
+      https://rdcpublic.blob.core.windows.net/website-uploads/2021/07/Planning-Validation-Checklist-July-2021.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Pre-application Engagement Statement for major proposals
+      over 50 dwellings or 1,000 sqm commercial."
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 1
+        description: The application creates one or more new dwellings.
+    source-text: "Refuse Disposal Strategy: Any application resulting in the creation of one of more new
+      dwellings"
+    source-url: 
+      https://rdcpublic.blob.core.windows.net/website-uploads/2021/07/Planning-Validation-Checklist-July-2021.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement): the council's item is a Refuse Disposal Strategy (mapped here
+      to waste management plan)."
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: building-height
+            operator: ">"
+            value: 20
+            description: The resulting structure would be over 20 metres high.
+        - discretionary
+    source-text: "Sunlight Daylight Assessment: Any application where the resultant structure would be
+      over 20m in height"
+    source-url: 
+      https://rdcpublic.blob.core.windows.net/website-uploads/2021/07/Planning-Validation-Checklist-July-2021.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement): also where there may be an adverse impact on neighbours' light
+      (discretionary)."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area]
+            description: The application affects a designated heritage asset or its setting.
+    must-include:
+      - item: The historic, cultural, aesthetic and archaeological significance of the heritage 
+          assets affected, and the contribution of their setting
+        level: must
+        source-text: >-
+          An Assessment of Significance will need to contain a description of the historic, cultural,
+          aesthetic and archaeological significance of those heritage assets affected by the proposal,
+          and the contribution of their setting to that significance.
+    notes: >-
+      Audit (wrong_app_type): 'Any application for planning permission affecting a designated
+      Heritage Asset or its setting', including householder, and listed building consent.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Protected or significant trees on or next to the site.
+        - application-type:
+            in: [consent-under-tpo]
+    must-include:
+      - item: Which trees within or adjacent to the site are to be retained
+        level: must
+      - item: How the retained trees will be protected during construction
+        level: must
+    notes: >-
+      Audit (wrong_app_type): also 'Any applications for consent to fell or remove a tree subject to a
+      Tree Preservation Order', and householder applications.
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - site:
+                in: [archaeological-priority-area]
+                description: The site is in an Archaeological Notification Area.
+            - condition:
+                field: ground-disturbance
+                value: true
+                description: Ground works are proposed.
+        - ref: major-development
+        - discretionary
+    source-url: 
+      https://rdcpublic.blob.core.windows.net/website-uploads/2021/07/Planning-Validation-Checklist-July-2021.pdf
+    confidence: medium
+    notes: >-
+      From the audit (wrong_trigger): ground works in an Archaeological Notification Area, works
+      affecting a Scheduled Monument (shown as discretionary), or major development. The workbook's
+      excerpt ended in a broken URL.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: Development in flood zone 2, 3a or 3b (minor domestic extensions with no 
+              new dwelling or bedroom are excluded).
+        - all:
+            - site:
+                in: [critical-drainage-area]
+                description: The site is in flood zone 1 with critical drainage problems.
+            - any:
+                - condition:
+                    field: site-area-residential
+                    operator: ">"
+                    value: 1
+                    description: The site is over 1 hectare.
+                - condition:
+                    field: site-area-non-residential
+                    operator: ">"
+                    value: 1
+                    description: The site is over 1 hectare.
+    source-url: 
+      https://rdcpublic.blob.core.windows.net/website-uploads/2021/07/Planning-Validation-Checklist-July-2021.pdf
+    confidence: medium
+    notes: "From the audit (wrong_trigger): FZ1 sites over 1 ha with critical drainage problems, and development
+      in FZ2/3a/3b. The workbook quoted 'A matrix is also provided...'."
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: The application includes or is for floodlighting, or any significant amount of 
+          external lighting (including lighting for advertisements).
+    source-text: Any application including or for floodlighting, or any significant amount of 
+      external lighting
+    source-url: 
+      https://rdcpublic.blob.core.windows.net/website-uploads/2021/07/Planning-Validation-Checklist-July-2021.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook placed it only under Advertisement consent."
+
+  - id: travel-plan
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 50
+            description: A major application of 50 or more dwellings.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: 1,000 square metres or more of commercial floorspace.
+    source-text: Any major application of 50 or more dwellings or 1,000sqm or more of commercial 
+      floorspace.
+    source-url: 
+      https://rdcpublic.blob.core.windows.net/website-uploads/2021/07/Planning-Validation-Checklist-July-2021.pdf
+    must-include:
+      - item: Targets and arrangements for monitoring
+        level: should
+        source-text: The Travel Plan should include details of targets and arrangements for 
+          monitoring.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted content text."
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      condition:
+        field: floorspace-non-residential
+        operator: ">="
+        value: 500
+        description: A retail application of 500 square metres or more.
+    source-text: Any retail application comprising floor space of 500 sq m or more.
+    source-url: 
+      https://rdcpublic.blob.core.windows.net/website-uploads/2021/07/Planning-Validation-Checklist-July-2021.pdf
+    must-include:
+      - item: Impact on existing, committed and planned public and private investment in centres in 
+          the catchment area
+        level: must
+      - item: Impact on town centre vitality and viability
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook omitted the 500 sq m threshold. The contents follow the
+      old NPPF paragraph 89 the list cites."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - any:
+            - site:
+                in: [site-of-special-scientific-interest, local-wildlife-site, 
+                      special-protection-area]
+                description: The site is within or adjacent to (where impact is likely) a SSSI, 
+                  SNCI, LNR, SPA, Ramsar site or SAC.
+            - discretionary
+    notes: >-
+      Not for change of use or householder development (council's wording). Priority habitats such
+      as ancient woodland and BAP habitats are shown as discretionary.
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: roof-alteration
+            value: true
+            description: The proposal alters an existing roof.
+        - discretionary
+    notes: "Also for new development proposing a complex or unusual roof structure (council's wording)."
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: roof-alteration
+            value: true
+            description: The proposal alters an existing roof.
+        - discretionary
+    notes: "Also for new development proposing a complex or unusual roof structure (council's wording)."
+
+  - id: section-proposed
+    action: update
+    must-include:
+      - item: How any new building will relate in scale, height and situation to neighbouring 
+          development, on and off the site
+        level: must
+        source-text: >-
+          Full information should be submitted to demonstrate how any new building(s) will relate in
+          scale, height and situation to neighbouring development, both on the site and outside it.
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: All sides of the proposal, including blank elevations
+        level: must
+        source-text: All sides of the proposal must be shown, including blank elevations.
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: The proposal is telecommunications development.
+    must-include:
+      - item: A declaration that the equipment and installation fully comply with the ICNIRP 
+          requirements
+        level: must
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      ref: major-development
+    notes: "All major developments involving traffic generation (council's wording)."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    notes: "Where affordable housing is not included, or is reduced, and this is argued on viability grounds
+      (council's wording)."
+
+unmapped:
+  - local-name: Structural Survey
+    source-text: "From the audit: conversion of a traditional agricultural building"
+    source-url: 
+      https://rdcpublic.blob.core.windows.net/website-uploads/2021/07/Planning-Validation-Checklist-July-2021.pdf
+    suggested-id: structural-survey
+  - local-name: Flood Risk Exception Test Evidence
+    source-text: "From the audit: relevant applications in flood zones 2, 3a and 3b (item 9, separate
+      from the sequential test)"
+    source-url: 
+      https://rdcpublic.blob.core.windows.net/website-uploads/2021/07/Planning-Validation-Checklist-July-2021.pdf
+    suggested-id: flood-exception-test
+  - local-name: Ground Stability Statement
+    source-text: >-
+      Ground Stability Statement In areas of known or suspected ground stability planning
+      applications must include information from a Competent Person (as defined by the NPPF Annex 2
+      Glossary) relating to construction and drainage methods. (From the audit: also required for all
+      coastal sites.)
+    source-url: 
+      https://rdcpublic.blob.core.windows.net/website-uploads/2021/07/Planning-Validation-Checklist-July-2021.pdf
+    suggested-id: ground-stability-assessment
+  - local-name: Sustainable Drainage
+    source-text: "Any major development involving surface water drainage (from the audit: also new development
+      at Fairlight Cove)"
+    source-url: 
+      https://rdcpublic.blob.core.windows.net/website-uploads/2021/07/Planning-Validation-Checklist-July-2021.pdf
+    suggested-id: drainage-strategy
+  - local-name: Viability and Marketing Statement
+    source-text: >-
+      Viability and Marketing Statement Where a change of use is proposed on the grounds that the
+      existing use, or the policy-compliant use, is not viable, marketing information will need to
+      be submitted to justify the case. … Any application for a change of use which involves the
+      loss of, or a reduction in, …
+    source-url: 
+      https://rdcpublic.blob.core.windows.net/website-uploads/2021/07/Planning-Validation-Checklist-July-2021.pdf
+    suggested-id: marketing-evidence
+
+low-confidence:
+  - id: design-and-access-statement
+    note: "The excerpt says only 'required for certain types of planning applications'. Audit (wrong_app_type):
+      the list also applies a Design and Access Statement to listed building consent."
+

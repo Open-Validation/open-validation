@@ -1,0 +1,342 @@
+# Corrections for Wychavon District Council, from inputs/audit/wychavon-district-council.json.
+# Grokbot read the June 2023 joint Malvern Hills / Wychavon 'Local Area Planning Application
+# Validation Requirements List'. It has been replaced by the November 2025 review, which the build
+# takes from the audit (url and date); the review says there are no significant content changes
+# but tweaks some triggers. The rules below come from the 2023 list and the audit. The list is
+# shared with Malvern Hills District Council, so its file should match this one.
+# Almost every row was INFERRED under Full planning; the list's triggers are by development type,
+# size and location, and many apply to householder, outline and reserved matters applications too.
+local-authority: WYC
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is Arboricultural Method Statement text; the list has no separate
+      schedule-of-works item"
+  - id: design-and-access-statement
+    reason: "wrong_trigger: the excerpt is an introductory sentence about CIL, not a local item"
+  - id: environmental-statement
+    reason: "wrong_trigger: the excerpt is an introductory sentence about CIL, not a local item"
+  - id: floor-plan-existing
+    reason: "wrong_trigger: the excerpt is the Street-scene Elevations item (kept as unmapped)"
+  - id: floor-plan-proposed
+    reason: "wrong_trigger: as above"
+  - id: elevation-existing
+    reason: "wrong_trigger: as above"
+  - id: elevation-proposed
+    reason: "wrong_trigger: as above"
+  - id: sustainability-statement
+    reason: "wrong mapping: the excerpt is the Energy Statement item; re-added as energy-statement below"
+
+drop-unmapped:
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "wrong_trigger: holds the Agricultural Land Classification text (duplicate of the next row);
+      the Rural Workers' Dwelling Justification is re-added below"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: holds the Retail and Centres Impact Assessment text; now in
+      town-centre-impact-assessment"
+
+requirements:
+  - id: cil-form
+    action: replace
+    required-if: discretionary
+    source-url:
+      https://www.wychavon.gov.uk/component/fileman/file/Documents/Planning/Local%20Area%20Requirements%20List%202023.pdf?routed=1&container=fileman-files
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, missing_requirement): the workbook row held the Planning Obligations /
+      Heads of Terms text. The list's CIL Assumption of Liability Form is for all CIL-liable
+      applications (Malvern Hills and Wychavon charge CIL); liability has no field here.
+
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      any:
+        - all:
+            - site:
+                in: [designated-rural-area]
+                description: The site is in a Designated Rural Area.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: At least a single new dwelling.
+        - discretionary
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the key local trigger, 'at least a single new dwelling in a Designated
+      Rural Area', was left out. Otherwise it is needed where a development plan policy requires
+      affordable housing (officer discretion).
+
+  - id: air-quality-assessment
+    action: update
+    required-if: discretionary
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees or hedges on the site, or on adjacent land that could influence or
+          be affected by the development.
+    notes: "Applies to householder applications too (audit missing_requirement)."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      site:
+        in: [archaeological-priority-area, scheduled-monument]
+        description: The development affects an archaeologically sensitive area (including a Scheduled
+          Ancient Monument or non-designated sites of archaeological interest).
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+    notes: "Where there is a potential adverse impact on the sunlight/daylight of adjoining properties;
+      applies to householder applications too (audit missing_requirement)."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: The development is likely to affect protected species.
+        - discretionary
+    notes: >-
+      The council names barn conversions, demolition of certain buildings and roof alterations as
+      examples; the list is cut off in the excerpt. Applies to householder applications too (audit
+      missing_requirement).
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 100
+            description: New development over 100 sq metres gross.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: One or more dwellings.
+    source-text: >-
+      Energy Statement Policy Drivers South Worcestershire Development Plan 2016 – Policy SWDP27
+      National Planning Policy Framework – para. 153 – 158 When required With planning applications
+      for new development over 100 sq metres gross, or one or more dwellings.
+    source-url:
+      https://www.wychavon.gov.uk/component/fileman/file/Documents/Planning/Local%20Area%20Requirements%20List%202023.pdf?routed=1&container=fileman-files
+    policy: SWDP27
+    confidence: medium
+    notes: >-
+      The workbook mapped this row to sustainability-statement. The audit (wrong_app_type) notes
+      the list addresses outline (broad terms) and reserved matters (detailed evidence) as well as
+      full applications.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: 1 hectare or greater in flood zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: 1 hectare or greater in flood zone 1.
+        - site:
+            in: [flood-risk-zone]
+            description: All development in Flood Zones 2 and 3.
+    source-url:
+      https://www.wychavon.gov.uk/component/fileman/file/Documents/Planning/Local%20Area%20Requirements%20List%202023.pdf?routed=1&container=fileman-files
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt ('will depend on the size, type and location')
+      lost the thresholds: '1 hectares or greater in flood zone 1' plus all development in Zones 2
+      and 3. Applies to householder applications too.
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: external-lighting
+            value: true
+            description: The development includes artificial external lighting.
+        - discretionary
+    notes: "Where the lighting may materially alter light levels outside the site, or affect residential
+      or visual amenity, highway/railway safety or the natural environment (officer judgement)."
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: New development that may create additional noise where noise-sensitive
+              development already exists.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: New noise-sensitive development in a noisy area.
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      condition:
+        field: loss-of-open-space
+        value: true
+        description: The proposal would lose recreational buildings or land, without an equivalent
+          replacement or a related recreational/community use.
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: new-build
+            value: true
+            description: The application proposes new buildings.
+        - site:
+            in: [contaminated-land]
+            description: The site is or has been used for purposes that may lead to ground contamination.
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+              scheduled-monument, park-and-garden]
+            description: The proposal affects the significance of a designated or non-designated heritage
+              asset, including its setting.
+    notes: "Audit (wrong_app_type): it applies to any planning application affecting a heritage asset,
+      including householder, not only listed building consent."
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: All applications proposing telecommunications development, including prior
+          approvals under Part 24 (now Part 16) of the GPDO.
+    notes: "Audit (wrong_app_type): filed only under prior approval, but it applies to all telecoms
+      applications."
+
+  - id: planning-statement
+    action: update
+    required-if: discretionary
+    confidence: low
+    notes: "The council's wording is optional: a Planning Statement 'can be submitted with any planning
+      application'."
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    notes: "The Worcestershire Local Transport Plan 4 Highway Design Guide sets the thresholds; they aren't
+      in the list."
+
+  - id: travel-plan
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more dwellings.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 1000
+            description: More than 1,000 square metres of non-residential floorspace.
+    source-text: 10 or more dwellings or more than 1,000 sq metres of non residential
+    source-url:
+      https://www.wychavon.gov.uk/component/fileman/file/Documents/Planning/Local%20Area%20Requirements%20List%202023.pdf?routed=1&container=fileman-files
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook repeated the Transport Assessment text instead of the Travel
+      Plan's own trigger."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      condition:
+        field: town-centre-use-floorspace
+        operator: ">"
+        value: 1000
+        description: Retail or leisure development of over 1,000 sq metres.
+    source-text: >-
+      with the sequential test as set out under para. 87 of the NPPF; the scale of development is
+      appropriate to the location; for all retail or leisure development of over 1,000 sq metres,
+      the impact of the development proposal on existing, committed and planned public and private
+      investment in the centre(s) in the catchment of the proposal; and for all retail or leisure
+      development of over 1,000 sq metres, the impact of the proposal on town centre vitality and
+      viability, including local consumer cho…
+    source-url:
+      https://www.wychavon.gov.uk/component/fileman/file/Documents/Planning/Local%20Area%20Requirements%20List%202023.pdf?routed=1&container=fileman-files
+    must-include:
+      - item: Compliance with the sequential test
+        level: must
+      - item: The scale of development is appropriate to the location
+        level: must
+      - item: Impact on existing, committed and planned public and private investment in centres in the
+          catchment
+        level: must
+      - item: Impact on town centre vitality and viability, including local consumer choice
+        level: must
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger, missing_requirement): the Retail and Centres Impact Assessment was
+      captured only as a mislabelled flood sequential test row. The start of its trigger is cut
+      off, so the 1,000 sq m threshold (which the excerpt applies to the impact items) is used.
+
+unmapped:
+  - local-name: Rural Workers' Dwelling Justification
+    source-text: "From the audit: list item for new rural workers' dwellings; the workbook row held the
+      Agricultural Land Assessment text instead"
+    source-url:
+      https://www.wychavon.gov.uk/component/fileman/file/Documents/Planning/Local%20Area%20Requirements%20List%202023.pdf?routed=1&container=fileman-files
+    suggested-id: rural-workers-dwelling-appraisal
+  - local-name: Existing Employment Sites re-development / change of use assessment
+    source-text: "From the audit: loss of B1/B2/B8 of 1,000sqm+ net in urban areas, or rural
+      employment/tourism/leisure premises"
+    source-url:
+      https://www.wychavon.gov.uk/component/fileman/file/Documents/Planning/Local%20Area%20Requirements%20List%202023.pdf?routed=1&container=fileman-files
+    suggested-id: employment-statement
+  - local-name: Glint and Glare Assessment
+    source-text: "From the audit: large-scale solar farms"
+    source-url:
+      https://www.wychavon.gov.uk/component/fileman/file/Documents/Planning/Local%20Area%20Requirements%20List%202023.pdf?routed=1&container=fileman-files
+    suggested-id: ""
+  - local-name: Replacement Rural Dwellings Statement
+    source-text: "From the audit: demolition/replacement of a dwelling in open countryside"
+    source-url:
+      https://www.wychavon.gov.uk/component/fileman/file/Documents/Planning/Local%20Area%20Requirements%20List%202023.pdf?routed=1&container=fileman-files
+    suggested-id: ""
+  - local-name: Ventilation / Extraction Statement
+    source-text: "From the audit: new restaurants, takeaways and pubs/bars selling hot food next to
+      residential property"
+    source-url:
+      https://www.wychavon.gov.uk/component/fileman/file/Documents/Planning/Local%20Area%20Requirements%20List%202023.pdf?routed=1&container=fileman-files
+    suggested-id: ventilation-extraction-statement
+  - local-name: Water Management Statement
+    source-text: "Water Management Statement: 'all applications that result in waste or surface water to be
+      drained'"
+    source-url:
+      https://www.wychavon.gov.uk/component/fileman/file/Documents/Planning/Local%20Area%20Requirements%20List%202023.pdf?routed=1&container=fileman-files
+    suggested-id: drainage-strategy
+
+low-confidence:
+  - id: viability-assessment
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('reasoning (eg. a Viability Assessment). 10.');
+      re-read the list for the trigger."

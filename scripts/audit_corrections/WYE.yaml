@@ -1,0 +1,561 @@
+# Corrections for Wyre Forest District Council, from inputs/audit/wyre-forest-district-council.json.
+# The audit compared the workbook with the council's Local Validation List web page (last updated
+# January 2025). The page has 'Local List Requirements' headings with triggers, then 26
+# development- and application-type checklists, which the workbook mostly ignored. Items marked
+# "From the audit" use the audit's paraphrase of the page.
+local-authority: WYE
+
+drop:
+  - id: floor-plan-existing
+    reason: "wrong_trigger/duplicate: garbled Householder Green Belt / doors-and-windows text, copied under LBC (content reused below)"
+  - id: floor-plan-proposed
+    reason: "wrong_trigger/duplicate: as above"
+  - id: elevation-existing
+    reason: "wrong_trigger/duplicate: as above"
+  - id: elevation-proposed
+    reason: "wrong_trigger/duplicate: as above"
+
+drop-unmapped:
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: the excerpt is the retail sequential test (now in town-centre-impact-assessment), not a flood test"
+  - local-name: Structural Survey
+    reason: "wrong_trigger: the excerpt runs into Checklists 9 and 10; re-added below"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: the excerpt omits the screening trigger; re-added below"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: the excerpt is viability text"
+  - local-name: Foul Sewage / Utilities Statement
+    reason: "wrong_trigger: the excerpt omits the actual requirement; re-added below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, reserved-matters]
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 10
+                description: Use Class C3 housing delivering a net gain of 10 units or more.
+            - condition:
+                field: site-area-residential
+                operator: ">="
+                value: 0.5
+                description: The site has an area of 0.5 hectares or more.
+            - site:
+                in: [rural-area]
+                description: Proposed rural housing developments.
+            - discretionary
+    source-text: >-
+      Affordable Housing Statement/Plan (for Full and Reserved Matters) A statement will be required
+      for applications for: for all Use Class C3 housing proposals delivering a net gain of 10 units
+      or more, or where the site has an area of 0.5 hectares or more. on entry level exception sites
+      on proposed rural housing developments Where a proposal meets the contribution and tenure
+      requirements of the Local Plan, a Housing Tenure Plan will be sufficient to demonstrate
+      compliance.
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the heading says Full and Reserved Matters; the workbook had Reserved
+      matters only. Entry level exception sites have no field, so they are shown as officer
+      discretion.
+
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    source-text: >-
+      An air quality assessment is required: For all major planning application proposals where the
+      development could result in significant vehicle movements through an Air Quality Management
+      Area (AQMA)
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    must-include:
+      - item: The existing air quality (baseline)
+        level: must
+      - item: A prediction of future air quality without the proposed development (future baseline)
+        level: must
+      - item: The impacts of the development during construction (construction phase)
+        level: must
+      - item: A prediction of future air quality with the development
+        level: must
+    confidence: medium
+    notes: >-
+      Major applications (including outline, per the audit) where the development could result in
+      significant vehicle movements through an AQMA; that part has no field, so it is officer
+      discretion within majors.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Building, demolition or engineering works where there are trees with a stem
+          diameter of more than 100mm (at 1.5 metres) within 15m of any operation, on the site or
+          adjacent land.
+    confidence: medium
+    notes: "The list's own trigger; the audit says it also applies to householder applications where applicable."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [scheduled-monument]
+            description: The site is within, or in the setting of, a Scheduled Ancient Monument.
+        - site:
+            in: [archaeological-priority-area]
+            description: The site is within a priority or archaeologically sensitive area.
+        - ref: major-development
+    confidence: medium
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [priority-habitat]
+            description: A priority habitat is present.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Non-residential sites above 1 hectare.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: Non-residential sites above 1,000 square metres.
+        - discretionary
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted the Daylight/Sunlight text. From the audit: priority
+      habitat present, residential sites above set thresholds (not given), other sites above 1ha or
+      1,000m2; a PEA, BNG metric and draft BNG plan are required on most checklists.
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: Protected species are present.
+        - discretionary
+    source-text: "margins); where protected species are present; where any off site interventions are required."
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt is only the tail of the Ecology entry. A
+      Preliminary Ecological Appraisal is also listed on the Householder, demolition and most other
+      checklists.
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+    source-text: >-
+      A Daylight / Sunlight Assessment will be required for all applications where the proposed
+      development may affect the current levels of daylight/sunlight enjoyed by occupiers of an
+      adjoining residential property.
+    must-include:
+      - item: Shadow analysis if the 45-degree code is breached
+        level: must
+        required-if:
+          application-type:
+            in: [hh]
+    confidence: medium
+    notes: "From the audit: the Householder checklist asks for a shadow analysis if the 45-degree code is breached."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The project needs an EIA under the 2017 EIA Regulations.
+    confidence: medium
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      site:
+        in: [flood-risk-zone]
+        description: All development in Flood Zones 2 and 3.
+    confidence: medium
+    notes: "The audit says it also applies to householder and Class MA prior approvals where applicable."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+              scheduled-monument, park-and-garden]
+            description: A heritage asset or its setting may be impacted by the proposed development.
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, missing_requirement): also required with listed building consent
+      (with a schedule of works), householder, advertisement and prior approval applications where
+      applicable.
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: Contamination is known or suspected, or the site is in the vicinity of such
+              land and ground works are proposed.
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: There is a sensitive end-user.
+        - discretionary
+    confidence: medium
+    notes: "Harm to drinking water supply, ground or surface water has no field, so it is shown as officer discretion."
+
+  - id: landscaping-plan
+    action: replace
+    required-if:
+      ref: major-development
+    source-text: >-
+      Landscaping Scheme All major planning applications will require a Landscaping Scheme to be
+      submitted, including outline applications and should include a landscape strategy plan.
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    must-include:
+      - item: A landscape strategy plan
+        level: should
+    confidence: medium
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: External lighting that may affect residential properties, listed buildings,
+          conservation areas, the open countryside or bats.
+    source-text: >-
+      A Lighting Assessment will be required for applications involving the provision of external
+      lighting and where the lighting may have an impact on residential properties, Listed
+      buildings, Conservation Areas and the open countryside or may result in harm to bat roosts or
+      commuting/feeding routes for bats.
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    confidence: medium
+    notes: "Audit (wrong_app_type): placed under Listed building consent only because the text mentions listed buildings."
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: plant-equipment
+            value: true
+            description: Plant, ventilation, air extraction or air conditioning equipment and flues.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise sensitive development.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Noise generating development.
+        - discretionary
+    confidence: medium
+    notes: "Where noise is likely to be a material consideration; the audit says it also applies to Class MA prior approvals."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      condition:
+        field: loss-of-open-space
+        value: true
+        description: The development involves the loss of open space or playing field provision.
+    confidence: medium
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: departure-from-development-plan
+            value: true
+            description: The proposed development would be contrary to the Development Plan.
+    source-text: >-
+      A Planning Statement will be required for all applications for a major development or where
+      the proposed development would be contrary to the Development Plan.
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    must-include:
+      - item: Evidence that the site has been actively marketed for at least a 12 month continuous
+          period
+        level: must
+        required-if:
+          condition:
+            field: loss-of-use
+            value: true
+            description: The proposal involves the loss of community facilities.
+        source-text: >-
+          If loss of community facilities, this also needs to be contained in the planning statement
+          with evidence that the site has been actively marketed for at least a 12 month continuous
+          period
+    confidence: medium
+    notes: "Audit (wrong_app_type): also applies to outline majors."
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: Retail, entertainment or leisure facilities outside the town centres (and
+          extensions to edge or out-of-centre facilities over 2,500 square metres gross).
+    source-text: >-
+      A retail impact assessment is required for any facilities that are to be located outside of
+      the town centres … Assessment including a sequential test will be required for applications
+      involving a proposed out of town retail, entertainment or leisure development, or an
+      extension to an existing edge or out-of-centre retail, entertainment or leisure development in
+      excess of 2,500 square metres gross floorspace.
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt ran into Checklist 16, and the sequential-test
+      text was misfiled as a flood test.
+
+  - id: travel-plan
+    action: replace
+    required-if:
+      ref: major-development
+    source-text: >-
+      Travel Plans will be required for all applications for major developments and should be
+      submitted with all Transport Assessments.
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    confidence: medium
+    notes: "Audit (wrong_app_type): also applies to outline majors."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: >-
+      Needed if fewer affordable units are proposed and/or the proposals do not meet the
+      requirements of the development plan policy.
+
+  - id: site-plan
+    action: add
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    must-include:
+      - item: The 45-degree line from the nearest neighbouring habitable window
+        level: must
+        required-if:
+          application-type:
+            in: [hh]
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Checklist 11 Householder says 'Block plan must show the
+      45-degree line...'. The block plan's own trigger is the national one.
+
+  - id: floor-plan-proposed
+    action: add
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    must-include:
+      - item: Full calculations of the original volume and proposed volume (including any previous
+          extensions) annotated on the original building and proposed building plans
+        level: should
+        required-if:
+          all:
+            - application-type:
+                in: [hh]
+            - site:
+                in: [green-belt]
+                description: The site is in the Green Belt.
+        source-text: >-
+          For all Householder Applications within the Green Belt, full calculations of the original
+          volume and proposed volume (including any previous extensions*) should be annotated on
+          original building and the proposed building plans.
+    confidence: medium
+    notes: "Floor plans themselves are a national requirement; this adds the Green Belt volume calculations."
+
+  - id: section-proposed
+    action: add
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [hh]
+            - site:
+                in: [listed-building, conservation-area]
+                description: Householder development relating to a listed building and/or within a
+                  conservation area, involving replacement doors and windows.
+        - application-type:
+            in: [lbc]
+        - all:
+            - application-type:
+                in: [advertising]
+            - condition:
+                field: illuminated
+                value: true
+                description: The advertisement is internally illuminated.
+    source-text: >-
+      Householder Development relating to a Listed Building and/or within the Conservation Area For
+      any Householder Application that involves replacement doors and windows, section drawings at
+      the scale of 1:20 should be provided.
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    must-include:
+      - item: Section drawings at a scale of 1:20 of replacement doors and windows
+        level: should
+        required-if:
+          application-type:
+            in: [hh]
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement, wrong_app_type): Checklist 13 (LBC) asks for
+      cross-sections where applicable, and Checklist 1 (adverts) for cross-section plans if
+      internally illuminated. The householder rule applies only to replacement doors and windows.
+
+  - id: schedule-of-works
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - discretionary
+    source-text: Heritage statement and schedule of works
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    confidence: medium
+    notes: "From the audit (missing_requirement): Checklist 13 (LBC), and the Schedule of Works heading (rural or listed building works)."
+
+  - id: photos
+    action: add
+    required-if:
+      application-type:
+        in: [lbc, consent-under-tpo, notice-trees-in-con-area, pa-demo-building]
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement, wrong_app_type): photographs/photomontages for listed
+      building consent (Checklist 13), supporting photos of the trees (Checklist 26), and a site
+      notice photo for demolition prior approval (Checklist 8).
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: The proposal is for telecommunications equipment.
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    must-include:
+      - item: ICNIRP compliance
+        level: must
+      - item: Site-sharing
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): Checklist 25 asks for a planning statement with ICNIRP compliance and site-sharing."
+
+  - id: water-impact-assessment
+    action: add
+    required-if: discretionary
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Water Framework Directive Assessment for hydropower,
+      bridges over watercourses and flood defences (no field for these).
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - condition:
+                field: floorspace-non-residential
+                operator: ">"
+                value: 100
+                description: Commercial floorspace over 100 square metres.
+        - discretionary
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    confidence: low
+    notes: "From the audit (missing_requirement): major commercial over 100 sqm, and residential where applicable."
+
+  - id: transport-assessment
+    action: add
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): the Transport Assessment/Statement heading is missing;
+      the audit gives no trigger. A transport statement is also listed for Class MA prior approvals
+      and HMOs.
+
+unmapped:
+  - local-name: Very Special Circumstances statement (Green Belt outbuildings)
+    source-text: >-
+      A Statement will be required to demonstrate Very Special Circumstances for any
+      outbuildings/garages that are proposed 5 metres from the dwellinghouse
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    suggested-id: green-belt-statement
+  - local-name: Structural Survey
+    source-text: >-
+      Structural Survey where it involves the loss of a Heritage Asset; Structural survey if
+      demolition or conversion is proposed
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    suggested-id: structural-survey
+  - local-name: Health Impact Assessment
+    source-text: >-
+      From the audit: HIA screening for restaurants, takeaways, leisure and institutions; full HIA
+      for large residential/employment schemes; HIA for 10+ unit HMOs. 'of the HIA screening
+      assessment, a full HIA may be required.'
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    suggested-id: health-impact-assessment
+  - local-name: Foul Drainage Assessment Form
+    source-text: "From the audit: a Foul Drainage Assessment Form for non-mains drainage"
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    suggested-id: foul-sewage-assessment
+  - local-name: Surface Water Drainage Strategy
+    source-text: "From the audit: all major applications (Policy SP32)"
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    suggested-id: drainage-strategy
+  - local-name: Minerals Statement
+    source-text: "From the audit: development in a minerals consultation area"
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    suggested-id: minerals-assessment
+  - local-name: Agricultural Land Assessment
+    source-text: "From the audit: greenfield solar farms, or 5ha+ of farmland"
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    suggested-id: agricultural-land-classification
+  - local-name: Agricultural/Rural Worker Dwelling Justification
+    source-text: "From the audit: agricultural or rural worker dwellings, and removal of an agricultural occupancy condition (Checklist 21)"
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    suggested-id: rural-worker-statement
+  - local-name: Groundwater Assessment
+    source-text: "From the audit: underground pollutant storage such as petrol stations, oil storage, cemeteries"
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    suggested-id: ""
+  - local-name: Lawful development certificate evidence
+    source-text: "From the audit: evidence of more than 10 years' continuous use (affidavits, receipts, dated photos) for existing use; a description of the use for proposed"
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    suggested-id: lawful-development-evidence
+  - local-name: Demolition method and restoration, site notice statement
+    source-text: "From the audit: Part 13 GPDO demolition prior approval: site notice statement and photo, method of demolition and restoration"
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    suggested-id: demolition-method-statement
+  - local-name: Covering letter stating the amendments
+    source-text: "Covering letter stating the amendments to plans or documents"
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    suggested-id: ""
+  - local-name: Solar fire assessment and glare/light-spill assessment
+    source-text: "From the audit: Checklist 24 (solar panels) asks for a fire assessment and a glare/light-spill assessment"
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    suggested-id: ""
+  - local-name: HMO requirements
+    source-text: "From the audit: Checklist 12 (HMOs): manager's flat/room, transport statement, HIA for 10+ units, cycle and refuse storage"
+    source-url: https://www.wyreforestdc.gov.uk/planning-and-buildings/guidance-and-practice-notes/local-validation-list/
+    suggested-id: ""

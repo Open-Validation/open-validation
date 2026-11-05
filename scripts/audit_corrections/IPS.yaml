@@ -1,0 +1,414 @@
+# Corrections for Ipswich Borough Council, from the council's audit.
+# The audit read the current list, the Ipswich Borough Council Local Validation List (Adopted
+# January 2026). Grokbot's extraction is poor: most excerpts are page headers, source lists or text
+# from a neighbouring item, Householder and listed building consent were left empty, and about 15
+# local items were missed. The audit gives few exact triggers, so several items below have no
+# trigger and show as "Check". Items marked "From the audit" use the audit's paraphrase.
+local-authority: IPS
+
+validation-list:
+  date: 2026-01
+  date-basis: "audit: the cover says 'Adopted January 2026'; the Notice of Adoption on the council page is
+    dated 26 March 2026"
+
+submission-standards:
+  - item: Drawings state the scale of the drawing and the paper size
+    level: must
+  - item: Any revisions to the drawings clearly identified with a revision number
+    level: should
+
+drop:
+  - id: construction-management-plan
+    reason: "wrong_trigger: the list says it is not formally a validation requirement, only strongly
+      encouraged"
+  - id: environmental-statement
+    sheets: [Outline]
+    reason: "wrong_document: text from the SEA screening report about the list itself"
+  - id: waste-management-plan
+    reason: "wrong_trigger / wrong_document: the Retail Impact Assessment header and SEA report text; the
+      list's Site Waste Management Statement is re-added below"
+  - id: schedule-of-works
+    reason: "wrong_trigger: the text is from the Structural Survey and Method Statement item (re-added
+      below as unmapped)"
+
+drop-unmapped:
+  - local-name: Equality / accessibility statement
+    reason: "wrong_document: text from the Equality Impact Assessment of the list; not a requirement"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_document: the Outline row is from the HRA screening report; the Full row is re-added
+      below"
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "wrong_trigger: lighting assessment text; re-added below"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: the Retail Impact Assessment header"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: Open Space Assessment heading and odour guidance text"
+  - local-name: Employment / Economic Statement
+    reason: "wrong_trigger: a page header fragment; re-added below as the Economic Impact Assessment"
+  - local-name: Odour / Dust / Vibration assessment
+    reason: "wrong_trigger: this is the Noise and Vibration Assessment trigger (now in noise-assessment)"
+  - local-name: Character / Conservation area appraisal reference
+    reason: "not_a_requirement: a list of sources and a page header"
+  - local-name: Self-build / custom build information
+    reason: "not_a_requirement: a list of sources and a paper-copy note"
+  - local-name: Tall buildings / Wind microclimate assessment
+    reason: "duplicate: the Daylight/Sunlight trigger; the list's Tall Building Assessment is re-added
+      below"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "duplicate: Design and Access Statement content text"
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_trigger: Low Emissions SPD and air quality source text"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 15
+            description: 15 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: A site of 0.5 hectares or more.
+    source-text: 15+ dwellings or sites of 0.5ha+
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was content about viability, not the trigger."
+
+  - id: arboriculturist-report
+    action: update
+    must-include:
+      - item: A full tree survey and assessment in line with BS 5837:2012, carried out by a competent
+          arborist
+        level: must
+    confidence: low
+    notes: "The workbook excerpt starts after the trigger; the list's trigger wasn't captured."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: Mandatory biodiversity net gain applies (all Town and Country Planning Act
+          development bar exempt types).
+    confidence: medium
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+    source-text: >-
+      Daylight/Sunlight/ Microclimate Assessment When is this required? … Where a development proposal
+      has the potential to affect the amenity of sensitive neighbouring uses.
+    confidence: medium
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      application-type:
+        in: [lbc]
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): the list requires a Design and Access Statement for listed building
+      consent. The list's other triggers for the statement weren't captured; the national rules
+      still apply.
+
+  - id: elevation-existing
+    action: update
+    required-if:
+      always: true
+    confidence: medium
+    notes: "Audit (wrong_app_type): the list says 'All applications', including householder."
+
+  - id: elevation-proposed
+    action: update
+    required-if:
+      always: true
+    confidence: medium
+    notes: "Audit (wrong_app_type): the list says 'All applications', including householder."
+
+  - id: floor-plan-existing
+    action: update
+    required-if:
+      always: true
+    confidence: medium
+    notes: "Audit (wrong_app_type): the list says 'All applications', including householder."
+
+  - id: floor-plan-proposed
+    action: update
+    required-if:
+      always: true
+    confidence: medium
+    notes: "Audit (wrong_app_type): the list says 'All applications', including householder."
+
+  - id: site-plan
+    action: update
+    required-if:
+      always: true
+    confidence: medium
+    notes: "Audit (wrong_app_type): Block Plans are needed for 'All applications', including householder."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area,
+              locally-listed-building, scheduled-monument, park-and-garden]
+            description: The proposal directly involves, is adjacent to or affects the setting of a
+              heritage asset.
+    source-text: >-
+      Heritage Statement Where a proposal involves directly, is adjacent to or affects the setting of a
+      heritage asset (as defined on page 21), the developer must submit a Heritage Statement
+      proportional to the heritage asset status.
+    confidence: medium
+    notes: "Audit (wrong_app_type): applies to householder and listed building consent applications too."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [advertising]
+        - condition:
+            field: illuminated
+            value: true
+            description: The advertisement is illuminated.
+    confidence: low
+    notes: "The list says a Lighting Assessment 'may be required' for illuminated adverts. Its trigger for
+      other development wasn't captured."
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Uses sensitive to noise are proposed close to an existing source of noise.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Development likely to generate noise is proposed.
+    source-text: >-
+      Noise and Vibration Assessment When is this required? … Where uses sensitive to noise are
+      proposed close to an existing source of noise or when development that is likely to generate
+      noise is proposed, the Council will … require an acoustic report to accompany the application.
+    source-url:
+      https://www.ipswich.gov.uk/sites/ipswich/files/2026-04/Ipswich%20Local%20Validation%20List%20Adopted%20Jan%2026%20v2.pdf
+    confidence: medium
+    notes: "The trigger was in the workbook's 'Odour / Dust / Vibration' row (wrong_trigger)."
+
+  - id: landscaping-plan
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url:
+      https://www.ipswich.gov.uk/sites/ipswich/files/2026-04/Ipswich%20Local%20Validation%20List%20Adopted%20Jan%2026%20v2.pdf
+    confidence: medium
+    notes: "From the audit (wrong_app_type): major applications, and minor applications in a sensitive
+      landscape (shown as officer discretion)."
+
+  - id: roof-plan-existing
+    action: add
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The proposal changes the shape or appearance of a roof.
+    source-url:
+      https://www.ipswich.gov.uk/sites/ipswich/files/2026-04/Ipswich%20Local%20Validation%20List%20Adopted%20Jan%2026%20v2.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): roof plans for roof shape/appearance changes, including
+      householder."
+
+  - id: roof-plan-proposed
+    action: add
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The proposal changes the shape or appearance of a roof.
+    source-url:
+      https://www.ipswich.gov.uk/sites/ipswich/files/2026-04/Ipswich%20Local%20Validation%20List%20Adopted%20Jan%2026%20v2.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): roof plans for roof shape/appearance changes, including
+      householder."
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: A sloping site, or ground levels outside the extension would be modified.
+    source-text: >-
+      particularly in the case of sloping sites it will be necessary to show how proposals relate to
+      existing ground levels or where ground levels outside the extension would be modified.
+    must-include:
+      - item: Clearly annotated existing and proposed
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): includes sloping sites for householder works."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: A sloping site, or ground levels outside the extension would be modified.
+    source-text: >-
+      particularly in the case of sloping sites it will be necessary to show how proposals relate to
+      existing ground levels or where ground levels outside the extension would be modified.
+    must-include:
+      - item: Clearly annotated existing and proposed
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): includes sloping sites for householder works."
+
+  - id: sci
+    action: add
+    required-if:
+      ref: major-development
+    source-url:
+      https://www.ipswich.gov.uk/sites/ipswich/files/2026-04/Ipswich%20Local%20Validation%20List%20Adopted%20Jan%2026%20v2.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Community Consultation Exercise Statement for all major
+      applications."
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - condition:
+                field: new-build
+                value: true
+                description: New residential development.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: One or more new dwellings.
+    source-text: >-
+      Sustainability Statement … When is this required? All major developments and new residential
+      development.
+    must-include:
+      - item: The Council's Sustainability Development Checklist, as an appendix
+        level: should
+    confidence: medium
+
+  - id: planning-statement
+    action: add
+    source-url:
+      https://www.ipswich.gov.uk/sites/ipswich/files/2026-04/Ipswich%20Local%20Validation%20List%20Adopted%20Jan%2026%20v2.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Planning Statement is in the list; its trigger wasn't
+      given."
+
+  - id: waste-management-plan
+    action: add
+    source-url:
+      https://www.ipswich.gov.uk/sites/ipswich/files/2026-04/Ipswich%20Local%20Validation%20List%20Adopted%20Jan%2026%20v2.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Site Waste Management Statement is in the list; its
+      trigger wasn't given."
+
+  - id: telecommunications-report
+    action: add
+    source-url:
+      https://www.ipswich.gov.uk/sites/ipswich/files/2026-04/Ipswich%20Local%20Validation%20List%20Adopted%20Jan%2026%20v2.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Telecommunications Report is in the list; its trigger
+      wasn't given."
+
+unmapped:
+  - local-name: Structural Survey and Method Statement
+    source-text: A schedule of works necessary to preserve the building
+    source-url:
+      https://www.ipswich.gov.uk/sites/ipswich/files/2026-04/Ipswich%20Local%20Validation%20List%20Adopted%20Jan%2026%20v2.pdf
+    suggested-id: structural-survey
+  - local-name: Joinery and Architectural Details
+    source-text: "From the audit: replacing traditional features on heritage assets (listed building consent)"
+    source-url:
+      https://www.ipswich.gov.uk/sites/ipswich/files/2026-04/Ipswich%20Local%20Validation%20List%20Adopted%20Jan%2026%20v2.pdf
+    suggested-id: joinery-details
+  - local-name: Shadow Habitats Regulations Assessment
+    source-text: >-
+      A Shadow Habitats Regulations Assessment (Shadow HRA) is required where the applicant must …
+      This document is described as a shadow HRA (sHRA) as it does not replace the LPA's duties to
+      complete such an assessment.
+    source-url:
+      https://www.ipswich.gov.uk/sites/ipswich/files/2026-04/Ipswich%20Local%20Validation%20List%20Adopted%20Jan%2026%20v2.pdf
+    suggested-id: habitats-regulations-assessment
+  - local-name: Marketing Information
+    source-text: "From the audit: loss of a community facility, public house or employment land (policies
+      DM24, DM28, DM30, DM33)"
+    source-url:
+      https://www.ipswich.gov.uk/sites/ipswich/files/2026-04/Ipswich%20Local%20Validation%20List%20Adopted%20Jan%2026%20v2.pdf
+    suggested-id: marketing-evidence
+  - local-name: Economic Impact Assessment
+    source-text: "From the audit: major applications losing E(g)/B2/B8 land"
+    source-url:
+      https://www.ipswich.gov.uk/sites/ipswich/files/2026-04/Ipswich%20Local%20Validation%20List%20Adopted%20Jan%2026%20v2.pdf
+    suggested-id: employment-statement
+  - local-name: Application Summary
+    source-text: "From the audit: major applications with more than 100 pages of supporting material"
+    source-url:
+      https://www.ipswich.gov.uk/sites/ipswich/files/2026-04/Ipswich%20Local%20Validation%20List%20Adopted%20Jan%2026%20v2.pdf
+    suggested-id: application-summary
+  - local-name: Disability Access Statement
+    source-text: "From the audit: 10+ homes"
+    source-url:
+      https://www.ipswich.gov.uk/sites/ipswich/files/2026-04/Ipswich%20Local%20Validation%20List%20Adopted%20Jan%2026%20v2.pdf
+    suggested-id: accessibility-statement
+  - local-name: Habitat Management and Monitoring Plan
+    source-text: "From the audit: all major applications"
+    source-url:
+      https://www.ipswich.gov.uk/sites/ipswich/files/2026-04/Ipswich%20Local%20Validation%20List%20Adopted%20Jan%2026%20v2.pdf
+    suggested-id: habitat-management-monitoring-plan
+  - local-name: Housing Delivery Statement
+    source-text: "From the audit: temporary car parks on housing allocations"
+    source-url:
+      https://www.ipswich.gov.uk/sites/ipswich/files/2026-04/Ipswich%20Local%20Validation%20List%20Adopted%20Jan%2026%20v2.pdf
+    suggested-id: housing-delivery-statement
+  - local-name: Minerals Assessment
+    source-text: "From the audit: sites in a minerals consultation area (Policy MP10)"
+    source-url:
+      https://www.ipswich.gov.uk/sites/ipswich/files/2026-04/Ipswich%20Local%20Validation%20List%20Adopted%20Jan%2026%20v2.pdf
+    suggested-id: minerals-assessment
+  - local-name: Theatre Assessment, Tall Building Assessment, Ipswich Garden Suburb strategies
+    source-text: "From the audit: listed in the Adopted January 2026 list; triggers not given"
+    source-url:
+      https://www.ipswich.gov.uk/sites/ipswich/files/2026-04/Ipswich%20Local%20Validation%20List%20Adopted%20Jan%2026%20v2.pdf
+    suggested-id: ""
+
+low-confidence:
+  - id: fire-statement
+    note: "The Outline excerpt is the DMPO outline access rule, not a Fire Statement trigger; the national
+      rules apply."
+  - id: recreation-facilities-assessment
+    note: "Audit (wrong_trigger): the excerpt under the Open Space Assessment heading is odour assessment
+      text; the list's trigger wasn't captured."
+  - id: town-centre-impact-assessment
+    note: "Audit (wrong_trigger): the excerpt is only the item heading; the list's trigger wasn't captured."
+  - id: flood-risk-assessment
+    note: "Audit (wrong_trigger): the excerpt is a list of sources and a page header; the list's trigger
+      wasn't captured."

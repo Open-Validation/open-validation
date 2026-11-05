@@ -1,0 +1,173 @@
+# Corrections for Darlington Borough Council, from the council's audit.
+# Darlington publishes no local validation checklist at present: its 'Validating your application'
+# page lists the validation guidance and local checklist as '[Currently being updated]'. Grokbot's
+# link was the Design and Access Statements sub-page and its date (2025-02-01) was that page's
+# last-updated date. The items below come from the council's own topic pages, as the audit read them.
+local-authority: DAL
+
+validation-list:
+  url: https://www.darlington.gov.uk/planning-and-building-regs/planning/planning-application-and-permission/validating-your-application/
+  date: ""
+  status: not-found
+  date-basis: >-
+    audit: the local validation checklist and guidance are marked '[Currently being updated]' with no
+    document; 21 February 2025 is only the last-updated date of the DAS web page
+
+submission-standards:
+  - item: All dimensions in metric
+    level: must
+
+drop-unmapped:
+  - local-name: Nutrient Neutrality statement / calculator
+    reason: >-
+      wrong_trigger: navigation fragment; the council's page gives background on the Teesmouth and
+      Cleveland Coast SPA catchment but names no statement or calculator as a validation item
+
+requirements:
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is within a conservation area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: The proposal provides one or more new dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: The proposal creates a building with 100 square metres or more of
+                      floorspace.
+    source-text: >-
+      Design and Access Statements (DAS) are required for: major developments (full and outline)
+      listed building applications developments within a conservation area for the provision of new
+      dwelling(s), or a building where the floor space created is 100m 2 or more.
+    source-url: https://www.darlington.gov.uk/planning-and-building-regs/planning/planning-application-and-permission/validating-your-application/design-and-access-statements/
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt began with page-title noise, and the new-dwelling and 100m2
+      tests apply only within conservation areas.
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: The proposal creates 10 or more dwellings.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: The proposal creates 1,000 square metres or more of non-residential
+              floorspace.
+    source-text: >-
+      (10+ dwellings or 1,000m2+ of non-residential floor space) should also complete a renewable
+      energy matrix
+    source-url: https://www.darlington.gov.uk/planning-and-building-regs/planning/planning-application-and-permission/validating-your-application/design-and-access-statements/
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): major developments complete a renewable energy matrix
+      (renewable_energy_matrix.pdf) alongside the DAS.
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, demolition-con-area]
+        - site:
+            in: [listed-building, scheduled-monument, conservation-area]
+            description: The works affect a listed building or scheduled monument, or are in a
+              conservation area.
+    source-text: Supporting applications for Listed Building Consent and Conservation Area Consent
+    source-url: https://www.darlington.gov.uk/planning-and-building-regs/planning/planning-application-and-permission/validating-your-application/
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): also covers works affecting scheduled monuments or
+      listed buildings, and development in conservation areas.
+
+  - id: structural-damage
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [consent-under-tpo, notice-trees-in-con-area]
+        - discretionary
+    source-text: >-
+      we insist that a structural report to accompany the application is submitted by a qualified
+      person
+    source-url: https://www.darlington.gov.uk/planning-and-building-regs/planning/planning-application-and-permission/validating-your-application/
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): for works to TPO or conservation area trees where
+      structural damage is the reason for the works. That reason can't be expressed as a field, so
+      it is shown as officer discretion.
+
+  - id: photos
+    action: add
+    required-if: discretionary
+    source-text: Please include pictures when you think they are helpful
+    source-url: https://www.darlington.gov.uk/planning-and-building-regs/planning/planning-application-and-permission/validating-your-application/
+    confidence: medium
+    notes: "From the audit (missing_requirement): optional photographs."
+
+  - id: site-plan
+    action: add
+    source-text: should be in metric scale (1:500), indicating the north
+    source-url: https://www.darlington.gov.uk/planning-and-building-regs/planning/planning-application-and-permission/validating-your-application/
+    must-include:
+      - item: Metric scale of 1:500
+        level: should
+      - item: North point
+        level: should
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): the site layout / block plan is described on the
+      validating page, but no trigger is given.
+
+  - id: floor-plan-existing
+    action: update
+    required-if: discretionary
+    source-text: If appropriate, you should include floor plans and elevations.
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): a general drawing item the council asks for 'if appropriate' on any
+      application; Grokbot placed it under Full planning by guess.
+  - id: floor-plan-proposed
+    action: update
+    required-if: discretionary
+    source-text: If appropriate, you should include floor plans and elevations.
+    confidence: medium
+    notes: "Audit (wrong_app_type): as for existing floor plans."
+  - id: elevation-existing
+    action: update
+    required-if: discretionary
+    source-text: If appropriate, you should include floor plans and elevations.
+    confidence: medium
+    notes: "Audit (wrong_app_type): as for existing floor plans."
+  - id: elevation-proposed
+    action: update
+    required-if: discretionary
+    source-text: If appropriate, you should include floor plans and elevations.
+    confidence: medium
+    notes: "Audit (wrong_app_type): as for existing floor plans."
+
+unmapped:
+  - local-name: Sustainable drainage (SuDS) details
+    source-text: >-
+      New developments need a sustainable drainage system. From the audit: major developments must
+      include drainage details at application (or pre-application) stage.
+    source-url: https://www.darlington.gov.uk/planning-and-building-regs/planning/planning-application-and-permission/validating-your-application/
+    suggested-id: drainage-strategy

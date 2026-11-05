@@ -1,0 +1,741 @@
+# Corrections for London Borough of Sutton, from inputs/audit/london-borough-of-sutton.json.
+# Grokbot's link is the current list (adopted 24/08/2026). The list is organised by application
+# type (Householder, Minor, Major, Change of Use, LBC, Advertisement, LDC, s73/NMA, Trees), with
+# each document Mandatory (M) or Conditional (C). Grokbot put everything under Full planning. Here
+# 'Major' uses ref: major-development; Sutton defines it as 10+ dwellings, 999sqm+ floorspace or a
+# site over 1ha. Items marked "From the audit" use the audit's paraphrase of the list.
+local-authority: STN
+
+submission-standards:
+  - item: All plans submitted as separate single-page PDF files; other document types or multi-page 
+      combined PDFs will not be accepted
+    level: must
+  - item: All submitted documents in PDF format (including photographs)
+    level: should
+  - item: Plans scaled appropriately (metric), with the stated scale or a scale bar, a unique 
+      drawing number and a title
+    level: must
+  - item: All plans accurate and correlating with partner drawings and other supporting 
+      documentation
+    level: must
+
+drop:
+  - id: affordable-housing-statement
+    reason: "duplicate: the list treats 'Financial Viability Assessment and Affordable Housing Statement'
+      as one item (kept as viability-assessment)"
+  - id: sustainability-statement
+    reason: "wrong_trigger: the excerpt is Circular Economy and Heritage Statement text; the Energy Statement
+      is added as energy-statement"
+
+drop-unmapped:
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: the excerpt is mixed with the Skills and Employment form; replaced below"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: the excerpt is the Demolition Method Statement checklist (replaced below)"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "wrong_trigger: a section-drawing note about land levels"
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_trigger: the excerpt is a parking-survey fragment and the PDF rule; replaced below"
+  - local-name: Ground investigation / Geotechnical / Basement Impact Assessment
+    reason: "wrong_trigger: no trigger ('Policies Map Basement Impact Assessment'); replaced below"
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "no trigger in the excerpt; replaced below with the householder trigger"
+
+requirements:
+  - id: photos
+    action: replace
+    required-if:
+      always: true
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's trigger was 'format (including photographs).'. From
+      the audit: Photos are Mandatory for every application type."
+
+  - id: cil-form
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [hh, full, outline, lbc, ldc-prospective-use]
+        - all:
+            - application-type:
+                in: [s73]
+            - discretionary
+    source-text: >-
+      CIL Additional Information Form This must be completed to help assess whether the proposal is
+      liable for the Community Infrastructure Levy.
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Mandatory for Householder, proposed LDC and LBC; for a
+      Minor Material Amendment (s73) only if the footprint changes (shown as officer discretion).
+
+  - id: floor-plan-existing
+    action: update
+    required-if:
+      application-type:
+        in: [hh, full, change-of-use, lbc, ldc-prospective-use]
+    confidence: medium
+    notes: "From the audit (missing_requirement): Floor Plans are Mandatory for Householder, proposed
+      LDC and LBC, as well as full applications."
+
+  - id: floor-plan-proposed
+    action: update
+    required-if:
+      application-type:
+        in: [hh, full, change-of-use, lbc, ldc-prospective-use]
+    confidence: medium
+    notes: "From the audit (missing_requirement): Floor Plans are Mandatory for Householder, proposed
+      LDC and LBC, as well as full applications."
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: Elevations from all sides where the new elements are visible
+        level: must
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was a cut-off fragment. From the audit: Fire
+      Statement (London Plan Part B) for buildings 18m+ or 7+ storeys with two or more dwellings or
+      educational use. The separate Fire Safety Strategy (Part A) is listed under unmapped.
+
+  - id: bng-metric
+    action: update
+    required-if:
+      application-type:
+        in: [full, outline, change-of-use, s73]
+    must-include:
+      - item: Biodiversity Net Gain (BNG) Statement
+        level: must
+      - item: Habitat Plan
+        level: must
+      - item: Metric Calculation Tool
+        level: must
+    confidence: medium
+    notes: >-
+      Nationally required for major (from 12 February 2024) and minor (from 2 April 2024)
+      applications. From the audit: for a Minor Material Amendment (s73) only where the original
+      permission was submitted on or after 12 Feb 2024. Householders submit a BNG exemption
+      declaration instead (see unmapped).
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: Block plan at 1:500
+        level: must
+    confidence: low
+    notes: >-
+      'Block Plan (1:500)'. From the audit: for Householder and proposed LDC applications it is only
+      needed for an extension beyond the existing walls or a new outbuilding; whether it is
+      Mandatory for Major/Minor applications needs checking.
+
+  - id: roof-plan-existing
+    action: add
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The proposal includes a new roof element.
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Roof Plans are Conditional (new roof element) for Householder,
+      proposed LDC, Major and Minor."
+
+  - id: roof-plan-proposed
+    action: add
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The proposal includes a new roof element.
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Roof Plans are Conditional (new roof element) for Householder,
+      proposed LDC, Major and Minor."
+
+  - id: section-existing
+    action: update
+    required-if: discretionary
+    must-include:
+      - item: Existing and finished levels, including level changes in relation to adjacent 
+          properties
+        level: must
+    confidence: medium
+    notes: "From the audit: for householders, Sections are Conditional (change in floor-to-ceiling height
+      or significant level difference); shown as officer discretion."
+
+  - id: section-proposed
+    action: update
+    required-if: discretionary
+    must-include:
+      - item: Existing and finished levels, including level changes in relation to adjacent 
+          properties
+        level: must
+    confidence: medium
+    notes: "From the audit: for householders, Sections are Conditional (change in floor-to-ceiling height
+      or significant level difference); shown as officer discretion."
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - site:
+                in: [archaeological-priority-area]
+                description: The site is in an Area of Archaeological Priority.
+            - condition:
+                field: ground-disturbance
+                value: true
+                description: The proposal involves ground disturbance.
+        - all:
+            - site:
+                in: [scheduled-monument]
+                description: The site is within 50m of an Ancient Monument.
+            - condition:
+                field: ground-disturbance
+                value: true
+                description: The proposal involves new footings.
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook had no trigger. From the audit: ground disturbance in an
+      Area of Archaeological Priority, or new footings within 50m of an Ancient Monument (applies to
+      Householder and LBC too).
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: The site is on contaminated land.
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Contaminated Land Assessment, Conditional (site on contaminated
+      land), including Householder."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [local-wildlife-site]
+            description: >-
+              The site is within or within 100m of a SINC, or loft or roof alterations are proposed
+              within a SINC or Green Corridor.
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): 'all planning applications must have consideration' does not mean it is
+      always required. From the audit: Ecological Assessment is Mandatory for Major; Conditional for
+      Minor (within or within 100m of a SINC, or loft/roof alterations) and Householder (loft or roof
+      alterations within a SINC or Green Corridor).
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - site:
+                in: [flood-risk-zone]
+                description: The site is in Flood Zone 2 or 3.
+            - condition:
+                field: ground-disturbance
+                value: true
+                description: The proposal involves new footings.
+        - condition:
+            field: basement
+            value: true
+            description: The proposal involves new subterranean levels.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more.
+    source-text: Flood Zones 2 or 3 with new footings; new subterranean levels; or sites of 1 
+      hectare or more
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt said 'should be prepared for all developments'."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [conservation-area, listed-building, locally-listed-building]
+            description: The site is in a conservation area or is a listed or locally listed 
+              building.
+    source-text: >-
+      Historic environment A Heritage Statement should be prepared by an appropriate expert where
+      necessary and among other matters should include: A description of the significance of the
+      heritage asset with reference to the relevant historic record.
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    must-include:
+      - item: A description of the significance of the heritage asset, with reference to the 
+          relevant historic record
+        level: should
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Mandatory for LBC; Conditional for Householder
+      (conservation area, listed or locally listed building) and Advertisement.
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees within 7.5m of the proposed footings.
+    source-text: The tree survey and AIA must comply with BS5837:2012 Trees in Relation to Design, 
+      Demolition and Construction.
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    must-include:
+      - item: Tree survey and AIA complying with BS5837:2012
+        level: must
+      - item: An arboricultural method statement (AMS) and tree protection plan to BS5837:2012
+        level: must
+        source-text: an arboricultural method statement (AMS) and tree protection plan to 
+          BS5837:2012 is also required.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook missed the distance triggers. From the audit: tree survey,
+      AIA and AMS where trees are within 7.5m of footings; trees 7.5-15m away need only a marked plan
+      and labelled photos.
+
+  - id: schedule-of-works
+    action: replace
+    required-if:
+      application-type:
+        in: [consent-under-tpo]
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted an arboricultural method statement sentence. From
+      the audit: 'Schedule of Works' is Mandatory for works to protected trees. The 'Schedule of
+      proposed changes' for NMA/MMA is listed under unmapped.
+
+  - id: condition-of-trees
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [consent-under-tpo]
+        - discretionary
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): for works to protected trees, an Arboricultural Report
+      is Mandatory if the reason for the works is the tree's condition."
+
+  - id: structural-damage
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [consent-under-tpo]
+        - discretionary
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): for works to protected trees, a Subsidence/Structural
+      Damage Report is Mandatory if the reason is alleged damage."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates a new dwelling.
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 100
+            description: More than 100 square metres of new floor area.
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted demolition and construction-management text. From
+      the audit: any new dwelling or more than 100sqm of new floor area."
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Commercial floorspace outside a town centre.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 2499
+            description: More than 2,499 square metres of commercial floorspace.
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted drawing-standards text. From the audit: more than
+      2,499sqm of commercial floorspace outside a town centre."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is EIA development.
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was the fragment 'traffic and EIA development.'"
+
+  - id: sci
+    action: replace
+    required-if:
+      ref: major-development
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type / wrong_trigger): the Statement of Community Engagement is for Major
+      applications only; the workbook's excerpt was mixed with the Skills and Employment form."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates new dwellings.
+    policy: Sutton Local Plan Policy 31 (Carbon and Energy)
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    confidence: medium
+    notes: "From the audit (wrong_app_type): Energy Assessment is Mandatory for Major and Conditional
+      for Minor (new dwellings)."
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    confidence: medium
+    notes: "From the audit (wrong_app_type): Landscaping Scheme is Mandatory for Major and Conditional
+      for Minor (if BNG applies, shown as officer discretion)."
+
+  - id: construction-management-plan
+    action: update
+    required-if:
+      ref: major-development
+    confidence: medium
+    notes: "From the audit (wrong_app_type): Construction Management Plan is for Major applications only."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: The proposal includes new external lighting or floodlighting (for adverts, new 
+          external spot or floodlights).
+    must-include:
+      - item: Hours of operation
+        level: should
+      - item: Light spillage (horizontal and vertical light spill, clearly scaled)
+        level: should
+      - item: Light levels
+        level: should
+      - item: Column heights
+        level: should
+      - item: Layout plan with beam orientation and light maps (isolux contour maps to 0.01 lux)
+        level: should
+      - item: Equipment design
+        level: should
+      - item: Impact on nearby dwellings, wildlife, habitat or roads, and use of planting to 
+          mitigate the effects
+        level: should
+    confidence: medium
+    notes: >-
+      The excerpt interleaves the Parking Management Plan entry. From the audit: Lighting
+      Assessment is Conditional for Advertisement applications with new external spot or floodlights.
+
+  - id: viability-assessment
+    action: replace
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    source-text: >-
+      Financial Viability Assessment (FVA) and Affordable Housing Statement The Mayor's current
+      Affordable Housing and Viability SPG August 2017 states that where less than 35% affordable
+      housing is proposed (50% on public land) a full Financial Viability Appraisal (FVA) shall be
+      provided to the Council for independent assessment.
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    confidence: medium
+    notes: >-
+      One combined item with the Affordable Housing Statement (audit, duplicate). Conditional in the
+      Major list: where less than 35% affordable housing is proposed (50% on public land), shown as
+      officer discretion.
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      ref: major-development
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Air Quality Assessment, Mandatory for Major."
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if:
+      ref: major-development
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Daylight and Sunlight Assessment, Mandatory for Major."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Planning Statement, Mandatory for Major."
+
+  - id: transport-assessment
+    action: add
+    required-if:
+      ref: major-development
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Transport Assessment, Mandatory for Major."
+
+  - id: travel-plan
+    action: add
+    required-if:
+      ref: major-development
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Travel Plan, Mandatory for Major."
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates new dwellings (Minor and Change of Use).
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Waste Management, Storage and Collection Strategy, Mandatory
+      for Major; Conditional for new dwellings in Minor and Change of Use."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Masts, base stations or cabinets.
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Telecommunication Report, Conditional (masts, base stations,
+      cabinets)."
+
+  - id: location-plan
+    action: update
+    must-include:
+      - item: A north point
+        level: must
+      - item: The site in relation to adjoining properties and the nearest road junctions
+        level: should
+    source-text: >-
+      Mandatory The application site must be edged in red, and the plan must include a north point
+      and should show the site in relation to adjoining properties and the nearest road junctions.
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    confidence: medium
+
+unmapped:
+  - local-name: Fire Safety Strategy (London Plan Part A)
+    source-text: "From the audit: Mandatory for Minor, Change of Use, Householder and LBC"
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    suggested-id: fire-safety-strategy
+  - local-name: BNG exemption declaration (Householder)
+    source-text: "From the audit: Mandatory for Householder; flats and maisonettes do not qualify for
+      the exemption"
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    suggested-id: bng-exemption-statement
+  - local-name: Streetscenes - Existing & Proposed
+    source-text: "Streetscenes - Existing & Proposed (appropriately scaled). From the audit: Householder,
+      Conditional (additional new storey, but not loft conversions or dormers)"
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    suggested-id: street-scene-elevations
+  - local-name: Window Sections
+    source-text: "From the audit: new windows on listed or locally listed buildings, or replacement windows
+      in a conservation area"
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    suggested-id: window-details
+  - local-name: Basement Impact Assessment
+    source-text: "From the audit: new or extended subterranean levels"
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    suggested-id: basement-impact-assessment
+  - local-name: Crossover Agreement
+    source-text: "From the audit: new or amended vehicular crossover"
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    suggested-id: highways-approval
+  - local-name: SUDS (Sustainable Urban Drainage System) Strategy
+    source-text: "SUDS (Sustainable Urban Drainage System) Strategy (can be provided as part of the site
+      specific FRA where one is produced). From the audit: Mandatory for Major; Conditional for Minor
+      (new footprint of 5sqm or more, or commercial-to-residential)"
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    suggested-id: drainage-strategy
+  - local-name: Drainage Assessment Form
+    source-text: "From the audit: Major, Mandatory"
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    suggested-id: drainage-strategy
+  - local-name: Demolition Method Statement
+    source-text: >-
+      Reasons for demolition Scope of works Method and sequence of demolition Details of access
+      arrangements Proposed working hours Any identified hazards Any Personal Protective Equipment
+      (PPE) required. From the audit: Conditional, demolishing a building over two storeys or a
+      listed or locally listed building
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    suggested-id: demolition-method-statement
+  - local-name: Parking Management Plan
+    source-text: "From the audit: Major applications only"
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    suggested-id: parking-plan
+  - local-name: Construction Logistics Plan
+    source-text: "From the audit: Major, Mandatory"
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    suggested-id: construction-logistics-plan
+  - local-name: Delivery and Servicing Management Plan
+    source-text: "From the audit: Major, Mandatory"
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    suggested-id: delivery-servicing-plan
+  - local-name: Air Quality Neutral Assessment
+    source-text: "From the audit: Major, Mandatory"
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    suggested-id: air-quality-neutral-assessment
+  - local-name: BREEAM Pre-Assessment / Interim Design Stage Certificate
+    source-text: "From the audit: Major, Mandatory except residential-only schemes"
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    suggested-id: breeam-pre-assessment
+  - local-name: Skills and Employment Strategy
+    source-text: "From the audit: Major, Mandatory"
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    suggested-id: employment-statement
+  - local-name: Cycle Store and Refuse Store plans / details
+    source-text: "For validation purposes if the store is contained within an external outbuilding, metric
+      scaled floor plans and elevations will be required. From the audit: Conditional, new or amended
+      external store"
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    suggested-id: cycle-refuse-store-details
+  - local-name: GLA environmental policy requirements (Circular Economy Statement, Whole Life-Cycle 
+      Carbon, Energy spreadsheets)
+    source-text: >-
+      The Circular Economy Statement must include both a written report that demonstrates how a
+      circular economy will be achieved by the development alongside the completed GLA Circular
+      Economy Template Spreadsheet and should be submitted in Excel format. From the audit:
+      Conditional, GLA-referable size/height thresholds
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    suggested-id: circular-economy-statement
+  - local-name: Schedule of proposed changes (NMA / MMA)
+    source-text: "From the audit: Mandatory for Non-Material Amendments and Minor Material Amendments
+      (s73)"
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    suggested-id: schedule-of-changes
+  - local-name: Works to protected trees - site plan with labelled trees and reason for works
+    source-text: "From the audit: Site Plan with labelled trees (Mandatory) and Reason for Works (Mandatory
+      for TPO)"
+    source-url: 
+      https://www.sutton.gov.uk/sites/default/files/2026-08/London%20Borough%20of%20Sutton%20Local%20Validation%20List%202026.pdf
+    suggested-id: tree-works-plan
+
+low-confidence:
+  - id: elevation-existing
+    note: "The workbook guessed Full planning; the list's per-type rules for elevations were not captured
+      (audit, wrong_app_type)."
+  - id: elevation-proposed
+    note: "The workbook guessed Full planning; the list's per-type rules for elevations were not captured
+      (audit, wrong_app_type)."
+

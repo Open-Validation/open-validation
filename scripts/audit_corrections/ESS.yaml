@@ -1,0 +1,550 @@
+# Corrections for Essex County Council, from inputs/audit/essex-county-council.json.
+# ECC publishes three March 2025 validation lists: Regulation 3 (the County Council's own
+# development, such as new schools), Minerals and Waste. ECC does not determine ordinary full
+# applications (residential and commercial applications go to the districts), but Grokbot filed
+# about 40 Reg 3 items under Full planning. Following the audit, the common items are scoped to
+# mineral-app, waste-dev and reg-3; items from only one list are scoped to its type.
+local-authority: ESS
+
+submission-standards:
+  - item: Use PDF format for all documents
+    level: must
+  - item: Drawings should include a north point, scale bar and a key to any symbols used
+    level: should
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is ecology mitigation text; the lists have no schedule of works requirement"
+  - id: waste-management-plan
+    reason: "wrong_trigger: the excerpt is a Dust Assessment fragment ('extraction and waste management developments.')"
+  - id: site-plan
+    reason: "wrong_app_type: the excerpt is the FRA content list (block plan), filed under prior approval; now a must-include of the FRA"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advisory text about pre-application discussions and online submission"
+  - local-name: Cycle parking details
+    reason: "not_a_requirement: a fragment ('provision, including cycle parking.') of the Parking Provision item"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "duplicate: a fragment ('gardens or amenity space.') of the Daylight/Sunlight item"
+  - local-name: Ground investigation / Geotechnical / Basement Impact Assessment
+    reason: "wrong_trigger: the row is the Hydrology/Hydrogeology Assessment; re-added below under that name"
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "wrong_trigger: only 'major8 development' was captured; re-added below with the audit's triggers"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - ref: major-development
+            - condition:
+                field: earthworks
+                value: true
+                description: Substantial earthworks or demolition.
+            - site:
+                in: [air-quality-management-area]
+                description: Development within 1km of an AQMA.
+            - discretionary
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger / wrong_app_type): the excerpt gave only 'Major development'. From the
+      audit, the list also covers substantial earthworks/demolition, dust or traffic impacts (shown
+      as officer discretion) and development within 1km of an AQMA.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: The proposal may affect trees within the site or on adjacent land, including
+              street trees.
+    confidence: medium
+    notes: "Audit (wrong_app_type): moved from Full planning to the county's application types."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - site:
+            in: [archaeological-priority-area]
+            description: The site is within an Area of Archaeological Potential.
+        - condition:
+            field: ground-disturbance
+            value: true
+            description: The development involves a new building or disturbance of the ground.
+    confidence: medium
+    notes: "Audit (wrong_app_type): moved from Full planning to the county's application types."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    source-text: ""
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was contents-page text. The list has a
+      Biodiversity Net Gain Statement section (pp14-15) whose trigger was not captured.
+
+  - id: cil-form
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [reg-3]
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 100
+            description: Net new floorspace of 100 square metres or more, in an adopted CIL area.
+    source-text: "CIL Form 2 (Assumption of Liability) – if the proposed development is CIL liable."
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt ran into the Contaminated Land text. From the audit, the
+      trigger is an adopted CIL area with net new floorspace of 100m2 or more.
+
+  - id: construction-management-plan
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: new-build
+            value: true
+            description: The application involves new built development.
+    confidence: medium
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - site:
+            in: [contaminated-land]
+            description: Contaminated land and/or buildings/structures are known or suspected to exist.
+    source-text: >-
+      Contaminated Land Assessment Required for applications for development where contaminated land
+      and/or buildings/structures are known or suspected to exist.
+    confidence: medium
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - discretionary
+    confidence: medium
+    notes: >-
+      Where there is potential adverse impact on current daylight/sunlight enjoyed by adjoining
+      properties, gardens or amenity space (council's wording).
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    source-text: ""
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was contents-page text. The list has a Design and
+      Access Statements section (pp12-13) whose trigger was not captured.
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    source-text: ""
+    confidence: low
+    notes: >-
+      The workbook's excerpt was the end of the Habitat Regulations Assessment entry ('This is not a
+      general Ecological Assessment ...') running into the HIA heading, so no trigger was captured.
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - ref: major-development
+    confidence: medium
+    notes: "It is also encouraged (not required) for minor applications that include new built development."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: eia-development
+            value: true
+            description: Schedule 1 or 2 development likely to have significant environmental effects.
+    source-url: https://www.essex.gov.uk/sites/default/files/2025-03/Regulation%203%20validation%20checklist%20March%202025.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted pre-application and online submission text."
+
+  - id: section-existing
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: The existing or proposed site levels would impact on built development.
+    must-include:
+      - item: Finished floor and site levels
+        level: must
+      - item: Drawn at a scale of 1:50 or 1:100
+        level: must
+    confidence: medium
+
+  - id: section-proposed
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: The existing or proposed site levels would impact on built development.
+    must-include:
+      - item: Finished floor and site levels
+        level: must
+      - item: Drawn at a scale of 1:50 or 1:100
+        level: must
+    confidence: medium
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - site:
+                in: [flood-risk-zone]
+                description: In Flood Zone 2 or 3, including minor development and change of use.
+            - condition:
+                field: site-area-residential
+                operator: ">"
+                value: 1
+                description: More than 1 hectare in Flood Zone 1.
+            - condition:
+                field: site-area-non-residential
+                operator: ">"
+                value: 1
+                description: More than 1 hectare in Flood Zone 1.
+            - site:
+                in: [critical-drainage-area]
+                description: In an area within Flood Zone 1 with critical drainage problems.
+            - discretionary
+    source-text: >-
+      Flood Risk Assessment Required for development: In Flood Zones 2 or 3 including minor
+      development and change of use Of more than 1 hectare in Flood Zone 1 Of less than 1 hectare in
+      Flood Zone 1, including a change of use in a development type to a more vulnerable class (e.g.,
+      from commercial to residential), which could be affected by sources of flooding other than
+      rivers and the sea (e.g., surface water drains, reservoirs) In an area within Flood Zone 1
+      which has critical dra…
+    source-url: https://www.essex.gov.uk/sites/default/files/2025-03/Regulation%203%20validation%20checklist%20March%202025.pdf
+    must-include:
+      - item: A general summary of the proposed development, including a block plan of existing and
+          proposed development, any change of use, the vulnerability classification and the
+          expected lifetime of the development
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): ECC's lists do not cover prior approvals. Small Flood Zone 1 sites at
+      risk from other sources are shown as officer discretion.
+
+  - id: floor-plan-existing
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: new-build
+            value: true
+            description: New built development is proposed.
+    confidence: low
+    notes: "The excerpt is the elevations trigger; the floor plan trigger may differ."
+
+  - id: floor-plan-proposed
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: new-build
+            value: true
+            description: New built development is proposed.
+    confidence: low
+    notes: "The excerpt is the elevations trigger; the floor plan trigger may differ."
+
+  - id: elevation-existing
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: new-build
+            value: true
+            description: New built development is proposed.
+    confidence: medium
+
+  - id: elevation-proposed
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: new-build
+            value: true
+            description: New built development is proposed.
+    confidence: medium
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - discretionary
+    must-include:
+      - item: Details of landscape maintenance and aftercare
+        level: must
+    confidence: medium
+    notes: "Required where new or replacement landscaping is proposed (council's wording); no field for this."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: floodlighting
+                value: true
+                description: The application includes floodlighting.
+            - condition:
+                field: external-lighting
+                value: true
+                description: A significant amount of external lighting, adjacent to a residential
+                  property (other cases cut off in the excerpt).
+    confidence: medium
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: noise-sensitive-use
+                value: true
+                description: Noise sensitive development, or development in a noise sensitive area.
+            - discretionary
+    must-include:
+      - item: Details of proposed hours of operation
+        level: must
+    confidence: medium
+    notes: "Required for all applications which may have a potential noise impact (shown as officer discretion)."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: loss-of-open-space
+                value: true
+                description: The loss of open space, sports and recreation facilities (including
+                  school playing fields) or green infrastructure.
+            - discretionary
+    confidence: medium
+    notes: "The provision of open space or sports facilities also triggers it (shown as officer discretion)."
+
+  - id: photos
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: demolition
+                value: true
+                description: The demolition of an existing building.
+            - discretionary
+    confidence: medium
+    notes: "Required where the development would significantly change the appearance of a building or landscape."
+
+  - id: planning-statement
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: medium
+    notes: "Required for all applications, commensurate with the scale of development."
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: roof-alteration
+            value: true
+            description: A new roof would be created or an existing roof altered.
+    must-include:
+      - item: Drawn at a scale of 1:50 or 1:100
+        level: must
+    confidence: medium
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: roof-alteration
+            value: true
+            description: A new roof would be created or an existing roof altered.
+    must-include:
+      - item: Drawn at a scale of 1:50 or 1:100
+        level: must
+    confidence: medium
+
+  - id: travel-plan
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - discretionary
+    confidence: medium
+    notes: "Required for development which would generate significant amounts of traffic."
+
+  - id: viability-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - ref: major-development
+        - discretionary
+    confidence: medium
+    notes: "Major development where no developer contributions, or a reduced level, are offered."
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - discretionary
+    source-text: Statement and Transport Assessment where appropriate.
+    source-url: https://www.essex.gov.uk/sites/default/files/2025-03/Regulation%203%20validation%20checklist%20March%202025.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type / wrong_trigger): placed under Listed building consent with the Heritage
+      Statement text. Only the tail 'Transport Assessment where appropriate' was captured.
+
+  - id: sci
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - ref: major-development
+    confidence: low
+    notes: >-
+      The excerpt is cut off; it carries footnote 6, which defines major development (minerals,
+      waste, 1,000m2 floorspace or 1 hectare). Check the exact trigger.
+
+  - id: water-impact-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app]
+        - discretionary
+    source-url: https://www.essex.gov.uk/sites/default/files/2025-03/Minerals%20validation%20checklist%20March%202025.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a Water Resources Assessment for new minerals development
+      or extensions with a non-domestic water demand over 20,000 litres a day (no field for this).
+
+unmapped:
+  - local-name: Hydrology/Hydrogeology Assessment
+    source-text: "Hydrology/Hydrogeology Assessment Required for applications for minerals and waste development where dewatering is proposed."
+    source-url: https://www.essex.gov.uk/sites/default/files/2025-03/Minerals%20validation%20checklist%20March%202025.pdf
+    suggested-id: hydrogeology-assessment
+  - local-name: Biodiversity Checklist
+    source-text: "From the audit: major development, SSSI Impact Risk Zones, land within 100m of nature reserves or local wildlife sites, and protected species"
+    source-url: https://www.essex.gov.uk/sites/default/files/2025-03/Regulation%203%20validation%20checklist%20March%202025.pdf
+    suggested-id: biodiversity-checklist
+  - local-name: Borehole or Trial Pit Analysis
+    source-text: "From the audit: all mineral extraction applications"
+    source-url: https://www.essex.gov.uk/sites/default/files/2025-03/Minerals%20validation%20checklist%20March%202025.pdf
+    suggested-id: borehole-analysis
+  - local-name: Phasing Plans / Proposed Scheme of Working
+    source-text: "From the audit: mineral operations proposed in phases"
+    source-url: https://www.essex.gov.uk/sites/default/files/2025-03/Minerals%20validation%20checklist%20March%202025.pdf
+    suggested-id: phasing-plan
+  - local-name: Airport Safeguarding Statement
+    source-text: "From the audit: within aerodrome consultation areas (tall structures over 90m, reflective structures, lighting, bird risk)"
+    source-url: https://www.essex.gov.uk/sites/default/files/2025-03/Regulation%203%20validation%20checklist%20March%202025.pdf
+    suggested-id: aerodrome-safeguarding-statement
+  - local-name: External Materials Board
+    source-text: "From the audit: new built development"
+    source-url: https://www.essex.gov.uk/sites/default/files/2025-03/Regulation%203%20validation%20checklist%20March%202025.pdf
+    suggested-id: materials-schedule
+  - local-name: Green Belt Statement
+    source-text: "From the audit: all applications in the Green Belt"
+    source-url: https://www.essex.gov.uk/sites/default/files/2025-03/Regulation%203%20validation%20checklist%20March%202025.pdf
+    suggested-id: green-belt-statement
+  - local-name: Public Rights of Way
+    source-text: "If a diversion of a PRoW is required, the current and proposed diverted route must be clearly shown on a drawing, to metric scale."
+    source-url: https://www.essex.gov.uk/sites/default/files/2025-03/Minerals%20validation%20checklist%20March%202025.pdf
+    suggested-id: public-rights-of-way-statement
+  - local-name: HRA for Epping Forest SAC
+    source-text: "From the audit: development with a possible impact on the Epping Forest SAC"
+    source-url: https://www.essex.gov.uk/sites/default/files/2025-03/Regulation%203%20validation%20checklist%20March%202025.pdf
+    suggested-id: habitats-regulations-assessment
+  - local-name: Essex Housing Accessibility Assessment and Sustainability Assessment (Annex 1)
+    source-text: "From the audit: Annex 1, Essex Housing: Accessibility Assessment (new residential) and Sustainability Assessment"
+    source-url: https://www.essex.gov.uk/sites/default/files/2025-03/Regulation%203%20validation%20checklist%20March%202025.pdf
+    suggested-id: ""
+
+low-confidence:
+  - id: heritage-statement
+    note: >-
+      The excerpt ('Required for: Applications for listed building consent.') is cut off; the other
+      cases in the Reg 3 list were not captured.

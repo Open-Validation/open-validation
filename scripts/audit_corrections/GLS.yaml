@@ -1,0 +1,329 @@
+# Corrections for Gloucestershire County Council, from the council's audit.
+# The audit could not read the list (fetch budget ran out; contents_checked: false), so this is
+# light. Gloucestershire CC is a county planning authority (minerals, waste and its own
+# Regulation 3 development), so every workbook row is scoped to mineral-app, waste-dev and
+# reg-3 rather than Full planning. Householder and other district types do not apply.
+# The workbook read the minerals (Appendix 1) and Reg 3 (Appendix 3) checklists but captured
+# neither separately; they still need a manual read. The list date (Feb 2024) comes from the URL
+# and the tab items cite the August 2023 v2 checklist; neither was confirmed.
+local-authority: GLS
+
+drop:
+  - id: site-plan
+    reason: "wrong_trigger: the excerpt is a Sport England reference ('England's website Planning for Sport for advice')"
+  - id: design-and-access-statement
+    sheets: [Full planning]
+    reason: "wrong_trigger: the excerpt is a waste-minimisation fragment"
+  - id: transport-assessment
+    sheets: [Full planning]
+    reason: "duplicate: the excerpt is the Construction Management Plan trigger"
+  - id: travel-plan
+    sheets: [Full planning]
+    reason: "duplicate: the excerpt is the Construction Management Plan trigger"
+
+drop-unmapped:
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "duplicate / not a county requirement: same ALC references and contamination text as the ALC row"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: a fragment of the Construction Management Plan entry"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: the excerpt is the Statement of Pre-application Engagement trigger; added below"
+  - local-name: Minerals / Waste specific statements (county matters)
+    reason: "wrong_trigger: the Full row is Tree Survey text; the waste row's Restoration Scheme is added below"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: the Full row is the Hydrological Assessment trigger; both items are added below"
+
+requirements:
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Trees are within the site.
+    source-text: "Tree survey / Arboricultural Statement When is it required? Any development where: trees
+      are within the site;"
+    source-url: https://www.gloucestershire.gov.uk/media/g4xd5wbh/updated-revised-gcc-local-validation-checklist-incorporating-addendum-bng-requirements-feb-2024.pdf
+    confidence: low
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3. The trigger
+      list is cut off after its first item."
+
+  - id: construction-management-plan
+    action: replace
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    source-text: >-
+      Construction Management Plan Any development unless the Highways Authority has indicated that one
+      would not be required.
+    source-url: https://www.gloucestershire.gov.uk/media/g4xd5wbh/updated-revised-gcc-local-validation-checklist-incorporating-addendum-bng-requirements-feb-2024.pdf
+    confidence: low
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3."
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: previously-developed-land
+                value: true
+                description: Development on brownfield land.
+            - site:
+                in: [contaminated-land]
+                description: There is reason to suspect contamination of the site or neighbouring land from
+                  previous uses.
+    source-text: >-
+      Land Contamination Assessment Any development on brownfield land or where there is reason to
+      suspect prior contamination of the application site or neighbouring land due to previous
+      operations, such as (but not limited to) the existence of former industrial uses …
+    source-url: https://www.gloucestershire.gov.uk/media/g4xd5wbh/updated-revised-gcc-local-validation-checklist-incorporating-addendum-bng-requirements-feb-2024.pdf
+    confidence: low
+    notes: "Audit (wrong_trigger): this trigger was filed under the two agricultural rows; the workbook's own
+      contamination row was a fragment."
+
+  - id: landscaping-plan
+    action: replace
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    source-text: >-
+      Landscaping and After-care Scheme Any development unless the Planning Authority has provided
+      written confirmation that one would not be required.
+    source-url: https://www.gloucestershire.gov.uk/media/g4xd5wbh/updated-revised-gcc-local-validation-checklist-incorporating-addendum-bng-requirements-feb-2024.pdf
+    confidence: low
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3."
+
+  - id: section-existing
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: change-in-ground-levels
+                value: true
+                description: The development changes ground levels.
+            - discretionary
+    source-text: Any development which involves any change in ground levels or where topography …
+    source-url: https://www.gloucestershire.gov.uk/media/g4xd5wbh/updated-revised-gcc-local-validation-checklist-incorporating-addendum-bng-requirements-feb-2024.pdf
+    confidence: low
+    notes: "Audit (wrong_trigger): the excerpt merged two entries; the topography case is cut off, so it is
+      shown as officer judgement."
+
+  - id: section-proposed
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: change-in-ground-levels
+                value: true
+                description: The development changes ground levels.
+            - discretionary
+    source-text: Any development which involves any change in ground levels or where topography …
+    source-url: https://www.gloucestershire.gov.uk/media/g4xd5wbh/updated-revised-gcc-local-validation-checklist-incorporating-addendum-bng-requirements-feb-2024.pdf
+    confidence: low
+    notes: "Audit (wrong_trigger): the excerpt merged two entries; the topography case is cut off, so it is
+      shown as officer judgement."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: eia-development
+            value: true
+            description: The development needs Environmental Impact Assessment.
+    source-url: https://www.gloucestershire.gov.uk/media/g4xd5wbh/updated-revised-gcc-local-validation-checklist-incorporating-addendum-bng-requirements-feb-2024.pdf
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook excerpt was a fragment ('that no EIA is required.')."
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    source-text: Historic environment Heritage and Archaeological Statement
+    source-url: https://www.gloucestershire.gov.uk/media/xixn5ktn/appendix-2-checklist-for-the-submission-of-applications-for-waste-development.docx
+    confidence: low
+    notes: "Audit (wrong_trigger): the general-checklist excerpt was drainage guidance; the waste checklist
+      only names the item, without a trigger."
+
+  - id: photos
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    must-include:
+      - item: The location where each photograph was taken
+        level: must
+    confidence: low
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3. No trigger
+      is given."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: low
+    notes: "Audit (wrong_app_type): a county list, so moved from Full planning to minerals, waste and
+      Regulation 3. Audit (wrong_trigger): the excerpt is a fragment ('least 10% BNG.')."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: low
+    notes: "Audit (wrong_app_type): a county list, so moved from Full planning to minerals, waste and
+      Regulation 3. Audit (wrong_trigger): the excerpt is a fragment."
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: low
+    notes: "Audit (wrong_app_type): a county list, so moved from Full planning to minerals, waste and
+      Regulation 3. Audit (wrong_trigger): the excerpt is a fragment ('no undue overshadowing to the waterway.')."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: low
+    notes: "Audit (wrong_app_type): a county list, so moved from Full planning to minerals, waste and
+      Regulation 3. The excerpt says only that all developments must consider flood risk in line with PPG."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: low
+    notes: "Audit (wrong_app_type): a county list, so moved from Full planning to minerals, waste and
+      Regulation 3. Audit (wrong_trigger): the excerpt is a fragment."
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: low
+    notes: "Audit (wrong_app_type): a county list, so moved from Full planning to minerals, waste and
+      Regulation 3. Listed in the waste checklist, without a trigger."
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: low
+    notes: "Audit (wrong_app_type): a county list, so moved from Full planning to minerals, waste and
+      Regulation 3. Listed in the waste checklist, without a trigger."
+
+  - id: travel-plan
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: low
+    notes: "Audit (wrong_app_type): a county list, so moved from Full planning to minerals, waste and
+      Regulation 3. Listed in the waste checklist, without a trigger."
+
+  - id: water-impact-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - discretionary
+    source-text: "Hydrological or Hydrogeological Assessment Any development: involving materials or
+      processes that could result in pollution of the water environment; and"
+    source-url: https://www.gloucestershire.gov.uk/media/g4xd5wbh/updated-revised-gcc-local-validation-checklist-incorporating-addendum-bng-requirements-feb-2024.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a Hydrological or Hydrogeological Assessment; the trigger
+      is cut off after its first condition, and pollution risk has no field, so it is shown as officer
+      judgement. The waste checklist also lists a Water Framework Directive compliance assessment.
+
+unmapped:
+  - local-name: Statement of Pre-application Engagement or Consultation
+    source-text: "Statement of Preapplication Engagement or Consultation Any development where: a boundary is
+      shared with a sensitive use receptor; and/ or"
+    source-url: https://www.gloucestershire.gov.uk/media/g4xd5wbh/updated-revised-gcc-local-validation-checklist-incorporating-addendum-bng-requirements-feb-2024.pdf
+    suggested-id: sci
+  - local-name: Dust Management Plan
+    source-text: "also include a Dust Management Plan and will need to indicate how the applicant will
+      minimise the impact of dust on the surrounding area."
+    source-url: https://www.gloucestershire.gov.uk/media/g4xd5wbh/updated-revised-gcc-local-validation-checklist-incorporating-addendum-bng-requirements-feb-2024.pdf
+    suggested-id: dust-management-plan
+  - local-name: Surface Water Drainage Strategy
+    source-text: "Surface Water Drainage Strategy (waste checklist, no trigger given)"
+    source-url: https://www.gloucestershire.gov.uk/media/xixn5ktn/appendix-2-checklist-for-the-submission-of-applications-for-waste-development.docx
+    suggested-id: drainage-strategy
+  - local-name: Restoration Scheme
+    source-text: "Restoration and aftercare Restoration Scheme"
+    source-url: https://www.gloucestershire.gov.uk/media/xixn5ktn/appendix-2-checklist-for-the-submission-of-applications-for-waste-development.docx
+    suggested-id: restoration-aftercare-scheme
+  - local-name: Waste Minimisation Statement
+    source-text: "Design And Access Statement Waste Minimisation Statement Waste Needs Assessment"
+    source-url: https://www.gloucestershire.gov.uk/media/xixn5ktn/appendix-2-checklist-for-the-submission-of-applications-for-waste-development.docx
+    suggested-id: waste-minimisation-statement
+  - local-name: Waste Needs Assessment
+    source-text: "Design And Access Statement Waste Minimisation Statement Waste Needs Assessment"
+    source-url: https://www.gloucestershire.gov.uk/media/xixn5ktn/appendix-2-checklist-for-the-submission-of-applications-for-waste-development.docx
+    suggested-id: need-statement
+  - local-name: Green Belt Assessment
+    source-text: "Landscape, landscaping and trees Green Belt Assessment"
+    source-url: https://www.gloucestershire.gov.uk/media/xixn5ktn/appendix-2-checklist-for-the-submission-of-applications-for-waste-development.docx
+    suggested-id: green-belt-statement
+  - local-name: Ancient Woodland Assessment
+    source-text: "Tree Survey/ Aboricultural Statement Ancient Woodland Assessment"
+    source-url: https://www.gloucestershire.gov.uk/media/xixn5ktn/appendix-2-checklist-for-the-submission-of-applications-for-waste-development.docx
+    suggested-id: ancient-woodland-assessment
+  - local-name: Assessment of impact on railway level crossings
+    source-text: "Transport Assessment Assessment of impact on railway level crossings"
+    source-url: https://www.gloucestershire.gov.uk/media/xixn5ktn/appendix-2-checklist-for-the-submission-of-applications-for-waste-development.docx
+    suggested-id: 
+  - local-name: Delivery and Servicing Management Plan
+    source-text: "Construction Management Plan Delivery and Servicing Management Plan"
+    source-url: https://www.gloucestershire.gov.uk/media/xixn5ktn/appendix-2-checklist-for-the-submission-of-applications-for-waste-development.docx
+    suggested-id: delivery-servicing-plan
+  - local-name: Road Safety Audit Stage 1 and Designer's Response
+    source-text: "Road Safety Audit Stage 1 Designers Response"
+    source-url: https://www.gloucestershire.gov.uk/media/xixn5ktn/appendix-2-checklist-for-the-submission-of-applications-for-waste-development.docx
+    suggested-id: road-safety-audit
+  - local-name: Utilities Assessment
+    source-text: "Water environments Flood Risk Assessment Utilities Assessments"
+    source-url: https://www.gloucestershire.gov.uk/media/xixn5ktn/appendix-2-checklist-for-the-submission-of-applications-for-waste-development.docx
+    suggested-id: utilities-statement
+  - local-name: Inshore and Offshore Marine Plan compliance assessment
+    source-text: "Inshore and Offshore Marine Plan compliance assessment"
+    source-url: https://www.gloucestershire.gov.uk/media/xixn5ktn/appendix-2-checklist-for-the-submission-of-applications-for-waste-development.docx
+    suggested-id: 
+  - local-name: Soil Resources Assessment
+    source-text: "Geological, land and soils assessment Coal Mining Risk Assessment Soil Resources Assessment Land Contamination Assessment Unstable Land Assessment Geodiversity Assessment"
+    source-url: https://www.gloucestershire.gov.uk/media/xixn5ktn/appendix-2-checklist-for-the-submission-of-applications-for-waste-development.docx
+    suggested-id: soil-resources-assessment
+  - local-name: Unstable Land Assessment
+    source-text: "Geological, land and soils assessment Coal Mining Risk Assessment Soil Resources Assessment Land Contamination Assessment Unstable Land Assessment Geodiversity Assessment"
+    source-url: https://www.gloucestershire.gov.uk/media/xixn5ktn/appendix-2-checklist-for-the-submission-of-applications-for-waste-development.docx
+    suggested-id: land-stability-assessment
+  - local-name: Geodiversity Assessment
+    source-text: "Geological, land and soils assessment Coal Mining Risk Assessment Soil Resources Assessment Land Contamination Assessment Unstable Land Assessment Geodiversity Assessment"
+    source-url: https://www.gloucestershire.gov.uk/media/xixn5ktn/appendix-2-checklist-for-the-submission-of-applications-for-waste-development.docx
+    suggested-id: geodiversity-assessment

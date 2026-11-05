@@ -1,0 +1,487 @@
+# Corrections for Nuneaton and Bedworth Borough Council, from
+# inputs/audit/nuneaton-and-bedworth-borough-council.json.
+# The Validation Checklist 2024 (adopted 11 July 2024) is current. The council hosts two near
+# identical copies (file 1459, and file 1470 with the matrix on p.81); Grokbot mixed both. It
+# ignored the E/P application-type matrix, filed Coal Mining under exactly the types the list
+# exempts, and several rows quote the wrong section.
+local-authority: NUN
+
+validation-list:
+  date: 2024-07-11
+  date-basis: "adoption statement (file 1533): 'formally adopted the Local Validation Checklist on 11th July 2024'"
+
+submission-standards:
+  - item: Drawings state the scale used and include a scale bar
+    level: must
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is the construction management / site waste checklist, nothing to do with listed buildings"
+  - id: construction-management-plan
+    reason: "wrong_trigger: the excerpt is the Ventilation/Extraction trigger, duplicating the ventilation row"
+  - id: landscaping-plan
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: the excerpt is Heritage Statement text"
+  - id: photos
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: the excerpt is Heritage Statement text"
+
+drop-unmapped:
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_app_type: filed under exactly the types the list exempts; re-added below once"
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_app_type: both rows quote the Lighting Impact Assessment (now in lighting-assessment)"
+  - local-name: Health Impact Assessment
+    reason: "wrong_app_type: the LBC row is Heritage Statement text; re-added below with the major development trigger"
+  - local-name: Design Code / Masterplan / Parameter plans
+    reason: "not_a_requirement: a fragment of the tree survey section"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: re-quotes the Heads of Terms text"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: location-plan red-line guidance"
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "not_a_requirement: a fragment of the community facility / employment land justification"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "not_a_requirement: a fragment ('way, public amenity space and roads.'); the list has no such item"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: a fragment of the FRA text; re-added below as the Surface Water Drainage Assessment"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "wrong_trigger: a fragment; re-added below as the Housing Statement"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 11
+        description: 11 or more dwellings (two affordable units for 11 to 14 dwellings, more for 15+).
+    confidence: medium
+
+  - id: air-quality-assessment
+    action: update
+    required-if: discretionary
+    policy: Nuneaton and Bedworth Air Quality Supplementary Planning Document
+    confidence: medium
+    notes: "The criteria and thresholds are set out in the Air Quality SPD, not in the list."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the biodiversity gain condition (householder
+          applications are exempt).
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt omits the criteria, including that householder applications are exempt."
+
+  - id: site-plan
+    action: update
+    source-text: >-
+      The proposed development within the context of existing Any existing or proposed vehicle
+      parking/spaces areas The species, position and spread of all trees on the site, and those on
+      adjacent land that overhang the site, or are affected by the development The scale used, a
+      scale bar and one significant measurement The boundary treatment including walls or fencing
+      where this is proposed.
+    must-include:
+      - item: The proposed development within the context of existing development
+        level: must
+      - item: Any existing or proposed vehicle parking spaces or areas
+        level: must
+      - item: The species, position and spread of all trees on the site, and those on adjacent land
+          that overhang the site or are affected by the development
+        level: must
+      - item: The scale used, a scale bar and one significant measurement
+        level: must
+      - item: Boundary treatment, including walls or fencing, where proposed
+        level: must
+    notes: >-
+      The workbook's excerpt was the location plan wording; the block plan contents are from the
+      council tab (Part One, Block or Site Plan).
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: Contamination is known or suspected, or the site is in the vicinity of such land
+          and ground works are proposed.
+    confidence: medium
+
+  - id: design-and-access-statement
+    action: update
+    source-text: ""
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was table-of-contents dot leaders; the national
+      rules for a Design and Access Statement apply ('where required').
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      ref: major-development
+    confidence: medium
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: Schedule 1 or 2 development under the EIA Regulations 2017.
+    confidence: medium
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 2
+            description: The building contains 2 or more dwellings.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt omitted the relevant-building criteria (18m+ or 7+ storeys, 2+ dwellings)."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in flood zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt omitted 'flood zones 2 or 3, or sites of 1ha or more'."
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: must
+      - item: Each side of the building or structure that will be altered or added to, labelled by
+          its direction (e.g. north facing)
+        level: must
+      - item: Where the proposal demolishes or replaces an existing structure, the extent of the
+          existing building shown with dashed lines
+        level: must
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    confidence: medium
+    notes: "Minor development likely to affect the existing landscape character or appearance of the site is shown as officer discretion."
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - condition:
+                field: external-lighting
+                value: true
+                description: The proposal includes external lighting or illumination.
+        - condition:
+            field: floodlighting
+            value: true
+            description: Floodlighting, including for sports pitches.
+        - condition:
+            field: external-lighting
+            value: true
+            description: External lighting for car parks, illumination of buildings, work areas or
+              security.
+    source-text: >-
+      Lighting Impact Assessment When is this required? major development proposals that include
+      external lighting/ illumination (with the exception of outline planning applications where
+      appearance, landscaping, layout and scale are reserved."; and other applications proposing
+      floodlighting, external lighting for sports pitches, car parks illumination of buildings, work
+      areas and security .
+    source-url: https://www.nuneatonandbedworth.gov.uk/downloads/file/1470/validation-checklist-matrix
+    must-include:
+      - item: Prepared by an appropriately qualified person
+        level: must
+      - item: A description of the lighting requirement with reference to relevant standards
+        level: must
+      - item: The layout and composition of the scheme
+        level: must
+      - item: Isolux diagrams showing predicted luminance in the horizontal and vertical plane
+        level: must
+      - item: The periods of operation of the lighting
+        level: must
+      - item: A description of the area where the lighting is to be installed, detailing any
+          sensitive receptors
+        level: must
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): outline applications with all matters reserved are exempt, which the
+      rules can't express. The must-include items are from the 'External lighting/illumination' text
+      that the workbook filed as advertisement drawings.
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: loss-of-open-space
+            value: true
+            description: The proposal would result in the loss or relocation of, or prejudice the value
+              of, existing open space.
+        - discretionary
+    confidence: medium
+    notes: >-
+      Residential proposals, and non-residential proposals in the listed use classes that generate
+      a need for open space, are shown as officer discretion.
+
+  - id: planning-statement
+    action: update
+    required-if:
+      ref: major-development
+    must-include:
+      - item: A discussion of how the development relates to national policy and the development plan
+          policies
+        level: must
+    confidence: medium
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: retail-floorspace
+            operator: ">="
+            value: 250
+            description: 250 square metres or more of gross retail floorspace.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">="
+            value: 2500
+            description: 2,500 square metres or more of gross floorspace for other town centre uses.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): 'development proposals for town centre uses which meet or exceed defined
+      thresholds' (250 sq m retail / 2,500 sq m other). Whether these apply only outside centres is
+      not stated.
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The proposal will alter the roof.
+    confidence: medium
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The proposal will alter the roof.
+    confidence: medium
+
+  - id: sci
+    action: update
+    required-if:
+      ref: major-development
+    confidence: medium
+    notes: "The council calls it a Pre-application Consultation Statement."
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-text: >-
+      Transport Assessments/Statements and Travel Plans When is this required? A Transport
+      Assessment and a Travel Plan are required for: major development proposals that generate
+      significant traffic movements; or other development that creates or exacerbates a traffic
+      problem or has an impact on the local highway network.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt began with a stray BREEAM URL fragment."
+
+  - id: travel-plan
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-text: >-
+      Transport Assessments/Statements and Travel Plans When is this required? A Transport
+      Assessment and a Travel Plan are required for: major development proposals that generate
+      significant traffic movements; or other development that creates or exacerbates a traffic
+      problem or has an impact on the local highway network.
+    confidence: medium
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    must-include:
+      - item: A full, un-redacted viability assessment, for publication with the other documents
+        level: must
+    confidence: medium
+    notes: "Where viability forms all or part of the justification for non-policy compliance."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [scheduled-monument, listed-building-setting]
+            description: The site is near a scheduled monument or listed building.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 0.2
+            description: The site is over 0.2 hectares.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 0.2
+            description: The site is over 0.2 hectares.
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement): it applies to full applications too, not only outline. From the
+      audit: sites near scheduled monuments or listed buildings, or over 0.2ha.
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [tree-preservation-zone]
+            description: Trees are protected (e.g. by a Tree Preservation Order).
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Trees of 75mm stem diameter or more on the site, overhanging it, or beyond the
+              red line within 12 times their stem diameter.
+    source-text: >-
+      Tree Survey and Arboricultural Impact Assessment (AIA) When is this required? This is required
+      (as per British Standard 5837 2012) in all instances where trees are protected (e.g. by way of
+      Tree Preservation Order) or located within the site boundary that have a stem diameter of 75
+      mm or more, and wherever trees with a stem diameter of 75 mm or more overhang the site, or are
+      located beyond the site red line boundary within a distance of up to 12 times their estimated
+      stem diameter.
+    source-url: https://www.nuneatonandbedworth.gov.uk/downloads/file/1470/validation-checklist-matrix
+    confidence: medium
+    notes: "Audit (wrong_app_type): a development-application requirement, not only for works to trees."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - all:
+            - ref: major-development
+            - site:
+                in: [conservation-area]
+                description: Within or otherwise affecting a conservation area.
+        - site:
+            in: [conservation-area, listed-building, listed-building-setting, locally-listed-building,
+              scheduled-monument, park-and-garden]
+            description: Development in a conservation area (including demolition) that would
+              materially affect its character or appearance, or that may affect the significance of
+              any heritage asset, including its setting.
+    source-text: >-
+      Heritage Statement (Statement of Significance) When it this required? listed building consent
+      applications; major planning applications within or otherwise affecting conservation areas;
+      planning applications for developments within conservation areas, including demolition; where
+      the proposal would materially affect its character or appearance; and planning applications
+      that may affect the significance of any heritage asset, including its settin…
+    source-url: https://www.nuneatonandbedworth.gov.uk/downloads/file/1470/validation-checklist-matrix
+    must-include:
+      - item: Appropriate photographs accompanying the appraisal
+        level: must
+      - item: For applications affecting the setting of heritage assets, plans showing historic
+          features on or adjacent to the site
+        level: must
+        required-if:
+          site:
+            in: [listed-building-setting]
+            description: The application affects the setting of a heritage asset.
+    confidence: medium
+    notes: "Audit (missing_requirement): it applies to planning applications too, not only LBC."
+
+unmapped:
+  - local-name: Coal Mining Risk Assessment
+    source-text: >-
+      Coal Mining Risk Assessment When is this required? development proposals located in an area
+      defined as "high risk area" by the Coal Authority, other than: householder development,
+      heritage consents (listed building), lawful development certificates, prior notification (any
+      type), hazardous substances consents, and tree or hedgerow works (TPO in a conservation area).
+    source-url: https://www.nuneatonandbedworth.gov.uk/downloads/file/1470/validation-checklist-matrix
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Health Impact Assessment and Screening Report
+    source-text: >-
+      Health Impact Assessment and Screening Report When is this required? Major development
+      proposals = Health Impact Assessment Screening Report.
+    source-url: https://www.nuneatonandbedworth.gov.uk/downloads/file/1470/validation-checklist-matrix
+    suggested-id: health-impact-assessment
+  - local-name: Surface Water Drainage Assessment
+    source-text: "major development proposals; and development with surface water drainage in an area at risk of flooding"
+    source-url: https://www.nuneatonandbedworth.gov.uk/downloads/file/1470/validation-checklist-matrix
+    suggested-id: drainage-strategy
+  - local-name: Housing Statement
+    source-text: "From the audit: 10+ dwellings, sites of 0.5ha+, or proposals with an affordable housing element"
+    source-url: https://www.nuneatonandbedworth.gov.uk/downloads/file/1470/validation-checklist-matrix
+    suggested-id: housing-statement
+  - local-name: Sustainable Design and Construction Checklist
+    source-text: "All planning applications must be accompanied by a complete sustainable design and construction checklist"
+    source-url: https://www.nuneatonandbedworth.gov.uk/downloads/file/1470/validation-checklist-matrix
+    suggested-id: sustainable-design-checklist
+  - local-name: Building for a Healthy Life Assessment
+    source-text: "From the audit: major residential development"
+    source-url: https://www.nuneatonandbedworth.gov.uk/downloads/file/1470/validation-checklist-matrix
+    suggested-id: building-for-healthy-life-assessment
+  - local-name: Crime and Disorder Statement
+    source-text: "From the audit: major development, hot food takeaways, pubs/licensed premises and public toilets"
+    source-url: https://www.nuneatonandbedworth.gov.uk/downloads/file/1470/validation-checklist-matrix
+    suggested-id: crime-prevention-statement
+  - local-name: Community Services and Facilities - Justification for Loss
+    source-text: "From the audit: loss of a community facility"
+    source-url: https://www.nuneatonandbedworth.gov.uk/downloads/file/1470/validation-checklist-matrix
+    suggested-id: loss-of-community-facility-statement
+  - local-name: Loss of land in or allocated for Economic Development - justification statement
+    source-text: "From the audit: non-employment uses on employment land or buildings"
+    source-url: https://www.nuneatonandbedworth.gov.uk/downloads/file/1470/validation-checklist-matrix
+    suggested-id: employment-land-statement
+  - local-name: Rural Building Conversion - Justification Statement
+    source-text: "applications for the conversion of rural buildings"
+    source-url: https://www.nuneatonandbedworth.gov.uk/downloads/file/1470/validation-checklist-matrix
+    suggested-id: rural-building-conversion-statement
+
+low-confidence:
+  - id: noise-assessment
+    note: >-
+      Audit (wrong_trigger): the excerpt quotes the Building for a Healthy Life / street design
+      checklist, not the noise trigger, which was not captured.
+  - id: photos
+    note: "The excerpt ('Appropriate photographs shall accompany the appraisal.') belongs to the Heritage Statement; no separate trigger."

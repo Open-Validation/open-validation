@@ -1,0 +1,444 @@
+# Corrections for Lichfield District Council, from the council's audit.
+# The workbook's link is the current list: 'Local planning validation guidance' (cover dated
+# March 2023), with a companion Validation Matrix. The extraction was thin: most rows were
+# guessed into 'Full planning' (INFERRED), many triggers are table headers or fragments, and
+# about 20 requirements were missed. Items marked "From the audit" use the audit's paraphrase
+# of the list, not the council's exact words. The build takes the date (March 2023) from the
+# audit, so no validation-list correction is needed.
+local-authority: LIF
+
+submission-standards:
+  - item: All plans include a linear scale bar, to help electronic scaling and measuring
+    level: must
+  - item: Every plan has a unique plan / drawing reference number
+    level: must
+  - item: The location plan shows the direction of north
+    level: must
+
+drop-unmapped:
+  - local-name: Drainage Strategy / SuDS
+    reason: "duplicate: same foul-drainage excerpt as the Foul Sewage row; the real SuDS item is added below"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: the excerpt is Cannock Chase SAC mitigation text; replaced below"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: a fragment ('specified in pre-application advice') from the heritage entry"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, reserved-matters]
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 15
+            description: A residential development of 15 or more units.
+    source-text: >-
+      Affordable Housing Statement NPPF Residential developments of 15 Units (excluding Outline
+      applications) or over unless Affordable Housing would render scheme unviable – A Planning
+      Statement will be required if this is the case justifying in detail why unviable.
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    confidence: medium
+    notes: "Audit (wrong_app_type): the source excludes outline applications; the workbook had put it under
+      Outline only."
+
+  - id: air-quality-assessment
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      Applications that will give rise to emissions to air of pollutants for which there is a national
+      air quality objective
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook excerpt was column headings. From the audit: also large car
+      parks and major construction. No field records pollutant emissions, so this is shown as officer
+      judgement.
+
+  - id: arboriculturist-report
+    action: replace
+    required-if: discretionary
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): the workbook's only row was under Lawful development certificates and
+      held Heritage Statement text ('LDC' there means Lichfield District Council). From the audit
+      (missing_requirement): a Tree Survey is needed 'where relevant', including for householders.
+
+  - id: cil-form
+    action: update
+    required-if:
+      always: true
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the Validation Matrix marks the CIL Question Form as Required for all
+      application types, and Lichfield is a CIL charging authority. From the audit: the CIL charge
+      covers extensions over 100 sq m to certain retail uses, new dwellings (not apartments) and new
+      retail units.
+
+  - id: daylight-sunlight-assessment
+    action: add
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    confidence: low
+    notes: "From the audit (missing_requirement): listed, including for householders; the audit gives no
+      trigger."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: The proposal creates one or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">"
+                    value: 100
+                    description: The proposal creates a new building of more than 100 square metres.
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted generic national text. From the audit: all major
+      development, new dwellings or new buildings over 100 sq m in conservation areas, and listed building
+      applications."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is Schedule 1 or Schedule 2 development under the EIA Regulations.
+    source-text: >-
+      Environmental Statement (Also known as EIA) … Usually these are only required for large-scale
+      developments as defined in Schedule 1 and/or Schedule 2 of the Environmental Impact Assessment
+      Regulations.
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook excerpt had the Cannock Chase SAC lead-in merged in."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (Flood Zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (Flood Zone 1).
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook excerpt was a fragment. From the audit: Flood Zones 2 and 3,
+      and Flood Zone 1 sites of 1 ha or more."
+
+  - id: floor-plan-existing
+    action: update
+    must-include:
+      - item: At a scale of 1:50 or 1:100
+        level: must
+    confidence: medium
+
+  - id: floor-plan-proposed
+    action: update
+    must-include:
+      - item: At a scale of 1:50 or 1:100
+        level: must
+    confidence: medium
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, demolition-con-area]
+        - site:
+            in: [listed-building, conservation-area, park-and-garden]
+            description: Development to a listed building, or in or next to a conservation area or a
+              registered park and garden.
+        - all:
+            - site:
+                in: [archaeological-priority-area]
+                description: A known area of archaeological significance.
+            - condition:
+                field: ground-disturbance
+                value: true
+                description: The proposal disturbs the ground.
+        - all:
+            - ref: major-development
+            - discretionary
+    source-text: >-
+      A Heritage Statement for development in or adjacent to a Conservation Area; or a Registered Park
+      and Garden; or for works to or within proximity of a Historic Hedgerow should include: An
+      assessment of the significance of the designated area. … A heritage statement will also be
+      required in respect of proposals involving the disturbance of ground within a known area of
+      archaeological significance, or in other areas the subject of major development proposals or
+      significant infrastructure works, where archaeological remains may survive, as may be specified
+      in pre-application advice.
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    must-include:
+      - item: An assessment of the significance of the designated area
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook captured only the archaeology clause; the conservation area
+      and registered park text was in the LDC tree-survey row. From the audit: listed buildings and
+      demolition in conservation areas too. Works near a Historic Hedgerow have no field.
+
+  - id: land-contamination-assessment
+    action: add
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    confidence: low
+    notes: "From the audit (missing_requirement): listed, but the audit gives no trigger."
+
+  - id: landscaping-plan
+    action: add
+    required-if:
+      application-type:
+        in: [full, outline, reserved-matters, s73]
+    source-text: >-
+      All applications (excluding Householder, Listed Building Consent, Advertisements and Change of
+      Use)
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    confidence: low
+    notes: "From the audit (missing_requirement). 'All except householder, LBC, adverts and change of use'
+      can't be written as a rule, so the main remaining types are listed."
+
+  - id: lighting-assessment
+    action: add
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    confidence: low
+    notes: "From the audit (missing_requirement): listed, but the audit gives no trigger."
+
+  - id: noise-assessment
+    action: add
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    confidence: low
+    notes: "From the audit (missing_requirement): a Noise and Vibration Assessment is listed, but the audit
+      gives no trigger."
+
+  - id: photos
+    action: add
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    confidence: low
+    notes: "From the audit (missing_requirement): Photographs / Photomontages are listed, but the audit gives
+      no trigger."
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [full, outline, reserved-matters, s73, lbc, demolition-con-area, change-of-use]
+        - all:
+            - application-type:
+                in: [hh]
+            - site:
+                in: [green-belt]
+                description: The site is in the Green Belt.
+    source-text: All applications (except Advertisements and Householders not in the Green Belt)
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    must-include:
+      - item: Where affordable housing would make the scheme unviable, a detailed justification of why
+        level: must
+        required-if:
+          condition:
+            field: dwelling-count
+            operator: ">="
+            value: 15
+            description: A residential development of 15 or more units.
+        source-text: "unless Affordable Housing would render scheme unviable – A Planning Statement will be
+          required if this is the case justifying in detail why unviable."
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the local document is a 'Planning and Sustainability Statement'. 'All
+      except adverts and householders outside the Green Belt' can't be written as a rule, so the main
+      types are listed.
+
+  - id: recreation-facilities-assessment
+    action: add
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    confidence: low
+    notes: "From the audit (missing_requirement): an Open Space Assessment and a Playing Fields Assessment
+      are listed, but the audit gives no triggers."
+
+  - id: section-existing
+    action: update
+    required-if: discretionary
+    must-include:
+      - item: At a scale of 1:50 or 1:100
+        level: must
+      - item: Cross section(s) through the proposed building(s), with finished floor and site levels
+        level: should
+    confidence: medium
+    notes: "The council asks for sections and levels 'where relevant'."
+
+  - id: section-proposed
+    action: update
+    required-if: discretionary
+    must-include:
+      - item: At a scale of 1:50 or 1:100
+        level: must
+      - item: Cross section(s) through the proposed building(s), with finished floor and site levels
+        level: should
+    confidence: medium
+    notes: "The council asks for sections and levels 'where relevant'."
+
+  - id: sci
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+    source-text: All major applications, and major change of use applications.
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    confidence: medium
+    notes: "Audit (missing_requirement)."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: The proposal is for telecommunications development, including prior notifications.
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    confidence: medium
+    notes: "From the audit (missing_requirement): Telecommunication Supporting Information, including for
+      prior notifications."
+
+  - id: town-centre-impact-assessment
+    action: add
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    confidence: low
+    notes: "From the audit (missing_requirement): a town centre sequential and retail impact assessment is
+      listed, but the audit gives no threshold."
+
+  - id: transport-assessment
+    action: update
+    must-include:
+      - item: Accessibility to the site by all modes of transport, including likely modal shift
+        level: should
+      - item: Measures to improve access by public transport, walking and cycling, to reduce the need for
+          parking
+        level: should
+      - item: Any necessary highway mitigation works
+        level: should
+    confidence: low
+    notes: "The excerpt lists contents but not when an assessment is needed (audit wrong_app_type: placed
+      under Full planning by guess)."
+
+  - id: viability-assessment
+    action: add
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    confidence: low
+    notes: "From the audit (missing_requirement): listed, but the audit gives no trigger."
+
+  - id: waste-management-plan
+    action: add
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    confidence: low
+    notes: "From the audit (missing_requirement): a Waste Audit / Site Waste Management Plan is listed, but
+      the audit gives no trigger."
+
+  - id: water-impact-assessment
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [full, outline, reserved-matters, s73, change-of-use]
+        - all:
+            - application-type:
+                in: [hh]
+            - discretionary
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a Water Quality Assessment for all applications except
+      listed building consent and adverts, including householders not draining to the mains foul
+      sewer. 'All except' can't be written as a rule, so the main types are listed; no field records
+      non-mains drainage, so householders are shown as officer judgement.
+
+unmapped:
+  - local-name: Surface Water Drainage Strategy
+    source-text: All major developments should be accompanied by a sustainable drainage strategy.
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    suggested-id: drainage-strategy
+  - local-name: Planning Obligations / Draft Heads of Terms
+    source-text: "From the audit: required for all major applications and residential schemes of one or
+      more dwellings"
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    suggested-id: heads-of-terms
+  - local-name: Cannock Chase SAC Unilateral Undertaking
+    source-text: For residential development within 15km of the Cannock Chase Special Area of Conservation
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    suggested-id: habitats-regulations-assessment
+  - local-name: Cannock Chase SAC Impact Assessment
+    source-text: "From the audit: all applications that lead to a net increase in visitors, and certain
+      residential units"
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    suggested-id: habitats-regulations-assessment
+  - local-name: River Mease SAC Impact Assessment
+    source-text: For all new residential units within the River Mease catchment.
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    suggested-id: habitats-regulations-assessment
+  - local-name: Parking / Access Arrangements
+    source-text: All applications (including domestic householder) proposing built structures / extensions.
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    suggested-id: parking-plan
+  - local-name: Coal Mining Risk Assessment
+    source-text: "From the audit: foundations in Coal Authority high-risk areas, excluding householder"
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Utilities Statement
+    source-text: "From the audit: 50+ dwellings or 10,000 sq m+"
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    suggested-id: utilities-statement
+  - local-name: Topographical Survey
+    source-text: "From the audit: listed, no trigger given"
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    suggested-id: topographical-survey
+  - local-name: Landscape Visual Impact Assessment
+    source-text: "From the audit: listed, no trigger given"
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Employment Land Assessment
+    source-text: "From the audit: listed, no trigger given"
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    suggested-id: employment-land-assessment
+  - local-name: Statement of Agricultural Need
+    source-text: "From the audit: listed, no trigger given"
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    suggested-id: agricultural-statement
+  - local-name: Structural Survey
+    source-text: "From the audit: barn conversions and demolition"
+    source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+    suggested-id: structural-survey
+
+low-confidence:
+  - id: site-plan
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('/ proposed block plan drawings.'). From the audit:
+      the Validation Matrix marks the Site Layout Plan as Required for householder."
+  - id: elevation-existing
+    note: "From the audit: the Validation Matrix marks existing and proposed elevations as Required for
+      householder; the workbook placed them under Full planning by guess."
+  - id: elevation-proposed
+    note: "From the audit: the Validation Matrix marks existing and proposed elevations as Required for
+      householder; the workbook placed them under Full planning by guess."

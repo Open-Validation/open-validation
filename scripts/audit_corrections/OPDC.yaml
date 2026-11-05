@@ -1,0 +1,314 @@
+# Corrections for the workbook's "Greater London Authority" row (really OPDC), from the council's audit.
+# The GLA does not run a local validation list: the workbook's link is the Old Oak and Park Royal
+# Development Corporation (OPDC) consultation draft of September 2015. The current list is the
+# OPDC Validation Checklist 2026 (49 local requirements). Grokbot captured none of them, so the
+# items below come from the audit's summary of the 2026 checklist, not the council's exact words.
+local-authority: OPDC
+
+validation-list:
+  url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+  date: 2026
+  date-basis: >-
+    audit: titled 'OPDC Validation Checklist 2026'; no adoption date in the PDF (draft approved for
+    consultation 19 March 2026, consultation summary report July 2026)
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: it only encourages pre-application discussion for majors"
+
+requirements:
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: The proposal creates 10 or more homes.
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Affordable Housing Statement for 10+ homes."
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): major applications, polluting uses, and sensitive uses
+      near pollution sources. The last two have no threshold, so they are shown as officer discretion.
+
+  - id: archaeological-assessment
+    action: add
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): an Archaeological desk-based assessment is listed; the audit gives no trigger."
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [local-wildlife-site]
+            description: The site is in or next to a SINC or local nature reserve.
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Biodiversity/Ecology for major applications and sites in or next to a SINC/LNR."
+
+  - id: cil-form
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 100
+            description: The proposal creates 100 square metres or more of floorspace.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates one or more dwellings.
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): CIL information for 100 sqm+ or 1+ dwellings."
+
+  - id: construction-management-plan
+    action: add
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Construction Management Plan is listed; the audit gives no trigger."
+
+  - id: land-contamination-assessment
+    action: add
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a contamination preliminary risk assessment is listed; the audit gives no trigger."
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Daylight/Sunlight for major applications."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    must-include:
+      - item: Overheating assessment
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): Energy Statement including overheating, for major applications."
+
+  - id: viability-assessment
+    action: add
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Financial Viability Appraisal is listed; the audit gives no trigger."
+
+  - id: fire-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Fire Statement for major applications."
+
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in flood zone 2 or 3.
+        - condition:
+            field: basement
+            value: true
+            description: The proposal includes a new or enlarged basement.
+        - all:
+            - ref: major-development
+            - site:
+                in: [critical-drainage-area]
+                description: The site is in a Critical Drainage Area.
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): FRA for flood zones 2/3, basements, and majors in Critical Drainage Areas."
+
+  - id: heritage-statement
+    action: add
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Heritage Statement is listed (also for householder works); the audit gives no trigger."
+
+  - id: landscaping-plan
+    action: add
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Landscape Strategy is listed; the audit gives no trigger."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: plant-equipment
+            value: true
+            description: The proposal includes air conditioning or other plant.
+        - discretionary
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement, wrong_app_type): Noise and Vibration is listed, and the
+      audit mentions it for air conditioning/plant; the full trigger was not given.
+
+  - id: recreation-facilities-assessment
+    action: add
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): an Open Space Assessment is listed; the audit gives no trigger."
+
+  - id: planning-statement
+    action: add
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): Planning Statement for all minor and major applications (no rule for 'minor' is set here)."
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Site Waste Management Plan for major applications."
+
+  - id: sci
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Statement of Community Involvement for major applications."
+
+  - id: telecommunications-report
+    action: add
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement, wrong_app_type): Telecommunications information is listed (prior approval/full); the audit gives no trigger."
+
+  - id: town-centre-impact-assessment
+    action: add
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Town Centre Uses Statement is listed; the audit gives no trigger."
+
+  - id: transport-assessment
+    action: add
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Transport Statement/Assessment is listed; the audit gives no trigger."
+
+  - id: travel-plan
+    action: add
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Travel Plan is listed; the audit gives no trigger."
+
+  - id: arboriculturist-report
+    action: add
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Tree Assessment is listed (also for householder works); the audit gives no trigger."
+
+unmapped:
+  - local-name: Design Code
+    source-text: "18 Design Code - all outline or hybrid applications"
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    suggested-id: design-code
+  - local-name: Sections 73 and 96a information
+    source-text: "38 Sections 73 and 96a Applications - any s73 or s96a application"
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    suggested-id: ""
+  - local-name: Accommodation Schedule
+    source-text: "From the audit: major applications"
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    suggested-id: accommodation-schedule
+  - local-name: Affordable Workspace Management Strategy
+    source-text: "From the audit: new employment floorspace"
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    suggested-id: ""
+  - local-name: BREEAM pre-assessment
+    source-text: "From the audit: non-residential units or extensions of 100 sqm or more"
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    suggested-id: sustainability-statement
+  - local-name: Circular Economy Statement (including Whole Life Carbon)
+    source-text: "From the audit: applications referable to the Mayor"
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    suggested-id: circular-economy-statement
+  - local-name: Delivery and Servicing Plan
+    source-text: "From the audit: listed without a trigger"
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    suggested-id: delivery-servicing-plan
+  - local-name: Digital 3D model
+    source-text: "From the audit: applications referable to the Mayor"
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    suggested-id: ""
+  - local-name: Health Impact Assessment
+    source-text: "From the audit: major applications"
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Marketing Strategy
+    source-text: "From the audit: loss of employment, town centre or social infrastructure uses, or pubs"
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    suggested-id: marketing-evidence
+  - local-name: Microclimate assessment
+    source-text: "From the audit: buildings over 30m"
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    suggested-id: microclimate-assessment
+  - local-name: Parking Design and Management Plan
+    source-text: "From the audit: listed without a trigger"
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    suggested-id: ""
+  - local-name: Photomontages / CGIs
+    source-text: "From the audit: major applications"
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    suggested-id: computer-visualisations
+  - local-name: Planning Obligations Draft Heads of Terms
+    source-text: "From the audit: listed without a trigger"
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    suggested-id: heads-of-terms
+  - local-name: Purpose Built Student Accommodation need study
+    source-text: "From the audit: student accommodation"
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    suggested-id: ""
+  - local-name: Residential Management Plan
+    source-text: "From the audit: PBSA, co-living, build to rent and supported housing"
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    suggested-id: ""
+  - local-name: SuDS and water efficiency
+    source-text: "From the audit: listed without a trigger"
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    suggested-id: drainage-strategy
+  - local-name: Tall Building Statement
+    source-text: "From the audit: buildings over 15 storeys or 48m"
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    suggested-id: tall-building-statement
+  - local-name: Townscape and Visual Impact Assessment
+    source-text: "From the audit: listed without a trigger"
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    suggested-id: townscape-visual-impact-assessment
+  - local-name: Urban Greening Factor
+    source-text: "From the audit: major applications"
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    suggested-id: urban-greening-factor
+  - local-name: Advertisement consent drawings
+    source-text: "From the audit: the OPDC list sets drawing requirements for advertisement consent"
+    source-url: https://www.oldoakandparkroyal.co.uk/sites/default/files/attachments/OPDC%20Validation%20Checklist%202026.pdf
+    suggested-id: ""

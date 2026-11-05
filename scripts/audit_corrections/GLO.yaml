@@ -1,0 +1,329 @@
+# Corrections for Gloucester City Council, from the audit of Gloucester.
+# The audit could not fetch the list (lvc-adopted.pdf), so contents were not checked. The workbook's
+# extraction merged table rows, so many requirements carry a neighbouring row's trigger. This file
+# drops the clearly wrong rows, moves triggers back to their own requirement where the excerpt makes
+# it plain, and records the missing items named in the workbook's own text.
+local-authority: GLO
+
+submission-standards:
+  - item: A scale bar on all drawings
+    level: must
+  - item: All drawings to a recognised metric scale; plans marked 'not to scale' or 'do not scale' will not
+      be registered
+    level: must
+  - item: Location plans and block plans include a north arrow
+    level: must
+  - item: Key dimensions annotated on the relevant plans and drawings (for householder applications, the
+      external width, height and depth of the proposed works)
+    level: should
+
+drop:
+  - id: bng-metric
+    reason: "wrong_app_type: the excerpt is the BNG exemption list (works to trees where no fee is required)"
+  - id: fire-statement
+    reason: "wrong_app_type: the excerpt says when a Fire Statement is NOT required; national rules apply"
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is tree text ('an arboricultural method statement.')"
+  - id: photos
+    reason: "wrong_trigger: the excerpt is soakaway infiltration-test content from the drainage item"
+
+drop-unmapped:
+  - local-name: Minerals / Waste specific statements (county matters)
+    reason: "wrong_document: this is the city's Waste Minimisation Statement, now in waste-management-plan"
+  - local-name: Foul Sewage / Utilities Statement
+    reason: "wrong_trigger: the excerpt is the Housing Statement text; both re-added below"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "duplicate: a fragment of the Daylight/Sunlight Assessment item"
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "duplicate: this is the Biodiversity Survey and Report item, now in biodiversity-survey-report"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    source-url: https://www.gloucester.gov.uk/media/ainn53uq/lvc-adopted.pdf
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook excerpt was the Historic Impact Statement trigger from the
+      next table row; the affordable housing trigger wasn't captured."
+
+  - id: air-quality-assessment
+    action: add
+    source-url: https://www.gloucester.gov.uk/media/ainn53uq/lvc-adopted.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): an Air Quality Assessment is a local item in the list, but
+      its trigger wasn't captured."
+
+  - id: arboriculturist-report
+    action: replace
+    source-url: https://www.gloucester.gov.uk/media/ainn53uq/lvc-adopted.pdf
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook excerpt was the Travel Plan trigger from a merged row; the
+      Trees Survey and Tree Protection Plan trigger wasn't captured."
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: A protected species could be affected by the proposal.
+        - site:
+            in: [local-wildlife-site, priority-habitat]
+            description: An important wildlife site, habitat or natural feature could be affected.
+    source-text: "11 Biodiversity Survey and Report GCP A1, E1, E2, E3 Required where an important wildlife
+      site, habitat, natural feature or species could be affected by the proposal."
+    source-url: https://www.gloucester.gov.uk/media/ainn53uq/lvc-adopted.pdf
+    policy: GCP A1, E1, E2, E3
+    must-include:
+      - item: The current habitat and how it will be impacted, including the effect on any protected species
+        level: must
+    confidence: medium
+    notes: "The workbook filed this item under an unmapped 'Biodiversity Checklist' row."
+
+  - id: cil-form
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 11
+            description: 11 or more dwellings.
+        - condition:
+            field: dwelling-count
+            operator: "<="
+            value: 449
+            description: 449 dwellings or fewer.
+    source-text: CIL Additional Information Requirement Form planning permission/lawful development
+      certiﬁcates for 11 to 449 dwellings.
+    source-url: https://www.gloucester.gov.uk/media/ainn53uq/lvc-adopted.pdf
+    confidence: medium
+    notes: "Applies to planning permission and lawful development certificates, not only LDCs."
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "'May be required' where there is a potential adverse impact on daylight/sunlight to adjoining
+      properties, gardens or amenity space."
+
+  - id: elevation-existing
+    action: update
+    required-if:
+      condition:
+        field: building-works
+        value: true
+        description: Any extensions or new building.
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: must
+      - item: All existing and proposed elevations affected by the proposal shown and labelled
+        level: must
+      - item: A scale bar
+        level: must
+    confidence: medium
+
+  - id: elevation-proposed
+    action: update
+    required-if:
+      condition:
+        field: building-works
+        value: true
+        description: Any extensions or new building.
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: must
+      - item: All existing and proposed elevations affected by the proposal shown and labelled
+        level: must
+      - item: Key dimensions of the proposal (height, width, depth)
+        level: must
+      - item: A scale bar
+        level: must
+    confidence: medium
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    source-url: https://www.gloucester.gov.uk/media/ainn53uq/lvc-adopted.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook excerpt ran into BNG text ('10% net gain')."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, demolition-con-area]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+              scheduled-monument, park-and-garden]
+            description: Heritage assets are affected.
+    source-text: 26 Historic Impact Statement NPPF Required for planning applications where heritage assets
+      are affected.
+    source-url: https://www.gloucester.gov.uk/media/ainn53uq/lvc-adopted.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger, missing_requirement): the workbook's heritage excerpt was generic
+      boilerplate, and the Historic Impact Statement trigger was filed under affordable housing. The audit
+      says it also belongs under Listed building consent, Householder and Demolition in a conservation
+      area."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: Risks from land contamination may be reasonably suspected.
+    confidence: medium
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: external-lighting
+            value: true
+            description: External lighting is proposed.
+        - discretionary
+    confidence: medium
+    notes: "Also where the proposal involves areas of public access (no field; shown as officer discretion)."
+
+  - id: noise-assessment
+    action: replace
+    source-url: https://www.gloucester.gov.uk/media/ainn53uq/lvc-adopted.pdf
+    must-include:
+      - item: Existing background noise levels measured over a 24-hour period (including the cumulative noise
+          levels of all existing units) at times likely to show the worst case
+        level: must
+      - item: Proposed noise levels (including the cumulative noise levels of all proposed units)
+        level: must
+    confidence: low
+    notes: "Audit (wrong_app_type): the workbook placed it under Advertisement consent because the words of
+      an adjacent table row ran into the excerpt. The audit says a Noise Impact Assessment applies to full
+      applications; its trigger wasn't captured. The content items are the list's own."
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The application involves a change in ground levels, or development is proposed next to
+          changing ground levels.
+    source-text: Required for all applications which involve a change in ground levels or where development
+      is proposed next to changing ground levels.
+    confidence: low
+    notes: "The trigger was captured in the merged roof plan row; from the table order it belongs to 'Site
+      Sections, Finished Floor and Site Levels'. Check against the list."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The application involves a change in ground levels, or development is proposed next to
+          changing ground levels.
+    source-text: Required for all applications which involve a change in ground levels or where development
+      is proposed next to changing ground levels.
+    confidence: low
+    notes: "As section-existing."
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: Bin storage (on major schemes a separate plan is required)
+        level: should
+    notes: "The excerpt is about bin storage, not when a block plan is needed; national rules apply."
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    source-text: Travel Plan … Required for applications likely to that generate signiﬁcant amounts of
+      transport movement.
+    confidence: medium
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      ref: major-development
+    source-text: 63 Waste Minimisation Statement JCS SD3 Gloucestershire Waste Core Strategy, Policy WCS2
+      Major development The statement needs to demonstrate how any waste arising during the demolition,
+      construction and subsequent occupation of the development will be minimised and sustainably managed.
+    source-url: https://www.gloucester.gov.uk/media/ainn53uq/lvc-adopted.pdf
+    policy: JCS SD3; Gloucestershire Waste Core Strategy WCS2
+    must-include:
+      - item: How waste arising during demolition, construction and occupation will be minimised and
+          sustainably managed
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_document): the workbook filed the Waste Minimisation Statement as a county matter;
+      its refuse row was about bin storage on the block plan."
+
+unmapped:
+  - local-name: Housing Statement
+    source-text: "A housing statement must include the following as relevant, preferably in an excel/csv file
+      format: - the total number of residential units - the mix of residential units including the house
+      type, number of habitable rooms/bedrooms and the floor space of habitable areas"
+    source-url: https://www.gloucester.gov.uk/media/ainn53uq/lvc-adopted.pdf
+    suggested-id: housing-statement
+  - local-name: Foul Drainage Assessment Form (FDA1)
+    source-text: "From the audit: Foul Drainage Assessment Form FDA1 (non-mains drainage)"
+    source-url: https://www.gloucester.gov.uk/media/ainn53uq/lvc-adopted.pdf
+    suggested-id: foul-drainage-assessment
+  - local-name: Hot Food Takeaway information
+    source-text: 27 Hot Food Takeaway NPPF 97 GCP C4 Applications for a hot food takeaway Applicants are
+      strongly advised to submit a pre-application for guidance on the extent of the information required.
+    source-url: https://www.gloucester.gov.uk/media/ainn53uq/lvc-adopted.pdf
+    suggested-id: hot-food-takeaway-statement
+  - local-name: Changing Places Toilet specification
+    source-text: Full speciﬁcations of the Changing Places Toilet and completed checklist.
+    source-url: https://www.gloucester.gov.uk/media/ainn53uq/lvc-adopted.pdf
+    suggested-id: changing-places-toilet
+  - local-name: Estate Regeneration checklist
+    source-text: Estate Regeneration The completed checklist/assessment/comments should be submitted alongside
+      the planning application either as a separate document or within the Design and Access Statement.
+    source-url: https://www.gloucester.gov.uk/media/ainn53uq/lvc-adopted.pdf
+    suggested-id: estate-regeneration-checklist
+  - local-name: Fall Prevention from Taller Buildings
+    source-text: "From the audit: listed as '22 23 Fall Prevention from Taller Buildings'; the run-on text
+      includes 'For all buildings and structures over 12m in height', which may be its trigger"
+    source-url: https://www.gloucester.gov.uk/media/ainn53uq/lvc-adopted.pdf
+    suggested-id: fall-prevention-statement
+  - local-name: Building for a Healthy Life assessment
+    source-text: "Building for a Healthy Life … When using BHL it is important that the LPA and developers
+      discuss the 12 considerations at the very start of the design process"
+    source-url: https://www.gloucester.gov.uk/media/ainn53uq/lvc-adopted.pdf
+    suggested-id: building-for-a-healthy-life
+  - local-name: Odour risk assessment (commercial kitchens)
+    source-text: The applicant should take into account the guidance contained in “Guidance on the Control of
+      Odour and Noise from Commercial Kitchen Exhaust Systems” (DEFRA / EMAQ+ 2018) and submit a completed
+      “odour risk assessment” based on this guidance.
+    source-url: https://www.gloucester.gov.uk/media/ainn53uq/lvc-adopted.pdf
+    suggested-id: odour-assessment
+  - local-name: Student Accommodation statement
+    source-text: "From the audit: a Student Accommodation statement is named in the list; trigger not
+      captured"
+    source-url: https://www.gloucester.gov.uk/media/ainn53uq/lvc-adopted.pdf
+    suggested-id: student-accommodation-statement
+
+low-confidence:
+  - id: flood-risk-assessment
+    note: "Audit (wrong_trigger): the excerpt is generic 'must not be a placeholder' boilerplate. The list's
+      FRA requirements say 'You should complete an FRA for all development (including minor development ...
+      and changes of use) proposed:' but the conditions were cut off."
+  - id: design-and-access-statement
+    note: "Audit (wrong_trigger): the excerpt is legislation citations from the national list, cut off
+      mid-sentence."
+  - id: roof-plan-existing
+    note: "Audit (wrong_trigger): legislation citations from a merged row; the ground-levels trigger in it
+      belongs to the site sections item."
+  - id: roof-plan-proposed
+    note: "As roof-plan-existing."
+  - id: archaeological-assessment
+    note: "Audit (wrong_trigger): the excerpt runs into the Hot Food Takeaway row and gives no trigger."
+  - id: viability-assessment
+    note: "Audit (wrong_trigger): the excerpt is a cut-off fragment."

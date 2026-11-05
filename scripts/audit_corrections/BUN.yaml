@@ -1,0 +1,557 @@
+# Corrections for Burnley Borough Council, from inputs/audit/burnley-borough-council.json.
+# The Validation Checklist adopted on 13 November 2025 is current. The only householder checklist
+# the council links is still the 1 June 2017 one, so its rows are kept. Grokbot also took several
+# rows from the superseded 2017 PAVC; where the 2025 list gives a trigger it is used instead, and
+# rows that exist only in the 2017 PAVC are flagged. Grokbot filed the DAS under five types the
+# list exempts and Coal Mining under householder, which the list excludes.
+local-authority: BUN
+
+validation-list:
+  date: 2025-11-13
+  date-basis: "council page: 'The Council adopted the latest Validation Checklist on 13th November 2025'"
+
+submission-standards:
+  - item: All drawings at a recognised metric scale, with a north point and a linear scale bar
+    level: must
+  - item: All drawings carry a drawing reference number, with any revisions highlighted
+    level: must
+
+drop:
+  - id: design-and-access-statement
+    sheets: [Advertisement consent, Change of use - prior approval, Variation of condition s73, Works to trees,
+      Hazardous substances]
+    reason: "wrong_app_type: the excerpt is the exemption list; a DAS is not required for these types"
+  - id: photos
+    reason: "wrong_trigger: the excerpt is Appendix A bat survey checklist text, not a photographs requirement"
+  - id: daylight-sunlight-assessment
+    reason: "not_a_requirement: the list only 'Recommended' it 'for applications that may cause significant issues of overshadowing'"
+  - id: sustainability-statement
+    reason: "outdated_link / wrong_trigger: a 2017 fragment about the Energy Statement; re-added as energy-statement with the 2025 trigger"
+  - id: schedule-of-works
+    reason: "wrong_trigger: householder Heritage Statement contents (now heritage-statement must-include items), not an LBC schedule of works"
+
+drop-unmapped:
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_app_type: filed under Householder, which the list excludes; re-added below"
+  - local-name: Validation checklist form (completed)
+    reason: "wrong_trigger: Appendix A bat survey text, not a separate requirement"
+  - local-name: Water efficiency / water usage statement
+    reason: "wrong_trigger: a generic energy-policy sentence; the list has no water-efficiency requirement"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "wrong_trigger: a fragment ('or gardens/amenity space.') of the daylight item"
+  - local-name: Landscape and Visual Impact Assessment
+    reason: "wrong_trigger: a garbled reference fragment; re-added below with the audit's trigger"
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "duplicate: both rows quote the Biodiversity Survey and Report trigger (now in biodiversity-survey-report)"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "duplicate / not_a_requirement: biodiversity survey text and a fragment ('Habitats Regulations Appropriate Assessment.')"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: the Householder row is block plan contents (now site-plan must-include items); the Parking and Access row is re-added below"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: process text about showing how pre-application advice was taken into account"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: fragments with no trigger; the LCC SuDS proforma is added below"
+
+requirements:
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - all:
+            - site:
+                in: [conservation-area]
+                description: Development within a conservation area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: One or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: A building with new floorspace of 100 square metres or more.
+    confidence: medium
+    notes: >-
+      The trigger wording is from the superseded 2017 PAVC; the 2025 list keeps the same exemption
+      list (s73, engineering or mining, waste, change of use, adverts, works to trees, hazardous
+      substances, prior approvals, non-material amendments).
+
+  - id: air-quality-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: >-
+      Applications likely to significantly affect or increase traffic congestion, vehicle speeds or
+      traffic composition (the excerpt is cut off after the first case).
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees and/or hedges within or adjacent to the site (including street trees) may be
+          directly or indirectly affected by the development or its construction.
+    source-text: >-
+      Tree Survey/Arboricultural Implications Assessment Required for all developments affecting trees
+      within or adjacent to the application site Where there are trees and/or hedges within or
+      adjacent to the site (including street trees) which may be directly or indirectly affected by
+      the development or its construction (such as by service runs, hardstanding's, walls or trenches
+      for services), then a tree survey should be prepared by a suitably qualified arboriculturist.
+    must-include:
+      - item: Prepared by a suitably qualified arboriculturist
+        level: should
+      - item: All trees and hedges on or adjacent to the site identified and annotated on the
+          site/block plan
+        level: should
+    confidence: medium
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      all:
+        - site:
+            in: [archaeological-priority-area]
+            description: The site is within an area of known archaeological interest.
+        - condition:
+            field: ground-disturbance
+            value: true
+            description: The development involves the disturbance of ground.
+    confidence: medium
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development would be subject to the general biodiversity gain condition.
+    confidence: medium
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [special-protection-area, special-area-of-conservation,
+              site-of-special-scientific-interest, local-wildlife-site]
+            description: Development impacting on the South Pennines SPA/SAC, a SSSI, Biological or
+              Geological Heritage Sites or Wildlife Corridors.
+        - condition:
+            field: protected-species
+            value: true
+            description: Development likely to affect the habitat of protected or S41 species
+              (including demolition, roof space works, removal of trees and hedgerows, alterations to
+              watercourses and ponds).
+    source-text: >-
+      Biodiversity Survey and Report Required for developments which impact upon: European Sites of
+      international importance: South Pennines Special Protection Area (SPA) and Special Area of
+      Conservation (SAC)
+    must-include:
+      - item: Bat surveys (where triggered by the checklist) carried out by an appropriately qualified
+          and experienced ecologist, and by a licensed officer where a survey may disturb roosting
+          bats
+        level: must
+    confidence: medium
+    notes: "The householder checklist (2017) gives the same triggers; the excerpts were filed as 'Biodiversity Checklist'."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: Contamination is known or suspected.
+    confidence: medium
+    notes: >-
+      The 2025 excerpt stops after the first case. The 2017 PAVC (superseded) also listed previously
+      developed land, sites within 250m of a landfill and vulnerable uses; not confirmed in the 2025
+      list. Audit (outdated_link): the Minerals & waste row came from the 2017 PAVC.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: Development falling within the EIA Regulations 2017.
+    confidence: medium
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal involves a change in ground levels, or the site slopes.
+    must-include:
+      - item: Existing and finished site and floor levels
+        level: must
+      - item: Levels related to a fixed datum point off site
+        level: should
+    confidence: medium
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal involves a change in ground levels, or the site slopes.
+    must-include:
+      - item: A cross section through the proposed building(s)
+        level: must
+      - item: How the proposed building relates to existing site levels and neighbouring development,
+          with levels related to a fixed datum point off site
+        level: must
+    confidence: medium
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 2
+            description: The building contains 2 or more dwellings.
+    confidence: medium
+    notes: "The excerpt gives only 'the provision of one or more relevant buildings'; the relevant-building test is the national one."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: All developments within Flood Zones 2 and 3.
+        - site:
+            in: [critical-drainage-area]
+            description: Areas with specific localised flooding issues where the proposal could
+              contribute to flooding.
+    confidence: medium
+
+  - id: floor-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: floorspace
+        operator: ">"
+        value: 0
+        description: New floorspace is proposed.
+    confidence: medium
+
+  - id: floor-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: floorspace
+        operator: ">"
+        value: 0
+        description: New floorspace is proposed.
+    must-include:
+      - item: A recognised metric scale, preferably 1:50 or 1:100
+        level: should
+      - item: Written/annotated external dimensions of new buildings or extensions
+        level: must
+      - item: Any existing walls to be demolished, clearly shown
+        level: must
+    confidence: medium
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, conservation-area, listed-building-setting, locally-listed-building,
+              archaeological-priority-area]
+            description: Works to alter, demolish or extend a listed building or a building in a
+              conservation area, affecting the setting of a listed building, a known or suspected
+              archaeological site, or a non-designated heritage asset.
+    source-text: >-
+      Heritage Statement Required for all applications to: Alter, demolish, extend a listed building or
+      a building within a conservation area
+    must-include:
+      - item: A schedule of works affecting the asset, its site and setting
+        level: must
+      - item: An assessment of the impact on the special interest and character of the asset, its site
+          and setting, and that of any adjacent heritage assets
+        level: must
+      - item: Justification for the proposals, with any mitigation measures proposed
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement): it applies to full applications as well as LBC and householder.
+      The must-include items were found in the workbook's householder 'schedule of works' row.
+
+  - id: landscaping-plan
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: New dwellings or residential accommodation.
+        - discretionary
+    source-text: >-
+      Landscaping scheme Required for (apart from outline applications where landscaping has not been
+      applied for): Institutional, training, educational or residential accommodation
+    source-url: https://burnley.gov.uk/wp-content/uploads/2025/11/Burnley-Council-Adopted-Validation-Checklist-November-2025.pdf
+    confidence: low
+    notes: >-
+      Audit (outdated_link): the Full planning row came from the 2017 PAVC, which also listed
+      industrial, commercial, office, retail or leisure development, new car parks, large extensions
+      and statutory undertakers' works (shown as officer discretion). Outline applications where
+      landscaping is not applied for are exempt, which the rules can't express.
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: floodlighting
+        value: true
+        description: Floodlighting near sensitive areas such as residential properties, heritage
+          assets, protected wildlife and countryside locations.
+    confidence: medium
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The proposal may impact on existing amenity (industrial processes, plant,
+              machinery, traffic, music, late night activity).
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: New occupiers (such as housing) would have lower amenity due to background
+              noise.
+    must-include:
+      - item: Carried out by a competent person
+        level: must
+    confidence: medium
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: loss-of-open-space
+            value: true
+            description: The loss or partial loss of existing open space, including public open space
+              and major open areas.
+        - discretionary
+    confidence: medium
+    notes: "The excerpt is cut off after the first case."
+
+  - id: planning-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    confidence: medium
+    notes: "The excerpt is cut off after 'all major development;'."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: Main town centre uses not in an existing centre and not in accordance with an
+          up-to-date Local Plan.
+    confidence: low
+    notes: "The excerpt reads like the sequential test trigger; any impact assessment threshold was not captured."
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: New roof details are proposed.
+    confidence: medium
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: New roof details are proposed.
+    must-include:
+      - item: A recognised metric scale, preferably 1:50 or 1:100
+        level: should
+      - item: The shape of the roof
+        level: must
+      - item: Details of roofing materials, vents etc and their location
+        level: must
+    confidence: medium
+
+  - id: sci
+    action: update
+    required-if:
+      condition:
+        field: pre-application-community-consultation
+        value: true
+        description: Pre-application consultation has taken place with the local community.
+    confidence: medium
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [pa-ecomms-network]
+        - condition:
+            field: telecommunications-development
+            value: true
+            description: A telecommunications application.
+    must-include:
+      - item: A Statement of Compliance with the ICNIRP guidelines
+        level: must
+      - item: An assessment of alternative sites, including mast sharing options, and why they are
+          unsuitable
+        level: must
+      - item: Why the development is required, including coverage maps where appropriate
+        level: must
+      - item: Details and outcomes of pre-application discussions
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): 'Required for telecommunications applications and prior approvals'."
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "A Transport Statement or a Transport Assessment and Travel Plan, depending on the type and size of the development."
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Depending on the type and size of the development."
+
+  - id: viability-assessment
+    action: replace
+    required-if: discretionary
+    source-url: https://burnley.gov.uk/wp-content/uploads/2025/11/Burnley-Council-Adopted-Validation-Checklist-November-2025.pdf
+    must-include:
+      - item: A redacted copy for publication, removing sensitive information and personal data
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted text about review fees. From the audit, required
+      where contributions would be contrary to Local Plan policies or the Developer Contributions SPD.
+      The redacted copy is from the council's guidance text.
+
+  - id: waste-management-plan
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: New dwellings (Refuse and Recycling Statement).
+        - discretionary
+    confidence: medium
+    notes: >-
+      Two items: a Construction Waste Management Plan for all major new developments (the excerpt),
+      and a Refuse and Recycling Statement 'Required for all new dwellings and any development that
+      will result in the need for refuse disposal' (other development shown as officer discretion).
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: Residential development.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: Non-residential development of 1,000sqm gross floorspace or over.
+    source-text: >-
+      Required for: All major applications for residential development; All non-residential
+      development with a gross floorspace of 1000sqm or over
+    source-url: https://burnley.gov.uk/wp-content/uploads/2025/11/Burnley-Council-Adopted-Validation-Checklist-November-2025.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the Energy Efficiency Statement in the 2025 list."
+
+unmapped:
+  - local-name: Coal Mining Risk Assessment
+    source-text: >-
+      Required for all applications for development within Coal Mining Development Referral Areas
+      excluding householder applications and changes of use or structures (including fences,
+      portacabins etc) where there are no ground works.
+    source-url: https://burnley.gov.uk/wp-content/uploads/2025/11/Burnley-Council-Adopted-Validation-Checklist-November-2025.pdf
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Landscape and Visual Impact Assessment
+    source-text: "From the audit: residential, industrial or commercial development in the rural area, plus energy generation with significant landscape impact"
+    source-url: https://burnley.gov.uk/wp-content/uploads/2025/11/Burnley-Council-Adopted-Validation-Checklist-November-2025.pdf
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Parking and Access Arrangements
+    source-text: "Parking and Access Arrangements Required for all applications: which will generate traffic or increase demand for parking;"
+    source-url: https://burnley.gov.uk/wp-content/uploads/2025/11/Burnley-Council-Adopted-Validation-Checklist-November-2025.pdf
+    suggested-id: parking-plan
+  - local-name: SuDS Lancashire County Council Proforma
+    source-text: "From the audit: all major applications and wherever a Sustainable Drainage Strategy is required"
+    source-url: https://burnley.gov.uk/wp-content/uploads/2025/11/Burnley-Council-Adopted-Validation-Checklist-November-2025.pdf
+    suggested-id: drainage-strategy
+  - local-name: Public Rights of Way
+    source-text: "From the audit: all applications affecting a public right of way"
+    source-url: https://burnley.gov.uk/wp-content/uploads/2025/11/Burnley-Council-Adopted-Validation-Checklist-November-2025.pdf
+    suggested-id: public-rights-of-way-statement
+  - local-name: Shop Front Details
+    source-text: "From the audit: new shop fronts and alterations"
+    source-url: https://burnley.gov.uk/wp-content/uploads/2025/11/Burnley-Council-Adopted-Validation-Checklist-November-2025.pdf
+    suggested-id: shopfront-details
+  - local-name: Summary of Application
+    source-text: "From the audit: where supporting documents total over 100 pages"
+    source-url: https://burnley.gov.uk/wp-content/uploads/2025/11/Burnley-Council-Adopted-Validation-Checklist-November-2025.pdf
+    suggested-id: application-summary
+  - local-name: Agricultural Needs Statement (agricultural buildings)
+    source-text: "From the audit: agricultural buildings (Grokbot captured only the workers' dwelling part)"
+    source-url: https://burnley.gov.uk/wp-content/uploads/2025/11/Burnley-Council-Adopted-Validation-Checklist-November-2025.pdf
+    suggested-id: agricultural-building-appraisal
+
+low-confidence:
+  - id: site-plan
+    note: >-
+      Audit (outdated_link): the Full planning row came from the superseded 2017 PAVC. The 2025 list:
+      'Required for all applications, with the exception of change of use proposal where no external
+      works are proposed' (filed by the workbook under prior approval).
+
+new-fields:
+  - field: pre-application-community-consultation
+    kind: boolean
+    label: Pre-application community consultation
+    description: The applicant consulted the local community before submitting the application.

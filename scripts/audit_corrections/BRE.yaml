@@ -1,0 +1,435 @@
+# Corrections for Breckland District Council, from inputs/audit/breckland-district-council.json.
+# Grokbot linked the right list (Local List 2026, in effect from 1 May 2026), but filed every row
+# under Full planning and missed about half of the list's matrix columns. The audit read the PDF
+# (manual upload) and gives each column's trigger and the application-type rows it applies to.
+# Type rows used here: Householder (hh), Outline, Reserved Matters, Full, Change of Use,
+# Variation of Condition (s73), Permission in Principle (pip), Technical Details Consent and
+# Listed Buildings (lbc). Items marked "From the audit" use the audit's paraphrase.
+# Not covered: the Prior Approval Part Q row marks three items "not required to validate the
+# application but could result in refusal if not submitted"; the audit doesn't say which.
+local-authority: BRE
+
+drop:
+  - id: design-and-access-statement
+    reason: >-
+      wrong_trigger: the excerpt is about the red line and ownership certificates (now in
+      location-plan); the list treats the DAS as a national requirement
+  - id: environmental-statement
+    reason: "wrong_trigger: national-requirements boilerplate; the list points to GOV.UK"
+  - id: recreation-facilities-assessment
+    reason: >-
+      other: Sport England's recommended checklist for playing-field applications, not a council
+      validation requirement
+
+drop-unmapped:
+  - local-name: Drainage Strategy / SuDS
+    reason: "duplicate: the list has one combined 'Flood Risk Assessment and Drainage Strategy' column"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: the list only suggests asking for pre-application advice"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: >-
+      wrong_trigger: note 3 says HRA information is 'not a specific Local Validation Requirement';
+      the binding item is the NN calculator and sHRA (unmapped below)
+  - local-name: Structural Survey
+    reason: "wrong_trigger: fragment; re-added below with the list's trigger"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: secondary trigger only; re-added below with the main one"
+  - local-name: Self-build / custom build information
+    reason: "wrong_trigger: cut off without the trigger; re-added below"
+
+requirements:
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees are present on, or within 15 metres of, any part of the development.
+    source-text: >-
+      Arboricultural Report – Where trees are present on, or within 15 metres of any form of
+      development, a tree survey and arboricultural information must be submitted in accordance
+      with BS5837:2012 – Trees in Relation to Design, Demolition and Construction to demonstrate
+      how trees have been considered within the design and layout of the proposed development.
+    source-url: https://www.breckland.gov.uk/media/21489/Council-s-Local-List/pdf/Local_List_2026.pdf?m=1778086477433
+    must-include:
+      - item: Tree survey and arboricultural information in accordance with BS5837:2012
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook filed this under Full planning only. The householder row
+      also asks for it where trees or hedgerows are likely to be affected.
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the statutory biodiversity gain condition.
+    source-text: >-
+      Biodiversity Net Gain (2) (BNG) Where applicants consider that the development would not be
+      subject to the biodiversity gain condition, Article 7 of The Town and Country Planning
+      (Development Management Procedure) (England) Order 2015 provides that the applicant must
+      provide a statement as part of the planning application setting out the reasons why they
+      believe this is the case.
+    must-include:
+      - item: Statutory Biodiversity metric (or BNG Metric) in Excel format
+        level: must
+        source-text: "Statutory Biodiversity metric (or BNG Metric) in excel format"
+      - item: A statement showing how the person who completed the metric meets the test of being a
+          competent person
+        level: must
+        source-text: >-
+          a statement should be submitted demonstrating how the person who has completed the metric
+          meets the test of being a competent person
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt covered only the exemption statement (needed
+      where the applicant believes the condition does not apply). The must-include items are from
+      the list's note 2.
+
+  - id: site-plan
+    action: update
+    source-text: >-
+      Block Plan – When submitted must show neighbouring dwellings so the impact on these can be
+      assessed.
+    must-include:
+      - item: Neighbouring dwellings, so the impact on them can be assessed
+        level: must
+    confidence: medium
+    notes: "The workbook guessed Full planning; the rule applies whenever a block plan is submitted."
+
+  - id: location-plan
+    action: add
+    required-if:
+      always: true
+    source-text: >-
+      For all application types, the red application site line must be to the nearest adopted
+      highway and notice served on any landowners within the red line, with the correct ownership
+      certificate served.
+    source-url: https://www.breckland.gov.uk/media/21489/Council-s-Local-List/pdf/Local_List_2026.pdf?m=1778086477433
+    must-include:
+      - item: Red line drawn to the nearest adopted highway
+        level: must
+    confidence: medium
+    notes: "The workbook filed this under the Design and Access Statement."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [outline, reserved-matters, full, change-of-use, s73, technical-details-consent]
+        - all:
+            - application-type:
+                in: [hh]
+            - condition:
+                field: protected-species
+                value: true
+                description: Protected and priority species are likely to be present.
+    source-text: >-
+      Ecological Survey – these MUST be no older than 18 months having regard to the CIEEM (2019)
+      Advice note.
+    source-url: https://www.breckland.gov.uk/media/21489/Council-s-Local-List/pdf/Local_List_2026.pdf?m=1778086477433
+    must-include:
+      - item: Surveys no older than 18 months (CIEEM 2019 advice note)
+        level: must
+      - item: All surveys, results and mitigations requested in the Preliminary Ecological Appraisal
+        level: must
+        source-text: "to be made valid all surveys, results and mitigations, as requested in the PEA should be provided"
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt gave only the age limit. From the audit: required for
+      outline, reserved matters, full, change of use, variation of condition and technical details
+      consent, and for householder only 'Where any protected and priority species are likely to be
+      present'.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [outline, reserved-matters, full, change-of-use, s73]
+            - any:
+                - ref: major-development
+                - site:
+                    in: [flood-risk-zone]
+                    description: The site is in an area of flood risk.
+        - all:
+            - application-type:
+                in: [technical-details-consent]
+            - site:
+                in: [flood-risk-zone]
+                description: The site is in an area of flood risk.
+    policy: "Breckland Local Plan ENV09"
+    source-text: "Yes for major applications or in areas of flood risk."
+    source-url: https://www.breckland.gov.uk/media/21489/Council-s-Local-List/pdf/Local_List_2026.pdf?m=1778086477433
+    must-include:
+      - item: A Drainage Strategy including foul and surface water management
+        level: should
+        source-text: >-
+          Any submitted Flood Risk Assessment (FRA) should include a Drainage Strategy including Foul
+          and Surface Water Management.
+      - item: A statement of compliance with Policy ENV09, showing no increase in greenfield
+          run-off and addressing Source Protection Zones and Critical Drainage Catchments
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, duplicate): the list has one 'Flood Risk Assessment and Drainage
+      Strategy' column. The ENV09 item is the audit's summary of the list's notes.
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: external-lighting
+            value: true
+            description: External lighting in the vicinity of residential properties or other
+              sensitive uses.
+        - condition:
+            field: floodlighting
+            value: true
+            description: Floodlighting in the vicinity of residential properties or other sensitive
+              uses.
+    must-include:
+      - item: Layout plan with beam orientation
+        level: should
+      - item: A schedule of the equipment
+        level: should
+      - item: Proposed hours of operation
+        level: should
+      - item: An isolux contour map showing light spillage to 1 lux
+        level: should
+      - item: Light levels
+        level: should
+      - item: Measures such as hoods and cowls to mitigate and avoid glare
+        level: should
+    confidence: medium
+    notes: "The council's text says these applications 'should provide' the items listed."
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [outline, full, change-of-use]
+        - any:
+            - all:
+                - ref: major-development
+                - condition:
+                    field: noise-generating-use
+                    value: true
+                    description: A business, employment or commercial use.
+            - condition:
+                field: noise-sensitive-use
+                value: true
+                description: New residential development close to employment areas.
+    source-text: >-
+      Yes for Majors business/employment commercial uses as well as new residential developments
+      laying close to employment areas
+    source-url: https://www.breckland.gov.uk/media/21489/Council-s-Local-List/pdf/Local_List_2026.pdf?m=1778086477433
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): from the list's table. The list's notes also ask for a noise assessment
+      for residential and other noise-sensitive development near existing noise sources, mixed
+      noise-generating and noise-sensitive schemes, plant and extraction near noise-sensitive uses,
+      and hot-food uses mixed with residential.
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - all:
+            - application-type:
+                in: [hh, outline, reserved-matters, full, change-of-use, s73, pip, technical-details-consent]
+            - site:
+                in: [conservation-area, listed-building, listed-building-setting, locally-listed-building]
+                description: The site is in a Conservation Area or within the curtilage/setting of a
+                  Listed Building or Heritage Asset.
+    source-text: "Yes, in a Conservation Area or within the curtilage/setting of a Listed Building or Heritage Asset"
+    source-url: https://www.breckland.gov.uk/media/21489/Council-s-Local-List/pdf/Local_List_2026.pdf?m=1778086477433
+    must-include:
+      - item: History of the asset
+        level: must
+      - item: Photographic record
+        level: must
+      - item: Assessment of significance and of the impact of the proposal
+        level: must
+      - item: Justification for the works
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): the must-include items are the audit's summary of note 4."
+
+  - id: transport-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [outline, full]
+        - ref: major-development
+    source-text: "Yes for all major development"
+    source-url: https://www.breckland.gov.uk/media/21489/Council-s-Local-List/pdf/Local_List_2026.pdf?m=1778086477433
+    confidence: medium
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      application-type:
+        in: [outline, reserved-matters, full, change-of-use, s73, technical-details-consent]
+    source-text: "Yes - vulnerability questionnaire for all developments and Site Investigation report for majors"
+    source-url: https://www.breckland.gov.uk/media/21489/Council-s-Local-List/pdf/Local_List_2026.pdf?m=1778086477433
+    must-include:
+      - item: Vulnerable Development (contamination) Questionnaire
+        level: must
+      - item: Site Investigation report
+        level: must
+        required-if:
+          any:
+            - all:
+                - application-type:
+                    in: [outline, full]
+                - ref: major-development
+            - all:
+                - application-type:
+                    in: [change-of-use]
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: A change of use to residential.
+    confidence: medium
+    notes: "From the audit (missing_requirement): 'Contaminated land documents' column and note 8."
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [outline, reserved-matters, full, change-of-use]
+        - any:
+            - site:
+                in: [air-quality-management-area]
+                description: The site is in an Air Quality Management Area.
+            - all:
+                - any:
+                    - condition:
+                        field: dwelling-count
+                        operator: ">="
+                        value: 10
+                        description: 10 or more residential units.
+                    - condition:
+                        field: site-area-residential
+                        operator: ">"
+                        value: 0.5
+                        description: A site of more than 0.5 hectares.
+                    - condition:
+                        field: site-area-non-residential
+                        operator: ">"
+                        value: 0.5
+                        description: A site of more than 0.5 hectares.
+                    - condition:
+                        field: floorspace-non-residential
+                        operator: ">"
+                        value: 1000
+                        description: More than 1,000 square metres of other floorspace.
+                - any:
+                    - condition:
+                        field: parking-spaces
+                        operator: ">"
+                        value: 10
+                        description: More than 10 parking spaces.
+                    - condition:
+                        field: biomass-or-chp
+                        value: true
+                        description: A centralised energy or combustion facility.
+            - discretionary
+    source-url: https://www.breckland.gov.uk/media/21489/Council-s-Local-List/pdf/Local_List_2026.pdf?m=1778086477433
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): an Air Quality and Dust Impact Assessment for
+      applications that may affect air quality. Note 9 requires screening for any site in an AQMA,
+      for intensive farming (shown as officer discretion), or for 10+ units / more than 0.5ha /
+      more than 1,000 sqm of other floorspace with more than 10 parking spaces or a centralised
+      energy or combustion facility.
+
+  - id: schedule-of-works
+    action: add
+    required-if:
+      application-type:
+        in: [lbc]
+    source-url: https://www.breckland.gov.uk/media/21489/Council-s-Local-List/pdf/Local_List_2026.pdf?m=1778086477433
+    must-include:
+      - item: Joinery details
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): the list's 'Joinery details and Schedule of works' column, Listed Buildings row."
+
+  - id: sci
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 50
+        description: 50 or more dwellings.
+    source-text: >-
+      It is recommended that a statement of community involvement is submitted for dwelling numbers
+      of 50 or more.
+    source-url: https://www.breckland.gov.uk/media/21489/Council-s-Local-List/pdf/Local_List_2026.pdf?m=1778086477433
+    confidence: low
+    notes: "From the audit (missing_requirement): recommended, not required, for 50+ dwellings."
+
+unmapped:
+  - local-name: Structural Survey
+    source-text: "For all Policy HOU12 applications - Yes. Also where new stories are added"
+    source-url: https://www.breckland.gov.uk/media/21489/Council-s-Local-List/pdf/Local_List_2026.pdf?m=1778086477433
+    suggested-id: structural-survey
+  - local-name: Ventilation / Extraction details (odour)
+    source-text: >-
+      should accompany all applications for premises that will be used for the sale of hot food …
+      Details of the position and design of ventilation and extraction equipment will also be
+      required for significant retail, business, industrial or leisure or other similar
+      developments where substantial ventilation or extraction equipment is proposed to be
+      installed.
+    source-url: https://www.breckland.gov.uk/media/21489/Council-s-Local-List/pdf/Local_List_2026.pdf?m=1778086477433
+    suggested-id: ventilation-extraction-statement
+  - local-name: Self-build / custom build information (Unilateral Undertaking)
+    source-text: "Yes where Self/custom Build"
+    source-url: https://www.breckland.gov.uk/media/21489/Council-s-Local-List/pdf/Local_List_2026.pdf?m=1778086477433
+    suggested-id: self-build-statement
+  - local-name: Healthy Planning Checklist (Planning in Health Protocol)
+    source-text: "If over 5 dwellings or 1000sqm of floorspace"
+    source-url: https://www.breckland.gov.uk/media/21489/Council-s-Local-List/pdf/Local_List_2026.pdf?m=1778086477433
+    suggested-id: health-impact-assessment
+  - local-name: Health Impact Assessment
+    source-text: "If over 50 dwellings"
+    source-url: https://www.breckland.gov.uk/media/21489/Council-s-Local-List/pdf/Local_List_2026.pdf?m=1778086477433
+    suggested-id: health-impact-assessment
+  - local-name: Nutrient Neutrality Calculator and sHRA
+    source-text: "For development which generates an overnight stay in an NN catchment"
+    source-url: https://www.breckland.gov.uk/media/21489/Council-s-Local-List/pdf/Local_List_2026.pdf?m=1778086477433
+    suggested-id: nutrient-neutrality-assessment
+  - local-name: Unilateral Undertaking for Norfolk RAMS
+    source-text: "Yes where overnight stays are created"
+    source-url: https://www.breckland.gov.uk/media/21489/Council-s-Local-List/pdf/Local_List_2026.pdf?m=1778086477433
+    suggested-id: recreational-impact-mitigation
+  - local-name: Community safety
+    source-text: "Yes for majors only"
+    source-url: https://www.breckland.gov.uk/media/21489/Council-s-Local-List/pdf/Local_List_2026.pdf?m=1778086477433
+    suggested-id: crime-prevention-statement
+  - local-name: Mineral Resource Assessment
+    source-text: "From the audit: relevant development in a Mineral Safeguarding Area (Norfolk Minerals and Waste Local Plan MP11)"
+    source-url: https://www.breckland.gov.uk/media/21489/Council-s-Local-List/pdf/Local_List_2026.pdf?m=1778086477433
+    suggested-id: mineral-resource-assessment
+  - local-name: Waste Management Facilities Impact Assessment
+    source-text: "From the audit: relevant development in a Waste Management Consultation Area around safeguarded waste sites (NM&WLP WP17)"
+    source-url: https://www.breckland.gov.uk/media/21489/Council-s-Local-List/pdf/Local_List_2026.pdf?m=1778086477433
+    suggested-id: ""
+  - local-name: Minerals Infrastructure Impact Assessment
+    source-text: "From the audit: relevant development in a Mineral Consultation Area around safeguarded mineral sites (NM&WLP MP10/MP11)"
+    source-url: https://www.breckland.gov.uk/media/21489/Council-s-Local-List/pdf/Local_List_2026.pdf?m=1778086477433
+    suggested-id: ""

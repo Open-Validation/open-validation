@@ -1,0 +1,76 @@
+# When a pull request adds cell marks to reviews/pending/, apply them and
+# commit the result back to the pull request, so the diff shows exactly which
+# cells changed. Then, if the rules below allow it, turn on auto-merge.
+#
+# Merges itself (once the checks pass) only when ALL of these are true:
+#   - the person who opened the pull request has write access to the repo
+#   - 50 cells or fewer, all for one council
+#   - no council-verified or council-updated marks (those need a maintainer to check the evidence)
+# Everything else waits for a maintainer. Pull requests from forks are only checked.
+# One-off setting: Settings > General > Allow auto-merge.
+name: apply-reviews
+on:
+  pull_request:
+    paths:
+      - "reviews/pending/**"
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          # Pushes made with the built-in token don't re-run the checks, which a protected main
+          # needs before auto-merge. Add a repository secret REVIEW_BOT_TOKEN (a fine-grained token
+          # for this repo with Contents: read and write) and the push below will use it.
+          token: ${{ secrets.REVIEW_BOT_TOKEN || github.token }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+
+      - name: Apply the marks (pull requests from this repo)
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        run: |
+          # Record the account that opened the pull request on every mark.
+          python scripts/apply_reviews.py --github-user "${{ github.event.pull_request.user.login }}" --summary marks.json
+          python scripts/check.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A specification data reviews
+          if git diff --cached --quiet; then
+            echo "Nothing changed."
+          else
+            git commit -m "Apply cell marks from reviews/pending"
+            git push
+          fi
+
+      - name: Merge automatically if the rules allow it
+        if: github.event.pull_request.head.repo.full_name == github.repository && hashFiles('marks.json') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          perm=$(gh api "repos/${{ github.repository }}/collaborators/$AUTHOR/permission" --jq .permission || echo none)
+          cells=$(python -c "import json;print(json.load(open('marks.json'))['cells'])")
+          councils=$(python -c "import json;print(len(json.load(open('marks.json'))['councils']))")
+          council_marks=$(python -c "import json;s=json.load(open('marks.json'))['statuses'];print(int(bool({'council-verified','council-updated'}&set(s))))")
+          echo "author=$AUTHOR permission=$perm cells=$cells councils=$councils council-statuses=$council_marks"
+          if { [ "$perm" = "admin" ] || [ "$perm" = "maintain" ] || [ "$perm" = "write" ]; } \
+             && [ "$cells" -le 50 ] && [ "$councils" -eq 1 ] && [ "$council_marks" -eq 0 ]; then
+            gh pr merge "$PR" --auto --squash && echo "Auto-merge turned on."
+          else
+            gh pr comment "$PR" --body "These marks need a maintainer's review before merging (the rules: write access, 50 cells or fewer, one council, no council statuses)."
+          fi
+
+      - name: Check only (pull requests from forks)
+        if: github.event.pull_request.head.repo.full_name != github.repository
+        run: |
+          echo "This pull request comes from a fork, so the marks are not applied automatically."
+          echo "A maintainer must apply them: python scripts/apply_reviews.py --github-user <author>, then commit."
+          python scripts/check.py

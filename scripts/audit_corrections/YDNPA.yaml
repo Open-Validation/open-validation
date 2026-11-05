@@ -1,0 +1,424 @@
+# Corrections for Yorkshire Dales National Park Authority, from the authority's audit.
+# The workbook linked the Full/Outline/Variation questionnaire (.doc) instead of the main list,
+# 'Local validation requirements in the Yorkshire Dales National Park - December 2025' (PDF),
+# and dated it May 2026 from the upload path; the build takes the PDF and its December 2025 date
+# from the audit. Grokbot read the PDF and the three questionnaires (Householder, Full/Outline/
+# Variation, Listed building consent), but many triggers are cut off or belong to a neighbouring
+# item. The list is trigger-based, so rows are left for every type with the authority's trigger.
+local-authority: YDNPA
+
+submission-standards:
+  - item: Plans produced at A4/A3 size where possible
+    level: should
+  - item: Elevations and floor plans drawn to a scale of 1:50 or 1:100 with a scale bar
+    level: should
+  - item: Sections drawn to a recognised metric scale, typically 1:100, 1:50 or 1:20
+    level: should
+  - item: Email submissions limited to 20MB of attachments
+    level: must
+  - item: Reports that refer to locations of badger setts clearly marked Sensitive/Confidential
+    level: must
+
+drop:
+  - id: schedule-of-works
+    reason: >-
+      wrong_trigger: the Full row is a tree fragment and the Outline row a garbled questionnaire
+      string; the item is really the Conversion Works Method Statement (added as unmapped)
+  - id: roof-plan-existing
+    sheets: [Change of use - prior approval]
+    reason: "wrong_trigger: the excerpt is Design and Access Statement text"
+  - id: roof-plan-proposed
+    sheets: [Change of use - prior approval]
+    reason: "wrong_trigger: the excerpt is Design and Access Statement text"
+
+drop-unmapped:
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: part of the site plan content list (3.3)"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "not_a_requirement: explanatory text, not a listed validation requirement"
+  - local-name: Structural Survey
+    reason: >-
+      wrong_trigger: the Full row quotes the Conversion Works Method Statement trigger and the
+      Outline row a garbled questionnaire string; both are re-added below
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: both excerpts are Noise Assessment text (now in noise-assessment)"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if: discretionary
+    source-text: 4.14 Affordable Housing Statement When required? When affordable housing is proposed.
+    source-url: https://www.yorkshiredales.org.uk/wp-content/uploads/sites/13/2025/12/Local-validation-requirements-December-2025.pdf
+    confidence: medium
+    notes: "Needed when affordable housing is proposed; there is no field for that, so it is shown as officer
+      discretion. The Outline row was a garbled questionnaire string."
+
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      all:
+        - site:
+            in: [site-of-special-scientific-interest, special-area-of-conservation,
+              special-protection-area]
+            description: The proposal is near an SSSI, SAC, SPA or Ramsar site.
+        - discretionary
+    source-url: https://www.yorkshiredales.org.uk/wp-content/uploads/sites/13/2025/12/Local-validation-requirements-December-2025.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpts were fragments. From the audit (PDF 4.23): proposals near
+      SSSIs/SACs/SPAs/Ramsar sites, including new slurry stores or animal housing, increased herd
+      or flock size, anaerobic digesters, combustion plants and traffic-generating development
+      (no fields for these, so officer discretion).
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    must-include:
+      - item: A desk based assessment and a field evaluation undertaken by a suitably qualified and
+          experienced archaeological consultant
+        level: must
+    notes: "The questionnaire names major development or significant infrastructure works; its other cases are cut
+      off, so officer discretion."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: The proposal is likely to affect protected species.
+        - site:
+            in: [special-area-of-conservation, special-protection-area,
+              site-of-special-scientific-interest, local-wildlife-site, priority-habitat]
+            description: The proposal is likely to affect a designated site or priority habitat.
+        - condition:
+            field: demolition
+            value: true
+            description: Demolition or removal of buildings (questionnaire).
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Removal or disturbance to the roof or roof structure (questionnaire).
+        - discretionary
+    source-text: >-
+      to affect protected species, a designated site, or priority habitat, the application must be
+      accompanied by an ecology report and meet the BS latest biodiversity code of practice for
+      planning and development.
+    source-url: https://www.yorkshiredales.org.uk/wp-content/uploads/sites/13/2025/12/Local-validation-requirements-December-2025.pdf
+    must-include:
+      - item: Meets the latest British Standard biodiversity code of practice for planning and
+          development
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the questionnaire excerpts were run-on Yes/No cells. The questionnaires
+      also ask for a protected species survey for work to bridges, mines and tunnels, loft
+      conversions, felling broadleaved trees over 10m, wind turbines and removal of barge or fascia
+      boards (officer discretion here).
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [conservation-area, world-heritage-site]
+                description: The site is in a conservation area or a world heritage site.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: Provision of one or more dwellinghouses.
+                - condition:
+                    field: floorspace
+                    operator: ">"
+                    value: 100
+                    description: Provision of building(s) where the floor space is over 100 square
+                      metres.
+        - application-type:
+            in: [lbc]
+    source-text: >-
+      Design and access statement – only required for some major applications; or applications in a
+      conservation area or a world heritage site for provision of one or more dwellinghouses or
+      provision of building(s) where the floor space >100m²
+    source-url: https://www.yorkshiredales.org.uk/wp-content/uploads/sites/13/2026/05/Full-Outline-Variation-validation-questionnaire-December-2025.doc
+    confidence: medium
+    notes: >-
+      Built from the authority's questionnaires (Householder, Full/Outline/Variation and LBC, which
+      lists a DAS) and PDF 3.8 (major applications, except a material change of use with no
+      operational development). The Change of use row was filed there only for that exception.
+
+  - id: elevation-existing
+    action: update
+    required-if:
+      condition:
+        field: external-alterations
+        value: true
+        description: The elevations will change as a result of the proposal.
+    source-text: Existing and proposed elevations – required in all cases where the elevations will
+      change as a result of the proposal.
+
+  - id: elevation-proposed
+    action: update
+    required-if:
+      condition:
+        field: external-alterations
+        value: true
+        description: The elevations will change as a result of the proposal.
+    source-text: Existing and proposed elevations – required in all cases where the elevations will
+      change as a result of the proposal.
+    must-include:
+      - item: The proposed works shown clearly in relation to what is already there
+        level: should
+
+  - id: floor-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: building-works
+        value: true
+        description: The proposal relates to buildings.
+    source-text: and Proposed Floor Plans When required? All cases which relate to buildings.
+
+  - id: floor-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: building-works
+        value: true
+        description: The proposal relates to buildings.
+    source-text: and Proposed Floor Plans When required? All cases which relate to buildings.
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: A Flood Zone 1 site of 1 hectare or greater.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: A Flood Zone 1 site of 1 hectare or greater.
+        - site:
+            in: [critical-drainage-area]
+            description: Critical drainage problems as notified by the Environment Agency.
+        - site:
+            in: [surface-water-flood-risk]
+            description: A moderate or high risk of flooding from surface or ground water.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [listed-building, listed-building-setting, scheduled-monument,
+              archaeological-priority-area, park-and-garden]
+            description: The proposal affects a heritage asset or its setting.
+        - discretionary
+    source-text: >-
+      4.11 Heritage Statement When required? Applications for proposals affecting heritage assets
+      (listed buildings, scheduled monuments, non-designated archaeological sites and features and
+      traditional buildings [any building pre1914]) and/or their setting must be supported by a
+      Heritage Statement that describes the significance of the heritage asset affected.
+    source-url: https://www.yorkshiredales.org.uk/wp-content/uploads/sites/13/2025/12/Local-validation-requirements-December-2025.pdf
+    must-include:
+      - item: A description of the significance of the heritage asset affected
+        level: must
+    confidence: medium
+    notes: >-
+      The questionnaire excerpts were run-on Yes/No cells. Traditional buildings (any building
+      before 1914) have no field, so they are shown as officer discretion.
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: Contamination is known or suspected.
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: The proposed use would be particularly vulnerable.
+        - condition:
+            field: previously-developed-land
+            value: true
+            description: Redevelopment of a former industrial or garage site.
+        - site:
+            in: [near-landfill-site]
+            description: The site is close to a former waste disposal site.
+    source-text: >-
+      4.20 Contaminated Land Assessment When required? Where contamination is known, or suspected,
+      or the proposed use would be particularly vulnerable.
+    source-url: https://www.yorkshiredales.org.uk/wp-content/uploads/sites/13/2025/12/Local-validation-requirements-December-2025.pdf
+    confidence: medium
+    notes: "The former industrial/garage site and waste disposal site cases are from the questionnaire (Q16)."
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The development is likely to give rise to noise that could disturb residents
+              or the tranquillity of the area (including HGV manoeuvring or kennelling of dogs).
+        - condition:
+            field: plant-equipment
+            value: true
+            description: Plant such as air source heat pumps or ventilation and extraction units.
+    source-text: >-
+      4.21 Noise Assessment When required? When the development is likely to give rise to noise that
+      could disturb residents or the tranquillity of the area around the site.
+    source-url: https://www.yorkshiredales.org.uk/wp-content/uploads/sites/13/2025/12/Local-validation-requirements-December-2025.pdf
+    must-include:
+      - item: Either a report from a qualified acoustician giving anticipated noise levels and noise
+          mitigation measures, or a statement from the District Council Environmental Health Officer
+          that the development would be compatible with the location relative to the nearest
+          residential properties
+        level: must
+    confidence: medium
+    notes: >-
+      The questionnaire (Q17, Q18) adds plant (ASHP, ventilation and extraction units, power tools),
+      HGV manoeuvring and dog kennelling; for plant a product specification sheet with dB levels may
+      be given instead. The 'What is required?' text was in the workbook's ventilation row.
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Works to the roof are proposed.
+        - condition:
+            field: new-build
+            value: true
+            description: New roofs are proposed.
+    notes: "Audit (wrong_trigger): the Change of use row quoted DAS text and is dropped."
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Works to the roof are proposed.
+        - condition:
+            field: new-build
+            value: true
+            description: New roofs are proposed.
+    must-include:
+      - item: Details of any proposed changes, e.g. roofing material, rooflights, solar panels
+        level: must
+    notes: "Audit (wrong_trigger): the Change of use row quoted DAS text and is dropped."
+
+  - id: section-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: A change in ground level, or the site is sloping.
+        - condition:
+            field: new-build
+            value: true
+            description: A new building.
+        - discretionary
+    notes: "Also for a track, new openings or staircases, new floor levels and double glazing in a listed building
+      (no fields, so officer discretion)."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: A change in ground level, or the site is sloping.
+        - condition:
+            field: new-build
+            value: true
+            description: A new building.
+        - discretionary
+    must-include:
+      - item: Sections through the glazing unit for double glazing in a listed building
+        level: must
+        required-if:
+          site:
+            in: [listed-building]
+            description: The building is listed.
+    notes: "Also for a track, new openings or staircases, new floor levels and double glazing in a listed building
+      (no fields, so officer discretion)."
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: An appropriate metric scale of 1:200 or 1:500
+        level: must
+      - item: The direction of north
+        level: must
+      - item: On the proposed plan, the development in relation to the site boundaries and other
+          existing buildings on the site
+        level: must
+    notes: "Required in all cases where the site layout will change (council's wording)."
+
+unmapped:
+  - local-name: Conversion Works Method Statement
+    source-text: "building, when a Structural Survey is not identified as necessary."
+    source-url: https://www.yorkshiredales.org.uk/wp-content/uploads/sites/13/2025/12/Local-validation-requirements-December-2025.pdf
+    suggested-id: construction-method-statement
+  - local-name: Structural Survey (conversions)
+    source-text: "From the audit: PDF 4.12, conversion of a traditional building showing signs of structural
+      instability"
+    source-url: https://www.yorkshiredales.org.uk/wp-content/uploads/sites/13/2025/12/Local-validation-requirements-December-2025.pdf
+    suggested-id: structural-survey
+  - local-name: Public Right of Way Information
+    source-text: "Where a public right of way crosses an application site, or is in close proximity, or passes
+      along an access route to the proposed site, or is otherwise affected by the proposed development."
+    source-url: https://www.yorkshiredales.org.uk/wp-content/uploads/sites/13/2026/05/Full-Outline-Variation-validation-questionnaire-December-2025.doc
+    suggested-id: public-rights-of-way-statement
+  - local-name: Occupancy Restriction Statement
+    source-text: "From the audit: PDF 4.15, proposals for 1-5 new dwellings, or conversion of a traditional
+      building, under local needs policies"
+    source-url: https://www.yorkshiredales.org.uk/wp-content/uploads/sites/13/2025/12/Local-validation-requirements-December-2025.pdf
+    suggested-id: ""
+  - local-name: Community Use Assessment
+    source-text: "Q15 Does the proposed development change the use of a site most recently used for community
+      purposes? (ie for public non-commercial use) Yes Viable community use assessment"
+    source-url: https://www.yorkshiredales.org.uk/wp-content/uploads/sites/13/2026/05/Full-Outline-Variation-validation-questionnaire-December-2025.doc
+    suggested-id: community-facilities-assessment
+  - local-name: Farm Buildings Questionnaire
+    source-text: "Q11 Is the proposal to erect an agricultural building? Yes Farm building questionnaire & farm
+      plan"
+    source-url: https://www.yorkshiredales.org.uk/wp-content/uploads/sites/13/2026/05/Full-Outline-Variation-validation-questionnaire-December-2025.doc
+    suggested-id: agricultural-statement
+  - local-name: Geological Assessment
+    source-text: "From the audit: PDF 4.7, within or next to an SSSI, Limestone Pavement Order, LNR or RIGS"
+    source-url: https://www.yorkshiredales.org.uk/wp-content/uploads/sites/13/2025/12/Local-validation-requirements-December-2025.pdf
+    suggested-id: geodiversity-assessment
+  - local-name: Shadow HRA (nutrient neutrality)
+    source-text: "Q10 Is the proposal for two or more dwellings/building conversions to residential use AND
+      within a Nutrient Neutrality area? Yes Shadow HRA & Nutrient Neutrality Assessment and Mitigation
+      Strategy"
+    source-url: https://www.yorkshiredales.org.uk/wp-content/uploads/sites/13/2026/05/Full-Outline-Variation-validation-questionnaire-December-2025.doc
+    suggested-id: habitats-regulations-assessment
+
+low-confidence:
+  - id: arboriculturist-report
+    note: "Audit (wrong_trigger): the excerpt ('to provide a Tree Protection Plan.') is a fragment with no trigger."

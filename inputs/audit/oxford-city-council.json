@@ -1,0 +1,86 @@
+{
+  "council": "Oxford City Council",
+  "slug": "oxford-city-council",
+  "workbook_url": "https://www.oxford.gov.uk/downloads/file/1092/list-of-national-and-local-planning-application-requirements",
+  "workbook_list_date": "2021-08-01",
+  "link_check": "blocked_to_fetch",
+  "current_url": null,
+  "current_date": null,
+  "is_workbook_link_current": null,
+  "current_evidence": "Not verified: the shared WebFetch budget (400/hour) and the per-turn WebSearch budget were both exhausted before any council page could be fetched. Grokbot itself read a second, higher-numbered download of the same-titled document (file/1658), which suggests file/1092 may be superseded.",
+  "contents_checked": false,
+  "issues": [
+    {
+      "type": "wrong_app_type",
+      "severity": "high",
+      "detail": "The document is organised in numbered sections by application type (Grokbot's own text shows '2 - APPLICATION FOR FULL PLANNING PERMISSION' and '10 - APPLICATION FOR A LAWFUL DEVELOPMENT CERTIFICATE FOR AN EXISTING USE...'). Despite this, Grokbot put 27 of 34 rows under Full planning as 'INFERRED' and marked Householder, Outline, Reserved matters, Listed building consent, Prior approval, Demolition in a conservation area, s73 and others as '(none)'. The per-type sections were not mapped.",
+      "evidence": "'7 2 - APPLICATION FOR FULL PLANNING PERMISSION One copy of the following documents will always be required...'; '25 10 - APPLICATION FOR A LAWFUL DEVELOPMENT CERTIFICATE...'",
+      "grok_review": "Agree",
+      "final_status": "Confirmed"
+    },
+    {
+      "type": "wrong_app_type",
+      "severity": "high",
+      "detail": "Several rows are filed under the wrong application section because the text before a section heading was treated as belonging to the next section. 'Roof plan' and 'Photographs / Photomontages' come before the heading '2 - APPLICATION FOR FULL PLANNING PERMISSION', so they belong to section 1 (presumably Householder), not Full planning. 'Lighting Assessment' and 'Planning Statement' come before the heading '10 - APPLICATION FOR A LAWFUL DEVELOPMENT CERTIFICATE', so they belong to section 9, not Lawful development certificate. 'Lawful development evidence (sworn affidavits)' is an LDC requirement but sits under Full planning, and 'Telecommunications Development Statement' is a telecoms requirement placed under Full planning.",
+      "evidence": "'Plans - Existing and Proposed Roof Plans Photographs/Photomontages - Where this would help support the application. 7 2 - APPLICATION FOR FULL PLANNING PERMISSION'; 'Planning Statement Other Documents Lighting Assessment 25 10 - APPLICATION FOR A LAWFUL DEVELOPMENT CERTIFICATE...'",
+      "grok_review": "Agree",
+      "final_status": "Confirmed"
+    },
+    {
+      "type": "wrong_trigger",
+      "severity": "high",
+      "detail": "Table cells were merged during extraction, giving rows the wrong trigger. Daylight/Sunlight Assessment and the CIL form both carry the tree trigger ('development within 15metres of the stem of any tree(s)... 150millimetres or more'). Noise Impact Assessment reads 'Archaeological Interest Acoustic report All applications.' Structural Survey reads 'Required All applications.' Telecommunications reads 'Floor Plans Telecommunications Development Statement N/A All applications.' Health Impact Assessment reads 'Health Impact Assessment Noise Impact Assessment Required for all major applications', so it is unclear which item the major-application trigger belongs to. The arboricultural row starts with column headers ('Document Required 5 ... Necessary for Validation Community Infrastructure Levy form Daylight/ Sunlight Assessment').",
+      "evidence": "app_type_rows trigger_excerpt for Daylight / Sunlight, CIL, Noise, Structural Survey, Telecommunications, Health Impact Assessment, Arboricultural",
+      "grok_review": "Agree",
+      "final_status": "Confirmed"
+    },
+    {
+      "type": "wrong_trigger",
+      "severity": "medium",
+      "detail": "Some rows are mislabelled or have fragment triggers. 'Highways / access details (visibility splays)' quotes block-plan contents, notices and the fee, with nothing about highways. 'Landscape and Visual Impact Assessment' quotes BS5837 tree text. 'Flood Risk Assessment' quotes a URL fragment ('ng_application_guidance_-_flooding 53') and gives no flood-zone trigger. 'Air Quality' is a fragment ('of the Air Quality Assessment for developments involving significant demolition.'). 'Odour / Dust' reads 'Necessary for Validation Arboricultural Impact Assessment Dust Assessment.' 'Sunlight to gardens' reads only 'gardens or amenity space.' 'Energy / Sustainability' quotes background prose with no trigger. 'Water efficiency' quotes the national 125 litres/person/day Building Regulations standard, not the local requirement.",
+      "evidence": "app_type_rows trigger_excerpt values as quoted",
+      "grok_review": "Agree",
+      "final_status": "Confirmed"
+    },
+    {
+      "type": "not_a_requirement",
+      "severity": "medium",
+      "detail": "Some items are process notes, not requirements. 'Pre-application advice / engagement details' is based only on 'can provide pre application advice on air quality.' The tab_items 'If we do not receive the missing information on an invalid application... returned' and 'For major applications submitted electronically, two paper copies will also be required:' are submission process text (the paper-copies rule is also likely out of date). The drawing-standards items are garbled with page numbers and bullet glyphs ('height above 51 ... Further details of proposal ground').",
+      "evidence": "tab_items 'Submission rules'; app_type_rows 'Pre-application advice / engagement details'",
+      "grok_review": "Agree",
+      "final_status": "Confirmed"
+    },
+    {
+      "type": "other",
+      "severity": "low",
+      "detail": "'Planning page' is the council homepage (https://www.oxford.gov.uk), not the planning validation page. Req. items (35) does not match the extracted rows: 34 requirement rows plus 15 '(none)' placeholders.",
+      "evidence": "reference_row 'Planning page': 'https://www.oxford.gov.uk'",
+      "grok_review": "Agree",
+      "final_status": "Confirmed"
+    }
+  ],
+  "summary": "The live source could not be checked because the session's web budgets ran out. Grokbot's own data shows it linked file/1092 although it also read a likely newer file/1658 version, and dated the list from PDF metadata. The per-application-type sections were mis-mapped, so Householder and most other types show '(none)' and LDC got items from another section, and many triggers are merged table cells assigned to the wrong requirement.",
+  "withdrawn_issues": [
+    {
+      "type": "outdated_link",
+      "severity": "high",
+      "detail": "Grokbot read two versions of the same-titled 'list of national and local planning application requirements': file/1092 (used as the workbook link and for almost all rows) and file/1658 (used only for the energy and water rows). File/1658 has a higher download ID and refers to the city's net-zero-by-2040 target, so it looks like the later revision. The workbook link probably points to a superseded list. This needs confirming against the council's validation page.",
+      "evidence": "docs_read: .../downloads/file/1092/list-of-national-and-local-planning-application-requirements and .../downloads/file/1658/list_of_national_and_local_planning_application_requirements; 1658 text: 'achieving net zero carbon emissions as a city by 2040'",
+      "grok_review": "Disagree",
+      "grok_comment": "file/1658 is not a later revision of the validation list. Raw 2bff0c1e7b shows it is the Sustainable Design & Construction / Green Spaces Technical Advice Note (June 2022), so file/1092 is the correct list link.",
+      "final_status": "Withdrawn",
+      "claude_response": "Accepted. file/1658 is a technical advice note, not a newer list."
+    },
+    {
+      "type": "wrong_date",
+      "severity": "medium",
+      "detail": "The list date of 2021-08-01 comes from PDF metadata (CreationDate), not from an adoption or publication date in the document. It also describes the older file/1092, not the file/1658 version Grokbot also read.",
+      "evidence": "reference_row 'Date basis': 'PDF metadata CreationDate'",
+      "grok_review": "Disagree",
+      "grok_comment": "The document text itself is titled \"...Validation Requirements August 2021\" (raw 7d427c51d7), so 2021-08-01 is correct. file/1658 is a TAN, not a newer list.",
+      "final_status": "Withdrawn",
+      "claude_response": "Accepted. The document text says August 2021."
+    }
+  ],
+  "grok_review": "Reviewed by Grok 5 Nov 2026; Claude responded to every disagreement the same day."
+}

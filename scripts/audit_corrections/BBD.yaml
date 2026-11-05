@@ -1,0 +1,582 @@
+# Corrections for Blackburn with Darwen Borough Council, from the council's audit.
+# blackburn.gov.uk refused automated fetching, so the audit checked the workbook against the
+# council's committee paper 'Final Draft version - Validation Checklist January 2024', whose
+# L-numbered items match Grokbot's extracts. The checklist splits national items (N1-N14) from
+# local items (L1-L40) and sets triggers by development type or threshold, not application type,
+# so rules below have no application type unless the list names one. Grokbot kept only the first
+# bullet ('When requested as part of the pre-application process') for many items, cut others
+# off, and marked every type but Full planning as '(none)'. Items marked "From the audit" use the
+# audit's paraphrase; quoted source-text from the audit's evidence is the checklist's wording.
+local-authority: BBD
+
+validation-list:
+  date: 2024-01-01
+  date-basis: >-
+    audit (claude_response): the title page reads 'VALIDATION CHECKLIST 1st January 2024'; 2025-03 is
+    only the upload folder in the url
+
+submission-standards:
+  - item: Plans submitted at A4 or A3 size where possible; A0 cannot be accepted
+    level: must
+  - item: Plans, elevations and sections drawn to a recognised metric scale, preferably 1:50 or 1:100
+    level: should
+
+drop:
+  - id: schedule-of-works
+    reason: "duplicate: quotes the L4 Structural Survey barn-conversion trigger; the list has no listed-building schedule of works"
+  - id: sustainability-statement
+    reason: "wrong mapping: the excerpt is 'L28 Energy Statement Required: For major development' (re-added as energy-statement)"
+
+drop-unmapped:
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_trigger: 'Coal Mining Risk Assessment (IF REQUIRED) 16.'; re-added below with the L26 trigger"
+  - local-name: Crime prevention / Secured by Design statement
+    reason: "wrong_trigger: only the pre-application bullet; re-added below with the L25 triggers"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: SuDS pro-forma boilerplate; re-added below as L16 Drainage Scheme and N13 SuDS plans"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: the L31 thresholds were left out; re-added below"
+  - local-name: Minerals / Waste specific statements (county matters)
+    reason: "wrong_trigger: map-link fragment and misleading label; re-added below as L33"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: L1 says 'Not required for validation'"
+  - local-name: Structural Survey
+    reason: "re-added below with the other L4 cases the audit names"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "L22: 'When requested as part of the pre-application process'."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Development with the potential to affect trees, including protected trees and
+          trees in a conservation area.
+    source-text: >-
+      L5 Tree Survey/ Arboricultural Survey Required for: Development with the potential to affect
+      trees where: Trees are on site
+    source-url: https://www.blackburn.gov.uk/sites/default/files/2025-03/Validation%20Checklist.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the excerpt began with L4 text, and the item also
+      applies to householder works affecting trees, TPO trees or trees in a conservation area.
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [archaeological-priority-area]
+            description: Development affecting a known archaeological site.
+        - discretionary
+    source-text: all development affecting a known archaeological site
+    source-url: https://www.blackburn.gov.uk/sites/default/files/2025-03/Validation%20Checklist.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook kept only the pre-application bullet of L17."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The application is not exempt from the statutory biodiversity gain condition.
+    must-include:
+      - item: The metric as a full Excel file (and PDF)
+        level: must
+      - item: Completed by an ecologist
+        level: must
+      - item: Dated
+        level: must
+      - item: Satisfies the trading rules
+        level: must
+      - item: No red boxes, unless suitably justified
+        level: must
+    confidence: medium
+    notes: >-
+      Must-include items from the checklist: 'To be accepted as valid, the metric must be submitted
+      as a full excel (and PDF) file, be completed by an ecologist, be dated, satisfy trading rules,
+      and not contain any red boxes (unless suitably justified).'
+
+  - id: site-plan
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - application-type:
+                in: [hh]
+            - condition:
+                field: parking-change
+                value: true
+                description: The extension displaces or alters parking.
+        - discretionary
+    source-text: >-
+      N7 Site Plans ARE ALWAYS required for: Major Developments … Householder extensions which
+      displace or alter parking … close to neighbouring properties
+    source-url: https://www.blackburn.gov.uk/sites/default/files/2025-03/Validation%20Checklist.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): also for householder extensions close to neighbours' habitable-room
+      windows, adverts not fixed to a building, and where asked for at pre-application; these are
+      shown as officer discretion. Refuse storage (L19) is normally shown on the proposed site plan.
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: The site is known or suspected to be contaminated.
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: A vulnerable end use.
+        - discretionary
+    source-url: https://www.blackburn.gov.uk/sites/default/files/2025-03/Validation%20Checklist.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook kept only the pre-application bullet of L20. From the
+      audit: known or suspected contamination and vulnerable uses. How these combine needs checking.
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - all:
+            - site:
+                in: [conservation-area]
+                description: Development in a conservation area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: One or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: A building of 100 square metres or more.
+    source-text: >-
+      Major development (full and outline); development in a Conservation Area ... one or more
+      dwellings or a building of 100 sq m or more; Listed Building Consent
+    source-url: https://www.blackburn.gov.uk/sites/default/files/2025-03/Validation%20Checklist.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt ended at 'Required for'. N11 is a national item on the list."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: Questions in the Protected Species proforma are answered 'yes'.
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Works to an existing roof.
+        - condition:
+            field: demolition
+            value: true
+            description: Demolition of any building.
+        - discretionary
+    source-text: >-
+      Where questions contained within the Protected Species proforma are answered ‘yes’ Within the
+      Urban Boundary an Ecological Survey may also be required for : o Works to an existing roof o
+      Redevelopment of an already cleared site Completing the Protected Species Proforma will
+      establish whether an Ecological Survey will be required.
+    source-url: https://www.blackburn.gov.uk/sites/default/files/2025-03/Validation%20Checklist.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): L6 also applies to householder roof works, demolition (including in a
+      conservation area) and tree or hedgerow removal. Cleared sites and tree/hedgerow removal are
+      shown as officer discretion.
+
+  - id: energy-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-text: "L28 Energy Statement Required: For major development"
+    source-url: https://www.blackburn.gov.uk/sites/default/files/2025-03/Validation%20Checklist.pdf
+    confidence: medium
+    notes: "The workbook mapped this to a sustainability statement and ran it into the agricultural dwelling row."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is EIA development.
+    confidence: medium
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal involves a change in ground levels.
+    confidence: medium
+    notes: "N10: drawings should show both existing and finished levels."
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal involves a change in ground levels.
+    must-include:
+      - item: Existing and finished levels
+        level: should
+      - item: A cross section through the proposed building(s)
+        level: must
+    confidence: medium
+    notes: "N10: drawings should show both existing and finished levels."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-text: two or more dwellings or educational accommodation ... 18 metres ... seven or more
+      storeys
+    source-url: https://www.blackburn.gov.uk/sites/default/files/2025-03/Validation%20Checklist.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted a GOV.UK template link and the L1 banner."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: All development in flood zones 2 and 3.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare in flood zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare in flood zone 1.
+        - discretionary
+    source-text: All development in Flood Zones 2 and 3 ... over 1ha in Flood Zone 1
+    source-url: https://www.blackburn.gov.uk/sites/default/files/2025-03/Validation%20Checklist.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook kept only the pre-application bullet of L15. For
+      householder schemes dormers are excluded and standing advice covers minor extensions.
+
+  - id: elevation-existing
+    action: update
+    required-if:
+      condition:
+        field: external-alterations
+        value: true
+        description: New elevation details are proposed.
+    confidence: medium
+    notes: "N9 (a national item on the list): existing and proposed elevations where new elevation details are proposed."
+  - id: elevation-proposed
+    action: update
+    required-if:
+      condition:
+        field: external-alterations
+        value: true
+        description: New elevation details are proposed.
+    confidence: medium
+    notes: "N9 (a national item on the list): existing and proposed elevations where new elevation details are proposed."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, demolition-con-area]
+        - site:
+            in: [listed-building, locally-listed-building, scheduled-monument, conservation-area]
+            description: Alteration or demolition of a heritage asset, or of any building in a
+              conservation area.
+    source-text: >-
+      L18 Heritage Statement/ Heritage Impact Assessment Required for: Alteration or demolition of a
+      Heritage Asset … Alteration or demolition of any building in a Conservation Area
+    source-url: https://www.blackburn.gov.uk/sites/default/files/2025-03/Validation%20Checklist.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): applies to householder, LBC and demolition in a conservation area too."
+
+  - id: lighting-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): L24 also covers lighting with effects on biodiversity or neighbours, not
+      only requests at pre-application; both are shown as officer discretion.
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: A noise-generating use near homes.
+        - discretionary
+    confidence: medium
+    notes: "Audit (wrong_trigger): L21 also covers wind turbines (shown as officer discretion) and noise-generating uses near homes."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      site:
+        in: [open-space]
+        description: The application affects playing field land.
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement): this row is the Sport England playing field checklist (L30/L32);
+      the separate L11 Open Space Proposals item is unmapped below.
+
+  - id: planning-statement
+    action: update
+    required-if:
+      ref: major-development
+    confidence: medium
+
+  - id: sci
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 50
+            description: Residential schemes of 50+ units.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 2
+            description: Retail, commercial, industrial, educational, hospital, leisure or recreation
+              schemes on sites of 2 hectares or more.
+        - all:
+            - condition:
+                field: involves-change-of-use
+                value: true
+                description: A change of use of buildings.
+            - condition:
+                field: floorspace
+                operator: ">="
+                value: 1500
+                description: Gross floor area of 1,500 sq m or more.
+        - discretionary
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the excerpt is cut off mid-list. All cases apply 'within or adjoining
+      residential areas', which can't be expressed; mixed-use schemes on 1.5ha sites and the cut-off
+      cases are shown as officer discretion.
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Telecommunications development.
+    source-text: >-
+      L36 A statement of compliance with ICNIRP guidelines Evidence of assessment of alternative sites
+      and/or mast sharing A justification as to why the installation is needed
+    must-include:
+      - item: A statement of compliance with ICNIRP guidelines
+        level: must
+      - item: Evidence of assessment of alternative sites and/or mast sharing
+        level: must
+      - item: A justification of why the installation is needed
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt ran into the BNG text, which is removed here."
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-text: All major development ... 50+ dwellings ... floor space over 1,000 sqm
+    source-url: https://www.blackburn.gov.uk/sites/default/files/2025-03/Validation%20Checklist.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, duplicate): the workbook quoted the Travel Plan text. L12: all major
+      development, with guide thresholds of 50+ dwellings or over 1,000 sqm, or when asked for at
+      pre-application.
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "L13: 'When requested as part of the pre-application process'."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): L9 asks for a viability appraisal where the applicant considers 20%
+      affordable housing or other S106 requirements unviable. It is 'not needed to validate, but
+      needed to determine'.
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      all:
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 280
+            description: Town centre uses over 280 square metres.
+        - discretionary
+    source-url: https://www.blackburn.gov.uk/sites/default/files/2025-03/Validation%20Checklist.pdf
+    policy: Local Plan Part 2 Policy 29
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): L14 applies to town centre uses over 280 sqm within 500m
+      of a district/local centre or parade, over 500 sqm in the Darwen urban area (south of the M65),
+      over 1,000 sqm in the Blackburn urban area (north of the M65), or when asked for at
+      pre-application. The locations can't be expressed, so the rule is the lowest threshold plus
+      officer discretion.
+
+  - id: water-impact-assessment
+    action: add
+    required-if: discretionary
+    source-text: catchment land for public water supply (Policy DM12)
+    source-url: https://www.blackburn.gov.uk/sites/default/files/2025-03/Validation%20Checklist.pdf
+    policy: Policy DM12
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): L40 Public Water Supply Risk Assessment, where development
+      is on catchment land for public water supply or when asked for at pre-application. The
+      catchment can't be expressed as a designation.
+
+unmapped:
+  - local-name: Coal Mining Risk Assessment
+    source-text: >-
+      From the audit: L26, development (except householder) that disturbs the ground in a Coal
+      Authority high-risk area, or when asked for at pre-application
+    source-url: https://www.blackburn.gov.uk/sites/default/files/2025-03/Validation%20Checklist.pdf
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Crime Impact Statement
+    source-text: >-
+      L25 Crime Impact Statement Required: When requested as part of the pre-application process.
+      From the audit: also residential 25+ dwellings, HMOs, licensed premises, student accommodation
+      and similar.
+    source-url: https://www.blackburn.gov.uk/sites/default/files/2025-03/Validation%20Checklist.pdf
+    suggested-id: crime-prevention-statement
+  - local-name: Drainage Scheme
+    source-text: >-
+      From the audit: L16, residential 10+ units (or over 0.5ha where units are unspecified),
+      retail/commercial/industrial over 1,000 sqm or sites over 1ha, other uses on sites over 1ha,
+      change of use over 1,000 sqm GFA, and discharge to the canal
+    source-url: https://www.blackburn.gov.uk/sites/default/files/2025-03/Validation%20Checklist.pdf
+    suggested-id: drainage-strategy
+  - local-name: SuDS Plans and North West SuDS Pro-forma
+    source-text: >-
+      N13 SuDS Plans 'All major developments'. NORTH WEST SuDS PRO-FORMA This pro-forma is a
+      requirement for any planning application for major development
+    source-url: https://www.blackburn.gov.uk/sites/default/files/2025-03/Validation%20Checklist.pdf
+    suggested-id: drainage-strategy
+  - local-name: Health Impact Assessment
+    source-text: >-
+      Health Impact Assessments will be required for all developments which have the potential to
+      impact on public health, with particular reference to obesity and related disorders, and
+      illnesses associated with alcohol or smoking. From the audit: residential 100+ units;
+      non-residential 10,000 m2+ (Appendix C screening toolkit).
+    source-url: https://www.blackburn.gov.uk/sites/default/files/2025-03/Validation%20Checklist.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Mineral Safeguarding Areas assessment
+    source-text: "Sites within a Mineral Safeguarding Area (Policy M2)"
+    source-url: https://www.blackburn.gov.uk/sites/default/files/2025-03/Validation%20Checklist.pdf
+    suggested-id: mineral-resource-assessment
+  - local-name: Structural Survey / Demolition & Method Statement
+    source-text: >-
+      L4 Structural Survey / Demolition & Method Statement Structural surveys are required for: The
+      conversion of barns or other buildings outside the urban area … Demolition of relevant
+      buildings in conservation areas … Prior notification for demolition. From the audit: also LBC
+      where structural alteration or demolition is proposed or asked for at pre-application.
+    source-url: https://www.blackburn.gov.uk/sites/default/files/2025-03/Validation%20Checklist.pdf
+    suggested-id: structural-survey
+  - local-name: Refuse Storage / Recycling Details
+    source-text: "All new developments ... extensions blocking rear access"
+    source-url: https://www.blackburn.gov.uk/sites/default/files/2025-03/Validation%20Checklist.pdf
+    suggested-id: refuse-storage-plan
+  - local-name: Vacant Building Credit Statement
+    source-text: >-
+      From the audit: L10, where a reduced affordable housing contribution is sought through Vacant
+      Building Credit; evidence of vacancy, evidence the use has not been abandoned, and existing vs
+      proposed GIFA (RICS definition)
+    source-url: https://www.blackburn.gov.uk/sites/default/files/2025-03/Validation%20Checklist.pdf
+    suggested-id: vacant-building-credit-statement
+  - local-name: Open Space Proposals
+    source-text: "L11 Open Space Proposals 'When requested as part of the pre-application process'"
+    source-url: https://www.blackburn.gov.uk/sites/default/files/2025-03/Validation%20Checklist.pdf
+    suggested-id: open-space-assessment
+  - local-name: Met Office Assessment
+    source-text: >-
+      From the audit: L29, wind turbine applications within the 20km consultation zone of the Hameldon
+      Hill radar, or above the consultation map height limits (with a proforma)
+    source-url: https://www.blackburn.gov.uk/sites/default/files/2025-03/Validation%20Checklist.pdf
+    suggested-id: aviation-impact-assessment
+  - local-name: Natural Capital Assessment
+    source-text: >-
+      From the audit: L39, when asked for at pre-application or where the nature or scale of the
+      proposal merits it
+    source-url: https://www.blackburn.gov.uk/sites/default/files/2025-03/Validation%20Checklist.pdf
+    suggested-id: natural-capital-assessment
+  - local-name: Climate Impact Framework
+    source-text: "Major residential; Major commercial; Minor residential (subject to consultation)"
+    source-url: https://www.blackburn.gov.uk/sites/default/files/2025-03/Validation%20Checklist.pdf
+    suggested-id: ""
+
+low-confidence:
+  - id: landscaping-plan
+    note: "Audit (wrong_trigger): the excerpt is cut off ('9 L7 Landscaping proposals Required'); no trigger is given."
+  - id: roof-plan-existing
+    note: >-
+      Audit (duplicate): the excerpt is the N9 elevations text. The council tab says roof plans are
+      'not usually required to validate householder applications where the roof is a simple one with
+      two planes or less'.
+  - id: roof-plan-proposed
+    note: "Audit (duplicate): the excerpt is the N9 elevations text; no trigger is given."
+  - id: floor-plan-existing
+    note: "The excerpt is N9 elevation text; the workbook guessed the type. N8/N9 also cover advert position details (audit, wrong_app_type)."
+  - id: floor-plan-proposed
+    note: "The excerpt is N9 elevation text; the workbook guessed the type."

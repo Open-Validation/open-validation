@@ -1,0 +1,337 @@
+# Corrections for Cumberland Council, from the council's audit.
+# Grokbot's PDF is the inherited Cumbria County Council list 'Local planning validation
+# requirements for Minerals, Waste and County Council planning applications' (November 2021).
+# It covers county matters only, so every workbook row is moved from Full planning to
+# minerals (mineral-app), waste (waste-dev) and Regulation 3 (reg-3) applications.
+# Cumberland's general requirements are still the legacy Allerdale, Carlisle and Copeland area
+# checklists (the audit's current_url is the Allerdale full checklist). None of them were
+# captured by the workbook or itemised by the audit, so they still need a manual read: Allerdale
+# alone has checklists for householder, windows and doors, larger home extension prior approval,
+# listed building, change of use, agricultural and equestrian buildings, wind turbines and
+# minor/major full and outline applications, and housing in identified river catchments must
+# show nutrient neutrality.
+# Audit (Stands, unverified): Cumberland consulted on a single Cumberland-wide checklist
+# (comments closed 9 May 2025, publication planned May 2025), but no adopted version was found.
+local-authority: CUA
+
+validation-list:
+  url: https://www.cumberland.gov.uk/sites/default/files/2025-03/allerdale_full_validation_checklist.pdf
+  date: 2025-03
+  date-basis: >-
+    audit: the Allerdale area checklists are 2025-03 uploads (folder path), with no date in the page
+    text; they cover the Allerdale area only (Carlisle and Copeland have their own legacy lists).
+    The county-matters list the workbook read is dated November 2021
+
+drop:
+  - id: site-plan
+    reason: "not_a_requirement: from section 3.0 (national requirements), not the local list"
+  - id: design-and-access-statement
+    reason: "not_a_requirement: from section 3.0 (national requirements), not the local list"
+  - id: photos
+    reason: "duplicate: part of the LVIA requirement, not a separate one"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: a fragment of the LVIA guidance"
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_trigger: a 'When required' heading; replaced below"
+  - local-name: Employment / Economic Statement
+    reason: "wrong_trigger: a 'When required' heading; replaced below"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: a 'When required' heading; replaced below"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "duplicate: shares the EIA row's sentence, which gives no trigger; replaced below"
+
+requirements:
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - site:
+                in: [air-quality-management-area]
+                description: The site is in or next to an Air Quality Management Area.
+            - discretionary
+    source-url: https://www.cumberland.gov.uk/sites/default/files/2026-10/Local%20validation%20list.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): emissions to air (dust, odour, stack, traffic), or sites in
+      or next to an AQMA. Emissions have no field, so they are shown as officer judgement."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: low
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3. Audit (wrong_trigger): the excerpt is a 'When required' heading."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: low
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3. The excerpt gives survey standards, not a trigger. From the audit (missing_requirement): the list's Biodiversity and Geodiversity section also has geology and quarry works triggers."
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: low
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3. Audit (wrong_trigger): the excerpt is a fragment."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: low
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3. The excerpt gives no trigger."
+
+  - id: floor-plan-existing
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: low
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3. The excerpt is a fragment and gives no trigger."
+
+  - id: floor-plan-proposed
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: low
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3. The excerpt is a fragment and gives no trigger."
+
+  - id: elevation-existing
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: low
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3. The excerpt is a fragment and gives no trigger."
+
+  - id: elevation-proposed
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: low
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3. The excerpt is a fragment and gives no trigger."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: low
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3. Audit (wrong_trigger): the excerpt is a 'When required' heading."
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: low
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3. Audit (wrong_trigger): the excerpt is a 'When required' heading."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: low
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3. The excerpt is cut off before the trigger ('... or yards a Lighting Assessment ... will be required')."
+
+  - id: travel-plan
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    confidence: low
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3. The excerpt is cut off before the trigger ('... travel movements a Travel Plan will be required')."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: eia-development
+            value: true
+            description: Schedule 1 development, or Schedule 2 development that needs EIA.
+    source-url: https://www.cumberland.gov.uk/sites/default/files/2026-10/Local%20validation%20list.pdf
+    confidence: medium
+    notes: "Audit (duplicate): the workbook's excerpt was shared with the HRA row and gave no trigger. From the
+      audit: Schedule 1 and some Schedule 2 development."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - site:
+            in: [contaminated-land, near-landfill-site]
+            description: Contamination is likely, or the site is within about 250m of a landfill site.
+    confidence: medium
+    notes: "Audit (wrong_app_type, wrong_trigger): the excerpt was a 'When required' heading. From the audit:
+      likely contamination, or within about 250m of landfill."
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - discretionary
+    confidence: medium
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3. Needed where
+      landscape planting or screening is integral to the proposal."
+
+  - id: planning-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - always: true
+    must-include:
+      - item: A detailed description of the proposed development
+        level: must
+      - item: An assessment of how the scheme fits with relevant national and local planning policy
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3 ('For all
+      development')."
+
+  - id: sci
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - ref: major-development
+            - condition:
+                field: eia-development
+                value: true
+                description: The proposal is accompanied by an Environmental Statement.
+    confidence: medium
+    notes: "Audit (wrong_app_type, wrong_trigger): the excerpt was a 'When required' heading. From the audit:
+      major proposals and those with an ES."
+
+  - id: section-existing
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: Changes to ground levels are needed to accommodate the development.
+    confidence: medium
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: Changes to ground levels are needed to accommodate the development.
+    confidence: medium
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3."
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - ref: major-development
+            - discretionary
+    confidence: medium
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3. Also
+      where there are significant implications for the highway network and vehicle movements."
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: earthworks
+                value: true
+                description: The proposal involves site excavation.
+            - condition:
+                field: demolition
+                value: true
+                description: The proposal involves building demolition.
+    source-url: https://www.cumberland.gov.uk/sites/default/files/2026-10/Local%20validation%20list.pdf
+    confidence: medium
+    notes: >-
+      Audit (not_a_requirement): the workbook's Reg 3 row was online-application process text, not a
+      waste requirement. From the audit (missing_requirement): a Site Waste Management Plan for site
+      excavation or building demolition.
+
+unmapped:
+  - local-name: Coal Mining Risk Assessment
+    source-text: "From the audit: development in Coal Authority high-risk areas (minerals, waste and Reg 3
+      list)"
+    source-url: https://www.cumberland.gov.uk/sites/default/files/2026-10/Local%20validation%20list.pdf
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Economic Statement
+    source-text: "From the audit: major proposals with significant employment impact (minerals, waste and
+      Reg 3 list)"
+    source-url: https://www.cumberland.gov.uk/sites/default/files/2026-10/Local%20validation%20list.pdf
+    suggested-id: economic-statement
+  - local-name: Drainage Details - Foul and Surface Water
+    source-text: "From the audit: all development (minerals, waste and Reg 3 list)"
+    source-url: https://www.cumberland.gov.uk/sites/default/files/2026-10/Local%20validation%20list.pdf
+    suggested-id: drainage-strategy
+  - local-name: Habitats Regulations Assessment information
+    source-text: >-
+      If a European site may be affected (Special Area of Conservation, Special Protection Area or
+      Ramsar site), the submitted documents must contain sufficient information to inform a Habitats
+      Regulations Assessment to be completed in accordance with Part 6 Regulation 63 (1) of The
+      Conservation of Habitats and Species Regulations 2017.
+    source-url: https://www.cumberland.gov.uk/sites/default/files/2026-10/Local%20validation%20list.pdf
+    suggested-id: habitats-regulations-assessment
+  - local-name: Birdstrike Assessment
+    source-text: "From the audit: open quarrying, landfill, sewage or outfall works, or features that attract
+      birds, within 13km of Carlisle or Walney Island airfields"
+    source-url: https://www.cumberland.gov.uk/sites/default/files/2026-10/Local%20validation%20list.pdf
+    suggested-id: birdstrike-assessment
+  - local-name: Blasting Scheme
+    source-text: "From the audit: blasting with explosives for minerals development"
+    source-url: https://www.cumberland.gov.uk/sites/default/files/2026-10/Local%20validation%20list.pdf
+    suggested-id: blasting-scheme
+  - local-name: Cumulative Impact Assessment
+    source-text: "From the audit: where impacts could worsen in combination with other developments"
+    source-url: https://www.cumberland.gov.uk/sites/default/files/2026-10/Local%20validation%20list.pdf
+    suggested-id: cumulative-impact-assessment
+  - local-name: Minerals Need Assessment
+    source-text: "From the audit: all minerals extraction proposals"
+    source-url: https://www.cumberland.gov.uk/sites/default/files/2026-10/Local%20validation%20list.pdf
+    suggested-id: minerals-need-assessment
+  - local-name: Public Rights of Way Statement
+    source-text: "From the audit: proposals that may affect a public right of way"
+    source-url: https://www.cumberland.gov.uk/sites/default/files/2026-10/Local%20validation%20list.pdf
+    suggested-id: public-rights-of-way-statement
+  - local-name: Utilities Assessment
+    source-text: "From the audit: major schemes (minerals, waste and Reg 3 list)"
+    source-url: https://www.cumberland.gov.uk/sites/default/files/2026-10/Local%20validation%20list.pdf
+    suggested-id: utilities-statement

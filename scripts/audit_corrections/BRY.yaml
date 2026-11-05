@@ -1,0 +1,814 @@
+# Corrections for London Borough of Bromley, from the audit of Bromley.
+# The audit confirmed Grokbot's link is the current list (published after Development Control
+# Committee agreement on 12 December 2024). Grokbot put about 40 items under Full planning with
+# 'INFERRED' types, many triggers stop at 'When Required' or quote the next item, and it never
+# read the 16 per-application-type checklists (bromley.gov.uk/PlanningChecklists).
+# Items marked "From the audit" use the audit's paraphrase, not the council's exact words.
+local-authority: BRY
+
+submission-standards:
+  - item: All documents, photos and plans in PDF format, as individual files (not bundles); each 
+      plan a separate single-page PDF
+    level: must
+  - item: Plans scaled accurately, stating the scale, with key dimensions annotated (width, height 
+      and depth of the works, overall height not just eaves height, and distance to site boundaries 
+      where relevant)
+    level: must
+  - item: Plans indicate the direction of north
+    level: must
+
+drop:
+  - id: floor-plan-existing
+    sheets: [Advertisement consent]
+    reason: "wrong_app_type: floor plans are needed for all proposals except external-only works such
+      as signage"
+  - id: floor-plan-proposed
+    sheets: [Advertisement consent]
+    reason: "wrong_app_type: as above"
+  - id: sustainability-statement
+    reason: "wrong_trigger: the row is the Energy Strategy item, now under energy-statement"
+
+drop-unmapped:
+  - local-name: Design Code / Masterplan / Parameter plans
+    reason: "wrong_trigger: the row is the Energy Masterplan requirement (re-added below)"
+  - local-name: Drainage Strategy / SuDS
+    reason: "duplicate: quotes the same Foul Sewage and Surface Water Drainage Assessment item"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "duplicate: part of the Flood Risk Assessment, Sequential Test and Exception Test item; runs
+      into the foul sewage text"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "wrong_trigger: fragment; re-added below as the Accessible/Adaptable Homes statement"
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_trigger: the fragment 'intensity of illumination.' gives no requirement or trigger"
+  - local-name: Cycle parking details
+    reason: "wrong_trigger: quotes drawing-dimension guidance"
+  - local-name: Odour / Dust / Vibration assessment
+    reason: "wrong_trigger: quotes the Construction Environmental Management Plan text"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: quotes the Air Quality heading; re-added below"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advice to seek pre-application engagement"
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_trigger: stops at 'When Required'; re-added below with the audit's trigger"
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "wrong_trigger: stops at 'When Required'; now a must-include item of elevation-proposed"
+  - local-name: Structural Survey
+    reason: "wrong_trigger: stops at 'When Required'; re-added below with the audit's trigger"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The major development includes housing.
+    source-text: Affordable Housing Statement When Required Major residential developments.
+    confidence: medium
+    notes: The council's list gives the trigger 'Major residential developments'.
+
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [air-quality-management-area]
+                description: The site is in an Air Quality Management Area or Air Quality Focus 
+                  Area.
+            - discretionary
+        - discretionary
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    confidence: medium
+    notes: >-
+      From the audit (wrong_trigger): major developments, potentially polluting or traffic-generating
+      sites in an AQMA or AQFA, and uses serving vulnerable groups. The workbook's excerpt stopped at
+      'When Required'.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are existing trees on the site that could be affected by the proposal.
+    source-text: >-
+      Tree Survey and Arboricultural Implications Report When Required For development on sites where
+      there are existing trees that could be affected by the proposal.
+    confidence: medium
+    notes: "Audit (wrong_app_type): this applies to any development affecting trees, including householder,
+      not only Full planning."
+
+  - id: cil-form
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [full, ldc, reserved-matters]
+        - all:
+            - application-type:
+                in: [hh]
+            - condition:
+                field: floorspace
+                operator: ">="
+                value: 100
+                description: The extension is 100 square metres or more.
+    source-text: Full planning permission (including householder), Lawful Development Certificates, 
+      and reserved matters
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook's excerpt was cut off. The Householder checklist asks for
+      CIL Form 1 where the extension is 100 sqm or more.
+
+  - id: construction-management-plan
+    action: update
+    must-include:
+      - item: Measures to address demolition and construction noise
+        level: must
+      - item: Dust management
+        level: must
+      - item: Impacts of the development on air quality during the demolition and construction 
+          phases
+        level: must
+      - item: Emissions from Non-Road Mobile Machinery considered
+        level: must
+    notes: >-
+      The excerpt is the content of a Construction Environmental Management Plan ("must include
+      details of measures to address ..."); the trigger is not given.
+
+  - id: daylight-sunlight-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: storey-count
+            operator: ">"
+            value: 6
+            description: A tall building (Bromley's list defines one as exceeding 6 storeys or 18 
+              metres).
+        - condition:
+            field: building-height
+            operator: ">"
+            value: 18
+            description: A tall building (Bromley's list defines one as exceeding 6 storeys or 18 
+              metres).
+    source-text: >-
+      A daylight, vertical sky components, sunlight availability and shadow study should be undertaken
+      and assessed against the criteria set out in the BRE document.
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    must-include:
+      - item: Daylight, vertical sky component, sunlight availability and shadow study, assessed 
+          against the BRE criteria
+        level: should
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's trigger ran into the Delivery and Servicing Plan item.
+      From the audit: major proposals and tall buildings. The tall-building thresholds are Bromley's
+      own definition from its Tall Buildings Impact Assessment item.
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: One or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: 100 square metres or more of floorspace.
+    source-text: >-
+      For Major Applications, Design and Access Statements shall: Explain the design principles and
+      concepts that have been applied to the development Demonstrate the steps taken to appraise the
+      context of the development and how the design of the development takes that context into
+      account Include all options considered in the evolution of a scheme with a clear explanation as
+      to why other options were discounted Explain the policy adopted as to access …
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    must-include:
+      - item: All options considered in the evolution of the scheme, with a clear explanation of why
+          other options were discounted
+        level: must
+        required-if:
+          ref: major-development
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): also required for Listed Building Consent and for one or more
+      dwellings, or 100 sqm or more, in a Conservation Area (including householder works).
+
+  - id: elevation-existing
+    action: replace
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): the workbook placed elevations under Advertisement consent with the
+      floor-plans text. From the audit, elevations (unlike floor plans) also apply to proposed signage.
+
+  - id: elevation-proposed
+    action: replace
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    must-include:
+      - item: Existing and proposed street scene elevations
+        level: must
+        required-if:
+          any:
+            - condition:
+                field: new-build
+                value: true
+                description: The proposal includes new buildings.
+            - condition:
+                field: height-change
+                value: true
+                description: The proposal increases the height of a building.
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): the workbook placed elevations under Advertisement consent with the
+      floor-plans text; elevations also apply to proposed signage. From the audit (wrong_trigger):
+      streetscene elevations for new buildings and height increases (Householder checklist: where
+      height increases).
+
+  - id: energy-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    confidence: medium
+    notes: >-
+      From the audit (wrong_trigger): Energy Strategy for major developments. The workbook mapped
+      this item ('27 Energy Strategy When Required') to sustainability-statement.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-text: >-
+      Planning Gateway One Fire Statement When Required Applications for Full planning permission which
+      involve: provision of one or more relevant buildings, or
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    confidence: medium
+    notes: >-
+      The excerpt is cut off at 'relevant buildings'; the rule uses the national definition of a
+      relevant building. The separate London Plan Fire Statement is listed under unmapped.
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      site:
+        in: [flood-risk-zone]
+        description: The site is in flood zone 2, 3 or 3b.
+    source-text: "Flood Risk Assessment, Sequential Test and Exception Test When Required Development
+      proposals: in flood zones 2, 3 or 3b"
+    confidence: medium
+    notes: >-
+      Householder and other minor extensions in Flood Zone 2/3 use a separate declaration (see
+      unmapped).
+
+  - id: floor-plan-existing
+    action: replace
+    source-text: >-
+      Existing and Proposed Floor Plans When Required For all proposed developments except proposals
+      which are only for external works such as boundary treatment or proposed signage.
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    confidence: medium
+    notes: "Audit (wrong_app_type): not needed for external-only works such as boundary treatment or signage
+      (no field for this exception)."
+
+  - id: floor-plan-proposed
+    action: replace
+    source-text: >-
+      Existing and Proposed Floor Plans When Required For all proposed developments except proposals
+      which are only for external works such as boundary treatment or proposed signage.
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    confidence: medium
+    notes: "Audit (wrong_app_type): not needed for external-only works such as boundary treatment or signage
+      (no field for this exception)."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, scheduled-monument]
+            description: >-
+              The development affects a listed building or its setting, needs Scheduled Ancient
+              Monument Consent, or is within or adjacent to a Conservation Area.
+    source-text: >-
+      Development affecting the setting of a Listed Building, Listed Building Consent, Scheduled
+      Ancient Monument Consent … within or adjacent to a Conservation Area
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    must-include:
+      - item: If provided within the Design and Access Statement, clearly titled/identified
+        level: must
+        source-text: this can be within the Design and Access Statement but must be clearly 
+          titled/identified.
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): the workbook's Full planning trigger stopped at 'When
+      Required'."
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: The site has previous contaminative uses, is former landfill, or has a 
+              commercial or unknown history.
+        - discretionary
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    confidence: medium
+    notes: >-
+      From the audit (wrong_trigger): sensitive uses, previous contaminative uses, former landfill,
+      commercial or unknown history. Sensitive uses have no field, so they are shown as officer
+      discretion.
+
+  - id: landscaping-plan
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - condition:
+                field: new-build
+                value: true
+                description: New-build development.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: The new-build development is residential.
+        - discretionary
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    must-include:
+      - item: Cycle and/or refuse storage areas, boundary treatments and SuDS shown, as relevant
+        level: must
+        source-text: bicycles and/or refuse storage areas, boundary treatments and SUDs must be 
+          shown as relevant
+      - item: A 5-year management plan identifying how and by whom any communal landscaping or 
+          public realm areas would be managed
+        level: must
+        source-text: >-
+          A management plan for a period of 5 years identifying how and by whom any communal
+          landscaping or public realm areas would be managed.
+    confidence: medium
+    notes: >-
+      From the audit (wrong_trigger): major, new-build residential, and external amenity space (shown
+      as officer discretion). The must-include text was in the workbook's waste row.
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: Floodlights and other lights that may affect visual or residential amenity or 
+          nature conservation interests on or next to the site.
+    source-text: >-
+      Lighting Assessment When Required For floodlights and other lights that may impact on visual or
+      residential amenity or nature conservation interests on or adjacent to an application site.
+    confidence: medium
+
+  - id: noise-assessment
+    action: update
+    must-include:
+      - item: Details of noise assessments, predictions and calculations
+        level: must
+      - item: Recommendations and specifications of any works needed to control noise, detailed on 
+          the application drawings
+        level: should
+    notes: "The excerpt gives the contents of a noise assessment but not when it is needed."
+
+  - id: photos
+    action: replace
+    required-if:
+      always: true
+    source-text: Photos - Mandatory on all applications
+    source-url: https://www.bromley.gov.uk/PlanningChecklists
+    must-include:
+      - item: Dated, numbered and cross-referenced to a plan
+        level: should
+        source-text: they should be dated, numbered and cross-referenced to a plan.
+      - item: Taken within the last 30 days
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): photos are required on all applications and must be taken within 30
+      days."
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted a covering-letter note. From the audit: major
+      development and proposals raising wide issues, including Green Belt/MOL very special
+      circumstances.
+
+  - id: roof-plan-existing
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New buildings.
+        - condition:
+            field: roof-alteration
+            value: true
+            description: First-floor and two-storey extensions, and roof works.
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    confidence: medium
+    notes: "From the audit (wrong_trigger): roof plans for new buildings, first-floor and two-storey extensions,
+      and roof works."
+
+  - id: roof-plan-proposed
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New buildings.
+        - condition:
+            field: roof-alteration
+            value: true
+            description: First-floor and two-storey extensions, and roof works.
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    confidence: medium
+    notes: "From the audit (wrong_trigger): roof plans for new buildings, first-floor and two-storey extensions,
+      and roof works."
+
+  - id: sci
+    action: update
+    required-if:
+      ref: major-development
+    must-include:
+      - item: If provided within another document, this made clear in the covering letter
+        level: must
+    confidence: medium
+    notes: "The council's list: 'When Required Major proposals'."
+
+  - id: section-existing
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: height-change
+            value: true
+            description: Changes to floor-to-ceiling or roof heights.
+        - condition:
+            field: basement
+            value: true
+            description: A basement is created.
+        - condition:
+            field: new-build
+            value: true
+            description: New units.
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    confidence: medium
+    notes: >-
+      From the audit (wrong_trigger): sections for changes to floor-to-ceiling heights, raised roofs
+      and new units; the Householder checklist adds basements.
+
+  - id: section-proposed
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: height-change
+            value: true
+            description: Changes to floor-to-ceiling or roof heights.
+        - condition:
+            field: basement
+            value: true
+            description: A basement is created.
+        - condition:
+            field: new-build
+            value: true
+            description: New units.
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    confidence: medium
+    notes: >-
+      From the audit (wrong_trigger): sections for changes to floor-to-ceiling heights, raised roofs
+      and new units; the Householder checklist adds basements.
+
+  - id: site-plan
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: footprint-increase
+            value: true
+            description: The proposal increases the built footprint.
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal adds buildings, including outbuildings.
+        - condition:
+            field: new-boundary-treatment
+            value: true
+            description: The proposal involves new boundary treatments.
+        - condition:
+            field: new-vehicle-access
+            value: true
+            description: The proposal creates a vehicle access.
+    source-text: >-
+      Block Plan Site must be outlined in Red - Please ensure there are no other coloured outlines on
+      the plan so the site outline is clear other than the site and any adjoining land.
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    must-include:
+      - item: Site outlined in red, with no other coloured outlines except the site and any 
+          adjoining land
+        level: must
+      - item: Parking, refuse storage and trees shown, where relevant
+        level: must
+        source-text: Not showing enough detail such as parking, refuse, trees (where required).
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the block plan is not specific to outline applications. It is required
+      where the built footprint increases, buildings are added, or there are boundary treatments or
+      freestanding signage; the Householder checklist adds outbuildings and vehicle access.
+      Freestanding signage has no field.
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - condition:
+                field: involves-change-of-use
+                value: true
+                description: A change of use.
+            - condition:
+                field: loss-of-use
+                value: true
+                description: The change of use is of retail premises.
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    confidence: medium
+    notes: "From the audit (wrong_trigger): major development, and non-major changes of use of retail
+      premises."
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted the Planning Obligations heading. From the audit:
+      major development and other development affecting the highway network.
+
+  - id: travel-plan
+    action: replace
+    required-if:
+      ref: major-development
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    confidence: medium
+    notes: "From the audit (wrong_trigger): major development. The workbook's excerpt stopped at 'When
+      Required'."
+
+  - id: viability-assessment
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    confidence: medium
+    notes: >-
+      Major developments that generate a need for developer contributions, where the applicant thinks
+      the scheme cannot support the likely requirements (council's wording).
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: New residential development, including conversions.
+        - discretionary
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted landscaping text. From the audit: new residential
+      including conversions, plus employment, education and leisure (shown as officer discretion).
+
+unmapped:
+  - local-name: Energy Masterplan
+    source-text: >-
+      Energy Masterplan When Required Larger scale major development (considered to be development
+      with a total floorspace of more than 15,000sqm, excluding development which only comprises the
+      provision of houses, flats, or houses and flats) in Opportunity Areas, Town Centres, other growth
+      areas or clusters of significant new development.
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    suggested-id: energy-masterplan
+  - local-name: Delivery and Servicing Plan
+    source-text: >-
+      Delivery and Servicing Plan When Required All proposals which have delivery and servicing
+      requirements, primarily new commercial uses and developments.
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    suggested-id: delivery-servicing-plan
+  - local-name: Accessible/Adaptable Homes and/or Wheelchair Housing Statement
+    source-text: "From the audit: all new-build residential (the workbook had only the fragment 'of 10%
+      wheelchair user provision.')"
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    suggested-id: accessible-housing-statement
+  - local-name: Planning Obligations - Draft Heads of Terms
+    source-text: "From the audit: major development and certain non-major schemes, e.g. in town centres"
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    suggested-id: heads-of-terms
+  - local-name: Parking provision for Cars and Bicycles
+    source-text: "From the audit: new residential, employment, education and leisure development"
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    suggested-id: parking-plan
+  - local-name: Structural Survey and Rebuilding Method Statement
+    source-text: "From the audit: demolition of statutory or locally listed buildings, Green Belt/MOL
+      conversions, unsafe buildings"
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    suggested-id: structural-survey
+  - local-name: Fire Statement (London Plan)
+    source-text: "From the audit: all major development, new dwellings including conversions, commercial
+      development and changes of use"
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    suggested-id: london-plan-fire-statement
+  - local-name: Flood Risk Householder and other minor extensions in Flood Zone 2/3 Declaration
+    source-text: "From the audit: extensions with additional footprint up to 250 sqm in Flood Zone 2 or
+      3"
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    suggested-id: flood-risk-declaration
+  - local-name: Circular Economy Statement
+    source-text: "From the audit: development referable to the Mayor"
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    suggested-id: circular-economy-statement
+  - local-name: Whole Life-Cycle Carbon (WLC) Assessment
+    source-text: "From the audit: applications referable to the Mayor; encouraged for other major schemes"
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    suggested-id: whole-life-carbon-assessment
+  - local-name: Air Quality Positive Statement
+    source-text: "From the audit: major proposals subject to EIA"
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    suggested-id: air-quality-positive-statement
+  - local-name: Living Roof and Wall Details
+    source-text: "From the audit: proposals including living roofs or walls"
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    suggested-id: living-roof-details
+  - local-name: Geological Survey Report
+    source-text: "From the audit: on or near a SSSI or regionally important geological site"
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    suggested-id: geological-survey
+  - local-name: Urban Greening Factor information
+    source-text: "From the audit: major developments"
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    suggested-id: urban-greening-factor
+  - local-name: Accommodation Schedule
+    source-text: "From the audit: major residential"
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    suggested-id: accommodation-schedule
+  - local-name: Housing Management Plan
+    source-text: "From the audit: build-to-rent, older persons housing, PBSA, large-scale shared living"
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    suggested-id: housing-management-plan
+  - local-name: Construction Logistics Management Plan
+    source-text: "From the audit: major development, 5+ new dwellings including change of use, or significant
+      traffic impact"
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    suggested-id: construction-logistics-plan
+  - local-name: Landfill and Waste Transfer Statement
+    source-text: "From the audit: waste transfer, treatment or deposit"
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    suggested-id: landfill-waste-statement
+  - local-name: Landscape / Townscape and Views Impact Assessment
+    source-text: "From the audit: development above the general height, important views, Green Belt/MOL,
+      heritage assets"
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    suggested-id: townscape-visual-impact-assessment
+  - local-name: Materials Schedule
+    source-text: "From the audit: major and complex or sensitive proposals"
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    suggested-id: materials-schedule
+  - local-name: Public Toilet Management Plan
+    source-text: "From the audit: public-facing schemes over 15,000 sqm"
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    suggested-id: public-toilet-plan
+  - local-name: Social Infrastructure Statement
+    source-text: "From the audit: provision or loss of social infrastructure"
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    suggested-id: social-infrastructure-statement
+  - local-name: Supporting Statement for Lawful Development Certificates - Outbuildings over 50sqm
+    source-text: "Supporting Statement for Lawful Development Certificates - Outbuildings over 50sqm"
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    suggested-id: lawful-development-evidence
+  - local-name: Additional requirements for S96a and S73 amendments
+    source-text: "Additional requirements for S96a and S73 amendments"
+    source-url: 
+      https://www.bromley.gov.uk/downloads/file/35/validation-guidance-and-local-information-requirements-for-planning-applications
+    suggested-id: ""
+
+low-confidence:
+  - id: biodiversity-survey-report
+    note: "The workbook's trigger stops at 'When Required' (the audit's wrong_trigger issue on truncated
+      triggers); no replacement trigger is given."
+  - id: recreation-facilities-assessment
+    note: "The workbook's excerpt is a fragment about a play space strategy; no trigger is given."
+

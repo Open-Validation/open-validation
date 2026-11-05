@@ -1,0 +1,613 @@
+# Corrections for Wigan Metropolitan Borough Council, from inputs/audit/wigan-metropolitan-borough-council.json.
+# The audit read the Validation Checklist adopted 21 May 2024 (the document Grokbot used; national
+# items N1-N15, local items L1-L33). Items marked "From the audit" use the audit's paraphrase.
+local-authority: WGN
+
+submission-standards:
+  - item: All plans to scale, with an accurate scale bar (and a numerical scale) and/or measurements or
+      dimensions
+    level: must
+  - item: Files no larger than 10MB each
+    level: must
+  - item: PDFs in a format that allows accurate digital measurement at the scale indicated
+    level: must
+  - item: File names include the drawing / document number (with revision) and signify the content, e.g.
+      '12456 Rev A_Site Plan'
+    level: should
+
+drop:
+  - id: photos
+    reason: "wrong_trigger: not a requirement in the list; the excerpt is L30 Tree Works evidence text"
+
+drop-unmapped:
+  - local-name: Crime prevention / Secured by Design statement
+    reason: "wrong_trigger / duplicate: quotes the L8 SuDS paragraph; L7 Crime Impact Statement re-added below"
+  - local-name: Landscape and Visual Impact Assessment
+    reason: "wrong_trigger / duplicate: quotes the L18 Lighting paragraph"
+  - local-name: Odour / Dust / Vibration assessment
+    reason: "wrong_trigger: the L20 Noise Impact Assessment contents, now in noise-assessment"
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_trigger: fragment; re-added below with the trigger"
+  - local-name: Employment / Economic Statement
+    reason: "wrong_trigger: contents only; re-added below with the L11 trigger"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: contents only; re-added below with the trigger"
+  - local-name: Pre-application advice / engagement details
+    reason: "wrong_trigger: the Article 12 validation-dispute boilerplate; N15 re-added below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: Residential development comprising 10 dwellings or more.
+    confidence: medium
+    notes: "The excerpt states the trigger (L1)."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees within the site, or on adjacent land, that could influence or be affected by the
+          development (including street trees).
+    must-include:
+      - item: Which trees are to be retained
+        level: must
+      - item: The means of protecting retained trees during construction works
+        level: must
+    confidence: medium
+    notes: "The excerpt states the trigger (L29)."
+
+  - id: archaeological-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "'May be required where the impacts will be significant' (council's wording)."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development will be subject to the general biodiversity gain condition.
+    must-include:
+      - item: A statement as to whether the applicant believes the permission would be subject to the
+          biodiversity gain condition
+        level: must
+      - item: Evidence that the information has been prepared by a suitably qualified and experienced
+          ecologist
+        level: must
+    confidence: medium
+    notes: >-
+      N13 'ALWAYS REQUIRED where development will be subject to the general biodiversity gain
+      condition'. From the audit (missing_requirement): L4 also asks for a draft BNG statement / draft
+      Biodiversity Gain Plan with a completed metric. The ecologist item was in the workbook's Fire
+      Statement row.
+
+  - id: site-plan
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: residential-extension
+            value: true
+            description: Householder extensions.
+        - condition:
+            field: footprint-increase
+            value: true
+            description: Commercial or industrial extensions.
+        - condition:
+            field: new-build
+            value: true
+            description: New buildings.
+        - condition:
+            field: parking-change
+            value: true
+            description: Schemes that increase parking demand.
+        - all:
+            - application-type:
+                in: [advertising]
+            - discretionary
+    must-include:
+      - item: Scale of 1:500 or 1:200 (or a scale that shows the extent of the site and the proposal)
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): N7 Site Plans are 'ALWAYS REQUIRED for' major developments, householder
+      extensions, commercial/industrial extensions, new buildings, schemes that increase parking
+      demand, and free-standing adverts (shown as discretion within advertisement consent). The
+      scale is from the council's site plan standards.
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a Conservation Area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: One or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: 100 square metres or more of new floorspace.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): N11 also lists 'one or more dwellings in a Conservation Area; 100 sqm+
+      ... Listed Building Consent applications'.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: Automatically EIA development, or screened by Wigan Council as needing an Environmental
+          Statement.
+    confidence: medium
+    notes: "The excerpt states the trigger (N14)."
+
+  - id: section-existing
+    action: update
+    required-if: &wgn-levels
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: A change in ground levels, or development set at a different ground level from adjoining
+          development.
+    confidence: medium
+    notes: &wgn-levels-note "The excerpt states the trigger (N10 'ALWAYS NEEDED where')."
+
+  - id: section-proposed
+    action: update
+    required-if: *wgn-levels
+    confidence: medium
+    notes: *wgn-levels-note
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building 18 metres or more in height.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building of 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: Two or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: Educational accommodation.
+    source-url: &wgn-url https://www.wigan.gov.uk/Docs/PDF/Resident/Planning-and-Building-Control/LocalValidationList30kb.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted BNG text. From the audit: N12, buildings 18m+ or 7+ storeys with 2+ dwellings or educational accommodation."
+
+  - id: floor-plan-existing
+    action: update
+    required-if: &wgn-floor
+      condition:
+        field: floorspace
+        operator: ">"
+        value: 0
+        description: New floor space is proposed.
+    must-include: &wgn-floor-items
+      - item: A recognised metric scale, normally 1:50 or 1:100
+        level: must
+    confidence: medium
+    notes: &wgn-floor-note "N8: existing and proposed floor plans are needed for applications where new floor space is proposed."
+
+  - id: floor-plan-proposed
+    action: update
+    required-if: *wgn-floor
+    must-include: *wgn-floor-items
+    confidence: medium
+    notes: *wgn-floor-note
+
+  - id: elevation-existing
+    action: replace
+    required-if: &wgn-elev
+      condition:
+        field: external-alterations
+        value: true
+        description: New elevations are proposed.
+    source-text: &wgn-elev-text "N9 Elevations and Roof Plans EXISTING AND PROPOSED ELEVATIONS are needed where: New elevations are proposed."
+    source-url: *wgn-url
+    must-include: &wgn-elev-items
+      - item: A recognised metric scale, normally 1:50 or 1:100
+        level: must
+    confidence: medium
+    notes: &wgn-elev-note "The N9 trigger was in the workbook's Roof plan row."
+
+  - id: elevation-proposed
+    action: replace
+    required-if: *wgn-elev
+    source-text: *wgn-elev-text
+    source-url: *wgn-url
+    must-include: *wgn-elev-items
+    confidence: medium
+    notes: *wgn-elev-note
+
+  - id: roof-plan-existing
+    action: update
+    must-include: &wgn-roof-items
+      - item: A recognised metric scale, normally 1:50 or 1:100
+        level: must
+    confidence: low
+    notes: &wgn-roof-note "The excerpt gives the N9 elevations trigger; the roof plan trigger was not captured."
+
+  - id: roof-plan-proposed
+    action: update
+    must-include: *wgn-roof-items
+    confidence: low
+    notes: *wgn-roof-note
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [advertising]
+            - condition:
+                field: illuminated
+                value: true
+                description: Advertisement consent with illumination or digital screens.
+        - discretionary
+    must-include:
+      - item: Details of the proposed lighting
+        level: should
+      - item: The proposed hours when the lighting would be switched on
+        level: should
+    confidence: medium
+    notes: >-
+      From the audit (wrong_app_type): L18 covers 'advertisement consent with illumination or digital
+      screens'; its other triggers were not captured and are shown as officer discretion.
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Noisy industrial uses, or commercial or entertainment uses with extraction or a shared
+              party wall with housing.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise-sensitive uses next to major noise sources.
+    source-url: *wgn-url
+    must-include:
+      - item: Noise and/or vibration assessment criteria to the relevant British Standard
+        level: should
+      - item: A subjective description of noise and/or vibration sources
+        level: should
+      - item: Assessment and calculations
+        level: should
+      - item: A construction and demolition phase assessment
+        level: should
+      - item: Conclusions and details of mitigation required
+        level: should
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): L20 Noise Impact Assessment. The contents are the council's
+      words, from the workbook's 'Odour / Dust / Vibration' row.
+
+  - id: recreation-facilities-assessment
+    action: update
+    must-include:
+      - item: A statement explaining how the open space or facility will be affected, when it was last used
+          and by whom
+        level: should
+      - item: A site plan clearly showing the layout of the existing facilities
+        level: should
+      - item: A proposed site plan showing how the development is likely to impact on the existing
+          facilities
+        level: should
+      - item: Details of any replacement facilities and/or improvements to existing facilities
+        level: should
+    notes: "The excerpt lists the contents of the L21 Open Space Assessment but not its trigger."
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: departure-from-development-plan
+            value: true
+            description: The proposal is a departure from the development plan.
+        - discretionary
+    source-text: major, complex or potentially controversial proposals
+    source-url: *wgn-url
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook had only the L23 heading. Complex or controversial proposals are shown as officer discretion."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Main town centre uses not in an existing centre or in accordance with an up-to-date
+              development plan.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 2500
+            description: Gross floorspace of over 2,500 square metres.
+    confidence: medium
+    notes: "The excerpt states the trigger."
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 80
+            description: 80 or more dwellings (C3).
+        - discretionary
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the excerpt is only the L27 Transport Statement definition. From the
+      audit: L26 Transport Assessment uses use-class thresholds, e.g. C3 80+ dwellings, B2 4,000 sqm+,
+      E(a) 1,500 sqm+. Only the dwelling threshold can be expressed; the others are shown as officer
+      discretion, and the L27 Transport Statement thresholds were not captured.
+
+  - id: travel-plan
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 80
+            description: Development that requires a Transport Assessment (L26), e.g. 80 or more dwellings.
+        - discretionary
+    must-include:
+      - item: For commercial development, completed using the Greater Manchester Travel Plan Toolkit
+        level: must
+    confidence: low
+    notes: >-
+      From the audit (wrong_trigger): L28 'Development that requires a Transport Assessment (L26)'.
+      It follows the Transport Assessment rule.
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Where the development will not comply fully with the council's policies on developer contributions (L32)."
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [waste-dev]
+        - discretionary
+    source-url: *wgn-url
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted site plan scale text. From the audit: L33 Waste
+      Management Scheme Details, for uses that process, transfer or deposit waste.
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: A site of 0.5 hectares or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 0.5
+            description: A site of 0.5 hectares or more.
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 1000
+            description: 1,000 square metres or more of floorspace.
+    policy: Places for Everyone JPS2
+    source-text: >-
+      L5 Carbon Reduction Strategy/Energy and Climate Change Adaptation Statement This report must
+      outline the measures to be implemented by the developer to ensure the development proposed
+      reduces gross CO2 emissions as required by Places for Everyone policy JPS2.
+    source-url: *wgn-url
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): placed under Outline only by keyword match. From the audit: L5 applies
+      to 10+ dwellings, 0.5ha+ or 1,000 sqm+ whatever the application type.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: Flood zone 2 or 3, including minor extensions and change of use.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: Sites over 1 hectare in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: Sites over 1 hectare in Flood Zone 1.
+        - all:
+            - site:
+                in: [critical-drainage-area]
+                description: The site is in a Critical Drainage Area.
+            - any:
+                - condition:
+                    field: site-area-residential
+                    operator: ">"
+                    value: 0.5
+                    description: Over 0.5 hectares.
+                - condition:
+                    field: site-area-non-residential
+                    operator: ">"
+                    value: 0.5
+                    description: Over 0.5 hectares.
+    source-text: >-
+      L12 Flood Risk Assessment (including sequential and exceptions test where necessary)
+      Development proposals: In flood zone 2 or 3, including minor extensions and change of use; …
+      sites over 1ha in Flood Zone 1 …
+    source-url: *wgn-url
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, missing_requirement): the workbook put this under prior approval only.
+      From the audit: also sites over 0.5ha in Critical Drainage Areas.
+
+  - id: air-quality-assessment
+    action: add
+    required-if: discretionary
+    source-url: *wgn-url
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): L2 Air Quality Assessment, with thresholds in Chapter 6
+      of the Development and Air Quality SPD (not given here).
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: Development (including listed building consent and demolition) that could affect
+              roosting bats, nesting birds, or protected or priority species.
+        - site:
+            in: [site-of-special-scientific-interest, local-wildlife-site, priority-habitat]
+            description: Development affecting designated sites or important habitats.
+    source-url: *wgn-url
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): L3 Bat and Bird Surveys and L9 Ecological Appraisal
+      (Extended Phase I).
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: Known or suspected contamination.
+        - site:
+            in: [near-landfill-site]
+            description: Development within 250m of a known landfill site.
+        - all:
+            - ref: major-development
+            - condition:
+                field: sensitive-end-use
+                value: true
+                description: A sensitive end use.
+    source-url: *wgn-url
+    confidence: medium
+    notes: "From the audit (missing_requirement): L16 Land Contamination Assessment."
+
+  - id: condition-of-trees
+    action: add
+    required-if:
+      application-type:
+        in: [consent-under-tpo, notice-trees-in-con-area]
+    source-text: >-
+      labelled digital photographs of the existing tree(s) together with a plan detailing their
+      location; written advice from an appropriate arboricultural expert detailing the justification
+      for and methodology of the works
+    source-url: *wgn-url
+    must-include:
+      - item: Labelled digital photographs of the existing tree(s), with a plan of their location
+        level: must
+      - item: Written advice from an arboricultural expert on the justification for and methodology of the
+          works
+        level: must
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): L30 Tree Works Specification and Evidence, for works to
+      trees covered by a TPO or in a Conservation Area. The wording was in the workbook's Photographs
+      row.
+
+  - id: structural-damage
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [consent-under-tpo, notice-trees-in-con-area]
+        - discretionary
+    source-text: >-
+      if required, a report from an appropriately qualified building surveyor or engineer if alleging
+      damage to property
+    source-url: *wgn-url
+    confidence: medium
+    notes: "L30 Tree Works evidence, where damage to property is alleged."
+
+unmapped:
+  - local-name: Crime Impact Statement (L7)
+    source-text: "10 or more dwellings; site area 0.5ha+; 1,000 sqm+"
+    source-url: https://www.wigan.gov.uk/Docs/PDF/Resident/Planning-and-Building-Control/LocalValidationList30kb.pdf
+    suggested-id: crime-prevention-statement
+  - local-name: Coal Mining Risk Assessment
+    source-text: "From the audit: development in a Coal Authority Development High Risk Area"
+    source-url: https://www.wigan.gov.uk/Docs/PDF/Resident/Planning-and-Building-Control/LocalValidationList30kb.pdf
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Employment Land Assessment (L11)
+    source-text: "sites over 0.4ha in current or last employment use"
+    source-url: https://www.wigan.gov.uk/Docs/PDF/Resident/Planning-and-Building-Control/LocalValidationList30kb.pdf
+    suggested-id: employment-statement
+  - local-name: Health Impact Assessment (L14)
+    source-text: "From the audit: development in Table 1 of the Planning for Health SPD, and all EIA applications"
+    source-url: https://www.wigan.gov.uk/Docs/PDF/Resident/Planning-and-Building-Control/LocalValidationList30kb.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Pre-Application Information (N15)
+    source-text: "From the audit: a copy of any pre-application advice and any information requested at pre-application stage"
+    source-url: https://www.wigan.gov.uk/Docs/PDF/Resident/Planning-and-Building-Control/LocalValidationList30kb.pdf
+    suggested-id: ""
+  - local-name: Green Belt Assessment (L13)
+    source-text: "From the audit: development in the Green Belt or Safeguarded Land; volume and floorspace calculations
+      are also needed for householder development"
+    source-url: https://www.wigan.gov.uk/Docs/PDF/Resident/Planning-and-Building-Control/LocalValidationList30kb.pdf
+    suggested-id: green-belt-statement
+  - local-name: Minerals Assessment (L19)
+    source-text: "From the audit: major development in Mineral Safeguarding Areas, or any mineral working"
+    source-url: https://www.wigan.gov.uk/Docs/PDF/Resident/Planning-and-Building-Control/LocalValidationList30kb.pdf
+    suggested-id: minerals-assessment

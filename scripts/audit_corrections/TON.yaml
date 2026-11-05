@@ -1,0 +1,169 @@
+# Corrections for Tonbridge and Malling Borough Council, from the council's audit.
+# The audit could not fetch the council's checklist (contents_checked: false), so these
+# corrections rest on Grokbot's own excerpts and the errors the audit found in them. Rows the
+# workbook marked INFERRED already carry no application type, so they apply to householder and
+# other types as the audit says they should.
+local-authority: TON
+
+validation-list:
+  date: 2026-08
+  date-basis: >-
+    audit (claude_response): the document is headed 'Draft Local validation requirements
+    checklist ... 3 August 2026'; it is a draft, so its adoption status needs confirming
+
+submission-standards:
+  - item: All drawings and documents submitted in PDF format, except where the list says otherwise
+    level: must
+  - item: Each individual file no larger than 25MB
+    level: must
+  - item: Each drawing has a title and drawing number, with any revision references
+    level: must
+  - item: Drawings state the scale and paper size and include a measurable scale bar (minimum 0-10 
+      metres), or clearly labelled dimensions
+    level: must
+  - item: Drawings marked 'Do not scale' are not acceptable
+    level: must
+  - item: The make, type and colour of external materials clearly annotated
+    level: should
+
+drop:
+  - id: site-plan
+    reason: >-
+      wrong_app_type: the excerpt is the Site Location Plan rule, and it was filed under exactly
+      the three types it exempts (s73, discharge of conditions, non-material amendment)
+  - id: cil-form
+    reason: >-
+      not_a_requirement: the excerpt is a reference to the CIL Regulations (probably the S106
+      tests); Tonbridge and Malling has no CIL charging schedule
+
+drop-unmapped:
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_trigger: the excerpt ran on into the Planning Obligations section; re-added below without
+      it"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: the excerpt started mid-sentence in the parking text; re-added below"
+
+requirements:
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (in Flood Zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (in Flood Zone 1).
+        - site:
+            in: [flood-risk-zone]
+            description: New development in Flood Zones 2 or 3.
+    source-text: >-
+      Required for development proposals of 1 hectare or greater in Flood Zone 1 and all proposals
+      for new developments located in flood zones 2, 3 except for minor domestic extensions or
+      where works where no new residential dwelling unit is being created and the scheme involves
+      no new bedroom space.
+    confidence: low
+    notes: >-
+      Trigger from the workbook excerpt (page-number debris removed). Not required for minor
+      domestic extensions, or works that create no new dwelling and no new bedroom space.
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      ref: major-development
+    confidence: low
+    notes: "The council's excerpt says 'Required for Major applications.' The national rules for a Design
+      and Access Statement still apply."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: The site is inside or next to an air quality management area.
+        - discretionary
+    source-text: >-
+      Where the development is proposed inside, or adjacent to an air quality management area
+      (AQMA), where the development could in itself result in the designation of an AQMA or where
+      it would conflict with, or render unworkable, elements of a local authority's air quality
+      action plan, applications should be supported by such information as is necessary to allow
+      a full consideration of the impact of the proposal on the air quality
+    confidence: low
+    notes: "The other cases (could cause an AQMA designation, or conflict with the action plan) are shown
+      as officer discretion."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 2500
+            description: 2,500 square metres or more of retail, leisure or office space.
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: The proposal is outside town or retail centres.
+    source-text: >-
+      Retail Impact Assessment Application Trigger -An impact assessment will be required for
+      proposals for 2,500sqm or more of retail, leisure and office space outside of town/ retail
+      centres.
+    confidence: low
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    source-text: >-
+      a Transport Assessment (TA) should be submitted as part of any planning application where
+      the proposed development has significant transport implications.
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger, other): the workbook's excerpt ('may propose mitigation measures') was
+      not a trigger; the council's trigger above was filed in the tab under submission rules.
+
+unmapped:
+  - local-name: Parking stress survey
+    source-text: >-
+      Parking stress surveys may be required where major developments and other developments
+      likely to cause or exacerbate on-street vehicular parking stress in the surrounding
+      highways.
+    source-url: 
+      https://www.tmbc.gov.uk/downloads/file/3989/local-validation-requirement-checklist-for-planning-applications-from-1-august-2026-
+    suggested-id: parking-plan
+  - local-name: Planning Obligations - Draft Head(s) of Terms
+    source-text: "Planning Obligations – Draft Head(s) of Terms Application Trigger: Major developments"
+    source-url: 
+      https://www.tmbc.gov.uk/downloads/file/3989/local-validation-requirement-checklist-for-planning-applications-from-1-august-2026-
+    suggested-id: planning-obligations-heads-of-terms
+
+low-confidence:
+  - id: floor-plan-existing
+    note: "Audit (wrong_trigger): the excerpt 'to the floor plan of the property.' is a fragment, not
+      a trigger."
+  - id: floor-plan-proposed
+    note: "Audit (wrong_trigger): the excerpt 'to the floor plan of the property.' is a fragment, not
+      a trigger."
+  - id: elevation-existing
+    note: "Audit (wrong_trigger): the excerpt 'to the floor plan of the property.' is a fragment, not
+      a trigger."
+  - id: elevation-proposed
+    note: "Audit (wrong_trigger): the excerpt 'to the floor plan of the property.' is a fragment, not
+      a trigger."
+  - id: heritage-statement
+    note: "Audit (wrong_trigger): the excerpt is a cross-reference taken from the archaeology section,
+      not the heritage statement trigger."
+  - id: affordable-housing-statement
+    note: "Audit (wrong_trigger): the excerpt is a content list with no threshold."
+  - id: archaeological-assessment
+    note: "Audit (wrong_trigger): the excerpt lists contents only, with no trigger."
+  - id: arboriculturist-report
+    note: "Audit (wrong_trigger): the excerpt describes contents only, with no trigger."
+  - id: fire-statement
+    note: "Audit (wrong_trigger): the excerpt is form wording with no height or storey trigger."
+

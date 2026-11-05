@@ -1,0 +1,249 @@
+# Corrections for Dudley Metropolitan Borough Council, from the council's audit.
+# The audit could not read the November 2024 checklist (its fetch budget ran out), so contents were not
+# checked and every file stays at confidence: low. The workbook mixes in the superseded February 2020
+# checklist. This file only fixes what the workbook's own excerpts and the audit's quotes show: rows
+# under excluded application types, fragment triggers, and clear triggers left unstructured.
+local-authority: DUD
+
+submission-standards:
+  - item: Plans drawn to an appropriate metric scale (1:50, 1:100, 1:200 or 1:500), with a scale bar on all
+      plans
+    level: must
+  - item: Plans marked 'Do Not Scale' or with similar disclaimers are not accepted
+    level: must
+  - item: Plans show the direction of North
+    level: must
+  - item: Plans A4 or A3 size wherever possible
+    level: should
+  - item: Information clear enough not to lose detail when scanned and viewed electronically (no faint lines)
+    level: must
+
+drop:
+  - id: noise-assessment
+    sheets: [Outline]
+    reason: "wrong_app_type: placed under Outline only because the text says the assessment 'should outline'
+      noise sources"
+  - id: waste-management-plan
+    reason: "wrong_trigger: the excerpt is about the application form for waste management facilities, not
+      refuse storage"
+
+drop-unmapped:
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_app_type: placed under Householder, which the trigger excludes; re-added below"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advice to seek pre-application advice"
+  - local-name: Cycle parking details
+    reason: "duplicate: a site-plan drawing note"
+  - local-name: Highways / access details (visibility splays)
+    reason: "duplicate: a site-plan drawing note"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 15
+        description: The application is for 15 or more dwellings.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees, woodlands or hedgerows are present on or immediately adjacent to the site.
+    notes: "Audit (wrong_app_type): triggered by site circumstances, so it applies to all application types."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      condition:
+        field: protected-species
+        value: true
+        description: Protected or important species are present, or may be adversely affected.
+    notes: "Audit (wrong_app_type): triggered by site circumstances, so it applies to all application types."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: minor-development
+            value: true
+            description: Minor development.
+    notes: "Major applications from February 2024 and minor applications from April 2024, unless exempt."
+
+  - id: cil-form
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: retail-floorspace
+            operator: ">"
+            value: 0
+            description: The application creates new retail floorspace.
+        - condition:
+            field: housing-floorspace
+            operator: ">"
+            value: 0
+            description: The application creates new residential floorspace.
+    source-text: >-
+      V14 Community Infrastructure Levy (CIL) Planning Application – Additional Information Requirements
+      Form and a completed Assumption of Liability Form (Form 1) … Planning applications … that create
+      new Retail or Residential floor space.
+    must-include:
+      - item: CIL Additional Information Requirements Form
+        level: must
+      - item: Completed Assumption of Liability Form (Form 1)
+        level: must
+    notes: "Audit (missing_requirement): V14 appeared only as garbled tab text."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development requires an Environmental Impact Assessment.
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site area is 1 hectare or more in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site area is 1 hectare or more in Flood Zone 1.
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3.
+    notes: "Audit (wrong_trigger): the excerpt runs into Transport Assessment guidance before the flood-zone
+      conditions; Flood Zones 2 and 3 are assumed from 'required for all planning applications'."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, locally-listed-building, conservation-area, archaeological-priority-area,
+              listed-building-setting]
+            description: The application affects designated or non-designated heritage assets or their setting.
+        - discretionary
+    notes: "Audit (wrong_app_type): applies to all application types, not only LBC. Areas of High Historic
+      Townscape or Landscape Value have no field and are shown as discretionary."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: Land contamination is present.
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: The proposed use is sensitive or vulnerable to land contamination.
+    notes: "Audit (wrong_document): this excerpt is from the superseded February 2020 checklist."
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: New residential development near licensed premises or next to existing commercial
+              premises.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: New B2 or B8 development next to housing, entertainment and licensed premises, and
+              similar noisy uses.
+        - discretionary
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      ref: major-development
+    source-text: >-
+      V33 Planning Statement All major applications (10 or more dwellings or 1,000 m2 or more of new
+      floorspace) including change of use applications, extensions and mezzanine floors, except for waste
+      management and mineral development applications
+    source-url: https://www.dudley.gov.uk/media/14208/dmbc-validation-checklist-final-version-feb-2020.pdf
+    must-include:
+      - item: A general description of the application site and of the development
+        level: must
+      - item: The key facts and figures
+        level: must
+      - item: A brief statement that the proposal is sustainable development as defined in current policy
+        level: must
+      - item: A brief statement that the proposal is consistent with development plan land use policy, or a
+          justified departure (with reasons)
+        level: must
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type, wrong_document): not minerals/waste (excluded) and not prior approval
+      ('change of use applications' means major planning applications). The trigger is from the February
+      2020 checklist; the contents are from the November 2024 one.
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      condition:
+        field: loss-of-open-space
+        value: true
+        description: The development would result in the loss of open space, buildings or land (including
+          playing fields).
+    notes: "Audit (wrong_document): this excerpt is from the superseded February 2020 checklist."
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The site is affected by a change in ground level.
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The site is affected by a change in ground level.
+    must-include:
+      - item: The extent of the change in levels and its effect on how the development will appear
+        level: must
+      - item: Details of any retaining structures or mitigation proposed
+        level: should
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: Existing and proposed site plan at a scale of 1:500
+        level: must
+
+unmapped:
+  - local-name: Coal Mining Risk Assessment
+    source-text: "A Coal Mining Risk Assessment will be required with all planning applications for development
+      within these areas (except householder developments)."
+    source-url: https://www.dudley.gov.uk/media/2lvh1ahe/planning_validation_checklist__-nov_2024-1.pdf
+    suggested-id: coal-mining-risk-assessment
+
+low-confidence:
+  - id: design-and-access-statement
+    note: "Audit (wrong_trigger): the excerpt combines the DAS heading with the elevations requirement and gives
+      no DAS trigger; the national rules apply."
+  - id: transport-assessment
+    note: "Audit (missing_requirement): the thresholds are in the list's Appendix B, which was not captured."

@@ -1,0 +1,362 @@
+# Corrections for Thurrock Council, from the audit of Thurrock.
+# Thurrock's local requirements are undated web pages in its 'Make a planning application' guide.
+# Grokbot read only the 'Detailed information' page and captured 5 of about 20 requirements. The
+# audit lists the rest with their triggers (some quoted from the 'Overview' page). Items marked
+# "From the audit" use the audit's paraphrase, not the council's exact words.
+local-authority: THR
+
+drop-unmapped:
+  - local-name: Cycle parking details
+    reason: "wrong_trigger: the excerpt is the parking and access text plus retail impact text; now a
+      must-include of site-plan and town-centre-impact-assessment"
+
+requirements:
+  - id: site-plan
+    action: replace
+    source-text: >-
+      Your site plan must show existing and proposed: parking cycle storage access arrangements for
+      vehicles and pedestrians
+    source-url:
+      https://www.thurrock.gov.uk/make-planning-application/detailed-information-for-specific-application-types
+    must-include:
+      - item: Existing and proposed parking
+        level: must
+        required-if:
+          condition:
+            field: parking-change
+            value: true
+            description: The application is likely to result in a loss or gain of parking provision.
+      - item: Existing and proposed cycle storage
+        level: must
+        required-if:
+          condition:
+            field: parking-change
+            value: true
+            description: The application is likely to result in a loss or gain of parking provision.
+      - item: Existing and proposed access arrangements for vehicles and pedestrians
+        level: must
+        required-if:
+          condition:
+            field: parking-change
+            value: true
+            description: The application is likely to result in a loss or gain of parking provision.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt is the 'Parking and access arrangements' item, which the
+      council asks for "with applications likely to result in a loss or gain of parking provision"
+      (including Householder, where a garage or parking space is lost). The workbook ran the retail
+      impact text on after it and guessed Full planning.
+
+  - id: travel-plan
+    action: replace
+    required-if:
+      condition:
+        field: staff-count
+        operator: ">="
+        value: 50
+        description: A non-residential proposal involving 50 or more employees.
+    source-text: "Travel plan: ... non-residential proposals involving 50 employees or more."
+    source-url:
+      https://www.thurrock.gov.uk/make-planning-application/detailed-information-for-specific-application-types
+    must-include:
+      - item: How reliance on private motor cars will be reduced
+        level: must
+        source-text: The travel plan must set out how reliance on private motor cars will be reduced.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted content instead of the threshold, and guessed Full
+      planning."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [tree-preservation-zone]
+            description: Trees protected by a tree preservation order, on or adjoining the site, may
+              be affected.
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - condition:
+                field: trees-on-or-near-site
+                value: true
+                description: Trees on or adjoining the site may be affected.
+        - discretionary
+    source-text: >-
+      An arboriculture statement is needed for applications where: preserved trees, either on or
+      adjoining the site, may be affected by your proposal where it is proposed that a number of
+      trees on site shall be removed Preserved trees are those that are either: the subject of a
+      tree preservation order within a conservation area Your arboriculture statement should
+      include: a tree survey a tree protection plan an arboriculture method statement, if
+      development takes place within a root protection area
+    source-url:
+      https://www.thurrock.gov.uk/make-planning-application/detailed-information-for-specific-application-types
+    must-include:
+      - item: A tree survey
+        level: must
+      - item: A tree protection plan
+        level: must
+      - item: An arboriculture method statement, if development takes place within a root protection
+          area
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): this is for development proposals (Full, Householder, Outline), not
+      applications for works to trees. "Where a number of trees on site shall be removed" has no
+      field and is shown as officer discretion.
+
+  - id: section-proposed
+    action: add
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal involves a change in ground levels.
+    source-url:
+      https://www.thurrock.gov.uk/make-planning-application/detailed-information-for-specific-application-types
+    must-include:
+      - item: Finished floor and site levels
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): site sections and finished floor/site levels where there
+      is a change in ground levels. Includes Householder."
+
+  - id: roof-plan-proposed
+    action: add
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: A roof would be created or altered.
+    source-text: "Roof plans: ... where a roof would be created or altered"
+    source-url:
+      https://www.thurrock.gov.uk/make-planning-application/detailed-information-for-specific-application-types
+    confidence: medium
+    notes: "Audit (missing_requirement, wrong_app_type): includes Householder."
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: The proposal creates 10 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: The site is 0.5 hectares or more.
+    source-text: "Affordable housing statement / viability statement - 10+ dwellings, or a site of 0.5
+      hectares or more"
+    source-url:
+      https://www.thurrock.gov.uk/make-planning-application/detailed-information-for-specific-application-types
+    confidence: medium
+    notes: "Audit (missing_requirement): quoted from the 'Overview of information for specific application
+      types' page. Includes Outline."
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      all:
+        - site:
+            in: [air-quality-management-area]
+            description: The site is within the Air Quality Management Area.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 10
+                description: The proposal creates 10 or more homes.
+            - condition:
+                field: floorspace-non-residential
+                operator: ">="
+                value: 500
+                description: The proposal creates 500 square metres or more of non-residential space.
+    source-text: "Air quality impact assessment - 10+ homes, or 500 sq m+ non-residential space, within
+      the Air Quality Management Area"
+    source-url:
+      https://www.thurrock.gov.uk/make-planning-application/detailed-information-for-specific-application-types
+    confidence: medium
+    notes: "Audit (missing_requirement): quoted from the 'Overview of information for specific application
+      types' page."
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if: discretionary
+    source-text: "where the type and location of development are such that the impact on biodiversity may
+      be significant"
+    source-url:
+      https://www.thurrock.gov.uk/make-planning-application/detailed-information-for-specific-application-types
+    must-include:
+      - item: An assessment of the impact of the proposed development on wildlife
+        level: must
+        source-text: Where your checklist shows the need for a biodiversity report, the report should
+          assess the impact of your proposed development on wildlife.
+    confidence: medium
+    notes: "Audit (missing_requirement, wrong_trigger): the need for a report follows from the council's
+      biodiversity checklist."
+
+  - id: environmental-statement
+    action: add
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    source-url:
+      https://www.thurrock.gov.uk/make-planning-application/detailed-information-for-specific-application-types
+    confidence: medium
+    notes: "From the audit (missing_requirement): an environmental impact assessment is listed."
+
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: Any new development in flood zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare (in flood zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare (in flood zone 1).
+    source-url:
+      https://www.thurrock.gov.uk/make-planning-application/detailed-information-for-specific-application-types
+    confidence: medium
+    notes: "From the audit (missing_requirement): sites over 1ha in Flood Zone 1, or any new development in
+      Zones 2/3."
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, demolition-con-area]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area]
+            description: The proposal affects a heritage asset.
+    source-text: "Heritage statement: You will only need to provide this with applications for listed
+      building consent, or conservation area consent"
+    source-url:
+      https://www.thurrock.gov.uk/make-planning-application/detailed-information-for-specific-application-types
+    confidence: medium
+    notes: "Audit (missing_requirement): for LBC, or effects on heritage assets (including Householder)."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: eia-development
+            value: true
+            description: The development needs an Environmental Impact Assessment.
+        - site:
+            in: [contaminated-land]
+            description: The site is known to be contaminated.
+    source-url:
+      https://www.thurrock.gov.uk/make-planning-application/detailed-information-for-specific-application-types
+    confidence: medium
+    notes: "From the audit (missing_requirement): major schemes (especially on brownfield land), EIA schemes,
+      or known contamination."
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: The proposal includes external lighting.
+    source-text: "Lighting assessment ... except for householder developments"
+    source-url:
+      https://www.thurrock.gov.uk/make-planning-application/detailed-information-for-specific-application-types
+    confidence: low
+    notes: "Audit (missing_requirement): external lighting, except householder developments. The rule can't
+      express the householder exception."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 2500
+            description: Retail or leisure development over 2,500 square metres.
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Retail or leisure development not in a central location and not in
+              accordance with the development plan.
+        - discretionary
+    source-text: >-
+      Retail or leisure impact assessment You will only need to provide this with applications for
+      retail or leisure developments over 2,500 square metres, or likely to have a significant
+      impact on smaller centres, or when they are not in a central location, nor in accordance with
+      a development plan.
+    source-url:
+      https://www.thurrock.gov.uk/make-planning-application/detailed-information-for-specific-application-types
+    confidence: medium
+    notes: "Found in the workbook's site plan row. 'Likely to have a significant impact on smaller centres'
+      is shown as officer discretion."
+
+  - id: sci
+    action: add
+    required-if: discretionary
+    source-url:
+      https://www.thurrock.gov.uk/make-planning-application/detailed-information-for-specific-application-types
+    confidence: medium
+    notes: "From the audit (missing_requirement): large or controversial schemes."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: The proposal is for telecommunications development.
+    source-url:
+      https://www.thurrock.gov.uk/make-planning-application/detailed-information-for-specific-application-types
+    confidence: low
+    notes: "From the audit (missing_requirement): telecommunications information is listed; the trigger is
+      assumed from the item's name."
+
+  - id: transport-assessment
+    action: add
+    required-if: discretionary
+    source-url:
+      https://www.thurrock.gov.uk/make-planning-application/detailed-information-for-specific-application-types
+    confidence: medium
+    notes: "From the audit (missing_requirement): significant vehicle movement, or a material change on a
+      trunk road. No threshold is given."
+
+unmapped:
+  - local-name: Health impact assessment
+    source-text: "From the audit: a health impact assessment is listed (no trigger given)"
+    source-url:
+      https://www.thurrock.gov.uk/make-planning-application/detailed-information-for-specific-application-types
+    suggested-id: health-impact-assessment
+  - local-name: Structural survey
+    source-text: "From the audit: barn conversions, reuse of rural buildings, partial demolition of a
+      heritage building"
+    source-url:
+      https://www.thurrock.gov.uk/make-planning-application/detailed-information-for-specific-application-types
+    suggested-id: structural-survey
+  - local-name: Biodiversity checklist
+    source-text: >-
+      You do not need a biodiversity checklist for: removal or variation of a condition
+      advertisement consent change of use of an existing building internal subdivision of an
+      existing building minor works, such as the erection of a fence, wall or gate, or a dropped
+      kerb a lawful development certificate prior notification of agricultural or forestry
+      development
+    source-url:
+      https://www.thurrock.gov.uk/make-planning-application/detailed-information-for-specific-application-types
+    suggested-id: biodiversity-checklist

@@ -1,0 +1,597 @@
+# Corrections for South Staffordshire Council, from inputs/audit/south-staffordshire-council.json.
+# Grokbot's link is the FULL validation guidance the council still links ('Guidance Notes for
+# Validation of Planning Applications March 2022'; the build takes March 2022 from the audit). The
+# householder rows come from a separate 'Validation Guidance (Householder) 2026 Update', which
+# Grokbot also copied, wrongly, under Change of use - prior approval; those copies are dropped. The
+# FULL guidance's items say which applications they apply to, so the INFERRED 'Full planning' type
+# is replaced where the trigger is structured. Items marked "From the audit" use its paraphrase.
+local-authority: SST
+
+submission-standards:
+  - item: All elevations and plans clearly and logically labelled (for example 'front' or 'rear
+      elevation') and given titles which refer to their content
+    level: must
+  - item: Drawings include a linear scale bar to assist with electronic scaling / measuring, with written
+      dimensions of the proposed works
+    level: should
+
+drop:
+  - id: arboriculturist-report
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: householder guidance copied under prior approval"
+  - id: site-plan
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: householder guidance copied under prior approval"
+  - id: daylight-sunlight-assessment
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: householder guidance copied under prior approval"
+  - id: design-and-access-statement
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: householder guidance copied under prior approval"
+  - id: biodiversity-survey-report
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: householder guidance copied under prior approval"
+  - id: section-existing
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: householder guidance copied under prior approval"
+  - id: section-proposed
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: householder guidance copied under prior approval"
+  - id: flood-risk-assessment
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: householder guidance copied under prior approval"
+  - id: floor-plan-existing
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: householder guidance copied under prior approval"
+  - id: floor-plan-proposed
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: householder guidance copied under prior approval"
+  - id: elevation-existing
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: householder guidance copied under prior approval"
+  - id: elevation-proposed
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: householder guidance copied under prior approval"
+  - id: heritage-statement
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: householder guidance copied under prior approval"
+  - id: landscaping-plan
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: householder guidance copied under prior approval"
+  - id: photos
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: householder guidance copied under prior approval"
+  - id: planning-statement
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: householder guidance copied under prior approval"
+  - id: roof-plan-existing
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: householder guidance copied under prior approval"
+  - id: roof-plan-proposed
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: householder guidance copied under prior approval"
+  - id: land-contamination-assessment
+    sheets: [Householder, Advertisement consent]
+    reason: "wrong_app_type: the source explicitly excludes householder and advertisement applications"
+  - id: schedule-of-works
+    reason: "wrong_trigger: reuses the Construction Method Statement sentence; not a listed building schedule"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "wrong_trigger: listed building consent text; not a validation requirement"
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "wrong_trigger: a fragment; re-added below with the item 13 trigger"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "duplicate: a fragment of the daylight assessment item"
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_trigger: Lighting Assessment text (now a must-include item in lighting-assessment)"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_trigger: drainage text; replaced below"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "wrong_trigger: just an SPD reference; replaced below"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: shares the garbled Street Scene / FRA excerpt; replaced below"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: shares the garbled Street Scene / FRA excerpt; replaced below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more dwellings.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: The site has an area of 0.5ha or more.
+    must-include:
+      - item: Details of tenure, location and number of proposed affordable dwellings
+        level: must
+    confidence: medium
+    notes: "Item 15: 'A major housing development - all applications for 10 or more dwellings or the site has
+      an area of 0.5ha or more'."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      site:
+        in: [air-quality-management-area]
+        description: The site is in or affects an Air Quality Management Area (Penkridge, Essington,
+          Wedges Mills or Hatherton).
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt doesn't name the four AQMAs; the trigger is from the audit."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Development within 15m of the centre of any tree with a stem diameter of 75mm or above
+          at 1.5m, on or adjacent to the site.
+    source-text: >-
+      A tree survey is required for all development within 15m of the centre of any tree that has a
+      stem diameter of 75mm or above measured at 1.5m above ground level whether on or adjacent to
+      the application site.
+    confidence: medium
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      condition:
+        field: protected-species
+        value: true
+        description: The proposal might affect natural habitats or disturb protected species (bats, barn
+          owls, badgers, great crested newts).
+    source-text: >-
+      Ecological survey and report If your proposal might affect natural habitats and/or disturb
+      protected species like bats, barn owls, badgers, great crested newts, you will need to conduct
+      an ecological survey.
+    confidence: medium
+    notes: "The Full planning row's excerpt was NatureSpace contact details (audit: wrong_trigger)."
+
+  - id: construction-management-plan
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 10
+            description: Residential development of more than 10 units.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.4
+            description: A residential site of 0.4ha or more.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: Commercial development of 1,000 sqm or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: A commercial site of 1ha or more.
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook reused the Construction Method Statement sentence. From the
+      audit: item 25a CEMP trigger."
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Where proposals might adversely affect the light enjoyed by adjoining properties, gardens or
+      amenity space."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [hh]
+            - site:
+                in: [listed-building, site-of-special-scientific-interest,
+                  area-of-outstanding-natural-beauty, conservation-area]
+                description: The property is a listed building, or within a SSSI, AONB or conservation
+                  area.
+        - application-type:
+            in: [lbc]
+    source-text: >-
+      You do not need to submit a design and access statement with a householder application unless
+      your property is: a listed building; within a Site of Special Scientific Interest; within an Area
+      of Outstanding Natural Beauty within a conservation area.
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2026-10/Validation%20Guidance%20%28Householder%29%202026%20Update.pdf
+    must-include:
+      - item: An explanation of the design principles and concepts applied to the proposed works, and how
+          they have taken account of the special architectural or historic importance of the building
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+    confidence: medium
+    notes: "The FULL guidance's own DAS triggers for other applications were not captured."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development meets the EIA Schedule 1/2 thresholds.
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted text about including the CMRA in an ES (item 43)."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 1
+            description: Buildings which contain more than 1 dwelling.
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: 18 metres or more in height.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: 7 or more storeys.
+    source-text: >-
+      Full applications involving buildings which contain more than 1 dwelling… 18 metres or more in
+      height or 7 or more storeys
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt omitted the threshold."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more in Flood Zone 1.
+        - site:
+            in: [flood-risk-zone]
+            description: New development in Flood Zones 2 or 3.
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    must-include:
+      - item: Finished floor levels set above the maximum extent of flooding
+        level: must
+        required-if:
+          application-type:
+            in: [hh]
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was garbled and cut off. From the audit (item 14):
+      1ha+ in Flood Zone 1, or new development in Zones 2/3, excluding extensions at first floor and
+      above. Householder applications in Zones 2/3 need floor-level information, not a full FRA.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, scheduled-monument, conservation-area,
+          park-and-garden, locally-listed-building]
+        description: The development impacts, or could impact, on a heritage asset or its setting.
+    source-text: >-
+      Heritage Asset - Heritage Impact Assessment (including Historical, Archaeological features and
+      Scheduled Ancient Monuments) Any application which either impacts or has the potential to impact
+      upon a heritage asset … a Heritage Impact Assessment will be required where development will
+      impact upon designated heritage assets and their settings (Listed buildings/structures,
+      Scheduled Monuments, Conservation Areas, Registered Parks and Gardens) as well as no…
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement): item 23 applies to all applications, not only LBC."
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - site:
+            in: [contaminated-land]
+            description: The land is or may be contaminated.
+    source-text: >-
+      Land Contamination All applications (excluding Householders, Advertisement and Heritage) where
+      new Applications may also need to be accompanied by a Land Contamination Assessment
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): the workbook read the exclusion as an inclusion. The application types
+      are listed to show 'all applications excluding householder, advertisement and heritage'.
+
+  - id: landscaping-plan
+    action: replace
+    required-if:
+      application-type:
+        in: [full, reserved-matters]
+    source-text: >-
+      All detailed applications (excluding shop fronts, advertisements, changes of use and householder
+      applications)
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted fee text. Item 12 Landscaping Details; shop fronts
+      and changes of use can't be excluded by the rule.
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: External lighting would be provided or made necessary by the development.
+    must-include:
+      - item: Details of external lighting and the proposed hours when it would be switched on
+        level: must
+      - item: Beam orientation, an illuminance contour plan and a schedule of the equipment
+        level: should
+      - item: Mitigation measures for any detrimental amenity or nature conservation impacts
+        level: should
+    confidence: medium
+    notes: "The second and third items were in the workbook's 'Advertisement drawings' row."
+
+  - id: noise-assessment
+    action: add
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): item 36 Noise Assessment; the audit gives no trigger."
+
+  - id: photos
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - any:
+            - condition:
+                field: demolition
+                value: true
+                description: The proposal involves demolition.
+            - site:
+                in: [conservation-area, listed-building]
+                description: The site is in a conservation area or is a listed building.
+    confidence: medium
+    notes: "Audit (wrong_trigger): from the audit, the householder guidance asks for photographs for
+      demolition, conservation areas and listed buildings."
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [green-belt, rural-area]
+                description: The site is in the Green Belt or Open Countryside.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: New dwellings (temporary or permanent).
+        - all:
+            - site:
+                in: [green-belt]
+                description: The site is in the Green Belt.
+            - discretionary
+    source-text: >-
+      Planning Statement / Business Case - Applications for all Major development - New dwellings
+      [temporary or permanent] within the Green Belt/Open Countryside - All Minor development within
+      the Green Belt which results in inappropriate development
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    confidence: medium
+    notes: >-
+      'Inappropriate development' in the Green Belt is shown as officer discretion. Householder
+      guidance (audit): needed where Green Belt/Open Countryside extension limits are exceeded.
+
+  - id: recreation-facilities-assessment
+    action: replace
+    required-if:
+      site:
+        in: [open-space]
+        description: The application affects playing field land.
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted a table-of-contents line. Item 47, applications
+      affecting playing field land."
+
+  - id: roof-plan-proposed
+    action: update
+    must-include:
+      - item: At a scale of 1:50 or 1:100
+        level: should
+      - item: The location of details such as roof lights and chimneys
+        level: should
+
+  - id: sci
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 41 Statement of Conformity with the SCI / pre-application
+      consultation, all major development."
+
+  - id: section-existing
+    action: replace
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal involves earthworks or the site has a noticeable slope.
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    must-include:
+      - item: Drawn to an appropriate scale, for example 1:50 or 1:100
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the householder excerpt was flood floor-level text. From the audit:
+      earthworks or a noticeable slope."
+
+  - id: section-proposed
+    action: replace
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal involves earthworks or the site has a noticeable slope.
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    must-include:
+      - item: Drawn to an appropriate scale, for example 1:50 or 1:100
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the householder excerpt was flood floor-level text. From the audit:
+      earthworks or a noticeable slope."
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: Drawn at a scale of 1:500 or 1:200
+        level: must
+      - item: The direction of north
+        level: must
+      - item: The proposed development in relation to the site boundaries and other existing buildings,
+          with written dimensions including those to the boundaries
+        level: must
+      - item: All buildings, roads and footpaths on land adjoining the site, including access arrangements
+        level: must
+      - item: All public rights of way crossing or adjoining the site
+        level: must
+      - item: The position of all trees on the site, and those on adjacent land that could influence or be
+          affected by the development
+        level: must
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Telecommunications development, including prior notification.
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 42 Telecommunications supporting information."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: Main village centre uses not in an existing centre and not in accordance with an
+          up-to-date development plan.
+    confidence: medium
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    notes: "Audit (wrong_trigger): the excerpt refers to the DfT thresholds and a phone number; no threshold
+      was captured."
+
+  - id: travel-plan
+    action: add
+    required-if: discretionary
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 30, significant transport implications."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Where the appropriate level of affordable housing (30% brownfield / 40% greenfield) is not proposed."
+
+unmapped:
+  - local-name: Cannock Chase SAC mitigation / draft Unilateral Undertaking
+    source-text: "applications which will be determined on or after 1st April 2022 for new housing which fall
+      within a 15-kilometre radius Zone of Influence for the Cannock Chase SAC will need to provide
+      mitigation. (From the audit: item 18; £232 per dwelling in the 0-8km zone and £290.58 per dwelling in
+      the 15km Zone of Influence, plus HRA information where likely significant effects on European sites
+      occur.)"
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    suggested-id: habitats-regulations-assessment
+  - local-name: Street Scene drawings
+    source-text: "Detailed applications for new dwellings and major employment site, where considered necessary
+      for applications in or adjacent to Conservation Areas"
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    suggested-id: street-scene-elevations
+  - local-name: Housing mix
+    source-text: "From the audit: all major residential development (Housing and Housing Mix SPD)"
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    suggested-id: housing-mix-statement
+  - local-name: Sustainable drainage and flood sequential test
+    source-text: "From the audit: SuDS for major applications; a sequential test for certain development in
+      Flood Zones 2/3 (item 14)"
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    suggested-id: drainage-strategy
+  - local-name: Foul and Surface Water Drainage Assessment
+    source-text: "From the audit: item 32, new dwellings, commercial/industrial development and hand car washes"
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    suggested-id: foul-sewage-utilities-statement
+  - local-name: Coal Mining Risk Assessment
+    source-text: "From the audit: item 34, all applications except householder in Coal Mining Development
+      Referral Areas"
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Loss of Employment Land
+    source-text: "From the audit: item 20"
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    suggested-id: marketing-evidence
+  - local-name: Retention of Local Community Facility/Service
+    source-text: "From the audit: item 21"
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    suggested-id: community-facilities-statement
+  - local-name: Redundant Rural Buildings statement
+    source-text: "From the audit: item 22, conversion of rural buildings to residential"
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    suggested-id: ""
+  - local-name: Structural Report and Construction Method Statement
+    source-text: "From the audit: item 24, re-use/conversion, loss of a heritage asset, sites adjacent to a
+      canal"
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    suggested-id: structural-survey
+  - local-name: Statement of Agricultural Need
+    source-text: "From the audit: item 26"
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    suggested-id: agricultural-statement
+  - local-name: Agricultural Occupancy Conditions
+    source-text: "From the audit: item 27, removal or variation of agricultural occupancy conditions"
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    suggested-id: marketing-evidence
+  - local-name: Statutory Declaration
+    source-text: "From the audit: item 45, certificates of lawful existing use (CLEUD)"
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    suggested-id: lawful-development-evidence
+  - local-name: Agricultural Land Classification
+    source-text: "From the audit: item 46, major developments including residential"
+    source-url: https://www.sstaffs.gov.uk/sites/default/files/2023-02/2.%20Validation%20Guidance%20%28FULL%29.pdf
+    suggested-id: agricultural-land-classification
+
+low-confidence:
+  - id: bng-metric
+    note: "Audit (wrong_trigger): the excerpt is only '(see 24b Biodiversity Net Gain)'; the item is 25b and
+      applies to any net loss of habitat."
+  - id: archaeological-assessment
+    note: "The excerpt describes the assessment but gives no trigger."

@@ -1,0 +1,222 @@
+# Corrections for South Hams District Council, from the council's audit.
+# South Hams and West Devon share one local requirements guide (web pages, undated), so this file
+# and WDE.yaml apply the same rules. The workbook linked the 'application types' page; the guide is
+# at /planning-validation/local-requirements. Its Full planning rows were inferred and several quote
+# the s73 or Technical Details Consent document lists. Items marked "From the audit" use the audit's
+# paraphrase; the AONB and heritage items come from the West Devon audit of the same guide.
+local-authority: SHA
+
+drop:
+  - id: bng-metric
+    reason: "wrong_app_type / wrong_trigger: placed under Householder and LBC (exempt from statutory BNG);
+      the excerpt is a list of link titles"
+  - id: land-contamination-assessment
+    sheets: [Advertisement consent]
+    reason: "wrong_app_type: contaminated land is not an advertisement requirement"
+  - id: site-plan
+    reason: "wrong_app_type: the excerpt is the s73 document list, inferred as Full planning"
+  - id: design-and-access-statement
+    reason: "wrong_app_type: the Full row quotes the s73 document list and NMAs do not need a DAS; the national
+      rules still apply"
+  - id: photos
+    reason: "wrong_trigger: a note about photographs of material samples, not a photograph requirement"
+
+drop-unmapped:
+  - local-name: Drainage Strategy / SuDS
+    reason: "duplicate: repeats the FDA1 foul drainage sentence; surface water drainage is re-added below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: Major residential development.
+        - all:
+            - site:
+                in: [designated-rural-area]
+                description: The site is in a designated rural area.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 5
+                description: 5 or more dwellings.
+        - discretionary
+    source-text: >-
+      Affordable Housing Statement Required for: Major residential development Rural exceptions sites 5
+      or more dwellings in a designated rural area Includes change of use
+    source-url: https://www.southhams.gov.uk/planning/planning-applications/apply/planning-validation/local-requirements/affordable-housing
+    must-include:
+      - item: Accommodation schedule listing the plot/unit number and size specification (occupancy and GIA)
+        level: must
+      - item: Layout plan showing all affordable housing plots and details such as allocated parking spaces,
+          sheds, bin storage and collection points, and outside spaces/communal areas
+        level: must
+      - item: Floor plans, ideally annotated to show compliance with the Nationally Described Space Standards
+        level: should
+      - item: For flatted developments, floor plans highlighting any common facilities and services
+        level: should
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): 'Includes change of use' means planning applications for change of use,
+      not prior approvals. Rural exception sites have no field, so they are shown as discretionary.
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees on or near the site.
+    source-url: https://www.southhams.gov.uk/planning/planning-applications/apply/planning-validation/local-requirements
+    confidence: low
+    notes: "From the audit (missing_requirement): tree survey/arboricultural information where trees are on or
+      near the site. The topic page's wording was not captured."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: demolition
+            value: true
+            description: Demolition of a building.
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Works to a roof, roof space, weather boarding or hanging tiles (e.g. loft conversion,
+              roof raising, extensions).
+        - site:
+            in: [special-area-of-conservation, special-protection-area, site-of-special-scientific-interest,
+              local-wildlife-site]
+            description: The site is within or immediately adjacent to a designated wildlife site (SAC, SPA,
+              SSSI, County Wildlife Site, Local Nature Reserve, Special Verge, RIGS).
+        - discretionary
+    source-text: >-
+      Biodiversity - Preliminary Ecological Appraisal (PEA) Required for all applications (including
+      householder development and Listed Building Consent) on a case-by-case basis. … A PEA will
+      generally be required for: Demolition of a building Works to a roof, roof space, weather boarding
+      or hanging tiles e.g. loft conversion, roof raising, extensions Works to a qu…
+    source-url: https://www.southhams.gov.uk/planning/planning-applications/apply/planning-validation/local-requirements/biodiversity
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the trigger was cut off and the Full planning row quoted
+      Technical Details Consent text. The PEA list is cut off in the excerpt; other cases (such as
+      lighting or removal of tree lines, hedges or pasture in a Greater Horseshoe Bat consultation zone)
+      are shown as discretionary.
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+          scheduled-monument, park-and-garden]
+        description: The application affects a heritage asset or its setting.
+    source-text: if the application affects a heritage asset or its setting
+    source-url: https://www.southhams.gov.uk/planning/planning-applications/apply/planning-validation/local-requirements
+    confidence: medium
+    notes: "From the West Devon audit of the shared guide (missing_requirement)."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: The site is on or adjacent to potentially contaminated land.
+    must-include:
+      - item: At least a Phase 1 desktop assessment
+        level: must
+    notes: "Audit (wrong_app_type): not an advertisement requirement; it applies by location."
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      condition:
+        field: wind-turbine
+        value: true
+        description: The proposal is for a wind turbine.
+    source-text: >-
+      A specific noise report in full compliance with ETSU guidance must be submitted with the
+      application, but only after full pre-application consultation with the Environmental Health Team.
+    source-url: https://www.southhams.gov.uk/planning/planning-applications/apply/planning-validation/special-application-types
+    must-include:
+      - item: Noise report in full compliance with ETSU guidance
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): this is the wind turbine requirement, not a general Full planning one."
+
+  - id: planning-statement
+    action: add
+    source-url: https://www.southhams.gov.uk/planning/planning-applications/apply/planning-validation/local-requirements
+    confidence: low
+    notes: "From the audit (missing_requirement): the guide has a Planning Statement page; its trigger was not
+      captured."
+
+  - id: protected-landscape-assessment
+    action: add
+    required-if:
+      site:
+        in: [area-of-outstanding-natural-beauty]
+        description: The application is within the AONB (National Landscape).
+    source-text: only if the application is within the AONB
+    source-url: https://www.southhams.gov.uk/planning/planning-applications/apply/planning-validation/local-requirements
+    confidence: medium
+    notes: "AONB (National Landscape) Statement of Need. From the West Devon audit of the shared guide
+      (missing_requirement)."
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: minor-development
+            value: true
+            description: Minor development.
+    source-url: https://www.southhams.gov.uk/planning/planning-applications/apply/planning-validation/local-requirements
+    policy: Plymouth and South West Devon Joint Local Plan DEV32
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): the DEV32 Carbon Reduction Statement, with separate pages
+      for major and minor development; the workbook only quoted the s73 document list. The West Devon
+      audit quotes the shared guide: 'Policy DEV32 requires all development to contribute to the 50%
+      carbon reduction target by 2034'.
+
+  - id: flood-risk-assessment
+    action: update
+    must-include:
+      - item: Information showing the proposal will be safe over its lifetime, will not increase flood risk
+          elsewhere and (where possible) will reduce flood risk overall
+        level: must
+        source-text: >-
+          The FRA must also provide sufficient information to demonstrate the proposal will be safe of its
+          lifetime, not increase flood risks elsewhere and (where possible) reduce flood risks overall.
+
+unmapped:
+  - local-name: Surface Water Drainage Assessment
+    source-text: "every planning application needs a Drainage Assessment that identifies how the surface water
+      will be managed"
+    source-url: https://www.southhams.gov.uk/planning/planning-applications/apply/planning-validation/local-requirements
+    suggested-id: drainage-strategy
+  - local-name: Habitats Regulations recreation mitigation (Tamar European Marine Site)
+    source-text: "All new residential and tourism development within the 12 km Zone of Influence around the
+      Tamar European Marine Site must contribute towards mitigating the recreational impact of development
+      on the Site."
+    source-url: https://www.southhams.gov.uk/planning/planning-applications/apply/planning-validation/local-requirements/biodiversity
+    suggested-id: habitats-regulations-assessment
+
+low-confidence:
+  - id: flood-risk-assessment
+    note: "Audit (wrong_trigger): the excerpt describes FRA content, not when an FRA is required; the trigger
+      was not captured."
+
+new-fields:
+  - field: wind-turbine
+    kind: boolean
+    label: Wind turbine
+    description: The proposal includes one or more wind turbines.

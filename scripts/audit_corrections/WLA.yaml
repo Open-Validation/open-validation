@@ -1,0 +1,198 @@
+# Corrections for West Lancashire Borough Council, from the council's audit.
+# The council's Registration and Validation page (last updated 2 January 2026) links the
+# 'Validation Criteria & Checklist' (media/548069) as the latest criteria; Grokbot cited an older
+# 'update-july-2020' file. Both PDFs were blocked (contents_checked: false), so these corrections
+# rest on Grokbot's excerpts and the errors the audit found in them. The list's dedicated Outline and
+# Reserved Matters checklists were not captured. Where an excerpt states clearly when the document is
+# needed, the trigger is structured.
+local-authority: WLA
+
+validation-list:
+  url: https://www.westlancs.gov.uk/media/548069/validation-criteria-checklist.pdf
+  date: ""
+  date-basis: "audit: the council page gives no date for the current checklist; the workbook's 2019-08-01
+    contradicts the older file's own name ('update-july-2020')"
+
+submission-standards:
+  - item: All plans and drawings at a standard identified metric scale, stating the paper size and
+      showing at least two written dimensions
+    level: should
+  - item: All plans have a date of issue and a separate drawing number
+    level: should
+
+drop-unmapped:
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_app_type: the excerpt is the Coal Mining Risk Assessment exemptions table, which says a
+      CMRA is NOT required for these application types"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advisory text"
+  - local-name: Employment / Economic Statement
+    reason: "duplicate: a fragment of the Economic Statement item (now town-centre-impact-assessment)"
+  - local-name: Drainage Strategy / SuDS
+    reason: "duplicate: the same text as the foul drainage row; the SuDS proforma is re-added below"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if: discretionary
+    notes: "Required for proposals that impact on air quality or are potential pollutants, and may be
+      required for sensitive development near sites with emissions; shown as officer discretion."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees or hedges within the development site, or on adjacent land within 10m of it.
+    must-include:
+      - item: Undertaken by a suitably qualified arboriculturist
+        level: must
+    notes: >-
+      Tree survey: all development with trees or hedges on the site or on adjacent land within 10m. An
+      Arboricultural Impact Assessment where the proposal (including access, services and earthworks)
+      could affect trees. Applies to householder and other applications (audit, wrong_app_type).
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: Protected species are known or suspected to be present.
+        - site:
+            in: [special-area-of-conservation, special-protection-area,
+              site-of-special-scientific-interest, local-wildlife-site]
+            description: The proposal is within or adjacent to a designated site of nature and/or
+              geological conservation importance (e.g. Ramsar, SPAs, SACs).
+        - discretionary
+    notes: "The list gives these as examples ('for example'), so officer discretion is included. Applies to
+      householder and other applications (audit, wrong_app_type)."
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: All elevations of the proposal
+        level: must
+      - item: The proposed building materials and the style, materials and finish of windows and doors,
+          where possible
+        level: should
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: A Schedule 1 project, or a Schedule 2 project that needs an Environmental Impact
+          Assessment.
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+          scheduled-monument, park-and-garden]
+        description: The proposal has the potential to affect heritage assets.
+    notes: "Applies to householder and listed building applications too (audit, wrong_app_type)."
+
+  - id: planning-statement
+    action: update
+    required-if: discretionary
+    notes: "The list says it 'would be particularly useful' where policy context matters, such as proposals
+      that may not accord with Local Plan policies."
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: A sloping site, or ground levels outside the extension would be modified.
+    source-text: to existing ground levels or where ground levels outside the extension would be
+      modified.
+    notes: "Audit (wrong_trigger): the excerpt is cut off at the start."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: A sloping site, or ground levels outside the extension would be modified.
+    source-text: to existing ground levels or where ground levels outside the extension would be
+      modified.
+    notes: "Audit (wrong_trigger): the excerpt is cut off at the start."
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: Scale of 1:500, 1:200 or 1:100
+        level: must
+      - item: The direction of North
+        level: must
+      - item: The proposed development in relation to the site boundaries and other existing buildings
+          on the site, with written dimensions including those to boundaries
+        level: must
+      - item: Any trees or hedges within the site or on adjacent land that could influence or be
+          affected by the development (including street trees), identified and annotated
+        level: must
+
+  - id: telecommunications-report
+    action: replace
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: The proposal is for telecommunications equipment.
+    source-text: >-
+      installation of a mast within three kilometres of the perimeter of an aerodrome, evidence is
+      required that the developer has notified the Civil Aviation Authority, the Secretary of State for
+      Defence or the aerodrome operator in accordance with A.3 (3) of part 16 of Schedule 2 of the Town
+      and Country Planning (General Permitted Development|) Order 2015 (ii).
+    source-url: https://www.westlancs.gov.uk/media/545649/validation-criteria-update-july-2020.pdf
+    must-include:
+      - item: For a mast within three kilometres of the perimeter of an aerodrome, evidence that the
+          developer has notified the Civil Aviation Authority, the Secretary of State for Defence or
+          the aerodrome operator
+        level: must
+    confidence: low
+    notes: "The workbook filed this under change of use prior approval; it is a telecommunications item."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: New main town centre uses (retail, leisure, commercial, office, tourism, cultural
+          and community) not within an existing centre.
+    notes: "The list calls this an Economic Statement."
+
+unmapped:
+  - local-name: SuDS proforma
+    source-text: >-
+      For all Major Development (10 or more dwellings or site area nore than 0.5ha if number of
+      dwellings is unknown; 1,000sqm or more building or 1ha or more site area) an additional SuDs
+      proforma is required
+    source-url: https://www.westlancs.gov.uk/media/545649/validation-criteria-update-july-2020.pdf
+    suggested-id: drainage-strategy
+  - local-name: Drainage Plans
+    source-text: >-
+      Drainage Plans For major applications and applications in area of known flood risk, existing and
+      proposed drainage plans will be require, drawn to a recognised metric scale.
+    source-url: https://www.westlancs.gov.uk/media/545649/validation-criteria-update-july-2020.pdf
+    suggested-id: drainage-strategy
+
+low-confidence:
+  - id: flood-risk-assessment
+    note: "Audit (wrong_trigger): the excerpt is empty ('When is this required? .')."
+  - id: travel-plan
+    note: "Audit (wrong_trigger): the excerpt describes content, not when a Travel Plan is needed."
+  - id: recreation-facilities-assessment
+    note: "Audit (wrong_trigger): the threshold was lost ('facilities an open space assessment will be
+      required.')."
+  - id: schedule-of-works
+    note: "Audit (wrong_app_type): this is part of the barn/rural conversion item, not a general Full planning
+      requirement."

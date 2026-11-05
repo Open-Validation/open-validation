@@ -1,0 +1,485 @@
+# Corrections for Borough Council of King's Lynn and West Norfolk, from the council's audit.
+# The council has no single local list: its 'Planning application validation checklists' page
+# links 15 per-type checklists, which together are the local list. The workbook link is the
+# current Full Application checklist (text dated '01/04/2026, v1'; cites the Local Plan
+# 2021-2040). Each checklist splits 'National Requirements' from 'Local Requirements'.
+# The workbook read the combined 'Householder and Listed Building Consent' checklist (id 9946)
+# for its Householder rows, not the plain Householder checklist (id 9948), whose only local items
+# are CIL, Local Plan compliance and Neighbourhood Plan requirements. The Listed Building (9943),
+# LDC existing (9952), Tree Application (9954) and Variation (Listed Building) (9949) checklists
+# were not read and still need a manual read. Items marked "From the audit" use its paraphrase.
+local-authority: KIN
+
+validation-list:
+  url: https://www.west-norfolk.gov.uk/download/downloads/id/9951/checklist_-_full_application.pdf
+  date: 2026-04-01
+  date-basis: "audit: Full Application checklist header '01/04/2026, v1' (the 2026-08 workbook date is PDF metadata)"
+
+submission-standards:
+  - item: Drawings must not be marked 'NOT TO SCALE'; this will invalidate the application
+    level: must
+
+drop:
+  - id: site-plan
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: copies of the Householder and LBC checklist items; the prior notification checklist read was the agricultural one"
+  - id: cil-form
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: copies of the Householder and LBC checklist items; the prior notification checklist read was the agricultural one"
+  - id: section-existing
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: copies of the Householder and LBC checklist items; the prior notification checklist read was the agricultural one"
+  - id: section-proposed
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: copies of the Householder and LBC checklist items; the prior notification checklist read was the agricultural one"
+  - id: flood-risk-assessment
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: copies of the Householder and LBC checklist items; the prior notification checklist read was the agricultural one"
+  - id: floor-plan-existing
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: copies of the Householder and LBC checklist items; the prior notification checklist read was the agricultural one"
+  - id: floor-plan-proposed
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: copies of the Householder and LBC checklist items; the prior notification checklist read was the agricultural one"
+  - id: elevation-existing
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: copies of the Householder and LBC checklist items; the prior notification checklist read was the agricultural one"
+  - id: elevation-proposed
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: copies of the Householder and LBC checklist items; the prior notification checklist read was the agricultural one"
+  - id: heritage-statement
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: copies of the Householder and LBC checklist items; the prior notification checklist read was the agricultural one"
+  - id: roof-plan-existing
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: copies of the Householder and LBC checklist items; the prior notification checklist read was the agricultural one"
+  - id: roof-plan-proposed
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: copies of the Householder and LBC checklist items; the prior notification checklist read was the agricultural one"
+  - id: section-existing
+    sheets: [Discharge of conditions, Variation of condition s73]
+    reason: "wrong_trigger: surface-water drainage text (discharge) and BNG text (s73)"
+  - id: section-proposed
+    sheets: [Discharge of conditions, Variation of condition s73]
+    reason: "wrong_trigger: surface-water drainage text (discharge) and BNG text (s73)"
+  - id: landscaping-plan
+    sheets: [Discharge of conditions]
+    reason: "wrong_trigger: part of the surface-water drainage checklist"
+
+drop-unmapped:
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: watercourse maintenance text from the drainage checklist"
+  - local-name: Ground investigation / Geotechnical / Basement Impact Assessment
+    reason: "wrong_trigger: hydrogeological context from the drainage checklist"
+  - local-name: Validation checklist form (completed)
+    reason: "not_a_requirement: SuDS evidence fragment"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: the discharge row is the Water Industry Act s106; the BNG and affordable housing Heads of Terms are re-added below"
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_app_type: the Full and RM rows are lighting-scheme text; the advert item is re-added below"
+  - local-name: Crime prevention / Secured by Design statement
+    reason: "not_a_requirement: applicants are only 'encouraged' to work towards Secured by Design"
+
+requirements:
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more dwellings (King's Lynn, Hunstanton, Downham Market).
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.33
+            description: A site of 0.33 ha or more (King's Lynn, Hunstanton, Downham Market).
+        - all:
+            - site:
+                in: [rural-area]
+                description: The site is in the rural areas.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 5
+                    description: 5 or more dwellings in rural areas.
+                - condition:
+                    field: site-area-residential
+                    operator: ">="
+                    value: 0.165
+                    description: A site of 0.165 ha or more in rural areas.
+    source-text: "Affordable housing (Policy LP28) ... 0.33 ha or 10 or more dwellings ... rural ... 0.165 ha
+      or 5 or more"
+    source-url: https://www.west-norfolk.gov.uk/download/downloads/id/9951/checklist_-_full_application.pdf
+    policy: Local Plan 2021-2040 LP28
+    confidence: medium
+    notes: "From the audit (missing_requirement): Affordable Housing Heads of Terms."
+
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      site:
+        in: [air-quality-management-area]
+        description: The site is in the Gaywood Clock AQMA or the King's Lynn Town Centre one-way system and
+          London Road AQMA.
+    source-text: "Air quality assessment: Required for applications within the Gaywood Clock AQMA or the King's
+      Lynn Town Centre one-way system and London Road AQMA"
+    source-url: https://www.west-norfolk.gov.uk/download/downloads/id/9951/checklist_-_full_application.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpts were odour and heritage text."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees within the site or on adjacent land could influence or be affected by the
+          development.
+    source-text: >-
+      Tree Survey Surveys should be carried out in accordance with BS5837 … Yes, where there are trees
+      within the application site or on land adjacent to it that could influence or be affected by the
+      development.
+    source-url: https://www.west-norfolk.gov.uk/download/downloads/id/9951/checklist_-_full_application.pdf
+    must-include:
+      - item: Survey carried out in accordance with BS5837
+        level: must
+    confidence: medium
+    notes: "The Tree Application checklist (id 9954) was not read (audit wrong_document)."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [site-of-special-scientific-interest, special-protection-area, special-area-of-conservation,
+              priority-habitat]
+            description: Development likely to affect internationally or nationally designated sites, or
+              priority habitats.
+        - condition:
+            field: protected-species
+            value: true
+            description: Development likely to affect European or nationally protected species.
+        - discretionary
+    source-text: >-
+      Major application All development likely to affect: a) Internationally and nationally designated
+      sites; b) European and nationally protected species; c) Priority habitats and species; and d)
+      Significant populations of national or local Red List or notable species.
+    source-url: https://www.west-norfolk.gov.uk/download/downloads/id/9951/checklist_-_full_application.pdf
+    must-include:
+      - item: Surveys following BS 42020:2013
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): this ecology trigger had been filed under Fire Statement. Red List or
+      notable species have no field, so they are shown as officer judgement."
+
+  - id: cil-form
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 100
+            description: More than 100 square metres of floorspace is proposed.
+        - condition:
+            field: residential-annexe
+            value: true
+            description: An extension or conversion of an existing building to create a residential annexe.
+        - discretionary
+    source-text: >-
+      If the work has already started or the more than 100 square metres of floorspace is proposed. …
+      CIL Forms must be submitted if your proposal is for an extension or conversion of an existing
+      building to create a residential Annexe.
+    source-url: https://www.west-norfolk.gov.uk/download/downloads/id/9951/checklist_-_full_application.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpts were column-merged. Work already started has no field, so it
+      is shown as officer judgement."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building 18 metres or more in height.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building with 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains two or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-text: "Fire statement: Required for buildings 18 m or more in height, or with 7 or more storeys,
+      that contain two or more dwellings or educational accommodation"
+    source-url: https://www.west-norfolk.gov.uk/download/downloads/id/9951/checklist_-_full_application.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted ecology text and the reserved matters definition. Listed
+      under the checklist's National Requirements."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      site:
+        in: [listed-building, conservation-area]
+        description: The proposal affects a listed building and/or a conservation area.
+    source-url: https://www.west-norfolk.gov.uk/download/downloads/id/9951/checklist_-_full_application.pdf
+    confidence: low
+    notes: >-
+      The excerpts point to the council's Heritage Statement template; the trigger text ('Yes, if your
+      proposal falls within one of the following; Listed Building and/or Conservation Area') is
+      column-merged in the sections row. Listed under the checklist's National Requirements.
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: floodlighting
+            value: true
+            description: Floodlighting.
+        - all:
+            - condition:
+                field: external-lighting
+                value: true
+                description: External illumination.
+            - site:
+                in: [rural-area]
+                description: In the countryside.
+        - all:
+            - application-type:
+                in: [advertising]
+            - condition:
+                field: illuminated
+                value: true
+                description: Illuminated advertisements.
+        - discretionary
+    source-text: >-
+      Lighting Scheme / Pollution Assessment … An assessment should include details of any existing and
+      proposed external lighting and the hours when the lighting would be switched on.
+    source-url: https://www.west-norfolk.gov.uk/download/downloads/id/9951/checklist_-_full_application.pdf
+    must-include:
+      - item: Details of any existing and proposed external lighting
+        level: must
+      - item: The hours when the lighting would be switched on
+        level: must
+    confidence: medium
+    notes: "From the audit: needed where a proposal would materially increase light pollution (e.g. floodlighting
+      or countryside illumination). Adverts: 'Drawings showing external lighting details (if applicable)'."
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: plant-equipment
+            value: true
+            description: Noisy plant such as air source heat pumps.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise-sensitive development.
+        - discretionary
+    source-url: https://www.west-norfolk.gov.uk/download/downloads/id/9951/checklist_-_full_application.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt was a fragment; from the audit, noisy plant/ASHP and
+      noise-sensitive development."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: eia-development
+            value: true
+            description: EIA development.
+        - discretionary
+    source-url: https://www.west-norfolk.gov.uk/download/downloads/id/9951/checklist_-_full_application.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Supporting Planning Statement for EIA, major and
+      'significant' applications (no threshold for 'significant')."
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: A site of 1 ha or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: A site of 1 ha or more.
+    source-text: "Climate change statement ... 1 ha or more (Policy LP06)"
+    source-url: https://www.west-norfolk.gov.uk/download/downloads/id/9951/checklist_-_full_application.pdf
+    policy: Local Plan 2021-2040 LP06
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Climate Change Statement."
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Outside existing service centres.
+        - any:
+            - condition:
+                field: retail-floorspace
+                operator: ">"
+                value: 2500
+                description: Gross floorspace greater than 2,500 square metres.
+            - discretionary
+    source-text: >-
+      Policy LP08 states that Retail impact assessments will be required for individual schemes having a
+      gross floorspace greater than 2,500 square metres, although in the case of the Hardwick area in
+      King’s Lynn, as identified on the Policies Map, (where there is already a significant accumulation
+      of out of town centre …
+    source-url: https://www.west-norfolk.gov.uk/download/downloads/id/9951/checklist_-_full_application.pdf
+    policy: Local Plan 2021-2040 LP07, LP08
+    confidence: medium
+    notes: "Audit (wrong_trigger): the Hardwick area threshold is 500 sqm; it has no field, so it is shown as
+      officer judgement."
+
+  - id: transport-assessment
+    action: replace
+    required-if: discretionary
+    source-text: Yes, where developments will have significant transport implications
+    source-url: https://www.west-norfolk.gov.uk/download/downloads/id/9951/checklist_-_full_application.pdf
+    confidence: medium
+    notes: "Transport Assessment and Travel Plan; contact Norfolk County Council for what is required."
+
+  - id: travel-plan
+    action: replace
+    required-if: discretionary
+    source-text: Yes, where developments will have significant transport implications
+    source-url: https://www.west-norfolk.gov.uk/download/downloads/id/9951/checklist_-_full_application.pdf
+    confidence: medium
+    notes: "Transport Assessment and Travel Plan; contact Norfolk County Council for what is required."
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: All features of the site, including buildings, hardstanding areas, parking, gates, walls,
+          fences and landscaping (including trees), existing and proposed
+        level: must
+      - item: At a scale of 1:200 or 1:500 in most cases, with a north point
+        level: should
+    confidence: medium
+
+  - id: floor-plan-existing
+    action: update
+    must-include:
+      - item: At a scale of 1:100
+        level: must
+    confidence: medium
+
+  - id: floor-plan-proposed
+    action: update
+    must-include:
+      - item: At a scale of 1:100
+        level: must
+    confidence: medium
+
+  - id: elevation-existing
+    action: update
+    must-include:
+      - item: At a scale of 1:100
+        level: must
+    confidence: medium
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: At a scale of 1:100
+        level: must
+    confidence: medium
+
+  - id: roof-plan-existing
+    action: update
+    must-include:
+      - item: At a scale of 1:100
+        level: must
+    confidence: medium
+
+  - id: roof-plan-proposed
+    action: update
+    must-include:
+      - item: At a scale of 1:100
+        level: must
+    confidence: medium
+
+  - id: section-existing
+    action: update
+    must-include:
+      - item: At a scale of 1:100, showing site levels and finished floor levels
+        level: must
+    confidence: medium
+
+  - id: section-proposed
+    action: update
+    must-include:
+      - item: At a scale of 1:100, showing site levels and finished floor levels
+        level: must
+    confidence: medium
+
+unmapped:
+  - local-name: Advertisement drawings
+    source-text: "Advertisement Drawings – 1:50 or 1:100 showing size, siting, materials and colours to be
+      used, height above ground, details of method and colour(s) of illumination … Section Through – 1:50 or
+      1:100 showing extent of projection"
+    source-url: https://www.west-norfolk.gov.uk/download/downloads/id/9942/checklist_-_advertisement_consent.pdf
+    suggested-id: advertisement-drawings
+  - local-name: BNG Heads of Terms and monitoring fee
+    source-text: "S106 heads of terms will be required at validation for any delivery of net gain within blue
+      line land. **A monitoring fee will be required where the Council is responsible for monitoring progress
+      towards Biodiveristy Net Gain delivery over the statutory 30 year period."
+    source-url: https://www.west-norfolk.gov.uk/download/downloads/id/9951/checklist_-_full_application.pdf
+    suggested-id: heads-of-terms
+  - local-name: Custom and self-build Heads of Terms
+    source-text: "From the audit: listed in the Full Application checklist's local requirements"
+    source-url: https://www.west-norfolk.gov.uk/download/downloads/id/9951/checklist_-_full_application.pdf
+    suggested-id: self-build-statement
+  - local-name: Odour Assessment
+    source-text: "From the audit: commercial kitchens, takeaways and other odour sources"
+    source-url: https://www.west-norfolk.gov.uk/download/downloads/id/9951/checklist_-_full_application.pdf
+    suggested-id: odour-assessment
+  - local-name: Local Plan policy compliance
+    source-text: "From the audit: all applications"
+    source-url: https://www.west-norfolk.gov.uk/download/downloads/id/9951/checklist_-_full_application.pdf
+    suggested-id: ""
+  - local-name: Neighbourhood Plan submission requirements
+    source-text: "From the audit: where the parish's Neighbourhood Plan sets them"
+    source-url: https://www.west-norfolk.gov.uk/download/downloads/id/9951/checklist_-_full_application.pdf
+    suggested-id: ""
+
+low-confidence:
+  - id: flood-risk-assessment
+    note: "The excerpts list what to submit (a full FRA, or the SFRA proforma for sequential and exception
+      tests) but not when; the Householder rows came from the combined Householder and LBC checklist (audit
+      wrong_document)."
+  - id: land-contamination-assessment
+    note: "Audit (wrong_trigger): the excerpts are column-merged with GIRAMS and heritage text; no trigger."
+  - id: landscaping-plan
+    note: "Audit (wrong_trigger): the excerpt is column-merged retail text; no trigger."
+  - id: recreation-facilities-assessment
+    note: "Audit (wrong_trigger): the excerpts are column-merged retail and heritage text; no trigger."

@@ -1,0 +1,634 @@
+# Corrections for London Borough of Brent, from inputs/audit/london-borough-of-brent.json.
+# The audit read Brent's adopted Full/Outline/Technical Details Consent list and its separate
+# Householder list. About a dozen workbook rows came from a haveyoursay.brent.gov.uk
+# consultation draft, not the adopted list; those are dropped or flagged. Items marked
+# "From the audit" use the audit's paraphrase, not the council's exact words.
+local-authority: BEN
+
+validation-list:
+  url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+  date: "2024"
+  date-basis: >-
+    audit: the list text has no adoption date (the 2025-09-01 date was PDF metadata); it
+    includes the February/April 2024 BNG wording and planning.data.gov.uk records Brent's
+    Local List from 2024-01-01
+
+submission-standards:
+  - item: Plans and drawings include a scale bar and an indication of North (indicative drawings for outline applications where the relevant matters are reserved)
+    level: must
+
+drop-unmapped:
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_document: text from the haveyoursay consultation draft, not the adopted list"
+  - local-name: Employment / Economic Statement
+    reason: "wrong_document: Employment Land Assessment text from the consultation draft"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_document: fragment from the consultation draft"
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "wrong_document: 24-month marketing test from the consultation draft"
+  - local-name: Water efficiency / water usage statement
+    reason: "wrong_document: text from the consultation draft"
+  - local-name: Design Code / Masterplan / Parameter plans
+    reason: "wrong_trigger: the source has no design code requirement; the excerpt is the UGF, ventilation, water quality and WLC rows (added below)"
+  - local-name: Ground investigation / Geotechnical / Basement Impact Assessment
+    reason: "wrong_trigger: the excerpt is the archaeology trigger; replaced by archaeological-assessment and a Basement impact assessment item"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "wrong_trigger: the excerpt is the air pollution trigger; replaced by the Amenity space quality statement below"
+  - local-name: Tall buildings / Wind microclimate assessment
+    reason: "wrong_trigger: the excerpt is the TV/Radio reception trigger; both are added below"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: the excerpt is the Odour Management Plan trigger; both are added below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - any:
+            - all:
+                - ref: major-development
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: The major development includes new homes.
+            - condition:
+                field: housing-type
+                value: shared
+                description: The proposal is large-scale purpose-built shared living.
+            - condition:
+                field: housing-type
+                value: student
+                description: The proposal is purpose-built student accommodation.
+    source-text: "Affordable Housing Statement: major residential schemes, large-scale purpose-built shared living, and purpose-built student accommodation"
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted the shared-facilities management plan trigger.
+      "Large-scale" shared living has no threshold in the audit.
+
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - any:
+            - ref: major-development
+            - discretionary
+    source-text: >-
+      Air Quality Assessment Air Quality Neutral Assessment Air Quality Positive Assessment … Where
+      the proposed development includes new uses or buildings that have the potential to generate
+      air pollution or where a sensitive use is proposed in close proximity to an existing source of
+      air pollution All major developments outside of Growth Areas and Air Quality Focus Areas All
+      major developments within Growth Areas and Air Quality Focus Areas
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    must-include:
+      - item: Air Quality Neutral Assessment (major developments outside Growth Areas and Air Quality Focus Areas)
+        level: must
+        required-if:
+          ref: major-development
+      - item: Air Quality Positive Assessment (major developments within Growth Areas and Air Quality Focus Areas)
+        level: must
+        required-if:
+          ref: major-development
+    confidence: medium
+    notes: >-
+      The workbook's excerpt runs the AQA, Air Quality Neutral and Air Quality Positive rows
+      together. From the audit (missing_requirement): Air Quality Neutral for majors outside Growth
+      Areas/AQFAs, Air Quality Positive for majors in them. The AQA itself is needed where new uses
+      could generate air pollution or a sensitive use is near an existing source (officer judgement).
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: The works affect trees.
+    source-url: https://www.brent.gov.uk/media/16421113/applications-for-householder-planning-permission.pdf
+    confidence: low
+    notes: >-
+      From the audit (wrong_document): the Householder list asks for a Tree survey for works
+      affecting trees. The workbook's tree survey text came from the consultation draft, so whether
+      the adopted Full/Outline list has the same item needs checking.
+
+  - id: archaeological-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, hh]
+        - any:
+            - site:
+                in: [archaeological-priority-area]
+                description: The site is in an Archaeological Priority Area or Site of Archaeological Importance.
+            - discretionary
+    source-text: >-
+      Archaeological impact statement … Sites which include or have the potential to include
+      heritage assets with archaeological interest, including Archaeological Priority Areas and
+      Sites of Archaeological Importance.
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Archaeological impact statement for APAs, on both the
+      Full/Outline and Householder lists. The wording was in the workbook's 'Basement Impact
+      Assessment' row.
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, hh]
+        - any:
+            - site:
+                in: [site-of-special-scientific-interest, local-wildlife-site]
+                description: The development could affect a designated environmentally important site.
+            - discretionary
+    confidence: medium
+    notes: >-
+      A reasonable likelihood of protected species being present is officer judgement. The audit
+      says the Householder list also has an Ecological assessment.
+
+  - id: cil-form
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, hh]
+        - any:
+            - condition:
+                field: floorspace
+                operator: ">="
+                value: 100
+                description: 100 square metres or more of new floorspace, including extensions.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: The proposal creates a new dwelling.
+    source-text: >-
+      Community Infrastructure Levy (CIL) additional information form … For all CIL liable
+      applications including: 100 sqm or more of new floorspace, including extensions;
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    confidence: medium
+    notes: "From the audit: the Householder list also asks for the CIL form for 100 sq m+ or a new dwelling."
+
+  - id: construction-management-plan
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - ref: major-development
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    confidence: medium
+    notes: "From the audit (missing_requirement): Construction Logistics Plan for all majors."
+
+  - id: daylight-sunlight-assessment
+    action: replace
+    required-if:
+      application-type:
+        in: [full, outline]
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted the CIL trigger. The list's own trigger for the
+      Daylight / sunlight assessment wasn't given by the audit.
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: The proposal creates one or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: The proposal creates 100 square metres or more of floorspace.
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was garbled. From the audit: majors, listed
+      building consent, and dwellings or 100 sq m+ in conservation areas; not required for
+      Section 73 applications.
+
+  - id: elevation-existing
+    action: update
+    must-include:
+      - item: Normally at a scale of 1:50 or 1:100
+        level: should
+    notes: "For outline applications where the relevant matters are reserved, the list accepts indicative drawings."
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: Normally at a scale of 1:50 or 1:100
+        level: should
+    notes: "For outline applications where the relevant matters are reserved, the list accepts indicative drawings."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - ref: major-development
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    confidence: medium
+    notes: "From the audit (missing_requirement): Energy strategy for all majors."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - condition:
+            field: eia-development
+            value: true
+            description: The development is subject to Environmental Impact Assessment.
+    source-text: >-
+      Environmental Statement and non-technical summary … Applications that are subject to
+      Environmental Impact Assessment in circumstances set out in the Town and Country Planning
+      (Environmental Impact Assessment) Regulations 2017.
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    confidence: medium
+    notes: "The workbook's excerpt ran several rows together; the EIA trigger is the last sentence."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - discretionary
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted the EIA trigger. The list refers to the national
+      Gateway One fire statement, which it says is not required for outline applications; the
+      audit gives no local trigger. Brent's local Planning Fire Safety Statement is listed under
+      unmapped items.
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, hh]
+        - any:
+            - site:
+                in: [flood-risk-zone]
+                description: Proposals in Flood Zone 2 or 3, including minor development and change of use.
+            - discretionary
+    confidence: medium
+    notes: >-
+      The excerpt lists Flood Zone 2 or 3 as the first of several circumstances; the rest were cut
+      off, so they are shown as officer discretion. The audit says the Householder list asks for a
+      flood risk assessment in Flood Zones 2/3.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - all:
+            - application-type:
+                in: [hh, full, outline]
+            - site:
+                in: [listed-building, conservation-area, article-4-direction-area, locally-listed-building]
+                description: The proposal affects a listed building, conservation area, Article 4 area or locally listed building.
+    source-text: "Listed building consent; householder and full applications affecting listed buildings..."
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    confidence: medium
+    notes: >-
+      Audit (wrong_document, wrong_app_type): the workbook's wording came from the consultation
+      draft. From the audit: the adopted list names listed building consent, and the Householder
+      list covers listed buildings, conservation areas, Article 4 areas and locally listed buildings.
+
+  - id: landscaping-plan
+    action: replace
+    required-if:
+      application-type:
+        in: [hh]
+    source-url: https://www.brent.gov.uk/media/16421113/applications-for-householder-planning-permission.pdf
+    confidence: low
+    notes: >-
+      From the audit (wrong_document): the Householder list asks for a Landscape plan for all
+      applications. The workbook's landscape plan text came from the consultation draft, so the
+      adopted Full/Outline trigger needs checking.
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      application-type:
+        in: [full, outline]
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    confidence: low
+    notes: "From the audit (missing_requirement): a Lighting assessment is listed, but the audit gives no trigger."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [hh]
+            - condition:
+                field: plant-equipment
+                value: true
+                description: The proposal includes new plant.
+        - all:
+            - application-type:
+                in: [full, outline]
+            - discretionary
+    source-url: https://www.brent.gov.uk/media/16421113/applications-for-householder-planning-permission.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement, wrong_document): the Householder list asks for a
+      Noise/vibration assessment for new plant; the Full/Outline list has a Noise and vibration
+      impact assessment, but the audit gives no trigger for it.
+
+  - id: photos
+    action: add
+    required-if:
+      application-type:
+        in: [hh, full, outline]
+    source-url: https://www.brent.gov.uk/media/16421113/applications-for-householder-planning-permission.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Photographs of the site for all applications, on both lists."
+
+  - id: planning-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - any:
+            - ref: major-development
+            - discretionary
+    confidence: medium
+    notes: "For all major developments and any development that is not in accordance with the development plan (council's wording)."
+
+  - id: roof-plan-existing
+    action: update
+    must-include:
+      - item: Normally at a scale of 1:50 or 1:100
+        level: should
+    notes: "For outline applications where the relevant matters are reserved, the list accepts indicative drawings."
+
+  - id: roof-plan-proposed
+    action: update
+    must-include:
+      - item: Normally at a scale of 1:50 or 1:100
+        level: should
+    notes: "For outline applications where the relevant matters are reserved, the list accepts indicative drawings."
+
+  - id: sci
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - ref: major-development
+    confidence: low
+    notes: >-
+      The workbook's excerpt runs the SCI, Sustainability statement and SuDS rows together; each
+      reads as major developments, but which trigger goes with which row needs checking.
+
+  - id: section-existing
+    action: update
+    must-include:
+      - item: Normally at a scale of 1:50 or 1:100
+        level: should
+    notes: "For outline applications where the relevant matters are reserved, the list accepts indicative drawings."
+
+  - id: section-proposed
+    action: update
+    must-include:
+      - item: Finished floor and site levels
+        level: must
+      - item: Normally at a scale of 1:50 or 1:100
+        level: should
+    notes: "For outline applications where the relevant matters are reserved, the list accepts indicative drawings."
+
+  - id: site-plan
+    action: update
+    required-if:
+      application-type:
+        in: [full, outline, hh]
+    must-include:
+      - item: Normally at a scale of 1:100 or 1:200
+        level: should
+    notes: "From the audit: the Householder list also asks for a site plan."
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - ref: major-development
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the excerpt is the SCI/sustainability/SuDS run-on. The Sustainability
+      statement may be limited to "major non-residential developments that include non-residential
+      floorspace"; check the list.
+
+  - id: transport-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - ref: major-development
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Transport Assessment including a Travel Plan for all
+      majors. A Transport Statement for large-scale minors is listed under unmapped items.
+
+  - id: travel-plan
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - ref: major-development
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    confidence: medium
+    notes: "From the audit (missing_requirement): Transport Assessment including a Travel Plan for all majors."
+
+  - id: water-impact-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - discretionary
+    source-text: "Water quality statement Proposals involve physical modifications to a water body, and/or materially affecting water bodies"
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    confidence: medium
+    notes: "From the audit (missing_requirement): Water quality statement. The wording was in the workbook's 'Design Code' row."
+
+unmapped:
+  - local-name: Basement impact assessment
+    source-text: "From the audit: any basement (Full/Outline and Householder lists)"
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: basement-impact-assessment
+  - local-name: Sustainable Urban Drainage Strategy
+    source-text: "Sustainable Urban Drainage Strategy All major developments."
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: drainage-strategy
+  - local-name: Planning Fire Safety Statement / Reasonable Exception Statement
+    source-text: "Planning Fire Safety Statement or Reasonable Exception Statement ... all non-major applications"
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: fire-safety-statement
+  - local-name: Urban Greening Factor
+    source-text: "Urban Greening Factor masterplan and calculation Major developments and minor residential developments"
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: urban-greening-factor
+  - local-name: Ventilation / extraction statement
+    source-text: "Ventilation / extraction statement Where development includes new restaurants / cafes / restaurants (including changes of use) or other development which require ventilation or extraction"
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: ventilation-extraction-statement
+  - local-name: Odour Management Plan
+    source-text: "… risk of odour nuisance associated with plant or process failure or where it complements control measures such as abatement systems."
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: odour-management-plan
+  - local-name: Whole Life-Cycle Carbon Assessment
+    source-text: "Whole Life Cycle Carbon Assessment For all applications referrable to the Mayor of Lon…"
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: whole-life-carbon-assessment
+  - local-name: Circular Economy Statement
+    source-text: "From the audit: applications referable to the GLA"
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: circular-economy-statement
+  - local-name: Wind microclimate assessment
+    source-text: "Wind microclimate assessment: tall buildings (30 m+) or proposals likely to adversely affect wind conditions"
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: wind-microclimate-assessment
+  - local-name: TV / Radio Reception Assessment
+    source-text: "TV / Radio Reception Assessment For tall buildings (30 m high and taller) or for proposals that are significantly taller than their surroundings."
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: tv-radio-reception-assessment
+  - local-name: Amenity space quality statement
+    source-text: "From the audit: all residential development"
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: amenity-space-statement
+  - local-name: Accommodation with shared facilities management plan
+    source-text: "… All planning applications for developments with shared facilities and/or additional support."
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: management-plan
+  - local-name: BREEAM pre-assessment
+    source-text: "From the audit: majors with 1,000 sq m+ non-residential floorspace"
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: breeam-assessment
+  - local-name: Decarbonisation plan
+    source-text: "From the audit: connection to a district heat network"
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: decarbonisation-plan
+  - local-name: Delivery and Servicing Management Plan
+    source-text: "From the audit: all majors"
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: delivery-servicing-plan
+  - local-name: Digital connectivity infrastructure plan
+    source-text: "From the audit: new residential and commercial development"
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: digital-connectivity-plan
+  - local-name: Digital model
+    source-text: "From the audit: all majors"
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: digital-model
+  - local-name: Education facilities report
+    source-text: "From the audit: loss of education or childcare facilities"
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: education-facilities-report
+  - local-name: Foul sewage and utilities assessment
+    source-text: "From the audit: large-scale majors"
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: foul-sewage-assessment
+  - local-name: Healthy Streets assessment
+    source-text: "From the audit: S278 or highway works over £200k"
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: healthy-streets-assessment
+  - local-name: Meanwhile Feasibility Study / Meanwhile Use Strategy
+    source-text: "From the audit: phased majors in town centres or growth areas"
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: meanwhile-use-strategy
+  - local-name: Noise Management Plan
+    source-text: "From the audit: listed without a trigger"
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: noise-management-plan
+  - local-name: Overheating assessment
+    source-text: "From the audit: new dwellings"
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: overheating-assessment
+  - local-name: Parking Design and Management Plan
+    source-text: "Parking Design and Management Plan ... major developments with 12 or more off-street parking spaces"
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: parking-management-plan
+  - local-name: Topographic survey / Site survey
+    source-text: "From the audit: topographic survey for majors and large minors; site survey (Householder list: level changes or basements)"
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: topographical-survey
+  - local-name: Play and informal recreation strategy
+    source-text: "From the audit: new residential development"
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: play-space-strategy
+  - local-name: Public house supporting information
+    source-text: "From the audit: listed without a trigger"
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: public-house-information
+  - local-name: Social Infrastructure report
+    source-text: "From the audit: listed without a trigger"
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: social-infrastructure-report
+  - local-name: Townscape / visual impact assessment
+    source-text: "From the audit: listed without a trigger"
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: townscape-visual-impact-assessment
+  - local-name: Transport Statement
+    source-text: "From the audit: large-scale minors"
+    source-url: https://www.brent.gov.uk/-/media/files/resident-documents/planning-and-bc-documents/full-planning-applications-outline-planning-applications-technical-details-consent.pdf?rev=4baabcf651dd4c8c96266c7a7481d4b5
+    suggested-id: transport-assessment
+  - local-name: Demolition plan
+    source-text: "From the audit: Householder list, significant demolition"
+    source-url: https://www.brent.gov.uk/media/16421113/applications-for-householder-planning-permission.pdf
+    suggested-id: demolition-plan
+
+low-confidence:
+  - id: town-centre-impact-assessment
+    note: "Audit (wrong_document): the Retail Impact Assessment wording came from the consultation draft, not the adopted list; check whether the adopted list asks for it and when."
+  - id: viability-assessment
+    note: "Audit (wrong_document): the Fast Track Route wording came from the consultation draft, not the adopted list; check the adopted list."
+  - id: waste-management-plan
+    note: "Audit (wrong_document): the servicing and refuse management plan wording came from the consultation draft. The adopted list has a Delivery and Servicing Management Plan for all majors (see unmapped)."
+  - id: recreation-facilities-assessment
+    note: "Audit (wrong_trigger): the excerpt is only the fragment 'amenity and play space will be provided.' The adopted list has a Play and informal recreation strategy for new residential (see unmapped); no open-space assessment trigger was found."
+  - id: floor-plan-existing
+    note: "Audit (wrong_app_type): for outline applications where the relevant matters are reserved, the list accepts indicative drawings."
+  - id: floor-plan-proposed
+    note: "Audit (wrong_app_type): for outline applications where the relevant matters are reserved, the list accepts indicative drawings."
+  - id: bng-metric
+    note: "Audit (not_a_requirement, low): BNG is a national requirement that the workbook counted as local."

@@ -1,0 +1,289 @@
+# Corrections for North Northamptonshire Council, from inputs/audit/north-northamptonshire-council.json.
+# The audit found no unified North Northamptonshire local validation list. Grokbot's link is the
+# general 'Supporting documents and reports' guidance page (last updated 19 May 2023), which gives
+# triggers only for the Design and Access Statement, Heritage Impact Assessment and Tree Survey and
+# lists other documents as needed "depending on the application". Legacy area lists (e.g. Corby's
+# 2018 'Validation Check List For Planning Applications') may still apply but were not checked.
+local-authority: NNUA
+
+validation-list:
+  url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application/supporting-documents-and-reports
+  status: not-found
+  date-basis: >-
+    audit: no unified local validation list found; the url is a general 'Supporting documents and
+    reports' guidance page (last updated 19 May 2023). Legacy predecessor-area lists (e.g. Corby
+    2018) appear to apply
+
+drop:
+  - id: bng-metric
+    sheets: [Householder]
+    reason: "wrong_app_type: the excerpt says householder applications are excepted"
+
+drop-unmapped:
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "wrong_trigger: quotes SPD guidance ('can be used to detect features'), no requirement or trigger"
+
+requirements:
+  - id: bng-metric
+    action: replace
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the statutory biodiversity gain condition (not
+          householder applications or de minimis habitats).
+    source-text: >-
+      All applications (except householder applications such as extensions, and de minimis
+      habitats) will need to complete a Biodiversity Net Gain metric There's a mandatory requirement
+      of 10% Biodiversity Net Gain for: major applications from 12 February 2024 small sites through
+      the Environment Act from 2 April 2024
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook placed this under Householder, which the excerpt excepts."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: The application is for one or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: The application is for building(s) with a floor space of 100 square
+                      metres or more.
+    source-text: >-
+      A Design and Access Statement is required if you are making an application for a 'major'
+      development or listed building consent or the site is in a conservation area and the
+      application is for one or more dwellings, or building(s) with a floor space of 100sqm or more
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application/supporting-documents-and-reports
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook placed this only under Listed building consent."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      site:
+        in: [conservation-area, listed-building, listed-building-setting]
+        description: The property is in, or adjacent to, a conservation area, or is, or is adjacent to,
+          a listed building.
+    source-text: >-
+      Heritage Impact Assessment : This is needed if your property is in, or adjacent to, a
+      conservation area or your property is, or adjacent to, a listed building
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application/supporting-documents-and-reports
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt ran on into the Tree Survey text and was placed
+      only under Listed building consent. 'Adjacent to a conservation area' has no designation of
+      its own; it is in the description.
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: The property has trees.
+    source-text: "Tree Survey : If your property has any trees"
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application/supporting-documents-and-reports
+    confidence: medium
+    notes: "From the audit (missing_requirement): Tree survey / arboricultural implications."
+
+  - id: site-plan
+    action: replace
+    source-text: location and block plans
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application/supporting-documents-and-reports
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was page navigation text. The page lists
+      location and block plans under plan and drawing requirements but gives no trigger.
+
+  - id: air-quality-assessment
+    action: add
+    required-if: discretionary
+    source-text: "Other documents you may need to provide, depending on the application:"
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application/supporting-documents-and-reports
+    confidence: low
+    notes: "From the audit (missing_requirement): listed on the guidance page with no trigger."
+
+  - id: archaeological-assessment
+    action: add
+    required-if: discretionary
+    source-text: "Other documents you may need to provide, depending on the application:"
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application/supporting-documents-and-reports
+    confidence: low
+    notes: "From the audit (missing_requirement): listed on the guidance page with no trigger."
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if: discretionary
+    source-text: "Other documents you may need to provide, depending on the application:"
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application/supporting-documents-and-reports
+    confidence: low
+    notes: "From the audit (missing_requirement): listed on the guidance page with no trigger."
+
+  - id: flood-risk-assessment
+    action: add
+    required-if: discretionary
+    source-text: "Other documents you may need to provide, depending on the application:"
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application/supporting-documents-and-reports
+    confidence: low
+    notes: "From the audit (missing_requirement): listed on the guidance page with no trigger."
+
+  - id: affordable-housing-statement
+    action: add
+    required-if: discretionary
+    source-text: "Other documents you may need to provide, depending on the application:"
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application/supporting-documents-and-reports
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a 'Housing statement' is listed on the guidance page
+      with no trigger; mapped here as the nearest id.
+
+  - id: land-contamination-assessment
+    action: add
+    required-if: discretionary
+    source-text: "Other documents you may need to provide, depending on the application:"
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application/supporting-documents-and-reports
+    confidence: low
+    notes: "From the audit (missing_requirement): listed on the guidance page with no trigger."
+
+  - id: landscaping-plan
+    action: add
+    required-if: discretionary
+    source-text: "Other documents you may need to provide, depending on the application:"
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application/supporting-documents-and-reports
+    confidence: low
+    notes: "From the audit (missing_requirement): 'Landscaping details' listed on the guidance page with no trigger."
+
+  - id: lighting-assessment
+    action: add
+    required-if: discretionary
+    source-text: "Other documents you may need to provide, depending on the application:"
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application/supporting-documents-and-reports
+    confidence: low
+    notes: "From the audit (missing_requirement): listed on the guidance page with no trigger."
+
+  - id: noise-assessment
+    action: add
+    required-if: discretionary
+    source-text: "Other documents you may need to provide, depending on the application:"
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application/supporting-documents-and-reports
+    confidence: low
+    notes: "From the audit (missing_requirement): listed on the guidance page with no trigger."
+
+  - id: photos
+    action: add
+    required-if: discretionary
+    source-text: "Other documents you may need to provide, depending on the application:"
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application/supporting-documents-and-reports
+    confidence: low
+    notes: "From the audit (missing_requirement): 'Photographs' listed on the guidance page with no trigger."
+
+  - id: sci
+    action: add
+    required-if: discretionary
+    source-text: "Other documents you may need to provide, depending on the application:"
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application/supporting-documents-and-reports
+    confidence: low
+    notes: "From the audit (missing_requirement): listed on the guidance page with no trigger."
+
+  - id: planning-statement
+    action: add
+    required-if: discretionary
+    source-text: "Other documents you may need to provide, depending on the application:"
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application/supporting-documents-and-reports
+    confidence: low
+    notes: "From the audit (missing_requirement): 'Supporting planning statement' listed on the guidance page with no trigger."
+
+  - id: sustainability-statement
+    action: add
+    required-if: discretionary
+    source-text: "Other documents you may need to provide, depending on the application:"
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application/supporting-documents-and-reports
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): 'Sustainability appraisal and energy statement' listed
+      on the guidance page with no trigger.
+
+  - id: energy-statement
+    action: add
+    required-if: discretionary
+    source-text: "Other documents you may need to provide, depending on the application:"
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application/supporting-documents-and-reports
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): 'Sustainability appraisal and energy statement' listed
+      on the guidance page with no trigger.
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if: discretionary
+    source-text: "Other documents you may need to provide, depending on the application:"
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application/supporting-documents-and-reports
+    confidence: low
+    notes: "From the audit (missing_requirement): 'Town centre uses' listed on the guidance page with no trigger."
+
+  - id: transport-assessment
+    action: add
+    required-if: discretionary
+    source-text: "Other documents you may need to provide, depending on the application:"
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application/supporting-documents-and-reports
+    confidence: low
+    notes: "From the audit (missing_requirement): 'Transport assessment/statement' listed on the guidance page with no trigger."
+
+  - id: travel-plan
+    action: add
+    required-if: discretionary
+    source-text: "Other documents you may need to provide, depending on the application:"
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application/supporting-documents-and-reports
+    confidence: low
+    notes: "From the audit (missing_requirement): listed on the guidance page with no trigger."
+
+  - id: fire-statement
+    action: add
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application
+    confidence: low
+    notes: "From the audit (missing_requirement): the 'Make a planning application' page adds Fire statements; the audit gives no trigger."
+
+unmapped:
+  - local-name: Crime impact assessment
+    source-text: "Other documents you may need to provide, depending on the application:"
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application/supporting-documents-and-reports
+    suggested-id: crime-prevention-statement
+  - local-name: S106 Heads of terms
+    source-text: "Other documents you may need to provide, depending on the application:"
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application/supporting-documents-and-reports
+    suggested-id: heads-of-terms
+  - local-name: Odour impact assessment
+    source-text: "Other documents you may need to provide, depending on the application:"
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application/supporting-documents-and-reports
+    suggested-id: odour-assessment
+  - local-name: Structural survey
+    source-text: "Other documents you may need to provide, depending on the application:"
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application/supporting-documents-and-reports
+    suggested-id: structural-survey
+  - local-name: Utilities assessment
+    source-text: "Other documents you may need to provide, depending on the application:"
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application/supporting-documents-and-reports
+    suggested-id: utilities-statement
+  - local-name: Upper Nene Valley Gravel Pits SPA mitigation contribution
+    source-text: >-
+      For residential developments which result in a net increase in the number of dwellings within
+      5.9km of the SPA, it is proposed to avoid and mitigate likely significant effect on the SPA by
+      making a financial contribution per dwelling towards Strategic Access Management and
+      Monitoring (SAMM) or other suitable infrastructure.
+    source-url: https://www.northnorthants.gov.uk/applications-appeals-and-enforcement/make-planning-application
+    suggested-id: habitats-regulations-assessment

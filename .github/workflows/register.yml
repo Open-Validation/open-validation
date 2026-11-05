@@ -1,0 +1,52 @@
+# Once a month, check MHCLG's register of planning authorities for anything
+# new, abolished (for example in a merger), renamed or recoded.
+# If anything changed, or the register couldn't be downloaded, this opens a
+# GitHub issue labelled 'register-change' that mentions the repo owner, so
+# GitHub sends an email. If that issue is still open, it adds a comment instead.
+# Nothing is changed automatically: run python scripts/update_register.py,
+# then python scripts/build_lpas.py, and close the issue.
+name: register
+on:
+  schedule:
+    - cron: "17 6 3 * *"   # 06:17 UTC on the 3rd of each month
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+jobs:
+  check-register:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+
+      - name: Compare MHCLG's register with data/organisation.csv
+        run: python scripts/update_register.py --check --report register-changes.md
+
+      - name: Open an issue so the owner gets an email
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          {
+            echo "@${{ github.repository_owner }} MHCLG's register of planning authorities has changed"
+            echo "(or the monthly check couldn't download it)."
+            echo
+            if [ -f register-changes.md ]; then cat register-changes.md; else echo "The check failed before it could compare. See the log: $RUN_URL"; fi
+            echo
+            echo "**What to do:** run \`python scripts/update_register.py\`, then \`python scripts/build_lpas.py\`,"
+            echo "check what it prints (mergers may need folders combining or ending), commit, and close this issue."
+            echo
+            echo "Workflow run: $RUN_URL"
+          } > issue.md
+          gh label create register-change --color D93F0B --description "MHCLG register changed" --force
+          open=$(gh issue list --label register-change --state open --json number --jq '.[0].number')
+          if [ -n "$open" ]; then
+            gh issue comment "$open" --body-file issue.md
+          else
+            gh issue create --title "MHCLG register changed ($(date +%Y-%m-%d))" --label register-change --body-file issue.md
+          fi

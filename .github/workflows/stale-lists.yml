@@ -1,0 +1,33 @@
+# Once a month, list councils whose validation list is more than 2 years old.
+# Keeps ONE open issue labelled 'stale-lists' up to date (it mentions the repo
+# owner only when the issue is first opened, so this doesn't email every month).
+name: stale-lists
+on:
+  schedule:
+    - cron: "41 6 5 * *"   # 06:41 UTC on the 5th of each month
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: python scripts/stale_lists.py --report stale.md
+      - name: Create or update the stale-lists issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create stale-lists --color FBCA04 --description "Council lists over 2 years old" --force
+          open=$(gh issue list --label stale-lists --state open --json number --jq '.[0].number')
+          if [ -n "$open" ]; then
+            gh issue edit "$open" --body-file stale.md
+          else
+            { echo "@${{ github.repository_owner }} this issue lists councils with old validation lists. It is updated monthly."; echo; cat stale.md; } > first.md
+            gh issue create --title "Validation lists more than 2 years old" --label stale-lists --body-file first.md
+          fi

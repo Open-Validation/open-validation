@@ -1,0 +1,330 @@
+# Corrections for Three Rivers District Council, from the council's audit.
+# The audit read the current Validation Checklist (updated June 2024, adopted 1 August 2024). Part B
+# sets out each local item and Part C is a matrix by application and development type. Grokbot
+# missed that several items apply to householder, listed building, advert and lawful development
+# applications, and many triggers lost their thresholds. Items marked "From the audit" use the
+# audit's paraphrase; quoted words are the council's.
+local-authority: THE
+
+validation-list:
+  date: 2024-08-01
+  date-basis: "audit: cover 'Updated June 2024 and adopted August 2024 following consultation'; the file
+    name gives 1 August 2024"
+
+submission-standards:
+  - item: Plans marked "not to scale" or "do not scale" will not be registered
+    level: must
+  - item: All plans and drawings state the paper size, key dimensions and a scale, and include a scale
+      bar
+    level: must
+  - item: All plans to a recognised metric scale (e.g. 1:100, 1:50)
+    level: must
+  - item: For major applications, an electronic copy and one hard copy of all plans and documents, with
+      an index listing all plan numbers
+    level: must
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: the text is the Arboricultural Method Statement from the Tree Survey item (now a
+      must-include there); the checklist has no schedule of works item"
+
+drop-unmapped:
+  - local-name: Self-build / custom build information
+    reason: "wrong_trigger: CIL Form 7 self-build exemption claim, submitted after completion; not a
+      validation requirement"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: the site/block plan definition, not a highways requirement"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: threshold missing; re-added below"
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "wrong_app_type: filed under Full planning only; re-added below for all applications"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    source-text: where affordable housing is to be provided on-site
+    confidence: low
+    notes: >-
+      From the audit (wrong_trigger): needed where affordable housing is to be provided on-site
+      (there is no field for this); indicative details are still needed for outline applications.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [tree-preservation-zone, conservation-area]
+            description: The site is subject to a Tree Preservation Order or is in a Conservation Area.
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: The site has trees over 75mm in diameter.
+    must-include:
+      - item: An Arboricultural Implications Assessment and Tree Constraints Plan, identifying trees to
+          be removed, the Root Protection Area of trees on the site and their protection
+        level: should
+      - item: An Arboricultural Method Statement (AMS) and Tree Protection Plan (TPP)
+        level: must
+        source-text: an Arboricultural Method Statement (AMS) and Tree Protection Plan (TPP).
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): applies to householder applications too."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the statutory biodiversity gain condition (major
+          development from 12 February 2024, small sites from 2 April 2024).
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook gave only part of the content, not the trigger."
+
+  - id: cil-form
+    action: replace
+    required-if:
+      always: true
+    source-url:
+      https://cdn.threerivers.gov.uk/files/2025/06/430751e0-4c3b-11f0-9e82-5f29d78682ab-Adopted%20Validation%20Checklist%20(1%20August%202024).pdf
+    source-text: must be submitted with ALL planning applications
+    must-include:
+      - item: CIL Additional Questions Form 1
+        level: must
+      - item: A Notice of Chargeable Development
+        level: must
+        required-if:
+          application-type:
+            in: [ldc]
+    confidence: medium
+    notes: "Audit (wrong_app_type, missing_requirement): CIL Form 1 with all planning applications, and a
+      Notice of Chargeable Development for all certificates of lawfulness."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development falls within Schedule 1 (or needs EIA under Schedule 2) of the EIA
+          Regulations.
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains two or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-text: Contains two or more dwellings or educational accommodation and
+    source-url:
+      https://cdn.threerivers.gov.uk/files/2025/06/430751e0-4c3b-11f0-9e82-5f29d78682ab-Adopted%20Validation%20Checklist%20(1%20August%202024).pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was cut off. Also development of, or within the
+      curtilage of, an existing relevant building."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: New development in Flood Zones 2 and 3.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: Development of 1 hectare or greater (in Flood Zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Development of 1 hectare or greater (in Flood Zone 1).
+    confidence: medium
+    notes: "From the audit (missing_requirement): an FRA is also needed for any basement proposal in the Moor
+      Park Conservation Area (Moor Park Conservation Area Appraisal); there is no field for that area."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      application-type:
+        in: [lbc]
+    must-include:
+      - item: An assessment/description of the significance of the heritage asset or assets which may be
+          affected by the proposed development
+        level: must
+    confidence: low
+    notes: "Audit (wrong_trigger, wrong_app_type): the workbook gave contents, not the trigger. The audit
+      confirms works needing Listed Building Consent; other triggers in the checklist weren't given."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: The site has, or is suspected to have, contamination.
+        - discretionary
+    source-text: >-
+      A preliminary risk assessment may be required on sites which have or are suspected to have
+      contamination
+    source-url:
+      https://cdn.threerivers.gov.uk/files/2025/06/430751e0-4c3b-11f0-9e82-5f29d78682ab-Adopted%20Validation%20Checklist%20(1%20August%202024).pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 13; also potentially contaminating uses in sensitive
+      areas (shown as officer discretion)."
+
+  - id: landscaping-plan
+    action: update
+    required-if: discretionary
+    notes: >-
+      Landscape management plans 'may be required for larger sites'. From the audit
+      (missing_requirement): the Chorleywood Neighbourhood Plan also asks for a landscape strategy for
+      all major applications in its area.
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: External lighting would be provided or made necessary by the development (the
+          area named before this is cut off; it ends '…countryside').
+    confidence: low
+    notes: "The start of the trigger is cut off in the workbook excerpt."
+
+  - id: noise-assessment
+    action: update
+    must-include:
+      - item: A plan showing the location of the unit in relation to the closest residential property
+        level: must
+        required-if:
+          condition:
+            field: plant-equipment
+            value: true
+            description: The proposal includes pumps or extraction systems.
+        source-text: >-
+          pumps and extraction systems must be accompanied by: - A plan showing the location of the
+          unit in relation to the closest residential property Data relating to the noise level, in
+          octave bands, at 1 metre from the unit
+      - item: Data relating to the noise level, in octave bands, at 1 metre from the unit
+        level: must
+        required-if:
+          condition:
+            field: plant-equipment
+            value: true
+            description: The proposal includes pumps or extraction systems.
+    notes: "The plant items were in the workbook's ventilation row. The checklist's main noise trigger is cut
+      off in the excerpt."
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: New residential development of one unit and above.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 0
+            description: All new commercial development.
+    source-text: new residential development of one unit and above
+    source-url:
+      https://cdn.threerivers.gov.uk/files/2025/06/430751e0-4c3b-11f0-9e82-5f29d78682ab-Adopted%20Validation%20Checklist%20(1%20August%202024).pdf
+    must-include:
+      - item: A CPLAN Energy Statement and Sustainability Checklist
+        level: must
+        source-text: >-
+          a CPLAN Energy Statement and Sustainability Checklist in order to demonstrate the extent to
+          which sustainability principles have been incorporated into the location, design,
+          construction and future use of proposals, and the expected carbon emissions.
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): not a prior approval item. The checklist (item 8) ties it to new
+      residential development of one unit and above and all new commercial development. The council's
+      web page instead says all new residential units (including conversions) and non-residential
+      development over 500 square metres (including change of use, conversions and extensions).
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 50
+            description: 50 or more residential units (a Transport Statement for 50-80, a Transport
+              Assessment over 80).
+        - discretionary
+    source-url:
+      https://cdn.threerivers.gov.uk/files/2025/06/430751e0-4c3b-11f0-9e82-5f29d78682ab-Adopted%20Validation%20Checklist%20(1%20August%202024).pdf
+    confidence: medium
+    notes: "From the audit (wrong_trigger): a Transport Statement for 50-80 residential units and a Transport
+      Assessment for over 80, plus floorspace bands the audit doesn't give (shown as officer discretion)."
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    notes: "Hertfordshire County Council may require an agreed Travel Plan Statement where a Transport
+      Statement is required."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+
+unmapped:
+  - local-name: Local Biodiversity Checklist (Part D)
+    source-text: >-
+      Part D contains a LOCAL BIODIVERSITY CHECKLIST which must be completed and submitted with all
+      applications.
+    source-url:
+      https://cdn.threerivers.gov.uk/files/2025/06/430751e0-4c3b-11f0-9e82-5f29d78682ab-Adopted%20Validation%20Checklist%20(1%20August%202024).pdf
+    suggested-id: biodiversity-checklist
+  - local-name: Sustainable Drainage Systems (SuDS)
+    source-text: all developments of 10 dwellings or more and all major commercial developments
+    source-url:
+      https://cdn.threerivers.gov.uk/files/2025/06/430751e0-4c3b-11f0-9e82-5f29d78682ab-Adopted%20Validation%20Checklist%20(1%20August%202024).pdf
+    suggested-id: drainage-strategy
+  - local-name: EV charging statement (Chorleywood Neighbourhood Plan area)
+    source-text: "From the audit: an EV charging statement for 10 or more dwellings in the Chorleywood
+      Neighbourhood Plan area"
+    source-url:
+      https://cdn.threerivers.gov.uk/files/2025/06/430751e0-4c3b-11f0-9e82-5f29d78682ab-Adopted%20Validation%20Checklist%20(1%20August%202024).pdf
+    suggested-id: ev-charging-statement
+  - local-name: Thames Water capacity confirmation
+    source-text: "From the audit: major applications"
+    source-url:
+      https://cdn.threerivers.gov.uk/files/2025/06/430751e0-4c3b-11f0-9e82-5f29d78682ab-Adopted%20Validation%20Checklist%20(1%20August%202024).pdf
+    suggested-id: utilities-statement
+  - local-name: Refuse vehicle access details
+    source-text: "From the audit: all new developments"
+    source-url:
+      https://cdn.threerivers.gov.uk/files/2025/06/430751e0-4c3b-11f0-9e82-5f29d78682ab-Adopted%20Validation%20Checklist%20(1%20August%202024).pdf
+    suggested-id: refuse-storage-details
+
+low-confidence:
+  - id: photos
+    note: "Audit (wrong_trigger): the excerpt has stray table text ('TABLE 2 Sites recognised for their
+      biodiversity importance'); the trigger isn't clear."
+  - id: design-and-access-statement
+    note: "The excerpt is web page text with no trigger; the national rules apply."

@@ -1,0 +1,507 @@
+# Corrections for London Borough of Bexley, from inputs/audit/ (Bexley audit).
+# The audit compared the workbook with Bexley's "Planning application requirements" PDF
+# (reviewed and updated 17 October 2018), which is still the council's only list. Its policy
+# references (London Plan 2016, Core Strategy, UDP, old A3/A4/A5 use classes) are out of date.
+# Items marked "From the audit" use the audit's paraphrase, not the council's exact words.
+local-authority: BEX
+
+submission-standards:
+  - item: Each drawing has a title and drawing number identifying its subject, including any 
+      revisions
+    level: must
+  - item: Drawings state the scale and paper size and include a scale bar showing at least 0-10 
+      metres
+    level: must
+  - item: Drawings marked 'Do not scale' are generally not acceptable
+    level: must
+  - item: Plans and drawings indicate key dimensions
+    level: should
+  - item: PDF is the preferred file type
+    level: should
+  - item: Each file no larger than 20MB
+    level: must
+
+drop:
+  - id: site-plan
+    reason: "not_a_requirement: generic national checklist text (run-on list of drawings), not a local
+      list item"
+  - id: floor-plan-existing
+    reason: "not_a_requirement: generic national checklist text"
+  - id: floor-plan-proposed
+    reason: "not_a_requirement: generic national checklist text"
+  - id: elevation-existing
+    reason: "not_a_requirement: generic national checklist text"
+  - id: elevation-proposed
+    reason: "not_a_requirement: generic national checklist text"
+  - id: cil-form
+    reason: "not_a_requirement: generic national checklist text"
+  - id: roof-plan-existing
+    reason: "not_a_requirement: generic national checklist text; excerpt is a fragment"
+  - id: roof-plan-proposed
+    reason: "not_a_requirement: generic national checklist text; excerpt is a fragment"
+  - id: section-existing
+    reason: "not_a_requirement: generic national checklist text"
+  - id: section-proposed
+    reason: "not_a_requirement: generic national checklist text"
+
+drop-unmapped:
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: fragment of the landscaping text; replaced below with the real trigger"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: fragment of the landscaping/site plan text; Transport Assessment added below"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: major-development trigger left out; replaced below"
+  - local-name: Structural Survey
+    reason: "wrong_app_type: not specific to listed building consent; replaced below"
+
+requirements:
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - site:
+                in: [air-quality-management-area]
+                description: The site is in or next to an Air Quality Management Area.
+        - discretionary
+    source-text: >-
+      Major developments where the development is located in or adjacent to an Air Quality
+      Management Area … Air quality assessments and Dust Risk Assessments are also required for
+      proposals which are likely to have an adverse effect on nearby sensitive receptors and/or are
+      likely to bring new sensitive receptors into an area of poor air quality.
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook left out the major development in or next to an AQMA trigger.
+      Effects on sensitive receptors are shown as officer discretion."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees within the site, or on adjacent land (including street trees), 
+          that could influence or be affected by the development.
+    must-include:
+      - item: Which trees are to be retained
+        level: must
+      - item: The means of protecting retained trees during construction works
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): applies to any works that could affect trees, including householder
+      schemes."
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - site:
+                in: [archaeological-priority-area]
+                description: The site is in an Area of High Archaeological Potential (previously 
+                  Area of Archaeological Search).
+            - condition:
+                field: ground-disturbance
+                value: true
+                description: The proposal disturbs the ground (extensions to existing residential 
+                  properties are excluded).
+        - all:
+            - condition:
+                field: ground-disturbance
+                value: true
+                description: The proposal disturbs the ground.
+            - any:
+                - condition:
+                    field: site-area-residential
+                    operator: ">"
+                    value: 0.4
+                    description: The site is greater than 0.4 hectares.
+                - condition:
+                    field: site-area-non-residential
+                    operator: ">"
+                    value: 0.4
+                    description: The site is greater than 0.4 hectares.
+        - discretionary
+    source-text: >-
+      Archaeological Assessment For all applications (other than those for extensions to existing
+      residential properties) involving the disturbance of ground within an Area of High
+      Archaeological Potential (previously referred to as an Area of Archaeological Search); where
+      the application involves the disturbance of ground on sites of greater than 0.4ha AND/OR
+      applications affecting nationally important archaeological remains, whether scheduled or not,
+      a desktop Ar…
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook excerpt began with air-quality text and was cut off.
+      Applications affecting nationally important archaeological remains are shown as officer
+      discretion.
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a Conservation Area.
+            - condition:
+                field: floorspace
+                operator: ">="
+                value: 100
+                description: The floorspace created by the development is 100 square metres or more.
+    source-text: >-
+      Design and Access Statements (where required by the DMPO 2015 – see below) … Design and
+      Access Statement where the site is in a Conservation Area … the floorspace created by the
+      development is 100sq m or more
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the Householder checklist requires a Design and Access Statement in a
+      Conservation Area where 100 sq m or more is created. The list refers to the DMPO 2015, which
+      also requires one for major development.
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    source-text: >-
+      Environmental Statement The Town and Country Planning (Environmental Impact Assessment)
+      Regulations (2017), as amended, set out the circumstances in which an Environmental Impact
+      Assessment (EIA) is required.
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook excerpt began with text from the previous section."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or greater (including in Flood Zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or greater (including in Flood Zone 1).
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3 (including minor development such as 
+              householder extensions).
+    source-text: >-
+      Application Trigger: Application for proposals of 1 hectare or greater in Flood Zone 1;… The
+      FRA should include the design of surface water management systems including Sustainable
+      Drainage Systems (SUDs) and address the requirement for safe access to and from the
+      development in areas at risk of flooding.
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    must-include:
+      - item: Design of surface water management systems, including Sustainable Drainage Systems 
+          (SuDS)
+        level: should
+      - item: Safe access to and from the development in areas at risk of flooding
+        level: should
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): the workbook gave report content, not the thresholds.
+      The FRA also covers minor development, including householder extensions, in Flood Zones 2 and 3."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, conservation-area, locally-listed-building]
+        description: The application affects a heritage asset or its setting.
+    must-include:
+      - item: The significance of any heritage assets affected, including any contribution made by 
+          their setting
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): required for all applications affecting heritage assets, including
+      householder works."
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: The site is potentially contaminated (especially for sensitive uses such as 
+          housing and schools).
+    source-text: >-
+      Land Contamination Assessment Applications may also need to be accompanied by a land
+      contamination assessment in accordance with paragraphs 120-122 of the National Planning
+      Policy Framework.
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook placed this under Minerals & waste (county) with the
+      Landfill Statement text. From the audit: it applies to development on potentially
+      contaminated land, especially sensitive uses such as housing and schools. Landfill Statement
+      is listed separately (unmapped).
+
+  - id: energy-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-text: >-
+      Major developments are expected to prepare an energy strategy based upon the Mayors energy
+      hierarchy adopting lean, clean, green principles.
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    confidence: medium
+    notes: "The workbook filed this energy strategy text under the Sustainability Statement."
+
+  - id: sustainability-statement
+    action: replace
+    required-if: discretionary
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a Sustainability Statement for non-major development
+      that does not need a full Energy Assessment. There is no rule construct for "non-major", so it
+      is shown as officer discretion. The workbook's excerpt (energy strategy for majors) is now in
+      energy-statement.
+
+  - id: construction-management-plan
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Construction Logistics Plan for major development, or
+      where there is a significant construction traffic impact."
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): major development, or potential adverse impact on daylight/sunlight."
+
+  - id: viability-assessment
+    action: add
+    required-if: discretionary
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Financial Viability Assessment for schemes that are
+      not policy-compliant on affordable housing."
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [open-space, green-belt]
+            description: The proposal affects open space or the Green Belt.
+        - discretionary
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): Open Space Assessment for proposals with an impact on
+      open space, Metropolitan Open Land or Green Belt."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    must-include:
+      - item: Secured by Design
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): Planning Statement including Secured by Design, for
+      major development or where policy justification is needed."
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 3
+            description: New development, conversions or changes of use resulting in a total of 
+              three or more residential units.
+        - ref: major-development
+        - discretionary
+    source-text: >-
+      Application Trigger: proposals for new development, conversions or changes of use … resulting
+      in a total of three or more residential units
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted landscaping text. Refuse storage details are needed
+      for 3+ residential units, HMOs and commercial uses; from the audit (missing_requirement), a
+      Site Waste Management Plan is needed for major or waste-related development. HMOs, commercial
+      and waste-related cases are shown as officer discretion.
+
+  - id: sci
+    action: add
+    required-if:
+      ref: major-development
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Statement of Community Involvement is encouraged for
+      all major applications, not required."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: The proposal is for telecommunications masts or base stations.
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): telecommunications supplementary information for masts
+      and base stations."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      any:
+        - all:
+            - condition:
+                field: out-of-centre-town-centre-use
+                value: true
+                description: Main town centre uses outside a defined centre.
+            - condition:
+                field: floorspace
+                operator: ">"
+                value: 2500
+                description: Over 2,500 square metres (impact test).
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Main town centre uses outside a defined centre (sequential test).
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): Town Centre Uses/Retail Impact Assessment for main town
+      centre uses outside centres, with the impact test over 2,500 sq m."
+
+  - id: transport-assessment
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-text: "Transport Assessment ... Application trigger: Major development and other development
+      which would have an impact on the highway"
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement)."
+
+  - id: travel-plan
+    action: add
+    required-if:
+      ref: major-development
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Travel Plan for major development."
+
+unmapped:
+  - local-name: Drainage Strategy / SuDS
+    source-text: "Application Trigger: All major applications. All non-householder applications where
+      buildings or hard surfaces are proposed"
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    suggested-id: drainage-strategy
+  - local-name: Health Impact Assessment
+    source-text: "Major development which are likely to have a significant impact on the health and wellbeing
+      … Subject to the scope of the application, a rapid or a full HIA may also be required."
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Demolition Methodology and Structural Survey
+    source-text: "A demolition methodology and structural survey may be required in support of an application
+      if the proposal seeks to justify the demolition in whole or in part of a building, including where
+      the structural performance of the building forms part of the justification for that demolition,
+      such as for barn conversions, façade retention schemes, basement development or development affecting
+      a listed building or a building within a Conservation Area."
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    suggested-id: structural-survey
+  - local-name: Landfill Statement
+    source-text: "Landfill Statements Required if proposal includes landfill proposals or likely to affect
+      satiability or efficient functioning of existing or proposed landfills."
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    suggested-id: landfill-statement
+  - local-name: Accommodation Schedule
+    source-text: "Accommodation Schedule ... Application trigger: all development proposing new residential
+      dwellings"
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    suggested-id: accommodation-schedule
+  - local-name: BREEAM pre-construction assessment
+    source-text: "From the audit: non-residential development of 1,000 sq m or more"
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    suggested-id: breeam-assessment
+  - local-name: CCTV details
+    source-text: "From the audit: any development proposing CCTV"
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    suggested-id: cctv-details
+  - local-name: Delivery and Servicing Plan
+    source-text: "From the audit: major development, or development with a significant servicing impact"
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    suggested-id: delivery-servicing-plan
+  - local-name: Economic Statement
+    source-text: "From the audit: major development, or loss of an employment site"
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    suggested-id: economic-statement
+  - local-name: Parking Provision
+    source-text: "From the audit: new development, or development affecting parking"
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    suggested-id: parking-provision
+  - local-name: Parking Stress Surveys
+    source-text: "From the audit: major development, or development likely to cause on-street parking
+      stress"
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    suggested-id: parking-survey
+  - local-name: Townscape/Landscape and Views Impact Assessment
+    source-text: "From the audit: most major developments, protected views, conservation areas and listed
+      buildings"
+    source-url: 
+      https://www.bexley.gov.uk/sites/default/files/2021-10/Planning-application-requirements.pdf
+    suggested-id: views-analysis
+
+low-confidence:
+  - id: noise-assessment
+    note: "Audit (wrong_trigger): the workbook excerpt gives report content, not the trigger; the audit
+      doesn't quote the threshold."
+
