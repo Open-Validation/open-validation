@@ -460,6 +460,35 @@ def add_new_fields(new_fields):
         print("Added new fields to data/new-field.csv:", ", ".join(added))
 
 
+def validate(code, files, corr):
+    """Run check.py's rule checks on files built in memory (nothing is written)."""
+    import check
+    from common import application_type_ids, requirement_ids
+    check.problems.clear()
+    fields = check.known_fields() | {f["field"] for f in corr.get("new-fields") or []}
+    ctx = {"ids": requirement_ids(), "types": application_type_ids(), "fields": fields,
+           "defs": {"major-development"}}
+    ended = {r["reference"] for r in read_csv(DATA / "planning-requirement.csv") if r["end-date"]}
+    for rid, data in files.items():
+        where = f"{code}/{rid}"
+        if rid not in ctx["ids"] or rid in ended:
+            check.problem(f"{where}: '{rid}' isn't a current id in data/planning-requirement.csv")
+        if data.get("confidence") not in ("high", "medium", "low"):
+            check.problem(f"{where}: confidence must be high, medium or low")
+        check.check_rule(data.get("required-if"), where, ctx)
+        check.check_items(data.get("must-include"), where, ctx, "must-include")
+    check.check_items(corr.get("submission-standards"), f"{code}/_lpa", ctx, "submission-standards")
+    for u in corr.get("unmapped") or []:
+        if not u.get("local-name") or "source-text" not in u:
+            check.problem(f"{code}: every unmapped item needs local-name and source-text")
+    if check.problems:
+        print(f"{code}: {len(check.problems)} problem(s):")
+        for msg in check.problems:
+            print("   -", msg)
+    else:
+        print(f"{code}: valid ({len(files)} requirement files)")
+
+
 # ---------- main ----------
 
 def main():
@@ -467,6 +496,8 @@ def main():
     p.add_argument("--lpa", help="comma-separated council codes, e.g. CMD,SHR")
     p.add_argument("--region", help='comma-separated regions, e.g. "London,South East"')
     p.add_argument("--dry-run", action="store_true", help="only print what would change")
+    p.add_argument("--validate", action="store_true",
+                   help="build in memory and run check.py's rule checks; write nothing")
     a = p.parse_args()
 
     lpa_rows = {r["code"]: r for r in read_csv(DATA / "lpa.csv")}
@@ -504,6 +535,9 @@ def main():
         new_fields += [dict(f, source=code) for f in corr.get("new-fields") or []]
         files = OrderedDict((rid, finish(d, audit, bool(corr), req_rows, by_id.get(rid)))
                             for rid, d in files.items())
+        if a.validate:
+            validate(code, files, corr)
+            continue
         update_lpa(code, audit, corr, a.dry_run)
         changes = write_council(code, files, a.dry_run)
         flag = "" if corr else " (no corrections file yet)"
@@ -513,8 +547,8 @@ def main():
             for what, rid in changes:
                 print(f"    {what} {rid}")
 
-    if a.dry_run:
-        print("Dry run: nothing was written.")
+    if a.dry_run or a.validate:
+        print("Nothing was written (" + ("--validate" if a.validate else "dry run") + ").")
         return
     write_unmapped(set(codes), unmapped_all)
     add_new_fields(new_fields)
