@@ -84,6 +84,15 @@ dialog.filter[open] { display: flex; flex-direction: column; }
 .inlineq { display: inline-flex; align-items: center; gap: 4px; margin-right: 8px; }
 .inlineq .seg button { padding: 2px 10px; }
 .typetags { font-size: 12px; color: var(--text-muted); }
+details.more summary { cursor: pointer; list-style: none; }
+details.more summary::-webkit-details-marker { display: none; }
+details.more .mlink, details.more .lless { color: var(--accent); white-space: nowrap; }
+details.more summary:hover .mlink, details.more summary:hover .lless { text-decoration: underline; }
+details.more .lless { display: none; }
+details.more[open] .pv, details.more[open] .mlink { display: none; }
+details.more[open] .lless { display: inline; }
+details.more[open] summary { order: 2; margin-top: 4px; }
+details.more[open] { display: flex; flex-direction: column; }
 .tag { display: inline-block; border: 1px solid var(--line-soft); border-radius: 999px; padding: 0 8px; font-size: 12px; line-height: 1.6; color: var(--text); background: transparent; margin: 1px 0; white-space: nowrap; }
 button.tag { cursor: pointer; } button.tag:hover { border-color: var(--accent); }
 .tags { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0 2px; }
@@ -490,12 +499,18 @@ function appliesTo(rule) {
     }
     Object.keys(x).forEach(function (k) { if (k !== "condition" && k !== "site" && k !== "application-type") walk(x[k]); });
   })(rule);
+  // No site condition at all (only discretion, or nothing): it can apply to any site
+  if (!tags.some(function (t) { return t.key !== "discretionary"; })) tags.unshift({ key: "any-site", text: "Any site" });
   return tags;
+}
+// Long text: a short preview with "show more"; opened, the full text shows once with "show less"
+function moreHTML(preview, full) {
+  return '<details class="more"><summary title="Click to show the full wording"><span class="pv">' + esc(preview) + '… </span>' +
+    '<span class="mlink">show more</span><span class="lless">show less</span></summary><span class="fulltext">' + esc(full) + "</span></details>";
 }
 function tagsHTML(rule, clickable) {
   var t = appliesTo(rule);
   if (rule === undefined) return '<span class="muted">see wording</span>';
-  if (!t.length) return '<span class="tag">Any site</span>';
   return t.map(function (x) { return clickable ? '<button type="button" class="tag" data-tag="' + esc(x.key) + '" title="Show only requirements that depend on this">' + esc(x.text) + "</button>" : '<span class="tag">' + esc(x.text) + "</span>"; }).join(" ");
 }
 
@@ -751,9 +766,11 @@ function renderTypeRows() {
   $("#addType").hidden = !S.chosen.length || S.addingType;
   S.addingType = false;
 }
-function selectCouncil(code) {
+// Choosing a council on the map (or under it) opens its Table; the search box opens Results
+function selectCouncil(code, tab) {
   S.lpa = code || ""; $("#councilList").hidden = true;
-  if (S.lpa && (S.tab === "map" || S.tab === "councils" || !S.tab)) S.tab = "results";
+  if (tab) S.tab = tab;
+  else if (S.lpa && (S.tab === "map" || S.tab === "councils" || !S.tab)) S.tab = "results";
   writeHash(); render();
 }
 
@@ -900,7 +917,7 @@ function renderMap(panel) {
   panel.querySelectorAll(".legend button[data-status]").forEach(function (b) { b.addEventListener("click", function () { S.highlight = S.highlight === b.dataset.status ? "" : b.dataset.status; renderMap(panel); }); });
   $("#patternsToggle").addEventListener("change", function (e) { S.patterns = e.target.checked; document.body.classList.toggle("patterns", S.patterns); renderMap(panel); });
   $("#listView").addEventListener("click", function () { S.tab = "councils"; writeHash(); render(); });
-  panel.querySelectorAll(".chip").forEach(function (c) { c.addEventListener("click", function () { selectCouncil(c.dataset.code); }); });
+  panel.querySelectorAll(".chip").forEach(function (c) { c.addEventListener("click", function () { selectCouncil(c.dataset.code, "table"); }); });
   if (!S.geo) { $("#map").outerHTML = '<div class="empty">' + SVG_BOARD + "<p>The map isn't built yet (docs/map/uk-lpa.geojson). Use the Councils tab or the search box.</p></div>"; return; }
   drawMap();
 }
@@ -940,9 +957,9 @@ function drawMap() {
     .on("mouseleave", function () { tip.hidden = true; })
     .on("click", function (e, f) {
       if (!f.properties.code) { tip.innerHTML = "<strong>" + esc(f.properties.name) + "</strong><br>" + tipText(f); tip.hidden = false; tip.style.left = e.clientX + "px"; tip.style.top = (e.clientY + window.scrollY) + "px"; return; }
-      tip.hidden = true; selectCouncil(f.properties.code);
+      tip.hidden = true; selectCouncil(f.properties.code, "table");
     })
-    .on("keydown", function (e, f) { if ((e.key === "Enter" || e.key === " ") && f.properties.code) { e.preventDefault(); selectCouncil(f.properties.code); } });
+    .on("keydown", function (e, f) { if ((e.key === "Enter" || e.key === " ") && f.properties.code) { e.preventDefault(); selectCouncil(f.properties.code, "table"); } });
   mapZoom = d3.zoom().scaleExtent([1, 60]).translateExtent([[-w, -hgt], [2 * w, 2 * hgt]]).on("zoom", function (e) { g.attr("transform", e.transform); });
   svg.call(mapZoom);
   $("#zoomIn").onclick = function () { svg.transition().duration(250).call(mapZoom.scaleBy, 1.8); };
@@ -1029,13 +1046,13 @@ function renderTable(panel, council) {
     .filter(function (r) { return !S.tagFilter || appliesTo(r.d["required-if"]).some(function (t) { return t.key === S.tagFilter; }); });
   var counts = {}; council.files.forEach(function (f) { REQ_CELLS.forEach(function (c) { if (!isEmpty(cellValue(f.data, c))) { var s = cellStatus(f.data, S.lpa, f.id, c).status; counts[s] = (counts[s] || 0) + 1; } }); });
   var html = '<div class="toolbar"><div><h2 style="margin:0">' + esc(S.lpaByCode[S.lpa].name) + '</h2><p class="muted" style="margin:4px 0 0">' + council.files.length + " requirement files. Every cell is tinted by its review status" + (S.review ? "; tap a cell to mark it." : ".") + "</p></div>" + statusFilterHTML() + "</div>" + countsHTML(counts) +
-    (S.tagFilter ? '<p class="filterbar">Showing requirements that apply to: <span class="chip-ans">' + esc(fieldLabel(S.tagFilter === "always" ? "All applications" : S.tagFilter === "discretionary" ? "Council's discretion" : S.tagFilter)) +
+    (S.tagFilter ? '<p class="filterbar">Showing requirements that apply to: <span class="chip-ans">' + esc(S.tagFilter === "always" ? "All applications" : S.tagFilter === "discretionary" ? "Council's discretion" : S.tagFilter === "any-site" ? "Any site" : fieldLabel(S.tagFilter)) +
       '<button type="button" id="clearTag" aria-label="Show all requirements">✕</button></span></p>' : "");
   html += tableHTML(cols, sortRows(rows, "table", cols), function (row, key) {
     if (key === "applies") return "<td>" + tagsHTML(row.d["required-if"], true) + "</td>";   // worked out from the rule, so not a cell of its own
     if (key === "requirement") return cellTD(row.d, row.code, row.file, key, badge(row.status) + "<br><strong>" + esc(row.cells.requirement) + '</strong> <span class="mono muted">' + esc(row.file) + "</span>");
     if (key === "source-url") return cellTD(row.d, row.code, row.file, key, row.cells[key] ? '<a href="' + esc(row.cells[key]) + '" target="_blank" rel="noopener">Council list</a>' : "");
-    if (key === "source-text") { var t = row.cells[key]; var first = t.split("\n")[0]; return cellTD(row.d, row.code, row.file, key, t ? (t.length > 120 || t.indexOf("\n") !== -1 ? "<details><summary>" + esc(first.slice(0, 120)) + "…</summary>" + esc(t) + "</details>" : esc(t)) : "", "wide"); }
+    if (key === "source-text") { var t = row.cells[key]; var first = t.split("\n")[0]; return cellTD(row.d, row.code, row.file, key, t ? (t.length > 120 || t.indexOf("\n") !== -1 ? moreHTML(first.slice(0, 120), t) : esc(t)) : "", "wide"); }
     if (key === "application-type") return cellTD(row.d, row.code, row.file, key, esc(row.cells[key] || (row.d["required-if"] ? "" : "")), "", !row.cells[key] && "all types");
     return cellTD(row.d, row.code, row.file, key, esc(row.cells[key]), key === "required-if" ? "wide" : "");
   }, "table");
@@ -1162,7 +1179,7 @@ function cardHTML(it, cls, icon) {
   var conf = S.confirmed[S.lpa] && S.confirmed[S.lpa][it.id];
   return '<article class="card result ' + cls + '"><header><div class="title">' + icon + "<h3>" + esc(reqName(it.id)) + '</h3></div><div class="meta" style="margin:0">' +
     (it.local ? '<span class="badge local">Local</span>' : "") + (it.national ? '<span class="badge national">National</span>' : "") +
-    (it.local ? badge(status) + ' <span class="badge plain">Confidence: ' + esc(d.confidence || "?") + "</span>" : "") + "</div></header>" +
+    (it.local ? badge(status) : "") + "</div></header>" +
     (it.local ? '<div class="tags"><span class="typetags">Applies to:</span> ' + tagsHTML(it.rule, false) + "</div>" : "") +
     (S.chosen.length > 1 && it.forTypes && it.forTypes.length ? '<p class="typetags">For: ' + it.forTypes.map(function (t) { return esc(typeName(t)); }).join(", ") + "</p>" : "") +
     '<p class="trigger">' + trig.map(esc).join("<br>") + "</p>" +
