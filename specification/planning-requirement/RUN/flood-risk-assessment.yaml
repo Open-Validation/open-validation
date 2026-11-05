@@ -5,33 +5,73 @@ required-if:
   - site:
       in:
       - flood-risk-zone
-      description: The site is in flood zone 2 or 3, or on land surrounded by higher risk flood zones
-        (a dry island).
-  - condition:
-      field: site-area-residential
-      operator: '>='
-      value: 1
-      description: The site is 1 hectare or more (flood zone 1).
-  - condition:
-      field: site-area-non-residential
-      operator: '>='
-      value: 1
-      description: The site is 1 hectare or more (flood zone 1).
+      description: Flood Zones 2 and 3, or land surrounded by higher risk flood zones (a dry island).
+  - any:
+    - condition:
+        field: site-area-residential
+        operator: '>='
+        value: 1
+        description: Sites of 1 hectare or more in Flood Zone 1.
+    - condition:
+        field: site-area-non-residential
+        operator: '>='
+        value: 1
+        description: Sites of 1 hectare or more in Flood Zone 1.
 source-url: https://www.runnymede.gov.uk/downloads/file/711/plannning-validation
-source-text: Flood Risk Assessment A Flood Risk Assessment (FRA) will be required for new developments
-  in Flood Zones 2 and 3, and for development proposals on sites of 1 hectare or greater in Flood Zone
-  1 or otherwise if located on land surrounded by higher risk flood zones (known as a dry island).
+policy: NPPF; Runnymede Strategic Flood Risk Assessment (April 2018)
+source-text: A Flood Risk Assessment (FRA) will be required for new developments in Flood Zones 2 and
+  3, and for development proposals on sites of 1 hectare or greater in Flood Zone 1 or otherwise if located
+  on land surrounded by higher risk flood zones (known as a dry island). ... Planning applications located
+  within flood zones 2 and 3.
 must-include:
-- item: Householder Flood Risk Assessment template
+- item: All risks from all forms of flooding
+  level: must
+- item: How the flood risks will be managed, taking climate change into account, with flood resilience
+    measures for the lifetime of the development
+  level: must
+- item: Design of surface water management systems, including SUDS (or alternatives where high groundwater
+    or clay soils prevent free drainage)
+  level: must
+- item: Safe access to and from the development
+  level: must
+- item: 'Flood Zones 2, 3a and 3b: information for the Sequential Test and Exception Test'
   level: must
   required-if:
-    application-type:
+    site:
       in:
-      - hh
-  source-text: Flood Risk Assessment – householder template … Planning applications located within flood
-    zones 2 and 3
+      - flood-risk-zone
+      description: Flood Zones 2, 3a and 3b.
+- item: 'Residential extensions and non-residential extensions under 250 sq m in Flood Zones 2 and 3 (council
+    template): floor levels 300mm above the 1 in 100 flood event, or matching existing floor levels with
+    a flood resilience design'
+  level: must
+  required-if:
+    all:
+    - site:
+        in:
+        - flood-risk-zone
+        description: Flood Zones 2 and 3.
+    - any:
+      - condition:
+          field: residential-extension
+          value: true
+          description: A residential extension.
+      - condition:
+          field: floorspace-non-residential
+          operator: <
+          value: 250
+          description: A non-residential extension under 250 sq m.
+- item: 'Egham and Chertsey Town Centres in Flood Zone 1: the SFRA safe escape route, with a map, and
+    how occupiers will be told about it (including the EA flood warning service)'
+  level: must
+  required-if:
+    site:
+      in:
+      - town-centre
+      description: Egham or Chertsey Town Centre, in Flood Zone 1.
 confidence: medium
-notes: 'Audit (wrong_trigger): the householder row quoted the web page (''a simple Flood Risk Assessment
-  may be required''); the checklist trigger is flood zones 2 and 3.'
+notes: From the council's list (published July 2020), page 8-9 of the Validation Document; page 2 of the
+  Householder validation checklist (republished December 2024). The last sentence of the source text is
+  the Householder checklist's trigger; householders use the council's FRA template.
 review-status: unverified
 field-status: {}
