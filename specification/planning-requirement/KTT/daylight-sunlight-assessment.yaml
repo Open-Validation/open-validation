@@ -3,17 +3,92 @@ local-authority: KTT
 required-if:
   any:
   - all:
-    - ref: major-development
-    - condition:
-        field: dwelling-count
-        operator: '>='
-        value: 1
-        description: The major application is residential.
-  - discretionary
+    - application-type:
+        in:
+        - full
+        - outline
+        - reserved-matters
+    - any:
+      - discretionary
+      - all:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: '>='
+            value: 1
+            description: Residential major development.
+  - all:
+    - application-type:
+        in:
+        - full
+        - outline
+        - reserved-matters
+        - hh
+    - any:
+      - condition:
+          field: footprint-increase
+          value: true
+          description: Extensions.
+      - condition:
+          field: outbuilding
+          value: true
+          description: The erection of outbuildings.
 source-url: https://www.kingston.gov.uk/sites/default/files/2025-04/Validation___Local_List___1__0.pdf
+policy: Royal Borough of Kingston upon Thames Residential Design SPD; BRE 'Site layout planning for daylight
+  and sunlight' (BR 209, 2022)
+source-text: All applications where the proposal is likely to have an effect upon levels of light to adjoining
+  land uses. Also required for all residential major developments, to demonstrate that adequate daylight
+  and sunlight would be provided to new units. ... All applications that involve extensions or the erection
+  of outbuildings.
+must-include:
+- item: '''45 Degree'' plans and statement at 1:50 or 1:100, accurately showing neighbouring buildings
+    and windows (and room uses where possible), annotated to show the 45 degree rule on floor plans and
+    elevations'
+  level: must
+  required-if:
+    any:
+    - condition:
+        field: footprint-increase
+        value: true
+        description: Extensions.
+    - condition:
+        field: outbuilding
+        value: true
+        description: The erection of outbuildings.
+- item: '''25 Degree'' elevation plan and statement at 1:50 or 1:100, annotated to show the 25 degree
+    rule'
+  level: must
+  required-if:
+    condition:
+      field: storey-count
+      operator: '>='
+      value: 2
+      description: Extensions or outbuildings of 2 or more storeys, or development above 2 storeys (e.g.
+        a roof extension).
+- item: 'A full daylight and sunlight assessment following the BRE guide (2022): impact on neighbouring
+    residential properties, internal daylight and sunlight for the new units, and sunlight to amenity
+    areas, with summary tables per receptor'
+  level: must
+  required-if:
+    any:
+    - discretionary
+    - all:
+      - ref: major-development
+      - condition:
+          field: dwelling-count
+          operator: '>='
+          value: 1
+          description: Residential major development.
+- item: A Daylight and Sunlight Report where the proposal fails the 45 degree rule (on both floor and
+    elevation plans) or the 25 degree rule
+  level: must
 confidence: medium
-notes: 'Audit (wrong_trigger): the workbook quoted Biodiversity Checklist text. From the audit: proposals
-  likely to affect light to adjoining land, and all major residential. On the Householder list it is needed
-  if the 45/25-degree tests fail.'
+notes: 'From the council''s list (adopted 1 May 2024), page 24-27 and 45-46 (Householder Local List page
+  21-24). The list has three rows: ''45 Degree'' Plans and Statement, ''25 Degree'' Elevation Plan and
+  Statement (both ''can be included within any Daylight, Sunlight and Overshadowing Assessment'') and
+  the full assessment. For householders the 45 and 25 degree drawings are likely to be enough. ''Likely
+  to have an effect upon levels of light'' shows as ''check''. The main list covers planning applications
+  without naming types, so it is applied to full, outline and reserved matters applications; householder
+  triggers come from the Householder Local List.'
 review-status: unverified
 field-status: {}
