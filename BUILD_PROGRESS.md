@@ -35,6 +35,27 @@ Working branch: `ccr-f743743a-pji9c0` (the session's designated branch, used ins
 - National parks use short codes (BROADS, DNPA, ENPA, LDNPA, NFNPA, NYMNPA, NNPA, PDNPA, SDNPA, YDNPA).
 - The council register lives in `data/organisation.csv` (refreshed by `scripts/update_register.py`), not `inputs/`.
 - Working branch is `ccr-f743743a-pji9c0`, not `build`.
+- A fifth status, **`incorrect`** (purple `#B388FF`, CSS `--status-incorrect`), sits below `unverified`.
+  It needs a `note`. Fixing the value clears it (hash). It has its own texture in Patterns mode
+  (horizontal lines) and a ✕ in table cells. Every new `incorrect` flag landing on `main` opens an
+  `incorrect-flag` issue mentioning @Open-Validation (`incorrect-alert.yml` + `new_incorrect_flags.py`).
+- Any change at all in MHCLG's register opens a `register-change` issue mentioning @Open-Validation (monthly).
+- **Merge rules for review mode (build in stage D, apply-reviews.yml):**
+
+  | Who | What | Merge |
+  |---|---|---|
+  | Contributor (write access) | Marks up to human-verified, down to unverified, or incorrect | auto if ≤ 50 cells and one council |
+  | Contributor | Bigger batches | manual |
+  | Registered council officer (public GitHub email on that council's own domain) | council-verified, own council only | auto |
+  | Registered council officer | Data corrections (→ council-updated) | manual at first |
+  | Anyone else | Anything | manual |
+
+  Council officers register once via the tool; the register needs a per-council email domain list.
+  Default until told otherwise: the maintainer approves each officer registration. Officers without
+  GitHub use the "I work for this council" form (maintainer confirms by emailing the council address).
+  Repo settings needed: Allow auto-merge; protect `main` requiring the `check` workflow.
+- Review mode signs in with a pasted fine-grained token (no backend). A "Sign in with GitHub" button
+  (Cloudflare Worker) can be added later.
 
 ## Notes for whoever picks this up
 
