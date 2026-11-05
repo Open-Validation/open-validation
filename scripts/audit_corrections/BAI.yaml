@@ -1,0 +1,400 @@
+# Corrections for Basildon Borough Council, from the council's audit.
+# The list in force is still the Local List of Validation Requirements of 1 July 2019. It
+# predates statutory Biodiversity Net Gain, which applies in addition (the council has a
+# separate BNG page). Grokbot's extraction was thin and fragmentary: the triggers below come
+# from the audit's reading of the 2019 list.
+local-authority: BAI
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is Arboricultural Method Statement and ventilation text; the 2019
+      list has no schedule of works for householder applications"
+  - id: site-plan
+    sheets: [Discharge of conditions]
+    reason: "wrong_app_type: the excerpt itself excludes discharge of condition applications"
+
+drop-unmapped:
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_app_type: placed under Householder, which the source excludes; re-added below"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: a fragment with no threshold; re-added below with the audit's trigger"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "duplicate: the excerpt repeats the affordable housing / 36% viability text"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: The site is for 10 or more residential units.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 0.2
+            description: The residential site is more than 0.2 hectares.
+    source-text: Affordable Housing Statement / Viability Statement Application for new residential
+      development where Sites of 10 units or more, or Sites of more than 0.2 Hectares.
+    source-url: &list
+      https://www.basildon.gov.uk/media/7449/Local-List-of-Validation-Requirements-for-Planning-Applications-July-2019/pdf/Basildon_Council_-_Local_List_of_Validation_Requirements_for_Planning_Applications_-_July_2019.pdf?m=637001811042370000
+    confidence: medium
+    notes: >-
+      Audit (duplicate, wrong_app_type): one item in the source, 'Affordable Housing Statement /
+      Viability Statement'; the workbook guessed Full planning but it applies to outline too.
+
+  - id: viability-assessment
+    action: replace
+    required-if: discretionary
+    source-text: Where less than 36% affordable housing is proposed, a full Viability Appraisal
+      shall be provided to the Council for independent assessment.
+    source-url: *list
+    confidence: medium
+    notes: >-
+      Audit (duplicate): part of the 'Affordable Housing Statement / Viability Statement' item
+      (10+ units or more than 0.2 ha). A Viability Appraisal is needed where less than 36%
+      affordable housing is proposed, which the rules can't express, so it is shown as officer
+      discretion.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: A Flood Zone 1 site over 1 hectare.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: A Flood Zone 1 site over 1 hectare.
+    source-text: Flood Zone 2 or 3; or Flood Zone 1 sites over 1 ha
+    source-url: *list
+    must-include:
+      - item: The design of surface water management systems, including Sustainable Drainage (SuDS)
+        level: should
+      - item: Safe access to and from the development in areas at risk of flooding
+        level: should
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted the FRA's content, not its trigger. The
+      must-include items are the council's wording ('The FRA should include ...').
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is EIA development.
+    source-text: would constitute EIA development.
+    source-url: *list
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was a fragment."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: There are trees on or next to the site.
+        - site:
+            in: [tree-preservation-zone]
+            description: Trees protected by a TPO or in a conservation area may be affected.
+    source-text: include an Arboricultural Statement in accordance with BS5837 will normally be
+      required.
+    source-url: *list
+    must-include:
+      - item: Arboricultural Statement in accordance with BS5837
+        level: should
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt left out the trigger. From the audit: trees on
+      or next to the site, TPO or Conservation Area trees.
+
+  - id: travel-plan
+    action: replace
+    required-if: discretionary
+    source-text: The Travel Plan must set out how the reliance on the private motor car will be
+      reduced.
+    source-url: *list
+    must-include:
+      - item: How the reliance on the private motor car will be reduced
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the content, not the trigger. From the audit: developments
+      with significant transport generation."
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal involves a change in ground levels.
+    must-include:
+      - item: Existing and finished levels
+        level: must
+    confidence: medium
+    notes: "The workbook guessed the application type; the excerpt says sections are needed where ground
+      levels change."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal involves a change in ground levels.
+    must-include:
+      - item: Existing and finished levels
+        level: must
+    confidence: medium
+    notes: "The workbook guessed the application type; the excerpt says sections are needed where ground
+      levels change."
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: Scale 1:200 or 1:500, with a scale bar
+        level: must
+      - item: Direction of north
+        level: must
+    confidence: low
+    notes: >-
+      The council's Block Plan applies to all applications except non-material amendments,
+      discharge of condition applications and outline applications where siting is a reserved
+      matter; the rules can't express those exceptions. The audit (wrong_app_type) notes this is a
+      national drawing requirement restated in the local list.
+
+  - id: elevation-existing
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal includes new buildings.
+        - condition:
+            field: external-alterations
+            value: true
+            description: The proposal alters the exterior of existing buildings.
+    source-text: Elevations existing and proposed All applications proposing new buildings or
+      alterations to the exterior of existing buildings Scale 1:50 or 1:100 to show overall size of
+      any new buildings or extensions (except outline applications) Scale Bar required
+    source-url: *list
+    must-include:
+      - item: Scale 1:50 or 1:100, with a scale bar
+        level: must
+    confidence: low
+    notes: >-
+      The workbook filed this under Outline, which the council's text excludes ('except outline
+      applications'); the rules can't express that exception. The excerpt ran on into the
+      location plan entry, which is cut here.
+
+  - id: elevation-proposed
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal includes new buildings.
+        - condition:
+            field: external-alterations
+            value: true
+            description: The proposal alters the exterior of existing buildings.
+    source-text: Elevations existing and proposed All applications proposing new buildings or
+      alterations to the exterior of existing buildings Scale 1:50 or 1:100 to show overall size of
+      any new buildings or extensions (except outline applications) Scale Bar required
+    source-url: *list
+    must-include:
+      - item: Scale 1:50 or 1:100, with a scale bar
+        level: must
+    confidence: low
+    notes: >-
+      The workbook filed this under Outline, which the council's text excludes ('except outline
+      applications'); the rules can't express that exception. The excerpt ran on into the
+      location plan entry, which is cut here.
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: Protected or priority species may be affected.
+        - site:
+            in: [site-of-special-scientific-interest, local-wildlife-site, priority-habitat]
+            description: An SSSI, Local Wildlife Site or priority habitat may be affected.
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): where protected or priority species, SSSI/Local Wildlife
+      Sites or priority habitats may be affected."
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, conservation-area, scheduled-monument, park-and-garden,
+              locally-listed-building]
+            description: The proposal affects a designated or non-designated heritage asset, or a
+              Local Value Register building.
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): Listed Building Consent and applications affecting designated
+      or non-designated heritage assets or Local Value Register buildings."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: previously-developed-land
+            value: true
+            description: The site is brownfield land.
+        - condition:
+            field: eia-development
+            value: true
+            description: The development is EIA development.
+        - site:
+            in: [contaminated-land]
+            description: Contamination is known on the site.
+    source-url: *list
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): major or brownfield development, EIA development, or
+      known contamination. Grokbot had only the advice to follow the 'Land Affected by
+      Contamination' booklet.
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      condition:
+        field: floodlighting
+        value: true
+        description: The proposal includes external flood lighting.
+    source-url: *list
+    confidence: low
+    notes: "From the audit (missing_requirement): external flood lighting, all applications except householder.
+      The rules can't express the householder exception."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: The proposal is residential.
+            - condition:
+                field: noise-sensitive-use
+                value: true
+                description: The housing would be affected by road, rail or industrial noise.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: B2/B8 or late-night A3-A5 uses next to homes.
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): major residential affected by road, rail or industrial
+      noise; B2/B8 or late-night A3-A5 uses next to homes."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 2500
+            description: Retail or leisure floorspace over 2,500 square metres.
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Main town centre uses outside a centre.
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): retail or leisure over 2,500 sq m, or main town centre uses
+      out of centre."
+
+  - id: sci
+    action: add
+    required-if: discretionary
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Statement of Community Involvement for large-scale or
+      controversial schemes."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Prior approval and planning applications for telecoms.
+    source-url: *list
+    must-include:
+      - item: ICNIRP declaration
+        level: must
+      - item: Area of search
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement, wrong_app_type): telecoms prior approvals and planning applications
+      need the telecoms information (ICNIRP declaration, area of search)."
+
+  - id: transport-assessment
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): majors, or a material increase in traffic on a trunk road
+      (shown as officer discretion)."
+
+unmapped:
+  - local-name: Ventilation / Extraction details (odour)
+    source-text: "Ventilation/ Extraction System A3, A4 and A5 uses and any other proposals (except householders)
+      which will incorporate a ventilation/extraction system."
+    source-url: *list
+    suggested-id: ventilation-extraction-details
+  - local-name: Drainage Strategy / SuDS
+    source-text: "From the audit: major development (10+ dwellings, more than 0.5 ha, more than 1,000 sq m
+      or 1 ha+); separate checklists for full and outline applications"
+    source-url: *list
+    suggested-id: drainage-strategy
+  - local-name: Health Impact Assessment
+    source-text: "From the audit: all EIA-qualifying development"
+    source-url: *list
+    suggested-id: health-impact-assessment
+  - local-name: Parking and Access Arrangements
+    source-text: "From the audit: any loss or gain of parking"
+    source-url: *list
+    suggested-id: parking-plan
+
+low-confidence:
+  - id: floor-plan-existing
+    note: "The workbook row is the elevations entry ('except outline applications') filed under Outline; the
+      council's floor plan trigger wasn't captured."
+  - id: floor-plan-proposed
+    note: "The workbook row is the elevations entry ('except outline applications') filed under Outline; the
+      council's floor plan trigger wasn't captured."

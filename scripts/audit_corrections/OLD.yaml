@@ -1,0 +1,617 @@
+# Corrections for Oldham Metropolitan Borough Council, from the council's audit.
+# The workbook's link appears to be the current 'Oldham Council – Planning Validation Checklist'
+# (it cites Places for Everyone 2024 and the 2024 BNG regulations, so it supersedes the older
+# download id 2785). It is a general list for all application types, so the workbook's
+# 'INFERRED ... Full planning' guesses are not used. Items marked "From the audit" use the
+# audit's paraphrase of the checklist, not the council's exact words.
+local-authority: OLD
+
+validation-list:
+  url: https://www.oldham.gov.uk/download/downloads/id/8273/planning_validation_checklist.pdf
+  date: 2025-10-01
+  date-basis: >-
+    PDF metadata (CreationDate) only; the checklist states no adoption, publication or version
+    date (audit wrong_date). It cites the 2024 Places for Everyone plan and 2024 BNG regulations
+
+submission-standards:
+  - item: No individual file larger than 10MB unless agreed in advance; split larger documents into
+      clearly labelled parts (Part 1, Part 2 etc.)
+    level: must
+  - item: All supporting documents (including letters, reports and photographs) in PDF format, ideally
+      PDF/A
+    level: must
+  - item: Drawings as single-layer, scalable PDFs, ideally PDF/A; CAD files not accepted, except drawings
+      of drainage or highway layouts (e.g. swept-path analysis), which are submitted in both formats
+    level: must
+  - item: Drawings on ISO 'A' paper sizes, at A3 where possible
+    level: must
+  - item: Each drawing has a title box, including the site address/name and the drawing reference/number
+      with revision number/letter
+    level: must
+  - item: Each drawing has a scale bar and a north point; 'Not to scale' or 'Do not scale' annotations
+      are not accepted
+    level: must
+  - item: PDF orientation matches the original drawing sheet
+    level: must
+  - item: A summary schedule of drawings, with drawing title, reference, description and paper size
+    level: must
+  - item: Electronic file names include the document type, title and reference (e.g. 'DRAWING -
+      PROPOSED-FLOORPLAN – 12345 REV.A')
+    level: must
+
+drop:
+  - id: photos
+    reason: "not_a_requirement: the excerpt is the rule that supporting documents must be PDFs"
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is Tree Survey text; the checklist has no listed-building schedule of works item"
+
+drop-unmapped:
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: the excerpt is Tree Survey text; the checklist has no highways item"
+  - local-name: Self-build / custom build information
+    reason: "not_a_requirement: the excerpt is the BNG exemption criteria"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "wrong_trigger: page-header debris; replaced below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      all:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal is residential.
+    source-url: https://www.oldham.gov.uk/download/downloads/id/8273/planning_validation_checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): major residential development."
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - site:
+                in: [air-quality-management-area]
+                description: The site is in an Air Quality Management Area.
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 50
+            description: Residential development of more than 50 dwellings.
+        - all:
+            - ref: major-development
+            - condition:
+                field: floorspace
+                operator: ">"
+                value: 5000
+                description: Major development of more than 5,000 square metres.
+        - condition:
+            field: biomass-or-chp
+            value: true
+            description: Combustion uses such as power stations, biomass or incineration.
+        - condition:
+            field: parking-spaces
+            operator: ">"
+            value: 50
+            description: More than 50 car parking spaces.
+    source-url: https://www.oldham.gov.uk/download/downloads/id/8273/planning_validation_checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): an Air Quality Statement for these cases."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees on or off the site with a stem diameter over 75mm (at 1.5m) may be affected
+          by the proposals.
+    source-text: >-
+      … on or offsite with a stem diameter greater than 75 mm when measured at 1.5 metres from the
+      ground that may foreseeably be impacted by the proposals prior to or during the implementation of
+      the proposals, or which may have foreseeable implications for the proposals post completion.
+    source-url: https://www.oldham.gov.uk/download/downloads/id/8273/planning_validation_checklist.pdf
+    must-include:
+      - item: Arboricultural Impact Assessment
+        level: must
+      - item: Tree Constraints Plan
+        level: must
+      - item: Tree Protection Plan
+        level: must
+      - item: Mitigation Planting Plan
+        level: must
+      - item: Method Statements
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): the checklist applies this to all applications, including householder.
+      The must-include items are the checklist item's sub-headings."
+
+  - id: archaeological-assessment
+    action: add
+    required-if:
+      any:
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - any:
+                - condition:
+                    field: demolition
+                    value: true
+                    description: The proposal involves demolition.
+                - condition:
+                    field: ground-disturbance
+                    value: true
+                    description: The proposal involves excavation.
+                - condition:
+                    field: new-build
+                    value: true
+                    description: The proposal involves new buildings.
+        - all:
+            - site:
+                in: [listed-building]
+                description: The site is in the curtilage of a listed building.
+            - any:
+                - condition:
+                    field: demolition
+                    value: true
+                    description: The proposal involves demolition.
+                - condition:
+                    field: ground-disturbance
+                    value: true
+                    description: The proposal involves excavation.
+                - condition:
+                    field: new-build
+                    value: true
+                    description: The proposal involves new buildings.
+        - discretionary
+    source-url: https://www.oldham.gov.uk/download/downloads/id/8273/planning_validation_checklist.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): also conversion or change of use of former textile mills,
+      or substantial demolition, excavation or new build in their curtilage. Former textile mills
+      have no field, so that case is shown as officer judgement.
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - condition:
+                field: demolition
+                value: true
+                description: Demolition of buildings.
+            - condition:
+                field: protected-species
+                value: true
+                description: The buildings could support protected species.
+        - all:
+            - condition:
+                field: minor-development
+                value: true
+                description: Minor development.
+            - any:
+                - site:
+                    in: [site-of-special-scientific-interest, local-wildlife-site]
+                    description: Within or near (50m) an SSSI or SBI.
+                - site:
+                    in: [flood-risk-zone]
+                    description: Within 10m of Flood Zone 2 or 3.
+                - condition:
+                    field: near-watercourse
+                    value: true
+                    description: Within 10m of a canal or green corridor.
+    source-text: >-
+      All Major ... demolition of buildings that could support protected species ... within 50m of
+      SSSI/SBI ... within 10m of a canal, green corridor or Flood Zones 2 and 3
+    source-url: https://www.oldham.gov.uk/download/downloads/id/8273/planning_validation_checklist.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook excerpt was a fragment ('to support protected species.')."
+
+  - id: bng-metric
+    action: update
+    confidence: medium
+    notes: "Audit (wrong_app_type): all applications for planning permission unless exempt; householder
+      applications are exempt (statutory)."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - all:
+            - site:
+                in: [conservation-area, world-heritage-site]
+                description: The site is in a designated area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: One or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: 100 square metres or more of floorspace.
+    source-text: >-
+      All Major developments; ... designated area ... one or more dwellings ... or 100 sqm or more;
+      Listed Building Consent applications
+    source-url: https://www.oldham.gov.uk/download/downloads/id/8273/planning_validation_checklist.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook had this under Listed building consent only."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs Environmental Impact Assessment.
+    confidence: low
+    notes: >-
+      The excerpt is garbled. It asks for information sufficient to allow a Screening Opinion for, for
+      example, residential development of more than 150 units or on more than 5 hectares, and urban
+      development projects for non-residential use (cut off).
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-text: >-
+      Fire Statement Buildings that are 18 metres … more in height, or 7 or more storeys and contain two
+      or more dwellings … or educational accommodation.
+    source-url: https://www.oldham.gov.uk/download/downloads/id/8273/planning_validation_checklist.pdf
+    confidence: medium
+    notes: "The checklist marks this as a National Information Requirement."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - condition:
+                field: minor-development
+                value: true
+                description: Minor development.
+            - site:
+                in: [flood-risk-zone]
+                description: The site is in Flood Zone 2, 3 or 3b.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare.
+        - all:
+            - site:
+                in: [surface-water-flood-risk]
+                description: The site is in a surface water flood area.
+            - condition:
+                field: sensitive-end-use
+                value: true
+                description: A more vulnerable use is introduced.
+        - discretionary
+    source-text: >-
+      Flood Risk Assessment All Major Developments and Minor Developments within Flood Zones … 2, 3 and
+      3b.
+    source-url: https://www.oldham.gov.uk/download/downloads/id/8273/planning_validation_checklist.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt was split mid-sentence and left out sites over 1 ha, surface
+      water flood areas where a more vulnerable use is introduced, and Flood Zone 1 sites at increased
+      risk in the SFRA (shown as officer judgement).
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [conservation-area]
+            description: All development in a conservation area, including house extensions and partial or
+              total demolition.
+        - application-type:
+            in: [lbc]
+    source-text: >-
+      Heritage Statement All development proposed within a … Conservation Area (including house
+      extensions and partial or total … demolition) … All applications for Listed Building …
+    source-url: https://www.oldham.gov.uk/download/downloads/id/8273/planning_validation_checklist.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type, wrong_trigger): applies to householder work too; the workbook excerpt ran
+      into the Health Impact Assessment text."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - condition:
+                field: minor-development
+                value: true
+                description: Minor development.
+            - condition:
+                field: new-build
+                value: true
+                description: New-build residential.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: The proposal creates dwellings.
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: New schools or hospitals, or changes of use to those uses or housing on previously
+              industrial land.
+    source-url: https://www.oldham.gov.uk/download/downloads/id/8273/planning_validation_checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Contaminated Land Survey (Phase I, and Phase II if needed)
+      for major development, minor new-build residential, schools or hospitals, and changes of use to those
+      uses on previously industrial land."
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: parking-spaces
+            operator: ">="
+            value: 4
+            description: Parking for 4 or more vehicles.
+        - condition:
+            field: floodlighting
+            value: true
+            description: Floodlighting, or outdoor sport and recreation.
+        - condition:
+            field: near-watercourse
+            value: true
+            description: Development within 10m of a Main River or open water.
+        - site:
+            in: [site-of-special-scientific-interest, local-wildlife-site]
+            description: Development within 10m of an SSSI or SBI.
+        - discretionary
+    source-url: https://www.oldham.gov.uk/download/downloads/id/8273/planning_validation_checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Lighting Impact Assessment for communal external areas over
+      50 sqm (no field, so shown as officer judgement), parking for 4+ vehicles, outdoor sport and
+      recreation, floodlighting, and development within 10m of a Main River, open water, SSSI or SBI."
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Noise-generating uses such as B2/B8 or evening-economy uses.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Sensitive uses (including schools and hospitals) near noise sources.
+    source-url: https://www.oldham.gov.uk/download/downloads/id/8273/planning_validation_checklist.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the opt-out wording. From the audit: noise-generating
+      B2/B8 uses, sensitive uses near noise sources, evening-economy uses, schools and hospitals."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.oldham.gov.uk/download/downloads/id/8273/planning_validation_checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): all major development."
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - condition:
+                field: minor-development
+                value: true
+                description: Minor development.
+            - condition:
+                field: loss-of-open-space
+                value: true
+                description: The proposal loses open space or sports facilities.
+    source-url: https://www.oldham.gov.uk/download/downloads/id/8273/planning_validation_checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): an Open Space, Sports and Recreation Statement."
+
+  - id: section-existing
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: minor-development
+            value: true
+            description: Minor new buildings or extensions.
+        - all:
+            - condition:
+                field: residential-extension
+                value: true
+                description: A house extension.
+            - discretionary
+    source-url: https://www.oldham.gov.uk/download/downloads/id/8273/planning_validation_checklist.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): Levels / Sections for major and minor new buildings or
+      extensions, and uneven sites including house extensions (rear extensions to terraced houses
+      excepted). 'Uneven site' has no field, so house extensions are shown as officer judgement."
+
+  - id: section-proposed
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: minor-development
+            value: true
+            description: Minor new buildings or extensions.
+        - all:
+            - condition:
+                field: residential-extension
+                value: true
+                description: A house extension.
+            - discretionary
+    source-url: https://www.oldham.gov.uk/download/downloads/id/8273/planning_validation_checklist.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): Levels / Sections for major and minor new buildings or
+      extensions, and uneven sites including house extensions (rear extensions to terraced houses
+      excepted). 'Uneven site' has no field, so house extensions are shown as officer judgement."
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: Existing and proposed site plans at a scale of 1:200 or 1:500, based on a site survey
+        level: must
+    source-text: … and Proposed Site Plan at a scale of 1:200 or 1:500 based on a site survey.
+    confidence: medium
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      any:
+        - all:
+            - any:
+                - ref: major-development
+                - condition:
+                    field: minor-development
+                    value: true
+                    description: Minor development.
+            - condition:
+                field: floorspace
+                operator: ">"
+                value: 0
+                description: The proposal creates new floorspace.
+        - all:
+            - condition:
+                field: involves-change-of-use
+                value: true
+                description: A change of use.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: The change of use creates new dwellings.
+    source-url: https://www.oldham.gov.uk/download/downloads/id/8273/planning_validation_checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Sustainability, Carbon and Energy Statement."
+
+  - id: telecommunications-report
+    action: replace
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: The proposal is for telecommunications development, including Part 16 prior
+          notifications.
+    source-text: >-
+      All proposals for telecommunications development including Prior Notification applications under
+      Part 16 of the Schedule 2 of the Town & Country Planning (General Permitted Development) Order 2015
+      (as amended)
+    source-url: https://www.oldham.gov.uk/download/downloads/id/8273/planning_validation_checklist.pdf
+    policy: PfE Policy JP-C2 (Digital Connectivity)
+    must-include:
+      - item: Evidence of compliance with ICNIRP, site selection and consultation
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): applies to all telecoms proposals, not only prior approvals."
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      condition:
+        field: town-centre-use-floorspace
+        operator: ">"
+        value: 2500
+        description: Retail or leisure development of more than 2,500 square metres.
+    source-url: https://www.oldham.gov.uk/download/downloads/id/8273/planning_validation_checklist.pdf
+    policy: Local Plan Policy 15 (Centres)
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook filed this under prior approval, with telecoms text. From the
+      audit: an Impact Assessment for retail or leisure over 2,500 sqm."
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    confidence: low
+    notes: "From the audit: Transport has a major-development threshold; the excerpt only explains when a
+      lighter Transport Statement will do."
+
+  - id: viability-assessment
+    action: replace
+    required-if: discretionary
+    source-url: https://www.oldham.gov.uk/download/downloads/id/8273/planning_validation_checklist.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted Tree Survey text. From the audit: needed where the
+      applicant claims the scheme cannot meet policy requirements, and agrees to fund independent review."
+
+unmapped:
+  - local-name: Residential Standards, Accessibility and Adaptability Statement
+    source-text: "From the audit: all new residential, including conversions, HMOs and student accommodation"
+    source-url: https://www.oldham.gov.uk/download/downloads/id/8273/planning_validation_checklist.pdf
+    suggested-id: housing-standards-statement
+  - local-name: Crime Impact Statement
+    source-text: "From the audit: residential of 50+ units, office or commercial over 2,500 sqm, all new
+      student accommodation, retail, hotel, health, leisure or worship uses over 2,500 sqm, and transport
+      stations of 1,000 sqm+"
+    source-url: https://www.oldham.gov.uk/download/downloads/id/8273/planning_validation_checklist.pdf
+    suggested-id: crime-prevention-statement
+  - local-name: Employment & Skills Statement
+    source-text: "From the audit: major schemes of 100+ dwellings or 2,500 sqm+ of commercial floorspace,
+      including mixed use that exceeds these together"
+    source-url: https://www.oldham.gov.uk/download/downloads/id/8273/planning_validation_checklist.pdf
+    suggested-id: employment-skills-plan
+  - local-name: Landscape Visual Impact Assessment
+    source-text: "From the audit: major development in the Green Belt or Other Protected Open Land, or with
+      significant landscape or townscape impact"
+    source-url: https://www.oldham.gov.uk/download/downloads/id/8273/planning_validation_checklist.pdf
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Town Centre Uses - Sequential test
+    source-text: "From the audit: main town centre uses outside centres and not in accordance with the Local
+      Plan"
+    source-url: https://www.oldham.gov.uk/download/downloads/id/8273/planning_validation_checklist.pdf
+    suggested-id: sequential-test
+  - local-name: Infrastructure phasing and delivery strategy
+    source-text: "From the audit: sites that are phased or developed by more than one developer"
+    source-url: https://www.oldham.gov.uk/download/downloads/id/8273/planning_validation_checklist.pdf
+    suggested-id: phasing-plan

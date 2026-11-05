@@ -1,0 +1,376 @@
+# Corrections for Barnsley Metropolitan Borough Council, from inputs/audit/barnsley-metropolitan-borough-council.json.
+# The audit read Barnsley's 2026 Local Validation List ('Updated 10 March 2026'), 21 numbered items
+# in Table 3. Its triggers are written by development type and scale, not application type, so
+# Grokbot's 'Full planning' (INFERRED) placements are removed and the replaced items below carry
+# no application types unless the list names one. Quotes are the council's words as given in the
+# audit's evidence; other audit detail is in notes.
+local-authority: BNS
+
+drop:
+  - id: design-and-access-statement
+    reason: >-
+      wrong_trigger: the row is Item 3 'Design Documents to supplement Design & Access Statements'
+      (Building for a Healthy Life and National Design Guide assessments), recorded below as
+      unmapped; the Design and Access Statement itself is national
+  - id: schedule-of-works
+    reason: >-
+      wrong_app_type: the actual requirement is the Heritage Statement for listed building consent,
+      with the schedule of works as part of it (now a must-include item of heritage-statement)
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: a sentence describing what a Planning Statement should contain"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: guidance fragment; re-added below with the 'Major Developments' trigger"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: omits the non-residential and takeaway triggers; re-added below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 15
+        description: Residential developments of 15 units or more.
+    source-text: "Affordable Housing Statement - Required for: Residential developments of 15 units or more"
+    source-url: https://www.barnsley.gov.uk/media/0qpll0xy/2026-local-validation-list.pdf
+    must-include:
+      - item: Details of M4(1), M4(2) and M4(3) units
+        level: must
+      - item: A viability appraisal where the scheme does not comply with the affordable housing
+          policy
+        level: must
+    confidence: medium
+    notes: "Audit (missing_requirement): Item 1. The must-include items are the audit's summary."
+
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: The site is within, adjacent to or impacting on an Air Quality Management
+              Area.
+        - discretionary
+    source-text: >-
+      Air Quality Assessment Details of when required Required for: Sites within, adjacent or
+      impacting on Air Quality Management Area’s (AQMA’s) or where a development would result in
+      air quality issues such as certain industrial processes e.g. glass recycling, concrete works,
+      sewage treatment works
+    source-url: https://www.barnsley.gov.uk/media/0qpll0xy/2026-local-validation-list.pdf
+    must-include:
+      - item: Existing air quality, and the impact of additional emissions associated with the
+          proposed development
+        level: should
+    confidence: medium
+    notes: >-
+      Developments that would result in air quality issues (certain industrial processes) are a
+      judgement, so shown as officer discretion. Audit (wrong_app_type): applies to outline and
+      reserved matters as well as full applications.
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees on the site or within 15m of building work or an engineering
+          operation (including householder excavations).
+    source-text: >-
+      Any planning application for building work or an engineering operation where there are trees
+      located on or within 15m
+    source-url: https://www.barnsley.gov.uk/media/0qpll0xy/2026-local-validation-list.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, missing_requirement): the workbook quoted the Arboricultural Method
+      Statement sentence; Item 20 Tree Survey applies to householder applications too. An
+      Arboricultural Method Statement may also be requested depending on the impacts on retained
+      trees.
+
+  - id: biodiversity-survey-report
+    action: replace
+    source-text: >-
+      Ecology Survey Details of when required Required for development: Of land with areas of
+      seminatural habitat (including brownﬁeld sites but not including minor developments unless
+      there are issues for particular species/habitats*);
+    source-url: https://www.barnsley.gov.uk/media/0qpll0xy/2026-local-validation-list.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): Item 7 Ecology Survey applies to outline and reserved matters as well,
+      not only Full planning. The excerpt holds only the first of the trigger list, so no trigger
+      is given; re-read Item 7.
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: Schedule 1 development, or Schedule 2 development where a screening opinion
+          requires EIA.
+    source-url: https://www.barnsley.gov.uk/media/0qpll0xy/2026-local-validation-list.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the Coal Mining item. From the audit: Item 9, Schedule
+      1 EIA development or Schedule 2 development where a Screening Opinion requires EIA."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: Development of 1 hectare or greater in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Development of 1 hectare or greater in Flood Zone 1.
+        - site:
+            in: [flood-risk-zone]
+            description: New development in Flood Zone 2 or 3.
+        - discretionary
+    source-text: >-
+      Planning applications for development proposals of 1 hectare or greater in Flood Zone 1 and
+      all proposals for new development located in Flood Zones 2 and 3 should be accompanied by an
+      FRA … A FRA will also be required where the proposed development or change of use to a more
+      vulnerable class may be subject to other sources of flooding or where the Environment Agency,
+      Internal Drainage Board and/or other bodies have indicated that there may be drainage
+      problems.
+    source-url: https://www.barnsley.gov.uk/media/0qpll0xy/2026-local-validation-list.pdf
+    must-include:
+      - item: The risks of all forms of flooding to and from the development, and how they will be
+          managed, taking climate change into account
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook filed this under 'Change of use - prior approval' only;
+      Item 10 is not a prior approval list and applies to householder, full, outline and reserved
+      matters applications. Other sources of flooding and drainage problems are shown as officer
+      discretion.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a Conservation Area.
+            - condition:
+                field: demolition
+                value: true
+                description: Relevant demolition that requires planning permission.
+        - site:
+            in: [conservation-area, listed-building-setting]
+            description: The site is in or next to a Conservation Area, or within the setting of a
+              listed building.
+    source-text: >-
+      Required for: Applications for Listed Building Consent … Relevant demolitions that require
+      planning permission in a Conservation Area
+    source-url: https://www.barnsley.gov.uk/media/0qpll0xy/2026-local-validation-list.pdf
+    must-include:
+      - item: A schedule of works
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+      - item: An analysis of the significance of archaeology, history and character of the
+          building/structure
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+      - item: The principles of and justification for the works, and their impact on the special
+          architectural or historic character of the listed building, its structure, its setting and
+          the setting of any adjacent heritage asset
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type, missing_requirement): Item 13 applies to listed building
+      consent, relevant demolitions in Conservation Areas, and (from the audit) sites in or next to
+      Conservation Areas or within the setting of listed buildings, including householder. The
+      must-include items are the workbook's listed building text ('that includes a schedule of
+      works, an analysis of the significance …').
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: Contamination is known or suspected.
+    source-text: Where contamination is known or suspected
+    source-url: https://www.barnsley.gov.uk/media/0qpll0xy/2026-local-validation-list.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted guidance text instead of the trigger."
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      condition:
+        field: noise-generating-use
+        value: true
+        description: Potentially noise generating development (pubs, clubs, takeaways,
+          industrial/commercial uses, recreation) in the vicinity of existing noise sensitive
+          development (residential, schools and hospitals).
+    source-text: >-
+      Noise Assessment Details of when required Required for: Potentially noise generating
+      developments (i.e. pubs, clubs, takeaways, industrial/commercial uses, recreation) in the
+      vicinity of existing noise sensitive developments residential, schools and hospitals;
+    source-url: https://www.barnsley.gov.uk/media/0qpll0xy/2026-local-validation-list.pdf
+    confidence: medium
+    notes: "The excerpt ends with ';', so the item may list further triggers. Audit (wrong_app_type): not
+      Full planning only."
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      condition:
+        field: site-area-residential
+        operator: ">="
+        value: 0.4
+        description: Housing proposals on sites of 0.4ha and above which are not on Local Plan
+          housing allocations.
+    source-text: A Planning Statement would be required for housing proposals on sites of 0.4ha and
+      above which are not on Local Plan Housing allocations.
+    source-url: https://www.barnsley.gov.uk/media/0qpll0xy/2026-local-validation-list.pdf
+    confidence: low
+    notes: "The 'not on a Local Plan housing allocation' part can't be expressed as a field; it is in the
+      description."
+
+  - id: sci
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: departure-from-development-plan
+            value: true
+            description: The application is a departure, including housing on sites above 0.4ha
+              contrary to the Local Plan.
+        - ref: major-development
+    source-text: Departures; housing on sites above 0.4ha contrary to the Local Plan; major
+      applications
+    source-url: https://www.barnsley.gov.uk/media/0qpll0xy/2026-local-validation-list.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): Item 17 Planning & Community Consultation Statement; the workbook omitted
+      departures and all major applications."
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: Residential schemes of 10 or more units.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: Non-residential schemes of 1,000 square metres or more of floorspace.
+    source-text: >-
+      Residential schemes of 10+ units … Non-residential schemes of 1,000m2 + floorspace … An
+      Energy/Sustainability Statement should demonstrate how the proposed development would minimise
+      resource and energy consumption compared to the minimum required under current Building
+      Regulations legislation and how it is located and designed to withstand the longer term
+      impacts of climate change.
+    source-url: https://www.barnsley.gov.uk/media/0qpll0xy/2026-local-validation-list.pdf
+    must-include:
+      - item: How the development would minimise resource and energy consumption compared with the
+          minimum required under current Building Regulations
+        level: must
+      - item: How the development is located and designed to withstand the longer term impacts of
+          climate change
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): Item 8; the workbook gave no threshold."
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: Retail and leisure uses outside the Primary Shopping Area of Barnsley Town Centre
+          of a scale, role or function that could harm the vitality and viability of the centre.
+    source-text: >-
+      Retail Impact Assessment & Sequential Approach Details of when required Impact Assessment:
+      Required for retail and leisure uses where they are of a scale, role or function where they
+      could have a negative impact on the vitality and viability of the centre and are: Located
+      outside the Primary Shopping Area of Barnsley Town Centre and are:
+    source-url: https://www.barnsley.gov.uk/media/0qpll0xy/2026-local-validation-list.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the excerpt is cut off before Item 18's floorspace thresholds
+      (2,500 / 1,000 / 500 square metres, by location); the audit doesn't say which applies where,
+      so they aren't encoded.
+
+  - id: transport-assessment
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      Transport Assessment & Draft Travel Plan Details of when required The NPPF sets out that all
+      developments that generate significant amounts of transport movement should be supported by a
+      Transport Statement or Transport Assessment.
+    source-url: https://www.barnsley.gov.uk/media/0qpll0xy/2026-local-validation-list.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): Item 19 has a local threshold table by use (e.g. C3 dwellings 80 units,
+      food retail 800m2, B2 4,000m2, B8 5,000m2) that the workbook omitted. The audit doesn't say
+      which thresholds are for a Transport Statement and which for an Assessment, so they aren't
+      encoded; re-read the table.
+
+  - id: travel-plan
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      Transport Assessment & Draft Travel Plan Details of when required The NPPF sets out that all
+      developments that generate significant amounts of transport movement should be supported by a
+      Transport Statement or Transport Assessment.
+    source-url: https://www.barnsley.gov.uk/media/0qpll0xy/2026-local-validation-list.pdf
+    confidence: low
+    notes: "Audit (wrong_trigger): see transport-assessment; Item 19's threshold table was omitted."
+
+unmapped:
+  - local-name: Building for a Healthy Life (BHL) Assessment
+    source-text: "Building for a healthy life (BHL) Assessment Required for: Major Residential schemes (10 or
+      more dwelling units)"
+    source-url: https://www.barnsley.gov.uk/media/0qpll0xy/2026-local-validation-list.pdf
+    suggested-id: building-for-a-healthy-life-assessment
+  - local-name: National Design Guide Assessment
+    source-text: "National Design Guide Assessment Required for: Major residential schemes"
+    source-url: https://www.barnsley.gov.uk/media/0qpll0xy/2026-local-validation-list.pdf
+    suggested-id: design-code
+  - local-name: Whole Life Carbon Assessment
+    source-text: "A Whole Life Carbon Assessment will be required for all major developments"
+    source-url: https://www.barnsley.gov.uk/media/0qpll0xy/2026-local-validation-list.pdf
+    suggested-id: whole-life-carbon-assessment
+  - local-name: Drainage Strategy / SuDS
+    source-text: "Item 11: 'Major Developments' (From the audit: the required-for text; the workbook quoted
+      'to use Sustainable Drainage Systems (SuDS) unless it can be demonstrated that SuDS are impractical.')"
+    source-url: https://www.barnsley.gov.uk/media/0qpll0xy/2026-local-validation-list.pdf
+    suggested-id: drainage-strategy
+  - local-name: Health Impact Assessment
+    source-text: "Health Impact Assessments Details of when required Required for: Large scale major housing
+      developments for in excess of 100 dwellings. From the audit: also non-residential 5,000m2+, hot
+      food takeaways and other relevant majors"
+    source-url: https://www.barnsley.gov.uk/media/0qpll0xy/2026-local-validation-list.pdf
+    suggested-id: health-impact-assessment
+
+low-confidence:
+  - id: bng-metric
+    note: >-
+      Audit (wrong_trigger): the excerpt is a policy-background fragment with no trigger. In the list,
+      BNG sits within Item 7 Ecology Survey and a separate Biodiversity Appendix linked from the
+      planning page.
+  - id: viability-assessment
+    note: "Audit (wrong_trigger): the excerpt starts mid-sentence ('106 agreement…') and gives no trigger."

@@ -1,0 +1,459 @@
+# Corrections for Epping Forest District Council, from inputs/audit/epping-forest-district-council.json.
+# The workbook links the companion 'Validation checklist - 2026 update' (.docx); the local list
+# itself is the 'Local List of Validation Requirements 2026 Update' PDF (February 2026), which the
+# build already uses. The list has a Householder section (10 local requirements) and an 'All
+# Non-Householder Applications' section. Grokbot placed most rows under Full planning
+# ('INFERRED'), several under Works to trees or Listed building consent because table text ran
+# together, and took some rows from the Harlow & Gilston Garden Town Sustainability Guidance
+# (2021), which is guidance, not the list. Items without the council's own words use the audit's
+# paraphrase ("From the audit").
+local-authority: EPP
+
+submission-standards:
+  - item: All drawings and supporting documents attached as PDF, not jpeg, TIF, doc, xls or CAD files
+    level: should
+  - item: Drawings and documents A3 size or smaller
+    level: must
+
+drop-unmapped:
+  - local-name: Agricultural Land Classification / Soils
+    reason: "wrong_trigger/duplicate: carries the Agricultural Buildings Appraisal trigger; re-added below with its own"
+  - local-name: Design Code / Masterplan / Parameter plans
+    reason: "not_a_requirement (Full row): HGGT guidance text; the Outline row (Strategic Masterplan Framework) is re-added below"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_trigger: carries the Air Quality trigger; re-added below"
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "wrong_trigger: a fragment; re-added below"
+  - local-name: Structural Survey
+    reason: "wrong_trigger: a fragment; re-added below with the audit's trigger"
+  - local-name: Water efficiency / water usage statement
+    reason: "not_a_requirement: a fragment from the HGGT Sustainability Guidance"
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "duplicate: now a must-include item of elevation-proposed"
+  - local-name: Landscape and Visual Impact Assessment
+    reason: "wrong_app_type: filed under listed building consent; re-added below"
+  - local-name: Ground investigation / Geotechnical / Basement Impact Assessment
+    reason: "wrong_app_type: filed under works to trees with the tree text; re-added below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 11
+            description: The site provides for 11 or more homes.
+        - condition:
+            field: housing-floorspace
+            operator: ">"
+            value: 1000
+            description: More than 1,000 square metres of residential floorspace (combined gross
+              internal area).
+    source-text: >-
+      On development sites which provide for 11 or more homes, or residential floorspace of more
+      than 1000 sqm (combined gross internal area) the requirement is 40% of those homes to be
+      affordable housing provided on site.
+    source-url: https://www.eppingforestdc.gov.uk/app/uploads/2026/02/Local-List-of-Validation-Requirements-2026-Update.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook filed it under Works to trees with the tree survey text.
+      The council's threshold wording was in the workbook's viability row.
+
+  - id: air-quality-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: >-
+      Required with any application that must provide a Transport Assessment/Statement and meets
+      the criteria in the list's Appendix A, and any other application that may adversely affect
+      local air quality. Appendix A is not in the workbook, so this is shown as officer discretion.
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [tree-preservation-zone]
+            description: There are trees protected by a TPO.
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - condition:
+                field: trees-on-or-near-site
+                value: true
+                description: There are trees within or adjacent to the site.
+    source-text: >-
+      Where there are trees protected by TPO or the site is situated with a conservation area, then
+      all trees within or adjacent to the site must be shown on a plan including a Tree Protection
+      Plan.
+    source-url: https://www.eppingforestdc.gov.uk/app/uploads/2026/02/Local-List-of-Validation-Requirements-2026-Update.pdf
+    must-include:
+      - item: All trees within or adjacent to the site shown on a plan
+        level: must
+      - item: A Tree Protection Plan
+        level: must
+    confidence: medium
+    notes: >-
+      The workbook filed this under Works to trees; it is the arboricultural report / tree survey
+      for development (householder and non-householder), per the audit's householder list.
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The application is not exempt from the biodiversity gain condition.
+    source-text: >-
+      Biodiversity Gain Plan & Metric Information - All planning applications which are not exempt
+      from BNG conditions will be required to submit:
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt ran on into the national requirements heading."
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if: discretionary
+    source-url: https://www.eppingforestdc.gov.uk/app/uploads/2026/02/Local-List-of-Validation-Requirements-2026-Update.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Sunlight/Daylight Assessment where there may be an
+      adverse impact on neighbours' light, or new homes in a restricted setting.
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: Street scene elevations for any work to the front or side fronting a road, including
+          additions to the roof (first floor level and above only), accurately depicting the
+          proposal in context with neighbouring properties as viewed from the street
+        level: must
+    confidence: medium
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full]
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building at least 18 metres tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building of 7 or more storeys.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 2
+            description: The building contains more than one dwelling.
+    confidence: medium
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      site:
+        in: [flood-risk-zone]
+        description: The site, including any outbuildings, is in Flood Zone 2 or 3.
+    source-url: https://www.eppingforestdc.gov.uk/app/uploads/2026/02/Local-List-of-Validation-Requirements-2026-Update.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): filed under Works to trees with the tree text. From the audit: a
+      Flood Risk Assessment for development in Flood Zones 2/3, including outbuildings.
+
+  - id: floor-plan-existing
+    action: update
+    source-text: ""
+    notes: "The workbook's excerpt was the street scene elevation text (duplicate), so it is removed here."
+  - id: floor-plan-proposed
+    action: update
+    source-text: ""
+    notes: "The workbook's excerpt was the street scene elevation text (duplicate), so it is removed here."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, scheduled-monument,
+              park-and-garden, locally-listed-building]
+            description: The proposal affects a heritage asset.
+    source-url: https://www.eppingforestdc.gov.uk/app/uploads/2026/02/Local-List-of-Validation-Requirements-2026-Update.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): filed under Works to trees with the tree text. From the audit: a
+      Heritage Statement where the proposal affects heritage assets (householder list).
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: The site is potentially contaminated.
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: The proposal introduces vulnerable receptors.
+    source-url: https://www.eppingforestdc.gov.uk/app/uploads/2026/02/Local-List-of-Validation-Requirements-2026-Update.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Contaminated Land Report for potential contamination or vulnerable receptors."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: The development requires external lighting or floodlighting.
+    confidence: medium
+
+  - id: noise-assessment
+    action: replace
+    source-text: we require a noise survey.
+    source-url: https://www.eppingforestdc.gov.uk/app/uploads/2026/02/Local-List-of-Validation-Requirements-2026-Update.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt carried the Glint and Glare and HRA headings
+      instead of the noise trigger, and the audit does not give it.
+
+  - id: photos
+    action: add
+    required-if:
+      application-type:
+        in: [hh]
+    source-text: >-
+      Site Photographs (PDF) - Photographs of the site showing the location of the proposed
+      development and any front, side, and rear elevations (as appropriate), including the location
+      of any outbuildings and trees.
+    source-url: https://www.eppingforestdc.gov.uk/app/uploads/2026/02/Local-List-of-Validation-Requirements-2026-Update.pdf
+    must-include:
+      - item: The location of the proposed development
+        level: must
+      - item: Front, side and rear elevations, as appropriate
+        level: must
+      - item: The location of any outbuildings and trees
+        level: must
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Site Photographs are required for all householder
+      applications. The council's wording was in the workbook's submission rules; whether it also
+      applies to non-householder applications is not stated.
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: Roof alterations are proposed.
+    confidence: medium
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: Roof alterations are proposed.
+    must-include:
+      - item: The shape and materials of the roof(s)
+        level: should
+    confidence: medium
+
+  - id: sci
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: departure-from-development-plan
+            value: true
+            description: The application is a departure from the development plan.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 10000
+            description: More than 10,000 square metres of non-residential floorspace.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 3
+            description: The site is 3 hectares or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 3
+            description: The site is 3 hectares or more.
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 100
+            description: More than 100 dwellings.
+        - discretionary
+    source-url: https://www.eppingforestdc.gov.uk/app/uploads/2026/02/Local-List-of-Validation-Requirements-2026-Update.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Statement of Community Involvement for departures,
+      >10,000 sqm non-residential, sites of 3ha+, >100 dwellings, and controversial proposals
+      (officer discretion).
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The site slopes or ground levels may be modified.
+    confidence: medium
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The site slopes or ground levels may be modified.
+    confidence: medium
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [hh]
+        - ref: major-development
+        - condition:
+            field: minor-development
+            value: true
+            description: Minor development.
+    confidence: medium
+    notes: >-
+      From the audit: the Sustainability Checklist & Statement is required for all householder
+      applications and all minor and major applications.
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 2500
+            description: More than 2,500 square metres of retail or leisure floorspace.
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Main town centre uses at an out-of-centre or edge-of-centre location.
+    source-url: https://www.eppingforestdc.gov.uk/app/uploads/2026/02/Local-List-of-Validation-Requirements-2026-Update.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Retail/Leisure Impact Assessment for >2,500 sqm or out/edge-of-centre main town centre uses."
+
+  - id: transport-assessment
+    action: replace
+    source-url: https://www.eppingforestdc.gov.uk/app/uploads/2026/02/Local-List-of-Validation-Requirements-2026-Update.pdf
+    confidence: low
+    notes: "The workbook's excerpt was the Air Quality trigger; the Transport Assessment's own trigger is not in the workbook or the audit."
+
+  - id: travel-plan
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: staff-count
+            operator: ">="
+            value: 50
+            description: A non-residential proposal involving 50 employees or more.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 250
+            description: A residential scheme of 250 or more units.
+    confidence: medium
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      application-type:
+        in: [full, outline, reserved-matters]
+    source-text: all development that generates waste, except householder
+    source-url: https://www.eppingforestdc.gov.uk/app/uploads/2026/02/Local-List-of-Validation-Requirements-2026-Update.pdf
+    confidence: low
+    notes: >-
+      Audit (not_a_requirement, wrong_app_type): the workbook quoted the HGGT checklist. Refuse and
+      recycling details cover all development that generates waste except householder; shown as
+      full, outline and reserved matters applications.
+
+unmapped:
+  - local-name: Agricultural Land Classification
+    source-text: "loss of agricultural land (especially Grades 1, 2 and 3a) (from the audit: and change of use from agriculture, e.g. solar farms)"
+    source-url: https://www.eppingforestdc.gov.uk/app/uploads/2026/02/Local-List-of-Validation-Requirements-2026-Update.pdf
+    suggested-id: agricultural-land-classification
+  - local-name: Strategic Masterplan Framework
+    source-text: >-
+      16 Strategic Masterplan Framework (SMF) - Required for all 'large-scale' major outline
+      applications for more than 200 homes, or 10,000 square metres of employment/other floorspace.
+    source-url: https://www.eppingforestdc.gov.uk/app/uploads/2026/02/Local-List-of-Validation-Requirements-2026-Update.pdf
+    suggested-id: masterplan
+  - local-name: Habitats Regulations Assessment / Air Quality Modelling (Epping Forest SAC)
+    source-text: >-
+      All new residential and non-residential proposals … A project-level HRA note and/or detailed
+      assessment should be completed by competent person(s).
+    source-url: https://www.eppingforestdc.gov.uk/app/uploads/2026/02/Local-List-of-Validation-Requirements-2026-Update.pdf
+    suggested-id: habitats-regulations-assessment
+  - local-name: Marketing Appraisal
+    source-text: "in the loss of employment uses. (From the audit: applications resulting in the loss of employment uses)"
+    source-url: https://www.eppingforestdc.gov.uk/app/uploads/2026/02/Local-List-of-Validation-Requirements-2026-Update.pdf
+    suggested-id: marketing-report
+  - local-name: Structural Survey
+    source-text: "From the audit: barn or rural building conversions, and demolition of listed buildings or positive buildings in a conservation area"
+    source-url: https://www.eppingforestdc.gov.uk/app/uploads/2026/02/Local-List-of-Validation-Requirements-2026-Update.pdf
+    suggested-id: structural-survey
+  - local-name: Landscape Visual Impact Assessment
+    source-text: >-
+      Residential developments of 50 or more units and major commercial applications … Required for
+      applications which may affect: Designated heritage assets (Listed Buildings, Scheduled Ancient
+      Monuments (SAMs), Historic Parks and Gardens, Conservation Areas);
+    source-url: https://www.eppingforestdc.gov.uk/app/uploads/2026/02/Local-List-of-Validation-Requirements-2026-Update.pdf
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Basement Impact Assessment and Basement Construction Management Statement
+    source-text: "From the audit: proposals including basements (householder list)"
+    source-url: https://www.eppingforestdc.gov.uk/app/uploads/2026/02/Local-List-of-Validation-Requirements-2026-Update.pdf
+    suggested-id: basement-impact-assessment
+  - local-name: Validation Checklist
+    source-text: "From the audit: all householder applications"
+    source-url: https://www.eppingforestdc.gov.uk/app/uploads/2026/02/Validation-Checklist-2026-Update.docx
+    suggested-id: ""
+  - local-name: Glint and Glare Assessment
+    source-text: >-
+      Required for proposals involving solar PV panels (ground‑mounted or roof‑mounted) where
+      reflections may affect: Nearby dwellings, …
+    source-url: https://www.eppingforestdc.gov.uk/app/uploads/2026/02/Local-List-of-Validation-Requirements-2026-Update.pdf
+    suggested-id: glint-glare-assessment
+  - local-name: Fire Risk Assessment / Battery Management Plan
+    source-text: "From the audit: battery storage proposals"
+    source-url: https://www.eppingforestdc.gov.uk/app/uploads/2026/02/Local-List-of-Validation-Requirements-2026-Update.pdf
+    suggested-id: battery-safety-management-plan
+  - local-name: Care Needs Assessment
+    source-text: "From the audit: specialist, supported or older people's accommodation"
+    source-url: https://www.eppingforestdc.gov.uk/app/uploads/2026/02/Local-List-of-Validation-Requirements-2026-Update.pdf
+    suggested-id: care-needs-assessment
+  - local-name: Consent Form for Payment of Council Related Costs
+    source-text: "From the audit: 1+ net new dwellings, S106 legal fees, or review of technical assessments"
+    source-url: https://www.eppingforestdc.gov.uk/app/uploads/2026/02/Local-List-of-Validation-Requirements-2026-Update.pdf
+    suggested-id: ""
+  - local-name: Housing Needs Survey
+    source-text: "From the audit: small-scale rural exception schemes"
+    source-url: https://www.eppingforestdc.gov.uk/app/uploads/2026/02/Local-List-of-Validation-Requirements-2026-Update.pdf
+    suggested-id: housing-needs-survey
+
+low-confidence:
+  - id: construction-management-plan
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('Strategy, or Construction Management Plan where required.')."
+  - id: viability-assessment
+    note: "The workbook's excerpt is the affordable housing threshold (now in affordable-housing-statement); the viability trigger is not given."

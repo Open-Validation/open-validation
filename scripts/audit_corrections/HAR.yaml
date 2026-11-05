@@ -1,0 +1,430 @@
+# Corrections for Harlow District Council, from the audit of Harlow.
+# The workbook link is Harlow's current Main validation checklist (August 2026). Grokbot captured
+# about 22 of its 37 elements, put them all under Full planning ('INFERRED') and missed the separate
+# Householder validation checklist web page. The checklist classifies each element against Major
+# (MAJ), Minor (MIN) and Change of Use (CoU) columns, with an 'Other Application Types' section.
+# Items marked "From the audit" use the audit's paraphrase, not the council's exact words.
+local-authority: HAR
+
+submission-standards:
+  - item: Drawings show a title and drawing number (with the revision number as necessary)
+    level: must
+  - item: Drawings at an identified metric scale, with a scale bar showing a length of 1 metre and 10
+      metres
+    level: must
+  - item: Drawings state which paper size the scale applies to (e.g. 1:200 at A3)
+    level: must
+  - item: Documents larger than 10MB split into separate files
+    level: should
+  - item: Plans grouped by type within multipage PDF documents
+    level: should
+
+drop:
+  - id: schedule-of-works
+    reason: "other: mislabelled; the excerpt is the Construction Method Statement element, and the
+      checklist has no listed-building schedule of works element"
+  - id: floor-plan-existing
+    reason: "duplicate: the excerpt is the street elevations bullet of the Plans and Drawings element"
+  - id: floor-plan-proposed
+    reason: "duplicate: as above"
+  - id: elevation-existing
+    reason: "duplicate: as above"
+
+drop-unmapped:
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "duplicate: same sentence as the elevations row; kept as a must-include of elevation-proposed"
+  - local-name: Self-build / custom build information
+    reason: "wrong_trigger: fragment; re-added below with the audit's trigger"
+  - local-name: Water efficiency / water usage statement
+    reason: "wrong_trigger: fragment; re-added below with the audit's trigger"
+
+requirements:
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the statutory biodiversity gain condition.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's trigger omitted the exemptions (sites of 0.2ha or less,
+      de minimis, temporary); these are the national exemptions from the biodiversity gain
+      condition.
+
+  - id: construction-management-plan
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      Construction Method Statement … Applications proposing development where loading activities
+      associated with the construction phase would cause congestion or obstruction on the public
+      highway, particularly where temporary closures are required on the highway or where safe and
+      legal loading cannot take place off the public highway.
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    confidence: medium
+    notes: "The element is the Construction Method Statement (p.10). The trigger depends on a judgement of
+      highway impact, so it is shown as officer discretion."
+
+  - id: daylight-sunlight-assessment
+    action: update
+    must-include:
+      - item: Shadow diagrams at appropriate hourly intervals on 21 December, 21 March and 21 June, as
+          existing and proposed
+        level: must
+    confidence: low
+    notes: "The workbook's excerpt is the element's required details, not its trigger."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [conservation-area, listed-building]
+            description: The site is in a conservation area or is a listed building.
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    confidence: medium
+    notes: >-
+      From the audit (wrong_app_type): a Design and Access Statement applies to all major
+      applications plus conservation area and listed building applications, including LBC. The
+      workbook's excerpt was a cross-reference from another element.
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The site slopes significantly or ground levels change.
+    confidence: medium
+    notes: "From the audit (missing_requirement): the Householder checklist asks for section drawings and a
+      site levels plan where a house is on a large slope or ground levels change."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The site slopes significantly or ground levels change.
+    must-include:
+      - item: Site levels, gradients and any earthworks required
+        level: must
+        source-text: Site levels, gradients and any earthworks required.
+    confidence: medium
+    notes: "From the audit (missing_requirement): the Householder checklist asks for section drawings and a
+      site levels plan where a house is on a large slope or ground levels change."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      site:
+        in: [flood-risk-zone]
+        description: The site is in flood zone 2 or 3.
+    source-text: >-
+      Flood Risk Assessment … Any applications as required by the Flood Risk Assessment produced
+      by the Environment Agency and DEFRA.
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    policy: HLDP PL11
+    confidence: medium
+    notes: "Includes Householder: the Householder checklist asks for one for a domestic extension in Flood
+      Zone 2 or 3 (from the audit)."
+
+  - id: elevation-proposed
+    action: replace
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    must-include:
+      - item: Street elevations showing the proposal in relation to the streetscene, at 1:50 or 1:100
+        level: must
+        source-text: Street elevations, showing the proposal in relation to streetscene at 1:50 or 1:100
+          scale.
+    confidence: low
+    notes: "Audit (duplicate): the street elevations bullet of the Plans and Drawings element (p.31); the
+      audit does not say which applications it applies to."
+
+  - id: recreation-facilities-assessment
+    action: replace
+    required-if:
+      site:
+        in: [open-space]
+        description: The development is within open space.
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a G&BI and Open Space Loss Assessment for development
+      within open space. The workbook's row was the open space provision element, which is now
+      unmapped below.
+
+  - id: travel-plan
+    action: update
+    policy: HLDP IN1, IN3
+    confidence: low
+    notes: "The council's trigger is 'Applications where a Transport Statement or Assessment is required',
+      which the list doesn't define further."
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, locally-listed-building, listed-building-setting,
+              conservation-area]
+            description: The proposal affects a heritage asset (including conservation areas, listed
+              or locally listed buildings).
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): development affecting heritage assets; the Householder
+      checklist names conservation areas, listed and locally listed buildings."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [full, outline]
+        - site:
+            in: [conservation-area]
+            description: A householder application in a conservation area.
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    must-include:
+      - item: How the proposal addresses the Conservation Area Character Appraisal and Management Plan
+        level: must
+        required-if:
+          site:
+            in: [conservation-area]
+            description: The site is in a conservation area.
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a Planning Statement for all applications on the Main
+      checklist (which excludes householder), and for householder applications in conservation
+      areas, addressing the Character Appraisals and Management Plans. The application types are
+      our reading of 'all applications' (MAJ/MIN/CoU).
+
+  - id: roof-plan-proposed
+    action: add
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The roof changes.
+    source-url:
+      https://www.harlow.gov.uk/planning-and-building-control/planning-permission/submitting-householder-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): Householder checklist, roof plans where the roof changes."
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 1
+        description: Residential development.
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    must-include:
+      - item: Provision of self-build and custom-build housing plots
+        level: must
+        required-if:
+          condition:
+            field: dwelling-count
+            operator: ">="
+            value: 50
+            description: The proposal creates 50 or more dwellings.
+    confidence: medium
+    notes: "From the audit (missing_requirement): an Affordable & Specialist Housing Statement (p.5) for
+      residential development, covering self-build plots for 50+ dwellings."
+
+  - id: archaeological-assessment
+    action: add
+    required-if:
+      site:
+        in: [archaeological-priority-area]
+        description: The site is on or next to a known or potential archaeological site.
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): development on or adjacent to known or potential
+      archaeological sites."
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [site-of-special-scientific-interest, local-wildlife-site,
+              special-area-of-conservation]
+            description: The site is on or next to a designated site, or could affect Epping Forest
+              SAC.
+    source-text: >-
+      a completed Habitats Regulation Assessment and, where necessary, demonstration of appropriate
+      avoidance or mitigation measures relating to Epping Forest.
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement, Amended): a Biodiversity & Geodiversity Assessment for all
+      major applications, minor and change of use applications on or next to designated sites, and
+      development affecting Epping Forest SAC. The HRA wording above is from that element (the
+      workbook's HRA row).
+
+  - id: fire-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: building-height
+            operator: ">="
+            value: 18
+            description: A building is 18 metres or more tall.
+        - condition:
+            field: storey-count
+            operator: ">="
+            value: 7
+            description: A building has 7 or more storeys.
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Fire Safety Statement for 'MAJ, 18m+/7+ storeys etc.'.
+      How these combine needs checking in the list."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: The site is known or suspected to be contaminated.
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Land Contamination Preliminary Risk Assessment for known
+      or suspected contamination."
+
+  - id: sci
+    action: add
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Statement of Community Involvement is listed; the audit
+      gives no trigger."
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: Minor or change of use residential development.
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): all major applications; minor and change of use
+      residential."
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees or hedges on or adjacent to the site.
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Tree and Hedgerow Report where trees or hedges are on or
+      adjacent to the site."
+
+  - id: viability-assessment
+    action: add
+    required-if:
+      all:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 11
+            description: The proposal creates 11 or more dwellings.
+        - discretionary
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): 11+ dwellings with reduced affordable housing, etc. The
+      'reduced affordable housing' part is shown as officer discretion."
+
+  - id: water-impact-assessment
+    action: add
+    required-if:
+      all:
+        - site:
+            in: [source-protection-zone]
+            description: The site is in a Source Protection Zone or over an aquifer.
+        - discretionary
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Water Quality Risk Assessment for high-risk activities in
+      Source Protection Zones or aquifers. Which activities are high-risk is not given."
+
+unmapped:
+  - local-name: Self-build and custom-build housing plots
+    source-text: "provision of Self-build and Custom-build housing plots."
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    suggested-id: self-build-statement
+  - local-name: Water Efficiency Statement
+    source-text: "From the audit: Water Efficiency Statement (p.43), trigger 'Residential development'"
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    suggested-id: water-efficiency-statement
+  - local-name: Green & blue infrastructure and open space provision
+    source-text: >-
+      Information on the G&BI and open space provision as part of the proposal, including: o the
+      required provision, including any calculations which show the deficit or surplus of
+      provision, using the standards set out in the Harlow GI & Open Spaces SPD; o the size and
+      types of provision proposed; o plans showing locations of the provision and it will be
+      accessed; o which elements would be new and which existing ones will be enhanced and how.
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    suggested-id: open-space-plan
+  - local-name: Materials Statement
+    source-text: "From the audit: all applications (Main checklist); householder works to listed or locally
+      listed buildings or in conservation areas"
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    suggested-id: materials-schedule
+  - local-name: Amenity Impact Assessment
+    source-text: "From the audit: development that could adversely affect amenity"
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    suggested-id: ""
+  - local-name: Delivery & Servicing Plan
+    source-text: "From the audit: weekly or more frequent commercial deliveries, or Class E over 100/999
+      sqm"
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    suggested-id: delivery-servicing-plan
+  - local-name: Economic Statement
+    source-text: "From the audit: loss of commercial/retail in designated areas, Town Centre subdivision
+      over 2,500 sqm, out-of-centre retail over 500 sqm"
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    suggested-id: economic-statement
+  - local-name: Education Facility Land Compliance Study
+    source-text: "From the audit: major applications"
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    suggested-id: ""
+  - local-name: Employment & Skills Action Plan
+    source-text: "From the audit: major applications"
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    suggested-id: employment-skills-plan
+  - local-name: Foul Sewage Assessment
+    source-text: "From the audit: non-mains drainage or capacity-constrained sewers"
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    suggested-id: foul-sewage-assessment
+  - local-name: Health Impact Assessment
+    source-text: "From the audit: 50+ dwellings, 999 sqm+, or C2 uses"
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Public Art Statement
+    source-text: "From the audit: all major applications"
+    source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
+    suggested-id: public-art-statement
+
+low-confidence:
+  - id: photos
+    note: "Audit (wrong_trigger): the workbook quoted a fragment; the source element is 'Visuals', and its
+      trigger was not captured."
+  - id: transport-assessment
+    note: "The workbook's trigger is circular ('Applications where a Transport Statement or Assessment is
+      required'); the audit gives no threshold."

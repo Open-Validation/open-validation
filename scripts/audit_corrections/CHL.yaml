@@ -1,0 +1,487 @@
+# Corrections for Chelmsford City Council, from inputs/audit/chelmsford-city-council.json.
+# The audit compared the workbook with the Local Validation List (February 2024), still current.
+# The list is organised by kind of project (householder, non-residential under/over 1,000 sqm,
+# residential replacement / <10 / 10-49 / 50+, change of use, rural conversions, shop fronts,
+# LBC, adverts, outline, conditions, amendments). Grokbot placed almost everything under Full
+# planning by inference. Items marked "From the audit" use the audit's paraphrase of the list.
+local-authority: CHL
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is viability text; the list has no listed-building schedule of works"
+  - id: floor-plan-existing
+    reason: "duplicate: shares the householder walls/gates/fences excerpt with the block plan row"
+  - id: floor-plan-proposed
+    reason: "duplicate: as above"
+  - id: elevation-existing
+    reason: "duplicate: as above"
+  - id: elevation-proposed
+    reason: "duplicate: as above"
+
+drop-unmapped:
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "wrong_trigger: the excerpt is affordable-housing M4(3) text; the real item is an Accommodation Schedule (below)"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: no trigger in the excerpt; re-added below with the audit's threshold"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: the excerpt is the noise sentence; re-added below with the audit's trigger"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "misfiled: the excerpt is the viability assessment trigger (now in viability-assessment)"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 11
+        description: The proposal is for 11 or more residential units.
+    source-text: >-
+      11 or more residential units. … Plans and drawings indicating the new affordable dwellings
+      built to meet Building Regulations requirement M4(3) indicating clearly how the dwellings will
+      meet Policy DM1 (B).
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    policy: Local Plan Policy DM1
+    must-include:
+      - item: Plans and drawings indicating the new affordable dwellings built to meet Building
+          Regulations requirement M4(3), showing how they meet Policy DM1 (B)
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): affordable housing applies at 11+ units; the workbook gave no threshold."
+
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 50
+            description: The proposal is for 50 or more residential units (core requirement).
+        - all:
+            - site:
+                in: [air-quality-management-area]
+                description: The development is within or adjacent to an Air Quality Management Area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 10
+                    description: 10 or more residential units.
+                - condition:
+                    field: floorspace-non-residential
+                    operator: ">="
+                    value: 500
+                    description: 500 square metres or more of non-residential floorspace.
+                - discretionary
+    source-text: >-
+      Air quality impact assessment When do I need this document? Where development is within or
+      adjacent to an Air Quality Management Area and will generate an increase in traffic or
+      pollutants, would consist of 10 or more residential units or, create 500 sq. m or more of
+      non-residential floorspace.
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): core for 50+ units. The AQMA rule is the list's own wording; 'will
+      generate an increase in traffic or pollutants' has no field, so it is shown as officer
+      discretion.
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [tree-preservation-zone]
+            description: There are trees protected by a tree preservation order.
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - condition:
+                field: trees-on-or-near-site
+                value: true
+                description: There are trees on or near the site.
+    source-text: >-
+      Arboricultural Impact Assessment (AIA) – this evaluates the direct and indirect effects of the
+      proposed development and where necessary recommends mitigation.
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement, wrong_app_type): 'Tree information' for TPO trees or
+      trees in a conservation area, including householder applications.
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: The proposal could affect protected species or habitats.
+        - application-type:
+            in: [hh, full, outline]
+    source-text: >-
+      Biodiversity checklist and report … effects on protected species and habitats it will be
+      necessary to submit sufficient information on what the impact will be.
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a Biodiversity checklist and report is listed for
+      householder/minor, non-householder and major applications, and for outline. The checklist
+      itself is recorded as unmapped. Check which project tables list the report.
+
+  - id: cil-form
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 100
+            description: Householder extensions, outbuildings and annexes where the floor area
+              exceeds 100 square metres.
+        - condition:
+            field: retail-floorspace
+            operator: ">"
+            value: 100
+            description: New retail buildings or extensions (Use classes E, and sui generis which
+              include sales) where the floor area exceeds 100 square metres.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: New and replacement residential units.
+    source-text: >-
+      You will need to submit a CIL Additional Questions Form if your proposal is for any of the
+      following: Planning applications or certificates of lawfulness for householder extensions,
+      outbuildings and annexes where the floor area exceeds 100m² Planning applications for new
+      retail buildings or extensions to existing retail buildings (Use classes E, and sui generis
+      which include sales) where the floor area exceeds 100m2 Planning applications for new and
+      replacement residential units Planning applica…
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    confidence: low
+    notes: >-
+      Built from the list's own wording; the workbook's excerpt is cut off after the third case, so
+      later cases are missing. It applies to planning applications and certificates of lawfulness.
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 1000
+            description: Major non-residential development (more than 1000 square metres).
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: Major non-residential development (more than 1 hectare).
+        - discretionary
+    source-text: >-
+      Major non-residential developments (more than 1000sqm or more than 1 hectare) What documents
+      must I submit with my planning application? Planning Application Form Site Location Plan
+      Application Fee Block Plan Existing & Proposed Elevations Existing & Proposed Floor plans
+      Existing & Proposed Roof Plans Design and access statement
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was only a heading. From the audit: core for
+      listed building consent and listed in the householder tables. The other project tables were
+      not extracted, so other cases are shown as officer discretion.
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted an air-quality sentence."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: The building is 18 metres or more above ground level.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: The building has 7 or more storeys.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The building is residential.
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted table headings. From the audit: residential buildings 18m+ above ground level or 7+ storeys."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: Any part of the site is in Flood Zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare in Flood Zone 1.
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt omitted the trigger. From the audit: any part in
+      Flood Zone 2/3 or over 1 ha in Zone 1; it is also listed for householder applications.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - discretionary
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was 'Document type Heritage statement When is it
+      required? Tree information' (no trigger). From the audit: core for listed building consent
+      and listed in the householder tables; the extract gives no other trigger.
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: external-lighting
+            value: true
+            description: The proposal includes new external lighting (for example outbuildings,
+              pools, stables, ménages).
+        - condition:
+            field: illuminated
+            value: true
+            description: Lighting details for illuminated shop fronts and adverts.
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook put this under Listed building consent. From the audit:
+      lighting details are for illuminated shop fronts and adverts, and a lighting assessment for
+      new external lighting (householder outbuildings, pools, stables, ménages).
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: plant-equipment
+            value: true
+            description: New ventilation, extraction or air cooling equipment near residential
+              properties.
+        - discretionary
+    confidence: medium
+    notes: >-
+      The excerpt names new ventilation, extraction or air cooling equipment near residential
+      properties; the start of the sentence is cut off, so other cases are shown as officer
+      discretion.
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      application-type:
+        in: [s73]
+    source-text: >-
+      Planning Statement* * This should include details of why you wish to vary or remove the
+      condition, and any other relevant information.
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    must-include:
+      - item: Details of why you wish to vary or remove the condition
+        level: should
+    confidence: medium
+    notes: "Audit (wrong_app_type): this is the removal/variation of condition requirement, not Full planning."
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 50
+            description: The proposal is for 50 or more residential units (core requirement).
+        - discretionary
+    source-text: >-
+      Of the two documents, a Transport Assessment is the much larger and more in-depth document
+      that is sometimes required for much bigger developments, where as a Transport Statement is the
+      smaller and more concise document that is required for smaller developments.
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): core only for 50+ units; a Transport Statement may be needed for smaller schemes."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    source-text: >-
+      level of planning obligations for a scheme it will need to demonstrate that either: a) the
+      development is proposed on an unallocated site of a wholly different type to those used in
+      the Viability Study, b) further information on infrastructure or site costs is required, c)
+      particular types of development are proposed which may significantly vary from standard models
+      of development for sale, d) a recession or similar significant economic change has occurred
+      since the Local Plan was adopted. … In this case it will be necessary for a Viability
+      Assessment to be submitted with the application.
+    confidence: medium
+    notes: >-
+      Needed where an applicant argues the scheme cannot support the policy level of planning
+      obligations (the text was in the workbook's Planning Obligations row).
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: The location of the wall/gate/fence
+        level: must
+        required-if:
+          condition:
+            field: new-boundary-treatment
+            value: true
+            description: The proposal includes new or altered walls, gates or fences.
+    source-text: "** Block Plan must include the location of the wall/gate/fence."
+    confidence: low
+    notes: >-
+      Audit (duplicate, wrong_app_type): the excerpt is from the householder walls/gates/fences table,
+      not Full planning. The block plan's own trigger is the national one.
+
+  - id: section-proposed
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: The proposal involves significant level changes.
+        - application-type:
+            in: [advertising]
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement, wrong_app_type): site sections/levels where there are
+      significant level changes (including householder), and advert sections for advertisement
+      consent.
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      condition:
+        field: town-centre-use-floorspace
+        operator: ">"
+        value: 2500
+        description: Retail and leisure floorspace over 2,500 square metres.
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Retail and leisure impact assessment (>2,500 sqm)."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: The proposal is for telecommunications equipment.
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    must-include:
+      - item: ICNIRP certificate
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): ICNIRP certificate for telecoms."
+
+  - id: land-contamination-assessment
+    action: add
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Land contamination assessment is listed; the audit gives no trigger."
+
+  - id: sustainability-statement
+    action: add
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a Sustainable Development Checklist (residential and
+      non-residential versions) is listed; the audit gives no trigger and the checklist may not be a
+      full sustainability statement.
+
+unmapped:
+  - local-name: Biodiversity checklist
+    source-text: "Biodiversity checklist and report"
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    suggested-id: biodiversity-checklist
+  - local-name: Accommodation Schedule
+    source-text: "From the audit: Accommodation Schedule: 10 or more residential units"
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    suggested-id: accommodation-schedule
+  - local-name: Health Impact Assessment
+    source-text: "From the audit: core for 50+ residential units. The level of detail required within the HIA will depend on the scale and nature of the development."
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Ventilation / Extraction details
+    source-text: "From the audit: hot food on premises or a commercial flue"
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    suggested-id: ventilation-extraction-details
+  - local-name: Agricultural appraisal
+    source-text: "From the audit: agricultural workers' dwellings or removal of an agricultural occupancy condition"
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    suggested-id: agricultural-worker-dwelling-statement
+  - local-name: Agricultural Land Classification survey
+    source-text: "From the audit: major development on agricultural land"
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    suggested-id: agricultural-land-classification
+  - local-name: SuDS information
+    source-text: "From the audit: 10+ dwellings / >0.5-1 ha"
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    suggested-id: drainage-strategy
+  - local-name: Parameter plans
+    source-text: "From the audit: allocated Strategic Growth Sites"
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    suggested-id: parameter-plans
+  - local-name: Amendment statement
+    source-text: "From the audit: S73 and s96A (non-material amendment) applications need an amendment statement"
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    suggested-id: amendment-statement
+  - local-name: Statement of existing agricultural activity
+    source-text: "Proposed agricultural buildings/hard surfaces/access tracks … Statement of existing agricultural activity/uses at the site"
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    suggested-id: ""
+  - local-name: Manufacturer's specification (plant/machinery)
+    source-text: "From the audit: Manufacturer's specification for plant/machinery"
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    suggested-id: plant-specification
+  - local-name: Indicative access details (outline)
+    source-text: "From the audit: outline applications need indicative access details"
+    source-url: https://www.chelmsford.gov.uk/media/gdyak1jg/local-validation-list-february-2024.pdf
+    suggested-id: ""
+
+low-confidence:
+  - id: bng-metric
+    note: >-
+      Audit (wrong_app_type): the workbook's excerpt is a run of table headings; the list sets
+      documents by kind of project (Section 2), so check which tables list the BNG statement and
+      metric.
+  - id: roof-plan-existing
+    note: "Audit (wrong_app_type): the excerpt is a run of table headings. From the audit: householder roof plans are needed for more than single storey works; other project tables also list roof plans."
+  - id: roof-plan-proposed
+    note: "Audit (wrong_app_type): the excerpt is a run of table headings. From the audit: householder roof plans are needed for more than single storey works; other project tables also list roof plans."

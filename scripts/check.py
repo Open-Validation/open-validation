@@ -248,6 +248,9 @@ def main():
     for code in sorted(set(lpa_rows) - folders):
         problem(f"data/lpa.csv lists {code} but there is no folder specification/planning-requirement/{code}/")
 
+    check_evaluator_copies()
+    check_index()
+
     if problems:
         print(f"check.py found {len(problems)} problem(s):\n")
         for p in problems[:300]:
@@ -257,6 +260,36 @@ def main():
         print()
     summary(loaded, lpa_rows)
     sys.exit(1 if problems else 0)
+
+
+def check_evaluator_copies():
+    """The rule evaluator is copied in docs/index.html and docs/evaluate.test.html; they must match."""
+    import re
+    pages = [ROOT / "docs" / "index.html", ROOT / "docs" / "evaluate.test.html"]
+    if not all(p.exists() for p in pages):
+        return
+    code = []
+    for p in pages:
+        m = re.search(r"// ===== EVALUATOR START.*?// ===== EVALUATOR END =====", p.read_text(encoding="utf-8"), re.S)
+        code.append(m.group(0) if m else None)
+    if None in code or code[0] != code[1]:
+        problem("docs/index.html and docs/evaluate.test.html have different copies of the rule evaluator "
+                "(the code between the EVALUATOR START and END markers must be identical)")
+
+
+def check_index():
+    """data/local-planning-requirement.csv must list exactly the requirement files on disk."""
+    path = DATA / "local-planning-requirement.csv"
+    if not path.exists():
+        return
+    listed = {(r["local-authority"], r["planning-requirement"]) for r in read_csv(path)}
+    on_disk = {(p.parent.name, p.stem) for p in SPEC.glob("*/*.yaml")
+               if p.parent.name != "definition" and p.name != "_lpa.yaml"}
+    if listed != on_disk:
+        extra, missing = sorted(listed - on_disk)[:5], sorted(on_disk - listed)[:5]
+        problem("data/local-planning-requirement.csv is out of date "
+                f"(lists missing files: {extra}; files not listed: {missing}). "
+                "Run: python scripts/build_from_workbook.py --lpa <CODE> or rebuild the index")
 
 
 def summary(loaded, lpa_rows):

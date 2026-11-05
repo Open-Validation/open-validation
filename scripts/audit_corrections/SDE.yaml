@@ -1,0 +1,346 @@
+# Corrections for South Derbyshire District Council, from inputs/audit/south-derbyshire-district-council.json.
+# Grokbot used the superseded 'Local Validation Requirements' (adopted 23 April 2019). The council
+# now links a 'Validation table January 2025' and a 'Validation lists supporting document January
+# 2025' (Word files); the build already uses the January 2025 table and date. The audit could not
+# read the 2025 files, so every correction below is checked against the 2019 list only.
+# Grokbot placed about 24 items under Full planning ('INFERRED'); the 2019 list is organised by
+# application type and by constraint (section 4.4). Items without the council's own words use the
+# audit's paraphrase ("From the audit").
+local-authority: SDE
+
+submission-standards:
+  - item: Documents provided as PDF files; DWG files are not acceptable
+    level: must
+  - item: Each document logically and clearly labelled (e.g. 'Site Layout - 9453_07 Rev A.pdf')
+    level: should
+
+drop:
+  - id: telecommunications-report
+    reason: "wrong_app_type: the excerpt is a list of prior approval types, not a requirement"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advice to seek pre-application advice, plus digital-file text"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: runs into the glossary; the swept-path item is re-added below"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: a fragment of the LDC text (s106 agreement, enforcement notice...); the planning obligations statement is re-added below"
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "wrong_app_type: this is the marketing report for removing an occupancy condition; re-added below"
+
+requirements:
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Protected or significant trees are affected.
+    source-url: https://www.southderbyshire.gov.uk/assets/attach/5546/SDDC-Local-Validation-Requirements-2019.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook's excerpt was the works-to-trees text (now under
+      unmapped). From the audit: section 2 asks for a tree survey on householder applications
+      where protected or significant trees are affected.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is EIA development.
+    must-include:
+      - item: A copy for each Parish Council affected, plus 2 further copies
+        level: must
+    confidence: medium
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare.
+    source-text: >-
+      The objectives of a flood risk assessment are to establish: whether a proposed development is
+      likely to be affected by current or future flooding from any source; whether it will increase
+      flood risk elsewhere; …
+    source-url: https://www.southderbyshire.gov.uk/assets/attach/5546/SDDC-Local-Validation-Requirements-2019.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): from the audit, the section 4.4 trigger is Flood Zone 2/3 or a site over 1 ha."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      application-type:
+        in: [lbc, demolition-con-area]
+    source-text: >-
+      a heritage impact assessment to justify the proposed demolition, having regard to the
+      significance of the structure affected and the impact of the demolition on the character and
+      appearance of the conservation area.
+    source-url: https://www.southderbyshire.gov.uk/assets/attach/5546/SDDC-Local-Validation-Requirements-2019.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the excerpt is the demolition-in-a-conservation-area requirement, not
+      Full planning. From the audit: listed building consent also requires a heritage impact
+      statement.
+
+  - id: schedule-of-works
+    action: replace
+    required-if:
+      application-type:
+        in: [lbc]
+    source-url: https://www.southderbyshire.gov.uk/assets/attach/5546/SDDC-Local-Validation-Requirements-2019.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook's excerpt was works-to-trees text. From the audit:
+      listed building consent requires a schedule of works.
+
+  - id: sci
+    action: replace
+    required-if:
+      all:
+        - ref: major-development
+        - condition:
+            field: departure-from-development-plan
+            value: true
+            description: The development is not in accordance with the Development Plan.
+    source-url: https://www.southderbyshire.gov.uk/assets/attach/5546/SDDC-Local-Validation-Requirements-2019.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt was a fragment ('15 metres; a statement of community
+      involvement.'). From the audit: major development not in accordance with the Development
+      Plan.
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The proposal seeks the use of roof spaces.
+    confidence: low
+    notes: "The council asks for cross sections where proposals seek the use of roof spaces; it is not clear that existing sections are meant."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The proposal seeks the use of roof spaces.
+    must-include:
+      - item: The position of any openings in the roof slope
+        level: must
+      - item: Floor to ceiling heights
+        level: must
+    confidence: medium
+
+  - id: site-plan
+    action: update
+    required-if:
+      application-type:
+        in: [advertising, hh]
+    must-include:
+      - item: The position/location of the proposed signs/adverts on the site and/or building(s) or
+          structure(s)
+        level: must
+        required-if:
+          application-type:
+            in: [advertising]
+      - item: Adjoining properties and their windows (layout plan)
+        level: must
+        required-if:
+          application-type:
+            in: [hh]
+      - item: Lowered kerb, hard surfacing and drainage
+        level: must
+        required-if:
+          all:
+            - application-type:
+                in: [hh]
+            - condition:
+                field: new-vehicle-access
+                value: true
+                description: A vehicular access is created or altered.
+    confidence: medium
+    notes: "The householder items are from the audit (wrong_app_type): section 2 of the 2019 list."
+
+  - id: floor-plan-existing
+    action: update
+    notes: >-
+      From the audit (wrong_app_type): section 2 requires floor plans for householder and listed
+      building consent applications too; the workbook's Full planning excerpt is only a "strongly
+      recommended" fragment.
+  - id: floor-plan-proposed
+    action: update
+    notes: >-
+      From the audit (wrong_app_type): section 2 requires floor plans for householder and listed
+      building consent applications too; the workbook's Full planning excerpt is only a "strongly
+      recommended" fragment.
+  - id: elevation-existing
+    action: update
+    notes: >-
+      From the audit (wrong_app_type): section 2 requires elevations for householder and listed
+      building consent applications too; the workbook's Full planning excerpt is only a "strongly
+      recommended" fragment.
+  - id: elevation-proposed
+    action: update
+    notes: >-
+      From the audit (wrong_app_type): section 2 requires elevations for householder and listed
+      building consent applications too; the workbook's Full planning excerpt is only a "strongly
+      recommended" fragment.
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if:
+      condition:
+        field: building-height
+        operator: ">"
+        value: 8
+        description: High-rise or commercial buildings over 8m to the eaves.
+    source-url: https://www.southderbyshire.gov.uk/assets/attach/5546/SDDC-Local-Validation-Requirements-2019.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a daylight and sunlight assessment for high-rise or
+      commercial development over 8m to the eaves. Whether the 8m applies to both is unclear.
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Main town centre uses outside a centre.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 1000
+            description: Over 1,000 square metres of main town centre use floorspace.
+    source-url: https://www.southderbyshire.gov.uk/assets/attach/5546/SDDC-Local-Validation-Requirements-2019.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): retail sequential and impact assessments for main
+      town centre uses outside centres; >1,000 m2. The audit does not say whether the 1,000 m2
+      applies to the impact assessment only.
+
+  - id: land-contamination-assessment
+    action: add
+    source-url: https://www.southderbyshire.gov.uk/assets/attach/5546/SDDC-Local-Validation-Requirements-2019.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): listed among the constraint-driven documents, but the audit gives no trigger."
+  - id: transport-assessment
+    action: add
+    source-url: https://www.southderbyshire.gov.uk/assets/attach/5546/SDDC-Local-Validation-Requirements-2019.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): listed among the constraint-driven documents, but the audit gives no trigger."
+  - id: travel-plan
+    action: add
+    source-url: https://www.southderbyshire.gov.uk/assets/attach/5546/SDDC-Local-Validation-Requirements-2019.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): listed among the constraint-driven documents, but the audit gives no trigger."
+  - id: biodiversity-survey-report
+    action: add
+    source-url: https://www.southderbyshire.gov.uk/assets/attach/5546/SDDC-Local-Validation-Requirements-2019.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): an ecology report (Preliminary Ecological Appraisal) is listed, but the audit gives no trigger."
+
+unmapped:
+  - local-name: Marketing report (removal of a rural worker occupancy condition)
+    source-text: >-
+      For rural worker occupancy conditions, this must include (a) the period which the property
+      has been marketed for, (b) the publications in which marketing has taken place, (c) the price
+      at which the property has been valued taking into account the occupancy restriction, and (d)
+      a record of all enquiries made and offers received.
+    source-url: https://www.southderbyshire.gov.uk/assets/attach/5546/SDDC-Local-Validation-Requirements-2019.pdf
+    suggested-id: marketing-report
+  - local-name: Works to trees details
+    source-text: >-
+      a tree survey and arboricultural method statement; for works involving the pruning of trees;
+      photos or diagrams marked with pruning points, crown lifting height and/or extent of crown
+      reduction.
+    source-url: https://www.southderbyshire.gov.uk/assets/attach/5546/SDDC-Local-Validation-Requirements-2019.pdf
+    suggested-id: tree-works-specification
+  - local-name: Swept path drawings
+    source-text: As a minimum, this must include swept paths for refuse wagons used by South Derbyshire District Council.
+    source-url: https://www.southderbyshire.gov.uk/assets/attach/5546/SDDC-Local-Validation-Requirements-2019.pdf
+    suggested-id: swept-path-analysis
+  - local-name: Planning obligations statement
+    source-text: "From the audit: development of 10 or more dwellings"
+    source-url: https://www.southderbyshire.gov.uk/assets/attach/5546/SDDC-Local-Validation-Requirements-2019.pdf
+    suggested-id: planning-obligations-statement
+  - local-name: Conditions pro-forma
+    source-text: >-
+      Pro-forma (for applications seeking approval of details required by conditions) A schedule of
+      the planning conditions subject of the application; the document(s) submitted in respect of
+      each condition(s) and a description thereof; and, if relevant, the assessment, report, plan or
+      drawing reference number(s) (and revision number(s)) relevant to each condition(s).
+    source-url: https://www.southderbyshire.gov.uk/assets/attach/5546/SDDC-Local-Validation-Requirements-2019.pdf
+    suggested-id: conditions-schedule
+  - local-name: River Mease impact statement
+    source-text: "From the audit: development in the River Mease catchment creating dwellings, annexes or commercial floorspace"
+    source-url: https://www.southderbyshire.gov.uk/assets/attach/5546/SDDC-Local-Validation-Requirements-2019.pdf
+    suggested-id: habitats-regulations-assessment
+  - local-name: Coal mining risk assessment
+    source-text: "From the audit: sites in a high-risk coal area"
+    source-url: https://www.southderbyshire.gov.uk/assets/attach/5546/SDDC-Local-Validation-Requirements-2019.pdf
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Soil quality survey
+    source-text: "From the audit: loss of grade 1-3 agricultural land"
+    source-url: https://www.southderbyshire.gov.uk/assets/attach/5546/SDDC-Local-Validation-Requirements-2019.pdf
+    suggested-id: agricultural-land-classification
+  - local-name: Minerals extraction feasibility study
+    source-text: "From the audit: major development in a Minerals Safeguarding Area"
+    source-url: https://www.southderbyshire.gov.uk/assets/attach/5546/SDDC-Local-Validation-Requirements-2019.pdf
+    suggested-id: mineral-assessment
+  - local-name: Community facilities analysis
+    source-text: "From the audit: loss of a community facility or Asset of Community Value"
+    source-url: https://www.southderbyshire.gov.uk/assets/attach/5546/SDDC-Local-Validation-Requirements-2019.pdf
+    suggested-id: community-facilities-assessment
+  - local-name: Retail sequential assessment
+    source-text: "From the audit: main town centre uses outside centres"
+    source-url: https://www.southderbyshire.gov.uk/assets/attach/5546/SDDC-Local-Validation-Requirements-2019.pdf
+    suggested-id: retail-sequential-test
+  - local-name: Drawing schedule and topographical survey
+    source-text: "From the audit: major development"
+    source-url: https://www.southderbyshire.gov.uk/assets/attach/5546/SDDC-Local-Validation-Requirements-2019.pdf
+    suggested-id: topographical-survey
+  - local-name: Conditions tracker
+    source-text: "From the audit: phased sites"
+    source-url: https://www.southderbyshire.gov.uk/assets/attach/5546/SDDC-Local-Validation-Requirements-2019.pdf
+    suggested-id: conditions-schedule
+  - local-name: Business plan, Rural enterprise statement, Equalities impact statement
+    source-text: "From the audit: listed in the 2019 list (business plan for rural businesses); no other triggers given"
+    source-url: https://www.southderbyshire.gov.uk/assets/attach/5546/SDDC-Local-Validation-Requirements-2019.pdf
+    suggested-id: ""
+  - local-name: Landscape and visual impact assessment
+    source-text: "From the audit: listed among the constraint-driven documents; no trigger given"
+    source-url: https://www.southderbyshire.gov.uk/assets/attach/5546/SDDC-Local-Validation-Requirements-2019.pdf
+    suggested-id: landscape-visual-impact-assessment
+
+low-confidence:
+  - id: "*"
+    note: >-
+      Audit (outdated_link): checked against the 2019 list only; the January 2025 validation table
+      and supporting document could not be read.
+  - id: landscaping-plan
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('levels/sections or landscaping details.') with no trigger."
+  - id: roof-plan-existing
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('elevation drawings; roof plans;') with no trigger."
+  - id: roof-plan-proposed
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('elevation drawings; roof plans;') with no trigger."

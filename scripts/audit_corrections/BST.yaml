@@ -1,0 +1,452 @@
+# Corrections for Bristol City Council, from inputs/audit/bristol-city-council.json.
+# The audit read Bristol's 'Planning Application Requirements Local List September 2024' (page
+# footers 'Last updated September 2026'). Part 1 is a table of 32 supporting documents with a
+# 'when required' column; Part 2 describes what each contains; Part 3 is drawing guidance.
+# Grokbot mostly quoted Part 2 and Part 3 text and filed nearly everything under Full planning
+# (INFERRED). Below, Part 1 triggers the audit quotes are used; Part 3 drawing items are dropped
+# (audit issue 6), and about 14 missing Part 1 items are added or listed as unmapped.
+local-authority: BST
+
+validation-list:
+  date: 2026-09
+  date-basis: >-
+    audit: page footers read 'Last updated September 2026'; the document's title edition is
+    'Local List September 2024' (with an addendum item 'Updated June 2025')
+
+submission-standards:
+  - item: All plans and drawings accurately drawn using a conventional metric scale (such as 1:100
+      or 1:50), with the scale stated on the drawing
+    level: must
+  - item: Except for location plans, plans and drawings include a scale bar and/or measured
+      dimensions
+    level: should
+  - item: Plans or drawings with disclaimers such as 'Not to scale' or 'Do not scale' are not
+      accepted (perspectives excepted)
+    level: must
+  - item: Each plan/drawing has a title box stating the address, the proposal, the drawing title,
+      the date, the scale and the drawing number
+    level: should
+  - item: Plans and drawings annotated so they are completely understandable
+    level: should
+  - item: A separate list or schedule of drawings, plans and documents, with drawing numbers and plan
+      titles
+    level: should
+  - item: Every document or file has a meaningful and accurate file name (e.g.
+      'proposedfloorplans'); files without one are not accepted
+    level: must
+  - item: Documents and files normally submitted in PDF format
+    level: should
+
+drop:
+  - id: viability-assessment
+    reason: >-
+      duplicate: the same un-redacted Viability Appraisal sentence as the Affordable Housing
+      Statement; recorded as a must-include item of affordable-housing-statement
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is Arboricultural Method Statement text (moved to arboriculturist-report)"
+  - id: site-plan
+    reason: "wrong_trigger: the excerpt is BNG GIS template text, not a site plan requirement"
+  - id: daylight-sunlight-assessment
+    reason: "not_a_requirement: only something the council 'may' request (closing note), not a Part 1 item"
+  - id: roof-plan-existing
+    reason: "not_a_requirement: Part 3 drawing guidance ('Roof plans – required in some cases'), not Part 1"
+  - id: roof-plan-proposed
+    reason: "not_a_requirement: Part 3 drawing guidance, as above"
+  - id: section-existing
+    reason: "not_a_requirement: Part 3 drawing guidance (site levels), not Part 1"
+  - id: section-proposed
+    reason: "not_a_requirement: Part 3 drawing guidance (site levels), not Part 1"
+  - id: floor-plan-existing
+    reason: "not_a_requirement: Part 3 drawing guidance, not Part 1"
+  - id: floor-plan-proposed
+    reason: "not_a_requirement: Part 3 drawing guidance, not Part 1"
+  - id: elevation-existing
+    reason: "not_a_requirement: Part 3 drawing guidance, not Part 1"
+  - id: elevation-proposed
+    reason: "not_a_requirement: Part 3 drawing guidance, not Part 1"
+
+drop-unmapped:
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "not_a_requirement: Part 3 drawing guidance ('required in some cases')"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "not_a_requirement: Part 3 drawing guidance (NDSS floor areas on plans)"
+  - local-name: Cycle parking details
+    reason: "wrong_app_type: site-plan drawing guidance, not an outline-specific requirement"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_app_type: site-plan drawing guidance, not an outline-specific requirement"
+  - local-name: Advertisement drawings / illumination details
+    reason: "duplicate: the same advert luminance sentence as lighting-assessment"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger / duplicate: the non-mains foul drainage sentence; re-added below with item 25's trigger"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: a fragment; re-added below with item 31's trigger"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: Residential or mixed use development providing 10 or more dwellings.
+    source-text: Residential or mixed use development providing 10 or more dwellings
+    source-url: https://www.bristol.gov.uk/files/documents/10-planning-applications-local-list-of-requirements/file
+    must-include:
+      - item: A full, un-redacted Viability Appraisal of the proposed development, where below-policy
+          affordable housing is proposed
+        level: must
+        source-text: >-
+          Where below-policy affordable housing is being proposed, the Affordable Housing Statement
+          shall be accompanied by a full, un-redacted Viability Appraisal of the proposed
+          development.
+    confidence: medium
+    notes: "Audit (wrong_trigger): Part 1 item 1. Applies to outline and reserved matters as well as full."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees within the site, or on adjacent land (including neighbouring
+          gardens and street trees), that could influence or be affected by the development.
+    source-text: >-
+      An arboricultural report (see Table 2) must be submitted where there are trees within a
+      proposed application site, or on land adjacent to an application site (including trees in
+      neighbouring gardens and street trees), that could influence or be affected by the
+      development, including works such as site access, service routes and site compounds.
+    source-url: https://www.bristol.gov.uk/files/documents/10-planning-applications-local-list-of-requirements/file
+    must-include:
+      - item: An Arboricultural Method Statement where works are needed within the Root Protection
+          Areas (BS5837:2012) of retained trees, or where retained trees cannot be protected by
+          standard physical means such as fencing and/or ground protection
+        level: must
+        source-text: >-
+          An Arboricultural Method Statement where works are needed within the Root Protection
+          Areas (see BS5837: 2012) of retained trees or where retained trees cannot be protected by
+          standard physical means such as fencing and/or ground protection.
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement): applies to householder applications too. The Arboricultural
+      Method Statement text was in the workbook's 'Schedule of works' row.
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: Mandatory BNG applies to the development, as confirmed by a correctly completed
+          BNG Screening Assessment.
+    source-text: >-
+      when mandatory BNG applies to the proposed development and a correctly th applications of
+      major developments from the 12 February completed BNG Screening Assessment confirms that it
+      is necessary. 2024 and for minor developments, the 2nd April 2024.
+    source-url: https://www.bristol.gov.uk/files/documents/10-planning-applications-local-list-of-requirements/file
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt is scrambled across table columns, but the trigger is
+      readable: when mandatory BNG applies (major development from 12 February 2024, minor
+      development from 2 April 2024).
+
+  - id: cil-form
+    action: replace
+    required-if:
+      condition:
+        field: floorspace
+        operator: ">"
+        value: 100
+        description: The proposal creates over 100 square metres of new floorspace.
+    source-text: Community Infrastructure Levy (CIL) Question Form
+    source-url: https://www.bristol.gov.uk/files/documents/10-planning-applications-local-list-of-requirements/file
+    confidence: medium
+    notes: "From the audit (missing_requirement): the CIL Question Form is needed for over 100 sq m of new
+      floorspace, including householder applications."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    source-url: https://www.bristol.gov.uk/files/documents/10-planning-applications-local-list-of-requirements/file
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was Coal Mining Risk Assessment and CIL Question
+      Form text. The audit gives no separate trigger, so the EIA Regulations' own test is used.
+
+  - id: fire-statement
+    action: add
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-url: https://www.bristol.gov.uk/files/documents/10-planning-applications-local-list-of-requirements/file
+    confidence: medium
+    notes: "From the audit (missing_requirement): Part 1 item 14 Fire Statement, as required by the DMPO
+      2015 (as amended); the rule is the DMPO's relevant-building test."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      site:
+        in: [flood-risk-zone]
+        description: The site is in Flood Zone 2 or 3, including minor development and change of use.
+    source-text: In flood zone 2 or 3 including minor development and change of use.
+    source-url: https://www.bristol.gov.uk/files/documents/10-planning-applications-local-list-of-requirements/file
+    confidence: medium
+    notes: "Audit (wrong_trigger): Part 1 item 15; the workbook quoted 'or not a flood risk assessment is
+      required.' Applies to householder applications too."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, demolition-con-area]
+        - site:
+            in: [listed-building, locally-listed-building, conservation-area, park-and-garden,
+              scheduled-monument]
+            description: >-
+              The proposal affects a nationally or locally listed building or its curtilage, is
+              within or adjacent to a conservation area, or affects a registered park or garden or
+              an ancient monument.
+    source-text: >-
+      Applications for planning permission affecting a nationally or locally listed building or its
+      curtilage … For applications within or adjacent to a conservation area, an assessment of the
+      impact of the development on the character and appearance of the area will be required.
+    source-url: https://www.bristol.gov.uk/files/documents/10-planning-applications-local-list-of-requirements/file
+    must-include:
+      - item: For sites within or adjacent to a conservation area, an assessment of the impact on the
+          character and appearance of the area
+        level: must
+        required-if:
+          site:
+            in: [conservation-area]
+            description: The site is within or adjacent to a conservation area.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type, missing_requirement): Part 1 item 17 covers listed
+      buildings and curtilage, listed building consent, demolition in conservation areas,
+      conservation areas, registered parks and gardens, ancient monuments and HER-recorded assets
+      (the last can't be expressed as a field). Applies to householder applications too.
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      all:
+        - ref: major-development
+        - any:
+            - condition:
+                field: sensitive-end-use
+                value: true
+                description: The proposal has a sensitive end use.
+            - site:
+                in: [contaminated-land]
+                description: The site may be contaminated.
+    source-url: https://www.bristol.gov.uk/files/documents/10-planning-applications-local-list-of-requirements/file
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted an LCRM guidance citation. From the audit: 'major
+      applications with a sensitive end use or possible contamination'. It is unclear whether
+      'major' qualifies both branches; check Part 1.
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise-sensitive development near significant noise sources.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Noisy development near housing.
+    source-url: https://www.bristol.gov.uk/files/documents/10-planning-applications-local-list-of-requirements/file
+    confidence: medium
+    notes: "From the audit (missing_requirement): Part 1 item 21 Noise Impact Assessment."
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.bristol.gov.uk/files/documents/10-planning-applications-local-list-of-requirements/file
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): Part 1 item 22 Open Space Assessment, for all major
+      residential or mixed use development creating a need for open space. The residential /
+      mixed-use limit can't be expressed alongside the major-development rule.
+
+  - id: sci
+    action: replace
+    required-if:
+      ref: major-development
+    source-url: https://www.bristol.gov.uk/files/documents/10-planning-applications-local-list-of-requirements/file
+    must-include:
+      - item: Submitted as a free-standing document, not part of a larger document
+        level: must
+        source-text: >-
+          To make the Community Involvement Statement as accessible as possible, it must be
+          submitted as a free standing document and not be part of a larger document.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the trigger is 'All major development'; the workbook quoted formatting
+      text."
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      application-type:
+        in: [full, outline, reserved-matters]
+    source-text: >-
+      Energy Strategy The energy strategy should address the requirements of policies BCS13, BCS 14
+      and BCAP 20, demonstrating the application of the energy hierarchy, and setting out how
+      overall energy use will be minimised through the design (including through additional energy
+      efficiency measures) to achieve energy performance beyond Building Regulations, renewable
+      energy incorporated to reduce CO 2 emissions by a further 20%, and addressing the requirement
+      to incorporate, where feasible, infrastru…
+    source-url: https://www.bristol.gov.uk/files/documents/10-planning-applications-local-list-of-requirements/file
+    policy: BCS13, BCS14, BCAP20
+    must-include:
+      - item: Application of the energy hierarchy
+        level: should
+      - item: How overall energy use will be minimised through design to achieve energy performance
+          beyond Building Regulations
+        level: should
+      - item: Renewable energy incorporated to reduce CO2 emissions by a further 20%
+        level: should
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): from the audit, required for all new residential, mixed use,
+      commercial, retail, community or leisure uses, with exceptions. That can't be expressed as a
+      rule, so the main application types are listed; check the exceptions in Part 1.
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Applications for masts or antennas.
+    source-url: https://www.bristol.gov.uk/files/documents/10-planning-applications-local-list-of-requirements/file
+    confidence: medium
+    notes: "From the audit (missing_requirement): Part 1 item 26 Telecommunication Information."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: A main town centre use outside a Primary Shopping Area or out of centre.
+        - any:
+            - condition:
+                field: retail-floorspace
+                operator: ">="
+                value: 500
+                description: Retail of 500 square metres or more.
+            - discretionary
+    source-url: https://www.bristol.gov.uk/files/documents/10-planning-applications-local-list-of-requirements/file
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): Part 1 item 27, retail of 500 sq m+ outside Primary
+      Shopping Areas; A2/A5 1,500 sq m+, leisure 2,500 sq m+ and offices 10,000 sq m+ out of
+      centre. The use-specific thresholds can't be expressed, so they are shown as officer
+      discretion.
+
+  - id: transport-assessment
+    action: add
+    required-if: discretionary
+    source-url: https://www.bristol.gov.uk/files/documents/10-planning-applications-local-list-of-requirements/file
+    confidence: medium
+    notes: "From the audit (missing_requirement): Part 1 item 28 Transport Statement/Assessment, for developments
+      generating significant movement."
+
+  - id: travel-plan
+    action: replace
+    required-if: discretionary
+    source-text: Please refer to TDM Guide (bristol.gov.uk) The Travel Plan should include details of
+      targets and arrangements for monitoring.
+    source-url: https://www.bristol.gov.uk/files/documents/10-planning-applications-local-list-of-requirements/file
+    must-include:
+      - item: Targets and arrangements for monitoring
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): from the audit, required for developments generating significant movement;
+      the workbook quoted monitoring text."
+
+unmapped:
+  - local-name: Drainage Strategy / SuDS
+    source-text: "All Major applications"
+    source-url: https://www.bristol.gov.uk/files/documents/10-planning-applications-local-list-of-requirements/file
+    suggested-id: drainage-strategy
+  - local-name: Ventilation / Extraction details (odour)
+    source-text: "All applications where extraction equipment for the preparation of cooked food is to be
+      installed"
+    source-url: https://www.bristol.gov.uk/files/documents/10-planning-applications-local-list-of-requirements/file
+    suggested-id: ventilation-extraction-details
+  - local-name: Amendments Proposed Form
+    source-text: "Required for applicants seeking non-material amendments"
+    source-url: https://www.bristol.gov.uk/files/documents/10-planning-applications-local-list-of-requirements/file
+    suggested-id: amendment-documents
+  - local-name: Ecological Screening Assessment
+    source-text: "Required for all planning applications except for applications for: advertisement consent,
+      LDCs, non-material amendments"
+    source-url: https://www.bristol.gov.uk/files/documents/10-planning-applications-local-list-of-requirements/file
+    suggested-id: biodiversity-checklist
+  - local-name: BNG Screening Assessment
+    source-text: "Required for all planning applications except for applications for: advertisement consent,
+      LDCs, non-material amendments"
+    source-url: https://www.bristol.gov.uk/files/documents/10-planning-applications-local-list-of-requirements/file
+    suggested-id: bng-screening-assessment
+  - local-name: BNG Exemption Statement
+    source-text: "From the audit: Part 1 item 8, where mandatory BNG does not apply"
+    source-url: https://www.bristol.gov.uk/files/documents/10-planning-applications-local-list-of-requirements/file
+    suggested-id: bng-exemption-statement
+  - local-name: Coal Mining Risk Assessment
+    source-text: "From the audit: Part 1 item 9, all development in Development High Risk Areas, excluding
+      the exemptions list"
+    source-url: https://www.bristol.gov.uk/files/documents/10-planning-applications-local-list-of-requirements/file
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Broadband Connectivity Assessment
+    source-text: "From the audit: Part 1 item 16b, all major development"
+    source-url: https://www.bristol.gov.uk/files/documents/10-planning-applications-local-list-of-requirements/file
+    suggested-id: broadband-connectivity-assessment
+  - local-name: Planning Obligations (s106) Statement
+    source-text: "From the audit: Part 1 item 23, all major development"
+    source-url: https://www.bristol.gov.uk/files/documents/10-planning-applications-local-list-of-requirements/file
+    suggested-id: planning-obligations-statement
+  - local-name: Relevant Application Information Template
+    source-text: "From the audit: Part 1 item 32, for application types specified periodically"
+    source-url: https://www.bristol.gov.uk/files/documents/10-planning-applications-local-list-of-requirements/file
+    suggested-id: ""
+
+low-confidence:
+  - id: air-quality-assessment
+    note: "Audit (wrong_trigger): the excerpt starts mid-sentence ('residential units …') and gives no trigger;
+      re-read Part 1."
+  - id: landscaping-plan
+    note: "Audit (wrong_trigger): the excerpt ('when submitting landscaping schemes.') gives no trigger;
+      re-read Part 1."

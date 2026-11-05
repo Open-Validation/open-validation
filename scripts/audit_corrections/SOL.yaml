@@ -1,0 +1,517 @@
+# Corrections for Solihull Metropolitan Borough Council, from the audit of Solihull.
+# The workbook link is the current Local Validation Criteria (January 2020, in force 10 February
+# 2020); Grokbot dated it to its 2015 predecessor. It captured under half of the 38 items, put
+# most under Full planning ('INFERRED') and mixed up several triggers. Item numbers below are the
+# list's. Items marked "From the audit" use the audit's paraphrase, not the council's words.
+local-authority: SOL
+
+validation-list:
+  date: 2020-01
+  date-basis: "audit: Local Validation Criteria dated January 2020 (Cabinet 22 January 2020), in force from 10 February 2020"
+
+submission-standards:
+  - item: Drawings to a recognisable metric scale, with the paper size reference ('@paper size') and a
+      linear scale bar
+    level: must
+  - item: Key written dimensions annotated on the plans (distances to boundaries; width and depth of
+      extensions; external height to ridge and eaves)
+    level: must
+  - item: Existing and proposed plans placed next to each other on the same sheet, or with identical
+      layouts if on separate sheets
+    level: should
+
+drop:
+  - id: site-plan
+    reason: "not_a_requirement: the excerpt is table-header boilerplate for the national block/site plan"
+  - id: archaeological-assessment
+    reason: "wrong_trigger: fragment; in the list, archaeology sits within the Heritage Statement (item 21),
+      added below"
+
+drop-unmapped:
+  - local-name: Gypsy & Traveller information
+    reason: "not_a_requirement: a rule about wording the description of the proposal"
+
+requirements:
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: eia-development
+            value: true
+            description: The development needs an Environmental Impact Assessment.
+        - condition:
+            field: parking-spaces
+            operator: ">="
+            value: 300
+            description: The proposal provides 300 or more parking spaces.
+        - discretionary
+    source-url:
+      https://www.solihull.gov.uk/sites/default/files/migrated/Planning_Local_Validation_Criteria_Jan_2020.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): item 13's trigger is background levels at or above 90% of the
+      objective, sites within 10m of a road with 10,000+ vehicles a day or a pollutant source, EIA
+      development, or 300+ parking spaces. The first two have no field and are shown as officer
+      discretion. The workbook's excerpt ("Others will need a full Air Quality Assessment using
+      advanced dispersion modelling software") is about the level of assessment.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees on or immediately adjacent to the site.
+    must-include:
+      - item: Arboricultural Impact Assessment to BS5837:2012
+        level: must
+      - item: Details of tree protection measures
+        level: must
+      - item: Method statement
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): item 35 applies to all applications with trees on or immediately
+      adjacent to the site, including Householder and prior notifications for demolition affecting
+      trees.
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - all:
+            - site:
+                in: [conservation-area, world-heritage-site]
+                description: The site is in a conservation area or World Heritage Site.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: The proposal creates one or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: The proposal creates 100 square metres or more of floorspace.
+    source-text: (iii) Listed Building Consent applications
+    source-url:
+      https://www.solihull.gov.uk/sites/default/files/migrated/Planning_Local_Validation_Criteria_Jan_2020.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, missing_requirement): item 6 requires a DAS for major development,
+      conservation area / World Heritage Site schemes of 1+ dwelling or 100 sqm+, and all LBC
+      applications.
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: demolition
+            value: true
+            description: The proposal demolishes a building.
+        - condition:
+            field: roof-alteration
+            value: true
+            description: The works would destroy a roof void.
+        - discretionary
+    source-text: >-
+      Bat survey required for demolition of a building or works resulting in destruction of a roof
+      void. … Required (i) major development as defined in article 2 of the Town and Country
+      Planning (Development Management Procedure (England) Order 2015
+    source-url:
+      https://www.solihull.gov.uk/sites/default/files/migrated/Planning_Local_Validation_Criteria_Jan_2020.pdf
+    policy: Local Plan P10, P13, P14
+    must-include:
+      - item: Bat survey
+        level: must
+        required-if:
+          any:
+            - condition:
+                field: demolition
+                value: true
+                description: The proposal demolishes a building.
+            - condition:
+                field: roof-alteration
+                value: true
+                description: The works would destroy a roof void.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt includes a URL fragment and is cut off, so the
+      rest of item 18's triggers are shown as officer discretion. The bat survey applies to
+      Householder works too.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    confidence: medium
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal changes site levels, or existing levels across the site vary by more
+          than 0.3 metres.
+    confidence: medium
+    notes: "Audit (wrong_app_type): item 10 applies to all applications, including Householder."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal changes site levels, or existing levels across the site vary by more
+          than 0.3 metres.
+    confidence: medium
+    notes: "Audit (wrong_app_type): item 10 applies to all applications, including Householder."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [flood-risk-zone, critical-drainage-area]
+            description: The site is in flood zone 2 or 3, or in a critical drainage area.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (in flood zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (in flood zone 1).
+    source-text: >-
+      FRA should identify opportunities to reduce the probability and consequences of flooding and
+      should include the design of surface water management systems including Sustainable Drainage
+      Systems (SuDS) and address the requirement for safe access to and from the development in
+      areas at risk of flooding.
+    source-url:
+      https://www.solihull.gov.uk/sites/default/files/migrated/Planning_Local_Validation_Criteria_Jan_2020.pdf
+    must-include:
+      - item: Design of surface water management systems, including SuDS
+        level: should
+      - item: Safe access to and from the development in areas at risk of flooding
+        level: should
+    confidence: medium
+    notes: "Audit (wrong_trigger): item 20's trigger is all major development, 1ha+ in flood zone 1, flood
+      zones 2/3, or a critical drainage area. Includes Householder in flood zones 2/3."
+
+  - id: elevation-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal includes new buildings.
+        - condition:
+            field: external-alterations
+            value: true
+            description: The proposal alters the exterior of an existing building (including
+              extensions).
+    confidence: medium
+
+  - id: elevation-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal includes new buildings.
+        - condition:
+            field: external-alterations
+            value: true
+            description: The proposal alters the exterior of an existing building (including
+              extensions).
+    confidence: medium
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: The proposal includes significant new or amended external lighting.
+    source-text: All developments proposing or including significant new or amended external lighting
+    source-url:
+      https://www.solihull.gov.uk/sites/default/files/migrated/Planning_Local_Validation_Criteria_Jan_2020.pdf
+    policy: Local Plan P10, P14
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook merged item 24 (Lighting) with item 25 (Meeting Housing
+      Needs), so 'all major residential development' is not a lighting trigger."
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      all:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The development is residential.
+    source-text: Meeting Housing Needs (including Affordable Housing) Statement … All major residential
+      development
+    source-url:
+      https://www.solihull.gov.uk/sites/default/files/migrated/Planning_Local_Validation_Criteria_Jan_2020.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement, wrong_trigger): item 25; its wording was in the workbook's lighting
+      row."
+
+  - id: recreation-facilities-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: loss-of-open-space
+            value: true
+            description: The proposal would lose any open space.
+    source-url:
+      https://www.solihull.gov.uk/sites/default/files/migrated/Planning_Local_Validation_Criteria_Jan_2020.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the trigger is major commercial or residential development, or any loss
+      of open space. The workbook quoted a fragment."
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: A main town centre use outside an existing centre and not in line with the
+              Local Plan.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 2500
+            description: More than 2,500 square metres of main town centre use floorspace.
+        - discretionary
+    source-url:
+      https://www.solihull.gov.uk/sites/default/files/migrated/Planning_Local_Validation_Criteria_Jan_2020.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted the Structural Survey text. Item 30 asks for a
+      sequential test for main town centre uses outside an existing centre and not in line with the
+      Local Plan, and an Economic Impact Assessment for town centre uses over 2,500 sqm or likely to
+      cause significant adverse impacts (shown as officer discretion).
+
+  - id: telecommunications-report
+    action: replace
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: The proposal is for a mast or antenna.
+    source-url:
+      https://www.solihull.gov.uk/sites/default/files/migrated/Planning_Local_Validation_Criteria_Jan_2020.pdf
+    must-include:
+      - item: An ICNIRP certificate or signed declaration
+        level: must
+        source-text: plus an ICNIRP certificate or signed declaration.
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): item 32 covers all mast and antenna applications,
+      including prior approval."
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 20
+            description: The proposal creates 20 or more new dwellings.
+        - discretionary
+    confidence: medium
+    notes: "The 20-dwelling threshold is the council's; other thresholds were not captured."
+
+  - id: viability-assessment
+    action: replace
+    required-if: discretionary
+    source-url:
+      https://www.solihull.gov.uk/sites/default/files/migrated/Planning_Local_Validation_Criteria_Jan_2020.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): needed where policy-compliant development is not proposed for viability
+      reasons. The workbook quoted a fragment."
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url:
+      https://www.solihull.gov.uk/sites/default/files/migrated/Planning_Local_Validation_Criteria_Jan_2020.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the local item is the Waste Audit (item 38) for major development and
+      other significant waste-generating schemes such as flatted development below the major
+      threshold (shown as officer discretion). The workbook quoted text about waste facility
+      applications.
+
+  - id: schedule-of-works
+    action: update
+    must-include:
+      - item: The location, extent and significance of all items to be removed or altered
+        level: must
+      - item: How remaining items will be protected during building works
+        level: must
+    confidence: medium
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, locally-listed-building,
+              conservation-area, park-and-garden, scheduled-monument, world-heritage-site]
+            description: The application affects a heritage asset or its setting.
+    source-text: >-
+      This should include photos/photomontages showing the whole building and its setting and/or
+      the particular section of the building affected by the proposals An assessment of the likely
+      impact of the proposal on the heritage asset and its setting A mitigation strategy to address
+      any impacts
+    source-url:
+      https://www.solihull.gov.uk/sites/default/files/migrated/Planning_Local_Validation_Criteria_Jan_2020.pdf
+    policy: Local Plan P16
+    must-include:
+      - item: Photos or photomontages showing the whole building and its setting and/or the section of
+          the building affected
+        level: should
+      - item: An assessment of the likely impact of the proposal on the heritage asset and its setting
+        level: should
+      - item: A mitigation strategy to address any impacts
+        level: should
+      - item: An Archaeological Statement, if required
+        level: must
+        required-if: discretionary
+        source-text: to include Archaeological Statement if required).
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement): item 21, for any application affecting heritage assets or their
+      settings, including Householder and LBC. The content wording was in the workbook's LBC
+      photographs row.
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      all:
+        - site:
+            in: [contaminated-land]
+            description: Contamination is known or suspected.
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 0
+            description: The proposal creates additional floorspace.
+    source-url:
+      https://www.solihull.gov.uk/sites/default/files/migrated/Planning_Local_Validation_Criteria_Jan_2020.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 22, additional floorspace where contamination is known
+      or suspected."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: The development is residential.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise levels of 50-55 dBA or more, or within 250m of an industrial area.
+    source-url:
+      https://www.solihull.gov.uk/sites/default/files/migrated/Planning_Local_Validation_Criteria_Jan_2020.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): item 26, Noise and Vibration Impact Assessment for 'major
+      residential, 50-55 dBA+ or within 250m of industrial area'. How these combine needs checking."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-url:
+      https://www.solihull.gov.uk/sites/default/files/migrated/Planning_Local_Validation_Criteria_Jan_2020.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 28, all major development including major change of
+      use."
+
+  - id: cil-form
+    action: add
+    source-url:
+      https://www.solihull.gov.uk/sites/default/files/migrated/Planning_Local_Validation_Criteria_Jan_2020.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): item 16, CIL Question Form for all CIL-liable
+      applications. The list's definition of CIL-liable was not captured."
+
+unmapped:
+  - local-name: Parking and Access Plan
+    source-text: "All applications with new or amended parking or access arrangements"
+    source-url:
+      https://www.solihull.gov.uk/sites/default/files/migrated/Planning_Local_Validation_Criteria_Jan_2020.pdf
+    suggested-id: parking-plan
+  - local-name: Tree Works Specification (and Structural Survey)
+    source-text: "Tree Works Specification (and Structural Survey): works to a protected tree"
+    source-url:
+      https://www.solihull.gov.uk/sites/default/files/migrated/Planning_Local_Validation_Criteria_Jan_2020.pdf
+    suggested-id: tree-works-plan
+  - local-name: Aerodrome Safeguarding Assessment
+    source-text: "From the audit: item 11, development affecting protected aerodrome surfaces or
+      navigation, lighting or solar that could distract pilots, landscaping increasing bird hazard"
+    source-url:
+      https://www.solihull.gov.uk/sites/default/files/migrated/Planning_Local_Validation_Criteria_Jan_2020.pdf
+    suggested-id: aerodrome-safeguarding
+  - local-name: Essential Rural Workers Dwelling Assessment
+    source-text: "From the audit: item 12, rural worker dwellings in the Green Belt"
+    source-url:
+      https://www.solihull.gov.uk/sites/default/files/migrated/Planning_Local_Validation_Criteria_Jan_2020.pdf
+    suggested-id: rural-worker-statement
+  - local-name: National Design Guide / Building for Life Statement
+    source-text: "From the audit: item 14, major residential development"
+    source-url:
+      https://www.solihull.gov.uk/sites/default/files/migrated/Planning_Local_Validation_Criteria_Jan_2020.pdf
+    suggested-id: ""
+  - local-name: Character Assessment
+    source-text: "From the audit: item 15, material impact on local character including the Arden landscape,
+      canal and rail"
+    source-url:
+      https://www.solihull.gov.uk/sites/default/files/migrated/Planning_Local_Validation_Criteria_Jan_2020.pdf
+    suggested-id: ""
+  - local-name: Security Considerations Assessment
+    source-text: "From the audit: item 17, major development, or significant crime risk"
+    source-url:
+      https://www.solihull.gov.uk/sites/default/files/migrated/Planning_Local_Validation_Criteria_Jan_2020.pdf
+    suggested-id: crime-prevention-statement
+
+low-confidence:
+  - id: floor-plan-existing
+    note: "The workbook's excerpt is the elevations entry ('All applications proposing new buildings or
+      alterations to the exterior of existing buildings'), not the floor plans entry."
+  - id: floor-plan-proposed
+    note: "The workbook's excerpt is the elevations entry, not the floor plans entry."

@@ -1,0 +1,328 @@
+# Corrections for Cheltenham Borough Council, from inputs/audit/cheltenham-borough-council.json.
+# Cheltenham's local list is a web page (application-type sections plus 22 requirement sub-pages),
+# matching the Local Validation List approved by Cabinet on 18 Feb 2025 (the build reads that date
+# from the audit). The workbook captured only three rows. The audit lists the 22 local
+# requirements for full applications with their triggers; the same list applies to outline
+# applications, and to reserved matters "in so far as they are relevant to the matters reserved".
+# Householder applications have three local requirements (trees, flood risk, ecology).
+# Items without the council's own words use the audit's paraphrase ("From the audit").
+local-authority: CHT
+
+submission-standards:
+  - item: All plans and drawings include the paper size, the address of the proposal and a metric
+      scale, and are appropriately titled
+    level: must
+  - item: Plans show the direction of north
+    level: must
+
+drop-unmapped:
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: the trigger was cut off; re-added below with both triggers"
+
+requirements:
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - discretionary
+    source-url: https://cheltenham.gov.uk/planning-and-building/planning-permission/make-a-planning-application/planning-application-supporting-information/
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): an Affordable Housing Statement where the affordable
+      housing policy applies. The audit gives no threshold, so it is shown as officer discretion.
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, reserved-matters]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: The development will have an impact on a tree on or next to the site (trees
+              with a trunk diameter under 75mm at 1.5m are excluded).
+    source-text: >-
+      Any development (including householder applications) which will have an impact on a tree on
+      or next to the site.
+    source-url: https://cheltenham.gov.uk/planning-and-building/planning-permission/make-a-planning-application/planning-application-supporting-information/
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): an Arboricultural Impact Assessment is a local
+      requirement for householder, full, outline and reserved matters applications; trees under
+      75mm trunk diameter at 1.5m are excluded.
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [full, outline, reserved-matters]
+            - ref: major-development
+        - all:
+            - application-type:
+                in: [full, outline, reserved-matters, lbc]
+            - condition:
+                field: demolition
+                value: true
+                description: The proposal involves demolition.
+        - all:
+            - application-type:
+                in: [hh, full, outline, reserved-matters]
+            - condition:
+                field: protected-species
+                value: true
+                description: The proposal affects woodland, parkland or mature trees, watercourses or
+                  aquatic habitat, underground structures, or derelict buildings or land.
+    source-text: >-
+      A Heritage Statement is always required for applications for listed building consent as is
+      an Ecology Report if demolition work is proposed
+    source-url: https://cheltenham.gov.uk/planning-and-building/planning-permission/make-a-planning-application/planning-application-supporting-information/
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, missing_requirement): the workbook's LBC excerpt was a garbled run-on.
+      From the audit: an Ecology Report (including protected species survey) for all major
+      applications, non-major applications involving demolition, and applications (including
+      householder) affecting woodland, parkland/mature trees, watercourses/aquatic habitat,
+      underground structures or derelict buildings/land; for listed building consent only where
+      demolition is proposed.
+
+  - id: energy-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - ref: major-development
+    source-url: https://cheltenham.gov.uk/planning-and-building/planning-permission/make-a-planning-application/planning-application-supporting-information/
+    confidence: medium
+    notes: "From the audit (missing_requirement): an Energy Statement for all major applications."
+
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, reserved-matters]
+        - any:
+            - site:
+                in: [flood-risk-zone]
+                description: The site is in Flood Zone 2 or 3.
+            - discretionary
+    source-url: https://cheltenham.gov.uk/planning-and-building/planning-permission/make-a-planning-application/planning-application-supporting-information/
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Flood Risk Assessment, mainly for sites in Flood Zone
+      2 or 3, for householder, full, outline and reserved matters applications. The audit says
+      "mainly" without listing the other cases, so they are shown as officer discretion.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - all:
+            - application-type:
+                in: [full, outline, reserved-matters]
+            - site:
+                in: [listed-building, conservation-area, listed-building-setting, scheduled-monument,
+                  park-and-garden, world-heritage-site]
+                description: The proposal affects a designated heritage asset or its setting.
+    source-text: >-
+      A Heritage Statement is always required for applications for listed building consent as is
+      an Ecology Report if demolition work is proposed
+    source-url: https://cheltenham.gov.uk/planning-and-building/planning-permission/make-a-planning-application/planning-application-supporting-information/
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was a garbled run-on into the next section.
+      From the audit: always for listed building consent, and for full, outline and reserved
+      matters applications affecting a designated heritage asset or its setting.
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - site:
+            in: [contaminated-land]
+            description: The site has known or historic contaminative uses, such as industrial or
+              refuelling sites being redeveloped.
+    source-url: https://cheltenham.gov.uk/planning-and-building/planning-permission/make-a-planning-application/planning-application-supporting-information/
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Contaminated Land Assessment for sites with known or
+      historic contaminative uses, and redevelopment of industrial or refuelling sites.
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: New commercial entertainment premises, or a use generating significant
+              noise near residential properties.
+    source-url: https://cheltenham.gov.uk/planning-and-building/planning-permission/make-a-planning-application/planning-application-supporting-information/
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Noise Impact Assessment for new commercial
+      entertainment premises or significant noise near residential properties.
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - any:
+            - all:
+                - ref: major-development
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: The major development is residential.
+            - condition:
+                field: loss-of-open-space
+                value: true
+                description: The proposal would result in the loss of open space.
+    source-url: https://cheltenham.gov.uk/planning-and-building/planning-permission/make-a-planning-application/planning-application-supporting-information/
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): an Open Space Assessment for all major residential
+      development, or where open space would be lost.
+
+  - id: sci
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - ref: major-development
+    source-url: https://cheltenham.gov.uk/planning-and-building/planning-permission/make-a-planning-application/planning-application-supporting-information/
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Statement of Community Involvement for all major applications."
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - any:
+            - all:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: The proposal creates 1 or more dwellings.
+                - condition:
+                    field: dwelling-count
+                    operator: "<="
+                    value: 9
+                    description: The proposal creates no more than 9 dwellings.
+            - ref: major-development
+    source-url: https://cheltenham.gov.uk/planning-and-building/planning-permission/make-a-planning-application/planning-application-supporting-information/
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Sustainable Construction Checklist for all 1-9
+      dwelling schemes, and for major applications alongside the Energy Statement.
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Retail or leisure development outside a defined centre.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 2500
+            description: Over 2,500 square metres of retail or leisure floorspace.
+    source-url: https://cheltenham.gov.uk/planning-and-building/planning-permission/make-a-planning-application/planning-application-supporting-information/
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Retail Impact Assessment for retail or leisure
+      development over 2,500 sq m out of centre. The Retail Sequential Test is listed separately
+      (unmapped).
+
+  - id: transport-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - ref: major-development
+        - discretionary
+    source-url: https://cheltenham.gov.uk/planning-and-building/planning-permission/make-a-planning-application/planning-application-supporting-information/
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Transport Assessment or Statement for major
+      development generating significant movements, as agreed with Gloucestershire County Council.
+
+  - id: travel-plan
+    action: add
+    required-if:
+      application-type:
+        in: [full, outline, reserved-matters]
+    source-url: https://cheltenham.gov.uk/planning-and-building/planning-permission/make-a-planning-application/planning-application-supporting-information/
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a Travel Plan is one of the 22 local requirements for
+      full applications, but the audit gives no trigger.
+
+  - id: viability-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - discretionary
+    source-url: https://cheltenham.gov.uk/planning-and-building/planning-permission/make-a-planning-application/planning-application-supporting-information/
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Viability Appraisal where reduced affordable housing
+      is proposed on viability grounds.
+
+unmapped:
+  - local-name: Sustainable Drainage Strategy
+    source-text: >-
+      A SUDS strategy is required for any development of: 1 or more new dwellings. A construction
+      footprint exceeding 100m2 (not householder)
+    source-url: https://cheltenham.gov.uk/planning-and-building/planning-permission/make-a-planning-application/planning-application-supporting-information/sustainable-drainage-strategy/
+    suggested-id: drainage-strategy
+  - local-name: Employment Skills Plan
+    source-text: "From the audit: major indoor commercial development of 1,000 sq m or more"
+    source-url: https://cheltenham.gov.uk/planning-and-building/planning-permission/make-a-planning-application/planning-application-supporting-information/
+    suggested-id: employment-statement
+  - local-name: Flood Risk Sequential Test
+    source-text: "From the audit: listed among the local requirements for full applications"
+    source-url: https://cheltenham.gov.uk/planning-and-building/planning-permission/make-a-planning-application/planning-application-supporting-information/
+    suggested-id: flood-sequential-test
+  - local-name: Health Impact Assessment
+    source-text: "From the audit: major applications on Joint Core Strategy strategic sites"
+    source-url: https://cheltenham.gov.uk/planning-and-building/planning-permission/make-a-planning-application/planning-application-supporting-information/
+    suggested-id: health-impact-assessment
+  - local-name: Landscape and Visual Impact Assessment
+    source-text: "From the audit: major applications in the Cotswolds National Landscape"
+    source-url: https://cheltenham.gov.uk/planning-and-building/planning-permission/make-a-planning-application/planning-application-supporting-information/
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Retail Sequential Test
+    source-text: "From the audit: main town centre uses outside a centre"
+    source-url: https://cheltenham.gov.uk/planning-and-building/planning-permission/make-a-planning-application/planning-application-supporting-information/
+    suggested-id: retail-sequential-test
+  - local-name: Self Build / Custom Build Proforma
+    source-text: "From the audit: self-build and custom build schemes"
+    source-url: https://cheltenham.gov.uk/planning-and-building/planning-permission/make-a-planning-application/planning-application-supporting-information/
+    suggested-id: self-build-proforma

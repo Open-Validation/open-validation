@@ -1,0 +1,468 @@
+# Corrections for Lancashire County Council, from the council's audit.
+# The Validation Information Guide (Updated December 2012) is still the only county list. It is 14
+# years old and cites revoked policy (North West RSS 2008, DMPO 2010, Site Waste Management Plans
+# Regulations 2008), so its local items may not be enforceable (DMPO 2015 art. 11(3)(c)).
+# The county decides minerals, waste and its own Regulation 3 development, so every item is scoped
+# to those types; Grokbot had put them all under Full planning ('INFERRED'). The audit lists about
+# 20 local items (guide sections 8-43) that the workbook missed; they are added below.
+local-authority: LAN
+
+drop:
+  - id: photos
+    sheets: [Discharge of conditions]
+    reason: "wrong_trigger: a tick-box row label from the approval-of-details checklist, not a trigger"
+  - id: planning-statement
+    sheets: [Discharge of conditions]
+    reason: "wrong_trigger: a tick-box row label from the approval-of-details checklist, not a trigger"
+  - id: floor-plan-existing
+    reason: "not_a_requirement: a national-list item (guide section 3), not a local requirement"
+  - id: floor-plan-proposed
+    reason: "not_a_requirement: a national-list item (guide section 3), not a local requirement"
+  - id: elevation-existing
+    reason: "not_a_requirement: a national-list item (guide section 3), not a local requirement"
+  - id: elevation-proposed
+    reason: "not_a_requirement: a national-list item (guide section 3), not a local requirement"
+  - id: design-and-access-statement
+    reason: "not_a_requirement: a national-list item (guide section 6); national rules still apply"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: encouragement to seek pre-application advice"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "duplicate: reuses the Odour/dust excerpt (s26); the s42 statement is added below"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - site:
+                in: [air-quality-management-area]
+                description: The development is inside or adjacent to an Air Quality Management Area.
+            - discretionary
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): moved from Full planning to the county's application types. The
+      other cases (could cause an AQMA to be designated, or conflict with an air quality action
+      plan) are shown as officer discretion.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: There are trees within, overhanging or within half their height of the
+              site boundary.
+    must-include:
+      - item: Accurate plotting of all tree stems and crowns
+        level: must
+      - item: A tree survey giving species, size and condition of the trees
+        level: must
+      - item: Any surgery work recommended
+        level: must
+      - item: A scheme for tree protection during the development of the site
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): moved from Full planning to the county's application types."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - site:
+                in: [site-of-special-scientific-interest, special-protection-area,
+                  special-area-of-conservation, local-wildlife-site]
+                description: The development may affect a designated nature conservation site.
+            - condition:
+                field: protected-species
+                value: true
+                description: The development may affect protected species.
+            - condition:
+                field: demolition
+                value: true
+                description: The proposal demolishes older buildings or affects roof spaces.
+            - discretionary
+    source-text: >-
+      may affect protected species and will need to provide information on them, any potential
+      impacts for them and any mitigation proposals for such impacts.
+    source-url: https://www.lancashire.gov.uk/media/h5lfrp5b/validation-information-guide-december-2012.pdf
+    must-include:
+      - item: Information on the protected species, any potential impacts on them and any mitigation
+          proposals
+        level: must
+        required-if:
+          condition:
+            field: protected-species
+            value: true
+            description: The development may affect protected species.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt was a mid-sentence fragment. From the audit: s9 covers
+      designated sites, protected species, demolition of older buildings/roof spaces, and removal
+      of trees, hedgerows or ponds (no field for the last, so shown as officer discretion).
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: eia-development
+            value: true
+            description: The development needs an Environmental Impact Assessment.
+    source-text: This information might form part of an Environmental Statement, where one is
+      necessary.
+    source-url: https://www.lancashire.gov.uk/media/h5lfrp5b/validation-information-guide-december-2012.pdf
+    confidence: medium
+    notes: "Moved from Full planning to the county's application types (audit wrong_app_type)."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: site-area-non-residential
+                operator: ">="
+                value: 1
+                description: The site is 1 hectare or greater.
+            - condition:
+                field: site-area-residential
+                operator: ">="
+                value: 1
+                description: The site is 1 hectare or greater.
+            - site:
+                in: [flood-risk-zone]
+                description: New development in Flood Zone 2 or 3.
+            - all:
+                - condition:
+                    field: minor-development
+                    value: false
+                    description: The proposal is not minor development.
+                - site:
+                    in: [critical-drainage-area]
+                    description: The site is in a notified critical drainage area.
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, wrong_trigger): moved to the county's application types; the excerpt
+      left out non-minor development in a notified critical drainage area (from the audit, s14).
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - site:
+                in: [listed-building, listed-building-setting, scheduled-monument, conservation-area]
+                description: The development affects a heritage asset or its setting, or is in or
+                  adjacent to a conservation area.
+            - all:
+                - condition:
+                    field: ground-disturbance
+                    value: true
+                    description: The proposal disturbs the ground.
+                - any:
+                    - site:
+                        in: [archaeological-priority-area]
+                        description: The site is in an Area of Archaeological Potential.
+                    - ref: major-development
+            - discretionary
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt only says the scope 'will vary'. From the audit, s16
+      applies to the setting of heritage assets, in or adjacent to a conservation area, ground
+      disturbance in an Area of Archaeological Potential or major development, and removal of
+      important hedgerows (no field, so officer discretion).
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - discretionary
+    notes: "Moved from Full planning to the county's application types. The excerpt says only 'if required'."
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: external-lighting
+            value: true
+            description: External lighting would be provided or made necessary by the development.
+        - any:
+            - site:
+                in: [listed-building-setting, conservation-area]
+                description: The development is in the vicinity of a listed building or a
+                  conservation area.
+            - discretionary
+    source-text: >-
+      Lighting assessments Proposals involving the provision of publicly accessible developments,
+      in the vicinity of residential property, a listed building or a conservation area, or open
+      countryside, where external lighting would be provided or made necessary by the … development,
+      should be required to be accompanied by details of external lighting and the proposed hours
+      when the lighting would be switched on.
+    source-url: https://www.lancashire.gov.uk/media/h5lfrp5b/validation-information-guide-december-2012.pdf
+    must-include:
+      - item: Details of the external lighting
+        level: must
+      - item: The proposed hours when the lighting would be switched on
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): filed under Listed building consent only because the trigger
+      mentions a listed building; LBC is not a county application type. Residential property and
+      open countryside have no field, so they are shown as officer discretion.
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: floorspace
+                operator: ">="
+                value: 500
+                description: The development has 500 square metres or more gross floor area.
+            - discretionary
+    confidence: low
+    notes: >-
+      Moved from Full planning to the county's application types. The excerpt is cut off and gives
+      500 sq m only as an example ('example simple Transport Assessments will be required...').
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: new-build
+                value: true
+                description: Proposed new development (Site Waste Management Plan, s33).
+            - all:
+                - application-type:
+                    in: [waste-dev]
+                - discretionary
+    source-text: >-
+      Site Waste Management Plan Proposed new development should be supported by site waste
+      management plans of the type now required by The Site Waste Management Plans Regulations 2008.
+    source-url: https://www.lancashire.gov.uk/media/h5lfrp5b/validation-information-guide-december-2012.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook row is the Site Waste Management Plan (s33), a
+      construction-waste plan under regulations repealed in 2013. From the audit, the waste
+      development item (s43, waste management details 'required in many cases where significant
+      effects are likely') was missing; it is shown as officer discretion for waste applications.
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - discretionary
+    source-url: https://www.lancashire.gov.uk/media/h5lfrp5b/validation-information-guide-december-2012.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): s10, where an adverse impact on adjoining properties or
+      gardens is possible."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    source-url: https://www.lancashire.gov.uk/media/h5lfrp5b/validation-information-guide-december-2012.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): s12 Energy statement. The audit gives no trigger."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - site:
+                in: [contaminated-land]
+                description: Contamination is known or suspected on the site.
+            - condition:
+                field: sensitive-end-use
+                value: true
+                description: The proposed use would be particularly vulnerable to contamination.
+    source-url: https://www.lancashire.gov.uk/media/h5lfrp5b/validation-information-guide-december-2012.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): s17, known or suspected contamination or a vulnerable end use."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [mineral-app, waste-dev]
+        - all:
+            - application-type:
+                in: [reg-3]
+            - any:
+                - condition:
+                    field: noise-generating-use
+                    value: true
+                    description: The development is likely to disturb occupiers of nearby property.
+                - condition:
+                    field: noise-sensitive-use
+                    value: true
+                    description: A noise-sensitive use near an existing noise source.
+    source-url: https://www.lancashire.gov.uk/media/h5lfrp5b/validation-information-guide-december-2012.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): s25, development likely to disturb occupiers,
+      noise-sensitive uses near noise sources, and all minerals or waste operations.
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - site:
+            in: [open-space]
+            description: The development is within open space.
+    source-url: https://www.lancashire.gov.uk/media/h5lfrp5b/validation-information-guide-december-2012.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): s27 Open space assessment, development within open space."
+
+  - id: photos
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: demolition
+                value: true
+                description: The proposal demolishes a building.
+            - site:
+                in: [conservation-area, listed-building]
+                description: The development affects a conservation area or a listed building.
+    source-url: https://www.lancashire.gov.uk/media/h5lfrp5b/validation-information-guide-december-2012.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): s29 Photographs and photomontages, for demolition of a
+      building or development affecting a conservation area or listed building. The workbook's
+      Discharge of conditions row was a checklist label and is dropped.
+
+  - id: planning-statement
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - site:
+            in: [green-belt]
+            description: Inappropriate development in the Green Belt.
+    source-url: https://www.lancashire.gov.uk/media/h5lfrp5b/validation-information-guide-december-2012.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): s31, mandatory where inappropriate development in the
+      Green Belt is proposed. The rule can't test 'inappropriate', so it fires for any Green Belt site.
+
+  - id: sci
+    action: add
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    source-url: https://www.lancashire.gov.uk/media/h5lfrp5b/validation-information-guide-december-2012.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): s34 Statement of Community Involvement. The audit gives no
+      trigger."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev]
+        - condition:
+            field: telecommunications-development
+            value: true
+            description: A telecommunications mast within a minerals or waste operation.
+    source-url: https://www.lancashire.gov.uk/media/h5lfrp5b/validation-information-guide-december-2012.pdf
+    must-include:
+      - item: ICNIRP declaration
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): s37, masts within a minerals or waste operation."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    source-url: https://www.lancashire.gov.uk/media/h5lfrp5b/validation-information-guide-december-2012.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): s38 Town centre uses. The audit gives no trigger."
+
+  - id: travel-plan
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - discretionary
+    source-url: https://www.lancashire.gov.uk/media/h5lfrp5b/validation-information-guide-december-2012.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): s40, development with significant transport implications."
+
+unmapped:
+  - local-name: Economic statement
+    source-text: "From the audit: s11, major employment-generating proposals"
+    source-url: https://www.lancashire.gov.uk/media/h5lfrp5b/validation-information-guide-december-2012.pdf
+    suggested-id: economic-statement
+  - local-name: Landscape and Visual Impact Assessment
+    source-text: "From the audit: s20 Landscape and Visual Impact Assessment (no trigger given)"
+    source-url: https://www.lancashire.gov.uk/media/h5lfrp5b/validation-information-guide-december-2012.pdf
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Mineral working and restoration
+    source-text: "From the audit: s23, all mineral working: restoration, aftercare, environmental standards"
+    source-url: https://www.lancashire.gov.uk/media/h5lfrp5b/validation-information-guide-december-2012.pdf
+    suggested-id: restoration-aftercare-scheme
+  - local-name: Mineral extraction (County mineral form)
+    source-text: "From the audit: s24, mineral applications using the County mineral form"
+    source-url: https://www.lancashire.gov.uk/media/h5lfrp5b/validation-information-guide-december-2012.pdf
+    suggested-id: minerals-assessment
+  - local-name: Planning obligations draft Heads of Terms
+    source-text: "From the audit: s30 Planning obligations draft Heads of Terms (no trigger given)"
+    source-url: https://www.lancashire.gov.uk/media/h5lfrp5b/validation-information-guide-december-2012.pdf
+    suggested-id: heads-of-terms
+  - local-name: Public Rights of Way
+    source-text: "From the audit: s32 Public Rights of Way (no trigger given)"
+    source-url: https://www.lancashire.gov.uk/media/h5lfrp5b/validation-information-guide-december-2012.pdf
+    suggested-id: public-rights-of-way-statement
+  - local-name: Ventilation / extraction statement
+    source-text: "From the audit: s42, minerals or waste management operations, and significant retail,
+      business, industrial or leisure developments with substantial ventilation or extraction equipment"
+    source-url: https://www.lancashire.gov.uk/media/h5lfrp5b/validation-information-guide-december-2012.pdf
+    suggested-id: ventilation-extraction-statement
+

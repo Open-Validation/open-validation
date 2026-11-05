@@ -1,0 +1,314 @@
+# Corrections for Broxtowe Borough Council, from the council's audit.
+# The list is 'Validation Checklist 02' (Revised October 2024), a table with Householder / Minor /
+# Major columns; Checklist 01 restates the national requirements. Grokbot put most items under
+# Full planning by guess, put three major-only items under Householder, and garbled many triggers.
+# Rules below use the list's own triggers with no application type, so they apply to every
+# application of that kind. Items marked "From the audit" use the audit's paraphrase.
+local-authority: BRT
+
+submission-standards:
+  - item: Critical dimensions and a recognised metric scale marked on all plans and drawings
+    level: must
+
+drop-unmapped:
+  - local-name: Drainage Strategy / SuDS
+    reason: >-
+      wrong_trigger / duplicate: the excerpt is the heritage asset trigger run into the Heads of
+      Terms text, and it was wrongly placed under Householder; re-added below
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: the excerpt is the affordable housing policy; re-added below with its own trigger"
+  - local-name: Highways / access details (visibility splays)
+    reason: "duplicate: same parking and access text as Parking provision; re-added below as one item"
+  - local-name: Parking provision / Parking plan
+    reason: "duplicate: fragment of the parking and access text; re-added below as one item"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">"
+        value: 10
+        description: A residential scheme of more than 10 dwellings.
+    source-text: residential schemes of more than 10 dwellings
+    source-url: https://www.broxtowe.gov.uk/media/tshlsx4i/02-additional-information-on-broxtowe-borough-council-local-validation-requirements.pdf
+    policy: Broxtowe Part 2 Local Plan (2019) Policy 15
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, wrong_trigger): the workbook placed it under Householder with the table
+      header as its excerpt. The Heads of Terms entry says Policy 15 seeks affordable housing 'on all
+      housing sites where 10 or more dwellings are proposed', so the threshold may be 10 or more.
+
+  - id: travel-plan
+    action: replace
+    required-if: discretionary
+    source-text: Travel Plan Additional Information If the proposal is likely to generate significant
+      amounts of movement.
+    source-url: https://www.broxtowe.gov.uk/media/tshlsx4i/02-additional-information-on-broxtowe-borough-council-local-validation-requirements.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, wrong_trigger): the workbook placed it under Householder and its excerpt
+      ran on into the tree survey row.
+
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-text: >-
+      Air quality assessment For ‘major’ applications proposing development inside, or adjacent to
+      an air quality management area (AQMA), or where the development itself could have
+      implications for air quality, or where the grant of planning permission would conflict with,
+      or render unworkable, elements of a local authority’s air quality action plan…
+    source-url: https://www.broxtowe.gov.uk/media/tshlsx4i/02-additional-information-on-broxtowe-borough-council-local-validation-requirements.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the table row asks for it for all major applications and for most
+      developments near Iona Drive / Tiree Close, Trowell. That location can't be expressed as a
+      designation, so it is shown as officer discretion.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees within the site or on adjacent land that could influence or be
+          affected by the development, including street trees.
+    must-include:
+      - item: Which trees are to be retained
+        level: must
+      - item: How retained trees will be protected during construction
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): the tree survey also applies to householder applications."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The application is not exempt from the statutory biodiversity gain condition.
+    must-include:
+      - item: The metric as both an Excel spreadsheet and a PDF
+        level: should
+    confidence: medium
+    notes: "The council's list restates the national BNG duty and asks for the metric in Excel and PDF form."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - site:
+            in: [contaminated-land]
+            description: The site is known to be contaminated, or was previously in use for
+              industrial processes.
+    confidence: medium
+    notes: "The excerpt limits it to 'major' applications on such sites."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    confidence: medium
+    notes: "From Checklist 01 (national requirements): where EIA is required."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more in flood zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more in flood zone 1.
+        - site:
+            in: [flood-risk-zone, critical-drainage-area]
+            description: The site is in flood zone 2 or 3, or in an area with critical drainage
+              problems.
+        - discretionary
+    confidence: medium
+    notes: >-
+      Sites under 1 hectare in flood zone 1 that could be affected by other sources of flooding are
+      shown as officer discretion.
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, conservation-area, scheduled-monument,
+          park-and-garden, locally-listed-building]
+        description: The development could affect a designated or non-designated heritage asset.
+    source-text: >-
+      Where development would have the potential to impact on a designated or nondesignated
+      heritage asset
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): this trigger was in the workbook's Drainage Strategy row. The heritage
+      row's own excerpt gave no trigger.
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      condition:
+        field: protected-species
+        value: true
+        description: The proposal may affect protected species.
+    confidence: low
+    notes: "The excerpt is cut off at the start; it is about proposals that may affect protected species."
+
+  - id: landscaping-plan
+    action: update
+    required-if: discretionary
+    source-text: >-
+      Additional plans or drawings may be required in certain circumstances, dependent on factors
+      such as the location or characteristics of the site and the scale and nature of the
+      development, for example, landscaping plans.
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook's excerpt was only 'for example, landscaping plans.'"
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Retail, leisure or office development outside a town centre.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 2500
+            description: Over 2,500 square metres.
+    source-url: https://www.broxtowe.gov.uk/media/tshlsx4i/02-additional-information-on-broxtowe-borough-council-local-validation-requirements.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was a fragment and lost the threshold. From the
+      audit: a retail, leisure or office impact assessment outside town centres over 2,500 m2.
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The proposal raises disturbance issues.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise-sensitive development.
+    source-url: https://www.broxtowe.gov.uk/media/tshlsx4i/02-additional-information-on-broxtowe-borough-council-local-validation-requirements.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): disturbance issues or noise-sensitive development."
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if:
+      site:
+        in: [open-space]
+        description: Development within public open space.
+    source-url: https://www.broxtowe.gov.uk/media/tshlsx4i/02-additional-information-on-broxtowe-borough-council-local-validation-requirements.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): an Open Space Assessment for development within public open space."
+
+  - id: sci
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.broxtowe.gov.uk/media/tshlsx4i/02-additional-information-on-broxtowe-borough-council-local-validation-requirements.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Statement of Community Involvement for major applications."
+
+  - id: transport-assessment
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: https://www.broxtowe.gov.uk/media/tshlsx4i/02-additional-information-on-broxtowe-borough-council-local-validation-requirements.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): all major applications, and proposals with significant transport implications."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: An application for a mast or antenna.
+    source-url: https://www.broxtowe.gov.uk/media/tshlsx4i/02-additional-information-on-broxtowe-borough-council-local-validation-requirements.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): telecommunications supplementary information for mast or antenna applications."
+
+  - id: sustainability-statement
+    action: add
+    source-url: https://www.broxtowe.gov.uk/media/tshlsx4i/02-additional-information-on-broxtowe-borough-council-local-validation-requirements.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): an Energy Efficiency/Sustainability Statement is listed; the audit gives no trigger."
+
+unmapped:
+  - local-name: Drainage Strategy
+    source-text: "From the audit: all major applications"
+    source-url: https://www.broxtowe.gov.uk/media/tshlsx4i/02-additional-information-on-broxtowe-borough-council-local-validation-requirements.pdf
+    suggested-id: drainage-strategy
+  - local-name: Planning obligations - Draft Head(s) of Terms
+    source-text: A statement of the proposed Heads of Terms should be submitted with all major
+      applications.
+    source-url: https://www.broxtowe.gov.uk/media/tshlsx4i/02-additional-information-on-broxtowe-borough-council-local-validation-requirements.pdf
+    suggested-id: heads-of-terms
+  - local-name: Parking and Access Arrangements
+    source-text: >-
+      Parking and Access Arrangements Most applications, including some householder applications,
+      will be required to provide details of existing and proposed vehicle parking provision and
+      access arrangements.
+    source-url: https://www.broxtowe.gov.uk/media/tshlsx4i/02-additional-information-on-broxtowe-borough-council-local-validation-requirements.pdf
+    suggested-id: parking-plan
+  - local-name: Building for a Healthy Life assessment
+    source-text: "From the audit: major development"
+    source-url: https://www.broxtowe.gov.uk/media/tshlsx4i/02-additional-information-on-broxtowe-borough-council-local-validation-requirements.pdf
+    suggested-id: building-for-a-healthy-life
+  - local-name: Coal Mining Risk Assessment
+    source-text: "From the audit: site in a Development High Risk Area"
+    source-url: https://www.broxtowe.gov.uk/media/tshlsx4i/02-additional-information-on-broxtowe-borough-council-local-validation-requirements.pdf
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Electric Vehicle Charging Points
+    source-text: "From the audit: major housing; commercial 1,000 sqm or more"
+    source-url: https://www.broxtowe.gov.uk/media/tshlsx4i/02-additional-information-on-broxtowe-borough-council-local-validation-requirements.pdf
+    suggested-id: ev-charging-plan
+  - local-name: Landscape Assessment
+    source-text: "From the audit: within or affecting a local landscape character area (Policy 30)"
+    source-url: https://www.broxtowe.gov.uk/media/tshlsx4i/02-additional-information-on-broxtowe-borough-council-local-validation-requirements.pdf
+    suggested-id: landscape-visual-impact-assessment
+
+low-confidence:
+  - id: design-and-access-statement
+    note: >-
+      Audit (wrong_trigger): the excerpt (from Checklist 01, national requirements) ends mid-sentence
+      ('works that are'); the national rules apply.
+  - id: fire-statement
+    note: >-
+      Audit (wrong_trigger): the excerpt (from Checklist 01, national requirements) is cut off
+      ('within the curtilage of'); the national rules apply.
+  - id: site-plan
+    note: "Audit (other): drawing guidance from Checklist 01 that largely mirrors the national requirements."
+  - id: section-existing
+    note: "Audit (other): drawing guidance from Checklist 01 that largely mirrors the national requirements."
+  - id: section-proposed
+    note: "Audit (other): drawing guidance from Checklist 01 that largely mirrors the national requirements."
+  - id: elevation-existing
+    note: "Audit (other): drawing guidance from Checklist 01 that largely mirrors the national requirements."
+  - id: elevation-proposed
+    note: "Audit (other): drawing guidance from Checklist 01 that largely mirrors the national requirements."

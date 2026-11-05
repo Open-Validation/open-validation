@@ -1,0 +1,107 @@
+# Corrections for Rochdale Metropolitan Borough Council, from the council's audit.
+# The audit could not read the list (Rochdale's /downloads/ path is blocked by robots.txt), so it
+# judged the workbook from Grokbot's own text. Every Full planning row was placed there by guess
+# ('INFERRED'), most excerpts are garbled table or glossary text, and the list's per-application
+# type checklists (Appendices 5, 7 and others) were not captured. This file only drops clear junk,
+# structures the one clear trigger, and keeps the council-wide drawing and file rules.
+local-authority: RCH
+
+submission-standards:
+  - item: Drawings at A3 paper size where possible
+    level: should
+  - item: All drawings on a recognised ISO 'A' paper size
+    level: must
+  - item: Each drawing has a reference/number including a revision number or letter
+    level: must
+  - item: Each drawing has a scale bar and a North point
+    level: must
+  - item: Annotations or disclaimers such as 'Not to scale' or 'Do not scale' are not accepted
+    level: must
+  - item: A summary list/schedule of drawings, with drawing title, reference, description and paper
+      size
+    level: must
+  - item: No individual file greater than 10MB; larger documents split into smaller files labelled
+      Part 1, Part 2 etc. (in the file name and within the file)
+    level: must
+  - item: No .zip, .exe, .doc or .docx files; all supporting reports in PDF format
+    level: must
+  - item: Drawings as single-layer, scaleable PDFs (ideally PDF/A)
+    level: must
+  - item: CAD files not accepted, except drawings with drainage or highway layouts (e.g. swept-path
+      analysis), which are submitted in both formats
+    level: must
+  - item: PDF orientation matches the original orientation of the drawing sheet
+    level: must
+
+drop:
+  - id: schedule-of-works
+    reason: >-
+      wrong_app_type: the excerpt is the end of a demolition checklist (Bat and Bird Surveys,
+      Demolition Method Statement) running into the Appendix 7 Works to Trees heading; it is not a
+      listed building schedule of works
+  - id: photos
+    reason: "wrong_trigger: the excerpt is the PDF-format submission rule (kept in submission-standards)"
+
+drop-unmapped:
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: the excerpt is location plan red-line / blue-line guidance"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: the fragment 'you during pre-application discussions.'"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: >-
+      wrong_trigger: the excerpt is the viability row (now viability-assessment) running into the
+      amenity-constraints row
+
+requirements:
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The application is subject to Environmental Impact Assessment.
+    source-text: Environmental Statement (Applications subject to Environmental Impact Assessment)
+    notes: "Audit (wrong_trigger): the excerpt was a checklist heading; the trigger is taken from it."
+
+  - id: lighting-assessment
+    action: replace
+    source-text: Lighting Assessment
+    source-url: https://www.rochdale.gov.uk/downloads/file/452/local-list
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): the workbook filed it under Listed building consent, but the excerpt
+      is the last line of one appendix running into the Appendix 5 (LBC) checklist heading. Which
+      application types it belongs to is not known, and no trigger is given.
+
+  - id: viability-assessment
+    action: add
+    required-if: discretionary
+    policy: Core Strategy Policy DM2
+    source-text: >-
+      Applications involving development for which planning obligations are sought and where the
+      applicant proposes that the development is unable to meet the required contributions due to
+      issues of financial viability or where an enabling case may be required to support
+      development
+    source-url: https://www.rochdale.gov.uk/downloads/file/452/local-list
+    confidence: low
+    notes: >-
+      The council's wording was found, interleaved with policy references, in the workbook's
+      arboricultural and planning obligations rows (audit wrong_trigger). There is no field for
+      'unable to meet the required contributions', so it is shown as officer discretion.
+
+low-confidence:
+  - id: arboriculturist-report
+    note: >-
+      Audit (wrong_trigger): the excerpt mixes the BS 5837 / Policy G6 tree row with the viability
+      row; no trigger could be read from it.
+  - id: transport-assessment
+    note: "Audit (wrong_trigger): the excerpt is a glossary definition with no thresholds."
+  - id: travel-plan
+    note: "Audit (wrong_trigger): the excerpt is a glossary definition with no thresholds."
+  - id: fire-statement
+    note: "Audit (wrong_app_type): a national requirement; the list's own trigger was not captured."
+  - id: "*"
+    note: >-
+      Audit (missing_requirement): the list has per-application-type indicative checklists
+      (Appendix 5 LBC, Appendix 7 Works to Trees and others) that were not captured; most types are
+      shown with no local requirements. Re-read the list when it can be fetched.

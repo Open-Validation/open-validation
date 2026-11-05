@@ -1,0 +1,438 @@
+# Corrections for Colchester City Council, from inputs/audit/colchester-city-council.json.
+# Grokbot used the superseded February 2017 list. The current list is the July 2024 Scheme of
+# Local Validation (SoLV), which the audit read. Workbook excerpts below are from the 2017 list;
+# items marked "From the audit" use the audit's paraphrase of the 2024 list.
+local-authority: COL
+
+validation-list:
+  url: >-
+    https://cbccrmdata.blob.core.windows.net/noteattachment/CBC-planning-Colchester-City-Council-Scheme-of-Local-Validation-(SoLV)-2024-Scheme%20of%20Local%20Validation_List_July%202024.pdf
+  date: 2024-07
+  date-basis: >-
+    audit: SoLV published July 2024 after consultation from 11 June to 1 July 2024 (the build
+    would otherwise read the consultation end date)
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is tree survey text, and the list has no schedule of works requirement"
+
+drop-unmapped:
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: viability text run into ventilation text; replaced by the 2024 s106 item below"
+  - local-name: Validation checklist form (completed)
+    reason: "duplicate: the ECC SuDS checklist, already covered by Drainage Strategy / SuDS"
+  - local-name: Landscape and Visual Impact Assessment
+    reason: "outdated: 2017 wording; replaced by the 2024 LVIA / Townscape Appraisal item below"
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "wrong_app_type / wrong_trigger: placed under Outline with roof plan text; replaced below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more homes in the urban area.
+        - all:
+            - site:
+                in: [rural-area]
+                description: The site is in the rural area.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 5
+                description: 5 or more homes in the rural area.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: A residential site of 0.5 hectares or more.
+    source-url: &col-2024 >-
+      https://cbccrmdata.blob.core.windows.net/noteattachment/CBC-planning-Colchester-City-Council-Scheme-of-Local-Validation-(SoLV)-2024-Scheme%20of%20Local%20Validation_List_July%202024.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was a fragment. From the audit: 10+ homes in the
+      urban area, 5+ in the rural area, or sites of 0.5 ha or more.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - condition:
+                field: trees-on-or-near-site
+                value: true
+                description: There are a number of trees on site which are proposed to be removed.
+        - discretionary
+    must-include:
+      - item: Tree Survey
+        level: must
+      - item: Tree Protection Plan
+        level: must
+      - item: Arboricultural Method Statement, if development is taking place within the root
+          protection area
+        level: must
+    confidence: low
+    notes: >-
+      The 2017 excerpt gives only part c) of the trigger (major applications where a number of
+      trees on site are proposed to be removed); the other cases are cut off and shown as officer
+      discretion. From the audit (wrong_app_type): all applications, including householder, must
+      show trees and answer question 15 of the application form.
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development would constitute EIA development.
+    source-text: would constitute EIA development.
+    source-url: https://cbccrmdata.blob.core.windows.net/noteattachment/Validation_List_2017.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt is a fragment of the EIA trigger."
+
+  - id: section-existing
+    action: update
+    required-if: &col-levels
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: >-
+          The proposal involves a change in ground levels, or is next to changing ground levels.
+    confidence: medium
+    notes: &col-levels-note >-
+      The excerpt gives the trigger. From the audit (wrong_app_type): site sections also apply to
+      householder applications.
+
+  - id: section-proposed
+    action: update
+    required-if: *col-levels
+    confidence: medium
+    notes: *col-levels-note
+
+  - id: flood-risk-assessment
+    action: update
+    must-include:
+      - item: Design of surface water management systems, including Sustainable Drainage systems (SuDS)
+        level: should
+      - item: Safe access to and from the development in areas at risk of flooding
+        level: should
+    notes: >-
+      The 2017 excerpt says what the FRA should include, not when it is needed; the national flood
+      risk rules apply.
+
+  - id: sci
+    action: replace
+    required-if: discretionary
+    source-text: Large-scale or potentially controversial applications
+    source-url: *col-2024
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the structural survey sentence."
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      ref: major-development
+    confidence: medium
+    notes: "From the audit (wrong_app_type): major applications only."
+
+  - id: travel-plan
+    action: update
+    required-if:
+      condition:
+        field: staff-count
+        operator: ">="
+        value: 50
+        description: Non-residential development with 50 or more employees.
+    must-include:
+      - item: How the reliance on the private motor car will be reduced
+        level: must
+    confidence: medium
+    notes: "From the audit (wrong_app_type): non-residential schemes of 50+ employees."
+
+  - id: viability-assessment
+    action: replace
+    required-if:
+      all:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The major development includes housing.
+    source-url: *col-2024
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Housing Viability & Delivery Statement for all major
+      housing (2024 list). The 2017 list asked for a Viability Statement for major applications
+      where no financial planning obligation is offered where one is required.
+
+  - id: roof-plan-existing
+    action: replace
+    required-if: &col-roof
+      all:
+        - application-type:
+            in: [hh, full, reserved-matters]
+        - condition:
+            field: roof-alteration
+            value: true
+            description: A roof would be created or altered by the proposed development.
+    source-text: &col-roof-text >-
+      Roof Plans Scale 1:100 or 1:200 with either written dimensions or a scale bar … Any
+      application where a roof would be created or altered by the proposed development (except
+      outline applications) Showing the shape of the roof, any roof features and details of the
+      roofing materials and any features such as chimney positions or windows.
+    source-url: https://cbccrmdata.blob.core.windows.net/noteattachment/Validation_List_2017.pdf
+    must-include: &col-roof-items
+      - item: Scale 1:100 or 1:200, with written dimensions or a scale bar
+        level: must
+      - item: The shape of the roof and any roof features
+        level: must
+      - item: Details of the roofing materials and features such as chimney positions or windows
+        level: must
+    confidence: low
+    notes: &col-roof-note >-
+      Audit (wrong_app_type): the workbook placed this under Outline, but outline applications are
+      excluded ("Where a roof is created or altered (excludes outline)"). The rule can't say "not
+      outline", so it lists householder, full and reserved matters.
+
+  - id: roof-plan-proposed
+    action: replace
+    required-if: *col-roof
+    source-text: *col-roof-text
+    source-url: https://cbccrmdata.blob.core.windows.net/noteattachment/Validation_List_2017.pdf
+    must-include: *col-roof-items
+    confidence: low
+    notes: *col-roof-note
+
+  - id: bng-metric
+    action: add
+    required-if: &col-bng
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the biodiversity gain condition.
+    source-url: *col-2024
+    confidence: medium
+    notes: &col-bng-note >-
+      From the audit (missing_requirement): a Biodiversity Net Gain package (BNG statement, metric,
+      draft BNG plan, baseline, exemption statement) for all developments. Exempt development needs
+      an exemption statement instead.
+
+  - id: habitat-baseline
+    action: add
+    required-if: *col-bng
+    source-url: *col-2024
+    confidence: medium
+    notes: *col-bng-note
+
+  - id: proposed-habitat-plan
+    action: add
+    required-if: *col-bng
+    source-url: *col-2024
+    confidence: medium
+    notes: *col-bng-note
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: The site is in an Air Quality Management Area.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more homes in the Air Quality Action Plan area.
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 500
+            description: 500 square metres or more in the Air Quality Action Plan area.
+    source-url: *col-2024
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): 'AQMA; 10+ homes or 500 sqm in the AQAP area'. The
+      rules have no field for the Air Quality Action Plan area, so the size thresholds are shown
+      without it; check the list.
+
+  - id: archaeological-assessment
+    action: add
+    source-url: *col-2024
+    confidence: low
+    notes: "From the audit (missing_requirement): listed in the 2024 list; the audit gives no trigger."
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+              scheduled-monument, park-and-garden]
+            description: The proposal affects a heritage asset.
+        - discretionary
+    source-url: *col-2024
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement, wrong_app_type): heritage assets, listed building consent
+      and pre-1900 structures (shown as officer discretion), including householder applications.
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      ref: major-development
+    source-url: *col-2024
+    confidence: medium
+    notes: "From the audit (missing_requirement, wrong_app_type): major applications."
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      condition:
+        field: floodlighting
+        value: true
+        description: The proposal includes floodlighting.
+    source-url: *col-2024
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): non-householder applications with floodlighting. The rule
+      can't exclude householder applications.
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: biomass-or-chp
+            value: true
+            description: The proposal includes biomass or combined heat and power.
+        - discretionary
+    source-url: *col-2024
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Renewable Energy Statement for air source heat pumps,
+      solar, biomass, CHP and battery storage (heat pumps, solar and battery storage are shown as
+      officer discretion).
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      condition:
+        field: town-centre-use-floorspace
+        operator: ">"
+        value: 2500
+        description: More than 2,500 square metres of retail or leisure floorspace.
+    source-url: *col-2024
+    confidence: medium
+    notes: "From the audit (missing_requirement): Retail/Leisure Impact Assessment over 2,500 sqm."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [pa-ecomms-network]
+        - condition:
+            field: telecommunications-development
+            value: true
+            description: The proposal is for telecommunications development.
+    source-url: *col-2024
+    confidence: medium
+    notes: "From the audit (missing_requirement, wrong_app_type): telecoms prior approvals and applications."
+
+  - id: design-and-access-statement
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - all:
+            - site:
+                in: [conservation-area, world-heritage-site]
+                description: The site is in a designated area.
+            - condition:
+                field: floorspace
+                operator: ">="
+                value: 100
+                description: The proposal creates 100 square metres or more of floorspace.
+    source-text: all Listed Building Consent applications
+    source-url: *col-2024
+    confidence: medium
+    notes: >-
+      From the audit (wrong_app_type): required for all listed building consent applications and,
+      including householder, in a designated area for 100 sqm or more.
+
+unmapped:
+  - local-name: Tree Canopy Cover Assessment
+    source-text: "From the audit: all major applications (10% canopy cover increase)"
+    source-url: &col-url-u >-
+      https://cbccrmdata.blob.core.windows.net/noteattachment/CBC-planning-Colchester-City-Council-Scheme-of-Local-Validation-(SoLV)-2024-Scheme%20of%20Local%20Validation_List_July%202024.pdf
+    suggested-id: tree-canopy-cover-assessment
+  - local-name: Climate Change Emergency Checklist
+    source-text: "From the audit: all major applications"
+    source-url: *col-url-u
+    suggested-id: sustainability-statement
+  - local-name: Landscape and Visual Impact Assessment / Townscape Appraisal
+    source-text: "From the audit: all major applications"
+    source-url: *col-url-u
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: SuDS water quantity and quality proforma
+    source-text: "From the audit: major applications with SuDS"
+    source-url: *col-url-u
+    suggested-id: drainage-strategy
+  - local-name: Part M4(3) accessibility information
+    source-text: "From the audit: residential applications"
+    source-url: *col-url-u
+    suggested-id: accessibility-statement
+  - local-name: Draft s106 agreement or Unilateral Undertaking
+    source-text: "From the audit: major applications"
+    source-url: *col-url-u
+    suggested-id: heads-of-terms
+  - local-name: Agricultural Appraisal
+    source-text: "From the audit: agricultural workers' dwellings or removal of an agricultural
+      occupancy condition"
+    source-url: *col-url-u
+    suggested-id: agricultural-appraisal
+  - local-name: Agricultural Diversification Plan
+    source-text: "From the audit: listed in the 2024 list; no trigger given"
+    source-url: *col-url-u
+    suggested-id: agricultural-appraisal
+  - local-name: Amendments Statement
+    source-text: "variations, or condition removal (s.73)"
+    source-url: *col-url-u
+    suggested-id: amendments-statement
+  - local-name: Community Facilities Justification
+    source-text: "From the audit: loss of a community facility"
+    source-url: *col-url-u
+    suggested-id: community-facilities-statement
+  - local-name: Health Impact Assessment
+    source-text: "From the audit: 50+ dwellings or more than 1,000 sqm non-residential floorspace"
+    source-url: *col-url-u
+    suggested-id: health-impact-assessment
+  - local-name: Parking and Access Arrangements
+    source-text: "From the audit: listed in both the 2017 and 2024 lists; no trigger given (applies to
+      householder applications too)"
+    source-url: *col-url-u
+    suggested-id: parking-plan
+  - local-name: Streetscenes
+    source-text: "From the audit: 2+ dwellings on a street frontage, in a conservation area, or next to a
+      listed building"
+    source-url: *col-url-u
+    suggested-id: street-scene-elevations
+
+low-confidence:
+  - id: floor-plan-existing
+    note: "The 2017 excerpt is about cross-referencing the structural survey, not when floor plans are needed."
+  - id: floor-plan-proposed
+    note: "The 2017 excerpt is about cross-referencing the structural survey, not when floor plans are needed."
+  - id: elevation-existing
+    note: "The 2017 excerpt is about cross-referencing the structural survey, not when elevations are needed."
+  - id: elevation-proposed
+    note: "The 2017 excerpt is about cross-referencing the structural survey, not when elevations are needed."

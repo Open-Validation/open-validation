@@ -1,0 +1,164 @@
+# Corrections for Derbyshire Dales District Council, from inputs/audit/derbyshire-dales-district-council.json.
+# The audit couldn't read the checklist PDF (robots) and the council's checklist page now errors,
+# so the contents weren't checked (contents_checked: false) and every file stays low confidence.
+# The council's 'Documents and Forms' page no longer links the checklist, so it may have moved
+# or been withdrawn (audit issue 1). Grokbot filed most items under Full planning (INFERRED); the
+# list applies them by development type, so the clear triggers below are given without types.
+local-authority: DEB
+
+submission-standards:
+  - item: Plans drawn to a metric scale (e.g. 1:100 or 1:50 for elevations and floor plans), with a
+      scale bar or dimensions for reference
+    level: must
+  - item: Plans submitted at A4 or A3 paper size
+    level: must
+  - item: Site plans typically at 1:200 or 1:500, with a north arrow
+    level: should
+
+drop:
+  - id: environmental-statement
+    reason: "not_a_requirement: general introductory text citing the EIA Regulations 2011, not a list entry"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: introductory advice on pre-application discussions"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "duplicate: the same jumbled excerpt as the Ecological Survey row (biodiversity-survey-report)"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: Residential development of 10 dwellings or more.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: Residential development on a site of 0.5 hectares or more.
+    source-text: >-
+      and guidance Affordable Housing statement Residential development The total number of of 10
+      dwellings or more, or residential units on sites of 0.5 hectares or proposed. more.
+    source-url: https://www.derbyshiredales.gov.uk/documents/validation-checklist-pdf-420kb/viewdocument/3110
+    confidence: low
+    notes: "Audit (wrong_trigger): the excerpt's columns are interleaved, but the trigger is readable."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Development within 15m of the stem of a tree (stem diameter 75mm or more at 1.5m)
+          on or adjacent to the site.
+    source-text: >-
+      When required Tree Survey All development within 15m of the stem of a tree with a stem
+      diameter (d.b.h) of 75mm or above measured at 1.5m above ground level on or adjacent to the
+      application site.
+    source-url: https://www.derbyshiredales.gov.uk/documents/validation-checklist-pdf-420kb/viewdocument/3110
+    confidence: low
+    notes: "Audit (wrong_app_type): applies to all development, not Full planning only."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      site:
+        in: [special-protection-area, special-area-of-conservation,
+          site-of-special-scientific-interest, local-wildlife-site]
+        description: >-
+          Development within, or close to, an SPA, SAC, Ramsar site or SSSI, or a site locally
+          identified as having ecological or geological importance.
+    notes: >-
+      Audit (wrong_trigger): the excerpt's columns are merged; the designations above are read from
+      it. The rest of the Biodiversity Survey and Report entry (and Appendix 1) was not captured.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: Development in Flood Zone 1 on a site over 1 hectare.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: Development in Flood Zone 1 on a site over 1 hectare.
+        - discretionary
+    source-text: >-
+      Flood Risk Assessment All forms of development Householder development and within flood zone 3
+      extensions to a nonAll forms of development domestic building within flood zone 2 where the
+      footprint created by the Development in flood development does not zone 1 that is any of the
+      exceed 250sqm: following: over 1 hectare in an area identified as being at increased flood
+      risk in the future would introduce a more vulnerable use on land subject to ot…
+    source-url: https://www.derbyshiredales.gov.uk/documents/validation-checklist-pdf-420kb/viewdocument/3110
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the excerpt's columns are interleaved. Read as: all development in
+      Flood Zone 3; householder and small non-domestic extensions (and other development) in Flood
+      Zone 2; in Flood Zone 1, development over 1 hectare, in an area at increased future flood
+      risk, or introducing a more vulnerable use on land at other flood risk (cut off; shown as
+      officer discretion). Applies to householder and other types.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting]
+        description: >-
+          Work to a listed building or within its curtilage, or work (other than householder
+          applications) that will affect the setting of a listed building.
+    source-text: >-
+      When required Heritage Statement Any work to a Listed Building, within the curtilage of a
+      Listed Building, or work (other than householder applications) which will affect the setting
+      of a Listed Building.
+    source-url: https://www.derbyshiredales.gov.uk/documents/validation-checklist-pdf-420kb/viewdocument/3110
+    confidence: low
+    notes: >-
+      The setting branch excludes householder applications, which the rule can't express; check
+      the application type for setting-only cases.
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: The site is known to be contaminated, or contamination is likely because of its
+          existing or previous use.
+    notes: "The excerpt's columns are interleaved, but the trigger is readable."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: floodlighting
+        value: true
+        description: Floodlighting, such as for sports facilities, large areas of open storage, or
+          industrial/commercial land.
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: Development of 10 or more dwellings.
+    notes: >-
+      Open Space Assessment. The excerpt also gives a 'more than 1000 sq m Gross Internal Floor Area
+      of …' branch, but it is cut off before saying what kind of floorspace, so it isn't encoded.
+
+low-confidence:
+  - id: "*"
+    note: >-
+      Audit (other): the council's own pages no longer link this checklist; it may have moved or
+      been withdrawn. Check it is still the current list.

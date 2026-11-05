@@ -1,0 +1,140 @@
+# Corrections for Cheshire West and Chester Council, from the council's audit.
+# Grokbot marked the council's 'What to submit with your application' page unreadable and captured
+# nothing, but the page loads. Its 'Minimum local supporting information' section is a table by
+# kind of development (change of use, new-build dwellings, all other development, householder).
+# The page says local supporting information is not automatically required for householder
+# development, prior approval, listed building consent or lawful development certificates, and
+# defines major development as 10+ dwellings, outline with unknown units on 0.5 ha+, 1,000 sqm+ new
+# floorspace, or a site of 1 ha+ where floorspace is unknown. The page shows no adoption date. The
+# quoted wording below is from the audit's evidence; the rest is the audit's paraphrase.
+local-authority: CHW
+
+requirements:
+  - id: sustainability-statement
+    action: add
+    required-if:
+      any:
+        - all:
+            - condition:
+                field: new-build
+                value: true
+                description: The proposal includes new-build dwellings.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: The proposal creates one or more dwellings.
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 40
+            description: Other development creating more than 40 square metres of new-build floorspace.
+    source-url:
+      https://www.cheshirewestandchester.gov.uk/residents/planning-and-building-control/planning/apply-for-planning-permission/what-to-submit-with-your-application
+    source-text: >-
+      New-build dwellings: Sustainable Housing Statement and Sustainable Construction Checklist … All
+      other development: Sustainable Construction Checklist if creating more than 40sqm new-build
+      floorspace … BREEAM assessment for major development*
+    must-include:
+      - item: Sustainable Housing Statement
+        level: must
+        required-if:
+          condition:
+            field: new-build
+            value: true
+            description: The proposal includes new-build dwellings (C3).
+      - item: Sustainable Construction Checklist
+        level: must
+      - item: BREEAM assessment
+        level: must
+        required-if:
+          ref: major-development
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement): sustainable construction information. Householder development
+      needs neither the statement nor the checklist. The BREEAM assessment applies to major
+      development in the 'all other development' column.
+
+  - id: bng-metric
+    action: add
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the statutory biodiversity gain condition.
+    policy: Local Plan (Part Two) Policy DM44
+    source-url:
+      https://www.cheshirewestandchester.gov.uk/residents/planning-and-building-control/planning/apply-for-planning-permission/what-to-submit-with-your-application
+    source-text: Refer to DEFRA guidance and Local Plan (Part Two) Policy DM44
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement): biodiversity net gain information for change of use, new-build
+      dwellings and all other development (not householder).
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      condition:
+        field: food-or-drink-use
+        value: true
+        description: >-
+          The proposal is a hot food takeaway, a mixed-use scheme that includes one, or a new use or
+          variation of conditions for one.
+    policy: Local Plan Part Two DM 29
+    source-url:
+      https://planningpolicy.cheshirewestandchester.gov.uk/guidance-and-advice-notes/hot-food-takeaway-requirements
+    must-include:
+      - item: A BS4142 odour and noise assessment
+        level: must
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): the hot food takeaway guidance note (July 2025) asks for
+      a BS4142 odour and noise assessment. The other takeaway items are under unmapped and
+      waste-management-plan.
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      condition:
+        field: food-or-drink-use
+        value: true
+        description: >-
+          The proposal is a hot food takeaway, a mixed-use scheme that includes one, or a new use or
+          variation of conditions for one.
+    policy: Local Plan Part Two DM 29
+    source-url:
+      https://planningpolicy.cheshirewestandchester.gov.uk/guidance-and-advice-notes/hot-food-takeaway-requirements
+    must-include:
+      - item: A site plan showing waste storage
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): the hot food takeaway guidance note (July 2025) asks for a
+      site plan of waste storage."
+
+unmapped:
+  - local-name: Health impact information
+    source-text: >-
+      Health impact: Change of use 'Required where 10 or more dwellings are to be provided'; New-build
+      dwellings / All other development 'Required for major development*'; Householder 'Not required'
+    source-url:
+      https://www.cheshirewestandchester.gov.uk/residents/planning-and-building-control/planning/apply-for-planning-permission/what-to-submit-with-your-application
+    suggested-id: health-impact-assessment
+  - local-name: Hot food takeaway location map and health statement
+    source-text: "From the audit: a location map of nearby takeaways and a statement on whether the ward
+      has high childhood obesity and high multiple deprivation (400m secondary school exclusion zone in
+      high childhood-obesity wards), for hot food takeaways (Local Plan Part Two DM 29)"
+    source-url:
+      https://planningpolicy.cheshirewestandchester.gov.uk/guidance-and-advice-notes/hot-food-takeaway-requirements
+    suggested-id: hot-food-takeaway-statement
+  - local-name: Rural worker dwellings advice note
+    source-text: "From the audit: rural worker dwellings; the detailed triggers are in the linked advice
+      note"
+    source-url:
+      https://www.cheshirewestandchester.gov.uk/residents/planning-and-building-control/planning/apply-for-planning-permission/what-to-submit-with-your-application
+    suggested-id: rural-workers-dwelling-appraisal
+  - local-name: Minerals safeguarding guidance note
+    source-text: "From the audit: sites in mineral safeguarding areas; the detailed triggers are in the
+      linked guidance note"
+    source-url:
+      https://www.cheshirewestandchester.gov.uk/residents/planning-and-building-control/planning/apply-for-planning-permission/what-to-submit-with-your-application
+    suggested-id: minerals-assessment

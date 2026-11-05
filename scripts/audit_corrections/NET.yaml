@@ -1,0 +1,685 @@
+# Corrections for Newcastle City Council, from inputs/audit/ (Newcastle audit).
+# Newcastle uses the joint Tyneside Validation Checklist 2024, shared with Gateshead (GAT),
+# North Tyneside (NTY) and South Tyneside (STY). Keep the four files consistent: they differ
+# only where the list itself names one council (affordable housing, HIA, space standards, CIL,
+# contamination screening). Notes 25-39 were checked only by heading (fetch budget ran out).
+# Grokbot also mixed in the superseded 2019 Tyne and Wear list; those rows are dropped.
+local-authority: NET
+
+validation-list:
+  url:
+    https://www.newcastle.gov.uk/sites/default/files/planning/Tyneside%20Validation%20Checklist%20Jan%2025%20-Final%20with%20bookmarks.pdf
+  date: 2024
+  date-basis: "audit: document and page titled 'Tyneside Validation Checklist 2024'; only the file
+    name says 'Jan 25' (the workbook's 2025-01-01 came from PDF metadata). No adoption date in the
+    text."
+
+submission-standards:
+  - item: All plans and drawings numbered or labelled; amended plans carry a revision number and date
+    level: must
+  - item: Location plan at an identified standard metric scale (1:1250 or 1:2500), showing the
+      direction north
+    level: must
+
+drop:
+  - id: site-plan
+    sheets: [Full planning]
+    reason: "outdated_link: the excerpt is the 2019 list's national-requirements contents list"
+  - id: heritage-statement
+    sheets: [Full planning]
+    reason: "outdated_link: 2019 list ('see requirement 16'); replaced below"
+  - id: travel-plan
+    sheets: [Full planning]
+    reason: "outdated_link: the excerpt comes from the superseded 2019 list"
+  - id: construction-management-plan
+    reason: "wrong_trigger: the excerpt is the SuDS Construction Method Statement text (see the drainage
+      strategy in unmapped); the list gives no CMP trigger"
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is the SuDS Construction Method Statement text, not a listed
+      building schedule of works"
+
+drop-unmapped:
+  - local-name: Minerals / Waste specific statements (county matters)
+    reason: "outdated_link / wrong_app_type / wrong_trigger: the Householder row is the 2019 coal-mining
+      text; the Full row is a fragment. Re-added below with the audit's trigger"
+  - local-name: Cycle parking details
+    reason: "outdated_link: from the superseded 2019 list"
+  - local-name: Employment / Economic Statement
+    reason: "not_a_requirement: 'would not be required for validation purposes'"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: table-of-contents text"
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_trigger: floodlighting text plus data-protection boilerplate (see lighting-assessment)"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: BNG-specific S106 text, not a heads-of-terms requirement"
+  - local-name: Odour / Dust / Vibration assessment
+    reason: "wrong_trigger: carries the Acoustic and Vibration Assessment trigger (now in noise-assessment)"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: fragment; re-added below with the audit's trigger"
+  - local-name: Tall buildings / Wind microclimate assessment
+    reason: "wrong_trigger: fragment ('near other tall buildings.'); re-added below"
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "wrong_trigger: fragment; re-added below with the audit's triggers"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: document-title wording; re-added below with the trigger"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_trigger: cut-off fragment; re-added below with the full sentence"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: the excerpt quotes Gateshead's wording; re-added with Newcastle's"
+  - local-name: Design Code / Masterplan / Parameter plans
+    reason: "wrong_app_type: landscape strategy/masterplan text filed under prior approval (now in
+      landscaping-plan)"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: a fragment of the site plan contents, not a separate item"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "wrong_trigger: document-title text; re-added below with Newcastle's M4(2) rule"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    source-text: >-
+      The title must state the document is/includes an affordable housing statement The document can
+      be included within the Design and Access or Planning Statement Guidance This statement should
+      clearly identify the following points: Is affordable housing to be provided? If not, then what is
+      the justification? (i.e. financial viability)
+    source-url:
+      https://www.newcastle.gov.uk/sites/default/files/planning/Tyneside%20Validation%20Checklist%20Jan%2025%20-Final%20with%20bookmarks.pdf
+    must-include:
+      - item: The title states that the document is or includes an affordable housing statement
+        level: must
+      - item: Whether affordable housing is to be provided and, if not, the justification (e.g.
+          financial viability)
+        level: should
+      - item: Whether it will be provided on site, off site or by a financial contribution
+        level: should
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the excerpt gives what to include but no unit threshold, and the audit
+      doesn't give Newcastle's (Note 12). The third must-include item is from the same joint-list text
+      as extracted for North Tyneside.
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [scheduled-monument]
+            description: The proposal is on or near a Scheduled Monument.
+        - site:
+            in: [archaeological-priority-area]
+            description: The site is in the Hadrian's Wall corridor or a Roman fort vicus area.
+        - all:
+            - condition:
+                field: greenfield-site
+                value: true
+                description: The site is greenfield.
+            - any:
+                - condition:
+                    field: site-area-residential
+                    operator: ">="
+                    value: 1
+                    description: The site is 1 hectare or more.
+                - condition:
+                    field: site-area-non-residential
+                    operator: ">="
+                    value: 1
+                    description: The site is 1 hectare or more.
+        - discretionary
+    source-text: >-
+      Archaeological Assessments When is this required? Archaeological desk based assessment
+      Proposals on or near Scheduled Monuments; …
+    source-url:
+      https://www.newcastle.gov.uk/sites/default/files/planning/Tyneside%20Validation%20Checklist%20Jan%2025%20-Final%20with%20bookmarks.pdf
+    confidence: medium
+    notes: >-
+      From the Gateshead and South Tyneside audits of the joint list (wrong_trigger): near Scheduled
+      Monuments, the Hadrian's Wall corridor, Roman fort vicus areas and greenfield sites of 1ha+
+      (Note 14); the list has further cases, shown as
+      officer discretion. The source-text is the joint list's wording as extracted for North Tyneside.
+      The South Tyneside audit adds archaeological field evaluation for new building work in these
+      areas or on sites on the Historic Environment Record.
+
+  - id: arboriculturist-report
+    action: update
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the excerpt is a cut-off fragment ('see section 35'); the audit gives no
+      trigger. Re-read the list.
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: Protected species such as bats may be affected (for householder works,
+              unless the bat-survey exemption applies).
+        - discretionary
+    source-text: >-
+      In the case of householder applications, a bat survey will not be required to validate the
+      application if: The proposal is for extensions or modifications at ground floor level only of a
+      building of two or more storeys; and There will not be any disturbance to the roof structure
+      (including the eaves) of the dwelling and/or any domestic outbuildings (e.g. garages).
+    source-url:
+      https://www.newcastle.gov.uk/sites/default/files/planning/Tyneside%20Validation%20Checklist%20Jan%2025%20-Final%20with%20bookmarks.pdf
+    confidence: low
+    notes: >-
+      The Full planning row came from the superseded 2019 list. From the Gateshead audit of the joint
+      list (missing_requirement): an Ecological Impact Assessment is needed for non-householder schemes affecting semi-natural
+      habitat (Note 16), shown as officer discretion. The second half of the householder exemption is
+      the joint list's wording as extracted for North Tyneside.
+
+  - id: cil-form
+    action: update
+    confidence: low
+    notes: >-
+      The excerpt is introductory text: 'CIL liable development in Newcastle, North Tyneside and
+      Gateshead will be required to provide further information' (Note 39). No threshold is given.
+
+  - id: daylight-sunlight-assessment
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      Sunlight/Daylight/Wind Study/Microclimate/Lighting Assessment When is this required? When a
+      proposed development is in close proximity to the windows of habitable rooms of an existing
+      residential development and is likely to significantly affect the sunlight and/or daylight levels
+      to those windows;
+    source-url:
+      https://www.newcastle.gov.uk/sites/default/files/planning/Tyneside%20Validation%20Checklist%20Jan%2025%20-Final%20with%20bookmarks.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook put this trigger on the Lighting Assessment row and gave
+      this row a list of metrics. No field captures 'close to windows of habitable rooms', so it is
+      shown as officer discretion.
+
+  - id: design-and-access-statement
+    action: update
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the excerpt is a fragment ('Design and Access Statement (if required)
+      8.'). The national rules apply; the Gateshead audit adds that Note 7 also lists it for listed
+      building consent.
+
+  - id: elevation-existing
+    action: replace
+    source-text: >-
+      (a) Existing and Proposed Elevations The drawings of the elevations shall be at a scale of 1:50
+      or 1:100 (unless an alternative scale is required and agreed) and all external sides of the
+      proposal must be shown, along with the proposed building materials and the style, materials and
+      finish of windows and doors where possible.
+    source-url:
+      https://www.newcastle.gov.uk/sites/default/files/planning/Tyneside%20Validation%20Checklist%20Jan%2025%20-Final%20with%20bookmarks.pdf
+    must-include:
+      - item: Scale of 1:50 or 1:100, unless another scale is required and agreed
+        level: must
+      - item: All external sides of the proposal
+        level: must
+    confidence: low
+    notes: >-
+      The workbook gave the floor plans/sections trigger, which doesn't mention elevations. The
+      drawing standards above come from the council tab; the list's trigger for elevations was not
+      extracted.
+
+  - id: elevation-proposed
+    action: replace
+    source-text: >-
+      (a) Existing and Proposed Elevations The drawings of the elevations shall be at a scale of 1:50
+      or 1:100 (unless an alternative scale is required and agreed) and all external sides of the
+      proposal must be shown, along with the proposed building materials and the style, materials and
+      finish of windows and doors where possible.
+    source-url:
+      https://www.newcastle.gov.uk/sites/default/files/planning/Tyneside%20Validation%20Checklist%20Jan%2025%20-Final%20with%20bookmarks.pdf
+    must-include:
+      - item: Scale of 1:50 or 1:100, unless another scale is required and agreed
+        level: must
+      - item: All external sides of the proposal
+        level: must
+      - item: Proposed building materials, and the style, materials and finish of windows and doors
+        level: should
+    confidence: low
+    notes: >-
+      The workbook gave the floor plans/sections trigger, which doesn't mention elevations. The
+      drawing standards above come from the council tab; the list's trigger for elevations was not
+      extracted.
+
+  - id: fire-statement
+    action: update
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the excerpt is only the guidance reference. A Fire Statement is needed
+      for schemes involving relevant high-rise residential buildings (national rules).
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - site:
+                in: [critical-drainage-area]
+                description: The site is in a critical drainage area identified in the strategic
+                  flood risk assessment.
+            - any:
+                - condition:
+                    field: site-area-residential
+                    operator: ">"
+                    value: 0.5
+                    description: The site is more than 0.5 hectare.
+                - condition:
+                    field: site-area-non-residential
+                    operator: ">"
+                    value: 0.5
+                    description: The site is more than 0.5 hectare.
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3 (including householder and other minor
+              development and change of use).
+    source-text: >-
+      A Flood Risk Assessment (FRA) will be required for all planning applications for: Development on
+      sites of more than 0.5 hectare within a local authority's own identified critical drainage area
+      (as identified within the strategic flood risk assessment) Development in Flood Zones 2 and/or 3
+      including householder and other minor development and change of use; …
+    source-url:
+      https://www.newcastle.gov.uk/sites/default/files/planning/Tyneside%20Validation%20Checklist%20Jan%2025%20-Final%20with%20bookmarks.pdf
+    confidence: medium
+    notes: >-
+      The workbook's Householder and Full rows give this trigger; the prior approval row is dropped
+      (the 'change of use' wording refers to planning applications). The Gateshead audit quotes Note
+      17: 'A simple FRA is needed for householder extensions in Flood Zones 2 and 3'. The list goes
+      on to further cases not extracted.
+
+  - id: floor-plan-existing
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: >-
+      'Required for applications where this would be expected to add to the understanding of the
+      proposal and/or where floor plans … are materially affected by the proposal'.
+
+  - id: floor-plan-proposed
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: >-
+      'Required for applications where this would be expected to add to the understanding of the
+      proposal and/or where floor plans … are materially affected by the proposal'.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, demolition-con-area]
+        - site:
+            in: [conservation-area]
+            description: The proposal is in or affects a conservation area.
+        - site:
+            in: [listed-building, listed-building-setting, locally-listed-building,
+              scheduled-monument, park-and-garden]
+            description: The proposal affects a designated or non-designated heritage asset.
+    source-text: >-
+      Heritage Statement When is this required? A Heritage Statement is required for: Listed Building
+      Consent applications; … Other applications in conservation areas, including demolition
+    source-url:
+      https://www.newcastle.gov.uk/sites/default/files/planning/Tyneside%20Validation%20Checklist%20Jan%2025%20-Final%20with%20bookmarks.pdf
+    must-include:
+      - item: For heritage assets on the Heritage at Risk Register, how the asset will be brought into
+          repair and, where possible, reuse
+        level: must
+        source-text: "Applications which affect heritage assets included on the Heritage at Risk Register
+          will be required to demonstrate how they will bring that heritage asset into repair, and
+          where possible, reuse."
+    confidence: medium
+    notes: >-
+      From the audit (wrong_trigger, wrong_app_type): Note 19 covers listed building consent, major
+      applications in or affecting conservation areas, demolition in conservation areas and any
+      application affecting a heritage asset. 'Other applications in conservation areas, including
+      demolition' is quoted by the Gateshead audit. The Full planning row came from the 2019 list. The Heritage
+      at Risk sentence was in the workbook's photographs row.
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: New development with a sensitive end use.
+        - site:
+            in: [contaminated-land]
+            description: The site is on the council's contaminated land register.
+        - all:
+            - condition:
+                field: dwelling-count
+                operator: "=="
+                value: 1
+                description: The application is for a single dwelling.
+            - condition:
+                field: greenfield-site
+                value: true
+                description: The site is land identified as previously undeveloped.
+    source-text: >-
+      The title must state the document is/includes a Phase 1 Desktop Investigation and whether a
+      Phase 2 Site Investigation and Ground Gas Risk Assessment Report is included An executive summary
+      setting out the findings of the Investigations Within Gateshead, Newcastle and South Tyneside, in
+      applications for single dwellings on land identified as previously undeveloped land, a simple
+      screening assessment is required.
+    source-url:
+      https://www.newcastle.gov.uk/sites/default/files/planning/Tyneside%20Validation%20Checklist%20Jan%2025%20-Final%20with%20bookmarks.pdf
+    must-include:
+      - item: The title states that the document is or includes a Phase 1 Desktop Investigation, and
+          whether a Phase 2 Site Investigation and Ground Gas Risk Assessment Report is included
+        level: must
+      - item: An executive summary setting out the findings of the investigations
+        level: must
+    confidence: medium
+    notes: >-
+      From the audit (wrong_trigger): Note 21 applies to 'All new development with a sensitive end
+      use' and land on the contaminated land register; for a single dwelling on previously undeveloped
+      land in Newcastle a simple screening assessment is enough.
+
+  - id: landscaping-plan
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-text: >-
+      All major planning applications … other than wholly change of use/conversion applications. …
+      Planning applications (except those for the change of use or alteration to an existing building)
+    source-url:
+      https://www.newcastle.gov.uk/sites/default/files/planning/Tyneside%20Validation%20Checklist%20Jan%2025%20-Final%20with%20bookmarks.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook filed this under prior approval, which the list excludes.
+      Note 22 (landscape strategy and site-wide landscape masterplan) covers major applications other
+      than wholly change of use/conversion; Note 23 (landscaping details) covers planning
+      applications except change of use or alterations to an existing building, where landscaping is
+      significant (shown as officer discretion). The rule can't express the change-of-use exclusion.
+
+  - id: lighting-assessment
+    action: replace
+    source-text: >-
+      hours of illumination, light levels, column design, specification and colour, and the need for
+      horizontal cut-off in accordance with Institute of Lighting Engineers guidance
+    source-url:
+      https://www.newcastle.gov.uk/sites/default/files/planning/Tyneside%20Validation%20Checklist%20Jan%2025%20-Final%20with%20bookmarks.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's Lighting row carried the daylight/sunlight trigger (now in
+      daylight-sunlight-assessment). The floodlighting text above was on the advertisement row; the
+      list's lighting trigger was not extracted.
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The development may create additional noise (including Class B2 uses).
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: The development would be sensitive to the prevailing acoustic environment.
+        - condition:
+            field: plant-equipment
+            value: true
+            description: New or replacement industrial plant or machinery is proposed.
+        - discretionary
+    source-text: >-
+      Acoustic and Vibration Assessment When is this required? Applications where development may
+      create additional noise, or would be sensitive to the prevailing acoustic environment (including
+      any anticipated changes to that environment from activities that are permitted but not yet
+      commenced) including involving: development within Classes B2, and/or where new or replacement
+      industrial plant/machinery is proposed that have the potential to result in increased noise
+      levels outside of the application …
+    source-url:
+      https://www.newcastle.gov.uk/sites/default/files/planning/Tyneside%20Validation%20Checklist%20Jan%2025%20-Final%20with%20bookmarks.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook swapped this with the odour row; the noise row carried
+      kitchen-extraction text. The South Tyneside audit of the joint list adds a vibration survey for
+      development next to rail or Metro lines and an acoustic trigger for air source heat pumps.
+
+  - id: planning-statement
+    action: replace
+    source-url:
+      https://www.newcastle.gov.uk/sites/default/files/planning/Tyneside%20Validation%20Checklist%20Jan%2025%20-Final%20with%20bookmarks.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was the affordable housing questions. The list
+      has a Planning Statement, but the audit gives no trigger.
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      site:
+        in: [open-space]
+        description: Development on existing open space, sports and recreational buildings and land,
+          including playing fields.
+    confidence: medium
+    notes: "Open Space Assessment: 'All planning applications for development on existing open space,
+      sports and recreational buildings and land, including playing fields.'"
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: roof-alteration
+            value: true
+            description: The proposal alters an existing roof.
+        - discretionary
+    confidence: medium
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: roof-alteration
+            value: true
+            description: The proposal alters an existing roof.
+        - discretionary
+    confidence: medium
+
+  - id: sci
+    action: update
+    required-if:
+      ref: major-development
+    confidence: medium
+
+  - id: section-existing
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: >-
+      'Site Sections and Site Levels are required for applications where this would be expected to
+      add to the understanding of the proposal and/or where … site sections and site levels
+      respectively are materially affected by the proposal'.
+
+  - id: section-proposed
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: >-
+      'Site Sections and Site Levels are required for applications where this would be expected to
+      add to the understanding of the proposal and/or where … site sections and site levels
+      respectively are materially affected by the proposal'.
+
+  - id: site-plan
+    action: replace
+    required-if:
+      condition:
+        field: external-alterations
+        value: true
+        description: The proposal includes extensions or external ground works (not change of use
+          only, or where no external building works are proposed).
+    source-text: >-
+      Site Plan (Existing and Proposed) All planning applications that include extensions or external
+      ground works (i.e. excluding applications for change of use only or where no external building
+      works are proposed) shall include existing and proposed site plans at a standard metric scale
+      (1:100 or 1:200), unless otherwise requested and agreed with the Local Planning Authority.
+    source-url:
+      https://www.newcastle.gov.uk/sites/default/files/planning/Tyneside%20Validation%20Checklist%20Jan%2025%20-Final%20with%20bookmarks.pdf
+    must-include:
+      - item: Both existing and proposed site plans
+        level: must
+      - item: A standard metric scale (1:100 or 1:200), unless otherwise agreed
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, outdated_link): the workbook filed this under prior approval, which the
+      list excludes, and its Full planning row was the 2019 contents list.
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, reserved-matters]
+        - ref: major-development
+    confidence: medium
+    notes: >-
+      'Major full planning applications and major reserved matter applications.' The audit notes
+      the workbook left reserved matters out.
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Mast and antenna development by mobile phone network operators.
+    confidence: medium
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: A main town centre use proposed outside an allocated centre.
+    confidence: medium
+    notes: "The excerpt is the sequential assessment trigger: 'A sequential assessment will be required
+      for any main town centre uses which are proposed outside of an allocated centre.'"
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    must-include:
+      - item: The title states that the document is or includes a Viability Assessment
+        level: must
+      - item: Enough information for an objective review of the scheme, having regard to the checklist
+          at Appendix C of the RICS guidance note
+        level: should
+    confidence: medium
+    notes: >-
+      'Applications where policy-compliant development is not being proposed for viability reasons'.
+      The second item is the joint list's wording as extracted for North Tyneside.
+
+  - id: waste-management-plan
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal involves new dwellings.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 0
+            description: The proposal creates new or increased commercial floorspace.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: A change of use that needs new or enhanced waste storage.
+    confidence: low
+    notes: >-
+      The trigger is from the 2026 update of the joint list, as extracted for South Tyneside: 'Planning
+      applications involving new dwellings, new and increased commercial floorspace and changes of use
+      applications that require new or enhanced waste storage provision.' Check it against the 2024
+      list.
+
+unmapped:
+  - local-name: Minerals safeguarding assessment
+    source-text: "From the Gateshead audit of the joint list: non-mineral development over 1ha (to avoid sterilisation of mineral
+      resources)"
+    source-url:
+      https://www.newcastle.gov.uk/sites/default/files/planning/Tyneside%20Validation%20Checklist%20Jan%2025%20-Final%20with%20bookmarks.pdf
+    suggested-id: minerals-safeguarding-assessment
+  - local-name: Surface water drainage strategy / SuDS
+    source-text: "From the audits of the joint list: major development; it includes a Construction Method Statement for the
+      proposed SuDS"
+    source-url:
+      https://www.newcastle.gov.uk/sites/default/files/planning/Tyneside%20Validation%20Checklist%20Jan%2025%20-Final%20with%20bookmarks.pdf
+    suggested-id: drainage-strategy
+  - local-name: Wind microclimate assessment
+    source-text: "Wind impacts Wind tunnel modelling will be required to assess the impact of new
+      development will have on a local wind environment and any consequential effects on pedestrian
+      comfort and safety using the Lawson criteria for comfort and safety."
+    source-url:
+      https://www.newcastle.gov.uk/sites/default/files/planning/Tyneside%20Validation%20Checklist%20Jan%2025%20-Final%20with%20bookmarks.pdf
+    suggested-id: wind-microclimate-assessment
+  - local-name: Marketing Information
+    source-text: "Marketing Information When is this required? Planning applications for: Change of use
+      from retail to other uses in town centre primary shopping frontages; … Demolition of listed and
+      locally listed buildings, and buildings in conservation areas"
+    source-url:
+      https://www.newcastle.gov.uk/sites/default/files/planning/Tyneside%20Validation%20Checklist%20Jan%2025%20-Final%20with%20bookmarks.pdf
+    suggested-id: marketing-evidence
+  - local-name: Flood risk Sequential Test
+    source-text: "Required for new development in Flood Zones 2 and 3 (from the Gateshead audit: householder,
+      non-residential extensions under 250 sqm and renewables are exempt)"
+    source-url:
+      https://www.newcastle.gov.uk/sites/default/files/planning/Tyneside%20Validation%20Checklist%20Jan%2025%20-Final%20with%20bookmarks.pdf
+    suggested-id: flood-sequential-test
+  - local-name: Habitats Regulations Assessment
+    source-text: "Where a development impacts upon a designated or candidate Special Area of Conservation
+      (SAC) and/or Special Protection Area (SPA), a Habitat Regulation Assessment (HRA) will be
+      required. (From the Gateshead audit: Note 16 also has a proximity trigger, e.g. within 500m of the coast.)"
+    source-url:
+      https://www.newcastle.gov.uk/sites/default/files/planning/Tyneside%20Validation%20Checklist%20Jan%2025%20-Final%20with%20bookmarks.pdf
+    suggested-id: habitats-regulations-assessment
+  - local-name: Health Impact Assessment
+    source-text: "Health Impact Assessments (HIA) are likely to be required for (but not limited to):
+      (from the audit) major residential applications of more than 100 units and employment sites of
+      10 hectares or more"
+    source-url:
+      https://www.newcastle.gov.uk/sites/default/files/planning/Tyneside%20Validation%20Checklist%20Jan%2025%20-Final%20with%20bookmarks.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Housing space standards statement
+    source-text: "In Newcastle, Gateshead and North Tyneside all planning applications for new homes
+      should be designed to achieve the Government's Nationally Described Space Standards (NDSS).
+      (From the audit: in Newcastle, M4(2) accessible homes for 25% of new-build schemes of 10+
+      dwellings.)"
+    source-url:
+      https://www.newcastle.gov.uk/sites/default/files/planning/Tyneside%20Validation%20Checklist%20Jan%2025%20-Final%20with%20bookmarks.pdf
+    suggested-id: housing-standards-statement
+  - local-name: Overheating Assessment and Mitigation
+    source-text: "From the South Tyneside audit of the joint list (Note 26; Newcastle's audit could not
+      read it): residential dwellings, residential institutions, student
+      accommodation and accommodation for children aged 5+ where overheating is a potential
+      significant issue"
+    source-url:
+      https://www.newcastle.gov.uk/sites/default/files/planning/Tyneside%20Validation%20Checklist%20Jan%2025%20-Final%20with%20bookmarks.pdf
+    suggested-id: overheating-assessment
+  - local-name: Historic building recording
+    source-text: "From the South Tyneside audit of the joint list (part of Note 14): demolition or substantial alteration of 19th-century
+      or older, listed, locally listed or conservation-area buildings"
+    source-url:
+      https://www.newcastle.gov.uk/sites/default/files/planning/Tyneside%20Validation%20Checklist%20Jan%2025%20-Final%20with%20bookmarks.pdf
+    suggested-id: historic-building-recording
+
+low-confidence:
+  - id: transport-assessment
+    note: >-
+      The excerpt defines a Transport Statement. The list's thresholds table (Transport
+      Assessment/Statement and Travel Plan by land use) was not extracted.
+  - id: travel-plan
+    note: >-
+      Only the Outline row (thresholds table header) is kept; the Full planning row came from the
+      2019 list. The thresholds table was not extracted.

@@ -1,0 +1,318 @@
+# Corrections for North Hertfordshire District Council, from the council's audit.
+# The workbook links the current validation matrix (April 2026), but Grokbot captured only three
+# web-page fragments from the 'Submit a planning application' page. The audit lists the matrix's
+# 22 local requirements and the local items in Validation checklist V11 (March 2025). The audit
+# names the matrix columns (Householder, listed buildings, conservation area, residential 1-9 /
+# 10+ / 50+, commercial, infrastructure, EIA, telecoms) but not which column each item falls in,
+# so items without a stated trigger are added with no trigger and confidence low ("Check").
+local-authority: NHE
+
+drop-unmapped:
+  - local-name: Self-build / custom build information
+    reason: >-
+      wrong_trigger: the excerpt is link text for the Self Build and Custom Build BNG exemption
+      form run into the Design and Access Statement text; recorded below as BNG exemption
+      justification
+
+requirements:
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: The proposal provides one or more dwellinghouses.
+            - site:
+                in: [conservation-area, world-heritage-site]
+                description: Any part of the development is in a designated area (a conservation
+                  area or World Heritage Site).
+    source-text: >-
+      Design and access statements Design and Access Statements are required for: major
+      developments the provision of one or more dwellinghouses where any part of the development is
+      in a designated area, i.e.
+    source-url: https://www.north-herts.gov.uk/submit-planning-application
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt started with a file size and is cut off at 'designated
+      area, i.e.'. 'Designated area' is read as the national definition (conservation area or
+      World Heritage Site); the rest of the council's list of cases is not captured.
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: minor-development
+            value: true
+            description: The proposal is minor development.
+    source-url: https://www.north-herts.gov.uk/submit-planning-application
+    must-include:
+      - item: The statutory biodiversity metric in Excel format
+        level: must
+      - item: The statutory biodiversity metric in PDF format
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, missing_requirement): the workbook filed BNG under Full planning as
+      'INFERRED' and quoted web-page text. From the audit: Validation checklist V11 asks for the
+      statutory BNG metric for major or minor development, in Excel and PDF; the matrix also lists
+      a Statutory Biodiversity Metric (item 20).
+
+  - id: site-plan
+    action: add
+    required-if:
+      always: true
+    source-text: 1:500 block plan ... All applications
+    source-url: https://www.north-herts.gov.uk/submit-planning-application
+    must-include:
+      - item: Scale 1:500
+        level: must
+      - item: Window positions
+        level: must
+      - item: Trees
+        level: must
+      - item: Materials
+        level: must
+      - item: Access and parking
+        level: must
+      - item: Boundary treatment
+        level: must
+      - item: Street scene
+        level: must
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Validation checklist V11 asks for a 1:500 block plan
+      showing window positions, trees, materials, access/parking, boundary treatment and street
+      scene, for all applications. The items are the audit's summary.
+
+  - id: roof-plan-existing
+    action: add
+    required-if:
+      always: true
+    source-text: Roof plan - existing and proposed
+    source-url: https://www.north-herts.gov.uk/submit-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): Validation checklist V11 asks for existing and proposed roof
+      plans for all applications."
+
+  - id: roof-plan-proposed
+    action: add
+    required-if:
+      always: true
+    source-text: Roof plan - existing and proposed
+    source-url: https://www.north-herts.gov.uk/submit-planning-application
+    confidence: medium
+    notes: "From the audit (missing_requirement): Validation checklist V11 asks for existing and proposed roof
+      plans for all applications."
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 20
+        description: The proposal creates 20 or more dwellings.
+    source-url:
+      https://www.north-herts.gov.uk/sites/default/files/2026-04/Matrix%20North%20Herts%20Council%20validation%20requirements%20April%202026%282%29.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): matrix item, Affordable Housing Statement (20+ units)."
+
+  - id: environmental-statement
+    action: add
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is Schedule 1 or Schedule 2 EIA development.
+    source-url:
+      https://www.north-herts.gov.uk/sites/default/files/2026-04/Matrix%20North%20Herts%20Council%20validation%20requirements%20April%202026%282%29.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): matrix item, Environmental Statement (Schedule 1/2 EIA
+      development)."
+
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3.
+        - discretionary
+    source-text: Householder and other minor extensions in Flood Zone 2 and 3 form
+    source-url: https://www.north-herts.gov.uk/submit-planning-application
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): the matrix lists Flood Risk Assessment / Drainage
+      (SuDS); its columns are not given. The council has its own form for householder and other
+      minor extensions in Flood Zones 2 and 3, which the workbook only had as link text.
+
+  - id: air-quality-assessment
+    action: add
+    source-url:
+      https://www.north-herts.gov.uk/sites/default/files/2026-04/Matrix%20North%20Herts%20Council%20validation%20requirements%20April%202026%282%29.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): matrix item, Air Quality Assessment. The audit gives no
+      trigger."
+
+  - id: biodiversity-survey-report
+    action: add
+    source-url:
+      https://www.north-herts.gov.uk/sites/default/files/2026-04/Matrix%20North%20Herts%20Council%20validation%20requirements%20April%202026%282%29.pdf
+    must-include:
+      - item: Prepared by a suitably qualified ecologist
+        level: must
+    confidence: low
+    notes: "From the audit (missing_requirement): matrix item, Biodiversity survey / ecological report. The
+      audit gives no trigger."
+
+  - id: town-centre-impact-assessment
+    action: add
+    source-url:
+      https://www.north-herts.gov.uk/sites/default/files/2026-04/Matrix%20North%20Herts%20Council%20validation%20requirements%20April%202026%282%29.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): matrix item, Town Centre Impact Assessment and
+      Sequential Test, for town-centre retail/commercial uses. The matrix columns (town centre /
+      non-town centre) are not given, so no trigger is set.
+
+  - id: archaeological-assessment
+    action: add
+    source-url:
+      https://www.north-herts.gov.uk/sites/default/files/2026-04/Matrix%20North%20Herts%20Council%20validation%20requirements%20April%202026%282%29.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): matrix item, Site Archaeological Evaluation. The audit gives
+      no trigger."
+
+  - id: land-contamination-assessment
+    action: add
+    source-url:
+      https://www.north-herts.gov.uk/sites/default/files/2026-04/Matrix%20North%20Herts%20Council%20validation%20requirements%20April%202026%282%29.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): matrix item, Preliminary Risk Assessment (contaminated
+      land). The audit gives no trigger."
+
+  - id: noise-assessment
+    action: add
+    source-url:
+      https://www.north-herts.gov.uk/sites/default/files/2026-04/Matrix%20North%20Herts%20Council%20validation%20requirements%20April%202026%282%29.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): matrix item, Noise Impact Assessment. The audit gives no
+      trigger."
+
+  - id: recreation-facilities-assessment
+    action: add
+    source-url:
+      https://www.north-herts.gov.uk/sites/default/files/2026-04/Matrix%20North%20Herts%20Council%20validation%20requirements%20April%202026%282%29.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): matrix item, Open Space Assessment. The audit gives no
+      trigger."
+
+  - id: transport-assessment
+    action: add
+    source-url:
+      https://www.north-herts.gov.uk/sites/default/files/2026-04/Matrix%20North%20Herts%20Council%20validation%20requirements%20April%202026%282%29.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): matrix item, Transport Assessment. The audit gives no
+      trigger."
+
+  - id: travel-plan
+    action: add
+    source-url:
+      https://www.north-herts.gov.uk/sites/default/files/2026-04/Matrix%20North%20Herts%20Council%20validation%20requirements%20April%202026%282%29.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): matrix item, Green Travel Plan. The audit gives no trigger."
+
+  - id: arboriculturist-report
+    action: add
+    source-url:
+      https://www.north-herts.gov.uk/sites/default/files/2026-04/Matrix%20North%20Herts%20Council%20validation%20requirements%20April%202026%282%29.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): matrix item, Tree survey / planting plan / landscape
+      appraisal. The audit gives no trigger."
+
+  - id: sustainability-statement
+    action: add
+    policy: Sustainability SPD 2024
+    source-url:
+      https://www.north-herts.gov.uk/sites/default/files/2026-04/Matrix%20North%20Herts%20Council%20validation%20requirements%20April%202026%282%29.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): matrix item, Sustainability Statement (Sustainability SPD
+      2024). The audit gives no trigger."
+
+  - id: energy-statement
+    action: add
+    policy: Sustainability SPD 2024
+    source-url:
+      https://www.north-herts.gov.uk/sites/default/files/2026-04/Matrix%20North%20Herts%20Council%20validation%20requirements%20April%202026%282%29.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): matrix item, Energy Statement (Sustainability SPD 2024). The
+      audit gives no trigger."
+
+  - id: daylight-sunlight-assessment
+    action: add
+    source-url:
+      https://www.north-herts.gov.uk/sites/default/files/2026-04/Matrix%20North%20Herts%20Council%20validation%20requirements%20April%202026%282%29.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): matrix item, Daylight and Sunlight test. The audit gives no
+      trigger."
+
+  - id: lighting-assessment
+    action: add
+    source-url:
+      https://www.north-herts.gov.uk/sites/default/files/2026-04/Matrix%20North%20Herts%20Council%20validation%20requirements%20April%202026%282%29.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): matrix item, External Lighting Survey. The audit gives no
+      trigger."
+
+  - id: waste-management-plan
+    action: add
+    source-url:
+      https://www.north-herts.gov.uk/sites/default/files/2026-04/Matrix%20North%20Herts%20Council%20validation%20requirements%20April%202026%282%29.pdf
+    must-include:
+      - item: Refuse and recycling storage
+        level: must
+      - item: Swept path analysis
+        level: must
+    confidence: low
+    notes: "From the audit (missing_requirement): matrix item, Waste Management Details (refuse/recycling
+      storage and swept path). The audit gives no trigger."
+
+  - id: sci
+    action: add
+    source-url:
+      https://www.north-herts.gov.uk/sites/default/files/2026-04/Matrix%20North%20Herts%20Council%20validation%20requirements%20April%202026%282%29.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): matrix item, Statement of Community Involvement. The audit
+      gives no trigger."
+
+unmapped:
+  - local-name: Unilateral Undertaking / Section 106 agreement
+    source-text: "From the audit: matrix item, UU/Section 106 agreement (residential 10+ units)"
+    source-url:
+      https://www.north-herts.gov.uk/sites/default/files/2026-04/Matrix%20North%20Herts%20Council%20validation%20requirements%20April%202026%282%29.pdf
+    suggested-id: heads-of-terms
+  - local-name: Structural Survey and Method Statement
+    source-text: "From the audit: matrix item, Structural Survey and Method Statement (listed buildings /
+      demolition)"
+    source-url:
+      https://www.north-herts.gov.uk/sites/default/files/2026-04/Matrix%20North%20Herts%20Council%20validation%20requirements%20April%202026%282%29.pdf
+    suggested-id: structural-survey
+  - local-name: Draft Habitat Management and Monitoring Plan (HMMP)
+    source-text: "From the audit: Validation checklist V11, a draft HMMP where there are significant on-site
+      enhancements"
+    source-url: https://www.north-herts.gov.uk/submit-planning-application
+    suggested-id: habitat-management-monitoring-plan
+  - local-name: BNG exemption justification
+    source-text: "Self Build and Custom Build BNG exemption form"
+    source-url: https://www.north-herts.gov.uk/submit-planning-application
+    suggested-id: bng-exemption-statement
+  - local-name: Covering letter
+    source-text: "From the audit: Validation checklist V11, a covering letter for all applications"
+    source-url: https://www.north-herts.gov.uk/submit-planning-application
+    suggested-id: cover-letter

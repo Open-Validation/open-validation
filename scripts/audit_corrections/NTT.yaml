@@ -1,0 +1,371 @@
+# Corrections for Nottinghamshire County Council, from inputs/audit/nottinghamshire-county-council.json.
+# Grokbot's link is the current Guidance Note on the Validation Requirements for Planning
+# Applications (March 2026, approved by the Planning and Rights of Way Committee on 10 March 2026).
+# The audit's main finding: as a county planning authority, the list covers minerals, waste and
+# Regulation 3 (the County Council's own development, such as schools), but Grokbot filed nearly
+# every item under 'Full planning' (INFERRED). The rows are moved to those types below. Items marked
+# "From the audit" use the audit's paraphrase of the Guidance Note, not its exact words.
+local-authority: NTT
+
+validation-list:
+  url: https://www.nottinghamshire.gov.uk/media/r3qpuy11/guidancenoteonvalidationrequirementsforplanningapplications.pdf
+  date: 2026-03-10
+  date-basis: "audit: document dated March 2026; approved by the Planning and Rights of Way Committee on
+    10 March 2026"
+
+submission-standards:
+  - item: All plans at an appropriate scale, with a unique drawing reference number and a title
+    level: should
+  - item: Maximum single or combined file size of 15 Megabytes (the sum of all document file sizes)
+    level: must
+  - item: Portable Document Format (PDF) is the recommended file format; photographs should be submitted
+      in PDF
+    level: should
+
+drop:
+  - id: photos
+    reason: "not_a_requirement: '1.19 All photographs should be submitted in PDF file format' is a file-format
+      rule (now a submission standard)"
+  - id: waste-management-plan
+    reason: "wrong_trigger: the excerpt is s6 design guidance for major waste facilities, not a refuse or
+      recycling storage requirement"
+
+drop-unmapped:
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "wrong_trigger: the excerpt is the s21.2 external lighting text (now in lighting-assessment)"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - all:
+                - condition:
+                    field: sensitive-end-use
+                    value: true
+                    description: The development would introduce sensitive receptors, such as a school.
+                - site:
+                    in: [air-quality-management-area]
+                    description: The site is in an area of poor air quality.
+            - discretionary
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3. Dust,
+      congestion and HGV movements have no field, so they are shown as officer discretion.
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    notes: >-
+      Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3. The
+      excerpt gives no trigger.
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: The works affect trees or hedgerows.
+    source-url: https://www.nottinghamshire.gov.uk/media/r3qpuy11/guidancenoteonvalidationrequirementsforplanningapplications.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): s15 Trees, for works affecting trees or hedgerows, with
+      an arboricultural survey for large or well-treed sites.
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    source-url: https://www.nottinghamshire.gov.uk/media/r3qpuy11/guidancenoteonvalidationrequirementsforplanningapplications.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was BNG text about securing gains for 30 years.
+      From the audit: s18 asks for an Ecological Impact Assessment (EcIA) for major development and
+      a Preliminary Ecological Appraisal (PEA) for other development.
+
+  - id: bng-metric
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: biodiversity-gain-condition
+            value: true
+            description: The application is a qualifying application for biodiversity net gain.
+    confidence: medium
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3."
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - discretionary
+    source-text: >-
+      Sunlighting/Daylighting/Lighting 21.1 Sun lighting/day lighting assessments are to be
+      undertaken and submitted for all applications where there is a potential adverse impact upon
+      current levels of sunlight/daylight enjoyed by adjoining properties or buildings, including
+      their gardens or amenity space.
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3. The
+      workbook's excerpt also held the s21.2 external lighting text (now in lighting-assessment).
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - ref: major-development
+            - all:
+                - site:
+                    in: [conservation-area, world-heritage-site]
+                    description: The site is in a Conservation Area or World Heritage Site.
+                - any:
+                    - condition:
+                        field: dwelling-count
+                        operator: ">="
+                        value: 1
+                        description: The development consists of one or more dwellings.
+                    - condition:
+                        field: floorspace
+                        operator: ">="
+                        value: 100
+                        description: A building or buildings with a floor space of 100 square metres
+                          or more.
+    confidence: medium
+    notes: >-
+      The list's own rule (para 3.9). Para 3.10, cut off in the excerpt, begins 'Applications for
+      waste development, minor development, change ...', listing applications that are exempt.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: eia-development
+            value: true
+            description: The proposal is EIA development under the EIA Regulations 2017.
+    confidence: medium
+    notes: "Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - site:
+                in: [flood-risk-zone]
+                description: New development in Flood Zone 2, 3a or 3b.
+            - condition:
+                field: site-area-non-residential
+                operator: ">="
+                value: 1
+                description: The site is 1 hectare or more (in Flood Zone 1).
+            - condition:
+                field: site-area-residential
+                operator: ">="
+                value: 1
+                description: The site is 1 hectare or more (in Flood Zone 1).
+    source-text: >-
+      12.4 Where a FRA is required this should be prepared by the applicant in consultation with
+      Nottinghamshire County Council as the Lead Local Flood Authority, the Environment Agency, and
+      the Internal Drainage Board where appropriate.
+    source-url: https://www.nottinghamshire.gov.uk/media/r3qpuy11/guidancenoteonvalidationrequirementsforplanningapplications.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt omits the trigger. From the audit: s12, new development in
+      Flood Zones 2, 3a and 3b, and 1 hectare or more in Flood Zone 1."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, scheduled-monument,
+              park-and-garden, locally-listed-building]
+            description: The development affects a heritage asset or its setting.
+    must-include:
+      - item: The significance of the heritage asset affected, including any contribution made by its
+          setting
+        level: should
+      - item: The effect of the development on the asset
+        level: should
+    notes: >-
+      Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3. The
+      trigger is read from 16.2 ('the heritage asset affected'); the excerpt gives no other trigger.
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    notes: >-
+      Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3. The
+      excerpt is cut off before it says which applications need the desktop study and walkover.
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: external-lighting
+            value: true
+            description: Significant external lighting is proposed (for instance, floodlighting of a
+              multi-use games area).
+    source-text: >-
+      21.2 Where significant external lighting is proposed as part of a development (for instance,
+      floodlighting of a multi-use games area) the application must include a layout plan with beam
+      orientation, a schedule of the proposed equipment and the proposed measures to reduce any
+      impact on neighbouring sites/properties.
+    source-url: https://www.nottinghamshire.gov.uk/media/r3qpuy11/guidancenoteonvalidationrequirementsforplanningapplications.pdf
+    must-include:
+      - item: A layout plan with beam orientation
+        level: must
+      - item: A schedule of the proposed equipment
+        level: must
+      - item: The proposed measures to reduce any impact on neighbouring sites/properties
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook swapped the lighting and sunlight/daylight excerpts."
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    notes: >-
+      Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3. The
+      excerpt describes the survey but gives no trigger.
+
+  - id: planning-statement
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    must-include:
+      - item: Pupil and staff numbers and parking
+        level: must
+        required-if:
+          condition:
+            field: school-expansion
+            value: true
+            description: The proposal is for a school.
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3. The list
+      says 'most applications'. From the audit: s5 asks school proposals for pupil/staff numbers and
+      parking.
+
+  - id: sci
+    action: add
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    source-url: https://www.nottinghamshire.gov.uk/media/r3qpuy11/guidancenoteonvalidationrequirementsforplanningapplications.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): s22 Statement of Community Involvement; the audit gives no
+      trigger."
+
+  - id: transport-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - discretionary
+    source-url: https://www.nottinghamshire.gov.uk/media/r3qpuy11/guidancenoteonvalidationrequirementsforplanningapplications.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): s8 Transport Assessment/Statement where significant
+      vehicle movements are generated, scoped with the Highways Authority/National Highways.
+
+  - id: travel-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: school-expansion
+                value: true
+                description: A new school or a significant extension to an existing school.
+            - discretionary
+    source-text: >-
+      It should identify the travel plan coordinator, the management arrangements, and the timetable
+      of the plan. 9.2 School Travel Plans (see link below) will be required for all new schools or
+      significant extensions to existing schools - these should address parent, staff, and pupil
+      parking as well as vehicular and pedestrian access.
+    source-url: https://www.nottinghamshire.gov.uk/media/r3qpuy11/guidancenoteonvalidationrequirementsforplanningapplications.pdf
+    must-include:
+      - item: The travel plan coordinator, the management arrangements and the timetable of the plan
+        level: should
+      - item: Parent, staff and pupil parking, and vehicular and pedestrian access
+        level: should
+        required-if:
+          condition:
+            field: school-expansion
+            value: true
+            description: A new school or a significant extension to an existing school.
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): moved from Full planning to minerals, waste and Regulation 3. Other
+      travel plans have no trigger in the excerpt, so they are shown as officer discretion.
+
+unmapped:
+  - local-name: Planning and Health
+    source-text: "From the audit: s10, proposals with potential health impacts must reference the Spatial
+      Planning and Health Framework 2025-2030"
+    source-url: https://www.nottinghamshire.gov.uk/media/r3qpuy11/guidancenoteonvalidationrequirementsforplanningapplications.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Groundwater and Surface Water Protection
+    source-text: "From the audit: s13, hydrogeological/hydrological assessment for most mineral extraction
+      or waste disposal to land"
+    source-url: https://www.nottinghamshire.gov.uk/media/r3qpuy11/guidancenoteonvalidationrequirementsforplanningapplications.pdf
+    suggested-id: hydrogeological-assessment
+  - local-name: Rights of Way
+    source-text: "From the audit: s23, where a right of way is temporarily or permanently affected"
+    source-url: https://www.nottinghamshire.gov.uk/media/r3qpuy11/guidancenoteonvalidationrequirementsforplanningapplications.pdf
+    suggested-id: public-rights-of-way-statement
+  - local-name: Landscape and Visual Impact
+    source-text: "From the audit: s24, where likely to affect landscape character or visual amenity"
+    source-url: https://www.nottinghamshire.gov.uk/media/r3qpuy11/guidancenoteonvalidationrequirementsforplanningapplications.pdf
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Coal Mining Risk Assessment
+    source-text: "From the audit: s25, sites in Development High Risk Areas"
+    source-url: https://www.nottinghamshire.gov.uk/media/r3qpuy11/guidancenoteonvalidationrequirementsforplanningapplications.pdf
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Aviation Impact
+    source-text: "From the audit: s27, aerodrome safeguarding zones; bird management for wetland
+      restoration"
+    source-url: https://www.nottinghamshire.gov.uk/media/r3qpuy11/guidancenoteonvalidationrequirementsforplanningapplications.pdf
+    suggested-id: aerodrome-safeguarding
+  - local-name: Sherwood ppSPA assessment
+    source-text: "Where proposals have the potential to affect the Sherwood 'proposed potential' Special
+      Protection Area (ppSPA), a risk-based approach will be adopted by the County Council requiring
+      applicants to submit an additional and robust assessment of likely impacts to be presented in a
+      format equivalent to an HRA."
+    source-url: https://www.nottinghamshire.gov.uk/media/r3qpuy11/guidancenoteonvalidationrequirementsforplanningapplications.pdf
+    suggested-id: habitats-regulations-assessment

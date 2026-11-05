@@ -1,0 +1,426 @@
+# Corrections for the Lake District National Park Authority, from the authority's audit.
+# Grokbot read the checklist reviewed 2 April 2024 (file name 'August 2025'). It has been replaced by
+# the checklist reviewed 6 August 2026 ('Post-6-August-2026-updated-BNG'), which the build now uses
+# as the list URL and date. The main change is the rewritten BNG section; ground levels were also
+# added to the plans section. The checklist works by trigger questions, not by application type, so
+# no application types are given below. Items marked "From the audit" use the audit's paraphrase;
+# quoted wording comes from the workbook excerpts (2024 checklist) or the audit's evidence.
+local-authority: LDNPA
+
+submission-standards:
+  - item: All drawings drawn to, and marked at, a metric scale; drawings that are not metric or are marked
+      'do not scale' are returned
+    level: must
+
+drop:
+  - id: environmental-statement
+    reason: >-
+      wrong_document: the excerpt is section 7, Heritage Impact Assessment for the World Heritage
+      Site (now a must-include item under heritage-statement); the checklist does not require an
+      Environmental Statement
+  - id: schedule-of-works
+    reason: "wrong_trigger: no such item; the excerpt repeats the Construction Method Statement text"
+  - id: sustainability-statement
+    reason: "the item is the Energy Statement; now under energy-statement with its trigger"
+
+drop-unmapped:
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "wrong_trigger: invented from Construction Method Statement text ('not required in garden areas')"
+  - local-name: Self-build / custom build information
+    reason: "not_a_requirement: a BNG exemption, and self-build is no longer exempt after 6 August 2026"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "duplicate: the same item (section 16) as noise-assessment, which now carries its trigger"
+  - local-name: Nutrient Neutrality statement / calculator
+    reason: "now under water-impact-assessment with its catchment trigger"
+
+requirements:
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: >-
+              Development (other than change of use at or below ground level) within 15m of trees.
+        - site:
+            in: [ancient-woodland]
+            description: The development is in Ancient Semi-Natural Woodland.
+    source-text: Tree Surveys … If yes, a full tree survey is required…
+    source-url: https://lakedistrict.gov.uk/wp-content/uploads/2026/08/Validation-Checklist-Post-6-August-2026-updated-BNG.pdf
+    must-include:
+      - item: Tree Constraints Plan
+        level: must
+      - item: A full tree survey, where development is in the root protection area or under the canopy of
+          trees on the tree constraints plan, or in Ancient Semi-Natural Woodland
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, missing_requirement): sections 9 and 10. A Tree Constraints Plan is needed
+      for development other than change of use at or below ground level within 15m of trees; a full
+      tree survey where development is in the root protection area or under the canopy of those
+      trees, or in Ancient Semi-Natural Woodland.
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: near-watercourse
+            value: true
+            description: The development is within or next to a lake.
+        - site:
+            in: [ancient-woodland]
+            description: The development is within 15m of Ancient Semi-Natural Woodland.
+        - condition:
+            field: external-alterations
+            value: true
+            description: >-
+              Roof, eaves or wall works to traditional, slate or stone buildings, especially within
+              400m of woodland or water (bat survey).
+        - condition:
+            field: floodlighting
+            value: true
+            description: >-
+              Floodlighting of churches, listed buildings or green space near woodland or water (bat
+              survey).
+        - discretionary
+    source-text: an Ecological Assessment is required…
+    source-url: https://lakedistrict.gov.uk/wp-content/uploads/2026/08/Validation-Checklist-Post-6-August-2026-updated-BNG.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, missing_requirement): an Ecological Assessment for hydro schemes,
+      development within or next to a lake, or within 15m of Ancient Semi-Natural Woodland (section
+      14); Bat Surveys (section 15) for roof, eaves or wall works to traditional/slate/stone
+      buildings, works to tunnels, mines, kilns or bridges, floodlighting of churches, listed
+      buildings or green space near woodland or water, felling or lopping of woodland, hedgerows or
+      veteran trees, and wind turbines. The hydro, tunnel/mine/kiln/bridge, felling and wind turbine
+      cases are shown as officer discretion.
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the statutory biodiversity gain condition.
+    source-text: Self-build and custom-build dwellings are no longer exempt after 6 August 2026
+    source-url: https://lakedistrict.gov.uk/wp-content/uploads/2026/08/Validation-Checklist-Post-6-August-2026-updated-BNG.pdf
+    confidence: medium
+    notes: >-
+      Audit (outdated_link, wrong_trigger): section 13 was rewritten in the 6 August 2026 checklist.
+      New exemptions for householder development and for sites of 0.2 ha or less with no priority
+      habitat impact; self-build and custom build is no longer exempt.
+
+  - id: construction-management-plan
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: demolition
+            value: true
+            description: Demolition of more than 50 cubic metres.
+        - site:
+            in: [special-area-of-conservation, site-of-special-scientific-interest, local-wildlife-site]
+            description: >-
+              The site is in or near a SAC, SSSI, County Wildlife Site, Ramsar site, limestone pavement
+              or Local Geological Site (not in garden areas).
+        - condition:
+            field: near-watercourse
+            value: true
+            description: The works are in or on the banks of a watercourse or lake.
+    source-text: a construction method statement is required…
+    source-url: https://lakedistrict.gov.uk/wp-content/uploads/2026/08/Validation-Checklist-Post-6-August-2026-updated-BNG.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): a Construction Method Statement (section 14) for demolition over 50 cu
+      m, development in or near a SAC, SSSI, County Wildlife Site, Ramsar site or limestone
+      pavement, or in or on the banks of a watercourse or lake.
+
+  - id: design-and-access-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates one or more houses.
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 100
+            description: The proposal creates 100 square metres or more of floorspace.
+        - site:
+            in: [listed-building, conservation-area, scheduled-monument, park-and-garden]
+            description: >-
+              The site is in the curtilage of a listed building, in a conservation area, or affects a
+              scheduled monument or registered park.
+    source-text: Access and Heritage Statement is required.
+    source-url: https://lakedistrict.gov.uk/wp-content/uploads/2026/08/Validation-Checklist-Post-6-August-2026-updated-BNG.pdf
+    confidence: medium
+    notes: >-
+      Section 6 asks for one combined Design, Access and Heritage Statement; the same rule is under
+      heritage-statement. From the audit: major development, 1+ houses, 100 sq m+, listed building
+      consent, listed curtilage, conservation area, scheduled monument, registered park. Householder
+      works in a conservation area or listed curtilage also trigger it.
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: Existing and proposed ground levels
+        level: must
+        required-if:
+          any:
+            - condition:
+                field: change-in-ground-levels
+                value: true
+                description: Ground levels change.
+            - condition:
+                field: basement
+                value: true
+                description: A basement or trenches are proposed.
+    notes: "From the audit (outdated_link): ground levels were added to the plans section (section 3) in the
+      6 August 2026 checklist."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal includes new housing.
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 100
+            description: The proposal creates 100 square metres or more of new floorspace.
+    source-url: https://lakedistrict.gov.uk/wp-content/uploads/2026/08/Validation-Checklist-Post-6-August-2026-updated-BNG.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's row (mapped to sustainability-statement) was a tick-box
+      fragment. From the audit: an Energy Statement for new housing, or 100 sq m or more of new
+      floorspace (section 11).
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">"
+                value: 18
+                description: A building over 18m in height.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building of 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains two or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building is for the purposes of educational accommodation.
+    confidence: medium
+    notes: >-
+      Structured from the excerpt: new buildings, development of an existing building, or
+      development within the curtilage of an existing building over 18m or 7+ storeys containing two
+      or more dwellings or educational accommodation.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone, surface-water-flood-risk]
+            description: The site is in Flood Zone 2 or 3, or at risk of surface water flooding.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (Flood Zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (Flood Zone 1).
+        - condition:
+            field: near-watercourse
+            value: true
+            description: The site is within a Main River buffer.
+    source-text: If the answer is yes to any of the above, a Flood Risk Assessment is required.
+    source-url: https://lakedistrict.gov.uk/wp-content/uploads/2026/08/Validation-Checklist-Post-6-August-2026-updated-BNG.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): from the audit: Flood Zones 2/3, Flood Zone 1 sites of 1 ha or more, the
+      Main River buffer and surface water risk (section 8)."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates one or more houses.
+        - condition:
+            field: floorspace
+            operator: ">="
+            value: 100
+            description: The proposal creates 100 square metres or more of floorspace.
+        - site:
+            in: [listed-building, conservation-area, scheduled-monument, park-and-garden]
+            description: >-
+              The site is in the curtilage of a listed building, in a conservation area, or affects a
+              scheduled monument or registered park.
+        - condition:
+            field: eia-development
+            value: true
+            description: EIA development (Heritage Impact Assessment).
+        - discretionary
+    source-text: Access and Heritage Statement is required.
+    source-url: https://lakedistrict.gov.uk/wp-content/uploads/2026/08/Validation-Checklist-Post-6-August-2026-updated-BNG.pdf
+    must-include:
+      - item: A Heritage Impact Assessment (Appendix 3)
+        level: must
+        required-if:
+          any:
+            - condition:
+                field: eia-development
+                value: true
+                description: EIA development.
+            - discretionary
+        source-text: >-
+          applications for environmental impact assessment development and / or any application which
+          we have screened at pre-application stage and have concluded that the development could
+          significantly impact the significance of the attributes of Outstanding Universal Value of
+          the Lake District World Heritage Site.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_document): the Design, Access and Heritage Statement (section 6;
+      the same rule is under design-and-access-statement) plus the Heritage Impact Assessment for
+      the World Heritage Site (section 7), which the workbook had filed as an Environmental
+      Statement. Schemes screened at pre-application stage as affecting the World Heritage Site are
+      shown as officer discretion.
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: plant-equipment
+            value: true
+            description: The proposal includes ventilation or extraction equipment.
+        - condition:
+            field: food-or-drink-use
+            value: true
+            description: The proposal includes a new commercial kitchen.
+    source-text: If the answer is yes technical details including noise assessment are required
+    source-url: https://lakedistrict.gov.uk/wp-content/uploads/2026/08/Validation-Checklist-Post-6-August-2026-updated-BNG.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, duplicate): section 16, Ventilation and Extraction, needs technical
+      details including a noise assessment where ventilation or extraction equipment or a new
+      commercial kitchen is proposed.
+
+  - id: section-proposed
+    action: update
+    must-include:
+      - item: Existing and proposed ground levels
+        level: must
+        required-if:
+          any:
+            - condition:
+                field: change-in-ground-levels
+                value: true
+                description: Ground levels change.
+            - condition:
+                field: basement
+                value: true
+                description: A basement or trenches are proposed.
+    notes: "From the audit (outdated_link): ground levels were added to the plans section (section 3) in the
+      6 August 2026 checklist."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Commercial, business or service development outside a Primary Shopping Area.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 1250
+            description: Over 1,250 square metres (net).
+    source-url: https://lakedistrict.gov.uk/wp-content/uploads/2026/08/Validation-Checklist-Post-6-August-2026-updated-BNG.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Commercial, Business and Services impact assessment over
+      1,250 sq m net outside Primary Shopping Areas (section 18). The checklist's figure is net."
+
+  - id: water-impact-assessment
+    action: add
+    required-if:
+      all:
+        - site:
+            in: [nutrient-neutrality-area]
+            description: The site is within Natural England's Nutrient Neutrality Catchment Areas.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: >-
+                  New overnight accommodation (including new dwellings, camping, glamping or caravan
+                  pitches served by on-site toilet or washing facilities, or new hotel bedrooms).
+            - discretionary
+    source-text: >-
+      Nutrient Neutrality Is the proposal… Within Natural England’s Nutrient Neutrality Catchment
+      Areas? … If yes, is the proposal for… New overnight accommodation (including new dwellings, new
+      camping, glamping or caravan pitches served by on-site toilet or washing facilities, or new
+      hotel bedroom accommodation) New tourism development which is likely to increase the number of
+      day visitors to a premises Agricultural development which will resu…
+    source-url: https://lakedistrict.gov.uk/wp-content/uploads/2026/02/Validation-Checklist-August-2025.pdf
+    must-include:
+      - item: Completed Natural England nutrient neutrality budget calculator for the relevant catchment
+        level: must
+      - item: Nutrient neutrality mitigation strategy
+        level: must
+      - item: Evidence that all proposed thresholds for small discharges to ground as set out in Natural
+          England Nutrient Neutrality Advice are met
+        level: must
+      - item: A shadow Habitats Regulations Assessment (Option 1)
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): nutrient neutrality applies only within the catchments, and only to new
+      overnight accommodation, tourism development increasing day visitors, or agricultural
+      development increasing stock (the last two are shown as officer discretion). Householder,
+      B2/B8, Class E and most F uses are excepted (section 19).
+
+unmapped:
+  - local-name: Wind energy pre-submission consultation
+    source-text: "From the audit: 2 or more wind turbines or any hub height over 15m; not for s73 (section 5)"
+    source-url: https://lakedistrict.gov.uk/wp-content/uploads/2026/08/Validation-Checklist-Post-6-August-2026-updated-BNG.pdf
+    suggested-id: pre-application-engagement
+  - local-name: Non-mains drainage details
+    source-text: "From the audit: non-mains drainage details/questionnaire, percolation tests and EA permit
+      status where non-mains drainage is provided or altered (section 12)"
+    source-url: https://lakedistrict.gov.uk/wp-content/uploads/2026/08/Validation-Checklist-Post-6-August-2026-updated-BNG.pdf
+    suggested-id: foul-sewage-assessment
+

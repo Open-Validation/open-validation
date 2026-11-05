@@ -1,0 +1,620 @@
+# Corrections for Preston City Council, from inputs/audit/preston-city-council.json.
+# The audit couldn't fetch the www checklist page and checked the workbook against a March 2022
+# copy of it ("adopted March 2022"); a revised draft was consulted on until 16 August 2024, so the
+# workbook's "October 2024" date is unconfirmed and left as it is. Grokbot mixed in the 2022 PDF and
+# an unrelated National Highways NSIP page. Most rows were placed under Full planning by guesswork
+# ("INFERRED"); the rules below give no application type unless the list names one.
+local-authority: PRE
+
+submission-standards:
+  - item: All drawings include a scale bar and are drawn to an identified scale
+    level: must
+  - item: All drawings include a reference number, with any revisions highlighted
+    level: must
+
+drop:
+  - id: construction-management-plan
+    reason: "wrong_document: National Highways NSIP guidance text, not a Preston requirement"
+  - id: sustainability-statement
+    reason: "wrong_document: National Highways NSIP guidance text (Energy Efficiency Statement added
+      as energy-statement)"
+  - id: design-and-access-statement
+    sheets: [Change of use - prior approval, Variation of condition s73, Minerals & waste (county)]
+    reason: "wrong_app_type: the excerpt says a DAS is NOT required for s73, change of use or waste
+      development"
+  - id: site-plan
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: the excerpt is an exemption for change of use with no external works; the
+      checklist doesn't cover prior approvals"
+  - id: elevation-existing
+    sheets: [Full planning]
+    reason: "wrong_trigger: the excerpt is telecommunications text"
+  - id: elevation-proposed
+    sheets: [Full planning]
+    reason: "wrong_trigger: the excerpt is telecommunications text"
+  - id: photos
+    reason: "wrong_trigger: 'The survey should include photographs as appropriate' is content guidance
+      for another document, not a requirement"
+
+drop-unmapped:
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "wrong mapping: the Householder excerpt is the Biodiversity Survey and Report trigger (now
+      in biodiversity-survey-report); the Full excerpt is a fragment"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_trigger: a list fragment from the Biodiversity Survey and Report trigger"
+  - local-name: Employment / Economic Statement
+    reason: "wrong_trigger: quotes only a document title; replaced by Employment Skills Statement below"
+  - local-name: Pre-application advice / engagement details
+    reason: "wrong_trigger: the excerpt is S106 heads-of-terms text (already unmapped as Planning
+      Obligations / S106 draft Heads of Terms)"
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "wrong_trigger: quotes only the exclusion; re-added below with the audit's trigger"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: the excerpt is the Outline applications section; re-added below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 15
+            description: The proposal is for 15 or more dwellings (urban areas).
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: The residential site is 0.5 hectares or more (urban areas).
+    confidence: low
+    notes: >-
+      The excerpt gives the urban-area threshold only ('In urban areas - …'); any different rural
+      threshold is cut off.
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: The development is inside, or adjacent to, an Air Quality Management Area.
+        - discretionary
+    confidence: medium
+    notes: >-
+      Officer discretion covers 'potential for air quality issues that may affect a
+      European/Internationally or Nationally designated site within a 10km radius'.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: The development affects trees or hedgerows within or adjacent to the site.
+    confidence: medium
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: The development is likely to affect the habitat of protected species,
+              Section 41 species or priority habitats and species (including work affecting roofs
+              or roof spaces).
+        - site:
+            in: [local-wildlife-site, site-of-special-scientific-interest, special-protection-area]
+            description: The development impacts Biological or Geological Heritage Sites, Wildlife
+              Corridors, Red Scar & Tun Brook SSSI, the Ribble and Alt Estuaries SPA/Ramsar site, or
+              SSSI Impact Risk Zones.
+    source-text: >-
+      Biodiversity Survey and Report Required for developments which is likely to affect the
+      habitat of protected species*, species included on the Section 41 of the National Environment
+      and Rural Communities 2006 list and priority habitats and species, including: Work affecting
+      roofs or roof spaces; … Biodiversity Survey and Report Required for developments which impact
+      upon: Biological Heritage Sites; Geological Heritage Sites; Wildlife Corridors; Red Scar & Tun
+      Brook Site of Special Scientific Interest; Ribble and Alt Estuaries Special Protection
+      Area/Ramsar site, including the Ribble Estuary SSSI and the National Nature Reserve; Site of
+      Special Scientific Interest (SSSI) Impact Risk Zones (IRZs).
+    source-url: https://www.preston.gov.uk/article/5129/Validation-Checklist-for-Planning-and-Other-Applications
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook split this between a 'Biodiversity Checklist' row and a
+      2022 PDF fragment. Both triggers are from the council's checklist; the householder list has
+      the first.
+
+  - id: bng-metric
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: minor-development
+            value: true
+            description: The proposal is minor development.
+    confidence: medium
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [conservation-area, world-heritage-site]
+                description: The site is in a conservation area or World Heritage Site.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: The development provides one or more dwellinghouses.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: The development creates 100 square metres or more of floorspace.
+        - application-type:
+            in: [lbc]
+    source-text: >-
+      Design and Access Statements Required for: All major applications; All development within a
+      designated area (conservation area or World Heritage Site) where the development consists of
+      the provision of one or more dwellinghouses or the provision of a building or buildings where
+      the floorspace created by the development is 100 square metres or more; and All applications
+      for listed building consent.
+    source-url: https://www.preston.gov.uk/media/9955/Validation-Checklist-for-Planning-and-Other-Applications-Full-Version/pdf/2022_FINAL_Validation_Checklist_-_Main_document.pdf?m=638098051882430000
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the excerpt was prefixed with BNG link text and its
+      exemptions were filed as requirements for s73, change of use and waste rows. A DAS is not
+      required for s73 applications, engineering or mining operations, material changes of use or
+      waste development.
+
+  - id: elevation-existing
+    action: update
+    must-include:
+      - item: Drawn to a scale of 1:50 or 1:100, with a scale bar
+        level: must
+    confidence: low
+    notes: >-
+      The householder row quotes the floor-plan text; the trigger for elevations isn't captured.
+      Audit (wrong_trigger): the Full row quoted telecommunications text.
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: Drawn to a scale of 1:50 or 1:100, with a scale bar
+        level: must
+    confidence: low
+    notes: >-
+      The householder row quotes the floor-plan text; the trigger for elevations isn't captured.
+      Audit (wrong_trigger): the Full row quoted telecommunications text.
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [full, outline]
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: The application is for residential development.
+        - all:
+            - application-type:
+                in: [full]
+            - condition:
+                field: floorspace-non-residential
+                operator: ">="
+                value: 500
+                description: The application is for 500 square metres or more of non-residential
+                  floorspace.
+    source-url: https://www.preston.gov.uk/article/5129/Validation-Checklist-for-Planning-and-Other-Applications
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): an Energy Efficiency Statement for all full residential
+      applications, full non-residential of 500 sqm or more, and outline residential with enough
+      detail (otherwise a letter of intent).
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development falls within the EIA Regulations 2017.
+    confidence: medium
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    confidence: medium
+    notes: "The council's trigger is new or existing 'relevant buildings' (18m+ or 7+ storeys with 2+ dwellings
+      or educational accommodation)."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in flood zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (flood zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (flood zone 1).
+        - site:
+            in: [critical-drainage-area]
+            description: The Environment Agency has identified the land as having critical drainage
+              problems.
+        - discretionary
+    source-text: >-
+      Flood Risk Assessment Required for: All developments within flood zones 2 and 3; In floor
+      zone 1, assessments will be required for: Sites of 1 hectare or more Land which has been
+      identified by the Environment Agency as having critical drainage problems; Land identified
+      in a strategic flood risk assessment at being at increased flood risk in future; or Land that
+      may be subject to other sources of flooding, where its development would introduce a more
+      vulnerable use.
+    source-url: https://www.preston.gov.uk/media/9955/Validation-Checklist-for-Planning-and-Other-Applications-Full-Version/pdf/2022_FINAL_Validation_Checklist_-_Main_document.pdf?m=638098051882430000
+    confidence: medium
+    notes: >-
+      Officer discretion covers land at increased future flood risk in the SFRA and land subject to
+      other sources of flooding where a more vulnerable use is introduced. Audit (outdated_link):
+      the wording is from the 2022 PDF.
+
+  - id: floor-plan-existing
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal is new built development.
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 0
+            description: The proposal creates new floorspace.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: The proposal is a change of use.
+    source-text: >-
+      Floor Plans (existing and proposed) Required for all householder applications proposing new
+      floor space These should: Be drawn to a scale of 1:50 or 1:100 (scale bar must be shown);
+    source-url: https://www.preston.gov.uk/article/9630/Validation-Checklist-for-Householder-Applications
+    must-include:
+      - item: Drawn to a scale of 1:50 or 1:100, with a scale bar
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the Full row quoted telecommunications text; the source trigger is new
+      built development, new floorspace or change of use.
+
+  - id: floor-plan-proposed
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal is new built development.
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 0
+            description: The proposal creates new floorspace.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: The proposal is a change of use.
+    source-text: >-
+      Floor Plans (existing and proposed) Required for all householder applications proposing new
+      floor space These should: Be drawn to a scale of 1:50 or 1:100 (scale bar must be shown);
+    source-url: https://www.preston.gov.uk/article/9630/Validation-Checklist-for-Householder-Applications
+    must-include:
+      - item: Drawn to a scale of 1:50 or 1:100, with a scale bar
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the Full row quoted telecommunications text; the source trigger is new
+      built development, new floorspace or change of use.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, conservation-area, park-and-garden,
+          archaeological-priority-area, locally-listed-building]
+        description: The works affect a listed building, a conservation area, their settings, a
+          historic park or garden, archaeology or a non-designated heritage asset.
+    source-text: >-
+      Heritage Statement Required for applications proposing: Alterations to or demolition of a
+      listed building or building(s) within a conservation area;
+    source-url: https://www.preston.gov.uk/article/5129/Validation-Checklist-for-Planning-and-Other-Applications
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook placed it only under Householder and LBC, but it also
+      applies to full applications; from the audit, it covers works affecting listed buildings,
+      conservation areas, their settings, historic parks/gardens, archaeology and non-designated
+      heritage assets.
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: The site is known or suspected to be contaminated.
+        - condition:
+            field: previously-developed-land
+            value: true
+            description: The site is previously developed land.
+        - site:
+            in: [near-landfill-site]
+            description: The site is within 250m of a current or former landfill site.
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: The proposal is for a particularly vulnerable use (allotments,
+              residential, schools, hospitals).
+    source-url: https://www.preston.gov.uk/article/5129/Validation-Checklist-for-Planning-and-Other-Applications
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Land Quality Assessment for known or suspected contamination,
+      previously developed land, sites within 250m of a current or former landfill, and particularly
+      vulnerable uses."
+
+  - id: planning-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: departure-from-development-plan
+            value: true
+            description: The development is not in accordance with the development plan.
+        - discretionary
+    confidence: medium
+    notes: "Officer discretion covers requests at pre-application stage and developments needing a detailed
+      understanding of planning policy."
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: New roof details are proposed.
+    must-include:
+      - item: Drawn to a scale of 1:50 or 1:100, with a scale bar
+        level: must
+    confidence: medium
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: New roof details are proposed.
+    must-include:
+      - item: Drawn to a scale of 1:50 or 1:100, with a scale bar
+        level: must
+    confidence: medium
+
+  - id: sci
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    confidence: medium
+    notes: "Officer discretion covers applications that have generated a significant level of public interest."
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal involves a change in ground levels, or the site slopes.
+    must-include:
+      - item: Existing and finished site and floor levels
+        level: must
+      - item: On sloping sites, how the development sits within the site and the relative levels
+          between existing and proposed land and buildings
+        level: must
+    confidence: medium
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal involves a change in ground levels, or the site slopes.
+    must-include:
+      - item: Existing and finished site and floor levels
+        level: must
+      - item: On sloping sites, how the development sits within the site and the relative levels
+          between existing and proposed land and buildings
+        level: must
+    confidence: medium
+
+  - id: site-plan
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: involves-change-of-use
+            value: false
+            description: The application is not a change of use.
+        - condition:
+            field: external-alterations
+            value: true
+            description: External works are proposed.
+    source-text: >-
+      Site Plan / Block Plan (Existing and Proposed) Required for all applications, with the
+      exception of change of use proposal where no external works are proposed.
+    source-url: https://www.preston.gov.uk/article/5129/Validation-Checklist-for-Planning-and-Other-Applications
+    must-include:
+      - item: Scale of 1:500 or 1:200, with a scale bar
+        level: must
+      - item: A north point
+        level: must
+      - item: The proposed development in relation to the site boundaries and other existing
+          buildings on the site
+        level: must
+      - item: All trees and hedges on or adjacent to the site identified and annotated
+        level: should
+    confidence: medium
+    notes: "Audit (wrong_app_type): the checklist doesn't cover prior approvals. Required for all
+      applications except change of use with no external works."
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: The application is for telecommunications development.
+    must-include:
+      - item: A statement of compliance with ICNIRP guidelines
+        level: must
+      - item: Evidence of an assessment of alternative sites and/or mast sharing
+        level: must
+      - item: An explanation of why the installation is needed
+        level: must
+      - item: The results of pre-application discussions
+        level: must
+    confidence: medium
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: A main town centre use that is not in an existing centre and not in
+          accordance with an up-to-date local plan.
+    must-include:
+      - item: Sequential Assessment
+        level: must
+      - item: Impact Assessment
+        level: must
+        required-if:
+          condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 2500
+            description: Retail, leisure and office development over 2,500 square metres.
+    confidence: medium
+    notes: "'Not in accordance with an up-to-date local plan' can't be expressed as a field."
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    confidence: medium
+    notes: "Officer discretion covers developments generating significant amounts of transport movement."
+
+  - id: travel-plan
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt describes content only; the source trigger is all major
+      development and development generating significant transport movements.
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    must-include:
+      - item: A redacted copy for publication, removing sensitive information and personal data
+        level: should
+    confidence: medium
+    notes: "Required where contributions expected from the development are not financially possible."
+
+unmapped:
+  - local-name: Employment Skills Statement
+    source-text: "From the audit: 'commercial floorspace of 1,000 square metres or over' (including cumulative
+      floorspace) or housing of 30+ units"
+    source-url: https://www.preston.gov.uk/article/5129/Validation-Checklist-for-Planning-and-Other-Applications
+    suggested-id: employment-statement
+  - local-name: Marketing Report
+    source-text: "From the audit: residential proposals on employment sites. 'A Marketing Report is not
+      required for those sites which are classed as \"other\", in the Central Lancashire Employment
+      Land Study - Update February 2022.'"
+    source-url: https://www.preston.gov.uk/article/5129/Validation-Checklist-for-Planning-and-Other-Applications
+    suggested-id: marketing-report
+  - local-name: Odour Assessment
+    source-text: "From the audit: new odour sources that could harm amenity, or odour-sensitive development
+      near an existing odour source"
+    source-url: https://www.preston.gov.uk/article/5129/Validation-Checklist-for-Planning-and-Other-Applications
+    suggested-id: odour-assessment
+  - local-name: Student Accommodation Assessment
+    source-text: "From the audit: new or converted student accommodation outside the Local Plan Policy HS6
+      area"
+    source-url: https://www.preston.gov.uk/article/5129/Validation-Checklist-for-Planning-and-Other-Applications
+    suggested-id: student-accommodation-assessment
+  - local-name: Replacement Dwellings and Extensions to Existing Dwellings in the Open Countryside
+    source-text: "From the audit: with volume calculations; in the open countryside, areas of separation and
+      the AONB, including householder extensions"
+    source-url: https://www.preston.gov.uk/article/5129/Validation-Checklist-for-Planning-and-Other-Applications
+    suggested-id: replacement-dwelling-volume-calculations
+  - local-name: Sustainable Drainage Pro-forma
+    source-text: "Sustainable Drainage Pro-forma: all major development"
+    source-url: https://www.preston.gov.uk/article/5129/Validation-Checklist-for-Planning-and-Other-Applications
+    suggested-id: drainage-strategy
+  - local-name: Outline applications (layout, scale parameters and access points)
+    source-text: "From the audit: outline applications state approximate layout locations, scale parameters
+      and access points where those matters are reserved"
+    source-url: https://www.preston.gov.uk/article/5129/Validation-Checklist-for-Planning-and-Other-Applications
+    suggested-id: outline-parameters
+
+low-confidence:
+  - id: noise-assessment
+    note: "Audit (wrong_trigger): the excerpt describes the assessment's content only; the trigger isn't
+      captured."
+  - id: cil-form
+    note: >-
+      The householder list asks for it where the extension is 100sqm or more of gross internal
+      floorspace; the general list says 'Required for all applications'. The workbook guessed the
+      types for the general list.

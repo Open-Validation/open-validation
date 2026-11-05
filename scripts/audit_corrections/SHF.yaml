@@ -1,0 +1,221 @@
+# Corrections for Sheffield City Council, from the council's audit.
+# Sheffield's list is three checklists on the 'Information requirements' page (Application,
+# Householder and Listed Building Requirements), each dated 7 January 2013; the build takes that
+# url and date from the audit. Grokbot linked the topic index instead, and its Full planning rows
+# quote only the index link blurbs, placed under Full planning by guess. The local drawing
+# requirements below are the audit's summary of the Application and Householder Requirements PDFs.
+# Grokbot did not read the Listed Building Requirements PDF, and the audit gives no detail from it.
+local-authority: SHF
+
+drop-unmapped:
+  - local-name: Sequential / Exception Test (flood)
+    reason: >-
+      wrong_app_type: the excerpt is the town centre uses sequential test, not the flood test;
+      re-added below under its own name
+
+requirements:
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - site:
+            in: [conservation-area]
+            description: The house is in a conservation area.
+    source-url: https://www.sheffield.gov.uk/planning-development/planning-application-requirements/information-requirements
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): the Householder Requirements PDF asks for a Design and
+      Access Statement in conservation areas. The workbook's row was only an index link blurb; the
+      national rules for other applications still apply.
+
+  - id: elevation-existing
+    action: add
+    required-if:
+      application-type:
+        in: [hh, full]
+    source-url: https://www.sheffield.gov.uk/planning-development/planning-application-requirements/information-requirements
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): existing and proposed elevations are a local
+      requirement on the Householder (always) and Application Requirements checklists.
+
+  - id: elevation-proposed
+    action: add
+    required-if:
+      application-type:
+        in: [hh, full]
+    source-url: https://www.sheffield.gov.uk/planning-development/planning-application-requirements/information-requirements
+    must-include:
+      - item: Facing materials
+        level: must
+        required-if:
+          application-type:
+            in: [hh]
+      - item: The wall shown down to ground level
+        level: must
+        required-if:
+          application-type:
+            in: [hh]
+      - item: A street scene drawing where the height of the dwelling is increased
+        level: must
+        required-if:
+          all:
+            - application-type:
+                in: [hh]
+            - condition:
+                field: height-change
+                value: true
+                description: The proposal increases the height of the dwelling.
+      - item: A street scene drawing for infill buildings
+        level: must
+        required-if:
+          all:
+            - application-type:
+                in: [full]
+            - discretionary
+    source-url: https://www.sheffield.gov.uk/planning-development/planning-application-requirements/information-requirements
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Householder and Application Requirements PDFs, Local
+      Requirements. The full-planning elevations have 'specified detail' the audit doesn't list.
+      'Infill building' can't be expressed as a field, so it is shown as officer discretion.
+
+  - id: floor-plan-existing
+    action: add
+    required-if:
+      application-type:
+        in: [hh, full]
+    source-url: https://www.sheffield.gov.uk/planning-development/planning-application-requirements/information-requirements
+    confidence: medium
+    notes: "From the audit (missing_requirement): floor plans are a local requirement (householder: always)."
+
+  - id: floor-plan-proposed
+    action: add
+    required-if:
+      application-type:
+        in: [hh, full]
+    source-url: https://www.sheffield.gov.uk/planning-development/planning-application-requirements/information-requirements
+    confidence: medium
+    notes: "From the audit (missing_requirement): floor plans are a local requirement (householder: always)."
+
+  - id: section-proposed
+    action: add
+    required-if:
+      application-type:
+        in: [hh, full]
+    source-url: https://www.sheffield.gov.uk/planning-development/planning-application-requirements/information-requirements
+    must-include:
+      - item: Finished floor and site levels
+        level: must
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): site sections with finished floor and site levels are
+      needed unless the works are far from any boundary or the area is unusually flat. That
+      exception can't be expressed, so the rule lists the application types only.
+
+  - id: site-plan
+    action: add
+    required-if:
+      application-type:
+        in: [full]
+    source-url: https://www.sheffield.gov.uk/planning-development/planning-application-requirements/information-requirements
+    must-include:
+      - item: Rights of way
+        level: must
+      - item: Trees to be kept or removed
+        level: must
+      - item: Landscaping
+        level: must
+      - item: Access and parking
+        level: must
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a layout plan for all applications on the Application
+      Requirements checklist.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more.
+        - site:
+            in: [critical-drainage-area]
+            description: The site is in flood zone 1 in an area with critical drainage problems
+              notified by the Environment Agency.
+        - discretionary
+    source-text: >-
+      A Flood Risk Assessment is required in the following instances: in Flood zone 1: Development
+      of 1 hectare or greater less than 1 ha in flood zone 1, including a change of use in
+      development type to a more vulnerable class (for example from commercial to residential),
+      where they could be affected by sources of flooding other than rivers and the sea (for example
+      surface water drains, reservoirs). in an area within flood zone 1 which has critical drainage
+      problems as notified by the Environment Age…
+    source-url: https://www.sheffield.gov.uk/planning-development/planning-application-requirements/flood-risk-assessment-local-planning
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the flood risk page's triggers apply to all application types, not
+      just change of use. Sites under 1ha at risk from other sources of flooding are shown as
+      officer discretion. The excerpt is cut off before any flood zone 2 and 3 triggers.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    confidence: medium
+    notes: "The excerpt ties the statement to the Environmental Impact Assessment Regulations."
+
+  - id: affordable-housing-statement
+    action: add
+    source-url: https://www.sheffield.gov.uk/planning-development/planning-application-requirements
+    confidence: low
+    notes: "From the audit (missing_requirement): an Affordable housing topic page is on the requirements index; no trigger is given."
+
+  - id: cil-form
+    action: add
+    source-url: https://www.sheffield.gov.uk/planning-development/planning-application-requirements
+    confidence: low
+    notes: "From the audit (missing_requirement): a Community Infrastructure Levy topic page is on the requirements index; no trigger is given."
+
+unmapped:
+  - local-name: Sequential test (town centre uses)
+    source-text: >-
+      Town centre use Find out when a sequential test is required for town centre development
+      proposals and what information must be provided to support it.
+    source-url: https://www.sheffield.gov.uk/planning-development/planning-application-requirements
+    suggested-id: sequential-test
+  - local-name: Open space statement
+    source-text: "From the audit: an 'Open space statement' topic page is on the requirements index; no trigger is given."
+    source-url: https://www.sheffield.gov.uk/planning-development/planning-application-requirements
+    suggested-id: open-space-assessment
+
+low-confidence:
+  - id: air-quality-assessment
+    note: "Audit (wrong_trigger): the excerpt is only the index link blurb; no trigger is given."
+  - id: bng-metric
+    note: "Audit (wrong_trigger): the excerpt is only a topic page summary; no trigger is given."
+  - id: biodiversity-survey-report
+    note: "Audit (wrong_trigger): the excerpt is only the index link blurb; no trigger is given."
+  - id: sustainability-statement
+    note: "Audit (wrong_trigger): the excerpt is only the index link blurb; no trigger is given."
+  - id: heritage-statement
+    note: >-
+      Audit (wrong_trigger): the excerpt is only the index link blurb. The Listed Building
+      Requirements checklist was not read (audit, missing_requirement).
+  - id: noise-assessment
+    note: "Audit (wrong_trigger): the excerpt is only the index link blurb; no trigger is given."
+  - id: transport-assessment
+    note: "Audit (wrong_trigger): the excerpt is only the index link blurb; no trigger is given."

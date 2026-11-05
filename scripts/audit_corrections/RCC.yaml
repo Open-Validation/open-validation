@@ -1,0 +1,446 @@
+# Corrections for Redcar and Cleveland Borough Council, from
+# inputs/audit/redcar-and-cleveland-borough-council.json.
+# The audit compared the workbook with the council's Local List (reviewed and re-adopted
+# 18 June 2015), which is still in force while the council reviews it. Nearly every workbook row
+# was placed under Full planning by inference; the list sets triggers by threshold, not by
+# application type. Items marked "From the audit" use the audit's paraphrase of the list.
+local-authority: RCC
+
+drop:
+  - id: construction-management-plan
+    reason: "not_a_requirement: not a heading in the list; the excerpt is a fragment of the Drainage strategy entry"
+
+requirements:
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 200
+            description: The application is for 200 or more dwellings.
+        - discretionary
+    source-text: >-
+      Applications for 200 or more dwellings / Applications with potentially air contamination
+      uses. Air quality assessment The assessment should indicate the change in air quality
+      resulting from the proposed development and outline appropriate mitigation measures as
+      necessary.
+    source-url: https://www.redcar-cleveland.gov.uk/sites/default/files/2022-04/Redcar%20and%20Cleveland%20Local%20List%20-%202015.pdf
+    must-include:
+      - item: The change in air quality resulting from the proposed development
+        level: should
+      - item: Appropriate mitigation measures as necessary
+        level: should
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook placed this under Outline only because of the verb
+      'outline'. 'Uses that could contaminate the air' has no field, so it is shown as officer
+      discretion.
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [tree-preservation-zone]
+            description: There are trees protected by a tree preservation order.
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - condition:
+                field: trees-on-or-near-site
+                value: true
+                description: There are trees on or near the site.
+    source-text: >-
+      Tree Survey Information will be required on which trees are to be retained and on the means
+      of protecting these trees during construction works.
+    source-url: https://www.redcar-cleveland.gov.uk/sites/default/files/2022-04/Redcar%20and%20Cleveland%20Local%20List%20-%202015.pdf
+    must-include:
+      - item: Which trees are to be retained
+        level: must
+      - item: The means of protecting retained trees during construction works
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook left out the list's thresholds. From the audit: TPO trees,
+      trees in a conservation area and loss of trees; it can also apply to householder schemes.
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: The application has a vulnerable end user.
+        - ref: major-development
+        - site:
+            in: [contaminated-land]
+            description: Contamination is known or suspected on the site or on land adjoining it.
+    source-text: >-
+      Where an application has been submitted which has a vulnerable end user / All major planning
+      applications excluding change of use applications. Where contamination is known or suspected
+      to exist on the application site or on land adjoining the application site a desktop study
+      will be required, in accordance with DEFRA and the Environment Agency's 'Model Procedures for
+      the Management of Land Contamination, CLR 11'.
+    source-url: https://www.redcar-cleveland.gov.uk/sites/default/files/2022-04/Redcar%20and%20Cleveland%20Local%20List%20-%202015.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted only 'Management of Land Contamination, CLR 11'.
+      The major-development branch excludes change of use applications, which the rule can't
+      express. The desktop-study sentence was in the workbook's open space row.
+
+  - id: recreation-facilities-assessment
+    action: replace
+    required-if:
+      site:
+        in: [open-space]
+        description: Development within designated open spaces, including parks, playing fields or
+          play grounds and allotments.
+    source-text: including parks, playing fields or play grounds and allotments
+    source-url: https://www.redcar-cleveland.gov.uk/sites/default/files/2022-04/Redcar%20and%20Cleveland%20Local%20List%20-%202015.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt ran into the land contamination text. From the
+      audit: development within designated open spaces.
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    source-text: This information might form part of an Environmental Statement, where one is necessary.
+    source-url: https://www.redcar-cleveland.gov.uk/sites/default/files/2022-04/Redcar%20and%20Cleveland%20Local%20List%20-%202015.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt gave no trigger; an Environmental Statement is needed for EIA development."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, demolition-con-area]
+        - site:
+            in: [listed-building]
+            description: Demolition related to a listed building.
+        - all:
+            - ref: major-development
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+    source-text: >-
+      Listed building consent / Demolition within a conservation area or related to a listed
+      building / Major applications within a conservation area. Heritage Statement For applications
+      that affect areas of significant archaeological remains and historic landscapes, the statement
+      should include plans illustrating the historical features including listed
+      buildings/structures, historic parks and gardens and historic battlefields.
+    source-url: https://www.redcar-cleveland.gov.uk/sites/default/files/2022-04/Redcar%20and%20Cleveland%20Local%20List%20-%202015.pdf
+    must-include:
+      - item: Plans illustrating the historical features, including listed buildings/structures,
+          historic parks and gardens and historic battlefields
+        level: should
+        required-if:
+          site:
+            in: [archaeological-priority-area, park-and-garden]
+            description: The application affects areas of significant archaeological remains or
+              historic landscapes.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the workbook's excerpt covered only archaeology and
+      historic landscapes, and omitted listed building consent, demolition in a conservation area
+      and majors in a conservation area.
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    must-include:
+      - item: Information on the existing conditions relating to the development site
+        level: should
+      - item: Details of the development proposal, as per the Department for Transport's Guidance on
+          Transport Assessments
+        level: should
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the list uses the DfT Guidance on Transport Assessments Appendix B
+      thresholds, which the extract does not give; shown as officer discretion.
+
+  - id: telecommunications-report
+    action: replace
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: The application is for telecommunications development (including prior
+          approvals).
+    source-text: >-
+      All telecommunications applications. … Radiation Protection (ICNIRP) guidelines, evidence of
+      assessment of alternative sites and/or mast sharing, and a justification for why the
+      installation is needed.
+    source-url: https://www.redcar-cleveland.gov.uk/sites/default/files/2022-04/Redcar%20and%20Cleveland%20Local%20List%20-%202015.pdf
+    must-include:
+      - item: Evidence of assessment of alternative sites and/or mast sharing
+        level: should
+      - item: A justification for why the installation is needed
+        level: should
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the list says 'All telecommunications applications', including prior
+      approvals, not only Full planning. The ICNIRP item is cut off in the workbook's excerpt.
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 2500
+            description: Over 2,500 square metres gross of retail or leisure floorspace.
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: A town centre use located outside a designated centre (sequential
+              assessment).
+    source-text: >-
+      to accompany town centre uses outside designated centres If the proposal is located outside a
+      designed centre an assessment would be required to show that there are no sequentially
+      preferable sites.
+    source-url: https://www.redcar-cleveland.gov.uk/sites/default/files/2022-04/Redcar%20and%20Cleveland%20Local%20List%20-%202015.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Retail/leisure impact assessment for over 2,500 sq m
+      gross. The sequential-test sentence is the workbook's excerpt.
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [site-of-special-scientific-interest, special-protection-area, local-wildlife-site]
+            description: The site is on or affects a designated nature conservation site.
+        - condition:
+            field: protected-species
+            value: true
+            description: The proposal could affect protected species.
+    source-text: >-
+      Information will also be required relating to protected species, any potential impacts and
+      any mitigation proposals.
+    source-url: https://www.redcar-cleveland.gov.uk/sites/default/files/2022-04/Redcar%20and%20Cleveland%20Local%20List%20-%202015.pdf
+    must-include:
+      - item: Protected species, any potential impacts and any mitigation proposals
+        level: must
+        required-if:
+          condition:
+            field: protected-species
+            value: true
+            description: The proposal could affect protected species.
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): 'Biodiversity survey on designated sites'. The audit does
+      not name which designations, so the site list is a best fit.
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: The proposal is for 10 or more dwellings (where policy requires affordable
+          housing).
+    source-url: https://www.redcar-cleveland.gov.uk/sites/default/files/2022-04/Redcar%20and%20Cleveland%20Local%20List%20-%202015.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): 10+ dwellings where policy requires it."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 200
+            description: The proposal is for over 200 dwellings.
+        - all:
+            - condition:
+                field: new-build
+                value: true
+                description: The proposal includes new buildings.
+            - condition:
+                field: floorspace
+                operator: ">"
+                value: 1000
+                description: New buildings over 1,000 square metres.
+    source-url: https://www.redcar-cleveland.gov.uk/sites/default/files/2022-04/Redcar%20and%20Cleveland%20Local%20List%20-%202015.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Energy reduction / on-site renewables statement for over
+      200 dwellings or new buildings over 1,000 sq m.
+
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare (Flood Zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare (Flood Zone 1).
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3.
+        - site:
+            in: [critical-drainage-area]
+            description: The site is in a critical drainage area.
+    source-url: https://www.redcar-cleveland.gov.uk/sites/default/files/2022-04/Redcar%20and%20Cleveland%20Local%20List%20-%202015.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): over 1 ha in Flood Zone 1, all in Flood Zones 2/3, critical drainage areas."
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      condition:
+        field: floodlighting
+        value: true
+        description: The proposal includes floodlighting (for example car parks or multi-use games
+          areas).
+    source-url: https://www.redcar-cleveland.gov.uk/sites/default/files/2022-04/Redcar%20and%20Cleveland%20Local%20List%20-%202015.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): floodlighting, e.g. car parks, MUGAs."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: plant-equipment
+            value: true
+            description: The proposal includes air conditioning, ventilation/extraction or
+              plant/machinery.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The proposal is for wind turbines or any other noisy use.
+    source-url: https://www.redcar-cleveland.gov.uk/sites/default/files/2022-04/Redcar%20and%20Cleveland%20Local%20List%20-%202015.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): wind turbines, air conditioning, ventilation/extraction,
+      plant/machinery, any noisy use. It can also apply to householder schemes.
+
+  - id: photos
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, demolition-con-area]
+        - site:
+            in: [listed-building]
+            description: Works to a listed building.
+        - all:
+            - ref: major-development
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+        - condition:
+            field: eia-development
+            value: true
+            description: The development needs an Environmental Impact Assessment.
+        - discretionary
+    source-url: https://www.redcar-cleveland.gov.uk/sites/default/files/2022-04/Redcar%20and%20Cleveland%20Local%20List%20-%202015.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Photographs and photomontages for works to listed
+      buildings, demolition and majors in conservation areas, wind turbines, major
+      commercial/industrial schemes and EIA cases. Wind turbines and major commercial/industrial
+      schemes have no field, so they are shown as officer discretion.
+
+  - id: planning-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 10
+            description: Over 10 dwellings.
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 1000
+            description: Over 1,000 square metres of floorspace.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare.
+    source-url: https://www.redcar-cleveland.gov.uk/sites/default/files/2022-04/Redcar%20and%20Cleveland%20Local%20List%20-%202015.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): over 10 dwellings, over 1,000 sq m, or over 1 ha."
+
+  - id: sci
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 10
+            description: Over 10 dwellings.
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 1000
+            description: Over 1,000 square metres of floorspace.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare.
+    source-url: https://www.redcar-cleveland.gov.uk/sites/default/files/2022-04/Redcar%20and%20Cleveland%20Local%20List%20-%202015.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): the same thresholds as the planning statement (over 10 dwellings, 1,000 sq m or 1 ha)."
+
+  - id: travel-plan
+    action: add
+    required-if: discretionary
+    source-url: https://www.redcar-cleveland.gov.uk/sites/default/files/2022-04/Redcar%20and%20Cleveland%20Local%20List%20-%202015.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): required at the DfT Appendix B thresholds, which the
+      extract does not give; shown as officer discretion.
+
+unmapped:
+  - local-name: Drainage strategy
+    source-text: >-
+      From the audit: housing over 10 units, buildings over 1,000 sq m, sites over 1 ha, or where a
+      critical drainage problem has been notified by the EA/LLFA. The entry asks for '...a phasing
+      plan and a construction management plan for drainage on site.'
+    source-url: https://www.redcar-cleveland.gov.uk/sites/default/files/2022-04/Redcar%20and%20Cleveland%20Local%20List%20-%202015.pdf
+    suggested-id: drainage-strategy
+  - local-name: Parking provision
+    source-text: >-
+      Any householder application affecting the existing parking arrangements or relating to the
+      provision of additional bedrooms (from the audit: also all full applications and parking
+      layouts)
+    source-url: https://www.redcar-cleveland.gov.uk/sites/default/files/2022-04/Redcar%20and%20Cleveland%20Local%20List%20-%202015.pdf
+    suggested-id: parking-plan
+

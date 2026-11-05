@@ -1,0 +1,544 @@
+# Corrections for Stratford-on-Avon District Council, from inputs/audit/stratford-on-avon-district-council.json.
+# Grokbot's link is the current Local List (July 2026; the '2023' in the filename is misleading).
+# Grokbot captured under half of the roughly 47 local requirements and filed most of them under
+# Full planning ('INFERRED'), so no application type is given unless the list names one. Many
+# excerpts are method text or page-header fragments. Items marked "From the audit" use the audit's
+# paraphrase of the list's 'When required' column, not the council's exact words.
+local-authority: STR
+
+validation-list:
+  url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+  date: 2026-07
+  date-basis: "audit: running header 'July 2026' on every page; the council's application process page
+    says it 'published a revised Local List in July 2026'"
+
+submission-standards:
+  - item: Draw a scale bar and state the page size that the scale should be read at
+    level: must
+  - item: Clearly identify the north point
+    level: must
+
+drop:
+  - id: construction-management-plan
+    sheets: [Outline]
+    reason: "wrong_app_type: the excerpt says outline applications do NOT normally need one; replaced below"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advice, not a validation requirement"
+  - local-name: Validation checklist form (completed)
+    reason: "not_a_requirement as named: it is the Climate Change Checklist (now sustainability-statement)"
+  - local-name: Ground investigation / Geotechnical / Basement Impact Assessment
+    reason: "wrong_trigger: not a heading in the list"
+  - local-name: Advertisement drawings / illumination details
+    reason: "duplicate: the same Lighting Schemes excerpt as lighting-assessment"
+  - local-name: Design Code / Masterplan / Parameter plans
+    reason: "wrong_trigger: mixes landscaping and tree RPA text (now in landscaping-plan and
+      arboriculturist-report)"
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "wrong_trigger: header text only; replaced below"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: cut off at '1.'; replaced below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    source-text: >-
+      For full and Reserved Matters applications, the affordable housing statement must also include
+      evidence that the estate layout and detailed design of all dwellings proposed as affordable
+      homes has been discussed with, and is considered satisfactory by, a named partner Registered
+      Provider.
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    must-include:
+      - item: Evidence that the estate layout and detailed design of the affordable homes has been
+          discussed with, and is considered satisfactory by, a named partner Registered Provider
+        level: must
+        required-if:
+          application-type:
+            in: [full, reserved-matters]
+    confidence: low
+    notes: >-
+      The workbook placed this under Reserved matters only; the excerpt is an extra content item
+      for full and reserved matters applications. The statement's own trigger was not captured.
+
+  - id: air-quality-assessment
+    action: add
+    required-if: discretionary
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Air Quality Impact Assessment and Damage Cost
+      Calculation for sites at risk of significant air-quality effects.
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: The works affect trees with stems over 75mm in diameter at 1.5m.
+    source-text: >-
+      'RPA's and other constraints must be plotted around each category A,B,C tree on all drawings,
+      in accordance with 'BS 5837:2012' (or subsequent amendments).
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    must-include:
+      - item: Root protection areas and other constraints plotted around each category A, B and C tree
+          on all drawings
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was method text. From the audit: works affecting
+      trees with stems over 75mm at 1.5m, including householder proposals. The must-include item
+      was in the workbook's Design Code row.
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: Major or minor development that is not exempt from statutory biodiversity net gain.
+    confidence: medium
+
+  - id: cil-form
+    action: replace
+    required-if:
+      always: true
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was garbled. From the audit: the CIL Liability
+      Figure is required on every application."
+
+  - id: condition-of-trees
+    action: add
+    required-if:
+      application-type:
+        in: [consent-under-tpo]
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): the Works to TPO Trees section asks for an arboricultural
+      report for health-related works."
+
+  - id: construction-management-plan
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-text: >-
+      Outline applications will not normally require a Construction Management Plan, which can be
+      required by condition.
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the only row was under Outline. From the audit: all major
+      development, development near sensitive uses, or sites with restricted access (shown as
+      officer discretion).
+
+  - id: daylight-sunlight-assessment
+    action: add
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Sunlight/Daylight Assessment is listed; the audit gives
+      no trigger."
+
+  - id: elevation-proposed
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [ldc-prospective-use]
+        - condition:
+            field: residential-extension
+            value: true
+            description: The application is for a proposed dwelling extension.
+    source-text: >-
+      Lawful development applications for proposed dwelling extensions must be accompanied by floor
+      and elevation plans to a recognised scale.
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement): this was only a stray item on the council tab."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: An Environmental Statement is a legal requirement.
+    confidence: medium
+
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone, critical-drainage-area]
+            description: The site is in Flood Zone 2 or 3 (including minor development and change of
+              use), or in a critical drainage area.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare (in Flood Zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: The site is over 1 hectare (in Flood Zone 1).
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Flood Zones 2/3 including minor development and change
+      of use, Zone 1 sites over 1ha, critical drainage areas. It can apply to householder proposals.
+      The workbook's 'A sequential test may also be required' row belongs here.
+
+  - id: floor-plan-proposed
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [ldc-prospective-use]
+        - condition:
+            field: residential-extension
+            value: true
+            description: The application is for a proposed dwelling extension.
+    source-text: >-
+      Lawful development applications for proposed dwelling extensions must be accompanied by floor
+      and elevation plans to a recognised scale.
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement): this was only a stray item on the council tab."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+              scheduled-monument, park-and-garden]
+            description: The proposal affects a heritage asset or its setting.
+    source-text: its setting, a Heritage Statement shall be provided.
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger and missing_requirement): the excerpt is a fragment. The Listed Building
+      Consent section requires a Heritage Statement, and it can apply to householder proposals.
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [contaminated-land]
+            description: The site has an industrial, waste or agricultural history.
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was LCRM method text. From the audit: all major
+      development, plus non-householder sites with an industrial, waste or agricultural history.
+      The rule can't exclude householder applications.
+
+  - id: landscaping-plan
+    action: add
+    required-if:
+      ref: major-development
+    source-text: >-
+      an indicative masterplan to show how the quantum of development proposed and accompanying
+      landscaping and Public Open Space can be accommodated on the site.
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    must-include:
+      - item: An indicative masterplan showing how the quantum of development, landscaping and Public
+          Open Space can be accommodated on the site
+        level: must
+        required-if:
+          application-type:
+            in: [outline]
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Landscaping Details for full major applications, and an
+      indicative masterplan for outline major applications. The council's wording was in the
+      workbook's Design Code row.
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: floodlighting
+            value: true
+            description: The proposal includes floodlighting.
+        - condition:
+            field: external-lighting
+            value: true
+            description: Significant external lighting, including in light sensitive areas (e.g.
+              Cotswold AONB and Special Landscape Areas).
+        - condition:
+            field: illuminated
+            value: true
+            description: The proposal includes illumination of advertisements.
+        - discretionary
+    source-text: >-
+      floodlighting, significant external lighting and illumination of advertisements New
+      residential next/near to existing lighting source Applications in light sensitive areas (eg
+      Cotswold AONB and Special Landscape Areas) where external lighting will be required. …
+      (Policies CS.9 and CS.11) A light impact assessment should provide details of external
+      lighting and the proposed hours when the lighting would be switched on.
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    policy: Core Strategy CS.9, CS.11
+    must-include:
+      - item: Details of external lighting
+        level: should
+      - item: The proposed hours when the lighting would be switched on
+        level: should
+    confidence: medium
+    notes: >-
+      The workbook placed this under Advertisement consent only, twice (audit: duplicate); the
+      triggers cover other applications too. 'New residential next/near to existing lighting
+      source' has no field, so it is shown as officer discretion.
+
+  - id: photos
+    action: add
+    required-if:
+      application-type:
+        in: [lbc]
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): the Listed Building Consent section requires photographs."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Planning Statement for all major development."
+
+  - id: renewables-decommissioning-report
+    action: add
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): Solar Farm requirements include decommissioning; there is
+      no field for solar farms."
+
+  - id: schedule-of-works
+    action: add
+    required-if:
+      application-type:
+        in: [lbc]
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): the Listed Building Consent section requires a schedule
+      of works."
+
+  - id: sci
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Statement of Community Involvement for all major development."
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: There are differences in ground levels.
+    confidence: low
+    notes: "The excerpt is a fragment about showing differences in ground levels on a topographical survey."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: There are differences in ground levels.
+    confidence: low
+    notes: "The excerpt is a fragment about showing differences in ground levels on a topographical survey."
+
+  - id: structural-damage
+    action: add
+    required-if:
+      application-type:
+        in: [consent-under-tpo]
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): the Works to TPO Trees section asks for monitoring data for
+      subsidence claims."
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New build development.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 20
+            description: Non-residential development adding over 20 square metres.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: Conversions.
+        - all:
+            - application-type:
+                in: [hh]
+            - condition:
+                field: floorspace
+                operator: ">"
+                value: 20
+                description: A householder extension adding over 20 square metres.
+    source-text: A completed checklist must accompany all qualifying applications.
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    policy: Development Requirements SPD Part V
+    confidence: medium
+    notes: >-
+      This is the Climate Change Checklist (SPD Part V). Audit (not_a_requirement and
+      missing_requirement): the workbook's 'Validation checklist form' row had lost its name and
+      trigger. From the audit: new build, non-residential development adding over 20 sqm,
+      conversions, and householder extensions adding over 20 sqm.
+
+  - id: telecommunications-report
+    action: add
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): a Telecommunications Infrastructure Assessment is listed;
+      the audit gives no trigger."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: The proposal is outside Stratford town centre.
+        - condition:
+            field: retail-floorspace
+            operator: ">"
+            value: 1000
+            description: Comparison retail over 1,000 sqm (convenience retail over 2,500 sqm).
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): Retail Impact Assessment for comparison retail over 1,000
+      sqm or convenience retail over 2,500 sqm outside Stratford town centre. The rule can't tell
+      comparison from convenience retail, so it uses the lower threshold.
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    confidence: low
+    notes: "Audit (wrong_trigger): the excerpt is a fragment ('of traffic a Travel Plan will be required');
+      shown as officer discretion."
+
+  - id: viability-assessment
+    action: add
+    required-if: discretionary
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Viability Assessment where full S106/CIL cannot be
+      met, and a Financial Appraisal where financial reasons justify the proposal (e.g. loss of a
+      rural pub or shop, enabling development, reduced contributions).
+
+unmapped:
+  - local-name: Agricultural / Rural Workers Assessment
+    source-text: "From the audit: rural worker dwellings, tied dwelling extensions and new agricultural,
+      horticultural or forestry businesses"
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    suggested-id: rural-workers-dwelling-appraisal
+  - local-name: Section 106 Heads of Terms
+    source-text: "From the audit: applications needing a Section 106 agreement, typically six or more houses
+      and larger commercial schemes"
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    suggested-id: planning-obligations-heads-of-terms
+  - local-name: Agricultural Land Quality Assessment
+    source-text: "From the audit: major development on greenfield land"
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    suggested-id: agricultural-land-classification
+  - local-name: BNG Statement for exempt sites
+    source-text: "From the audit: non-householder sites exempt from statutory BNG"
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    suggested-id: ""
+  - local-name: BREEAM Pre-assessment
+    source-text: "From the audit: non-residential development"
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    suggested-id: breeam-pre-assessment
+  - local-name: Connectivity Statement
+    source-text: "From the audit: all new major development (Core Strategy CS.26)"
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    suggested-id: digital-connectivity-plan
+  - local-name: Foul Sewerage Details
+    source-text: "From the audit: non-mains foul sewage disposal"
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    suggested-id: foul-sewage-assessment
+  - local-name: Green Belt Statement
+    source-text: "From the audit: inappropriate development in the Green Belt"
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    suggested-id: green-belt-statement
+  - local-name: Housing Mix Statement
+    source-text: "From the audit: major residential schemes departing from the SHMA mix"
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    suggested-id: housing-mix-statement
+  - local-name: Landscape and Visual Impact Appraisal
+    source-text: "From the audit: major development, and non-householder minor development in or visible
+      from the Cotswolds AONB or a Special Landscape Area"
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Marketing Information
+    source-text: "From the audit: loss of employment or community uses, removal of rural occupancy conditions"
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    suggested-id: marketing-evidence
+  - local-name: Mineral Assessment Report
+    source-text: "From the audit: major non-mineral development in a Mineral Safeguarding Area"
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    suggested-id: minerals-assessment
+  - local-name: Public Open Space Contributions
+    source-text: "From the audit: 10 or more dwellings"
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    suggested-id: ""
+  - local-name: Self-Build Housing
+    source-text: "From the audit: listed without a trigger"
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    suggested-id: self-build-statement
+  - local-name: Solar farm glint and glare assessment
+    source-text: "From the audit: Solar Farm requirements (glint/glare and decommissioning)"
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    suggested-id: ""
+  - local-name: Street Trees
+    source-text: "From the audit: full and reserved matters major applications"
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    suggested-id: ""
+  - local-name: Surface Water Drainage Strategy
+    source-text: "From the audit: all major development, and development in flood-risk areas (Core Strategy
+      CS.4)"
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    suggested-id: drainage-strategy
+  - local-name: Topographical Survey
+    source-text: "From the audit: major sites and minor applications with significant level changes"
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    suggested-id: topographical-survey
+  - local-name: Structural report (listed buildings)
+    source-text: "From the audit: the Listed Building Consent section asks for a structural report where
+      needed"
+    source-url: https://www.stratford.gov.uk/doc/211993/name/2023%20Local%20List%20for%20website.pdf
+    suggested-id: structural-survey
+
+low-confidence:
+  - id: noise-assessment
+    note: "Audit (wrong_trigger): the excerpt is BS 4142 method text with a page header; no trigger was
+      captured (it can apply to householder proposals, e.g. air-conditioning units)."
+  - id: transport-assessment
+    note: "Audit (wrong_trigger): the excerpt is a fragment ending in 'click here'; no trigger was captured."
+  - id: biodiversity-survey-report
+    note: "Audit (wrong_trigger): the ecology excerpt is cut off mid-word; no clear trigger was captured."

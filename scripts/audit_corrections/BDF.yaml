@@ -1,0 +1,532 @@
+# Corrections for Bedford Borough Council, from inputs/audit/bedford-borough-council.json.
+# Grokbot used Bedford's old per-form checklists (Reserved Matters, Planning Permission REV March
+# 2014, Outline, Listed Building, Hedgerow, Demolition prior notification) on the edrms server.
+# The current local list is the 'Local Validation Document Checklist and Guidance on Content'
+# (28 September, probably 2025) with a 'Local Validation List - Matrix'; the matrix excludes
+# prior approval submissions. Items marked "From the audit" use the audit's paraphrase of that list.
+# Workbook rows from the old checklists are kept where their wording gives a clear trigger.
+local-authority: BDF
+
+validation-list:
+  url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+  date: 2025-09-28
+  date-basis: >-
+    audit: link title 'Local Validation Document Checklist and guidance 28 September'; no year is
+    stated, but the document cites 2025 sources (SCI 2025, Bedfordshire Nature Recovery Strategy
+    2025), so probably 2025
+
+drop:
+  - id: site-plan
+    sheets: [Outline, Reserved matters]
+    reason: "not_a_requirement: national drawing standards"
+  - id: floor-plan-existing
+    sheets: [Outline, Reserved matters]
+    reason: "not_a_requirement: national drawing standards"
+  - id: floor-plan-proposed
+    sheets: [Outline, Reserved matters]
+    reason: "not_a_requirement: national drawing standards"
+  - id: elevation-existing
+    sheets: [Outline, Reserved matters]
+    reason: "not_a_requirement: national drawing standards"
+  - id: elevation-proposed
+    sheets: [Outline, Reserved matters]
+    reason: "not_a_requirement: national drawing standards"
+  - id: roof-plan-existing
+    sheets: [Outline, Reserved matters]
+    reason: "not_a_requirement: national drawing standards"
+  - id: roof-plan-proposed
+    sheets: [Outline, Reserved matters]
+    reason: "not_a_requirement: national drawing standards"
+  - id: arboriculturist-report
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: from the demolition prior-notification checklist; the matrix excludes prior approval submissions"
+  - id: photos
+    reason: "wrong_app_type: only row is from the demolition prior-notification checklist; the matrix excludes prior approval submissions"
+  - id: planning-statement
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: from the demolition prior-notification checklist; the matrix excludes prior approval submissions"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: process text ('also provide pre-application advice for a fee')"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: block-plan text about trees and access arrangements, not a separate requirement"
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "wrong_app_type: prior-notification checklist row; the matrix excludes prior approval submissions"
+  - local-name: Minerals / Waste specific statements (county matters)
+    reason: "wrong_app_type: prior-notification checklist row; the matrix excludes prior approval submissions"
+  - local-name: Structural Survey
+    reason: "wrong_app_type: prior-notification checklist row; re-added below with the local list's triggers"
+
+requirements:
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [tree-preservation-zone]
+            description: The proposal affects a tree covered by a tree preservation order.
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - condition:
+                field: trees-on-or-near-site
+                value: true
+                description: The proposal affects trees.
+    source-text: >-
+      In some instances, it maybe necessary for a tree report to be submitted in accordance with
+      BS5837: 2012 Trees in relation to design, demolition and construction (eg. where a proposal
+      affects trees in a conservation area or a tree covered by a tree preservation order).
+    source-url: https://edrms.bedford.gov.uk/OpenDocument.aspx?id=dpM1xA7oxodP7i2UzkcUBA%3d%3d&name=M.%20Approval%20of%20Reserved%20Matters%20Application%20checklist%20(23)%20new.pdf
+    confidence: medium
+    notes: >-
+      From the old per-form checklists. The audit (wrong_app_type) says the local list applies
+      Trees to householders too, so no application type is given.
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [conservation-area]
+            description: The dwelling is located within a conservation area.
+    source-text: >-
+      Design and Access Statement Only required if your … dwelling is located within … a
+      Conservation Area.
+    source-url: https://www.bedford.gov.uk/media/1368/download?inline
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was column-merged text from the old householder
+      checklist; read in order it says a householder DAS is only required within a conservation
+      area. The listed building checklist also asks for one. The current local list was not
+      extracted for this item.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: All new development in Flood Zones 2 and 3 (including householder).
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: Sites of 1 hectare or more in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: Sites of 1 hectare or more in Flood Zone 1.
+        - condition:
+            field: near-watercourse
+            value: true
+            description: The development is within 8 metres of a main river bank.
+    source-text: "All new development in Flood Zones 2 and 3 … 1ha+ sites in Flood Zone 1 … within 8m of a main river bank"
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was column-merged text from the old householder checklist."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, conservation-area]
+        description: The affected property is a listed building, in the setting of a listed building
+          or in a conservation area.
+    must-include:
+      - item: The historical significance of the listed building, including any contribution made by
+          its setting
+        level: should
+      - item: The potential impact on this significance, proportionate to the significance of the
+          building and the amount of work proposed
+        level: should
+    confidence: medium
+    notes: >-
+      The excerpt (column-merged) says a Heritage Statement is required if the affected property is
+      a listed building, in the setting of a listed building or in a conservation area. The audit
+      says the local list applies Heritage to householders too.
+
+  - id: section-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: Sloping sites, or a proposal that involves a change in ground levels.
+        - application-type:
+            in: [lbc]
+    must-include:
+      - item: Existing and finished levels of the site in relation to the surrounding land and
+          buildings (contours, spot levels or cross or long sections)
+        level: must
+        required-if:
+          condition:
+            field: change-in-ground-levels
+            value: true
+            description: Sloping sites, or a proposal that involves a change in ground levels.
+      - item: Sectional (vertical and horizontal) drawings at a scale of not less than 1:20
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+    confidence: medium
+    notes: >-
+      From the old per-form checklists (column-merged): 'Only required in the case of sloping sites
+      or where a proposal involves a change in ground levels or where listed building consent is
+      sought'.
+
+  - id: section-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: Sloping sites, or a proposal that involves a change in ground levels.
+        - application-type:
+            in: [lbc]
+    must-include:
+      - item: Existing and finished levels of the site in relation to the surrounding land and
+          buildings (contours, spot levels or cross or long sections)
+        level: must
+        required-if:
+          condition:
+            field: change-in-ground-levels
+            value: true
+            description: Sloping sites, or a proposal that involves a change in ground levels.
+      - item: Sectional (vertical and horizontal) drawings at a scale of not less than 1:20
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+    confidence: medium
+    notes: >-
+      From the old per-form checklists (column-merged): 'Only required in the case of sloping sites
+      or where a proposal involves a change in ground levels or where listed building consent is
+      sought'.
+
+  - id: elevation-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: external-alterations
+            value: true
+            description: External alterations are proposed to a building.
+        - application-type:
+            in: [lbc]
+    must-include:
+      - item: Elevations of the affected building shown in their entirety
+        level: must
+    confidence: medium
+    notes: "From the old per-form checklists: 'Only required in cases where external alterations are proposed to a building.'"
+
+  - id: elevation-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: external-alterations
+            value: true
+            description: External alterations are proposed to a building.
+        - application-type:
+            in: [lbc]
+    confidence: medium
+    notes: "From the old per-form checklists: 'Only required in cases where external alterations are proposed to a building.'"
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The proposal alters the roof structure.
+    must-include:
+      - item: Shape of the roof illustrated, including valleys and unusual or complicated ridges
+        level: must
+    confidence: low
+    notes: "From the old per-form checklists (column-merged): 'Only required in cases where there is an … roof structure.' The words in the gap are lost."
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The proposal alters the roof structure.
+    must-include:
+      - item: Shape of the roof illustrated, including valleys and unusual or complicated ridges
+        level: must
+    confidence: low
+    notes: "From the old per-form checklists (column-merged): 'Only required in cases where there is an … roof structure.' The words in the gap are lost."
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: parking-spaces
+            operator: ">="
+            value: 300
+            description: 300 or more parking spaces.
+        - site:
+            in: [air-quality-management-area]
+            description: The site is in or affects an Air Quality Management Area.
+        - discretionary
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): 12 categories, including 300+ parking spaces, roads with
+      more than 10,000 vehicles per day and AQMAs. The other categories are not given, so they are
+      shown as officer discretion.
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if: discretionary
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    confidence: medium
+    notes: "From the audit (missing_requirement, wrong_app_type): where the SPG impact on neighbours applies, including householders."
+
+  - id: renewables-decommissioning-report
+    action: add
+    required-if:
+      condition:
+        field: renewable-energy-development
+        value: true
+        description: Renewable energy or grid infrastructure development.
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    confidence: medium
+    notes: "From the audit (missing_requirement): Decommissioning and Site Restoration Plan for renewables and grid infrastructure."
+
+  - id: fire-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: building-height
+            operator: ">"
+            value: 18
+            description: A building over 18 metres tall.
+        - condition:
+            field: storey-count
+            operator: ">="
+            value: 7
+            description: A building of 7 or more storeys.
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    confidence: medium
+    notes: "From the audit (missing_requirement): >18m or 7+ storeys."
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: 10 or more dwellings.
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Housing Statement for 10+ dwellings; mapped to the nearest id."
+
+  - id: landscaping-plan
+    action: add
+    required-if:
+      application-type:
+        in: [full, outline, reserved-matters]
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): Landscape Proposals for outline, full and reserved
+      matters applications where landscaping is to be determined; that condition can't be expressed.
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      ref: major-development
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    confidence: medium
+    notes: "From the audit (missing_requirement): Planning Statement for major applications."
+
+  - id: sci
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    confidence: medium
+    notes: "From the audit (missing_requirement): Statement of Community Involvement for all majors."
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    confidence: medium
+    notes: "From the audit (missing_requirement): Sustainability Statement for all majors."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: A main town centre use outside a centre (sequential test).
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 2500
+            description: Retail impact assessment for more than 2,500 square metres.
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    confidence: medium
+    notes: "From the audit (missing_requirement): Retail/Town Centre (sequential test; RIA >2,500 sqm)."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: The proposal is for telecommunications equipment.
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    confidence: medium
+    notes: "From the audit (missing_requirement): Telecoms statement."
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 1
+        description: The proposal creates new dwellings (waste storage).
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    confidence: low
+    notes: "From the audit (missing_requirement): Waste Audit; all new dwellings need waste storage. Other triggers are not given."
+
+  - id: cil-form
+    action: add
+    required-if:
+      always: true
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    confidence: medium
+    notes: "From the audit (missing_requirement): CIL forms for all applications."
+
+  - id: biodiversity-survey-report
+    action: add
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    confidence: low
+    notes: "From the audit (wrong_app_type): Ecology applies including hedge/tree/pond removal at householder scale; the audit gives no full trigger."
+
+  - id: land-contamination-assessment
+    action: add
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    confidence: low
+    notes: "From the audit (missing_requirement): listed; no trigger given."
+
+  - id: lighting-assessment
+    action: add
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    confidence: low
+    notes: "From the audit (missing_requirement): Lighting Statement listed; no trigger given."
+
+  - id: noise-assessment
+    action: add
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    confidence: low
+    notes: "From the audit (missing_requirement): Noise Impact Assessment listed; no trigger given."
+
+  - id: recreation-facilities-assessment
+    action: add
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    confidence: low
+    notes: "From the audit (missing_requirement): Open Space Assessment listed; no trigger given."
+
+  - id: viability-assessment
+    action: add
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    confidence: low
+    notes: "From the audit (missing_requirement): Viability listed; no trigger given."
+
+  - id: transport-assessment
+    action: add
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    confidence: low
+    notes: "From the audit (missing_requirement): Transport Assessment/Statement listed; no trigger given."
+
+  - id: travel-plan
+    action: add
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    confidence: low
+    notes: "From the audit (missing_requirement): Travel Plan listed; no trigger given."
+
+unmapped:
+  - local-name: Agricultural/rural workers' dwelling appraisal
+    source-text: "From the audit: Agricultural/rural workers' dwelling appraisal"
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    suggested-id: agricultural-worker-dwelling-statement
+  - local-name: Agricultural Land Classification and Soil Statement
+    source-text: "From the audit: Grade 1/2/3a agricultural land"
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    suggested-id: agricultural-land-classification
+  - local-name: Economic Statement
+    source-text: "From the audit: Economic Statement (no trigger given)"
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    suggested-id: economic-statement
+  - local-name: Emergency Services Statement
+    source-text: "From the audit: Emergency Services Statement (no trigger given)"
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    suggested-id: ""
+  - local-name: Health Impact Assessment
+    source-text: "From the audit: 50+ dwellings, 5ha+ employment, retail >500 sqm"
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    suggested-id: health-impact-assessment
+  - local-name: Landscape and Visual Impact Assessment
+    source-text: "From the audit: EIA development, all solar/wind, majors outside settlement boundaries"
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Marketing Strategy
+    source-text: "From the audit: loss of shops/pubs, 12 months"
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    suggested-id: marketing-evidence
+  - local-name: Parking Provision
+    source-text: "From the audit: all applications involving parking"
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    suggested-id: parking-plan
+  - local-name: Planning Obligations Heads of Terms
+    source-text: "From the audit: Planning Obligations Heads of Terms (no trigger given)"
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    suggested-id: heads-of-terms
+  - local-name: Structural Survey
+    source-text: "From the audit: barn conversions, listed buildings"
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    suggested-id: structural-survey
+  - local-name: Surface and Foul Water Drainage
+    source-text: "From the audit: major full and reserved matters applications"
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    suggested-id: drainage-strategy
+  - local-name: Ventilation/Extraction
+    source-text: "From the audit: Ventilation/Extraction (no trigger given)"
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    suggested-id: ventilation-extraction-details
+  - local-name: BNG self-build exemption form
+    source-text: "From the audit: BNG self-build exemption form"
+    source-url: https://www.bedford.gov.uk/files/local-validation-document-checklist-and-guidance-28-september.pdf/download?inline
+    suggested-id: ""
+
+low-confidence:
+  - id: floor-plan-existing
+    note: "Audit (wrong_trigger): the workbook's excerpt is elevation text from the old per-form checklists; check the current local list for floor plan requirements."
+  - id: floor-plan-proposed
+    note: "Audit (wrong_trigger): the workbook's excerpt is elevation text from the old per-form checklists; check the current local list for floor plan requirements."
+
+new-fields:
+  - field: renewable-energy-development
+    kind: boolean
+    label: Renewable energy development
+    description: The proposal is for renewable or low carbon energy generation (for example solar
+      or wind) or electricity grid infrastructure.

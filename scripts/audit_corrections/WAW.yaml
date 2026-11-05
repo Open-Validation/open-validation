@@ -1,0 +1,432 @@
+# Corrections for Warwick District Council, from inputs/audit/warwick-district-council.json.
+# The audit read the Local Validation Checklist (adopted May 2018, reviewed May 2026), the same
+# document Grokbot used. Items marked "From the audit" use the audit's paraphrase of the numbered
+# list items, not the council's exact words.
+local-authority: WAW
+
+validation-list:
+  date: 2026-05
+  date-basis: "audit: cover reads 'Adopted May 2018 / Reviewed May 2026'; the review date is the list's current date"
+
+submission-standards:
+  - item: Drawings at recognisable, standard scales (e.g. 1:50, 1:100 or 1:200), with the '@ paper size' reference
+    level: must
+  - item: A scale bar on the plans
+    level: must
+  - item: Plans submitted at A4 or A3 size where possible
+    level: should
+
+drop:
+  - id: design-and-access-statement
+    reason: "not_a_requirement: the list repeats the national Design and Access Statement requirement"
+
+drop-unmapped:
+  - local-name: Drainage Strategy / SuDS
+    reason: "not_a_requirement: from 'Recommended Additional Documents (not required for validation)'"
+  - local-name: Water efficiency / water usage statement
+    reason: "not_a_requirement: recommended document only; the excerpt is garbled"
+  - local-name: Structural Survey
+    reason: "not_a_requirement: Class Q structural survey is in the recommended section"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: a recommendation to consult WCC Ecological Services"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: template S106 deed clauses; heads of terms are only recommended"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: mislabelled; the text is the town centre Impact Assessment, now in town-centre-impact-assessment"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: mislabelled; the text is the item 23 unallocated parking plan, re-added below"
+  - local-name: Advertisement drawings / illumination details
+    reason: "duplicate: the same luminance sentence as the lighting assessment row"
+
+requirements:
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 11
+            description: Residential development of 11 or more dwellings.
+        - condition:
+            field: housing-floorspace
+            operator: ">"
+            value: 1000
+            description: Residential development of more than 1,000 square metres gross floorspace.
+    source-url: &waw-url https://www.warwickdc.gov.uk/download/downloads/id/8022/local_validation_checklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 1, residential 11+ dwellings or >1,000 sq m gross."
+
+  - id: air-quality-assessment
+    action: add
+    required-if: discretionary
+    source-url: *waw-url
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): item 3, an Air Quality Mitigation Statement for any
+      application increasing vehicle movements, excluding householder applications. The rules have
+      no field for that, so it is shown as officer discretion.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Development that will affect existing trees.
+    must-include:
+      - item: Prepared in accordance with BS 5837:2012, including survey, impact and mitigation proposals
+        level: should
+    confidence: medium
+    notes: >-
+      The excerpt gives the trigger ('All development that will affect existing trees'). Audit
+      (wrong_app_type): this includes householder applications.
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [scheduled-monument, listed-building, park-and-garden]
+            description: The site includes or affects a scheduled monument, listed building or registered
+              park or battlefield.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 0.2
+            description: The site is more than 0.2 hectares.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 0.2
+            description: The site is more than 0.2 hectares.
+    source-text: >-
+      pre- determination archaeological assessment is not necessary, or Provide a desk-based
+      Archaeological Assessment and, if necessary, a field evaluation.
+    source-url: *waw-url
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt omits the site triggers. From the audit: Scheduled
+      Monument, listed building, registered park or battlefield, and sites over 0.2 ha (registered
+      battlefields have no field yet).
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: Major and small sites subject to the biodiversity gain condition.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt omits the major/small-site scope. Development not subject
+      to the condition needs a statement of the reasons instead.
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: Minor and major applications likely to affect protected species (Preliminary
+              Ecological Appraisal).
+        - condition:
+            field: demolition
+            value: true
+            description: Demolition (Preliminary Roost Assessment).
+        - discretionary
+    source-text: of follow-on bat survey may be necessary prior to validation.
+    source-url: *waw-url
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt is a fragment. From the audit: a PEA for minor and major
+      applications likely to affect protected species, plus a Preliminary Roost Assessment for
+      demolition, works to non-inhabited loft voids or mature trees (loft voids and mature trees are
+      shown as officer discretion). The PRA also applies to householder applications.
+
+  - id: cil-form
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: New dwellings.
+        - condition:
+            field: retail-floorspace
+            operator: ">"
+            value: 100
+            description: Retail development over 100 square metres.
+        - all:
+            - condition:
+                field: housing-type
+                value: student
+                description: Student housing.
+            - condition:
+                field: housing-floorspace
+                operator: ">"
+                value: 100
+                description: Over 100 square metres.
+        - all:
+            - condition:
+                field: residential-extension
+                value: true
+                description: A residential extension.
+            - condition:
+                field: floorspace
+                operator: ">"
+                value: 100
+                description: Over 100 square metres.
+    source-url: *waw-url
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt stops at 'All applications which: i.'. From the audit (item
+      8): new dwellings, retail or student housing over 100 sq m, or residential extensions over
+      100 sq m (CIL Form 1).
+
+  - id: energy-statement
+    action: add
+    required-if:
+      always: true
+    policy: Local Plan Policy CC1; Warwick Net Zero Carbon DPD NZC1, NZC2, NZC3
+    source-url: *waw-url
+    must-include:
+      - item: Net Zero Carbon DPD policies NZC1 and NZC2
+        level: must
+        required-if:
+          any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: One or more dwellings.
+            - condition:
+                field: floorspace-non-residential
+                operator: ">="
+                value: 1000
+                description: 1,000 square metres or more of non-residential floorspace.
+      - item: Embodied carbon (NZC3)
+        level: must
+        required-if:
+          ref: major-development
+      - item: Whole-life carbon assessment
+        level: must
+        required-if:
+          any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 50
+                description: 50 or more dwellings.
+            - condition:
+                field: floorspace
+                operator: ">="
+                value: 5000
+                description: 5,000 square metres or more.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's 'Energy / Sustainability Statement' excerpt is Design
+      Statement content. From the audit (item 11): an Energy Statement for all development (Policy
+      CC1), with the Net Zero Carbon DPD items above.
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      condition:
+        field: floorspace-non-residential
+        operator: ">"
+        value: 1000
+        description: Non-residential development over 1,000 square metres.
+    source-url: *waw-url
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a BREEAM Statement for non-residential development over
+      1,000 sq m. The workbook's row here was Design Statement text (see energy-statement).
+
+  - id: environmental-statement
+    action: add
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: Schedule 1 development, or Schedule 2 development screened as EIA development.
+    source-text: >-
+      All development in Schedule 1 of the Regulations or positively screened development in
+      Schedule 2 of the Regulations
+    source-url: *waw-url
+    confidence: medium
+    notes: "Audit (wrong_trigger): this text was in the workbook's Flood Risk Assessment row."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone, critical-drainage-area]
+            description: The site is in Flood Zone 2 or 3 or a critical drainage area.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: A site over 1 hectare in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">"
+            value: 1
+            description: A site over 1 hectare in Flood Zone 1.
+        - discretionary
+    source-url: *waw-url
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted the EIA trigger. From the audit (item 13): Flood
+      Zones 2/3 (including minor development and change of use, and householder), sites over 1 ha
+      in Flood Zone 1, smaller Zone 1 sites with more vulnerable uses or other flood sources (shown
+      as officer discretion), and critical drainage areas.
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [conservation-area, listed-building, listed-building-setting, locally-listed-building]
+            description: The development affects a designated heritage asset, including conservation
+              areas, listed and locally listed buildings.
+    source-url: *waw-url
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement, wrong_app_type): development affecting designated
+      heritage assets, including conservation areas and listed and locally listed buildings; this
+      includes householder and listed building consent applications.
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: Land likely to be contaminated or affected by contamination.
+    source-url: *waw-url
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Contaminated Land Survey."
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: floodlighting
+            value: true
+            description: The proposal includes floodlighting.
+        - all:
+            - application-type:
+                in: [advertising]
+            - condition:
+                field: illuminated
+                value: true
+                description: The advertisement is illuminated.
+    source-text: Lighting assessments will also be required to detail the level of luminance for all
+      advertisements.
+    source-url: *waw-url
+    must-include:
+      - item: The level of luminance for all advertisements
+        level: must
+        required-if:
+          application-type:
+            in: [advertising]
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Lighting/Light Pollution Assessment for floodlighting
+      proposals; the workbook captured only the advertisement sentence.
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Noisy uses beside existing uses.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Residential development beside noise sources.
+    source-url: *waw-url
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Noise/Vibration Impact Assessment."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Office, retail, meeting, tourism, leisure, cultural or sport development
+              outside the town centres identified in the Local Plan.
+        - any:
+            - condition:
+                field: town-centre-use-floorspace
+                operator: ">"
+                value: 500
+                description: Above 500 square metres (2,500 square metres for office development).
+            - discretionary
+    source-text: >-
+      Impact Assessment / Sequential Test Required for all applications for new office, retail,
+      meeting, tourism, leisure, cultural and sport development above 500 sq. m. (2,500 sq. m. for
+      office development) seeking to place development outside of the town centres as identified
+      within the Local Plan. (Outside of the town centre schemes below 500 sq. m. will be considered
+      on a case-by-case basis and an assessment may be required)
+    source-url: *waw-url
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook labelled this a flood sequential test. The rule can't give
+      offices their own 2,500 sq m threshold, so it uses 500 sq m for all uses.
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt is a fragment. From the audit: major applications
+      generating significant traffic.
+
+unmapped:
+  - local-name: Agricultural Land Quality Assessment
+    source-text: "From the audit: all major applications on greenfield land"
+    source-url: https://www.warwickdc.gov.uk/download/downloads/id/8022/local_validation_checklist.pdf
+    suggested-id: agricultural-land-classification
+  - local-name: Design Statement (large residential schemes)
+    source-text: "From the audit: major residential development of 200+ units or more than 10,000 sq m"
+    source-url: https://www.warwickdc.gov.uk/download/downloads/id/8022/local_validation_checklist.pdf
+    suggested-id: design-statement
+  - local-name: Foul Sewerage / Utilities Statement
+    source-text: "From the audit: development not relying solely on connection to the public sewer"
+    source-url: https://www.warwickdc.gov.uk/download/downloads/id/8022/local_validation_checklist.pdf
+    suggested-id: foul-drainage-assessment
+  - local-name: Housing / Local Needs Survey
+    source-text: "From the audit: where local need is the justification for the development"
+    source-url: https://www.warwickdc.gov.uk/download/downloads/id/8022/local_validation_checklist.pdf
+    suggested-id: housing-needs-survey
+  - local-name: Open Space Statement
+    source-text: "From the audit: residential development of 11+ units"
+    source-url: https://www.warwickdc.gov.uk/download/downloads/id/8022/local_validation_checklist.pdf
+    suggested-id: open-space-statement
+  - local-name: Ventilation / Extraction Details
+    source-text: "From the audit: any new ventilation or extraction equipment (including householder)"
+    source-url: https://www.warwickdc.gov.uk/download/downloads/id/8022/local_validation_checklist.pdf
+    suggested-id: ventilation-extraction-details
+  - local-name: Visitor Accommodation Assessment
+    source-text: "From the audit: loss of visitor accommodation"
+    source-url: https://www.warwickdc.gov.uk/download/downloads/id/8022/local_validation_checklist.pdf
+    suggested-id: ""
+  - local-name: Unallocated parking plan
+    source-text: "Plan demonstrating provision of 20% of the total allocated parking space provision as
+      unallocated parking exclusively/ predominantly on street"
+    source-url: https://www.warwickdc.gov.uk/download/downloads/id/8022/local_validation_checklist.pdf
+    suggested-id: parking-plan

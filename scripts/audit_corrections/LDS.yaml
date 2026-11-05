@@ -1,0 +1,543 @@
+# Corrections for Leeds City Council, from inputs/audit/leeds-city-council.json.
+# Leeds' local list is an undated web page (validation requirements) plus a Flood Risk and Surface
+# Water Drainage PDF. Grokbot captured about 13 of roughly 40 local items, filed most under Full
+# planning ('INFERRED'), and several excerpts are fragments from the wrong item. Items below marked
+# "From the audit" use the audit's summary of the page, not the council's exact words.
+# Not added: the audit's notes on discharge of conditions (the relevant drawings and the
+# permission and condition numbers), which add nothing beyond the national requirement.
+local-authority: LDS
+
+drop-unmapped:
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_trigger: the excerpt is the coal recovery exemption; re-added below with the real trigger"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: a cut-off fragment ('then only a drainage plan ...'); re-added below with the audit's triggers"
+  - local-name: Lawful development evidence (statutory declarations etc.)
+    reason: "wrong_app_type: filed under Full planning; re-added below (it belongs to certificates of existing use)"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: The site is within or adjacent to an Air Quality Management Area.
+        - discretionary
+    policy: Natural Resources and Waste Local Plan Policy AIR 1
+    source-text: >-
+      An Air Quality Report is needed if any of these apply: Within or adjacent to Air Quality Area
+      Result in designation of new Air Quality Area Development near designated industrial process
+      Industrial development where emissions could affect surrounding neighbourhood
+    confidence: medium
+    notes: >-
+      The other three cases (would result in a new Air Quality Area, development near a designated
+      industrial process, industrial development whose emissions could affect the neighbourhood)
+      have no field, so they are shown as officer discretion.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: There are trees within the site, or on adjacent land, that could influence or
+              be affected by the development (including street trees).
+        - site:
+            in: [tree-preservation-zone]
+            description: A tree on the site is protected by a TPO (householder TPO tree plan).
+    must-include:
+      - item: Which trees are to be retained
+        level: must
+      - item: The means of protecting the retained trees during construction works
+        level: must
+      - item: A tree plan showing species and protection measures
+        level: must
+        required-if:
+          site:
+            in: [tree-preservation-zone]
+            description: There is a TPO on the site.
+    confidence: medium
+    notes: >-
+      From the audit (wrong_app_type): householder applications need a TPO tree plan where a TPO is
+      on site; listed building consent and prior notification of demolition also need a tree survey
+      where relevant.
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the statutory biodiversity gain condition.
+    confidence: medium
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      condition:
+        field: protected-species
+        value: true
+        description: The site is in or near a bat alert zone, or close to a known bat roost.
+    must-include:
+      - item: A bat scoping survey
+        level: must
+      - item: Where evidence of bats is found, a bat survey that meets the Minimum Standards for Bat
+          Surveys in West Yorkshire, undertaken by a licensed bat worker
+        level: must
+    confidence: medium
+    notes: >-
+      From the audit (wrong_app_type): the bat scoping survey is in the householder section; it is
+      also asked for with listed building consent and prior notification of demolition where
+      relevant. The second item is from the council's submission rules.
+
+  - id: design-and-access-statement
+    action: update
+    source-text: ""
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was photograph guidance ('These can form part of
+      the design and access statement...'); the national rules for a Design and Access Statement
+      still apply.
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: Schedule 1 development, or Schedule 2 development where screening finds
+          significant effects.
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted boilerplate about plans and block plans."
+
+  - id: site-plan
+    action: add
+    required-if:
+      application-type:
+        in: [hh, full]
+    source-text: >-
+      Block plan - existing and proposed Block plan of the site which should: be at a scale of 1:100
+      or 1:200 show all site boundaries show the position, type and height of boundary treatment
+      (walls, gates, fences etc)
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    must-include:
+      - item: Scale of 1:100 or 1:200
+        level: must
+      - item: All site boundaries
+        level: must
+      - item: The position, type and height of boundary treatment (walls, gates, fences etc)
+        level: must
+    confidence: medium
+    notes: >-
+      The council's wording was found in the workbook's Environmental Statement row (cut off). The
+      audit confirms existing and proposed block plans for householder and full applications.
+
+  - id: section-existing
+    action: replace
+    required-if:
+      application-type:
+        in: [hh, full]
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    must-include:
+      - item: Sections and levels at 1:50 or 1:100
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted the flood PDF ('if raised Finished Floor Levels
+      ...'). From the audit: sections and levels at 1:50/1:100 are a standard drawing for
+      householder and full applications.
+
+  - id: section-proposed
+    action: replace
+    required-if:
+      application-type:
+        in: [hh, full]
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    must-include:
+      - item: Sections and levels at 1:50 or 1:100
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): as for section-existing."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in flood zone 2 or 3 (including 3b).
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site (in flood zone 1) is 1 hectare or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site (in flood zone 1) is 1 hectare or more.
+        - site:
+            in: [critical-drainage-area]
+            description: The site is in a critical drainage area.
+    must-include:
+      - item: Details of the proposed surface water management strategy
+        level: should
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt started mid-sentence. From the audit: flood zones 2/3, zone 1
+      sites of 1 ha or more, and critical drainage areas; this also applies to householder
+      applications.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+              scheduled-monument, park-and-garden]
+            description: The proposal affects a heritage asset or its setting.
+        - all:
+            - condition:
+                field: demolition
+                value: true
+                description: The proposal involves demolition.
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+    source-text: >-
+      Heritage statement The scope and degree of detail necessary in a Heritage Statement will vary
+      according to the particular circumstances of each application.
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): from the audit, it applies to proposals affecting a heritage asset or
+      its setting, demolition in conservation areas and LBC applications. For LBC the page also asks
+      for a conservation area impact assessment where the site is within or adjacent to a
+      conservation area.
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: plant-equipment
+            value: true
+            description: The proposal involves plant or machinery such as wind turbines, swimming pools
+              or air conditioning units.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: A noise-sensitive use.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Uses in classes E(c), E(d), F2, sui generis pubs and takeaways, or industry in
+              town centres.
+        - discretionary
+    source-text: >-
+      Noise assessment All proposals involving plant/machinery such as wind turbines, swimming
+      pools, air conditioning units and so on - a noise impact assessment will be required detailing
+      operational noise levels measured in decibels (dB) including the manufacturer's
+      specification/leaflet.
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    must-include:
+      - item: Operational noise levels measured in decibels (dB), with the manufacturer's
+          specification or leaflet
+        level: must
+        required-if:
+          condition:
+            field: plant-equipment
+            value: true
+            description: The proposal involves plant or machinery.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt is the householder plant/machinery wording. From the audit,
+      the full-application trigger also covers noise-sensitive uses, the listed use classes,
+      industry in town centres, and development near noise sources or residential uses (shown as
+      officer discretion). Telecoms prior notifications also need an acoustic report.
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if: discretionary
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    confidence: medium
+    notes: "From the audit (missing_requirement): where there is an adverse impact on current light levels."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: A vulnerable use, including a single house in a garden.
+        - condition:
+            field: previously-developed-land
+            value: true
+            description: A low-vulnerability use on brownfield land.
+        - site:
+            in: [near-landfill-site]
+            description: The site is within 250m of a landfill.
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    must-include:
+      - item: A Phase 1 report
+        level: must
+        required-if:
+          condition:
+            field: sensitive-end-use
+            value: true
+            description: A vulnerable use.
+      - item: A historic map review from 1850 (single houses in gardens)
+        level: must
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): vulnerable uses need a Phase 1; single houses in gardens
+      need a historic map review from 1850; low-vulnerability uses on brownfield land or within
+      250m of a landfill. The exact wording needs checking on the page.
+
+  - id: landscaping-plan
+    action: add
+    required-if:
+      always: true
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    must-include:
+      - item: A landscaping plan at 1:200
+        level: must
+        required-if:
+          ref: major-development
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): landscaping for all applications, plus a 1:200 plan for
+      majors. Which application types 'all applications' covers needs checking. Prior notification
+      of demolition also needs a 1:200 landscaping plan.
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: The proposal includes external lighting in a residential or conservation area.
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    must-include:
+      - item: Hours of use, light pollution and shrouds
+        level: must
+        required-if:
+          application-type:
+            in: [advertising]
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement / wrong_app_type): external lighting in residential or
+      conservation areas; advertisement applications need external lighting details.
+
+  - id: photos
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [advertising, lbc, consent-under-tpo, notice-trees-in-con-area, pa-demo-building]
+        - discretionary
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    must-include:
+      - item: A plan showing the position where the photograph was taken from
+        level: should
+      - item: Interior, exterior and setting photographs, with a location plan
+        level: must
+        required-if:
+          application-type:
+            in: [lbc]
+      - item: Photographs of all elevations (retrospective householder applications)
+        level: must
+        required-if:
+          application-type:
+            in: [hh]
+    confidence: low
+    notes: >-
+      From the audit (wrong_app_type / missing_requirement): photographs or photomontages for
+      adverts; interior, exterior and setting photographs for LBC; photographs for prior
+      notification of demolition and tree works; photographs of all elevations for retrospective
+      householder applications and position photos for satellite dishes (shown as discretion). The
+      first item is the council's wording from the workbook's Design and Access Statement row.
+
+  - id: sci
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    confidence: medium
+    notes: "From the audit (missing_requirement): major and sensitive schemes."
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    must-include:
+      - item: BREEAM assessment
+        level: must
+        required-if:
+          condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 0
+            description: Non-residential major development.
+    confidence: medium
+    notes: "From the audit (missing_requirement): all majors, plus BREEAM for non-residential majors."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      all:
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 2500
+            description: Retail or leisure floorspace over 2,500 square metres.
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: The site is outside a centre.
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    confidence: medium
+    notes: "From the audit (missing_requirement): retail/leisure over 2,500 sq m outside a centre."
+
+  - id: transport-assessment
+    action: add
+    required-if: discretionary
+    policy: Leeds Transport SPD
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): transport assessment/statement for significant transport
+      implications, using the thresholds in the Leeds Transport SPD (not given here).
+
+  - id: travel-plan
+    action: add
+    required-if: discretionary
+    policy: Leeds Transport SPD
+    source-text: >-
+      Travel plans Policies National Planning Policy Framework Adopted Supplementary Planning
+      Documents Travel Plan Requirements Significant transport implications - threshold defined in
+      the Leeds Transport SPD
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    confidence: medium
+    notes: "The thresholds are in the Leeds Transport SPD and are not given here."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      application-type:
+        in: [pa-ecomms-network]
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    must-include:
+      - item: Evidence of notice to owners
+        level: must
+      - item: Notice for masts within 3 km of an aerodrome
+        level: must
+      - item: An acoustic report
+        level: must
+    confidence: low
+    notes: "From the audit (wrong_app_type): the page's telecoms prior notification requirements."
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      always: true
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): waste and refuse storage details for all developments.
+      Which application types 'all developments' covers needs checking.
+
+unmapped:
+  - local-name: Coal Mining Risk Assessment
+    source-text: "Coal Mining Risk Assessment: full and outline non-householder applications in Development High Risk Areas"
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Coal recovery report
+    source-text: >-
+      If the site is also within a High Risk Area, the Coal Mining Risk Assessment Report will cover
+      Coal Recovery so a separate report is not required.
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    suggested-id: coal-recovery-report
+  - local-name: Surface water drainage / SuDS
+    source-text: >-
+      From the audit: drainage information for sites of 1 ha or more in zone 1 and new development in
+      zones 2/3; a Surface Water Drainage Assessment above the 250 m2 minor threshold; a Conceptual
+      SuDS Design Assessment for majors
+    source-url: https://www.leeds.gov.uk/sites/default/files/files-imported/341736a87955719f4a68ea1e04b211698011f40b943e4b243d187bf13dab2827.pdf
+    suggested-id: drainage-strategy
+  - local-name: Lawful development evidence (statutory declarations etc.)
+    source-text: "Sworn affidavit or tenancy agreements plus additional information is required."
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    suggested-id: lawful-development-evidence
+  - local-name: Environmental and amenity impact report
+    source-text: "From the audit: energy, waste and minerals development"
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    suggested-id: environmental-amenity-impact-report
+  - local-name: Glint and glare assessment
+    source-text: "From the audit: development that could cause solar reflection"
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    suggested-id: glint-and-glare-assessment
+  - local-name: Parking provision
+    source-text: "From the audit: listed as a local requirement; no trigger given"
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    suggested-id: parking-plan
+  - local-name: Planning obligations - draft Heads of Terms
+    source-text: "Planning obligations – see also Community Infrastructure Levy (CIL) Requirements Draft Heads of Terms."
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    suggested-id: heads-of-terms
+  - local-name: Sand and gravel safeguarding
+    source-text: "From the audit: sites over 1 ha in a sand and gravel safeguarding area"
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    suggested-id: mineral-safeguarding-assessment
+  - local-name: Minerals/waste safeguarding justification statement
+    source-text: "From the audit: full, outline and reserved matters applications"
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    suggested-id: mineral-safeguarding-assessment
+  - local-name: Tall buildings design statement and wind study
+    source-text: "From the audit: buildings substantially taller than their neighbours"
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    suggested-id: tall-buildings-statement
+  - local-name: Town centre sequential test
+    source-text: "From the audit: main town centre uses outside a centre; extensions of 200 sq m or less are exempt"
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    suggested-id: sequential-test
+  - local-name: Ventilation/extraction details
+    source-text: "From the audit: restaurants, cafes, pubs, takeaways, and large uses with substantial extraction"
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    suggested-id: ventilation-extraction-statement
+  - local-name: Visual representations
+    source-text: "From the audit: major applications and proposals affecting conservation areas"
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    suggested-id: computer-visualisations
+  - local-name: Wind turbines and birds
+    source-text: "From the audit: non-EIA wind turbines within 1 km of the South Pennine Moors SPA"
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    suggested-id: bird-impact-assessment
+  - local-name: Onshore wind
+    source-text: "From the audit: more than 2 turbines or hub height over 15m, with compulsory community pre-application consultation"
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    suggested-id: onshore-wind-statement
+  - local-name: Listed building detail drawings
+    source-text: "From the audit: detail drawings at 1:20 for features being altered, with manufacturer specifications (listed building consent)"
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    suggested-id: joinery-details
+  - local-name: Condition survey (listed buildings)
+    source-text: "From the audit: listed building consent where historic fabric is replaced"
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    suggested-id: condition-survey
+  - local-name: Advertisement drawings
+    source-text: "From the audit: 1:50/1:100 drawings with size, siting, materials, colours, projection, illumination method and cross-section"
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    suggested-id: advertisement-drawings
+  - local-name: Tree works - evidence and tree plan
+    source-text: "From the audit: evidence of advice sought for works to trees; s211 notices need a detailed tree plan with street names and house numbers"
+    source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+    suggested-id: tree-works-plan

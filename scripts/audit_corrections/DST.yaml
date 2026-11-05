@@ -1,0 +1,494 @@
+# Corrections for Dorset Council, from the council's audit.
+# The audit read Dorset's 'National and Local List of Validation Requirements' (adopted 2 February
+# 2026, now v1.3 of 6 August 2026). Grokbot's URL no longer resolves; the same list is served at the
+# -02-02-2026 URL. Most of the workbook's rows were 'INFERRED' under Full planning, so clear triggers
+# from each item's 'When it's required' text are structured below. The minerals and waste section
+# (items 48-68) was not captured and is only noted here.
+local-authority: DST
+
+submission-standards:
+  - item: All plans drawn to an identified standard metric scale, with a stated scale and a scale bar that
+      matches it, and a north point
+    level: must
+  - item: "'Do not scale' removed and replaced with wording that allows the Council to scale from the drawing"
+    level: must
+  - item: Each plan up to date and given a unique reference number and title
+    level: must
+  - item: A revision number shown when a plan is revised
+    level: should
+  - item: Plans submitted as single PDF documents; JPGs and photographs of plans and drawings are not
+      acceptable
+    level: must
+  - item: Single line plans are not acceptable
+    level: must
+  - item: Plans taken from Dorset Explorer or other Dorset Council mapping web pages are not accepted
+      (copyright)
+    level: must
+
+drop:
+  - id: photos
+    sheets: [Householder, Listed building consent]
+    reason: "wrong_trigger: the excerpt says photographs of plans are not acceptable (a drawing standard)"
+  - id: section-existing
+    sheets: [Householder]
+    reason: "wrong_app_type: the excerpt says it applies to non-householder applications only"
+  - id: section-proposed
+    sheets: [Householder]
+    reason: "wrong_app_type: the excerpt says it applies to non-householder applications only"
+  - id: elevation-existing
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: inferred from 'change of use' in text about planning applications"
+  - id: elevation-proposed
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: inferred from 'change of use' in text about planning applications"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: encourages use of the pre-application service"
+  - local-name: Validation checklist form (completed)
+    reason: "duplicate: a mislabelled copy of the sustainability checklist text (item 43)"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: the excerpt is the air quality assessment text; item 46 is re-added below"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: a mid-sentence fragment of the flood risk item ending in the page number '41'"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: reuses the FRA trigger; re-added below with the item heading only"
+  - local-name: Odour / Dust / Vibration assessment
+    reason: "wrong_app_type: the excerpt is item 51 (blasting and vibration, minerals); re-added below"
+  - local-name: Minerals / Waste specific statements (county matters)
+    reason: "wrong_app_type: waste planning statement text placed under Full planning; re-added below"
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "duplicate: a fragment of the Photographs and Photomontages entry"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "duplicate: a fragment of the Daylight/sunlight assessment entry"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if: discretionary
+    notes: "Needed where national or local policy, SPDs or made neighbourhood plans require affordable
+      housing; there is no field for that, so it is shown as officer discretion."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: The site is within or adjoining an Air Quality Management Area.
+        - discretionary
+    source-text: >-
+      aerosols, vapours, odours or any other emissions to the air or for sites within or adjoining an
+      Air Quality Management Area (AQMA) an air quality assessment will be required to be undertaken by
+      a qualified specialist.
+    notes: "Developments with emissions to the air are shown as officer discretion; the start of the
+      trigger is cut off in the excerpt (it was filed under the workbook's Ventilation row)."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees or hedgerows on the application site or near to it.
+    notes: "Audit (wrong_app_type): trees apply to all application types, householder included."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, hh, outline, reserved-matters, technical-details-consent, lbc]
+        - discretionary
+    source-text: >-
+      Required for full, householder, outline, reserved matters, technical details consent and listed
+      building consent applications
+    source-url: https://www.dorsetcouncil.gov.uk/documents/d/guest/validation-national-and-local-list-02-02-2026
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, wrong_trigger): item 23 names these application types; the workbook's
+      householder excerpt was change-log text. Surveys are needed where the application
+      form/biodiversity checklist indicates that ecological information is required, shown here as
+      discretionary. The audit also mentions permission in principle; it is not in the quoted text.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is EIA development under the 2017 EIA Regulations.
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more in height.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building is used for 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone, surface-water-flood-risk]
+            description: The site is in Flood Zone 2, 3 or 3b, or an area at risk of surface water flooding.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site has an area of 1 hectare or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site has an area of 1 hectare or more.
+        - discretionary
+    source-text: >-
+      Flood Risk Assessment flood Risk zone 2, 3 or 3b an area at risk of surface water flooding an
+      area at risk of ground water flooding as identified on the Ground Water Susceptibility of
+      Flooding layer an area identified in the Councils’ Strategic Flood Risk Assessment (SRFA) at
+      risk of flooding in the future … Note: If your site has an area of 1 hect…
+    source-url: https://www.dorsetcouncil.gov.uk/documents/d/guest/householder-checklist-29-04-2025
+    confidence: medium
+    notes: >-
+      The list says 'For all applications*, a site-specific flood risk assessment (FRA) will be
+      required for ... development on a site in Flood Zone 2 or 3 including householder, minor
+      development and change of use'. Groundwater and SFRA future-risk areas have no field, so they are
+      shown as discretionary. The 1 hectare note is cut off in the excerpt.
+
+  - id: floor-plan-existing
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 0
+            description: The proposal creates new or extended floor space.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: The proposal involves a change of use.
+        - condition:
+            field: building-works
+            value: true
+            description: The proposal alters existing buildings, including conversions.
+    source-text: >-
+      Existing and proposed floor plans When it’s required For all applications proposing new or
+      extended floor space, change of use and/or proposals to alter existing buildings including
+      conversions.
+    source-url: https://www.dorsetcouncil.gov.uk/documents/d/guest/validation-national-and-local-list-02-02-2026
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook placed this under prior approval, inferred from the words
+      'change of use'; the item applies to planning applications generally."
+
+  - id: floor-plan-proposed
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 0
+            description: The proposal creates new or extended floor space.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: The proposal involves a change of use.
+        - condition:
+            field: building-works
+            value: true
+            description: The proposal alters existing buildings, including conversions.
+    source-text: >-
+      Existing and proposed floor plans When it’s required For all applications proposing new or
+      extended floor space, change of use and/or proposals to alter existing buildings including
+      conversions.
+    source-url: https://www.dorsetcouncil.gov.uk/documents/d/guest/validation-national-and-local-list-02-02-2026
+    must-include:
+      - item: Finished floor levels for new buildings, related to at least one off-site fixed and clearly
+          identifiable datum point (non-householder applications only)
+        level: must
+        required-if:
+          condition:
+            field: new-build
+            value: true
+            description: The proposal includes new buildings.
+        source-text: >-
+          For new buildings, the floor plan must include finished floor levels for the new building
+          related to at least one-off site fixed and clearly identifiable datum point (this applies to
+          non-householder applications only).
+      - item: Proposed changes marked on the plans
+        level: must
+        required-if:
+          application-type:
+            in: [s73, non-material-amendment]
+        source-text: Section 73 and non-material amendment applications must mark proposed changes
+    confidence: medium
+    notes: "Audit (wrong_app_type, missing_requirement): not prior approval; item 12 requires s73 and
+      non-material amendment applications to mark proposed changes."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+              scheduled-monument, park-and-garden, world-heritage-site]
+            description: The application affects, or has the potential to affect, a heritage asset.
+    source-text: >-
+      Heritage statement When it’s required A heritage statement is required for all applications which
+      affect, or have the potential to affect, a heritage asset.
+    notes: "Audit (wrong_app_type): applies to all application types, householder included."
+
+  - id: landscaping-plan
+    action: replace
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [full]
+            - ref: major-development
+        - all:
+            - application-type:
+                in: [outline, reserved-matters]
+            - discretionary
+        - discretionary
+    source-text: >-
+      Landscaping proposals When it’s required All full applications for major development or where it
+      is identified that the development proposals could have an impact on the landscape character
+      and/or views and visual amenity.
+    source-url: https://www.dorsetcouncil.gov.uk/documents/d/guest/validation-national-and-local-list-02-02-2026
+    confidence: medium
+    notes: "Audit (wrong_app_type): item 31 'Also required for outline and reserved matters applications
+      where landscaping is being applied for' (no field for that, so shown as discretionary)."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: The site is on or near land that has had past or present potentially contaminating
+          uses.
+    notes: "Audit (wrong_app_type): applies to all application types."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: The proposal includes external or free-standing lighting.
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: plant-equipment
+            value: true
+            description: Air source heat pumps, air conditioning units or other plant that may generate noise.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Development that may generate noise affecting sensitive receptors.
+        - discretionary
+    notes: "Audit (wrong_app_type): applies to all application types, householder included."
+
+  - id: photos
+    action: update
+    required-if: discretionary
+    notes: "'For certain proposals' only. The Householder and LBC rows quoted a drawing standard and were
+      dropped (audit wrong_trigger)."
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      application-type:
+        in: [waste-dev]
+    source-text: >-
+      A waste planning statement should also include where applicable: how the facility meets
+      sustainable waste management, drives waste up the waste hierarchy and does not undermine
+      movement up the waste hierarchy (prevent, reuse, recycle, other recovery and disposal);
+    source-url: https://www.dorsetcouncil.gov.uk/documents/d/guest/validation-national-and-local-list-02-02-2026
+    must-include:
+      - item: How the facility meets sustainable waste management and drives waste up the waste hierarchy
+        level: should
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook's only excerpt is the waste planning statement from the
+      minerals and waste section, so it is scoped to waste applications. The general planning
+      statement trigger was not captured."
+
+  - id: protected-landscape-assessment
+    action: add
+    required-if:
+      all:
+        - ref: major-development
+        - site:
+            in: [area-of-outstanding-natural-beauty]
+            description: The site is within a National Landscape.
+    source-url: https://www.dorsetcouncil.gov.uk/documents/d/guest/validation-national-and-local-list-02-02-2026
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 30, National Landscapes assessment of need statement,
+      for major development within a National Landscape."
+
+  - id: schedule-of-works
+    action: add
+    source-url: https://www.dorsetcouncil.gov.uk/documents/d/guest/validation-national-and-local-list-02-02-2026
+    confidence: low
+    notes: "From the audit (missing_requirement): item 40 'Structural surveys and schedules of work' is in
+      the local list; the audit gives no trigger."
+
+  - id: sci
+    action: update
+    required-if:
+      ref: major-development
+    notes: "Audit (wrong_app_type): major development only. The list 'encourages' pre-application
+      consultation for all major applications."
+
+  - id: site-plan
+    action: update
+    required-if:
+      always: true
+    source-text: Site or block plan When it’s required For all applications.
+    must-include:
+      - item: Metric scale, usually 1:500, 1:200 or 1:100 (1:1250, 1:2500 or 1:10,000 for major sites
+          over 1 hectare)
+        level: should
+        source-text: >-
+          A detailed metric scale drawing, usually at scale 1:500, 1:200 or 1:100 for most applications or
+          1:1250 or 1:2500,1:10,000 for major sites more than 1ha
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters, technical-details-consent]
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: New residential units, including change of use/conversion, replacement
+                  dwellings and holiday accommodation.
+            - discretionary
+    source-text: >-
+      Sustainability checklist and statement When it’s required For full planning applications,
+      outline* and reserved matter applications, and applications for technical details consent, a
+      completed checklist and sustainability statement is required for the following types of
+      development: New residential/the creation of additional residential units including change of
+      use/conversion, replacement dwellings and holiday accommodation including hotels.
+    source-url: https://www.dorsetcouncil.gov.uk/documents/d/guest/validation-national-and-local-list-02-02-2026
+    must-include:
+      - item: A completed sustainability checklist, answering the Yes/No column and the reasoning column
+          where relevant
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, duplicate): item 43 is limited to full, outline, reserved matters and
+      technical details consent, not prior approval; the workbook entered it twice per sheet. The
+      excerpt is cut after the first type of development, so the other types are shown as discretionary.
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Mast and antenna development by mobile phone network operators.
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Retail or leisure development outside a town centre, not in accordance with an
+              up-to-date development plan.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 2500
+            description: The proposal exceeds 2,500 square metres of gross floorspace.
+    notes: "The impact assessment threshold is 2,500 sqm; the sequential test part of the item has no
+      separate threshold in the excerpt."
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+
+unmapped:
+  - local-name: Aerodrome and/or radar impact assessment
+    source-text: "From the audit: item 13, for any proposal that could affect aviation (bird hazard in airport
+      safeguarding areas, height over aerodrome thresholds, smoke or dust, radar interference, lighting)"
+    source-url: https://www.dorsetcouncil.gov.uk/documents/d/guest/validation-national-and-local-list-02-02-2026
+    suggested-id: aerodrome-safeguarding-assessment
+  - local-name: Battery energy storage safety statement
+    source-text: "18. Battery energy storage safety statement ... 1 MWh or more, excluding systems linked to a
+      residential dwelling"
+    source-url: https://www.dorsetcouncil.gov.uk/documents/d/guest/validation-national-and-local-list-02-02-2026
+    suggested-id: battery-storage-safety-statement
+  - local-name: Bio-aerosol risk assessment
+    source-text: "From the audit: item 19, for handling or treating biodegradable waste, including composting,
+      within 250 m of homes or sensitive workplaces"
+    source-url: https://www.dorsetcouncil.gov.uk/documents/d/guest/validation-national-and-local-list-02-02-2026
+    suggested-id: bioaerosol-risk-assessment
+  - local-name: Blasting and vibration assessment (minerals)
+    source-text: "51.Blasting and vibration assessment When it’s required For minerals proposals that involve
+      quarry blasting or other significant sources of vibration."
+    source-url: https://www.dorsetcouncil.gov.uk/documents/d/guest/validation-national-and-local-list-02-02-2026
+    suggested-id: vibration-assessment
+  - local-name: Waste planning statement (waste applications)
+    source-text: "A waste planning statement should also include where applicable: how the facility meets
+      sustainable waste management, drives waste up the waste hierarchy and does not undermine movement up
+      the waste hierarchy (prevent, reuse, recycle, other recovery and disposal);"
+    source-url: https://www.dorsetcouncil.gov.uk/documents/d/guest/validation-national-and-local-list-02-02-2026
+    suggested-id: planning-statement
+  - local-name: Additional requirements for minerals and waste applications (items 48-68)
+    source-text: "From the audit: a whole section of about 21 requirements for minerals and waste
+      applications, not captured by the workbook"
+    source-url: https://www.dorsetcouncil.gov.uk/documents/d/guest/validation-national-and-local-list-02-02-2026
+    suggested-id: ""
+  - local-name: Ventilation and extraction statement
+    source-text: "From the audit: item 46, Ventilation and extraction statement (trigger not given)"
+    source-url: https://www.dorsetcouncil.gov.uk/documents/d/guest/validation-national-and-local-list-02-02-2026
+    suggested-id: ventilation-extraction-details
+  - local-name: Sequential and exception tests (flood)
+    source-text: "Flood risk assessments, sequential and exception tests"
+    source-url: https://www.dorsetcouncil.gov.uk/documents/d/guest/validation-national-and-local-list-02-02-2026
+    suggested-id: flood-sequential-test

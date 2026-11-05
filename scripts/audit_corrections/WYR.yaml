@@ -1,0 +1,432 @@
+# Corrections for Wyre Borough Council, from inputs/audit/wyre-borough-council.json.
+# The Local Validation Checklist (Version 2.1, October 2024) is current. Section 1 holds the
+# national requirements (NR) and Section 2 the Wyre requirements (WR.1-WR.34). Grokbot missed about
+# 15 WR items, filed most rows under Full planning ('INFERRED'), and quoted content descriptions
+# instead of triggers. Items marked "From the audit" use the audit's summary of the checklist.
+local-authority: WYR
+
+drop:
+  - id: schedule-of-works
+    reason: "not_a_requirement: the excerpt is the Arboricultural Implications Assessment tree-survey text"
+  - id: landscaping-plan
+    reason: "not_a_requirement: a fragment from the AIA ('a proposed landscaping plan included with the AIA')"
+  - id: photos
+    reason: "not_a_requirement: a content line ('recent and dated photographic evidence of the land')"
+  - id: viability-assessment
+    reason: "wrong_trigger: the row is WR.14 Existing Employment Viability Statement, not a viability appraisal; re-added as unmapped"
+
+drop-unmapped:
+  - local-name: Electric vehicle charging details
+    reason: "not_a_requirement: the fragment 'standard charge Electric Vehicle Recharging (EVR) points.' is not a WR item"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "not_a_requirement: a garbled run of biodiversity source links into the WR.6 heading (WR.6 is in bng-metric below)"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: the row is the WR.25 Odour Assessment; re-added below with its trigger"
+  - local-name: Landscape and Visual Impact Assessment
+    reason: "wrong_trigger: only the Schedule 1 EIA case was captured; re-added below with the full WR.20 trigger"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_app_type: filed under Outline and ran into the WR.31 heading; re-added below"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: The site is within 500m of an Air Quality Management Area.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 80
+            description: Housing of 80 or more units.
+        - condition:
+            field: site-area-residential
+            operator: ">"
+            value: 1
+            description: Housing on a site over 1 hectare.
+        - condition:
+            field: parking-spaces
+            operator: ">"
+            value: 300
+            description: More than 300 extra parking spaces.
+        - discretionary
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt described the content. From the audit: within 500m of an
+      AQMA, housing of 80+ units or over 1ha, more than 60 extra vehicles an hour (shown as officer
+      discretion, no field), or more than 300 extra parking spaces.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [tree-preservation-zone]
+            description: Trees on or near the site are protected by a TPO.
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Trees (including those in a conservation area or on a major development site)
+              are within influencing distance of the development.
+        - discretionary
+    must-include:
+      - item: A survey of existing trees and hedgerows
+        level: must
+      - item: A method statement indicating how the work will be carried out in relation to any trees,
+          including site preparation and earth works
+        level: must
+      - item: A tree constraints plan
+        level: must
+      - item: A tree protection plan
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): from the audit, WR.34 applies to trees under a TPO, in a conservation
+      area, of significant amenity value (shown as officer discretion), on major development, or
+      within influencing distance. It can also apply to householder schemes.
+
+  - id: bng-metric
+    action: update
+    required-if:
+      application-type:
+        in: [full, outline]
+    source-text: >-
+      WR.6 Biodiversity Net Gain Statement & Metric (BNG) The Planning Practice Guidance sets out that
+      LPAs may seek further information (beyond the national minimum information requirements) about
+      the proposed approach to meeting the biodiversity gain objective
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted the national NR.9 text; the local WR.6 BNG Statement
+      & Metric applies to outline and full applications. The council's wording was found in the
+      workbook's Habitats Regulations row.
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - all:
+            - site:
+                in: [conservation-area, world-heritage-site]
+                description: The site is in a conservation area or World Heritage Site.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: One or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: 100 square metres or more of floorspace.
+    source-text: "10+ dwellings; outline 0.5ha+; 1,000 sqm+; 1ha+; LBC; CA/WHS 1+ dwellings or 100 sqm+"
+    source-url: https://www.wyre.gov.uk/downloads/file/2093/wbc-local-validation-checklist-2024-
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was cut off at 'for the following types of
+      applications;'. The source-text is the audit's summary of NR.7, which restates the national
+      thresholds.
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: Schedule 1 development, or Schedule 2 development needing EIA.
+    source-url: https://www.wyre.gov.uk/downloads/file/2093/wbc-local-validation-checklist-2024-
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted a regulations citation instead of the trigger."
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more in height.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has seven or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains two or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    confidence: medium
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2, 3a or 3b.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site (in Flood Zone 1) is 1 hectare or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site (in Flood Zone 1) is 1 hectare or more.
+        - discretionary
+    source-text: >-
+      An FRA is required for all development (including change of use): Within Flood Zones 2, 3a or
+      3b Within Flood Zone 1 where: the site area is 1 hectare or more; or the most up-to-date Wyre
+      Strategic Flood Risk Assessment (SFRA) shows that it will be at risk of flooding from rivers or
+      sea in the future (for example because of climate change); or the site is less than 1 hectare,
+      including a change of use to a more vulnerable type of development (for example commercial to
+      residential), and is on lan…
+    source-url: https://www.wyre.gov.uk/downloads/file/2093/wbc-local-validation-checklist-2024-
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): WR.15 applies to all development, not only prior approvals. Future risk
+      in the SFRA and the cut-off small-site case are shown as officer discretion.
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+              scheduled-monument, park-and-garden]
+            description: The development could affect a heritage asset.
+    must-include:
+      - item: How the development will affect the significance of any heritage assets, including
+          their setting
+        level: must
+      - item: Any harm or loss of significance that may arise from the development
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger / wrong_app_type): WR.17 applies to any development that could affect a
+      heritage asset, including listed building consent and householder schemes.
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: External lighting near homes, heritage assets, wildlife areas or the countryside.
+    must-include:
+      - item: Details of all external lights and when they will be used
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): WR.21 applies near homes, heritage assets, wildlife areas or countryside."
+
+  - id: planning-statement
+    action: update
+    required-if:
+      ref: major-development
+    confidence: medium
+    notes: "Audit (wrong_trigger): WR.26 applies to all major applications."
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      application-type:
+        in: [full, outline, reserved-matters]
+    source-text: >-
+      WR.31 Sustainability Statement What? A sustainability statement should outline the impacts and
+      benefits to the environments that will arise as part of the proposed development.
+    source-url: https://www.wyre.gov.uk/downloads/file/2093/wbc-local-validation-checklist-2024-
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): WR.31 applies to 'All development except householder applications'.
+      The rules can't say 'not householder', so the main planning types are listed; check others.
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">="
+            value: 1000
+            description: New or extended E(a) or D2 development of 1,000 square metres or more.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 2500
+            description: New or extended E(g) development of 2,500 square metres or more.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 100
+            description: 100 or more residential units.
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): WR.33 'New or extended developments of 1,000 sqm ... E(a) or D2 ... 100
+      or more residential units'; E(g) at 2,500 sqm+. The thresholds are use-class specific, which
+      the fields only approximate. The workbook's excerpt is about Transport Statements for smaller
+      schemes.
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: The proposal creates 10 or more dwellings.
+    source-url: https://www.wyre.gov.uk/downloads/file/2093/wbc-local-validation-checklist-2024-
+    confidence: medium
+    notes: "From the audit (missing_requirement): WR.1 Affordable Housing Statement, 10+ dwellings."
+
+  - id: protected-landscape-assessment
+    action: add
+    required-if:
+      site:
+        in: [area-of-outstanding-natural-beauty]
+        description: The site is in or near the Forest of Bowland AONB.
+    source-url: https://www.wyre.gov.uk/downloads/file/2093/wbc-local-validation-checklist-2024-
+    confidence: medium
+    notes: "From the audit (missing_requirement): WR.4 AONB Statement, in or near the Forest of Bowland AONB."
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: Protected species are likely to be affected.
+        - site:
+            in: [priority-habitat]
+            description: The site contains or adjoins a protected or priority habitat.
+    source-url: https://www.wyre.gov.uk/downloads/file/2093/wbc-local-validation-checklist-2024-
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): WR.5 Biodiversity Report for protected species or
+      habitats, e.g. bats for roof works within 100m of water or woodland or barn/church conversions;
+      great crested newts within 250m of a pond; otter/water vole within 50m of a main river. It can
+      apply to householder roof works.
+
+  - id: coastal-change-assessment
+    action: add
+    required-if:
+      site:
+        in: [coastal-erosion-zone]
+        description: The site is in a Coastal Change Management Area.
+    source-url: https://www.wyre.gov.uk/downloads/file/2093/wbc-local-validation-checklist-2024-
+    confidence: medium
+    notes: "From the audit (missing_requirement): WR.9 Coastal Change Management Area Statement."
+
+  - id: waste-management-plan
+    action: add
+    required-if: discretionary
+    source-url: https://www.wyre.gov.uk/downloads/file/2093/wbc-local-validation-checklist-2024-
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): WR.27 Refuse and Recycling Statement for any development
+      generating waste (no field for this, so shown as officer discretion).
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: retail-floorspace
+            operator: ">="
+            value: 500
+            description: 500 square metres or more of retail floorspace.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">="
+            value: 2500
+            description: 2,500 square metres or more of leisure floorspace.
+    source-url: https://www.wyre.gov.uk/downloads/file/2093/wbc-local-validation-checklist-2024-
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): WR.28 Retail Sequential Test and Impact Assessment, with
+      500sqm+ retail and 2,500sqm+ leisure impact thresholds. Whether these apply only outside
+      centres is not stated in the audit.
+
+unmapped:
+  - local-name: Existing Employment Viability Statement
+    source-text: >-
+      An existing employment viability statement is required for any development – including
+      employment-related development - that has the potential to affect the existing employment
+      areas or sites including through redevelopment or through incremental losses where a
+      non-employment use is proposed.
+    source-url: https://www.wyre.gov.uk/downloads/file/2093/wbc-local-validation-checklist-2024-
+    suggested-id: employment-viability-statement
+  - local-name: Odour Assessment
+    source-text: >-
+      From the audit: WR.25, an odour-emitting process near sensitive properties, or sensitive
+      development near an odour source. "The assessment should include current and future levels of
+      odour and all details of any mitigation measures where appropriate such as ventilation/
+      extraction details."
+    source-url: https://www.wyre.gov.uk/downloads/file/2093/wbc-local-validation-checklist-2024-
+    suggested-id: odour-assessment
+  - local-name: Landscape and Visual Impact Assessment
+    source-text: >-
+      From the audit: WR.20, Schedule 1 EIA development, wind turbines, pylons, telecoms masts, solar
+      farms and schemes with significant landscape impact, including near the AONB or affecting the
+      setting of a heritage asset
+    source-url: https://www.wyre.gov.uk/downloads/file/2093/wbc-local-validation-checklist-2024-
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    source-text: >-
+      The requirement for section 106 obligations can be identified at the pre-app stage or within
+      planning and local policies.
+    source-url: https://www.wyre.gov.uk/downloads/file/2093/wbc-local-validation-checklist-2024-
+    suggested-id: heads-of-terms
+  - local-name: Agricultural Building Appraisal
+    source-text: "From the audit: WR.2, new agricultural buildings in the countryside"
+    source-url: https://www.wyre.gov.uk/downloads/file/2093/wbc-local-validation-checklist-2024-
+    suggested-id: agricultural-building-appraisal
+  - local-name: Business Plan
+    source-text: "From the audit: WR.7, tourism accommodation and commercial stables"
+    source-url: https://www.wyre.gov.uk/downloads/file/2093/wbc-local-validation-checklist-2024-
+    suggested-id: business-plan
+  - local-name: Climate Change Statement
+    source-text: "From the audit: WR.8, all development except householder and changes of use with no external alterations"
+    source-url: https://www.wyre.gov.uk/downloads/file/2093/wbc-local-validation-checklist-2024-
+    suggested-id: climate-change-statement
+  - local-name: Community Loss Statement
+    source-text: "From the audit: WR.10, loss of pubs, shops and community halls"
+    source-url: https://www.wyre.gov.uk/downloads/file/2093/wbc-local-validation-checklist-2024-
+    suggested-id: loss-of-community-facility-statement
+  - local-name: Equestrian Development Statement
+    source-text: "From the audit: WR.13, equestrian development"
+    source-url: https://www.wyre.gov.uk/downloads/file/2093/wbc-local-validation-checklist-2024-
+    suggested-id: equestrian-statement
+  - local-name: Green Infrastructure Impact Assessment
+    source-text: "From the audit: WR.16, development affecting open space, play areas or allotments, or 11+ net dwellings"
+    source-url: https://www.wyre.gov.uk/downloads/file/2093/wbc-local-validation-checklist-2024-
+    suggested-id: green-infrastructure-assessment
+  - local-name: Management Plans (children's care homes)
+    source-text: "Children's care homes (Use Class C2), including change of use and lawful development certificates"
+    source-url: https://www.wyre.gov.uk/downloads/file/2093/wbc-local-validation-checklist-2024-
+    suggested-id: management-plan
+  - local-name: Marketing Assessment
+    source-text: "From the audit: WR.23, loss of an employment or retail unit, or change of use of a heritage asset"
+    source-url: https://www.wyre.gov.uk/downloads/file/2093/wbc-local-validation-checklist-2024-
+    suggested-id: marketing-evidence
+
+low-confidence:
+  - id: land-contamination-assessment
+    note: "Audit (wrong_trigger): the excerpt is a sentence fragment with no trigger."
+  - id: noise-assessment
+    note: "Audit (wrong_trigger): the excerpt is a sentence fragment ('residential) – A noise assessment ...') with no full trigger."

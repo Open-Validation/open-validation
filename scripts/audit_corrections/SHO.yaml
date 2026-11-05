@@ -1,0 +1,740 @@
+# Corrections for South Holland District Council, from the council's audit.
+# The audit read the current list, the 'Local List for All Applications (2019)' (Table 1 gives
+# each requirement and when it is needed, by development type). The Householder list was not part
+# of the upload, so Householder rows were judged from Grokbot's own text. Grokbot captured nearly
+# every Table 1 row, but many triggers are cut off at 'a.' or carry a neighbouring row's text.
+# Items marked "From the audit" use the audit's paraphrase; quoted words are the council's.
+local-authority: SHO
+
+validation-list:
+  date: 2019
+  date-basis: "audit: the cover reads only 'Local List ... 2019'; the March 2019 date in the audit text
+    is the South East Lincolnshire Local Plan, and 2019-09-01 was PDF metadata"
+
+submission-standards:
+  - item: All plans include a drawing number for identification purposes
+    level: should
+  - item: Technical reports prepared by suitably qualified people; surveys and assessments up to date
+      and no more than 2 years old
+    level: should
+
+drop:
+  - id: travel-plan
+    reason: "not_a_requirement: from a Transport Assessment sentence ('producing a Travel Plan is not always
+      required'); Table 1 has no Travel Plan row"
+  - id: photos
+    reason: "not_a_requirement: item e of the Heritage Statement (now a must-include there)"
+  - id: schedule-of-works
+    sheets: [Full planning]
+    reason: "wrong_trigger: contaminated land remediation text (now a must-include on
+      land-contamination-assessment)"
+
+drop-unmapped:
+  - local-name: Tall buildings / Wind microclimate assessment
+    reason: "not_a_requirement: a clause in the Daylight/Sunlight trigger; no wind assessment is required"
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "not_a_requirement / duplicate: from the Heritage Statement photographs item"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "duplicate: a fragment of the Daylight/Sunlight trigger"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: process text from 'Pre-application Discussions'"
+  - local-name: Cycle parking details
+    reason: "wrong_trigger: part of the content of the Parking Arrangements row"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: a site layout plan bullet, and the outline access rule (now must-include items on
+      site-plan)"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: carries the Financial Viability text; re-added below"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: a sentence from the FRA content; re-added below"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_trigger: the Householder row is the first Ecology bullet and the second trigger was lost;
+      re-added below"
+  - local-name: Employment / Economic Statement
+    reason: "wrong_trigger: cut off at 'a.'; re-added below"
+  - local-name: Structural Survey
+    reason: "wrong_trigger: cut off at 'a.'; re-added below"
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "wrong_trigger: a content bullet plus a page header; re-added below"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: interleaved columns; re-added below"
+  - local-name: Validation checklist form (completed)
+    reason: "wrong_app_type: filed under Full planning only; re-added below for all planning applications"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The development is residential.
+    source-text: Affordable Housing Statement Required for all major residential developments.
+    confidence: medium
+    notes: "Applies to outline as well as full applications (audit, wrong_app_type)."
+
+  - id: air-quality-assessment
+    action: update
+    required-if: discretionary
+    notes: >-
+      The list refers to the minor, medium or major classes in Table 2 of the draft East Midlands Air
+      Quality Network guidance (June 2017), which aren't reproduced here; shown as officer discretion.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees within the site, or on land adjacent to it, that could influence
+          or be affected by development (including street trees).
+    source-text: >-
+      Tree Survey Required for all applications where there are trees within the application site, or
+      on land adjacent to it, that could influence or be affected by development (including street
+      trees), including works such as site access, service routes and site compounds.
+    confidence: medium
+    notes: "Applies to all applications, including householder. Excerpt debris ('accessed at: 0') removed."
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      site:
+        in: [scheduled-monument, archaeological-priority-area]
+        description: Operational development close to designated heritage assets such as Scheduled
+          Ancient Monuments, or sites on the Historic Environment Record.
+    source-text: >-
+      operational development is deemed close to designated heritage assets such as Scheduled Ancient
+      Monuments
+    source-url:
+      https://www.sholland.gov.uk/media/14057/Local-List-for-All-Applications-2019/pdf/South_Holland_District_Council_Local_List_for_All_Applications_20191.pdf?m=1607959333640
+    must-include:
+      - item: A description of archaeological potential based on evidence obtained from the
+          Lincolnshire Historic Environment Record
+        level: must
+        source-text: >-
+          As a minimum, an Archaeological Assessment must include a description of archaeological
+          potential based on evidence obtained from the Lincolnshire Historic Environment Record,
+          using appropriate expertise where necessary.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook gave content instead of the trigger."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [special-area-of-conservation, special-protection-area,
+              site-of-special-scientific-interest, local-wildlife-site, priority-habitat]
+            description: The development may directly or indirectly affect International Sites
+              (SAC/SPA/Ramsar), SSSI, NNR, SNCI, RIGS, LNR, LWS or s41 priority habitats.
+        - condition:
+            field: demolition
+            value: true
+            description: Applications involving demolition works to an existing building.
+        - condition:
+            field: veteran-trees
+            value: true
+            description: Work to veteran trees, trees with holes or cavities, or trees with a girth over
+              1m.
+        - condition:
+            field: floodlighting
+            value: true
+            description: Floodlighting within 50m of woodland or water.
+        - condition:
+            field: near-watercourse
+            value: true
+            description: Proposals within 20m of rivers.
+        - condition:
+            field: protected-species
+            value: true
+            description: Protected or priority species are known or likely to be present.
+        - discretionary
+    source-text: >-
+      Ecological Assessment Required for all developments which may, directly or indirectly affect: -
+      International Sites (SAC/SPA/ Ramsar); … - Applications involving demolition works to an
+      existing building; … - Major proposals within 500m of a pond or lake or minor proposals within
+      100m of a pond or lake; … - Proposed tree work (felling or lopping)
+    source-url:
+      https://www.sholland.gov.uk/media/14057/Local-List-for-All-Applications-2019/pdf/South_Holland_District_Council_Local_List_for_All_Applications_20191.pdf?m=1607959333640
+    must-include:
+      - item: Recommendations for biodiversity net gain
+        level: must
+        source-text: Make recommendations for biodiversity net gain.
+      - item: A Protected Species Survey, where protected or priority species are known or likely to
+          be present
+        level: must
+        required-if:
+          condition:
+            field: protected-species
+            value: true
+            description: Protected or priority species are known or likely to be present.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook kept only the first bullet. From the audit, the trigger also
+      covers barn conversions, works affecting roof spaces, church curtilages, major proposals within
+      500m (minor within 100m) of a pond or lake, and derelict, allotment or railway land; these are
+      shown as officer discretion. Applies to all application types, including householder,
+      demolition in a conservation area and works to trees.
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the statutory biodiversity gain condition (major
+          applications from 12 February 2024, small sites from 2 April 2024).
+    source-url: https://www.sholland.gov.uk/article/11295
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): the council's web page adds statutory BNG, which is not in
+      the 2019 PDF. Householder development is exempt; the workbook's Householder row was a fragment
+      of the Ecology content.
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+    source-text: >-
+      Daylight/Sunlight Assessment Required where there is the potential for significant loss of
+      sunlight/daylight enjoyed by adjoining properties or building(s), including habitable rooms and
+      associated gardens/amenity space.
+    notes: "Applies to householder and other applications. The trigger also covers tall buildings."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: One or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: 100 square metres or more of floorspace.
+        - application-type:
+            in: [lbc]
+    source-text: >-
+      Design and Access Statement A Design and Access Statement is required for: All major
+      applications (as defined in the DMPO) (whether outline or full); … All applications for Listed
+      Building Consent.
+    source-url:
+      https://www.sholland.gov.uk/media/14057/Local-List-for-All-Applications-2019/pdf/South_Holland_District_Council_Local_List_for_All_Applications_20191.pdf?m=1607959333640
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): the workbook stopped after the major-applications bullet."
+
+  - id: elevation-existing
+    action: update
+    required-if:
+      condition:
+        field: external-alterations
+        value: true
+        description: New elevations are proposed and/or existing elevations are altered.
+    source-text: >-
+      Existing and proposed elevations Required for all applications where: - New elevations are
+      proposed; and/or - Existing elevations are altered.
+    must-include:
+      - item: Drawn to a recognised metric scale, preferably at 1:50 or 1:100
+        level: should
+      - item: Written/annotated external dimensions of new buildings/extensions
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the scale note, not the trigger."
+
+  - id: elevation-proposed
+    action: update
+    required-if:
+      condition:
+        field: external-alterations
+        value: true
+        description: New elevations are proposed and/or existing elevations are altered.
+    source-text: >-
+      Existing and proposed elevations Required for all applications where: - New elevations are
+      proposed; and/or - Existing elevations are altered.
+    must-include:
+      - item: Drawn to a recognised metric scale, preferably at 1:50 or 1:100
+        level: should
+      - item: Written/annotated external dimensions of new buildings/extensions
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the scale note, not the trigger."
+
+  - id: floor-plan-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 0
+            description: New floor space is proposed.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: A change of use of floor space is proposed.
+    must-include:
+      - item: Drawn to a recognised metric scale, preferably at 1:50 or 1:100
+        level: should
+    confidence: medium
+    notes: "From the audit (wrong_trigger): needed for new floor space or change of use of floor space."
+
+  - id: floor-plan-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 0
+            description: New floor space is proposed.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: A change of use of floor space is proposed.
+    must-include:
+      - item: Drawn to a recognised metric scale, preferably at 1:50 or 1:100
+        level: should
+    confidence: medium
+    notes: "From the audit (wrong_trigger): needed for new floor space or change of use of floor space."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is listed under Schedule 1 or Schedule 2 of the EIA Regulations.
+    notes: "The list cites the 1999 EIA Regulations (since replaced by the 2017 Regulations)."
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in flood zone 2 or 3 (including minor development and change of
+              use).
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (in flood zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (in flood zone 1).
+        - site:
+            in: [surface-water-flood-risk, critical-drainage-area]
+            description: A site under 1 hectare at risk from other sources of flooding, or with
+              critical drainage problems notified by the Environment Agency.
+    source-text: >-
+      a. In flood zone 2 or 3 (including minor development and change of use); or b. Of 1 hectare
+      (ha) or more in flood zone 1.
+    source-url:
+      https://www.sholland.gov.uk/media/14057/Local-List-for-All-Applications-2019/pdf/South_Holland_District_Council_Local_List_for_All_Applications_20191.pdf?m=1607959333640
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook gave only 'most developments within one of the flood zones'."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, demolition-con-area]
+        - site:
+            in: [conservation-area]
+            description: The site is in a conservation area (excluding changes of use with no
+              operational development).
+        - site:
+            in: [listed-building-setting, locally-listed-building]
+            description: Material impact on the setting of a listed, locally listed or other
+              designated or non-designated heritage asset.
+    source-text: "Heritage Statement Required for all applications: a. For Listed Building Consent; …"
+    source-url:
+      https://www.sholland.gov.uk/media/14057/Local-List-for-All-Applications-2019/pdf/South_Holland_District_Council_Local_List_for_All_Applications_20191.pdf?m=1607959333640
+    must-include:
+      - item: "Photographs: a general image showing the building in context (including neighbours,
+          streetscene or landscape)"
+        level: must
+        source-text: >-
+          Photographs comprising: a general image showing the building in context (incl.
+          neighbours, streetscene or landscape); single image of each elevation where practical;
+          detailed images of items/areas to be altered/removed/demolished. (This is especially
+          relevant to window replacement applications).
+      - item: A single photograph of each elevation, where practical
+        level: should
+      - item: Detailed photographs of items or areas to be altered, removed or demolished
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the workbook's trigger was cut off at 'a.'. From the
+      audit: listed building consent; conservation areas, excluding changes of use with no operational
+      development; and material impact on the setting of a heritage asset. The exclusion can't be
+      expressed in the rule. The photographs item was split out by the workbook as separate rows.
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: Land with known or suspected contamination.
+        - condition:
+            field: previously-developed-land
+            value: true
+            description: The site is a brownfield site.
+        - ref: major-development
+    source-text: >-
+      The requirement applies to all brownfield sites … should be undertaken as standard for major
+      developments
+    source-url:
+      https://www.sholland.gov.uk/media/14057/Local-List-for-All-Applications-2019/pdf/South_Holland_District_Council_Local_List_for_All_Applications_20191.pdf?m=1607959333640
+    must-include:
+      - item: Any remediation detailed in a remediation method statement, setting out the
+          verification required
+        level: should
+        source-text: >-
+          Any remediation should be detailed in a remediation method statement, which must clearly set
+          out the verification required.
+    confidence: medium
+    notes: "Audit (wrong_app_type, wrong_trigger): not outline-only; the workbook gave content, not the trigger."
+
+  - id: landscaping-plan
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      Landscaping Proposals Details of landscaping proposals are normally required to be submitted (by
+      planning condition) after permission has been granted. … - Large scale development is proposed;
+    source-url:
+      https://www.sholland.gov.uk/media/14057/Local-List-for-All-Applications-2019/pdf/South_Holland_District_Council_Local_List_for_All_Applications_20191.pdf?m=1607959333640
+    confidence: medium
+    notes: >-
+      From the audit (wrong_trigger): needed at submission where large-scale development is proposed,
+      on prominent sites in open countryside, or on a new settlement edge. No threshold is given, so
+      shown as officer discretion.
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: External lighting (such as floodlighting) near sensitive areas such as residential
+          properties, a listed building or a conservation area, protected wildlife or open
+          countryside.
+    source-text: >-
+      Lighting Assessment Required for applications involving external lighting (such as
+      floodlighting) near sensitive areas such as residential properties, a listed building or a
+      conservation area, protected wildlife or open countryside.
+    source-url:
+      https://www.sholland.gov.uk/media/14057/Local-List-for-All-Applications-2019/pdf/South_Holland_District_Council_Local_List_for_All_Applications_20191.pdf?m=1607959333640
+    confidence: medium
+    notes: "Audit (wrong_app_type, wrong_trigger): not a listed building consent item, and not needed for all
+      applications."
+
+  - id: location-plan
+    action: add
+    source-url:
+      https://www.sholland.gov.uk/media/14057/Local-List-for-All-Applications-2019/pdf/South_Holland_District_Council_Local_List_for_All_Applications_20191.pdf?m=1607959333640
+    must-include:
+      - item: The red line links to a highway
+        level: must
+        source-text: the red line must link to a highway. It should also include any visibility splays
+      - item: The red line includes any visibility splays
+        level: should
+    confidence: medium
+    notes: "From the audit (missing_requirement): local site location plan rules (scale 1:1250 or 1:2500,
+      two named roads, blue line for other land owned)."
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: A new noise-sensitive use near a noise source.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: A new noise-generating use near a noise-sensitive use.
+        - condition:
+            field: plant-equipment
+            value: true
+            description: Alteration of an existing industrial or commercial site (new plant, layout or
+              working hours).
+    source-text: "Noise Impact Assessment Required for applications for: a. …"
+    source-url:
+      https://www.sholland.gov.uk/media/14057/Local-List-for-All-Applications-2019/pdf/South_Holland_District_Council_Local_List_for_All_Applications_20191.pdf?m=1607959333640
+    confidence: medium
+    notes: "From the audit (wrong_trigger): the workbook's trigger was cut off at 'a.'. Changes to layout or
+      working hours are included in the third branch."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      condition:
+        field: loss-of-open-space
+        value: true
+        description: Redevelopment or change of use of open space, sporting facilities (including
+          playing fields), recreational facilities and/or green infrastructure.
+    confidence: medium
+    notes: "From the audit (wrong_trigger): the workbook's excerpt started mid-sentence."
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: New roof details are proposed.
+    source-text: Roof plans Required for all applications where new roof details are proposed.
+    confidence: medium
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: New roof details are proposed.
+    source-text: Roof plans Required for all applications where new roof details are proposed.
+    confidence: medium
+
+  - id: section-existing
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, reserved-matters]
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: A change in ground levels is proposed, and/or the site slopes.
+    source-text: >-
+      Existing and proposed site sections and finished floor and site levels Required for all full and
+      reserved matters applications: - Where a change in ground levels is proposed; and/or - On sloping
+      sites.
+    source-url:
+      https://www.sholland.gov.uk/media/14057/Local-List-for-All-Applications-2019/pdf/South_Holland_District_Council_Local_List_for_All_Applications_20191.pdf?m=1607959333640
+    must-include:
+      - item: A full Topographical Survey for major proposals
+        level: must
+        required-if:
+          ref: major-development
+        source-text: e. Provide a full Topographical Survey for major proposals
+    confidence: medium
+    notes: "Audit (wrong_app_type): the list names full applications too. The Householder list has the same
+      trigger."
+
+  - id: section-proposed
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, reserved-matters]
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: A change in ground levels is proposed, and/or the site slopes.
+    source-text: >-
+      Existing and proposed site sections and finished floor and site levels Required for all full and
+      reserved matters applications: - Where a change in ground levels is proposed; and/or - On sloping
+      sites.
+    source-url:
+      https://www.sholland.gov.uk/media/14057/Local-List-for-All-Applications-2019/pdf/South_Holland_District_Council_Local_List_for_All_Applications_20191.pdf?m=1607959333640
+    must-include:
+      - item: A full Topographical Survey for major proposals
+        level: must
+        required-if:
+          ref: major-development
+        source-text: e. Provide a full Topographical Survey for major proposals
+    confidence: medium
+    notes: "Audit (wrong_app_type): the list names full applications too. The Householder list has the same
+      trigger."
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: The proposed development in relation to the site boundaries and other existing buildings
+          and features on the site, with written/annotated dimensions between new buildings and site
+          boundaries
+        level: must
+      - item: Existing and proposed vehicle and cycle parking arrangements
+        level: must
+        source-text: Details of existing and proposed vehicle and cycle parking arrangements.
+      - item: Indicative or illustrative details of the intended access arrangements, where access is
+          a reserved matter
+        level: must
+        required-if:
+          application-type:
+            in: [outline]
+        source-text: >-
+          Where access is a reserved matter, outline applications must still provide indicative or
+          illustrative details of the intended access arrangements.
+    notes: >-
+      The content items come from the list's site layout plan, parking and outline sections, which
+      the workbook had filed as separate rows. The parking item belongs to the list's Parking
+      Arrangements row and may not apply to every application.
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: A main town centre use outside Spalding and the District and Local Centres.
+    source-url:
+      https://www.sholland.gov.uk/media/14057/Local-List-for-All-Applications-2019/pdf/South_Holland_District_Council_Local_List_for_All_Applications_20191.pdf?m=1607959333640
+    must-include:
+      - item: A sequential test
+        level: must
+      - item: A Retail Impact Assessment, for over 250m2 of floorspace (gross)
+        level: must
+        required-if:
+          condition:
+            field: retail-floorspace
+            operator: ">"
+            value: 250
+            description: Over 250 square metres of floorspace (gross figure).
+        source-text: over 250m2 of floorspace (gross figure)
+    confidence: medium
+    notes: "From the audit (wrong_trigger): a sequential test for out-of-centre main town centre uses, and
+      a Retail Impact Assessment over 250m2 gross outside Spalding and the District/Local Centres."
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 80
+            description: 80 or more dwellings.
+        - condition:
+            field: retail-floorspace
+            operator: ">="
+            value: 1000
+            description: 1000m2 and above gross retail floor space.
+        - condition:
+            field: office-floorspace
+            operator: ">="
+            value: 2500
+            description: 2500m2 and above gross office floor space.
+        - condition:
+            field: industrial-floorspace
+            operator: ">="
+            value: 5000
+            description: 5000m2 and above gross industrial floor space.
+        - condition:
+            field: warehousing-floorspace
+            operator: ">="
+            value: 10000
+            description: 10000m2 and above gross warehousing floor space.
+    source-text: >-
+      Transport Assessment Required for applications which would result in the development of: a. 80
+      or more dwellings; b. 1000m2 and above gross retail floor space; c. 2500m2 and above gross office
+      floor space; d. 5000m2 and above gross industrial floor space; and e. 10000m2 and above gross
+      warehousing floor space.
+    source-url:
+      https://www.sholland.gov.uk/media/14057/Local-List-for-All-Applications-2019/pdf/South_Holland_District_Council_Local_List_for_All_Applications_20191.pdf?m=1607959333640
+    confidence: medium
+    notes: "Applies to outline as well as full applications (audit, wrong_app_type)."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    source-text: >-
+      Financial Viability Assessment Required for all applications that do not offer the full range
+      of planning obligations required by policy.
+    confidence: medium
+
+unmapped:
+  - local-name: Planning Obligations / Draft Heads of Terms
+    source-text: Required for all major developments.
+    source-url:
+      https://www.sholland.gov.uk/media/14057/Local-List-for-All-Applications-2019/pdf/South_Holland_District_Council_Local_List_for_All_Applications_20191.pdf?m=1607959333640
+    suggested-id: planning-obligations-heads-of-terms
+  - local-name: Surface Water Drainage Strategy
+    source-text: "From the audit: all major developments. '- Outline applications: Level 2 ...' (Outline
+      Whole Site Drainage Strategy and Level 2 Ground Investigation) / '- Reserved Matters and Full
+      applications: Level 3 ...' (Detailed Strategy and Level 3 Geotechnical Interpretive Report)"
+    source-url:
+      https://www.sholland.gov.uk/media/14057/Local-List-for-All-Applications-2019/pdf/South_Holland_District_Council_Local_List_for_All_Applications_20191.pdf?m=1607959333640
+    suggested-id: drainage-strategy
+  - local-name: Habitats Regulations Assessment (Project Level)
+    source-text: >-
+      Habitats Regulations Assessment (ProjectLevel) Required for all housing development within the
+      following Sustainable Urban Extensions: Spalding (sites Pin024 and Pin045 as indicated on Inset
+      Map 2 of the South East Lincolnshire Local Plan, March 2019); and Holbeach West (site Hob048 as
+      indicated on Inset Map 5 of the South East Lincolnshire Local Plan, March 2019). … all major
+      housing proposals within 10km of The Wash
+    source-url:
+      https://www.sholland.gov.uk/media/14057/Local-List-for-All-Applications-2019/pdf/South_Holland_District_Council_Local_List_for_All_Applications_20191.pdf?m=1607959333640
+    suggested-id: habitats-regulations-assessment
+  - local-name: Economic Statement
+    source-text: "From the audit: new major B1/B2/B8 development, or loss of B1/B2/B8 land or buildings to
+      another use"
+    source-url:
+      https://www.sholland.gov.uk/media/14057/Local-List-for-All-Applications-2019/pdf/South_Holland_District_Council_Local_List_for_All_Applications_20191.pdf?m=1607959333640
+    suggested-id: employment-statement
+  - local-name: Structural Survey
+    source-text: >-
+      b. Any listed building or structure where works are proposed that involve demolition or would
+      affect the structural integrity (From the audit: also rural building conversions)
+    source-url:
+      https://www.sholland.gov.uk/media/14057/Local-List-for-All-Applications-2019/pdf/South_Holland_District_Council_Local_List_for_All_Applications_20191.pdf?m=1607959333640
+    suggested-id: structural-survey
+  - local-name: Marketing evidence (loss of B1/B2/B8 employment land)
+    source-text: >-
+      Any marketing evidence which demonstrates there is a lack of demand for the land/building in its
+      current use class
+    source-url:
+      https://www.sholland.gov.uk/media/14057/Local-List-for-All-Applications-2019/pdf/South_Holland_District_Council_Local_List_for_All_Applications_20191.pdf?m=1607959333640
+    suggested-id: marketing-evidence
+  - local-name: Ventilation/Extraction Statement
+    source-text: >-
+      Ventilation/Extraction Statement Required for all applications for: - The use of premises for the
+      cooking of food (Use Classes A3, A4 and A5) … (From the audit: also B1/B2 uses with odour and
+      'substantial ventilation equipment')
+    source-url:
+      https://www.sholland.gov.uk/media/14057/Local-List-for-All-Applications-2019/pdf/South_Holland_District_Council_Local_List_for_All_Applications_20191.pdf?m=1607959333640
+    suggested-id: ventilation-extraction-details
+  - local-name: Information Checklist
+    source-text: An Information Checklist must be completed and submitted with all planning
+      applications.
+    source-url:
+      https://www.sholland.gov.uk/media/14057/Local-List-for-All-Applications-2019/pdf/South_Holland_District_Council_Local_List_for_All_Applications_20191.pdf?m=1607959333640
+    suggested-id: validation-checklist
+
+low-confidence:
+  - id: schedule-of-works
+    note: "The Householder excerpt ('Where appropriate, this could include a schedule, method statement and/or
+      specification of works.') looks like part of another item's content, not a trigger."
+
+new-fields:
+  - field: office-floorspace
+    kind: number
+    label: Office floorspace (sqm)
+    description: Gross new or additional office floorspace proposed, in square metres.
+  - field: industrial-floorspace
+    kind: number
+    label: Industrial floorspace (sqm)
+    description: Gross new or additional industrial floorspace proposed, in square metres.
+  - field: warehousing-floorspace
+    kind: number
+    label: Warehousing floorspace (sqm)
+    description: Gross new or additional warehousing (storage and distribution) floorspace proposed,
+      in square metres.

@@ -1,0 +1,226 @@
+# Corrections for Erewash Borough Council, from inputs/audit/erewash-borough-council.json.
+# Grokbot read only the general 'apply for planning permission' page, whose 'Specific National
+# Validation Requirements' section it captured. Erewash's local requirements are on two linked,
+# undated pages: 'Additional Plans required in Erewash' and 'Additional Reports required in
+# Erewash' (node/354). The audit summarises those pages; items marked "From the audit" use its
+# paraphrase, not the council's exact words.
+local-authority: ERE
+
+validation-list:
+  url: https://www.erewash.gov.uk/node/354
+  date-basis: >-
+    audit: undated. The local requirements are on two pages: 'Additional Reports required in
+    Erewash' (this url) and https://www.erewash.gov.uk/planning/additional-plans-required-erewash
+
+requirements:
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Retail and/or leisure uses outside a designated or proposed town centre.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">="
+            value: 2500
+            description: 2,500 square metres gross floorspace or more.
+    source-text: >-
+      Town Centre Impact Assessment All applications for retail and / or leisure uses of 2,500sqm
+      gross floorspace or more that are located outside a designated or proposed town centre
+    confidence: medium
+    notes: >-
+      The council lists this under 'Specific National Validation Requirements' (NPPF), not as a
+      local requirement (audit: wrong_document).
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    confidence: low
+    notes: >-
+      Needed for all applications that do not provide the infrastructure, including affordable
+      housing, required by adopted policy. The council lists this under 'Specific National
+      Validation Requirements', not as a local requirement (audit: wrong_document).
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: demolition
+            value: true
+            description: The proposal involves demolition (bat survey).
+        - all:
+            - any:
+                - condition:
+                    field: greenfield-site
+                    value: true
+                    description: Greenfield or re-vegetated brownfield land.
+                - condition:
+                    field: near-watercourse
+                    value: true
+                    description: The site is next to a watercourse.
+            - any:
+                - condition:
+                    field: involves-change-of-use
+                    value: true
+                    description: The proposal changes the use of the land.
+                - condition:
+                    field: new-build
+                    value: true
+                    description: The proposal includes new buildings.
+        - discretionary
+    source-url: https://www.erewash.gov.uk/node/354
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a Bat Survey Report for all applications involving
+      demolition, barn conversions, and conversions involving roof-space works next to relevant
+      landscape features (barn and roof-space conversions are shown as officer discretion); and a
+      Protected Species Survey Report for greenfield, re-vegetated brownfield, or sites next to a
+      watercourse involving change of use of land or new buildings, excluding householder
+      applications (the rule can't express that exclusion).
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Noisy development near noise-sensitive uses.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise-sensitive uses near noise sources.
+        - condition:
+            field: plant-equipment
+            value: true
+            description: Commercial extraction or cooling units.
+        - discretionary
+    source-url: https://www.erewash.gov.uk/node/354
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Noise Impact Assessment for noisy development near
+      sensitive uses, sensitive uses near noise sources, mixed use, and commercial
+      extraction/cooling units. Mixed use is shown as officer discretion.
+
+  - id: planning-statement
+    action: add
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: Major housing development of 10 or more dwellings.
+    policy: Core Strategy Policies 8 and 19; saved policies H7 and H9
+    source-url: https://www.erewash.gov.uk/node/354
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): 'Local Planning Statement' details for major housing of
+      10 or more dwellings.
+
+  - id: elevation-existing
+    action: add
+    required-if: &ere-plans
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal includes new buildings.
+        - condition:
+            field: footprint-increase
+            value: true
+            description: The proposal is an extension.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: The proposal is a change of use.
+    source-url: &ere-plans-url https://www.erewash.gov.uk/planning/additional-plans-required-erewash
+    confidence: medium
+    notes: &ere-plans-note >-
+      From the audit (missing_requirement): existing and proposed elevations and floor plans for new
+      buildings, extensions and change of use ('Additional Plans required in Erewash'). This includes
+      householder extensions.
+
+  - id: elevation-proposed
+    action: add
+    required-if: *ere-plans
+    source-url: *ere-plans-url
+    confidence: medium
+    notes: *ere-plans-note
+
+  - id: floor-plan-existing
+    action: add
+    required-if: *ere-plans
+    source-url: *ere-plans-url
+    confidence: medium
+    notes: *ere-plans-note
+
+  - id: floor-plan-proposed
+    action: add
+    required-if: *ere-plans
+    source-url: *ere-plans-url
+    confidence: medium
+    notes: *ere-plans-note
+
+  - id: section-proposed
+    action: add
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The site slopes or the proposal changes ground levels.
+    source-url: https://www.erewash.gov.uk/planning/additional-plans-required-erewash
+    must-include:
+      - item: Finished floor and site levels
+        level: must
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): site sections and finished floor/site levels for sloping
+      sites or a change in ground level.
+
+  - id: roof-plan-proposed
+    action: add
+    source-url: https://www.erewash.gov.uk/planning/additional-plans-required-erewash
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a roof plan is required unless the roof is flat or
+      mono-pitched. The rules can't express that exception, so no trigger is given.
+
+  - id: site-plan
+    action: add
+    required-if:
+      always: true
+    source-url: https://www.erewash.gov.uk/planning/additional-plans-required-erewash
+    must-include:
+      - item: An existing site plan
+        level: must
+      - item: A proposed block plan (developments of fewer than 10 buildings)
+        level: must
+      - item: A proposed master plan (developments of 10 or more buildings)
+        level: must
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): an existing site plan for all applications, a proposed
+      block plan for fewer than 10 buildings and a proposed master plan for 10 or more buildings.
+      The items are the audit's summary.
+
+unmapped:
+  - local-name: Wind turbine applications (LVIA, planning statement, wildlife surveys)
+    source-text: "From the audit: landscape and visual impact assessment, planning statement and
+      wildlife surveys for all wind turbines except those for single-dwelling domestic use"
+    source-url: https://www.erewash.gov.uk/node/354
+    suggested-id: landscape-visual-impact-assessment
+
+low-confidence:
+  - id: archaeological-assessment
+    note: >-
+      Audit (wrong_trigger, wrong_document): the excerpt says what a desk-based assessment should
+      contain, not when one is needed, and comes from the council's 'Specific National Validation
+      Requirements' section.
+  - id: flood-risk-assessment
+    note: >-
+      Audit (wrong_trigger, wrong_document): the excerpt says what a site-specific flood risk
+      assessment should contain, not when one is needed, and comes from the council's 'Specific
+      National Validation Requirements' section; the national flood risk rules apply.

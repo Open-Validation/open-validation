@@ -1,0 +1,493 @@
+# Corrections for Northumberland County Council, from inputs/audit/northumberland-county-council.json.
+# The audit couldn't fetch the council's page (contents_checked: false), so its findings come from
+# Grokbot's own extracts: swapped open space and contamination triggers, garbled householder
+# checklist rows, landscaping under change of use, and three items captured only as process text.
+# The page is organised by numbered Notes (up to at least Note 39); only the Householder checklist
+# PDF was read, so some Notes are probably missing. The list is undated.
+local-authority: NBL
+
+submission-standards:
+  - item: Drawings at the correct scale for the drawing type, stating the scale and with a scale bar
+      or a measurement that matches the scale
+    level: must
+  - item: Drawings provided at the correct paper size (for example 1:20 at A3 must be on A3 paper)
+    level: must
+  - item: Drawings show the materials and colours, either on the drawing or in the application form
+    level: must
+  - item: Drawings clear and easy to read; not photographs of drawings
+    level: must
+  - item: Each drawing clearly labelled as existing or proposed
+    level: must
+  - item: Documents clearly named, with the title shown on the front cover
+    level: must
+
+drop:
+  - id: site-plan
+    sheets: [Full planning]
+    reason: "wrong_trigger: the excerpt is the Open Space requirement (now in
+      recreation-facilities-assessment)"
+  - id: landscaping-plan
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: the trigger limits it to major full and reserved matters applications and
+      excludes change of use only"
+  - id: sci
+    reason: "wrong_trigger: the row is the wind-turbine pre-application consultation statement, not an
+      SCI (moved to unmapped)"
+
+drop-unmapped:
+  - local-name: Foul Sewage / Utilities Statement
+    reason: "wrong_trigger: garbled table text; re-added below with the trigger that slipped into the
+      Heritage Statement row"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, reserved-matters]
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 10
+                description: 10 or more homes (new homes, conversions and changes of use).
+            - condition:
+                field: site-area-residential
+                operator: ">="
+                value: 0.5
+                description: A site of 0.5 hectares or larger.
+            - all:
+                - site:
+                    in: [area-of-outstanding-natural-beauty]
+                    description: The site is in the Northumberland Coast AONB.
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 5
+                    description: 5 to 9 homes.
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, reserved-matters]
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 100
+                description: 100 or more new homes, including residential caravan parks.
+            - condition:
+                field: floorspace
+                operator: ">="
+                value: 10000
+                description: 10,000 square metres or more of new floorspace.
+            - condition:
+                field: biomass-or-chp
+                value: true
+                description: A combined heat and power plant.
+            - discretionary
+    notes: >-
+      Officer discretion covers industrial processes that release emissions into the air, new or
+      extended minerals sites, and major changes to roads such as new roundabouts or dual
+      carriageways.
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - any:
+            - all:
+                - any:
+                    - condition:
+                        field: site-area-residential
+                        operator: ">="
+                        value: 1
+                        description: The site is 1 hectare or more.
+                    - condition:
+                        field: site-area-non-residential
+                        operator: ">="
+                        value: 1
+                        description: The site is 1 hectare or more.
+                - condition:
+                    field: external-alterations
+                    value: true
+                    description: The proposal includes external works.
+            - all:
+                - site:
+                    in: [listed-building, scheduled-monument, conservation-area, park-and-garden,
+                      world-heritage-site]
+                    description: The site includes a designated heritage asset.
+                - condition:
+                    field: ground-disturbance
+                    value: true
+                    description: A new building or ground floor extension, groundworks, new roads,
+                      tracks or access routes, or underground services.
+    notes: >-
+      Audit (wrong_app_type): the workbook placed it only under Outline, but the trigger says full
+      or outline planning permission. The list of designated heritage assets is cut off in the
+      excerpt.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [consent-under-tpo]
+            - discretionary
+        - all:
+            - application-type:
+                in: [hh]
+            - site:
+                in: [tree-preservation-zone]
+                description: Trees protected by a TPO will be removed or pruned.
+        - all:
+            - application-type:
+                in: [full, reserved-matters]
+            - condition:
+                field: minor-development
+                value: true
+                description: The proposal is minor development.
+            - site:
+                in: [tree-preservation-zone]
+                description: Protected trees will be removed or pruned.
+        - all:
+            - application-type:
+                in: [full, reserved-matters]
+            - ref: major-development
+            - condition:
+                field: trees-on-or-near-site
+                value: true
+                description: There are trees on the site, whether protected or not.
+    notes: >-
+      Tree works applications need it where the applicant answered yes to the questions about tree
+      condition or damage to property (shown as officer discretion). Audit (wrong_trigger): the
+      householder checklist row is garbled.
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, hh, lbc, reserved-matters, demolition-con-area]
+        - condition:
+            field: protected-species
+            value: true
+            description: The proposal may affect protected species (a bat survey is more likely
+              where works affect the roof, roof space or wall tops).
+    notes: "Applicants must self-assess the need for an ecology report using the council's PDF guide."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: BNG applies to the development.
+    notes: "A BNG Strategy (local requirement, Note 14) is also needed: see unmapped."
+
+  - id: coastal-change-assessment
+    action: add
+    required-if:
+      site:
+        in: [coastal-erosion-zone]
+        description: The development is in the coastal change area.
+    source-text: >-
+      It must consider: the risk of coastal erosion and flooding existing sea defences planned
+      changes to the coast how the development could affect coastal change You must show that your
+      development will: be safe for its planned lifetime not make coastal erosion or other coastal
+      change worse protect the character and important features of the coast provide wider
+      benefits where possible not block the England Coast Path
+    source-url: https://www.northumberland.gov.uk/planning-and-building/planning/apply-planning-permission/planning-application-requirements
+    must-include:
+      - item: The risk of coastal erosion and flooding
+        level: must
+      - item: Existing sea defences and planned changes to the coast
+        level: must
+      - item: How the development could affect coastal change
+        level: must
+      - item: That the development will be safe for its planned lifetime and won't make coastal
+          erosion or other coastal change worse
+        level: must
+      - item: That the development protects the character and important features of the coast
+        level: must
+      - item: That the development will not block the England Coast Path
+        level: must
+    confidence: medium
+    notes: "Audit (missing_requirement): captured only as process text."
+
+  - id: elevation-existing
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - condition:
+            field: external-alterations
+            value: true
+            description: Alteration to existing elevations (including outbuildings, window or door
+              alteration or replacement).
+
+  - id: elevation-proposed
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh]
+        - condition:
+            field: external-alterations
+            value: true
+            description: Alteration to existing elevations (including outbuildings, window or door
+              alteration or replacement).
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, reserved-matters, prior-approval]
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: The building will be 18 metres or more high.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: The building will have 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building will contain 2 or more homes.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building will contain residential educational accommodation.
+    notes: "Only some prior approval applications; some developments are exempt."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      site:
+        in: [flood-risk-zone]
+        description: The development itself is in a flood zone.
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the excerpt starts mid-list ('- an FRA is always needed, whatever the
+      flood zone') and loses the cases it refers to; only 'We only need an FRA if the development
+      itself is in the flood zone' is usable.
+
+  - id: habitat-baseline
+    action: add
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: BNG applies to the development.
+    source-text: >-
+      If BNG applies, you will need to provide: … a plan showing the habitats on the site before
+      work starts
+    source-url: https://www.northumberland.gov.uk/planning-and-building/planning/apply-planning-permission/planning-application-requirements
+    confidence: medium
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building]
+            description: The red line boundary contains a listed building.
+    must-include:
+      - item: The history and value of the site or building
+        level: must
+      - item: How the proposal affects the heritage asset and its setting
+        level: must
+      - item: Photos
+        level: must
+      - item: Both the inside and outside, if the building is listed
+        level: must
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the householder trigger is 'Only if: the red line
+      boundary contains a listed building'; the Full row has only what-to-include text, and LBC had
+      no row. Other heritage triggers may be missing.
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline]
+        - any:
+            - condition:
+                field: sensitive-end-use
+                value: true
+                description: Homes, flats or care homes; schools, nurseries or play areas; playing
+                  fields or allotments; or mixed use including any of these.
+            - site:
+                in: [contaminated-land]
+                description: The land is known or suspected to be contaminated.
+    must-include:
+      - item: For a single home, the YALPAG Screening Form
+        level: must
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the workbook filed half of this under 'Open space' and
+      placed it only under Outline; the trigger says full or outline planning permission.
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, reserved-matters]
+        - ref: major-development
+    notes: "Not normally needed for a change of use only, or changes to a building where there is no
+      landscaping."
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [hh]
+            - condition:
+                field: plant-equipment
+                value: true
+                description: New or replacement air source or ground source heat pumps.
+        - all:
+            - application-type:
+                in: [full, reserved-matters]
+            - any:
+                - condition:
+                    field: noise-sensitive-use
+                    value: true
+                    description: A noise-sensitive use (list A) next to a potentially noisy use (list
+                      B).
+                - condition:
+                    field: noise-generating-use
+                    value: true
+                    description: A new or changed use that could create harmful noise (list B).
+
+  - id: recreation-facilities-assessment
+    action: replace
+    required-if:
+      site:
+        in: [open-space]
+        description: The proposal affects open space or a playing field.
+    source-text: >-
+      …and proposed site plans: at 1:200, 1:500 or 1:1000 scale showing all open space affected by
+      the proposal with the area of open space clearly measured We will not normally approve the
+      loss of open space unless you can show that: the space is no longer needed the lost space
+      will be replaced the development provides better sports or recreational facilities
+    source-url: https://www.northumberland.gov.uk/planning-and-building/planning/apply-planning-permission/planning-application-requirements
+    must-include:
+      - item: Existing and proposed site plans at 1:200, 1:500 or 1:1000 showing all open space
+          affected, with the area clearly measured
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook had swapped this with the land contamination text. The
+      start of the trigger is cut off.
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, reserved-matters, lbc]
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Changes to the shape of an existing roof (including flat to pitched,
+              dormers, solar panels); any roof change in a conservation area or to a listed
+              building.
+    notes: "Outline and reserved matters only if scale or appearance is applied for. The excerpt is cut
+      off after the listed building cases."
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, reserved-matters, lbc]
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Changes to the shape of an existing roof (including flat to pitched,
+              dormers, solar panels); any roof change in a conservation area or to a listed
+              building.
+    notes: "Outline and reserved matters only if scale or appearance is applied for. The excerpt is cut
+      off after the listed building cases."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, reserved-matters]
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Retail development outside a town centre boundary or primary shopping area.
+        - condition:
+            field: retail-floorspace
+            operator: ">="
+            value: 1000
+            description: 1,000 square metres or more of gross retail floorspace.
+    confidence: low
+    notes: "The excerpt names Amble, Bedlington, Haltwhistle, Ponteland and Prudhoe and is cut off before
+      the other centres and thresholds."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    must-include:
+      - item: Prepared by a chartered professional
+        level: must
+      - item: A suggested contribution amount
+        level: must
+      - item: Supporting details such as land price, build costs and estimated sale prices
+        level: must
+    notes: "Needed where affordable housing is not provided (a viability appraisal to explain why)."
+
+unmapped:
+  - local-name: Foul drainage assessment form
+    source-text: "Foul drainage Note 21 Only for: … a new or replacement non-mains sewerage system …
+      assessment form"
+    source-url: https://www.northumberland.gov.uk/NorthumberlandCountyCouncil/media/Planning-and-Building/ValidationChecklistHouseholderPlanningPermission.pdf
+    suggested-id: foul-drainage-assessment
+  - local-name: Pre-application consultation statement (wind turbines)
+    source-text: >-
+      You must submit a pre-application consultation statement if you are applying for: full
+      planning permission approval of reserved matters and you propose: 2 or more new wind turbines
+      a wind turbine with a hub height of more than 15 metres
+    source-url: https://www.northumberland.gov.uk/planning-and-building/planning/apply-planning-permission/planning-application-requirements
+    suggested-id: sci
+  - local-name: BNG Strategy
+    source-text: "a BNG Strategy – this is a local requirement, see Note 14 for what to include"
+    source-url: https://www.northumberland.gov.uk/planning-and-building/planning/apply-planning-permission/planning-application-requirements
+    suggested-id: bng-strategy
+  - local-name: Biomass boiler information request form
+    source-text: "First, download the biomass boiler information request form (PDF) ."
+    source-url: https://www.northumberland.gov.uk/planning-and-building/planning/apply-planning-permission/planning-application-requirements
+    suggested-id: biomass-boiler-information
+
+low-confidence:
+  - id: travel-plan
+    note: "Audit (wrong_trigger): the excerpt is only 'You must show how your development could affect
+      traffic, roads and travel'; no trigger is captured."
+  - id: site-plan
+    note: "Householder checklist: 'Yes, unless: the building footprint or site layout won't change.' The
+      general list's trigger wasn't captured."

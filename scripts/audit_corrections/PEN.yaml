@@ -1,0 +1,417 @@
+# Corrections for Pendle Borough Council, from the council's audit.
+# Pendle publishes 16 checklists, one per application type. Grokbot read only the Outline checklist,
+# whose guidance cites 2001-2004 policy (PPS23, PPG13, Use Class A3), so every row sits under Outline.
+# The main list is the Full Planning Applications checklist (last updated March 2024); a revised Full
+# Application Planning Checklist (Appendix A) was recommended for adoption on 28 May 2026. The audit
+# could not confirm whether it was adopted. Triggers below follow the audit's reading of Appendix A,
+# with no application type, because the audit says they apply to full applications (including
+# change of use) and, through their own checklists, to householder, reserved matters and LBC.
+local-authority: PEN
+
+validation-list:
+  date: 2024-03
+  date-basis: >-
+    audit: the Executive report of 28 May 2026 says the list 'was last updated in March 2024'; it only
+    recommended adopting a revised list, and adoption could not be confirmed
+
+submission-standards:
+  - item: All drawings contain a drawing title, drawing number and revision numbers
+    level: must
+  - item: All plans and drawings include the paper size, key dimensions and a scale bar indicating a
+      minimum of 0-10 metres
+    level: should
+
+drop:
+  - id: photos
+    reason: "not_a_requirement: advisory text ('These provide useful background information')"
+  - id: schedule-of-works
+    reason: >-
+      wrong_trigger: the excerpt is checklist questions about a method statement, boundary
+      treatments and materials, not a listed building schedule of works
+  - id: roof-plan-proposed
+    reason: "wrong mapping: the excerpt only asks for an existing roof plan"
+
+drop-unmapped:
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "duplicate: the same biodiversity survey item as biodiversity-survey-report; no questionnaire is required"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "duplicate: the end of the daylight/sunlight sentence"
+  - local-name: Housing mix / dwelling standards (NDSS, accessible homes)
+    reason: "wrong_trigger: the excerpt is a reference to open-space guidance, not dwelling standards"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: Building Regulations wording; re-added below with the current trigger"
+  - local-name: Employment / Economic Statement
+    reason: "not_a_requirement: advice ('will be beneficial'); re-added below with the current trigger"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: fragment; re-added below as Parking and Access Arrangements"
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_trigger: fragment; re-added below as Parking and Access Arrangements"
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: The site is inside or adjacent to an Air Quality Management Area.
+        - discretionary
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the current list names the North Valley, A682 Brierfield and A682
+      Barrowford areas. Development that could itself lead to an AQMA or conflict with the air
+      quality action plan is shown as officer discretion.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees within the site or on adjacent land that could influence or be
+          affected by the development, including street trees.
+    must-include:
+      - item: Which trees are to be retained
+        level: must
+      - item: How retained trees will be protected during construction
+        level: must
+    confidence: medium
+
+  - id: site-plan
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: parking-change
+            value: true
+            description: The proposal increases parking demand.
+        - discretionary
+    source-text: Where appropriate, existing and proposed site plans must be provided.
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): the current list's Parking and Access Arrangements item
+      asks for a site layout plan for proposals that increase parking demand.
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land, near-landfill-site]
+            description: The site is known or suspected to be contaminated, or within 250m of a
+              landfill site.
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: The proposal is for a sensitive end use.
+    source-url: https://www.pendle.gov.uk/downloads/file/11878/full_planning_applications_checklist_-_including_biodiversity_net_gain_validation
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's text cited PPS23 (2004). From the audit: the current
+      list covers sites within 250m of a landfill and sensitive end uses. How these combine needs
+      checking in Appendix A.
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Needed where there is a potential adverse impact on daylight or sunlight to adjoining properties, gardens or amenity space."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [site-of-special-scientific-interest, local-wildlife-site]
+            description: Development on or near a site of ecological importance.
+        - condition:
+            field: demolition
+            value: true
+            description: The proposal involves demolition.
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Works to roof spaces.
+        - condition:
+            field: protected-species
+            value: true
+            description: Protected species may be affected.
+        - discretionary
+    source-url: https://www.pendle.gov.uk/downloads/file/11878/full_planning_applications_checklist_-_including_biodiversity_net_gain_validation
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a Preliminary Ecological Appraisal and protected
+      species/bat surveys for development on or near ecological sites, demolition, barn conversions,
+      works to older buildings or roof spaces, and removal of trees, hedgerows, scrub or water
+      features. Barn conversions, older buildings and removal of habitat features are shown as
+      officer discretion.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    confidence: medium
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone, critical-drainage-area]
+            description: The site is in flood zone 2, 3 or 3b, or in a critical drainage area.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more in flood zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more in flood zone 1.
+        - discretionary
+    source-text: flood zones 2, 3, or 3b; flood zone 1 with a site area of 1 hectare or more; critical
+      drainage …
+    source-url: https://www.pendle.gov.uk/downloads/file/11878/full_planning_applications_checklist_-_including_biodiversity_net_gain_validation
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's wording was generic. SFRA increased-risk areas and
+      changes in vulnerability are also named; they are shown as officer discretion.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [conservation-area, listed-building, listed-building-setting,
+              archaeological-priority-area]
+            description: >-
+              Development in, adjacent to or close to a conservation area or a listed building, or
+              affecting archaeology.
+        - discretionary
+    source-text: in, adjacent to, or close to a conservation area, or to or close to a listed building
+    source-url: https://www.pendle.gov.uk/downloads/file/11878/full_planning_applications_checklist_-_including_biodiversity_net_gain_validation
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's trigger was limited to Areas of Archaeological Potential
+      and major development. Other heritage assets are shown as officer discretion.
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: external-lighting
+            value: true
+            description: External lighting would be provided or made necessary by the development.
+        - any:
+            - site:
+                in: [listed-building-setting, conservation-area]
+                description: The development is in the vicinity of a listed building or conservation
+                  area.
+            - discretionary
+    must-include:
+      - item: Details of the external lighting
+        level: must
+      - item: The proposed hours when the lighting would be switched on
+        level: must
+    confidence: medium
+    notes: >-
+      Publicly accessible developments near residential property or open countryside are shown as
+      officer discretion.
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: An application for a B2 (general industrial) use.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise-sensitive development near a major noise source.
+    source-url: https://www.pendle.gov.uk/downloads/file/11878/full_planning_applications_checklist_-_including_biodiversity_net_gain_validation
+    confidence: medium
+    notes: "Audit (wrong_trigger): now required for all B2 applications and noise-sensitive development near major noise sources."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      site:
+        in: [open-space]
+        description: Development within open space.
+    must-include:
+      - item: Plans showing any existing or proposed open space within or adjoining the site
+        level: should
+    confidence: medium
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: The proposal creates one or more dwellings, including by change of use.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 1000
+            description: Commercial development over 1,000 square metres.
+        - discretionary
+    source-url: https://www.pendle.gov.uk/downloads/file/11878/full_planning_applications_checklist_-_including_biodiversity_net_gain_validation
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): from the audit, now required for major development, 1+ dwellings,
+      residential change of use, commercial over 1,000 sqm, non-agricultural development on
+      agricultural land and Traveller sites. The last two are shown as officer discretion.
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: The proposal includes a roof extension.
+    confidence: medium
+
+  - id: sci
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Applications 'may need' a statement on how pre-application consultation requirements were met."
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    confidence: low
+    notes: >-
+      The excerpt cites PPG13 (2001), which is superseded (audit, outdated_link): 'where the proposed
+      development has significant transport implications'.
+
+  - id: waste-management-plan
+    action: update
+    required-if:
+      ref: major-development
+    confidence: low
+    notes: >-
+      The excerpt asks for site waste management plans for new major development, citing DTI 2004
+      guidance that is superseded (audit, outdated_link).
+
+  - id: construction-management-plan
+    action: add
+    required-if: discretionary
+    source-url: https://www.pendle.gov.uk/downloads/file/11878/full_planning_applications_checklist_-_including_biodiversity_net_gain_validation
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Construction Method Statement where construction could
+      affect neighbours (deliveries, hours, limited space, mud on roads).
+
+  - id: bng-metric
+    action: add
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The application is not exempt from the statutory biodiversity gain condition.
+    source-url: https://www.pendle.gov.uk/downloads/file/11878/full_planning_applications_checklist_-_including_biodiversity_net_gain_validation
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): statutory 10% BNG, with Tables 1-3 of required documents
+      and listed exemptions; the audit does not list the documents.
+
+  - id: fire-statement
+    action: add
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-url: https://www.pendle.gov.uk/downloads/file/11878/full_planning_applications_checklist_-_including_biodiversity_net_gain_validation
+    confidence: medium
+    notes: "From the audit (missing_requirement): buildings 18m+ or 7+ storeys with 2+ dwellings or educational accommodation."
+
+unmapped:
+  - local-name: Drainage strategy / SuDS
+    source-text: >-
+      From the audit: major development, or surface-water drainage in Flood Zone 2/3 or areas at
+      surface-water flood risk; SuDS on the LCC pro-forma for all majors
+    source-url: https://www.pendle.gov.uk/downloads/file/11878/full_planning_applications_checklist_-_including_biodiversity_net_gain_validation
+    suggested-id: drainage-strategy
+  - local-name: Economic Statement
+    source-text: "From the audit: loss of protected employment land, or development justified by economic benefit"
+    source-url: https://www.pendle.gov.uk/downloads/file/11878/full_planning_applications_checklist_-_including_biodiversity_net_gain_validation
+    suggested-id: employment-statement
+  - local-name: Parking and Access Arrangements
+    source-text: "From the audit: proposals that increase parking demand, with a site layout plan"
+    source-url: https://www.pendle.gov.uk/downloads/file/11878/full_planning_applications_checklist_-_including_biodiversity_net_gain_validation
+    suggested-id: parking-plan
+  - local-name: Ball Strike Assessment
+    source-text: >-
+      From the audit: development that could produce balls, such as golf or cricket, or development
+      near such venues (new in 2026)
+    source-url: https://www.pendle.gov.uk/downloads/file/11878/full_planning_applications_checklist_-_including_biodiversity_net_gain_validation
+    suggested-id: ball-strike-assessment
+  - local-name: Coal Mining Assessment
+    source-text: "From the audit: ground disturbance in a Coal Authority high-risk area"
+    source-url: https://www.pendle.gov.uk/downloads/file/11878/full_planning_applications_checklist_-_including_biodiversity_net_gain_validation
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Marketing and Viability Report
+    source-text: >-
+      From the audit: change of use or redevelopment where the existing use is claimed unviable and
+      policy requires its retention
+    source-url: https://www.pendle.gov.uk/downloads/file/11878/full_planning_applications_checklist_-_including_biodiversity_net_gain_validation
+    suggested-id: marketing-report
+  - local-name: Pre-commencement conditions
+    source-text: "From the audit: where full details are not available at application stage"
+    source-url: https://www.pendle.gov.uk/downloads/file/11878/full_planning_applications_checklist_-_including_biodiversity_net_gain_validation
+    suggested-id: ""
+  - local-name: Topographical survey
+    source-text: "From the audit: normally for major development, or where levels are important to the design"
+    source-url: https://www.pendle.gov.uk/downloads/file/11878/full_planning_applications_checklist_-_including_biodiversity_net_gain_validation
+    suggested-id: topographical-survey
+
+low-confidence:
+  - id: design-and-access-statement
+    note: "The excerpt is an Outline checklist question; the national rules apply."
+  - id: travel-plan
+    note: "Audit (wrong_trigger): the excerpt cites 2002 guidance and runs into the tree survey text; no trigger is given."
+  - id: town-centre-impact-assessment
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('other main town centre uses located within the town centre.'); no trigger is given."
+  - id: floor-plan-existing
+    note: "Audit (wrong_app_type): from the Outline checklist only; the Full and other checklists were not read."
+  - id: floor-plan-proposed
+    note: "Audit (wrong_app_type): from the Outline checklist only; the Full and other checklists were not read."
+  - id: elevation-existing
+    note: "Audit (wrong_app_type): from the Outline checklist only; the Full and other checklists were not read."
+  - id: elevation-proposed
+    note: "Audit (wrong_app_type): from the Outline checklist only; the Full and other checklists were not read."
+  - id: section-existing
+    note: "Audit (wrong_app_type): from the Outline checklist only; the Full and other checklists were not read."
+  - id: section-proposed
+    note: "Audit (wrong_app_type): from the Outline checklist only; the Full and other checklists were not read."

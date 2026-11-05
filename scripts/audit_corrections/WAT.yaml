@@ -1,0 +1,246 @@
+# Corrections for Watford Borough Council, from inputs/audit/watford-borough-council.json.
+# Grokbot's link is Watford's current Development Management Validation Checklist, but the document
+# is undated. Grokbot placed every item under Full planning ('INFERRED'); the checklist's Part C
+# matrix assigns items to householder, LBC, adverts, LDC, S73 and outline, but the audit doesn't say
+# which items go with which type, so no application types are set here. Items marked "From the
+# audit" use the audit's paraphrase of Part B, not the council's exact words.
+local-authority: WAT
+
+validation-list:
+  url: https://www.watford.gov.uk/downloads/file/1395/validation-checklist-local-list-
+  date: 2024
+  date-basis: "audit: the document is undated; internal references suggest 2023-24 and the planning data
+    register gives a start date of 2024-01-01 (the May 2026 date is only PDF metadata)"
+
+submission-standards:
+  - item: Plans marked "not to scale" or "do not scale" will not be registered
+    level: must
+  - item: All plans and drawings state the paper size, key dimensions and a scale, and include a scale bar
+    level: must
+  - item: All plans to a recognised metric scale, i.e. 1:100, 1:50
+    level: must
+
+drop:
+  - id: schedule-of-works
+    reason: "duplicate: the excerpt is the Tree Survey text; Part B has no schedule-of-works item"
+
+drop-unmapped:
+  - local-name: Sequential / Exception Test (flood)
+    reason: "not_a_requirement: an exemption note belonging to the Flood Risk Assessment item"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: threshold missing; replaced below"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: a fragment; replaced below"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: a fragment with no trigger; replaced below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: add
+    required-if: discretionary
+    source-url: https://www.watford.gov.uk/downloads/file/1395/validation-checklist-local-list-
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): Part B item 4, for proposals providing affordable
+      housing (at least 60% social rent). The audit gives no dwelling threshold, so it is shown as
+      officer discretion.
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [tree-preservation-zone]
+            description: The site has trees protected by a Tree Preservation Order.
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: There are trees in a conservation area, or trees over 75mm in diameter on or
+              next to the site.
+    source-text: >-
+      provide an Arboricultural Impact Assessment (AIA), Arboricultural Method Statement (AMS) and
+      Tree Protection Plan (TPP).
+    source-url: https://www.watford.gov.uk/downloads/file/1395/validation-checklist-local-list-
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): Part B item 7 Tree Survey applies to sites with a TPO, trees in a
+      Conservation Area, or trees on or next to the site 'over 75mm in diameter'; the AIA, AMS and
+      TPP are needed where significant trees are affected.
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      condition:
+        field: protected-species
+        value: true
+        description: The development, demolition, extension or conversion could affect protected
+          species (for example buildings close to water or woodland, barns, land near a pond).
+    confidence: medium
+    notes: "The council's list of instances is cut off in the workbook's excerpt."
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if: discretionary
+    source-url: https://www.watford.gov.uk/downloads/file/1395/validation-checklist-local-list-
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Part B item 13, for applications including or near
+      residential development. The rules can't express 'near residential', so it is shown as
+      officer discretion.
+
+  - id: energy-statement
+    action: add
+    required-if: discretionary
+    source-url: https://www.watford.gov.uk/downloads/file/1395/validation-checklist-local-list-
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Part B item 6, Energy and Sustainability Statements for
+      proposals subject to climate and sustainability policy.
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (in Flood Zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (in Flood Zone 1).
+        - site:
+            in: [flood-risk-zone]
+            description: New development in Flood Zone 2 or 3.
+    confidence: medium
+    notes: >-
+      The Level 2 Strategic Flood Risk Assessment (2020) has already carried out the sequential and
+      exception test for some sites, and it 'may not be required again'.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      site:
+        in: [listed-building, listed-building-setting, conservation-area, locally-listed-building,
+          scheduled-monument, park-and-garden]
+        description: The proposal affects a heritage asset or its setting.
+    source-url: https://www.watford.gov.uk/downloads/file/1395/validation-checklist-local-list-
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was a fragment ('As a guide a Heritage Statement
+      must: 7|Page'). From the audit: applications affecting a heritage asset or its setting."
+
+  - id: land-contamination-assessment
+    action: add
+    source-url: https://www.watford.gov.uk/downloads/file/1395/validation-checklist-local-list-
+    confidence: low
+    notes: "From the audit (missing_requirement): Part B item 11; the audit gives no trigger."
+
+  - id: landscaping-plan
+    action: add
+    source-url: https://www.watford.gov.uk/downloads/file/1395/validation-checklist-local-list-
+    must-include:
+      - item: Hard and soft landscaping
+        level: must
+    confidence: low
+    notes: "From the audit (missing_requirement): Part B item 8, hard and soft landscaping; the audit gives
+      no trigger."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: External lighting would be provided or made necessary by the development.
+    confidence: low
+    notes: >-
+      The excerpt starts mid-sentence ('Area where external lighting...'), so the area it applies
+      to is missing; the rule covers external lighting anywhere.
+
+  - id: planning-statement
+    action: add
+    required-if:
+      always: true
+    source-url: https://www.watford.gov.uk/downloads/file/1395/validation-checklist-local-list-
+    confidence: medium
+    notes: "From the audit (missing_requirement): Part B item 2, all applications, proportionate to the
+      proposal."
+
+  - id: sustainability-statement
+    action: add
+    required-if: discretionary
+    source-url: https://www.watford.gov.uk/downloads/file/1395/validation-checklist-local-list-
+    must-include:
+      - item: BREEAM pre-assessment
+        level: must
+        required-if:
+          all:
+            - ref: major-development
+            - condition:
+                field: floorspace-non-residential
+                operator: ">"
+                value: 0
+                description: The scheme is non-residential.
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Part B item 6, Energy and Sustainability Statements for
+      proposals subject to climate and sustainability policy, plus a BREEAM pre-assessment for major
+      non-residential schemes.
+
+  - id: transport-assessment
+    action: add
+    required-if: discretionary
+    source-url: https://www.watford.gov.uk/downloads/file/1395/validation-checklist-local-list-
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Transport Statement/Assessment for developments
+      generating significant movement (only the Travel Plan half was captured).
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt is a fragment. From the audit: developments generating
+      significant movement."
+
+unmapped:
+  - local-name: Surface Water Drainage Scheme
+    source-text: "Surface Water Drainage Scheme: 'developments of 10 or more dwellings and all major
+      commercial developments'"
+    source-url: https://www.watford.gov.uk/downloads/file/1395/validation-checklist-local-list-
+    suggested-id: drainage-strategy
+  - local-name: Health Impact Assessment
+    source-text: "From the audit: 'major residential proposals of 100 or more units', major transport
+      infrastructure and other significant infrastructure"
+    source-url: https://www.watford.gov.uk/downloads/file/1395/validation-checklist-local-list-
+    suggested-id: health-impact-assessment
+  - local-name: Ventilation / Extraction details (odour)
+    source-text: "From the audit: restaurant/takeaway extraction and B2 uses raising odour issues. Such
+      details must demonstrate that odours will not be discernible at the nearest residential property."
+    source-url: https://www.watford.gov.uk/downloads/file/1395/validation-checklist-local-list-
+    suggested-id: ventilation-extraction-details
+  - local-name: Housing Schedule
+    source-text: "From the audit: proposals with a residential element, including a housing trajectory"
+    source-url: https://www.watford.gov.uk/downloads/file/1395/validation-checklist-local-list-
+    suggested-id: housing-schedule
+  - local-name: Wind Assessment
+    source-text: "From the audit: tall buildings, with wind tunnel or CFD testing likely for buildings of
+      30m or more"
+    source-url: https://www.watford.gov.uk/downloads/file/1395/validation-checklist-local-list-
+    suggested-id: wind-assessment
+  - local-name: Training, Skills and Employment Strategy
+    source-text: "From the audit: major development proposals"
+    source-url: https://www.watford.gov.uk/downloads/file/1395/validation-checklist-local-list-
+    suggested-id: employment-statement
+
+low-confidence:
+  - id: fire-statement
+    note: "Audit (wrong_trigger): the excerpt starts mid-sentence ('more storeys'), so the height threshold
+      is cut off."
+  - id: noise-assessment
+    note: "Audit (wrong_trigger): the excerpt gives only 'prepared by a suitably qualified acoustician' and
+      no trigger."
+  - id: viability-assessment
+    note: "The excerpt ('a Financial Viability Appraisal will be required.') gives no trigger."

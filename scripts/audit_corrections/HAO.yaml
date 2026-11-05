@@ -1,0 +1,387 @@
+# Corrections for Harborough District Council, from inputs/audit/harborough-district-council.json.
+# The workbook links the current list, 'Planning Application Local Validation List' (April 2026;
+# the build reads that date from the audit). Grokbot placed every section-6 item under Full
+# planning ('INFERRED'); the list applies them by trigger ('Various'), so the corrected files below
+# carry no application type unless the list names one. Several excerpts ran across table rows.
+# Items without the council's own words use the audit's paraphrase ("From the audit").
+local-authority: HAO
+
+submission-standards:
+  - item: Plans proportionate to the nature and size of the proposal, titled and numbered
+      identifying revisions, and annotated with dimensions and a scale bar
+    level: should
+  - item: Plans clearly show the proposed works in relation to what is already there, highlighting
+      any structures to be demolished
+    level: should
+
+drop:
+  - id: environmental-statement
+    reason: "not_a_requirement: a national requirement the list only references"
+  - id: fire-statement
+    reason: "not_a_requirement/wrong_trigger: national requirement; the excerpt is the Agricultural holding certificate row"
+  - id: design-and-access-statement
+    reason: "not_a_requirement: national requirement; the LBC excerpt is a heading fragment"
+
+new-fields:
+  - field: external-space
+    kind: boolean
+    label: Includes external space
+    description: The proposal includes external space around buildings (gardens, open areas, parking
+      or other outdoor areas).
+
+requirements:
+  - id: air-quality-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: >-
+      The list applies it to any proposal that may have a significant impact on air quality
+      ('Various'), so no application type is given.
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees within the application site or on adjacent sites, including
+          street trees.
+    source-text: If there are trees within the application site or on adjacent sites including street trees
+    source-url: https://www.harborough.gov.uk/download/downloads/id/778/local_validation_requirements_for_planning_applications.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the workbook's excerpt mixed the retail, tree,
+      landscaping and transport rows and was filed under Full planning only; the list applies it
+      to all applications ('Various').
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (Flood Zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (Flood Zone 1).
+    source-url: https://www.harborough.gov.uk/download/downloads/id/778/local_validation_requirements_for_planning_applications.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt left out the threshold. From the audit:
+      development in Flood Zones 2 or 3, or sites of 1 hectare or more in Flood Zone 1.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting]
+            description: The application impacts on the setting of a listed building.
+        - all:
+            - application-type:
+                in: [full, outline, reserved-matters]
+            - site:
+                in: [conservation-area, scheduled-monument, park-and-garden, world-heritage-site]
+                description: A non-householder proposal affecting a designated heritage asset.
+    source-text: >-
+      Heritage statement All listed building consent applications and applications which impact on
+      the setting of listed buildings.
+    source-url: https://www.harborough.gov.uk/download/downloads/id/778/local_validation_requirements_for_planning_applications.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook filed it only under listed building consent. The list
+      also requires it for applications affecting a listed building's setting and for
+      non-householder proposals affecting designated heritage assets (shown here as full, outline
+      and reserved matters applications).
+
+  - id: landscaping-plan
+    action: replace
+    required-if:
+      condition:
+        field: external-space
+        value: true
+        description: The application includes external space.
+    source-text: >-
+      All applications that include external space must be accompanied by a detailed scheme for
+      landscaping
+    source-url: https://www.harborough.gov.uk/download/downloads/id/778/local_validation_requirements_for_planning_applications.pdf
+    must-include:
+      - item: Planting of trees and/or shrubs
+        level: must
+      - item: Surface materials
+        level: must
+      - item: Boundary screen walls and fences
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt ran across the retail, tree and transport rows.
+      The must-include items are the council's words, which the workbook had put under the open
+      space row ("The applicant must provide details of the planting of trees and/or shrubs,
+      surface materials, boundary screen walls and fences").
+
+  - id: recreation-facilities-assessment
+    action: replace
+    source-text: open space, playing fields, sports and recreation facilities
+    source-url: https://www.harborough.gov.uk/download/downloads/id/778/local_validation_requirements_for_planning_applications.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was landscaping-detail text. The audit says the
+      open space item applies to 'Various' applications but gives no trigger.
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: Drawn at an identified standard metric scale (e.g. 1:500 or 1:200)
+        level: should
+      - item: Parking shown
+        level: must
+        required-if:
+          application-type:
+            in: [hh]
+    confidence: medium
+    notes: >-
+      The list asks for a site/block plan on all applications. The householder parking item is
+      from the audit (missing_requirement, section 2).
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      condition:
+        field: retail-floorspace
+        operator: ">"
+        value: 2500
+        description: Retail development over 2,500 square metres gross floorspace.
+    source-text: Retail impact assessment … Retail development over 2,500 square metres gross floor space
+    source-url: https://www.harborough.gov.uk/download/downloads/id/778/local_validation_requirements_for_planning_applications.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt ran into the tree and landscaping rows."
+
+  - id: elevation-proposed
+    action: update
+    required-if:
+      application-type:
+        in: [hh, non-material-amendment, ldc-prospective-use]
+    must-include:
+      - item: Elevations of the whole property for roof extensions, dormers and window or door
+          replacement
+        level: must
+        required-if:
+          application-type:
+            in: [hh]
+      - item: At a scale of 1:100 or 1:50
+        level: must
+        required-if:
+          application-type:
+            in: [ldc-prospective-use]
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): section 2 asks for whole-property elevations for
+      householder roof extensions, dormers and window/door replacement; section 4 asks for plans,
+      elevations and sections at 1:100 or 1:50 for proposed lawful development certificates.
+
+  - id: floor-plan-proposed
+    action: update
+    required-if:
+      application-type:
+        in: [non-material-amendment, ldc-prospective-use]
+    must-include:
+      - item: At a scale of 1:100 or 1:50
+        level: must
+        required-if:
+          application-type:
+            in: [ldc-prospective-use]
+    confidence: low
+    notes: "From the audit (missing_requirement): section 4 asks for plans at 1:100 or 1:50 for proposed
+      lawful development certificates."
+
+  - id: section-proposed
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [ldc-prospective-use, advertising]
+        - all:
+            - application-type:
+                in: [hh]
+            - condition:
+                field: roof-alteration
+                value: true
+                description: The proposal includes a roof extension or dormer.
+    must-include:
+      - item: Roof sections for roof extensions and dormers
+        level: must
+        required-if:
+          application-type:
+            in: [hh]
+      - item: At a scale of 1:100 or 1:50
+        level: must
+        required-if:
+          application-type:
+            in: [ldc-prospective-use]
+      - item: 1:20 sections of fascia or projecting signs, with the method of illumination, colour
+          and fitting details
+        level: must
+        required-if:
+          application-type:
+            in: [advertising]
+    source-url: https://www.harborough.gov.uk/download/downloads/id/778/local_validation_requirements_for_planning_applications.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): sections 2 and 4 drawing requirements for householder
+      roof works, proposed lawful development certificates and adverts. The items are the audit's
+      summary.
+
+  - id: archaeological-assessment
+    action: add
+    required-if:
+      all:
+        - site:
+            in: [archaeological-priority-area]
+            description: The site is in an area of archaeological potential.
+        - condition:
+            field: ground-disturbance
+            value: true
+            description: The proposal involves ground disturbance.
+    source-url: https://www.harborough.gov.uk/download/downloads/id/778/local_validation_requirements_for_planning_applications.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): an archaeological desk-top assessment and field
+      evaluation for ground disturbance in an area of archaeological potential.
+
+  - id: biodiversity-survey-report
+    action: add
+    required-if:
+      condition:
+        field: protected-species
+        value: true
+        description: Protected species are likely to be affected.
+    source-url: https://www.harborough.gov.uk/download/downloads/id/778/local_validation_requirements_for_planning_applications.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): an ecological/protected species survey where protected species are likely to be affected."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: Redevelopment or significant change of use of potentially contaminated land.
+    source-url: https://www.harborough.gov.uk/download/downloads/id/778/local_validation_requirements_for_planning_applications.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a contaminated land survey for redevelopment or significant change of use of potentially contaminated land."
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      condition:
+        field: floodlighting
+        value: true
+        description: The proposal includes significant floodlighting.
+    source-url: https://www.harborough.gov.uk/download/downloads/id/778/local_validation_requirements_for_planning_applications.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a lighting assessment for significant floodlighting."
+
+  - id: schedule-of-works
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [lbc]
+        - condition:
+            field: structural-alteration
+            value: true
+            description: The proposal involves structural alterations to a listed building.
+    source-url: https://www.harborough.gov.uk/download/downloads/id/778/local_validation_requirements_for_planning_applications.pdf
+    must-include:
+      - item: Cross-referenced to the drawings
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): a schedule of works cross-referenced to drawings for structural alterations to a listed building."
+
+  - id: viability-assessment
+    action: add
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    source-url: https://www.harborough.gov.uk/download/downloads/id/778/local_validation_requirements_for_planning_applications.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a viability assessment, including s106, for major development where viability is an issue."
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    source-url: https://www.harborough.gov.uk/download/downloads/id/778/local_validation_requirements_for_planning_applications.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a noise impact assessment for major proposals that may affect residential amenity."
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      ref: major-development
+    policy: Local Plan CC1
+    source-url: https://www.harborough.gov.uk/download/downloads/id/778/local_validation_requirements_for_planning_applications.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a mitigating climate change statement under policy CC1(a)-(g) for all major development."
+
+  - id: transport-assessment
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.harborough.gov.uk/download/downloads/id/778/local_validation_requirements_for_planning_applications.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a transport statement, or a transport assessment plus
+      travel plan, for major development. The council's tree/landscaping row adds: "TA should be
+      complete including PRTM* modelling where necessary (or equivalent to LHA standard) and
+      outputs."
+
+  - id: travel-plan
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.harborough.gov.uk/download/downloads/id/778/local_validation_requirements_for_planning_applications.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a transport assessment plus travel plan for major
+      development (a transport statement may be enough instead), so not every major needs one.
+
+unmapped:
+  - local-name: Mineral assessment
+    source-text: "From the audit: major development in a Mineral Safeguarding Area"
+    source-url: https://www.harborough.gov.uk/download/downloads/id/778/local_validation_requirements_for_planning_applications.pdf
+    suggested-id: mineral-assessment
+  - local-name: Sustainable drainage details
+    source-text: "From the audit: all major development; outfall, infiltration tests and sewerage consultation"
+    source-url: https://www.harborough.gov.uk/download/downloads/id/778/local_validation_requirements_for_planning_applications.pdf
+    suggested-id: drainage-strategy
+  - local-name: Landscape and visual impact assessment
+    source-text: "From the audit: major development with significant visual effects"
+    source-url: https://www.harborough.gov.uk/download/downloads/id/778/local_validation_requirements_for_planning_applications.pdf
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Works to trees details
+    source-text: >-
+      From the audit: tree works applications give the species, reductions in metres, thinning as
+      a percentage and a labelled plan. Council: "Photographs of the tree/s annotated to show where
+      the reductions are to be made/branches removed are helpful."
+    source-url: https://www.harborough.gov.uk/download/downloads/id/778/local_validation_requirements_for_planning_applications.pdf
+    suggested-id: tree-works-specification
+  - local-name: Permission in principle details
+    source-text: "From the audit: location, land use and amount of development"
+    source-url: https://www.harborough.gov.uk/download/downloads/id/778/local_validation_requirements_for_planning_applications.pdf
+    suggested-id: ""
+  - local-name: Outline application details
+    source-text: "From the audit: details of the matters not reserved"
+    source-url: https://www.harborough.gov.uk/download/downloads/id/778/local_validation_requirements_for_planning_applications.pdf
+    suggested-id: ""

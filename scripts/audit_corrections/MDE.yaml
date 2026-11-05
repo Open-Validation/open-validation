@@ -1,0 +1,321 @@
+# Corrections for Mid Devon District Council, from inputs/audit/mid-devon-district-council.json.
+# Grokbot cited the 2023 Climate Emergency interim policy statement PDF instead of Mid Devon's
+# web-based Validation Checklist (Part 1 national, Part 2 'at a glance' by type, Part 3 with 36
+# local requirements), adopted on 26 September 2025. Most workbook rows are garbled policy prose
+# from that PDF. The audit names the Part 3 items, mostly without their triggers; items marked
+# "From the audit" use the audit's paraphrase, not the council's exact words.
+local-authority: MDE
+
+drop-unmapped:
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "wrong_trigger: climate checklist rows about food growing; the real Agricultural Appraisal is re-added below"
+  - local-name: Agricultural Land Classification / Soils
+    reason: "wrong_trigger: climate checklist rows about food growing, not a validation requirement"
+  - local-name: Design Code / Masterplan / Parameter plans
+    reason: "wrong_trigger: policy-context paragraph with footnote debris"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_app_type: climate policy prose; the Surface Water Drainage Strategy is re-added below"
+  - local-name: Electric vehicle charging details
+    reason: "wrong_trigger: quotes Building Regulations Part S, not a planning validation trigger"
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_trigger: quotes Building Regulations Part S, not a planning validation trigger"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: climate checklist rows about natural ventilation and food growing"
+
+requirements:
+  - id: bng-metric
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [outline, s73]
+        - all:
+            - application-type:
+                in: [full, reserved-matters, change-of-use]
+            - discretionary
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    must-include:
+      - item: Habitat or biodiversity maps submitted as separate PDF documents, not embedded within
+          the metric
+        level: should
+        source-text: >-
+          The preferred option is for any habitat or biodiversity maps to be submitted as separate
+          PDF documents and not embedded within the metric.
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted 2023 text about BNG 'in advance of the mandatory
+      requirement'. From the audit: the adopted checklist lists BNG as required for outline and
+      s73, and may be required for change of use, full and reserved matters.
+
+  - id: site-plan
+    action: update
+    required-if:
+      always: true
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-part-1-national-requirements/
+    must-include:
+      - item: As up-to-date as possible
+        level: must
+      - item: An identified measurable scale of 1:500, 1:200 or 1:100, with a scale bar
+        level: must
+      - item: Clearly marked with the direction of North
+        level: must
+      - item: Clearly shows the proposed development
+        level: must
+      - item: All site boundaries, existing buildings, roads, tracks, footpaths, public rights of
+          way, banks and historic features, ponds and watercourses
+        level: must
+      - item: Proposed boundary treatments, walls and fencing, including measures for removal
+          and/or retention
+        level: must
+    confidence: medium
+    notes: >-
+      The council's Part 1 text says 'Block/Site Plan (Existing and Proposed) All applications'.
+      The workbook guessed Full planning only.
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      The report must include all the information required in order for the local planning
+      authority to determine the application (including any survey information on protected and
+      priority species), County Wildlife Sites, Priority Habitats and Protected Sites, including
+      Sites of Special Scientific Interest (SSSI’s), Special Areas of Conservation (SAC’s), Special
+      Protection Areas (SPA’s) and Ramsar Sites.
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-part-3-local-requirements-1/ecology-report/
+    must-include:
+      - item: Survey information on protected and priority species
+        level: must
+      - item: Information on County Wildlife Sites, Priority Habitats and Protected Sites (SSSIs,
+          SACs, SPAs and Ramsar sites)
+        level: must
+      - item: Evidence of how the mitigation will fully offset the impacts on the SPA/SAC
+        level: must
+        required-if:
+          site:
+            in: [special-protection-area]
+            description: The development may affect the Exe Estuary Special Protection Area,
+              directly or indirectly, alone or in combination.
+        source-text: "- how the mitigation will fully offset the impacts on the SPA/SAC;"
+    confidence: low
+    notes: >-
+      The workbook quoted the introduction of the protected species guidance. From the audit: an
+      Ecology report may be required for householder applications (Part 2); no trigger is given.
+      The Wildlife & Geology Trigger Table (below, unmapped) decides when it is needed.
+
+  - id: sustainability-statement
+    action: replace
+    required-if: discretionary
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted the climate statement's introduction. From the
+      audit: a Climate Emergency checklist/statement is listed in Part 3 for 'all applications',
+      while the householder 'at a glance' list says it may be required. Check which applies.
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if: discretionary
+    policy: "S1, S9"
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's row quoted the Surface Water Drainage Strategy (now
+      unmapped below). From the audit: the FRA is a separate Part 3 item and may be required for
+      householder too; no trigger is given.
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: parking-spaces
+            operator: ">"
+            value: 10
+            description: A car park of more than 10 spaces.
+        - site:
+            in: [air-quality-management-area]
+            description: The site is within 20 metres of an Air Quality Management Area.
+        - discretionary
+    policy: "DM3"
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): major development; car parks over 10 spaces; within
+      20 m of an AQMA; significant traffic change (shown as officer discretion).
+
+  - id: energy-statement
+    action: add
+    required-if:
+      ref: major-development
+    policy: "DM2"
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Carbon Reduction Statement for major development."
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - discretionary
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement, wrong_app_type): required for listed building consent and
+      may be required for householder applications.
+
+  - id: schedule-of-works
+    action: add
+    required-if:
+      application-type:
+        in: [lbc]
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    confidence: medium
+    notes: "From the audit (wrong_app_type): Part 2 lists a Schedule of Works as required for listed building consent."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Planning Statement for major development."
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      ref: major-development
+    policy: "DM4"
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Waste Audit Statement (DM4) for major development."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      application-type:
+        in: [pa-ecomms-network]
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement, wrong_app_type): telecoms prior notifications need an
+      ICNIRP statement/certificate.
+
+  - id: arboriculturist-report
+    action: add
+    required-if: discretionary
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a Tree Survey and Report (BS 5837); may be required for
+      householder applications. No trigger is given.
+
+  - id: land-contamination-assessment
+    action: add
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    confidence: low
+    notes: "From the audit (missing_requirement): listed in Part 3; the audit gives no trigger."
+
+  - id: noise-assessment
+    action: add
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    confidence: low
+    notes: "From the audit (missing_requirement): a Noise Impact Assessment is listed in Part 3; the audit gives no trigger."
+
+  - id: town-centre-impact-assessment
+    action: add
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    confidence: low
+    notes: "From the audit (missing_requirement): a Retail Impact Assessment is listed in Part 3; the audit gives no trigger."
+
+  - id: sci
+    action: add
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    confidence: low
+    notes: "From the audit (missing_requirement): listed in Part 3; the audit gives no trigger."
+
+  - id: transport-assessment
+    action: add
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    confidence: low
+    notes: "From the audit (missing_requirement): listed in Part 3; the audit gives no trigger."
+
+  - id: travel-plan
+    action: add
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    confidence: low
+    notes: "From the audit (missing_requirement): listed in Part 3; the audit gives no trigger."
+
+  - id: viability-assessment
+    action: add
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    confidence: low
+    notes: "From the audit (missing_requirement): listed in Part 3; the audit gives no trigger."
+
+unmapped:
+  - local-name: Artificial Intelligence (AI) Declaration
+    source-text: >-
+      From the audit: a new requirement, required for almost all application types (householder,
+      LBC, outline, s73, LDC, NMA, PiP and works to TPO trees among them)
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    suggested-id: ai-declaration
+  - local-name: Wildlife & Geology Trigger Table
+    source-text: "From the audit: required for householder, full, outline, reserved matters, LBC and hedgerow applications"
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    suggested-id: wildlife-trigger-table
+  - local-name: Active Travel England toolkit
+    source-text: "From the audit: 150+ dwellings, 7,500 sqm+ or 5 ha+"
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    suggested-id: active-travel-assessment
+  - local-name: Agricultural Appraisal (DM8)
+    source-text: "From the audit: new agricultural, forestry or rural occupational dwellings in the countryside (Policy DM8)"
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    suggested-id: agricultural-appraisal
+  - local-name: Surface Water Drainage Strategy
+    source-text: >-
+      the following information with regard to surface water drainage must be submitted as part of
+      a major planning application in order for the application to be accepted as valid.
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-part-3-local-requirements-1/surface-water-drainage-strategy/
+    suggested-id: drainage-strategy
+  - local-name: EIA Screening/Scoping
+    source-text: "From the audit: listed in Part 3; no trigger given"
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    suggested-id: environmental-statement
+  - local-name: Foul Drainage Assessment (FDA1)
+    source-text: "From the audit: non-mains drainage"
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    suggested-id: foul-drainage-assessment
+  - local-name: Justification for Works to a Listed Building
+    source-text: "From the audit: required for listed building consent"
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    suggested-id: ""
+  - local-name: LVIA / Landscape Proposals
+    source-text: "From the audit: listed in Part 3; no trigger given"
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Mineral Resource Assessment (Devon Minerals Plan M2)
+    source-text: "From the audit: listed in Part 3; no trigger given"
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    suggested-id: mineral-resource-assessment
+  - local-name: Nutrient Neutrality
+    source-text: "From the audit: development in the Somerset Levels and Moors Ramsar catchment"
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    suggested-id: nutrient-neutrality-assessment
+  - local-name: Pollution Impact Statement
+    source-text: "From the audit: listed in Part 3; no trigger given"
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    suggested-id: ""
+  - local-name: Statutory Definition of a Caravan
+    source-text: "From the audit: listed in Part 3; no trigger given"
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    suggested-id: ""
+  - local-name: Structural Survey
+    source-text: "From the audit: listed in Part 3; no trigger given"
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    suggested-id: structural-survey
+  - local-name: Tourism / Holiday Lets
+    source-text: "From the audit: listed in Part 3; no trigger given"
+    source-url: https://www.middevon.gov.uk/residents/planning/validation-checklist-for-planning-applications
+    suggested-id: ""
