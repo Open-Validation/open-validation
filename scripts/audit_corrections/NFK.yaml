@@ -1,0 +1,609 @@
+# Corrections for Norfolk County Council, from inputs/audit/norfolk-county-council.json.
+# A county council with two current lists, both approved by Cabinet on 5 June 2023:
+#   - the Minerals and Waste Local List (M&W): scoped here to mineral-app and waste-dev;
+#   - the Regulation 3 Local List (County Council's own development): scoped to reg-3.
+# The audit read both (uploaded by the user). Grokbot filed most rows under district types (Full
+# planning, LBC, prior approval), which the county does not determine; every rule below is
+# scoped to the county types. Where a row came from one list only, only that list's types are
+# used. Items marked "From the audit" use the audit's paraphrase.
+local-authority: NFK
+
+submission-standards:
+  - item: Supporting documents and attachments in PDF format; single PDF plans without layers
+    level: should
+  - item: Individual attachments no larger than 10MB (larger documents on portable media such as USB)
+    level: should
+  - item: All drawings with a scale bar, north point (where appropriate), at least one key dimension and
+      the original paper size marked
+    level: should
+  - item: Drawings to scale, unless there are special circumstances, in which case annotated 'DO NOT SCALE'
+    level: should
+  - item: A clear description of the plan or document in the file name, and an index of all submitted
+      documents
+    level: should
+
+drop:
+  - id: schedule-of-works
+    reason: "not_a_requirement: the excerpt is the Structural Survey section"
+  - id: waste-management-plan
+    reason: "not_a_requirement: the excerpt is the Economic Statement for major waste proposals"
+  - id: design-and-access-statement
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: the county does not determine listed building consent"
+  - id: heritage-statement
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: the county does not determine listed building consent"
+  - id: flood-risk-assessment
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: 'change of use' in the trigger refers to planning applications; the county handles no prior approvals"
+
+drop-unmapped:
+  - local-name: Advertisement drawings / illumination details
+    reason: "not_a_requirement: the Lighting Scheme trigger (now in lighting-assessment)"
+  - local-name: Agricultural Land Classification / Soils
+    reason: "wrong name: a sentence of Restoration and Aftercare, re-added below"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: Airport Safeguarding text; SuDS re-added below"
+  - local-name: Ground investigation / Geotechnical / Basement Impact Assessment
+    reason: "wrong name: the M&W row is the Hydrology/Hydrogeology Assessment (now water-impact-assessment); the Reg 3 row is a SuDS sub-list"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "not_a_requirement: biodiversity references plus the BNG heading"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: two of three rows carry Heritage Statement text; re-added below with the Reg 3 wording"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advisory text"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "duplicate: the tail of the Daylight/Sunlight trigger"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: EIA text (Reg 3) and Open Space text (M&W)"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: site location plan and Certificates text"
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "not_a_requirement: the Planning Statement's mineral/waste content list"
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "wrong name: the Agricultural Justification Statement, re-added below"
+
+requirements:
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Proposed development could potentially affect trees.
+    confidence: medium
+    notes: "The excerpt (M&W list) states the trigger."
+
+  - id: archaeological-assessment
+    action: update
+    required-if: &nfk-all-disc
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - discretionary
+    confidence: low
+    notes: "In both lists; the excerpts are cut off before the trigger (audit: wrong_trigger)."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev]
+    confidence: medium
+    notes: "M&W list: 'Required for all applications' (statutory exemptions aside)."
+
+  - id: site-plan
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3, s73, non-material-amendment]
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt is a contents-page line; the trigger is 'for all
+      applications except Outline applications'. Both lists also ask for a site plan for s73/s73A
+      and s96A applications.
+
+  - id: construction-management-plan
+    action: update
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [reg-3, waste-dev]
+            - condition:
+                field: new-build
+                value: true
+                description: The application involves new built development.
+        - all:
+            - application-type:
+                in: [mineral-app]
+            - discretionary
+    must-include:
+      - item: The general construction considerations / overview
+        level: should
+      - item: The site entrance
+        level: should
+      - item: Construction traffic, including vehicle turning within the site so vehicles leave in forward gear
+        level: should
+    confidence: medium
+    notes: >-
+      Reg 3: all applications with new built development. M&W: waste development with new built
+      development; mineral development that brings large plant onto the site or where access is
+      sensitive (shown as officer discretion).
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - site:
+            in: [contaminated-land]
+            description: Contaminated land or buildings/structures are known or suspected to exist.
+    must-include:
+      - item: A Preliminary Risk Assessment with information about the site and contamination
+        level: must
+      - item: A conceptual model identifying pollutant sources, pathways and receptors
+        level: must
+      - item: Options for remediation
+        level: must
+    confidence: medium
+    notes: "Both lists; the excerpts state the trigger."
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: *nfk-all-disc
+    confidence: medium
+    notes: >-
+      Both lists: 'any application where there is potential adverse impact upon current levels of
+      daylight/sunlight enjoyed by adjoining properties or buildings including associated gardens or
+      amenity space'.
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - ref: major-development
+            - all:
+                - site:
+                    in: [conservation-area, world-heritage-site]
+                    description: Development in a designated area.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: A building or buildings creating 100m² or more of floor space.
+    confidence: low
+    notes: >-
+      The list repeats Article 9 of the DMPO. Audit (wrong_trigger): the excerpt is cut off before
+      the M&W exemptions for waste development, engineering or mining operations and s73, which the
+      rule does not apply.
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: protected-species
+                value: true
+                description: Development likely to affect protected species.
+            - site:
+                in: [special-area-of-conservation, special-protection-area, site-of-special-scientific-interest,
+                  local-wildlife-site]
+                description: Development likely to affect Protected Sites (SACs, SPAs, Ramsar Sites, SSSIs, Local
+                  Wildlife Sites and Special Roadside Verges).
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the excerpt is reduced to 'sites or protected species.' The Protected
+      Sites list is the council's own definition.
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - ref: major-development
+    confidence: medium
+    notes: >-
+      Climate Change, Energy Statement, Renewable Energy and Sustainability Statement: 'Required for
+      all applications for major development' (Reg 3 wording; the audit says the M&W list is the same).
+
+  - id: energy-statement
+    action: add
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3]
+    source-text: Required by the Climate Change Act 2008. Required for all applications.
+    source-url: &nfk-url https://www.norfolk.gov.uk/article/38630/Local-List
+    must-include:
+      - item: How the development achieves net zero carbon
+        level: must
+      - item: How any shortfall will be met
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): Net Zero Carbon Statement, in both lists (Reg 3 p.54, M&W p.64)."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - condition:
+            field: eia-development
+            value: true
+            description: Schedule 1 or Schedule 2 development which may have significant effects on the environment.
+    source-text: >-
+      Environmental Impact Assessment Required by the Town and Country Planning (Environmental Impact
+      Assessment) Regulations 2017 Required for all applications proposing development included in
+      Schedule 1 or Schedule 2 of the EIA Regulations which may have significant effects on the
+      environment
+    source-url: https://www.norfolk.gov.uk/media/21243/Minerals-And-Waste-Regulations-3-Local-List/pdf/5kminerals-and-waste-regulations-3-local-list.pdf?m=1712148339460
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's EIA row quoted pre-application text; this wording was in its ventilation row."
+
+  - id: section-existing
+    action: update
+    required-if: &nfk-levels
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev]
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: Existing or proposed site levels would impact on built development or be permanently
+              changed by proposed restoration.
+    must-include: &nfk-levels-items
+      - item: Finished floor and site levels
+        level: must
+    confidence: medium
+    notes: &nfk-levels-note "M&W list; the excerpt states the trigger."
+
+  - id: section-proposed
+    action: update
+    required-if: *nfk-levels
+    must-include: *nfk-levels-items
+    confidence: medium
+    notes: *nfk-levels-note
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - site:
+                in: [flood-risk-zone]
+                description: Development in Flood Zone 2 or 3, including minor development and change of use.
+            - condition:
+                field: site-area-residential
+                operator: ">"
+                value: 1
+                description: More than 1 hectare in Flood Zone 1.
+            - condition:
+                field: site-area-non-residential
+                operator: ">"
+                value: 1
+                description: More than 1 hectare in Flood Zone 1.
+            - discretionary
+    confidence: medium
+    notes: >-
+      Both lists; the excerpts state the triggers. Sites under 1 ha in Flood Zone 1 with a change to a
+      more vulnerable class (cut off) are shown as officer discretion.
+
+  - id: elevation-proposed
+    action: update
+    required-if: *nfk-all-disc
+    must-include:
+      - item: The elevations of the proposed works in relation to what is already on site
+        level: must
+      - item: All sides of the proposal, including blank elevations
+        level: must
+      - item: Where possible, the proposed building materials and the style, materials and finish of windows
+          and doors
+        level: should
+      - item: Where an elevation adjoins or is close to another building, the relationship and the positions
+          of the openings of each property
+        level: must
+    confidence: low
+    notes: "M&W list; the excerpt gives contents but not the trigger."
+
+  - id: elevation-existing
+    action: update
+    required-if: *nfk-all-disc
+    confidence: low
+    notes: "The trigger was not captured; scoped to county applications."
+
+  - id: floor-plan-existing
+    action: update
+    required-if: *nfk-all-disc
+    confidence: low
+    notes: "The trigger was not captured; scoped to county applications."
+
+  - id: floor-plan-proposed
+    action: update
+    required-if: *nfk-all-disc
+    confidence: low
+    notes: "The trigger was not captured; scoped to county applications."
+
+  - id: landscaping-plan
+    action: update
+    required-if: *nfk-all-disc
+    confidence: medium
+    notes: "Both lists: 'Required for all applications where new or replacement landscaping is proposed'."
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev]
+        - condition:
+            field: external-lighting
+            value: true
+            description: New external lighting is proposed (for example car parks, illumination of buildings,
+              work areas and security lighting).
+    source-url: https://www.norfolk.gov.uk/media/19094/Minerals-And-Waste-Local-List/pdf/19minerals-and-waste-local-list.pdf?m=1712148339267
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted Airport Safeguarding text. From the audit: the M&W Lighting Scheme, for new external lighting."
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: noise-generating-use
+                value: true
+                description: Applications which may have a potential noise impact.
+            - condition:
+                field: noise-sensitive-use
+                value: true
+                description: Development considered to be noise sensitive or within a noise sensitive area.
+            - discretionary
+    confidence: medium
+    notes: "Both lists; the excerpts state the trigger."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: loss-of-open-space
+                value: true
+                description: The loss of open spaces or a playing field.
+            - site:
+                in: [open-space]
+                description: Development which prejudices the use of open spaces or a playing field (including
+                  school playing fields).
+    confidence: medium
+    notes: "Both lists; the excerpts state the trigger."
+
+  - id: photos
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev]
+        - any:
+            - condition:
+                field: demolition
+                value: true
+                description: The demolition of an existing building.
+            - discretionary
+    confidence: medium
+    notes: >-
+      M&W list: where the development would result in a significant change in the appearance of a
+      building and/or landscape (including demolition).
+
+  - id: planning-statement
+    action: update
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev, reg-3, s73, non-material-amendment]
+    must-include:
+      - item: An explanation of the principles behind and the justification for the proposed development
+        level: must
+      - item: A rationale for the proposed changes
+        level: must
+        required-if:
+          application-type:
+            in: [s73, non-material-amendment]
+      - item: An educational need statement, where educational development is proposed
+        level: should
+        required-if:
+          application-type:
+            in: [reg-3]
+    confidence: medium
+    notes: >-
+      M&W list: 'for all applications'; the Reg 3 list also requires one. From the audit
+      (missing_requirement, wrong_app_type): Reg 3 asks for an educational need statement within it
+      where relevant, and both lists ask s73/s73A and s96A applicants for a Planning Statement
+      setting out the rationale for the changes.
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [reg-3]
+            - any:
+                - condition:
+                    field: parking-spaces
+                    operator: ">="
+                    value: 100
+                    description: 100 or more parking spaces.
+                - discretionary
+        - all:
+            - application-type:
+                in: [mineral-app, waste-dev]
+            - discretionary
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the excerpts omit the thresholds. From the audit, Reg 3: 30+ two-way
+      vehicle movements an hour, 100+ a day, 100+ parking spaces, D1 over 1,000 sqm (Transport
+      Statement for 500-1,000 sqm). Only the parking threshold can be expressed; the M&W triggers
+      were not captured.
+
+  - id: travel-plan
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - condition:
+                field: school-expansion
+                value: true
+                description: Development which increases the number of pupils and/or staff at an education
+                  facility (or other County Council building).
+            - condition:
+                field: staff-count
+                operator: ">="
+                value: 50
+                description: Non-residential development with 50 or more employees.
+            - discretionary
+    confidence: medium
+    notes: >-
+      Reg 3 excerpt; the audit says the M&W list asks for non-residential proposals with 50+
+      employees. Significant impact on the road network, or existing congestion or pollution
+      problems, are shown as officer discretion.
+
+  - id: heritage-statement
+    action: update
+    required-if: *nfk-all-disc
+    confidence: low
+    notes: "M&W list ('Required for any application ...', cut off). Not a listed building consent requirement."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev, reg-3]
+        - any:
+            - site:
+                in: [air-quality-management-area]
+                description: Within or adjacent to an Air Quality Management Area.
+            - discretionary
+    confidence: medium
+    notes: >-
+      The excerpt states the trigger (cut off after 'could in itself result in the designation of'
+      an AQMA, shown as officer discretion). Audit (wrong_app_type): also in the Reg 3 list.
+
+  - id: water-impact-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [mineral-app, waste-dev]
+        - condition:
+            field: ground-disturbance
+            value: true
+            description: Disturbance to the ground that could affect the water table and the movement of water.
+    source-text: >-
+      Hydrology/Hydrogeology Assessment … Required for any development which involves disturbance to
+      the ground that could affect the water table and the movement of water (under and around the
+      site)
+    source-url: https://www.norfolk.gov.uk/media/19094/Minerals-And-Waste-Local-List/pdf/19minerals-and-waste-local-list.pdf?m=1712148339267
+    confidence: medium
+    notes: "Audit (other): filed by the workbook as 'Ground investigation / Geotechnical / Basement Impact Assessment'."
+
+unmapped:
+  - local-name: Agricultural Justification Statement
+    source-text: "Required for applications for agricultural reservoirs where mineral is proposed to be extracted
+      and exported to create the reservoir landform."
+    source-url: https://www.norfolk.gov.uk/media/19094/Minerals-And-Waste-Local-List/pdf/19minerals-and-waste-local-list.pdf?m=1712148339267
+    suggested-id: agricultural-justification-statement
+  - local-name: Health Impact Assessment
+    source-text: "Health Impact Assessment (HIA) Required by District/Borough/City Local Plan policies Required for
+      applications for major/strategic development."
+    source-url: https://www.norfolk.gov.uk/media/21243/Minerals-And-Waste-Regulations-3-Local-List/pdf/5kminerals-and-waste-regulations-3-local-list.pdf?m=1712148339460
+    suggested-id: health-impact-assessment
+  - local-name: Sustainable Drainage Systems (SuDS)
+    source-text: "From the audit: major development (1,000m2 or 1ha)"
+    source-url: https://www.norfolk.gov.uk/article/38630/Local-List
+    suggested-id: drainage-strategy
+  - local-name: Restoration and Aftercare
+    source-text: "Required for all proposals which involve the disturbance of the ground for the extraction of
+      mineral or waste disposal except for applications seeking to vary/remove a condition which has no
+      impact on the final restoration/aftercare"
+    source-url: https://www.norfolk.gov.uk/media/19094/Minerals-And-Waste-Local-List/pdf/19minerals-and-waste-local-list.pdf?m=1712148339267
+    suggested-id: restoration-aftercare-scheme
+  - local-name: Dust Impact Assessment
+    source-text: "Required for all development for mineral extraction and waste management facilities."
+    source-url: https://www.norfolk.gov.uk/media/19094/Minerals-And-Waste-Local-List/pdf/19minerals-and-waste-local-list.pdf?m=1712148339267
+    suggested-id: dust-assessment
+  - local-name: Airport Safeguarding Statement
+    source-text: "Required for all applications within the consultation area of civil and military aerodromes and
+      airstrips (Norwich International Airport, RAF Marham ...)"
+    source-url: https://www.norfolk.gov.uk/article/38630/Local-List
+    suggested-id: aerodrome-safeguarding-assessment
+  - local-name: Public Rights of Way (PRoW) Statement
+    source-text: "Required for all proposals requiring any diversions/extinguishments of existing PRoWs and the
+      creation of new PRoWs."
+    source-url: https://www.norfolk.gov.uk/article/38630/Local-List
+    suggested-id: public-rights-of-way-statement
+  - local-name: Landfill Statement
+    source-text: "Required for any application which proposes landfilling (including re-working or reclamation of
+      former mineral sites)"
+    source-url: https://www.norfolk.gov.uk/media/19094/Minerals-And-Waste-Local-List/pdf/19minerals-and-waste-local-list.pdf?m=1712148339267
+    suggested-id: ""
+  - local-name: Phasing plans / Proposed Scheme of Working
+    source-text: "Required for all applications where operations are proposed in a phased manner"
+    source-url: https://www.norfolk.gov.uk/media/19094/Minerals-And-Waste-Local-List/pdf/19minerals-and-waste-local-list.pdf?m=1712148339267
+    suggested-id: phasing-plan
+  - local-name: Soil Assessment
+    source-text: "Required for applications which involve major development on agricultural land ..."
+    source-url: https://www.norfolk.gov.uk/media/19094/Minerals-And-Waste-Local-List/pdf/19minerals-and-waste-local-list.pdf?m=1712148339267
+    suggested-id: agricultural-land-classification
+  - local-name: Soils Management and Handling Strategy
+    source-text: "Required for applications where significant development of agricultural land is involved"
+    source-url: https://www.norfolk.gov.uk/media/19094/Minerals-And-Waste-Local-List/pdf/19minerals-and-waste-local-list.pdf?m=1712148339267
+    suggested-id: ""
+  - local-name: Bio-aerosol Assessment
+    source-text: "Required for applications for new waste composting facilities or changes to existing facilities
+      within 250m of the boundary of a sensitive receptor"
+    source-url: https://www.norfolk.gov.uk/media/19094/Minerals-And-Waste-Local-List/pdf/19minerals-and-waste-local-list.pdf?m=1712148339267
+    suggested-id: bioaerosol-assessment
+  - local-name: Borehole or trial pit analysis
+    source-text: "For applications involving mineral extraction and restoration"
+    source-url: https://www.norfolk.gov.uk/media/19094/Minerals-And-Waste-Local-List/pdf/19minerals-and-waste-local-list.pdf?m=1712148339267
+    suggested-id: ""
+  - local-name: External Materials Sample Board
+    source-text: "Required for all applications where new built development is proposed"
+    source-url: https://www.norfolk.gov.uk/media/21243/Minerals-And-Waste-Regulations-3-Local-List/pdf/5kminerals-and-waste-regulations-3-local-list.pdf?m=1712148339460
+    suggested-id: materials-schedule
+  - local-name: Unilateral Undertaking (Regulation 3)
+    source-text: "Any obligations would be required through the submission of a Unilateral Undertaking at
+      application stage"
+    source-url: https://www.norfolk.gov.uk/media/21243/Minerals-And-Waste-Regulations-3-Local-List/pdf/5kminerals-and-waste-regulations-3-local-list.pdf?m=1712148339460
+    suggested-id: heads-of-terms
+  - local-name: Environmental Permit statement (waste)
+    source-text: "Where an application for an Environmental Permit has already been made the reference of the
+      application should be provided"
+    source-url: https://www.norfolk.gov.uk/media/19094/Minerals-And-Waste-Local-List/pdf/19minerals-and-waste-local-list.pdf?m=1712148339267
+    suggested-id: ""
+
+low-confidence:
+  - id: sci
+    note: >-
+      Audit (wrong_trigger): both excerpts belong to neighbouring sections (Airport Safeguarding in
+      Reg 3, Agricultural Justification in M&W); the SCI trigger was not captured.
