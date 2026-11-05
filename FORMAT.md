@@ -122,6 +122,9 @@ field-status:
     status: human-verified
     by: Jake White
     date: 2026-11-06
+    checked-against:                # the council list it was compared with
+      url: https://next.shropshire.gov.uk/media/xsnj0cye/validation-checklist-2022.pdf
+      date: 2022-05-01
     hash: 3f2a9c1e                  # fingerprint of the cell's value when it was marked
   source-text:
     status: council-verified
@@ -134,6 +137,9 @@ field-status:
     by: Jake White
     date: 2026-11-06
     note: The council's 2026 list cites policy DP4, not MD2
+    checked-against:
+      url: https://next.shropshire.gov.uk/media/xsnj0cye/validation-checklist-2022.pdf
+      date: 2022-05-01
     hash: 51c0e8b2
 ```
 
@@ -141,6 +147,10 @@ field-status:
   status and doesn't count.
 - `council-verified` and `council-updated` need `evidence`: a link to the issue or PR, or a
   short note of the email.
+- `human-verified` and `incorrect` record `checked-against`: the link (and date) of the council
+  list the cell was compared with. Scripts fill it in from the council's current list in
+  `_lpa.yaml` unless you give another one. If the council later publishes a new list, you can
+  see which marks were made against the old one.
 - `incorrect` needs a `note`: what's wrong, or what the council's list actually says. When
   someone fixes the value, the hash stops matching and the flag clears itself, so the cell goes
   back to `unverified` (fixed, but not yet checked). Every new `incorrect` flag that lands on

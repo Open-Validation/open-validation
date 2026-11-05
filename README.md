@@ -99,6 +99,9 @@ The explorer's buttons open GitHub issues from the forms in `.github/ISSUE_TEMPL
   the issue link as `--evidence`.
 - A council's own corrections, merged as a pull request: mark those cells `council-updated` with the
   pull request link as evidence.
+- **Right of reply:** once every cell for a council is `human-verified`, run
+  `python scripts/right_of_reply.py` to draft an email to its planning team, send it, then record it
+  with `--mark-sent CODE`. The council has 28 days to confirm (→ `council-verified`) or correct it.
 - A **`cell-marks`** issue: save its YAML as `reviews/pending/<date>-<name>.yaml` and run
   `python scripts/apply_reviews.py`.
 
@@ -120,6 +123,8 @@ Install once: `pip install -r requirements.txt`. Then, from the repo root:
 | `python scripts/check.py` | Checks everything and prints a summary (also runs on every push) |
 | `python scripts/set_status.py ...` | Marks cells; `--recompute` refreshes every status |
 | `python scripts/apply_reviews.py` | Applies marks waiting in `reviews/pending/` |
+| `python scripts/right_of_reply.py` | Drafts emails to councils whose data is fully checked, so they can confirm or correct it; `--mark-sent CODE` records it |
+| `python scripts/stale_lists.py` | Lists councils whose list is over 2 years old (a monthly Action keeps a `stale-lists` issue up to date) |
 | `python scripts/new_incorrect_flags.py <commit>` | Lists cells newly flagged `incorrect` since a commit (used for the email alert) |
 | `python scripts/update_register.py` | Checks MHCLG's register of planning authorities for new, abolished or renamed councils and updates `data/organisation.csv` (runs monthly; opens an issue if anything changed) |
 | `python scripts/build_lpas.py` | Matches workbook councils to MHCLG codes; creates folders, `_lpa.yaml`, `lpa.csv` |

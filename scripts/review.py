@@ -20,6 +20,9 @@ from common import DATA, SPEC, load_yaml, read_csv, write_csv, write_yaml
 STATUSES = ["incorrect", "unverified", "human-verified", "council-verified", "council-updated"]
 NEEDS_EVIDENCE = {"council-verified", "council-updated"}
 NEEDS_NOTE = {"incorrect"}  # say what's wrong, or what the council's list actually says
+# These marks record which council list the cell was compared with (url + the list's date).
+# If you don't give one, the council's current list from its _lpa.yaml is used.
+RECORDS_CHECKED_AGAINST = {"human-verified", "incorrect"}
 
 # The cells of a requirement file and of a council's _lpa.yaml (FORMAT.md, "Review status").
 REQUIREMENT_CELLS = ["requirement", "application-type", "required-if", "must-include",
@@ -127,7 +130,17 @@ def file_status(data, filename):
     return lowest(cell_statuses(data, filename).values())
 
 
-def mark_cell(data, filename, cell, status, by, when=None, evidence="", note=""):
+def council_list(code):
+    """The council's current validation list as {url, date}, from its _lpa.yaml."""
+    path = SPEC / str(code) / "_lpa.yaml"
+    vl = (load_yaml(path).get("validation-list") or {}) if path.exists() else {}
+    out = {"url": vl.get("url") or ""}
+    if vl.get("date"):
+        out["date"] = str(vl["date"])
+    return out
+
+
+def mark_cell(data, filename, cell, status, by, when=None, evidence="", note="", checked_against=None):
     """Write a mark for one cell into data['field-status'] (in memory).
     Returns False (and changes nothing) if the cell is empty."""
     if cell not in cells_for(filename):
@@ -151,6 +164,12 @@ def mark_cell(data, filename, cell, status, by, when=None, evidence="", note="")
         entry["evidence"] = evidence
     if note:
         entry["note"] = note
+    if status in RECORDS_CHECKED_AGAINST:
+        against = checked_against or council_list(data.get("local-authority"))
+        if not against.get("url"):
+            raise ValueError("this council has no validation list link, so say what you checked against "
+                             "(--checked-against <url>)")
+        entry["checked-against"] = against
     entry["hash"] = cell_hash(value)
     marks[cell] = entry
     return True

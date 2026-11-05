@@ -12,7 +12,9 @@ Examples:
       council, coverage and data/lpa.csv
 
 Statuses: incorrect, unverified, human-verified, council-verified, council-updated.
-The two council statuses need --evidence; 'incorrect' needs --note (what's wrong). Marking a cell 'unverified' removes its mark.
+The two council statuses need --evidence; 'incorrect' needs --note (what's wrong).
+human-verified and incorrect marks also record which list you checked against: the
+council's current list by default, or give --checked-against <url> [--list-date YYYY-MM-DD]. Marking a cell 'unverified' removes its mark.
 """
 
 import argparse
@@ -36,7 +38,7 @@ def recompute_all():
     print(f"Recomputed review-status and coverage for {len(lpa_folders())} councils and updated data/lpa.csv.")
 
 
-def mark(code, status, by, files, cells, evidence, note=""):
+def mark(code, status, by, files, cells, evidence, note="", against=None):
     folder = SPEC / code
     if not (folder / "_lpa.yaml").exists():
         sys.exit(f"There is no council folder called {code}.")
@@ -62,7 +64,8 @@ def mark(code, status, by, files, cells, evidence, note=""):
         targets = [c for c in (cells or names) if c in names]
         done = []
         for cell in targets:
-            if review.mark_cell(data, path.stem, cell, status, by, evidence=evidence, note=note):
+            if review.mark_cell(data, path.stem, cell, status, by, evidence=evidence, note=note,
+                                checked_against=against):
                 done.append(cell)
         if done:
             write_yaml(path, data)
@@ -82,6 +85,9 @@ def main():
     p.add_argument("--cells", help="comma-separated cell names (default: every non-empty cell)")
     p.add_argument("--evidence", default="", help="link or note; needed for the council statuses")
     p.add_argument("--note", default="", help="what's wrong; needed for 'incorrect'")
+    p.add_argument("--checked-against", help="link to the list you compared with "
+                   "(default: the council's current list in _lpa.yaml)")
+    p.add_argument("--list-date", help="date of that list, if you give --checked-against")
     p.add_argument("--recompute", action="store_true", help="only recompute statuses (see above)")
     a = p.parse_args()
 
@@ -91,7 +97,12 @@ def main():
     if not (a.code and a.status and a.by):
         p.error("give a council code, a status and --by (or use --recompute)")
     split = lambda s: [x.strip().removesuffix(".yaml") for x in s.split(",") if x.strip()] if s else None
-    mark(a.code, a.status, a.by, split(a.files), split(a.cells), a.evidence, a.note)
+    against = None
+    if a.checked_against:
+        against = {"url": a.checked_against}
+        if a.list_date:
+            against["date"] = a.list_date
+    mark(a.code, a.status, a.by, split(a.files), split(a.cells), a.evidence, a.note, against)
 
 
 if __name__ == "__main__":

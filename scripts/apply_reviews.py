@@ -12,6 +12,9 @@ Each file in reviews/pending/ is a list of marks like this:
     date: 2026-11-06
     evidence: ""             # needed for the two council statuses
     note: ""                 # needed for 'incorrect': what's wrong
+    checked-against:         # optional; default is the council's current list
+      url: https://...
+      date: 2022-05-01
 
 All marks in all pending files are checked first. If any is wrong, nothing is
 changed and you get a clear message. Otherwise they're applied, each file is
@@ -85,7 +88,8 @@ def main():
             path = SPEC / m["lpa"] / f"{m['file']}.yaml"
             data = load_yaml(path)
             review.mark_cell(data, m["file"], m["cell"], m["status"], m["by"],
-                             when=m["date"], evidence=m.get("evidence") or "", note=m.get("note") or "")
+                             when=m["date"], evidence=m.get("evidence") or "", note=m.get("note") or "",
+                             checked_against=m.get("checked-against"))
             write_yaml(path, data)
             councils.add(m["lpa"])
             count += 1

@@ -54,6 +54,13 @@ Working branch: `ccr-f743743a-pji9c0` (the session's designated branch, used ins
   Default until told otherwise: the maintainer approves each officer registration. Officers without
   GitHub use the "I work for this council" form (maintainer confirms by emailing the council address).
   Repo settings needed: Allow auto-merge; protect `main` requiring the `check` workflow.
+- Lessons adopted from similar projects: (1) human-verified/incorrect marks record `checked-against`
+  (list url + date, auto-filled); (2) `right_of_reply.py` drafts council emails and records
+  `right-of-reply` in `_lpa.yaml`; (4) **stage D: Subresource Integrity hashes on the js-yaml and d3
+  script tags, plus a Content-Security-Policy meta tag** (scripts only from self + cdn.jsdelivr.net,
+  connect only to self + api.github.com); (5) monthly `stale-lists` issue (`stale_lists.py`).
+  Deferred: no-account feedback form.
+- Stage B scope changed by the user: build **Camden, all of London and the South East** (not SHR+CMD).
 - Review mode signs in with a pasted fine-grained token (no backend). A "Sign in with GitHub" button
   (Cloudflare Worker) can be added later.
 
