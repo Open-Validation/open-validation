@@ -205,6 +205,8 @@ def apply_corrections(files, corr, code):
             files[rid].setdefault("confidence", "medium")
             files[rid]["_corrected"] = True
         else:  # update: keep the workbook's file, override the keys given
+            if "notes" in given:  # notes are added to the workbook's notes, not swapped for them
+                given["notes"] = as_list(files[rid].get("notes")) + as_list(given["notes"])
             files[rid].update(given)
             files[rid]["_corrected"] = True
     for lc in corr.get("low-confidence") or []:
