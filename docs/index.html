@@ -317,7 +317,7 @@ function parseCSV(text) {
 }
 function fetchText(url) { return fetch(url).then(function (r) { if (!r.ok) throw new Error(r.status + " " + url); return r.text(); }); }
 function fetchCSV(url) { return fetchText(url).then(parseCSV); }
-function fetchYAML(url) { return fetchText(url).then(function (t) { return jsyaml.load(t); }); }
+function fetchYAML(url) { return fetchText(url).then(function (t) { return jsyaml.load(t, { schema: jsyaml.CORE_SCHEMA }); }); }   // CORE_SCHEMA keeps dates as text
 
 // ======================================================================
 // ===== EVALUATOR START (keep identical in docs/index.html and docs/evaluate.test.html) =====
@@ -431,12 +431,14 @@ function describe(rule) {
     else if (k === "any") { var parts = (v || []).map(describe).filter(Boolean); out.push(parts.length > 1 ? "any of: " + parts.join("; or ") : parts.join("")); }
     else if (k === "always") out.push("always");
     else if (k === "application-type") out.push("for " + ((v && v["in"]) || []).map(typeName).join(", ") + " applications");
-    else if (k === "condition") out.push(v.description ? v.description.replace(/\.$/, "") : fieldLabel(v.field) + " " + (OPS[v.operator] || "is") + " " + v.value);
-    else if (k === "site") out.push(v.description ? v.description.replace(/\.$/, "") : "site is in: " + ((v && v["in"]) || []).map(fieldLabel).join(", "));
+    else if (k === "condition") out.push(v.description ? lower(v.description) : fieldLabel(v.field).toLowerCase() + " " + (OPS[v.operator] || "is") + " " + v.value);
+    else if (k === "site") out.push(v.description ? lower(v.description) : "site is in: " + ((v && v["in"]) || []).map(fieldLabel).join(", "));
     else if (k === "ref") out.push(v === "major-development" ? "major development" : tidy(v));
   });
   return out.filter(Boolean).join(" and ");
 }
+// "The site is in…." -> "the site is in…" (keeps acronyms such as "SSSI" as they are)
+function lower(t) { t = String(t).trim().replace(/\.$/, ""); return /^[A-Z][a-z]/.test(t) ? t.charAt(0).toLowerCase() + t.slice(1) : t; }
 function typeName(id) { var t = S.typeById[id]; return t ? t.name.replace(/ planning application$| base type$/i, "") : id; }
 
 // Every field a rule mentions: { field: count }
@@ -1150,7 +1152,7 @@ function setupReview() {
     if (t.checked && !reviewer()) { t.checked = false; return reviewSetup(function () { t.checked = true; S.review = true; store("sessionStorage", "ov-review", true); document.body.classList.add("reviewing"); render(); }); }
     S.review = t.checked; store("sessionStorage", "ov-review", S.review); document.body.classList.toggle("reviewing", S.review); render();
   });
-  document.addEventListener("click", function (e) { if (!S.review) return; var td = e.target.closest("td.cell[data-cell]"); if (td && !e.target.closest("a,button,summary")) openCellMenu(td); });
+  document.addEventListener("click", function (e) { if (!S.review) return; var td = e.target.closest("td.cell[data-cell]"); if (td && !e.target.closest("a,button")) { if (e.target.closest("summary")) e.preventDefault(); openCellMenu(td); } });
   document.addEventListener("keydown", function (e) { if (!S.review || e.key !== "Enter") return; var td = e.target.closest && e.target.closest("td.cell[data-cell]"); if (td) { e.preventDefault(); openCellMenu(td); } });
 }
 function reviewSetup(done) {

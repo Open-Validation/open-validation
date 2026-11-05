@@ -68,6 +68,8 @@ def main():
     p = argparse.ArgumentParser(description="Apply cell marks waiting in reviews/pending/.")
     p.add_argument("--github-user", default="",
                    help="the GitHub account that submitted the marks (recorded on every mark)")
+    p.add_argument("--summary", help="write a summary of the marks (cells, councils, statuses) to this JSON "
+                   "file; the workflow uses it to decide whether the pull request can merge itself")
     a = p.parse_args()
     files = sorted(PENDING.glob("*.yaml"))
     if not files:
@@ -92,6 +94,13 @@ def main():
         for msg in problems:
             print("  -", msg)
         sys.exit(1)
+
+    if a.summary:
+        import json
+        all_marks = [m for _, marks in batches for m in marks]
+        with open(a.summary, "w") as f:
+            json.dump({"cells": len(all_marks), "councils": sorted({m["lpa"] for m in all_marks}),
+                       "statuses": sorted({m["status"] for m in all_marks})}, f)
 
     councils, count = set(), 0
     for f, marks in batches:

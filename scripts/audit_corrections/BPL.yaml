@@ -1,0 +1,338 @@
+# Corrections for Blackpool Borough Council, from the audit of Blackpool.
+# The current list is the council's 'Local validation checklist' web page (last modified 17 Oct 2025;
+# its content matches the revised list consulted on in 2023). The workbook's reference link is a
+# superseded pre-2021 Word checklist (citing the GDPO 1995 and EIA Regulations 1999), and most rows
+# came from it. The audit confirms that air quality, archaeology, lighting, structural survey, the
+# Table 4 transport thresholds, S106 heads of terms and A3 odour items are not in the current list,
+# so they are dropped; the current page's requirements are added from the audit.
+local-authority: BPL
+
+validation-list:
+  url: https://www.blackpool.gov.uk/Residents/Planning-environment-and-community/Planning/Planning-applications/Local-validation-checklist.aspx
+  date: 2025-10-17
+  date-basis: "Current page: 'Last Modified October 17, 2025'; no adoption date is stated. The previous list
+    was adopted 10 May 2021 and the revised list was consulted on in 2023."
+
+drop:
+  - id: air-quality-assessment
+    reason: "other (audit issue 3): from the superseded pre-2021 checklist; not in the current list"
+  - id: archaeological-assessment
+    reason: "other (audit issue 3): from the superseded pre-2021 checklist; not in the current list"
+  - id: lighting-assessment
+    reason: "other (audit issue 3): from the superseded pre-2021 checklist; not in the current list"
+  - id: flood-risk-assessment
+    reason: "other (audit issue 3): national wording from the superseded checklist; the current list asks for
+      a flood sequential appraisal instead (unmapped below)"
+  - id: schedule-of-works
+    sheets: [Householder]
+    reason: "wrong_app_type: the excerpt is the demolition method statement, which 'does not apply to
+      householder schemes'"
+  - id: design-and-access-statement
+    reason: "wrong_trigger: table-of-contents text; national rules apply"
+  - id: floor-plan-existing
+    sheets: [Listed building consent]
+    reason: "other: national requirement quoting the repealed GDPO 1995"
+  - id: floor-plan-proposed
+    sheets: [Listed building consent]
+    reason: "other: as above"
+  - id: elevation-existing
+    sheets: [Listed building consent]
+    reason: "other: as above"
+  - id: elevation-proposed
+    sheets: [Listed building consent]
+    reason: "other: as above"
+  - id: roof-plan-existing
+    sheets: [Listed building consent]
+    reason: "other: as above"
+  - id: roof-plan-proposed
+    sheets: [Listed building consent]
+    reason: "other: as above"
+  - id: section-existing
+    reason: "wrong_trigger: the current page lists section drawings under 'Recommendations (non-mandatory)'"
+  - id: section-proposed
+    reason: "wrong_trigger: as above"
+
+drop-unmapped:
+  - local-name: Structural Survey
+    reason: "other (audit issue 3): from the superseded checklist; not in the current list"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "other (audit issue 3): from the superseded checklist; not in the current list"
+  - local-name: Pre-application advice / engagement details
+    reason: "wrong_trigger: reuses the superseded S106 heads of terms text"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "other (audit issue 3): old Use Class A3 text from the superseded checklist"
+  - local-name: Advertisement drawings / illumination details
+    reason: "other (audit issue 3): the superseded checklist's lighting text"
+  - local-name: Drainage Strategy / SuDS
+    reason: "missing_requirement: old trade-waste/foul text; replaced by the SUDS proforma below"
+  - local-name: Foul Sewage / Utilities Statement
+    reason: "other: the same old foul drainage text from the superseded checklist"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: a fragment ('highway and visibility splays.') from the superseded checklist"
+  - local-name: Landscape and Visual Impact Assessment
+    reason: "wrong_trigger: a fragment; re-added below with the full trigger"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 15
+        description: A residential scheme of 15 or more dwellings.
+    must-include:
+      - item: The proposed housing types
+        level: must
+      - item: How the properties would be managed
+        level: must
+      - item: How their affordable status would be maintained
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt was cut off before the threshold, 'residential schemes of 15
+      or more dwellings'."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      all:
+        - site:
+            in: [conservation-area]
+            description: The site is in a conservation area.
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Root protection areas are affected or trees are to be removed.
+    source-url: https://www.blackpool.gov.uk/Residents/Planning-environment-and-community/Planning/Planning-applications/Local-validation-checklist.aspx
+    confidence: medium
+    notes: "From the audit (missing_requirement): a tree survey in conservation areas where root protection
+      areas are affected or trees removed. The workbook quoted the superseded checklist."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [site-of-special-scientific-interest, local-wildlife-site, special-protection-area,
+              special-area-of-conservation]
+            description: The site includes or is within 500m of a pond, Biological Heritage Site, SSSI or
+              habitats site.
+        - all:
+            - condition:
+                field: greenfield-site
+                value: true
+                description: A greenfield site.
+            - condition:
+                field: trees-on-or-near-site
+                value: true
+                description: The site has trees, hedgerows or shrubs.
+        - condition:
+            field: demolition
+            value: true
+            description: The proposal involves demolition (bat survey or ecologist's statement).
+    source-url: https://www.blackpool.gov.uk/Residents/Planning-environment-and-community/Planning/Planning-applications/Local-validation-checklist.aspx
+    confidence: medium
+    notes: "From the audit (missing_requirement): in ecologically sensitive locations, an ecological
+      appraisal or an ecologist's confirmation; for proposals involving demolition, a bat survey or
+      ecologist statement. Ponds have no designation id, so they are named in the description."
+
+  - id: energy-statement
+    action: add
+    required-if:
+      all:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: A residential proposal (major or minor scale).
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal is not a change of use.
+    source-text: "All minor scale residential proposals other than change of use must be accompanied by: A
+      statement explaining what renewable energy generation options have been considered to serve the
+      development, including building orientation etc, and a justification if no such measures are
+      proposed"
+    source-url: https://www.blackpool.gov.uk/Residents/Planning-environment-and-community/Planning/Planning-applications/Local-validation-checklist.aspx
+    must-include:
+      - item: What renewable energy generation options have been considered, including building orientation
+        level: must
+      - item: A justification if no such measures are proposed
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): a renewable energy statement for major and minor
+      residential proposals. The wording was in the workbook's prior approval transport row."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    confidence: low
+    notes: "The excerpt is from the superseded checklist (EIA Regulations 1999); the national requirement
+      applies."
+
+  - id: noise-assessment
+    action: update
+    required-if: discretionary
+    must-include:
+      - item: A management plan covering waste storage and collection, guest arrival and departure,
+          cleaning and servicing, displayed managing agent contact details, and resolving issues
+        level: must
+    confidence: low
+    notes: "Needed for serviced holiday accommodation ('Must be accompanied by a noise survey and a
+      management plan'); that use has no field, so it is shown as officer discretion."
+
+  - id: schedule-of-works
+    action: update
+    required-if:
+      application-type:
+        in: [lbc]
+    confidence: low
+    notes: "The excerpt ('may be required') is from the superseded checklist; check the current page."
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: minor-development
+            value: true
+            description: A minor scale proposal.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 0
+            description: A non-residential proposal.
+    source-text: A sustainability statement explaining how the scheme would minimise energy and water use
+      and waste
+    source-url: https://www.blackpool.gov.uk/Residents/Planning-environment-and-community/Planning/Planning-applications/Local-validation-checklist.aspx
+    must-include:
+      - item: How the scheme would minimise energy and water use and waste
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): this is the minor non-residential sustainability statement;
+      the TVIA text the workbook ran on is now unmapped. Major non-residential schemes need a BREEAM
+      certificate instead (unmapped)."
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: Retail (Class E(a)) outside a defined centre, or major non-sports leisure outside the
+          resort core and town centre.
+    policy: Policies CS4 and DM15
+    source-text: "Main town centre uses outside a defined centre - retail proposals (Class E(a)) … sequential
+      appraisal and impact assessment (Policies CS4 and DM15)"
+    source-url: https://www.blackpool.gov.uk/Residents/Planning-environment-and-community/Planning/Planning-applications/Local-validation-checklist.aspx
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook read 'uses located within the town centre'; the source
+      requires it OUTSIDE a defined centre. The leisure branch is from audit issue 8."
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      all:
+        - ref: major-development
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal is not a change of use.
+    source-text: "Major scale proposals (residential) - other than change of use … A transport statement or
+      transport assessment and travel plan as required by appendix G2"
+    source-url: https://www.blackpool.gov.uk/Residents/Planning-environment-and-community/Planning/Planning-applications/Local-validation-checklist.aspx
+    policy: Blackpool Local Plan Part 2 appendix G2
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook placed it under prior approval, the opposite of 'other than
+      change of use'. 'Not a change of use' is shown with the new-build field."
+
+  - id: travel-plan
+    action: replace
+    required-if:
+      all:
+        - ref: major-development
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal is not a change of use.
+    source-text: "Major scale proposals (residential) - other than change of use … A transport statement or
+      transport assessment and travel plan as required by appendix G2"
+    source-url: https://www.blackpool.gov.uk/Residents/Planning-environment-and-community/Planning/Planning-applications/Local-validation-checklist.aspx
+    policy: Blackpool Local Plan Part 2 appendix G2
+    confidence: medium
+    notes: "Audit (wrong_app_type): as transport-assessment."
+
+unmapped:
+  - local-name: Demolition method statement
+    source-text: A demolition method statement Please note that this validation requirement does not apply
+      to householder schemes but, where necessary, this information may be required before a decision can
+      be made on your application.
+    source-url: https://www.blackpool.gov.uk/Residents/Planning-environment-and-community/Planning/Planning-applications/Local-validation-checklist.aspx
+    suggested-id: demolition-method-statement
+  - local-name: Townscape visual impact assessment (TVIA)
+    source-text: New build developments of 5 storeys (or equivalent) or more in height All such applications
+      must be accompanied by a townscape visual impact assessment (TVIA).
+    source-url: https://www.blackpool.gov.uk/Residents/Planning-environment-and-community/Planning/Planning-applications/Local-validation-checklist.aspx
+    suggested-id: townscape-visual-impact-assessment
+  - local-name: Maximum height above ordnance datum (Blackpool Airport)
+    source-text: "From the audit: sites within 6 km of Blackpool Airport - applications other than change of
+      use must specify maximum height above ordnance datum"
+    source-url: https://www.blackpool.gov.uk/Residents/Planning-environment-and-community/Planning/Planning-applications/Local-validation-checklist.aspx
+    suggested-id: airport-safeguarding
+  - local-name: SUDS proforma and concept drainage strategy
+    source-text: "From the audit: major scale proposals (residential and non-residential) other than change
+      of use: 'SUDS proforma and concept drainage strategy'"
+    source-url: https://www.blackpool.gov.uk/Residents/Planning-environment-and-community/Planning/Planning-applications/Local-validation-checklist.aspx
+    suggested-id: drainage-strategy
+  - local-name: Biodiversity matrix
+    source-text: "From the audit: major scale proposals other than change of use: a biodiversity matrix for
+      the existing and proposed site"
+    source-url: https://www.blackpool.gov.uk/Residents/Planning-environment-and-community/Planning/Planning-applications/Local-validation-checklist.aspx
+    suggested-id: biodiversity-matrix
+  - local-name: BREEAM design-stage interim certificate
+    source-text: "From the audit: major non-residential: 'BREEAM design-stage interim certificate ... very
+      good'"
+    source-url: https://www.blackpool.gov.uk/Residents/Planning-environment-and-community/Planning/Planning-applications/Local-validation-checklist.aspx
+    suggested-id: breeam-certificate
+  - local-name: Full-fibre broadband statement
+    source-text: "From the audit: major and minor non-residential proposals"
+    source-url: https://www.blackpool.gov.uk/Residents/Planning-environment-and-community/Planning/Planning-applications/Local-validation-checklist.aspx
+    suggested-id: broadband-statement
+  - local-name: Flood sequential appraisal and exceptions test
+    source-text: "From the audit: flood zones 2 and 3, a sequential appraisal and, where necessary, the
+      exceptions test for new-build"
+    source-url: https://www.blackpool.gov.uk/Residents/Planning-environment-and-community/Planning/Planning-applications/Local-validation-checklist.aspx
+    suggested-id: flood-sequential-test
+  - local-name: Site parking review (Blackpool Victoria Hospital and Blackpool and Fylde College)
+    source-text: "From the audit: any material increase in floorspace or loss of parking at Blackpool Victoria
+      Hospital or Blackpool and Fylde College"
+    source-url: https://www.blackpool.gov.uk/Residents/Planning-environment-and-community/Planning/Planning-applications/Local-validation-checklist.aspx
+    suggested-id: parking-review
+  - local-name: Holiday accommodation viability study
+    source-text: "From the audit: change of use away from holiday accommodation in holiday accommodation
+      areas"
+    source-url: https://www.blackpool.gov.uk/Residents/Planning-environment-and-community/Planning/Planning-applications/Local-validation-checklist.aspx
+    suggested-id: viability-assessment
+  - local-name: Employment marketing evidence
+    source-text: "From the audit: at least 12 months of marketing evidence for loss of employment use in
+      employment areas"
+    source-url: https://www.blackpool.gov.uk/Residents/Planning-environment-and-community/Planning/Planning-applications/Local-validation-checklist.aspx
+    suggested-id: marketing-evidence
+  - local-name: Management plan (residential care, supported housing, student accommodation)
+    source-text: "From the audit: residential care, supported housing and student accommodation"
+    source-url: https://www.blackpool.gov.uk/Residents/Planning-environment-and-community/Planning/Planning-applications/Local-validation-checklist.aspx
+    suggested-id: management-plan
+
+low-confidence:
+  - id: heritage-statement
+    note: "The excerpt is from the superseded pre-2021 checklist and gives no trigger; check the current
+      page's Conservation areas section."
+  - id: landscaping-plan
+    note: "The excerpt is from the superseded pre-2021 checklist and gives no trigger."
+  - id: viability-assessment
+    note: "Audit (wrong_trigger): the excerpt is only the planning-obligations viability text; the current
+      list also asks for a viability study for loss of holiday accommodation (unmapped)."

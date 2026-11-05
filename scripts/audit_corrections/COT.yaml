@@ -1,0 +1,495 @@
+# Corrections for Cotswold District Council, from inputs/audit/cotswold-district-council.json.
+# The audit compared the workbook with Cotswold's full planning permission and listed building
+# consent checklist (a shared Publica checklist with Cotswold-specific thresholds; the
+# workbook's 'Rev 1 - 20 July 2026' version is treated as current) and the Householder checklist.
+# Grokbot copied the 'Removal or variation of a condition' checklist into Listed building consent
+# and mixed in superseded 2022 checklists. Items marked "From the audit" use the audit's
+# paraphrase of the checklists.
+local-authority: COT
+
+validation-list:
+  date: 2026-07-20
+  date-basis: "audit: document header 'Rev 1 - 20 July 2026' (the workbook's date came from PDF metadata)"
+
+submission-standards:
+  - item: All drawings must include a title, drawing number, confirmation of the scale and a scale bar
+    level: must
+  - item: All drawings supplied in a scalable format, ideally as PDF documents and not in draft format
+    level: should
+
+drop:
+  - id: bng-metric
+    sheets: [Listed building consent, Non-material amendment]
+    reason: "wrong_app_type: LBC rows are copied from the s73 checklist (BNG does not apply to LBC); statutory BNG does not apply to s96A amendments"
+  - id: site-plan
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: copied from the s73 checklist"
+  - id: cil-form
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: copied from the s73 checklist; CIL does not apply to LBC"
+  - id: section-existing
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: copied from the s73 checklist"
+  - id: section-proposed
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: copied from the s73 checklist"
+  - id: floor-plan-existing
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: copied from the s73 checklist"
+  - id: floor-plan-proposed
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: copied from the s73 checklist"
+  - id: elevation-existing
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: copied from the s73 checklist"
+  - id: elevation-proposed
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: copied from the s73 checklist"
+  - id: planning-statement
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: copied from the s73 checklist"
+  - id: roof-plan-existing
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: copied from the s73 checklist"
+  - id: roof-plan-proposed
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: copied from the s73 checklist"
+  - id: biodiversity-survey-report
+    sheets: [Non-material amendment]
+    reason: "wrong_app_type: generic BNG text; statutory BNG does not apply to s96A amendments"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "wrong_trigger/not_a_requirement: fragment 'of the pre-application advice process.'"
+  - local-name: Self-build / custom build information
+    reason: "wrong_trigger: fragment 'CIL e.g. self-build.' from the CIL entry"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not a separate requirement: site plan contents (now a site-plan must-include item)"
+
+requirements:
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - site:
+                in: [archaeological-priority-area, scheduled-monument]
+                description: The site is on or next to an archaeological heritage asset.
+            - condition:
+                field: ground-disturbance
+                value: true
+                description: New building or ground disturbance.
+        - discretionary
+    source-text: >-
+      site may contain or affect archaeological deposits … The Desk Based Assessment must be carried
+      out in accordance with the CIfA Codes, regulations and Standards, and guidance | CIfA
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    must-include:
+      - item: Desk Based Assessment carried out in accordance with the CIfA Codes, regulations and
+          Standards, and guidance
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, missing_requirement): the workbook quoted the CIfA standards line. The
+      full checklist trigger is 'site may contain or affect archaeological deposits' (officer
+      discretion); the Householder checklist asks for it for new building or ground disturbance on
+      or next to an archaeological heritage asset.
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: Protected or priority species may be affected.
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Works affecting an existing roof (bats).
+        - condition:
+            field: near-watercourse
+            value: true
+            description: Works close to a pond or watercourse.
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): the Householder checklist asks for a Biodiversity Survey
+      and Report for works affecting an existing roof (bats) or close to a pond or watercourse.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    confidence: medium
+    notes: "Schedule 2 development should request a screening opinion first."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building of 7 or more storeys.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 2
+            description: The building contains more than one dwelling.
+    source-text: "Buildings 18m+ or 7+ storeys with more than one dwelling; exempt for some material changes of use"
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type, wrong_trigger): the workbook filed it under prior approval using the exemption wording."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building]
+            description: The property is listed.
+        - discretionary
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was 'to the Heritage Statement requirement.'.
+      From the audit: the Householder checklist asks for one for a listed property; the full
+      checklist trigger is not given.
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: The proposal is outside a centre.
+        - any:
+            - condition:
+                field: retail-floorspace
+                operator: ">="
+                value: 100
+                description: A retail increase of 100 square metres or more.
+            - condition:
+                field: town-centre-use-floorspace
+                operator: ">"
+                value: 500
+                description: Leisure over 500 square metres gross.
+    source-text: "Cotswold: retail increase of 100 sqm+ outside a centre, or leisure over 500 sqm gross"
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted the S106 variation row."
+
+  - id: cil-form
+    action: replace
+    required-if:
+      condition:
+        field: floorspace
+        operator: ">"
+        value: 0
+        description: The proposal creates new floorspace (liable at 100 square metres GIA or more, or
+          any new residential floorspace).
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement, wrong_trigger): CIL Form 1 for any new floorspace (liable
+      at 100 sqm+ GIA); the Householder checklist asks for CIL Form 1/2 for new residential
+      floorspace. The workbook's excerpt was garbled.
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: Site levels are proposed to be altered.
+    must-include:
+      - item: Existing and proposed site levels and finished floor levels, related to a defined datum
+          point
+        level: must
+    confidence: medium
+    notes: "The checklists' own trigger: 'Where site levels are proposed to be altered'."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: Site levels are proposed to be altered.
+    must-include:
+      - item: Existing and proposed site levels and finished floor levels, related to a defined datum
+          point
+        level: must
+    confidence: medium
+    notes: "The checklists' own trigger: 'Where site levels are proposed to be altered'."
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: Visibility splays where relevant, landscaping, car parking and open areas around
+          buildings
+        level: must
+        source-text: "public highway, visibility splays where relevant, landscaping, car parking and open areas around buildings)."
+    confidence: low
+    notes: "The workbook's site plan excerpts are garbled (roof text); check the checklists for when a site plan is needed."
+
+  - id: design-and-access-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - all:
+            - site:
+                in: [world-heritage-site, conservation-area]
+                description: The site is in a World Heritage Site or conservation area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: One or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: 100 square metres or more of floorspace.
+        - all:
+            - application-type:
+                in: [hh]
+            - condition:
+                field: floorspace
+                operator: ">"
+                value: 100
+                description: More than 100 square metres of new floorspace.
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): major; LBC; WHS/conservation area with 1+ dwelling or
+      100 sqm+; and householder proposals with more than 100 sqm of new floorspace.
+
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 11
+            description: 11 or more dwellings.
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 1000
+            description: Over 1,000 square metres.
+        - all:
+            - site:
+                in: [designated-rural-area]
+                description: The site is in a designated rural area.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 6
+                description: 6 to 10 dwellings in a rural area.
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Cotswold: 11+ dwellings or over 1,000 sqm, or 6-10 rural dwellings."
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: The site is in or next to an Air Quality Management Area.
+        - discretionary
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): in or next to an AQMA, or where there are air quality impacts."
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees or hedges with a stem over 75mm (at 1.5m) on or near the site.
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): trees or hedges with stems over 75mm, in both the full and Householder checklists."
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if: discretionary
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Householder checklist, where there is possible loss of light or overshadowing of neighbours."
+
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3 (including minor householder extensions).
+        - ref: major-development
+        - site:
+            in: [critical-drainage-area]
+            description: The site is in a critical drainage area.
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): FZ2/3, all major, critical drainage areas; householder minor extensions follow EA standing advice."
+
+  - id: landscaping-plan
+    action: add
+    required-if:
+      condition:
+        field: new-build
+        value: true
+        description: New commercial or residential development.
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Landscaping Scheme for new commercial/residential development."
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if:
+      condition:
+        field: loss-of-open-space
+        value: true
+        description: The proposal would result in the loss of open space.
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Open Space Assessment for loss of open space."
+
+  - id: waste-management-plan
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 300
+            description: Employment floorspace of 300 square metres or more.
+        - condition:
+            field: retail-floorspace
+            operator: ">="
+            value: 500
+            description: Retail floorspace of 500 square metres or more.
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): Site Waste Management Plan (major, employment 300 sqm+,
+      retail 500 sqm+) and Waste Minimisation Statement (all major).
+
+  - id: sci
+    action: add
+    required-if:
+      ref: major-development
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): Statement of Community Involvement for major applications."
+
+  - id: sustainability-statement
+    action: add
+    required-if: discretionary
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): Cotswold requires it for all applications in
+      Stow-on-the-Wold and The Swells; there is no designation for that area.
+
+  - id: land-contamination-assessment
+    action: add
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): listed; no trigger given."
+
+  - id: lighting-assessment
+    action: add
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): listed; no trigger given."
+
+  - id: noise-assessment
+    action: add
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): listed; no trigger given."
+
+  - id: transport-assessment
+    action: add
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): Transport Statement/Assessment listed; no trigger given."
+
+unmapped:
+  - local-name: Biodiversity Self-Assessment
+    source-text: "Biodiversity Self-Assessment - All new applications, unless a Biodiversity Report is submitted (Full, Outline, LBC, Permission in Principle)"
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    suggested-id: biodiversity-checklist
+  - local-name: Agricultural/Forestry Dwelling Justification
+    source-text: "From the audit: new rural worker dwelling"
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    suggested-id: agricultural-worker-dwelling-statement
+  - local-name: Coal Mining Assessment
+    source-text: "From the audit: groundworks in coal mining areas"
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Foul Sewerage Assessment (FDA1)
+    source-text: "From the audit: non-mains drainage"
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    suggested-id: foul-sewage-assessment
+  - local-name: Landscape and Visual Impact Assessment
+    source-text: "From the audit: LVIA listed in the full planning checklist (no trigger given)"
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Mains Sewage Capacity Assessment
+    source-text: "From the audit: all major (Cotswold)"
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    suggested-id: foul-sewage-utilities-statement
+  - local-name: Planning Obligation / Heads of Terms
+    source-text: "From the audit: listed in the full planning checklist (no trigger given)"
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    suggested-id: heads-of-terms
+  - local-name: Structural Survey
+    source-text: "From the audit: Cotswold: conversion of countryside barns/buildings"
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    suggested-id: structural-survey
+  - local-name: Surface Water Drainage Strategy
+    source-text: "From the audit: major, FZ2/3"
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    suggested-id: drainage-strategy
+  - local-name: Ventilation/Extraction Statement
+    source-text: "From the audit: restaurants, takeaways, hot food"
+    source-url: https://www.cotswold.gov.uk/media/5cwjexsa/full-planning-permission-validation-checklist-cdc-20-07-26-af.pdf
+    suggested-id: ventilation-extraction-statement
+
+low-confidence:
+  - id: planning-statement
+    note: "Audit (wrong_trigger): the excerpts are fragments ('countryside Supporting Planning Statement', 'Form Supporting Planning Statement') with no trigger."
+  - id: floor-plan-existing
+    note: "Audit (wrong_trigger): the Full planning excerpt is 1:5/1:1 joinery detail text; the checklist trigger is 'extends floorspace / alterations / new building'."
+  - id: floor-plan-proposed
+    note: "Audit (wrong_trigger): the Full planning excerpt is 1:5/1:1 joinery detail text; the checklist trigger is 'extends floorspace / alterations / new building'."
+  - id: elevation-existing
+    note: "Audit (wrong_trigger): the Full planning excerpt is 1:5/1:1 joinery detail text; the checklist trigger is 'extends floorspace / alterations / new building'."
+  - id: elevation-proposed
+    note: "Audit (wrong_trigger): the Full planning excerpt is 1:5/1:1 joinery detail text; the checklist trigger is 'extends floorspace / alterations / new building'."
+  - id: bng-metric
+    note: "Audit (wrong_trigger, outdated_link): the excerpts are generic metric text and headings; superseded 2022 checklists were mixed in."

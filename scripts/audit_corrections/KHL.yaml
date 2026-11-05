@@ -1,0 +1,500 @@
+# Corrections for Hull City Council, from the council's audit.
+# The link is the current Local Validation Requirements, adopted 17 January 2023 (the build takes
+# that date from the audit). The list is a table with a 'Types of application' column that gives
+# each item's trigger; it does not split items by application type, so no types are given below
+# unless the list names one. Grokbot missed about 15 of the 45 local items and many of its triggers
+# are column fragments. Items marked "From the audit" use the audit's paraphrase of the table.
+# Not added: floor plans for extensions (audit issue 8 mentions them only in passing; national rules
+# cover floor plans).
+local-authority: KHL
+
+drop:
+  - id: floor-plan-existing
+    reason: "wrong_trigger: the excerpt is the Street view elevations item (re-added under unmapped)"
+  - id: floor-plan-proposed
+    reason: "wrong_trigger: as above"
+  - id: elevation-existing
+    reason: "wrong_trigger: as above"
+  - id: elevation-proposed
+    reason: "wrong_trigger: as above"
+
+drop-unmapped:
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_app_type: filed under prior approval; re-added below for residential planning applications"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: the town centre sequential test, now under town-centre-impact-assessment"
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "wrong_trigger: a run of column headers; re-added below with the audit's trigger"
+  - local-name: Structural Survey
+    reason: "wrong_trigger: a run of column headers; re-added below with the audit's trigger"
+  - local-name: Street scene elevations / Contextual drawings
+    reason: "wrong_trigger: a fragment; re-added below with the full wording"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 15
+            description: 15 or more dwellings (Housing Market Zones 1-4).
+        - all:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 11
+                description: 11 or more dwellings.
+            - discretionary
+    policy: SPD 15
+    source-text: Affordable housing statement See SPD 15 Appendix 1 for requirements.
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the list gives 15 or more dwellings in Housing Market Zones 1-4, and 11
+      or more in Zone 5. The rules can't express the zones, so the Zone 5 case is shown as 11+
+      dwellings at officer discretion.
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      any:
+        - all:
+            - site:
+                in: [air-quality-management-area]
+                description: The site is in the Air Quality Management Area (Local Plan map 13.1).
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: Residential development.
+        - site:
+            in: [special-area-of-conservation]
+            description: The development is within 200m of the Humber Estuary SAC.
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    confidence: medium
+    notes: "From the audit (missing_requirement): residential in the AQMA (Local Plan map 13.1), or
+      development within 200m of the Humber Estuary SAC."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: There are trees on or near the site that could be affected.
+        - application-type:
+            in: [consent-under-tpo]
+    must-include:
+      - item: Which trees are to be removed and which retained
+        level: must
+      - item: The means of protecting retained trees during construction
+        level: must
+      - item: An assessment of the trees' health
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): the tree survey trigger includes 'applications to fell or lop protected
+      trees'."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [full, outline, reserved-matters]
+            - condition:
+                field: new-build
+                value: true
+                description: New build (not householder or minor extensions).
+        - discretionary
+    source-text: >-
+      Biodiversity / ecological impact assessment The level of detail required will vary considerably
+      depending on circumstances, for example if protected species or habitats are identified.
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): all new build except householder and minor extensions, plus works to
+      buildings likely to be used by bats (shown as officer discretion).
+
+  - id: daylight-sunlight-assessment
+    action: add
+    required-if:
+      all:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: New residential development.
+        - discretionary
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    confidence: medium
+    notes: "From the audit (missing_requirement): new residential development where daylight is an issue."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: EIA is needed under Schedule 1, or a screening opinion found it is needed under Schedule 2.
+    source-text: >-
+      Environmental Impact Assessment / Scoping Opinion A scoping opinion is required for EIA needed
+      under Schedule 1 of the Regs or where a screening opinion has identified a need for an EIA for
+      Schedule 2
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt ran on into the national Fire Statement header."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building of 18 metres or more.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building of 7 or more storeys.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 2
+            description: The building contains two or more dwellings.
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's row gave no trigger. The Fire Statement is in the list's
+      National Validation Requirements section (buildings of 18m or 7 storeys or more with 2 or more
+      dwellings), not a local item.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - discretionary
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the workbook's excerpt was 'of the Heritage Statement.'.
+      From the audit: needed for listed building consent and wherever relevant (including
+      householder works); the audit gives no fuller trigger.
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    must-include:
+      - item: The extent of existing and proposed planting areas, and the type of planting within them
+        level: must
+      - item: Locations of new trees
+        level: must
+      - item: Areas and type of hard surfacing
+        level: must
+      - item: Location and nature of boundary treatments
+        level: must
+      - item: Earthworks and ground level changes
+        level: must
+    confidence: medium
+    notes: "The council asks for a landscape strategy plan / assessment for 'Most major applications'."
+
+  - id: lighting-assessment
+    action: add
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: Lighting that could affect people or wildlife.
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    confidence: medium
+    notes: "From the audit (missing_requirement): a lighting impact assessment where light could affect people
+      or wildlife."
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      condition:
+        field: noise-sensitive-use
+        value: true
+        description: >-
+          Development near main roads or rail, or a noise-sensitive use near other noise sources.
+    source-text: >-
+      Noise Impact Assessment Assessments should be prepared by an independent acoustician in
+      accordance with industry standards, and include mitigation proposals where required.
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    must-include:
+      - item: Prepared by an independent acoustician in accordance with industry standards
+        level: should
+      - item: Mitigation proposals where required
+        level: should
+    confidence: medium
+    notes: "Audit (wrong_trigger): from the audit: near main roads or rail, or noise-sensitive uses near noise
+      sources."
+
+  - id: photos
+    action: replace
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted another item. From the audit: 3D images or photos as
+      agreed for large developments."
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [open-space]
+            description: The development is on open space, sports or recreation land.
+        - condition:
+            field: loss-of-open-space
+            value: true
+            description: The development would lose open space, sports or recreation land.
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    confidence: medium
+    notes: "From the audit (missing_requirement): an open space assessment for development on, or loss of,
+      open space, sports or recreation land."
+
+  - id: roof-plan-existing
+    action: replace
+    required-if:
+      condition:
+        field: new-build
+        value: true
+        description: New buildings and extensions (not flat roofs).
+    source-text: >-
+      Roof plan Drawn at a scale of 1:100 or 1:200 to show … roof planes and ridges. … New buildings
+      and … extensions (not required for … flat roofs)
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    must-include:
+      - item: Drawn at a scale of 1:100 or 1:200, showing roof planes and ridges
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt ran on into the window details item, which is under unmapped."
+
+  - id: roof-plan-proposed
+    action: replace
+    required-if:
+      condition:
+        field: new-build
+        value: true
+        description: New buildings and extensions (not flat roofs).
+    source-text: >-
+      Roof plan Drawn at a scale of 1:100 or 1:200 to show … roof planes and ridges. … New buildings
+      and … extensions (not required for … flat roofs)
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    must-include:
+      - item: Drawn at a scale of 1:100 or 1:200, showing roof planes and ridges
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt ran on into the window details item, which is under unmapped."
+
+  - id: section-proposed
+    action: add
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal changes site levels.
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    must-include:
+      - item: Finished floor and site levels
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): site sections, finished floor and site levels where site
+      levels change."
+
+  - id: site-plan
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: The proposal includes new buildings.
+        - discretionary
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    must-include:
+      - item: Existing and proposed site/block plan at 1:100 or 1:200
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): new buildings or layout changes (layout changes shown as
+      officer discretion)."
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      ref: major-development
+    policy: Local plan policy 17; SPD 7
+    confidence: medium
+    notes: "The council says it is 'Normally required for major development'."
+
+  - id: telecommunications-report
+    action: replace
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Telecommunications development (planning and prior approval applications).
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): the excerpt was 'of the mast/equipment.'; the statement
+      covers planning and prior approval applications."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: A main town centre use (retail, leisure or office) outside a centre.
+    source-text: >-
+      Sequential test and impact assessment (Retail / leisure / office uses) See the NPPG, and NPPF for
+      further guidance on both the Sequential Test and Impact Assessments.
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    must-include:
+      - item: Sequential test
+        level: must
+      - item: Impact assessment
+        level: must
+        required-if:
+          any:
+            - condition:
+                field: retail-floorspace
+                operator: ">"
+                value: 900
+                description: More than 900 square metres of retail floorspace.
+            - discretionary
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook labelled this a flood sequential test. From the audit: an
+      impact assessment above 900 sqm retail, 1,000 sqm offices and 2,500 sqm leisure (the office and
+      leisure thresholds are shown as officer discretion).
+
+  - id: transport-assessment
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      Transport assessment / transport statement/ travel plan Refer to Appendix B of the Local Plan All
+      applications above specified thresholds (refer to table in Appendix B of the Local Plan)
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt ran on into the noise text. The thresholds are in Appendix B
+      of the Local Plan, which the list doesn't repeat, so they are shown as officer discretion.
+
+  - id: travel-plan
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      Transport assessment / transport statement/ travel plan Refer to Appendix B of the Local Plan All
+      applications above specified thresholds (refer to table in Appendix B of the Local Plan)
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    confidence: medium
+    notes: "Audit (wrong_trigger): as for the transport assessment; thresholds in Local Plan Appendix B."
+
+  - id: viability-assessment
+    action: add
+    required-if: discretionary
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    confidence: medium
+    notes: "From the audit (missing_requirement): where reduced provision is argued, or heritage harm is
+      justified on viability grounds."
+
+  - id: waste-management-plan
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New development.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: A change of use.
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    must-include:
+      - item: Design of refuse storage areas
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt was 'design of refuse storage areas.'; the trigger is all new
+      development or change of use."
+
+  - id: water-impact-assessment
+    action: add
+    required-if:
+      site:
+        in: [source-protection-zone]
+        description: The site is within a groundwater Source Protection Zone.
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    confidence: medium
+    notes: "From the audit (missing_requirement): a hydrogeological risk assessment within groundwater Source
+      Protection Zones."
+
+unmapped:
+  - local-name: Section 106 / Unilateral Undertaking heads of terms
+    source-text: "All applications for new residential development ... including change of use to flats"
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    suggested-id: planning-obligations-heads-of-terms
+  - local-name: Marketing statement
+    source-text: "From the audit: demolition of heritage buildings, Assets of Community Value or pubs"
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    suggested-id: marketing-evidence
+  - local-name: Structural survey
+    source-text: "From the audit: substantial demolition or works affecting the stability of a heritage asset"
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    suggested-id: structural-survey
+  - local-name: Street view elevations
+    source-text: >-
+      Street view elevations Drawn at a scale of 1:100 or 1:200 to show the location and height of
+      proposed buildings relative to adjoining buildings within the street scene. … Applications for
+      new infill development or within conservation areas or adjacent to listed buildings, including
+      major development outside of conservation areas.
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    suggested-id: street-scene-elevations
+  - local-name: Window details
+    source-text: >-
+      Drawings at a scale of not less than 1:20 showing the sections, plans and elevations of windows,
+      including any features and position in the reveal (from the audit: all new or replacement
+      windows)
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    suggested-id: joinery-details
+  - local-name: Car parking layout
+    source-text: "From the audit: new parking or vehicle access"
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    suggested-id: parking-plan
+  - local-name: Sports pitch statement
+    source-text: "From the audit: loss of, or building on, sports pitches"
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    suggested-id: playing-pitch-assessment
+  - local-name: Visual amenity / townscape assessment
+    source-text: "From the audit: buildings over 30m, or bordering open countryside"
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    suggested-id: townscape-visual-impact-assessment
+  - local-name: Drainage plans
+    source-text: "From the audit: new buildings needing new surface or foul drainage"
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    suggested-id: drainage-strategy
+  - local-name: Building for Healthy Life statement
+    source-text: "From the audit: new housing"
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    suggested-id: building-for-healthy-life-statement
+  - local-name: Socio-economic impact assessment
+    source-text: "From the audit: larger commercial schemes"
+    source-url: https://www.hull.gov.uk/downloads/file/3598/validation-checklist
+    suggested-id: economic-statement

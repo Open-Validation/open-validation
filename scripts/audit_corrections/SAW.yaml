@@ -1,0 +1,497 @@
+# Corrections for Sandwell Metropolitan Borough Council, from
+# inputs/audit/sandwell-metropolitan-borough-council.json.
+# The workbook link is Sandwell's current (and only) Validation Checklist, dated September 2023 on
+# its cover; the build reads that from the audit. The list has a Householder checklist (Section 3,
+# H1-H13) and an 'All other applications' section (Section 4: national N1-N13, mandatory local
+# M1-M17, supporting S1-S8) for every non-householder type. Grokbot placed most rows under Full
+# planning ('INFERRED'), so Section 4 items here are scoped to full, outline, reserved matters and
+# listed building consent. Items marked "From the audit" use its paraphrase of the list.
+local-authority: SAW
+
+submission-standards:
+  - item: Plans drawn to an appropriate metric scale (1:50, 1:100, 1:200 or 1:500)
+    level: must
+  - item: Plans show the direction of North
+    level: must
+  - item: Scale bars on all plans, or at least two dimensions on each plan
+    level: must
+  - item: No 'Do Not Scale' disclaimer or similar on plans
+    level: must
+  - item: All elevations and plans clearly and logically labelled (e.g. front or rear elevation), with
+      titles that refer to their content and a plan number reference; amendments with updated
+      revision numbers
+    level: must
+  - item: Plans A4 or A3 size wherever possible
+    level: should
+
+drop:
+  - id: planning-statement
+    sheets: [Change of use - prior approval, Minerals & waste (county)]
+    reason: "wrong_app_type: S2 covers major applications including change of use (not prior approval) and excludes waste and minerals"
+  - id: landscaping-plan
+    sheets: [Householder, Advertisement consent]
+    reason: "wrong_app_type: S8 excludes householder applications and advertisements"
+  - id: affordable-housing-statement
+    sheets: [Householder]
+    reason: "wrong_app_type: M10 applies to 10 or more dwellings; re-added below"
+  - id: floor-plan-existing
+    reason: "drawing labelling standard, not a requirement; moved to submission-standards"
+  - id: floor-plan-proposed
+    reason: "as above"
+  - id: elevation-existing
+    reason: "as above"
+  - id: elevation-proposed
+    reason: "as above"
+  - id: waste-management-plan
+    reason: "wrong_trigger: the excerpt is S5 (waste management facility proposals), not refuse storage; listed as unmapped"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advice to seek pre-application advice"
+  - local-name: Gypsy & Traveller information
+    reason: "not_a_requirement: a note on wording the description of development"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: block plan text about trees and parking positions (now in site-plan)"
+  - local-name: Cycle parking details
+    reason: "wrong_trigger: from M5 Parking Plan; re-added below as Parking Plan"
+  - local-name: Water efficiency / water usage statement
+    reason: "duplicate: the Water Conservation Statement is part of the sustainability statement entry; the excerpt is table header text"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: The proposal creates 10 or more dwellings.
+    source-url: https://www.sandwell.gov.uk/downloads/file/1297/sandwell-validation-checklist
+    source-text: All applications for 10 or more dwellings.
+    confidence: medium
+    notes: "Audit (wrong_app_type): M10 was placed under Householder and its excerpt merged M9's exemption wording."
+
+  - id: landscaping-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, reserved-matters]
+        - discretionary
+    source-url: https://www.sandwell.gov.uk/downloads/file/1297/sandwell-validation-checklist
+    source-text: >-
+      S8 Proposed Landscape Scheme All detailed applications (excluding shop fronts, advertisements,
+      changes of use … and householder applications) meeting the criteria set out in the adjacent
+      guidance column.
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, wrong_trigger): S8 excludes shop fronts, advertisements, changes of use
+      and householder applications. The guidance-column criteria were cut off, so they are shown as
+      officer discretion.
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters, lbc]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Mature or semi-mature trees are present.
+        - site:
+            in: [tree-preservation-zone, conservation-area]
+            description: The trees are protected by a TPO or are within a conservation area.
+    source-url: https://www.sandwell.gov.uk/downloads/file/1297/sandwell-validation-checklist
+    source-text: >-
+      M17 Arboricultural Report/ Trees Assessments All applications where any trees preservation
+      orders, or are within conservation areas and where mature and semimature trees are present A
+      plan must be provided showing the location of all trees on site and within 8m of the proposed
+      work (NB trees further away may be relevant, see below) together with a list of trees which
+      are desired to be removed and a schedule of any pruning to retained trees.
+    must-include:
+      - item: A plan showing the location of all trees on site and within 8m of the proposed work
+        level: must
+      - item: A list of trees to be removed
+        level: must
+      - item: A schedule of any pruning to retained trees
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): M17 is in Section 4, for all non-householder applications, not Full planning only."
+
+  - id: archaeological-assessment
+    action: update
+    must-include:
+      - item: At minimum a Desk Based Assessment referring to the Historic Environment Record (HER)
+        level: must
+    confidence: low
+    notes: "Audit (wrong_trigger): the excerpt is content, not the trigger; the trigger was not captured."
+
+  - id: bng-metric
+    action: replace
+    source-url: https://www.sandwell.gov.uk/downloads/file/1297/sandwell-validation-checklist
+    confidence: low
+    notes: >-
+      Audit (other): the workbook quoted a forward-looking note ('at least 10% biodiversity net
+      gain, expected to be required from November 2023'). The list predates statutory BNG and gives
+      no trigger.
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: Drawn at a scale of 1:500
+        level: should
+      - item: The proposed development in relation to site boundaries, and existing structures,
+          buildings and roads on adjoining land
+        level: should
+      - item: Parking and access arrangements
+        level: should
+      - item: Positions and details of any trees which may be affected by the proposed development
+        level: should
+    confidence: low
+    notes: "The workbook's excerpt is block plan content ('should clearly show'); the application types were guessed."
+
+  - id: land-contamination-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters, lbc]
+        - condition:
+            field: ground-disturbance
+            value: true
+            description: >-
+              The proposal involves excavation, ground works or other ground disturbance (or a
+              change of use providing garden areas).
+    source-url: https://www.sandwell.gov.uk/downloads/file/1297/sandwell-validation-checklist
+    source-text: >-
+      Householder applications, and / or Changes of use or adaptation of existing buildings that do
+      not involve any excavation, ground works or other operations which involve ground disturbance
+      (except where gardens areas are provided).
+    must-include:
+      - item: The presence of land contamination, its nature and potential risk to the proposed
+          development, and what further measures are required to ensure the site is suitable for use
+        level: must
+    confidence: low
+    notes: >-
+      The source text is M9's exemption wording, which the workbook had put in the affordable
+      housing row (audit, wrong_app_type). M9's own positive trigger was not captured.
+
+  - id: daylight-sunlight-assessment
+    action: replace
+    required-if: discretionary
+    source-url: https://www.sandwell.gov.uk/downloads/file/1297/sandwell-validation-checklist
+    source-text: >-
+      Sunlight path/45 degree code This will be required to demonstrate the impact on light and
+      outlook to neighbouring properties.
+    confidence: medium
+    notes: "Audit (missing_requirement): H13 also asks householders for it where neighbours' light or outlook is affected."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [conservation-area, world-heritage-site]
+                description: The site is in a designated area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: The proposal creates one or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">="
+                    value: 100
+                    description: The proposal creates a building of 100 square metres or more.
+        - application-type:
+            in: [lbc]
+    source-url: https://www.sandwell.gov.uk/downloads/file/1297/sandwell-validation-checklist
+    source-text: >-
+      major development, dwellings or buildings of 100 sqm+ in designated areas, and listed
+      building consent
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was minerals (Policy MIN1) text. N8 is a national-list item."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [site-of-special-scientific-interest, local-wildlife-site]
+            description: The site is within or next to a designated wildlife site.
+        - condition:
+            field: protected-species
+            value: true
+            description: Protected species may be present on the site.
+    source-url: https://www.sandwell.gov.uk/downloads/file/1297/sandwell-validation-checklist
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, missing_requirement): the workbook's excerpt was garbled ('All planning
+      applications ... on sites where protected'). From the audit: M7 Habitat survey for sites
+      within or next to designated wildlife sites.
+
+  - id: sustainability-statement
+    action: update
+    must-include:
+      - item: An Energy Statement summarising how the proposal addresses the need for energy
+          efficiency and to increase use of renewable/low carbon energy
+        level: must
+      - item: A Waste and Resource Management Statement summarising how the proposal addresses the
+          need for resource efficiency and sustainable waste management
+        level: must
+      - item: A Water Conservation Statement summarising how the proposal addresses the need to
+          minimise water consumption and use water more efficiently
+        level: must
+    confidence: low
+    notes: "The excerpt gives the contents but its trigger was cut off."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    source-url: https://www.sandwell.gov.uk/downloads/file/1297/sandwell-validation-checklist
+    source-text: >-
+      whether an EIA is required, this process should be applied for prior to the submission of an
+      application.
+    confidence: medium
+    notes: "Audit (wrong_app_type): M15 EIA screening applies to any non-householder application, not Full planning only."
+
+  - id: section-existing
+    action: replace
+    required-if:
+      condition:
+        field: site-level-change
+        operator: ">"
+        value: 300
+        description: The site, or its relationship with a neighbouring site, is affected by a change in ground level of over 300mm.
+    source-url: https://www.sandwell.gov.uk/downloads/file/1297/sandwell-validation-checklist
+    source-text: >-
+      Where an application site itself and its relationship with a neighbouring site is affected by
+      a change in ground level of over 300mm, sections should be provided to demonstrate the extent
+      of the change in levels, the effect that this has on how a development will appear and
+      details, where necessary, of any retaining structures or mitigation proposed.
+    confidence: medium
+    notes: "Audit (missing_requirement): the Householder checklist also asks for sections (H7) and levels over 300mm (H10)."
+
+  - id: section-proposed
+    action: replace
+    required-if:
+      condition:
+        field: site-level-change
+        operator: ">"
+        value: 300
+        description: The site, or its relationship with a neighbouring site, is affected by a change in ground level of over 300mm.
+    source-url: https://www.sandwell.gov.uk/downloads/file/1297/sandwell-validation-checklist
+    source-text: >-
+      Where an application site itself and its relationship with a neighbouring site is affected by
+      a change in ground level of over 300mm, sections should be provided to demonstrate the extent
+      of the change in levels, the effect that this has on how a development will appear and
+      details, where necessary, of any retaining structures or mitigation proposed.
+    must-include:
+      - item: The extent of the change in levels
+        level: should
+      - item: The effect the change has on how the development will appear
+        level: should
+      - item: Details of any retaining structures or mitigation proposed, where necessary
+        level: should
+    confidence: medium
+    notes: "Audit (missing_requirement): the Householder checklist also asks for sections (H7) and levels over 300mm (H10)."
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building of 18 metres or more in height.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building of seven or more storeys.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: For residential purposes.
+    source-url: https://www.sandwell.gov.uk/downloads/file/1297/sandwell-validation-checklist
+    source-text: >-
+      Buildings of 18 metres or more in height, or of seven or more storeys for residential
+      purposes.
+    confidence: medium
+    notes: "Audit (wrong_trigger): N13, a national requirement; the workbook omitted the threshold."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, scheduled-monument,
+              park-and-garden]
+            description: The application affects a designated heritage asset.
+    source-url: https://www.sandwell.gov.uk/downloads/file/1297/sandwell-validation-checklist
+    source-text: >-
+      Heritage Statement This will be required for applications which effect Designated Heritage
+      Assets which can be found via Sandwell’s web site.
+    confidence: medium
+    notes: "Audit (wrong_app_type): M16 includes listed building consent, and H12 asks householders for it where designated heritage assets are affected."
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - condition:
+                field: floorspace-non-residential
+                operator: ">"
+                value: 0
+                description: Industrial or commercial development.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: A sensitive use in a noisy or vibration-affected area.
+        - discretionary
+    source-url: https://www.sandwell.gov.uk/downloads/file/1297/sandwell-validation-checklist
+    source-text: >-
+      may warrant a noise impact assessment / noise mitigation scheme, this will be determined on a
+      site to site basis.
+    confidence: medium
+    notes: "From the audit (missing_requirement): S3 Noise and vibration assessment for major industrial/commercial schemes, or sensitive uses in noisy or vibration-affected areas."
+
+  - id: planning-statement
+    action: update
+    required-if:
+      ref: major-development
+    must-include:
+      - item: A general description of the application site and the proposed development
+        level: must
+    confidence: medium
+    notes: >-
+      S2: all major applications (10 or more dwellings or 1,000 m2 or more of new floorspace),
+      including change of use applications, extensions and mezzanine floors, except waste and
+      mineral applications (which can't be excluded here). The excerpt goes on to ask for 'a summary
+      of how the proposal accord…', cut off.
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: A main town centre use not in an existing centre and not in accordance with the plan.
+    confidence: medium
+    notes: "Audit (wrong_app_type): M14 applies to any non-householder application, not Full planning only."
+
+  - id: transport-assessment
+    action: replace
+    required-if: discretionary
+    source-url: https://www.sandwell.gov.uk/downloads/file/1297/sandwell-validation-checklist
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt was a fragment. From the audit: M4, significant traffic generation per the SPD thresholds."
+
+  - id: viability-assessment
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more residential units.
+        - discretionary
+    source-url: https://www.sandwell.gov.uk/downloads/file/1297/sandwell-validation-checklist
+    confidence: medium
+    notes: "Audit (wrong_trigger): the excerpt was a fragment. From the audit: M12, 10+ residential units where affordable housing is not provided for viability reasons."
+
+  - id: cil-form
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: retail-floorspace
+            operator: ">"
+            value: 0
+            description: The application creates new retail floor space.
+        - condition:
+            field: housing-floorspace
+            operator: ">"
+            value: 0
+            description: The application creates new residential floor space.
+    source-url: https://www.sandwell.gov.uk/downloads/file/1297/sandwell-validation-checklist
+    source-text: Planning applications that create new Retail or Residential floor space.
+    confidence: medium
+    notes: "Audit (missing_requirement): M1 CIL Additional Information Form and Assumption of Liability."
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      site:
+        in: [air-quality-management-area]
+        description: >-
+          The development is within an area where air quality does not, or is unlikely to, meet air
+          quality objectives.
+    source-url: https://www.sandwell.gov.uk/downloads/file/1297/sandwell-validation-checklist
+    source-text: >-
+      Developments within areas where air quality does not, or is unlikely to, meet air quality
+      objectives
+    confidence: medium
+    notes: "Audit (missing_requirement): M3 Air Quality Impact Assessment/mitigation, per the Black Country AQ SPD Table 1."
+
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in flood zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: A site of 1 hectare or more in flood zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: A site of 1 hectare or more in flood zone 1.
+        - discretionary
+    source-url: https://www.sandwell.gov.uk/downloads/file/1297/sandwell-validation-checklist
+    confidence: medium
+    notes: "From the audit (missing_requirement): M6, Flood Zones 2/3 and specified areas; Flood Zone 1 sites of 1ha or more. The 'specified areas' are shown as officer discretion."
+
+unmapped:
+  - local-name: Parking Plan
+    source-text: >-
+      vehicle parking, cycle parking and access arrangements (existing and proposed). From the
+      audit: M5, floorspace or use changes that add parking demand; H11 existing and proposed
+      parking where bedrooms are added (householder).
+    source-url: https://www.sandwell.gov.uk/downloads/file/1297/sandwell-validation-checklist
+    suggested-id: parking-plan
+  - local-name: Waste management development information
+    source-text: >-
+      All proposals for waste management development (including proposals to expand, upgrade or
+      relocate existing waste facilities) should be made using a detailed planning application form
+      and section on ‘Industrial or Commercial Processes and Machinery’ must be completed in full.
+    source-url: https://www.sandwell.gov.uk/downloads/file/1297/sandwell-validation-checklist
+    suggested-id: minerals-waste-statement
+  - local-name: Education and Health Facilities Statement
+    source-text: Proposals involving the loss of a health or education facility.
+    source-url: https://www.sandwell.gov.uk/downloads/file/1297/sandwell-validation-checklist
+    suggested-id: community-facilities-statement
+  - local-name: Impact assessment for waste management facilities
+    source-text: "From the audit: S4, loss of a waste site, or sensitive uses next to one"
+    source-url: https://www.sandwell.gov.uk/downloads/file/1297/sandwell-validation-checklist
+    suggested-id: ""

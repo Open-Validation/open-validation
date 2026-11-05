@@ -1,0 +1,308 @@
+# Corrections for Bolton Metropolitan Borough Council, from the council's audit.
+# The current list is the Local Validation Checklist adopted 5 December 2024 (downloads/file/4686);
+# the build takes the url and date from the audit. Grokbot mixed in rows from the superseded Draft
+# Planning Validation Checklist 2022 (downloads/file/4495); those rows are dropped or replaced here.
+# The 2024 list mostly words its triggers as 'Major' and/or 'Minor' development, and some items
+# also apply to house extensions; many workbook excerpts lost the 'When required' criteria.
+# Items marked "From the audit" use the audit's paraphrase or its quotes from the 2024 list.
+local-authority: BOL
+
+submission-standards:
+  - item: All plans and drawings accurately drawn to a conventional metric scale (such as 1:50 or
+      1:100) and true to the stated scale
+    level: must
+  - item: A scale bar or dimensions on plans and drawings
+    level: should
+  - item: No disclaimers such as 'not to scale' or 'do not scale' (except on perspective drawings)
+    level: must
+  - item: A title box on each plan stating the address and proposal, the drawing title, the date, the
+      scale and the drawing number, with revisions clearly identified
+    level: should
+  - item: Where supporting documents contain personal or sensitive information, a redacted copy for
+      publication and an unredacted copy
+    level: should
+
+drop:
+  - id: site-plan
+    reason: "other: taken from the superseded 2022 draft checklist; the excerpt is a fragment"
+  - id: design-and-access-statement
+    reason: "other: taken from the superseded 2022 draft checklist; the excerpt is a table header with no trigger"
+  - id: schedule-of-works
+    reason: "other: taken from the superseded 2022 draft checklist and placed under Full planning"
+  - id: sci
+    reason: "not_a_requirement: a link title followed by the 'Public Art When Required' heading"
+  - id: construction-management-plan
+    reason: "not_a_requirement: 'to submit construction management plans as appropriate' is not a list item"
+  - id: waste-management-plan
+    reason: "not_a_requirement: the excerpt is the Health Impact Assessment criteria"
+  - id: land-contamination-assessment
+    sheets: [Minerals & waste (county)]
+    reason: "wrong_app_type: from the superseded 2022 draft; Bolton is not a minerals and waste authority"
+
+drop-unmapped:
+  - local-name: Structural Survey
+    reason: "other: taken from the superseded 2022 draft checklist"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advice text"
+  - local-name: Agricultural Land Classification / Soils
+    reason: "not_a_requirement: Places for Everyone policy prose"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: the criteria were lost; re-added below with the audit's trigger"
+
+requirements:
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [conservation-area, listed-building, listed-building-setting]
+            description: Development in a conservation area, or affecting a heritage asset or its
+              setting.
+    source-text: >-
+      All development (including house extensions and demolition) in a Conservation Area … all
+      Listed Building Consent applications
+    source-url: https://www.bolton.gov.uk/downloads/file/4686/local-validation-checklist
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type, wrong_trigger): item 15 of the 2024 list also covers house extensions
+      affecting the setting of a heritage asset. The workbook's excerpt was policy prose.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees with a stem over 75mm within the site or within 10m of the red line, or
+          hedges on the site.
+    source-text: All development including house extensions where trees within the site or within 10 m
+      of the red line...
+    confidence: medium
+    notes: "Audit (wrong_app_type): item 33 Tree Surveys also applies to house extensions. To the standards of BS5837:2012."
+
+  - id: section-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: residential-extension
+            value: true
+            description: A house extension.
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: The site has a change of levels.
+    confidence: low
+    notes: >-
+      From the audit (wrong_app_type): levels and sections apply to house extensions, except rear
+      terraced extensions up to 4m or where the level change is no more than 1m within 21m. Those
+      exceptions can't be expressed, and the criteria for other development were lost.
+  - id: section-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: residential-extension
+            value: true
+            description: A house extension.
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: The site has a change of levels.
+    confidence: low
+    notes: "As for existing sections (audit, wrong_app_type)."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [listed-building]
+            description: Works within the curtilage of a listed building.
+        - discretionary
+    confidence: low
+    notes: >-
+      From the audit (wrong_app_type): the 2024 list asks for it for works within a listed building's
+      curtilage; its other criteria were lost in the workbook's excerpt.
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: Major or minor development not exempt from the biodiversity gain condition.
+    source-text: All Major and Minor, unless exempt
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was a navigation fragment."
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: departure-from-development-plan
+            value: true
+            description: The proposal is a departure from the Development Plan.
+    source-text: All Major; departures from the Development Plan
+    source-url: https://www.bolton.gov.uk/downloads/file/4686/local-validation-checklist
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was 'be justified Planning Statement NEW'."
+
+  - id: recreation-facilities-assessment
+    action: replace
+    required-if:
+      condition:
+        field: loss-of-open-space
+        value: true
+        description: Loss or partial loss of open space or sports/recreation land or buildings.
+    source-text: Major and Minor causing loss or partial loss of open space or sports/recreation land or
+      buildings
+    source-url: https://www.bolton.gov.uk/downloads/file/4686/local-validation-checklist
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): a Needs and Opportunities Assessment (item 22). The workbook's
+      Minerals & waste row was contaminated-land text from the 2022 draft.
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Retail or leisure development outside a town centre.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 2500
+            description: Over 2,500 square metres.
+    source-text: "Impact: retail or leisure over 2,500 sqm"
+    source-url: https://www.bolton.gov.uk/downloads/file/4686/local-validation-checklist
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook quoted the NPPF sequential principle. The sequential
+      assessment (over 250 sqm) is unmapped below. Whether the impact threshold applies only outside
+      centres needs checking in item 31.
+
+  - id: telecommunications-report
+    action: replace
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: All telecommunications development, including Part 24 prior notification
+          applications.
+    source-text: >-
+      All proposals for telecommunications development, including Prior Notification applications
+      under Part 24 of the Schedule 2 of the Town & Country Planning (General Permitted Development)
+      Order 1995 (as amended) Requirement If the development falls within the criteria above, a
+      Telecommunications Justification will be required in order for the application to be
+      validated.
+    source-url: https://www.bolton.gov.uk/downloads/file/4686/validation-checklist-2023
+    confidence: medium
+    notes: >-
+      Audit (other): Grokbot placed it under change-of-use prior approval; it covers all telecoms
+      proposals (item 30). The ICNIRP wording in the Full planning row came from the 2022 draft.
+
+  - id: landscaping-plan
+    action: replace
+    required-if: discretionary
+    source-text: >-
+      A detailed landscape scheme may also be requested for sites that do not meet the criteria above
+      but are on main road frontages, are close to Public Rights of Way or affect the setting of a
+      Listed Building or a Registered Park.
+    source-url: https://www.bolton.gov.uk/downloads/file/4686/validation-checklist-2023
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type, other): the LBC placement came only from the mention of a listed
+      building, and the Full planning row was from the 2022 draft. The 2024 list's main criteria
+      ('the criteria above') were not captured.
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 0
+            description: Major or minor development that creates new floorspace.
+    source-text: >-
+      Sustainability, Carbon & Energy Statement All Major and Minor development that creates new
+      floorspace PfE Policy JP-S2 … a Carbon and Energy Statement that demonstrates how PfE Policies
+      JP-S2 and S3 have been complied with, or
+    confidence: low
+    notes: >-
+      'Major and Minor' is shown by listing the full, outline and reserved matters types. The
+      excerpt ran into self-build text, and the other options are cut off.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was a navigation fragment."
+
+  - id: biodiversity-survey-report
+    action: replace
+    source-url: https://www.bolton.gov.uk/downloads/file/4686/local-validation-checklist
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger, other): the Full planning row was a navigation fragment ('To Table
+      Ecological Assessment / Bat Surveys ... When Required') and the Outline row came from the
+      superseded 2022 draft. The 2024 trigger needs reading from the list.
+
+unmapped:
+  - local-name: SuDS Drainage Strategy
+    source-text: "From the audit: all Major; Minor of 5+ dwellings or 500 sqm+"
+    source-url: https://www.bolton.gov.uk/downloads/file/4686/local-validation-checklist
+    suggested-id: drainage-strategy
+  - local-name: Sequential assessment (main town centre uses)
+    source-text: "Sequential: main town centre uses over 250 sqm outside allocated shopping areas."
+    source-url: https://www.bolton.gov.uk/downloads/file/4686/local-validation-checklist
+    suggested-id: sequential-test
+  - local-name: Green Belt Justification
+    source-text: "From the audit: all development in the Green Belt (new item 13)"
+    source-url: https://www.bolton.gov.uk/downloads/file/4686/local-validation-checklist
+    suggested-id: green-belt-statement
+  - local-name: Public Art
+    source-text: "From the audit: Major schemes on sites of 1 ha+, Major schemes over 2,500 sqm, or Major schemes of 50+ dwellings (item 25)"
+    source-url: https://www.bolton.gov.uk/downloads/file/4686/local-validation-checklist
+    suggested-id: public-art-statement
+  - local-name: House Extension Justification
+    source-text: >-
+      From the audit: house extensions solely for a disabled person's benefit that would not
+      normally be acceptable (new item 16)
+    source-url: https://www.bolton.gov.uk/downloads/file/4686/local-validation-checklist
+    suggested-id: ""
+
+low-confidence:
+  - id: air-quality-assessment
+    note: "Audit (wrong_trigger): the excerpt starts 'above, an Air Quality Assessment will be required', so the criteria were lost."
+  - id: fire-statement
+    note: "Audit (wrong_trigger): the excerpt starts mid-sentence, so the criteria were lost."
+  - id: flood-risk-assessment
+    note: "Audit (wrong_trigger): the excerpt starts mid-sentence, so the criteria were lost."
+  - id: lighting-assessment
+    note: "Audit (wrong_trigger): the excerpt starts mid-sentence, so the criteria were lost."
+  - id: noise-assessment
+    note: "Audit (wrong_trigger): the excerpt is a navigation fragment ('To Table Noise Impact Assessment When Required')."
+  - id: land-contamination-assessment
+    note: "Audit (wrong_trigger): the excerpt quotes policy aims, not the 2024 list's criteria."
+  - id: viability-assessment
+    note: >-
+      The excerpt is about Heads of Terms or a viability assessment under Policy IPC1 ('Any other
+      option ... will result in applications being returned'); the criteria were not captured.
+  - id: transport-assessment
+    note: "The thresholds are in the Accessibility, Transport and Safety SPD table, which the excerpt doesn't include."
+  - id: travel-plan
+    note: "The thresholds are in the Accessibility, Transport and Safety SPD table, which the excerpt doesn't include."

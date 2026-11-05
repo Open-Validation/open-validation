@@ -1,0 +1,372 @@
+# Corrections for Plymouth City Council, from inputs/audit/plymouth-city-council.json.
+# Grokbot's link is the Local Validation List the council's planning page links (uploaded 2025-02),
+# but the PDF is robots-blocked, so the audit couldn't check its contents (every file stays low
+# confidence). The audit's issues come from Grokbot's own excerpts: several triggers were taken
+# from other items. Grokbot filed most rows under Full planning ('INFERRED'), so no application type
+# is given. Clear triggers in the excerpts are structured below. The drawing standards come from
+# the superseded November 2023 list (audit: wrong_document) and should be re-checked.
+local-authority: PLY
+
+validation-list:
+  url: https://www.plymouth.gov.uk/sites/default/files/2025-02/Local-Validation-List.pdf
+  date: 2025-02
+  date-basis: "upload folder in the URL path; the planning page gives no date and the PDF couldn't be read"
+
+submission-standards:
+  - item: All plans and drawings accurately drawn using a conventional metric scale such as 1:100 or
+      1:50, and drawn true to the stated scale(s)
+    level: must
+  - item: Plans/drawings must not contain disclaimers such as 'not to scale' and 'do not scale' (except
+      perspective drawings)
+    level: must
+  - item: Plans/drawings include a scale bar or dimensions
+    level: should
+  - item: Each plan/drawing has a title box stating the address and proposal, the drawing title, the date,
+      the scale and the drawing number, with revisions clearly identified
+    level: should
+
+drop:
+  - id: recreation-facilities-assessment
+    reason: "wrong_trigger: the excerpt is the tail of the Community Involvement Statement trigger"
+  - id: environmental-statement
+    reason: "wrong_trigger: the excerpt is the Community Involvement Statement trigger list"
+  - id: schedule-of-works
+    reason: "wrong_trigger: a roof-plan drawing note ('drawing and schedule of works')"
+  - id: waste-management-plan
+    reason: "wrong_trigger: a noise-assessment clause about night-time deliveries within 100m"
+  - id: design-and-access-statement
+    reason: "wrong_app_type: listed in the checklist before the '3.4 Advertisement consent' heading, not
+      under advertisement consent; a national requirement"
+  - id: sustainability-statement
+    reason: "the row is the Energy Statement or Strategy (now energy-statement)"
+
+drop-unmapped:
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: the retail town-centre sequential test (now in town-centre-impact-assessment)"
+  - local-name: Pre-application advice / engagement details
+    reason: "wrong_trigger: BNG text, and pre-application advice is not a validation requirement"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: the site-plan drawing description (its sections sentence is used in
+      section-existing/proposed)"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_trigger: cut off with no trigger; replaced below with the council tab's bed-space wording"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">"
+        value: 10
+        description: More than 10 dwellings proposed.
+    confidence: medium
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">"
+            value: 100
+            description: Development in excess of 100 dwellings.
+        - condition:
+            field: floorspace
+            operator: ">"
+            value: 10000
+            description: Development in excess of 10,000 square metres of new floorspace.
+        - condition:
+            field: parking-spaces
+            operator: ">"
+            value: 300
+            description: More than 300 new parking spaces are proposed.
+    notes: >-
+      Audit (wrong_trigger): the excerpt is mixed with space-standards text and cut off. The list
+      also names Use Class B2 development of 1,000 square metres or more, which the rule can't
+      express.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees within the site, or on adjacent land that could influence or be
+          affected by the development (including street trees).
+    confidence: medium
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      site:
+        in: [archaeological-priority-area]
+        description: Works on or adjoining a site of known or suspected archaeological interest.
+    confidence: medium
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the statutory biodiversity gain condition.
+    notes: >-
+      Audit (wrong_trigger): the excerpt mentions only major development from 12 February 2024;
+      statutory BNG has also applied to small sites since 2 April 2024.
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: All elevations of the proposed development, with corresponding existing elevation drawings
+        level: must
+
+  - id: energy-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: floorspace-non-residential
+            operator: ">"
+            value: 1000
+            description: Major applications for non-residential development over 1,000 square metres.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: New residential development of 10 units or more (new build and conversion).
+    source-text: >-
+      21.2 Energy Statement or Strategy Where or when this item is required: Major applications for
+      non-residential development over 1,000 sq m; or new residential development comprising 10
+      units or more (new build and conversion)
+    source-url: https://www.plymouth.gov.uk/sites/default/files/2025-02/Local-Validation-List.pdf
+    confidence: medium
+    notes: "The workbook mapped this row to sustainability-statement."
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">"
+                value: 18
+                description: The building exceeds 18m in height.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: The building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains two dwellings or more.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational residential accommodation (i.e. student
+                  halls of residence).
+    confidence: medium
+
+  - id: heritage-statement
+    action: replace
+    source-text: >-
+      Heritage Statement [guidance] Location Plan [guidance] Plans and Drawings [guidance] Design and
+      Access Statement [guidance] You will need to check the Local Validation List for other items
+      that may need to be submitted with your application.
+    source-url: https://www.plymouth.gov.uk/sites/default/files/2025-02/Local-Validation-List.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): the workbook put this under Advertisement consent, but it is listed in
+      the checklist before the '3.4 Advertisement consent' heading, so it belongs to the preceding
+      application-type checklist (3.3). The audit couldn't confirm which type that is, or the trigger.
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      all:
+        - site:
+            in: [contaminated-land]
+            description: Contamination is known or suspected, or the site is in the vicinity of such land.
+        - condition:
+            field: ground-disturbance
+            value: true
+            description: Groundworks are proposed.
+    notes: "The excerpt is cut off after the first case ('; or,')."
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Potentially noise generating development (pubs, clubs, takeaways,
+              industrial/commercial uses, recreation) near existing noise sensitive development.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise sensitive uses near existing noise generating uses, classified roads,
+              railways or in a noisy environment such as the city centre.
+    notes: "The excerpt is cut off in the third case (mixed use applications)."
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: A new roof would be created.
+    notes: "'Any new roof that would be created may need to be accompanied and supported by more detailed
+      drawing'."
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: A new roof would be created.
+    notes: "'Any new roof that would be created may need to be accompanied and supported by more detailed
+      drawing'."
+
+  - id: sci
+    action: update
+    required-if:
+      any:
+        - discretionary
+        - all:
+            - ref: major-development
+            - condition:
+                field: departure-from-development-plan
+                value: true
+                description: A departure from the Plymouth and South West Devon Joint Local Plan.
+        - condition:
+            field: eia-development
+            value: true
+            description: EIA applications.
+        - condition:
+            field: retail-floorspace
+            operator: ">="
+            value: 20000
+            description: Large scale retail (20,000 square metres or more).
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 150
+            description: 150 dwellings or more.
+        - all:
+            - condition:
+                field: greenfield-site
+                value: true
+                description: The site is greenfield land.
+            - any:
+                - condition:
+                    field: site-area-residential
+                    operator: ">="
+                    value: 5
+                    description: The site is 5 hectares or more.
+                - condition:
+                    field: site-area-non-residential
+                    operator: ">="
+                    value: 5
+                    description: The site is 5 hectares or more.
+        - site:
+            in: [open-space]
+            description: Development is proposed on playing fields.
+    confidence: medium
+    notes: >-
+      'Significant local impact' in the opinion of the LPA is shown as officer discretion. Not
+      expressed: retail of 2,500 sqm that would make 20,000 sqm combined with existing, and onshore
+      wind of more than 2 turbines or a hub height over 15 metres.
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal involves a change in levels or is on a sloping site.
+    source-text: >-
+      Sections – required where any proposal involves a change in levels or is on a sloping site.
+    must-include:
+      - item: How the proposed development relates to existing site levels and adjacent development,
+          with levels related to a fixed datum point off site
+        level: should
+    confidence: medium
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: The proposal involves a change in levels or is on a sloping site.
+    source-text: >-
+      Sections – required where any proposal involves a change in levels or is on a sloping site.
+    must-include:
+      - item: Finished floor levels
+        level: should
+      - item: How the proposed development relates to existing site levels and adjacent development,
+          with levels related to a fixed datum point off site
+        level: should
+      - item: Details of existing and proposed foundations and eaves where a change is proposed
+        level: should
+      - item: How encroachment onto adjoining land is to be avoided
+        level: should
+    confidence: medium
+    notes: "The trigger sentence was in the workbook's 'Highways / access details' row."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: Main town centre uses not in an existing or proposed centre (excluding the Derriford
+          Commercial Centre) or not in line with an up-to-date Development Plan allocation.
+    must-include:
+      - item: A sequential test assessing the availability and suitability of sequentially preferable
+          sites in and on the edge of existing and proposed centres
+        level: should
+    confidence: medium
+    notes: "The sequential test item was in the workbook's 'Sequential / Exception Test (flood)' row."
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+    notes: "'Please seek specific advice through the pre-application service on this matter.'"
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    notes: "'Please seek specific advice through the pre-application service on this matter.'"
+
+  - id: viability-assessment
+    action: replace
+    source-text: >-
+      a detailed Viability Assessment is required to be submitted with the planning application as
+      outlined in para 57 of the NPPF.
+    source-url: https://www.plymouth.gov.uk/sites/default/files/2025-02/Local-Validation-List.pdf
+    confidence: low
+    notes: "Audit (wrong_app_type): the workbook put this under Outline, but the text doesn't mention outline
+      applications; no trigger was captured."
+
+unmapped:
+  - local-name: Habitats Regulations Assessment (recreational pressure)
+    source-text: "Recreational pressure only If your development is proposing new bed spaces, we require the
+      quantity so the LPA can complete a HRA for recreational impact only."
+    source-url: https://www.plymouth.gov.uk/sites/default/files/2023-11/Validation-list-nov-2023.pdf
+    suggested-id: habitats-regulations-assessment
+
+low-confidence:
+  - id: flood-risk-assessment
+    note: "Audit (wrong_trigger): the excerpt is garbled ('Where or when this item is required: Flood Risk
+      Assessment 1.')."
+  - id: biodiversity-survey-report
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('by an Ecological Impact Assessment (EcIA).')."
+  - id: planning-statement
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('plan and a planning statement.')."

@@ -1,0 +1,337 @@
+# Corrections for South Gloucestershire Council, from inputs/audit/south-gloucestershire-council.json.
+# Grokbot's link is the current 'Planning application requirements local list 2024'. Some rows and
+# all the council-tab items come from the council's separate 'National Planning Application
+# Requirements' guidance (November 2019), not the local list. Grokbot filed most rows under Full
+# planning ('INFERRED'), so no application type is given unless the list names one. Items marked
+# "From the audit" use the audit's paraphrase of the 2024 list, not the council's exact words.
+local-authority: SGC
+
+validation-list:
+  url: https://beta.southglos.gov.uk/static/a2b5319e25b7e3a805507cbb73796fce/Planning-application-requirements-local-list-2024.pdf
+  date: 2024
+  date-basis: "audit: the council page's link title 'Planning application requirements local list 2024';
+    the PDF text has no date (the 2026-04 date was PDF metadata)"
+
+submission-standards:
+  - item: The scale clearly indicated on all plans, stating the paper size (e.g. 1:50 @ A1); a linear
+      scale is helpful
+    level: should
+  - item: Plans/drawings containing disclaimers such as "Not to Scale" and "Do Not Scale" will not be
+      accepted
+    level: must
+
+drop:
+  - id: environmental-statement
+    reason: "not_a_requirement: a note about including the Coal Mining Risk Assessment within an ES"
+  - id: cil-form
+    reason: "not_a_requirement: taken from the 2019 national requirements guidance, not the local list"
+  - id: schedule-of-works
+    reason: "wrong_app_type: not a local list item; the excerpt is the Structural Survey text"
+  - id: design-and-access-statement
+    sheets: [Minerals & waste (county)]
+    reason: "wrong_app_type: the excerpt excludes mining and waste development; South Gloucestershire is
+      not a county minerals authority"
+  - id: sustainability-statement
+    reason: "wrong_trigger: the row is the Energy Statement (now energy-statement)"
+
+drop-unmapped:
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_trigger: Lighting Assessment text (now a must-include item in lighting-assessment)"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_app_type: the excerpt excludes change of use; from the 2019 guidance, not the 2024 list"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: quotes the foul-drainage sentence; Surface Water Drainage Details added below"
+  - local-name: Self-build / custom build information
+    reason: "wrong_trigger: legislation background; replaced below"
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_trigger: content text with no trigger; replaced below"
+  - local-name: Structural Survey
+    reason: "wrong_app_type: filed under LBC only; replaced below"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: the excerpt is CIL form text from the 2019 guidance; replaced below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      ref: major-development
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): affordable housing applies to major development, including outline.
+      The workbook's excerpt is table text shared with the viability row.
+
+  - id: air-quality-assessment
+    action: update
+    required-if: discretionary
+    source-text: >-
+      Air Quality Assessment An air quality assessment is required to be submitted for developments
+      where there is the risk of significant air quality effects, either from the development
+      impacting on the local area and/or the development creating exposure to existing pollutant
+      sources for new residents.
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt began with an email address from the previous item."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees within the site, or on adjacent land, that could influence or be
+          affected by the development (including street trees).
+    must-include:
+      - item: Which trees are to be retained or removed
+        level: must
+      - item: The means of protecting these trees during construction works
+        level: must
+    confidence: medium
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if: discretionary
+    notes: "From the 2019 national requirements guidance ('Where appropriate')."
+
+  - id: bng-metric
+    action: update
+    must-include:
+      - item: A completed draft metric for the proposed scheme
+        level: must
+      - item: The pre-development habitat survey and biodiversity value, including the results of
+          condition assessments
+        level: must
+    notes: "The excerpt is cut off after the first point of the draft Biodiversity Net Gain Plan list."
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      ref: major-development
+    confidence: low
+    notes: >-
+      From the 2019 national requirements guidance: 'major developments excluding developments for
+      mining operations or waste development'. The excerpt is cut off after the first case, so
+      other cases (such as designated areas) may be missing.
+
+  - id: energy-statement
+    action: add
+    required-if:
+      ref: major-development
+    source-text: Major development is defined as 10 or more dwellings or over 1000sqm of commercial space
+    source-url: https://beta.southglos.gov.uk/static/a2b5319e25b7e3a805507cbb73796fce/Planning-application-requirements-local-list-2024.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's 'Energy / Sustainability Statement' row quoted only
+      'provide an energy assessment.' and was mapped to sustainability-statement.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters, lbc]
+        - site:
+            in: [conservation-area, listed-building, listed-building-setting]
+            description: The application is in or affects a conservation area or listed building.
+    source-text: "Excludes: Change of use, advertisements, and householder applications unless adjoining or
+      adjacent"
+    source-url: https://beta.southglos.gov.uk/static/a2b5319e25b7e3a805507cbb73796fce/Planning-application-requirements-local-list-2024.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was 'in any heritage statement.' From the audit:
+      applications in or affecting a conservation area or listed building, excluding change of use,
+      adverts and householder applications unless adjoining or adjacent. The application types are
+      listed to show the exclusions; householder cases next to a heritage asset aren't expressed.
+
+  - id: land-contamination-assessment
+    action: update
+    required-if: discretionary
+    source-text: >-
+      Land Contamination Assessment Applications may also need to be accompanied by a land
+      contamination assessment which should include an extended assessment of contamination in line
+      with Environment Agency Guidance document LCRM (Land contamination Risk Management) October
+      2020.
+    confidence: medium
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: floodlighting
+            value: true
+            description: The proposal includes floodlighting.
+        - condition:
+            field: external-lighting
+            value: true
+            description: A significant amount of external lighting would be provided or made necessary
+              (for example near homes, a listed building, a conservation area or open countryside).
+    source-text: >-
+      Lighting Assessment Proposals involving the provision of publicly accessible developments, in
+      the vicinity of residential property, a listed building or a conservation area, or open
+      countryside, including /for flood lighting or a significant amount of external lighting would
+      be provided or made necessary by the development, should be required to be accompanied by
+      details of external lighting and the proposed hours when the lighting would be…
+    source-url: https://beta.southglos.gov.uk/static/a2b5319e25b7e3a805507cbb73796fce/Planning-application-requirements-local-list-2024.pdf
+    must-include:
+      - item: Details of external lighting
+        level: must
+      - item: The proposed hours when the lighting would be switched on
+        level: must
+      - item: Calculations (vertical illuminance, ULR calculations, etc.) as required
+        level: should
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook put this under Listed building consent because the text
+      mentions a listed building, which is a location here. The calculations item was in the
+      workbook's 'Advertisement drawings' row.
+
+  - id: noise-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise-sensitive development, including sites next to major road/transport
+              infrastructure or another significant noise source.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The proposal is a noise-generating use.
+    source-text: >-
+      Applications for noise sensitive development including sites adjacent to major road/transport
+      infrastructure and any other significant noise source.
+    source-url: https://beta.southglos.gov.uk/static/a2b5319e25b7e3a805507cbb73796fce/Planning-application-requirements-local-list-2024.pdf
+    policy: PSP21, PSP8 (criteria d), Local Plan EP4
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the workbook put this under Householder because 'householder
+      applications' bled in from the previous item. From the audit: also noise-generating uses.
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if:
+      all:
+        - ref: major-development
+        - site:
+            in: [open-space]
+            description: The development is on existing open space.
+    source-url: https://beta.southglos.gov.uk/static/a2b5319e25b7e3a805507cbb73796fce/Planning-application-requirements-local-list-2024.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): 'Assessment of Proposed Development within Existing Open
+      Space', for major residential or mixed development on existing open space."
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: A sloping site, or ground levels outside the extension would be modified.
+    notes: "From the 2019 national requirements guidance; the excerpt is a fragment."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: A sloping site, or ground levels outside the extension would be modified.
+    notes: "From the 2019 national requirements guidance; the excerpt is a fragment."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: The proposal is telecommunications development.
+    source-url: https://beta.southglos.gov.uk/static/a2b5319e25b7e3a805507cbb73796fce/Planning-application-requirements-local-list-2024.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): 'Telecommunication Information' for all telecoms development."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: Main town centre uses outside existing centres.
+    source-url: https://beta.southglos.gov.uk/static/a2b5319e25b7e3a805507cbb73796fce/Planning-application-requirements-local-list-2024.pdf
+    must-include:
+      - item: A retail impact assessment
+        level: must
+        required-if:
+          condition:
+            field: retail-floorspace
+            operator: ">="
+            value: 350
+            description: 350 square metres or more of retail floorspace outside the Primary Shopping Area.
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): 'Evidence for Town Centre Uses' for main town centre
+      uses outside existing centres, with a retail impact assessment at 350 sqm+ outside the Primary
+      Shopping Area.
+
+  - id: transport-assessment
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [full, reserved-matters]
+        - condition:
+            field: new-vehicle-access
+            value: true
+            description: The proposal includes a dropped kerb.
+        - discretionary
+    source-url: https://beta.southglos.gov.uk/static/a2b5319e25b7e3a805507cbb73796fce/Planning-application-requirements-local-list-2024.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): 'Assessment of Transport Impact' for significant
+      transport implications, all major and minor full and reserved matters applications, and
+      dropped kerbs. The workbook only had a visibility-splays fragment (left as an unmapped item).
+
+unmapped:
+  - local-name: Public Open Space Assessment
+    source-text: "From the audit: major residential and mixed-use development"
+    source-url: https://beta.southglos.gov.uk/static/a2b5319e25b7e3a805507cbb73796fce/Planning-application-requirements-local-list-2024.pdf
+    suggested-id: ""
+  - local-name: Surface Water Drainage Details
+    source-text: "From the audit: all major and minor full applications and reserved matters. 'For outline
+      planning applications the applicant should include an outline drainage strategy'"
+    source-url: https://beta.southglos.gov.uk/static/a2b5319e25b7e3a805507cbb73796fce/Planning-application-requirements-local-list-2024.pdf
+    suggested-id: drainage-strategy
+  - local-name: Self-build / custom build information
+    source-text: "From the audit: custom/self-build sites, and residential sites over 100 dwellings"
+    source-url: https://beta.southglos.gov.uk/static/a2b5319e25b7e3a805507cbb73796fce/Planning-application-requirements-local-list-2024.pdf
+    suggested-id: self-build-statement
+  - local-name: Coal Mining Risk Assessment
+    source-text: "'All full planning applications excluding those set out in the Coal Authority's exemptions
+      list', in high-risk coal mining areas. The CMRA should include and identify; the mining information
+      (Coal Authority reports), what risk the mining poses to the proposed development, the mitigation
+      measures that should be included to manage or reduce the risk and whether the Coal Authority
+      permission is required."
+    source-url: https://beta.southglos.gov.uk/static/a2b5319e25b7e3a805507cbb73796fce/Planning-application-requirements-local-list-2024.pdf
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Structural Survey
+    source-text: "A structural survey may be required in support of an application if the proposal involves
+      substantial demolition or renovation of a listed building. (From the audit: also conversion of rural
+      outbuildings outside settlement boundaries.)"
+    source-url: https://beta.southglos.gov.uk/static/a2b5319e25b7e3a805507cbb73796fce/Planning-application-requirements-local-list-2024.pdf
+    suggested-id: structural-survey
+  - local-name: Planning Obligations
+    source-text: "From the audit: major development, including outline"
+    source-url: https://beta.southglos.gov.uk/static/a2b5319e25b7e3a805507cbb73796fce/Planning-application-requirements-local-list-2024.pdf
+    suggested-id: planning-obligations-heads-of-terms
+
+low-confidence:
+  - id: viability-assessment
+    note: "The excerpt is table text shared with the Affordable Housing row; no trigger was captured."
+  - id: archaeological-assessment
+    note: "Audit (wrong_trigger): the excerpt is only the tail of an NPPF paragraph."
+  - id: landscaping-plan
+    note: "The excerpt is a public open space fragment; no trigger was captured."
+  - id: waste-management-plan
+    note: "Audit (wrong_trigger): the excerpt is a fragment ('sheds and bin stores ... a site survey will
+      also be required')."
+  - id: flood-risk-assessment
+    note: "The excerpt (from the 2019 national requirements guidance) describes content, not a trigger."

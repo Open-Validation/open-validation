@@ -1,0 +1,505 @@
+# Corrections for Peak District National Park Authority, from inputs/audit/peak-district-national-park-authority.json.
+# The Authority's own list: the Aug 2026 'Local Validation Guidance List'. The audit couldn't fetch
+# the PDF, so it checked the workbook against the adopted 2025 list's requirements-by-application-
+# type matrix (Appendix 1, adopted 18 July 2025); the Aug 2026 revision may differ in detail.
+# Grokbot put every item under Full planning ('INFERRED'). The application types below come from
+# the audit's reading of that matrix: Outline and Variation of condition (s73) are ticked for
+# L1.1-L17; Householder, Reserved matters, Listed building consent and Advertisement consent for
+# the items the audit names; Full is taken as ticked throughout. The audit says NMA and LDC are
+# ticked for "L1.x plans", the planning statement and landscaping, without saying which plans,
+# so they are added only to the site plan, planning statement and landscaping scheme.
+# Triggers are the Authority's own wording from the workbook; where it can't be expressed as a
+# rule ("significant", "more complicated issues") it is shown as officer discretion.
+local-authority: PDNPA
+
+validation-list:
+  url: https://www.peakdistrict.gov.uk/__data/assets/pdf_file/0028/180946/Local_validation_list_guidance_Aug_2026.pdf
+  date: 2026-08-06
+  date-basis: >-
+    workbook text 'Revised 06 August 2026' (the audit couldn't open the PDF to confirm it); the
+    underlying list was adopted 18 July 2025
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is Arboricultural Method Statement text, not a schedule of works"
+  - id: recreation-facilities-assessment
+    reason: "wrong_trigger: the fragment 'of any playing fields or sports facilities' is a site plan item (now in site-plan)"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advice about the paid pre-application service"
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_trigger: the fragment 'operation and parking provision.'"
+  - local-name: Ground investigation / Geotechnical / Basement Impact Assessment
+    reason: "wrong_trigger: this is the L5 Hydrology / hydrogeology statement, re-added below under that name"
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "wrong_trigger: part of the agricultural statement guidance; re-added below as L2.4"
+
+requirements:
+  - id: site-plan
+    action: update
+    required-if:
+      application-type:
+        in: [hh, full, outline, s73, reserved-matters, lbc, advertising, non-material-amendment, ldc]
+    source-text: >-
+      L1.1 Site / block plans (existing and proposed) A site / block plan is necessary for most
+      applications to show proposed changes on the site so they can be assessed and understood and
+      in relation to neighbouring properties.
+    must-include:
+      - item: An identified metric scale (e.g. 1:200 or 1:500, or as appropriate)
+        level: must
+      - item: A drawing reference number and title
+        level: should
+      - item: A scale bar or other annotated measurement so scale can be verified
+        level: should
+      - item: The direction of North
+        level: should
+      - item: The proposed development in relation to the site boundaries, with written dimensions
+          including those to the boundaries
+        level: should
+      - item: The extent and type of any hard surfacing
+        level: should
+      - item: Boundary treatment including walls or fencing, where proposed
+        level: should
+      - item: Connection points for foul and surface waters and any culverted watercourses within the
+          site (where known)
+        level: should
+      - item: The position and extent of any playing fields or sports facilities
+        level: should
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): L1.1 applies to the types listed (2025 matrix). The must-include
+      items are the Authority's wording ('A site plan must be drawn at an identified metric scale
+      … should include a drawing reference number and title and should accurately show: …'),
+      including items g)-j), which the workbook had filed under the tree survey.
+
+  - id: elevation-existing
+    action: update
+    required-if:
+      application-type:
+        in: [hh, full, outline, s73, reserved-matters, lbc, advertising]
+    confidence: medium
+    notes: "Audit (wrong_app_type): L1.2 applies to these types (2025 matrix)."
+
+  - id: elevation-proposed
+    action: update
+    required-if:
+      application-type:
+        in: [hh, full, outline, s73, reserved-matters, lbc, advertising]
+    source-text: >-
+      including blank elevations, include a drawing reference number and title and show: a) a scale
+      bar or other annotated measurement so scale can be verified; b) clearly show proposed works in
+      relation to what is already there; c) position of doors, windows and other architectural
+      features; d) details of all materials, finishes and colour; e) relationship with any adjacent
+      buildings and structures.
+    must-include:
+      - item: All elevations, including blank elevations
+        level: must
+      - item: A drawing reference number and title
+        level: must
+      - item: A scale bar or other annotated measurement so scale can be verified
+        level: must
+      - item: Proposed works shown clearly in relation to what is already there
+        level: must
+      - item: Position of doors, windows and other architectural features
+        level: must
+      - item: Details of all materials, finishes and colour
+        level: must
+      - item: Relationship with any adjacent buildings and structures
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): L1.2 applies to these types (2025 matrix). The audit also names L1.3
+      Detailed elevation drawings (unmapped below).
+
+  - id: floor-plan-existing
+    action: update
+    required-if:
+      application-type:
+        in: [hh, full, outline, s73, reserved-matters, lbc, advertising]
+    confidence: medium
+    notes: "Audit (wrong_app_type): L1.4 applies to these types (2025 matrix)."
+
+  - id: floor-plan-proposed
+    action: update
+    required-if:
+      application-type:
+        in: [hh, full, outline, s73, reserved-matters, lbc, advertising]
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): L1.4 applies to these types (2025 matrix). The workbook's excerpt for
+      this row was the elevations text (now in elevation-proposed).
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      application-type:
+        in: [hh, full, outline, s73, reserved-matters, lbc]
+    confidence: medium
+    notes: "Audit (wrong_app_type): L1.5 applies to these types (2025 matrix)."
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      application-type:
+        in: [hh, full, outline, s73, reserved-matters, lbc]
+    must-include:
+      - item: An identified metric scale (1:50 or 1:100 as appropriate)
+        level: must
+      - item: All parts of the roof shown clearly
+        level: must
+      - item: A drawing reference number and title
+        level: must
+      - item: A scale bar or other annotated measurement so scale can be verified
+        level: must
+      - item: Proposed works shown clearly in relation to what is already there
+        level: must
+      - item: Position of roof windows, balconies, chimneys and any other architectural features
+        level: must
+      - item: Relationship with any adjacent buildings and structures
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): L1.5 applies to these types (2025 matrix)."
+
+  - id: section-existing
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, s73, reserved-matters, lbc]
+        - any:
+            - condition:
+                field: new-build
+                value: true
+                description: The proposal includes new buildings.
+            - condition:
+                field: change-in-ground-levels
+                value: true
+                description: Significant engineering operations and changes to levels.
+            - discretionary
+    source-text: >-
+      Cross-sections and ground levels (existing and proposed) Cross-sections and ground levels are
+      required for applications proposing new buildings or any significant extension to existing
+      buildings or other development proposing significant engineering operations and changes to
+      levels so that they can be assessed and understood.
+    source-url: https://www.peakdistrict.gov.uk/__data/assets/pdf_file/0028/180946/Local_validation_list_guidance_Aug_2026.pdf
+    confidence: medium
+    notes: "L1.6 types from the audit's 2025 matrix. 'Any significant extension' is shown as officer discretion."
+
+  - id: section-proposed
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, s73, reserved-matters, lbc]
+        - any:
+            - condition:
+                field: new-build
+                value: true
+                description: The proposal includes new buildings.
+            - condition:
+                field: change-in-ground-levels
+                value: true
+                description: Significant engineering operations and changes to levels.
+            - discretionary
+    source-text: >-
+      Cross-sections and ground levels (existing and proposed) Cross-sections and ground levels are
+      required for applications proposing new buildings or any significant extension to existing
+      buildings or other development proposing significant engineering operations and changes to
+      levels so that they can be assessed and understood.
+    source-url: https://www.peakdistrict.gov.uk/__data/assets/pdf_file/0028/180946/Local_validation_list_guidance_Aug_2026.pdf
+    confidence: medium
+    notes: "L1.6 types from the audit's 2025 matrix. 'Any significant extension' is shown as officer discretion."
+
+  - id: planning-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, s73, reserved-matters, advertising, non-material-amendment, ldc]
+        - discretionary
+    confidence: medium
+    notes: "L2.1: for applications 'that raise more complicated issues'. Types from the audit's 2025 matrix."
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      application-type:
+        in: [hh, full, outline, reserved-matters, s73]
+    source-url: https://www.peakdistrict.gov.uk/__data/assets/pdf_file/0028/180946/Local_validation_list_guidance_Aug_2026.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): L2.2 Climate change statement, ticked for householder,
+      full, outline, reserved matters and variation of condition in the 2025 matrix. The audit gives
+      no further trigger.
+
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, s73]
+        - discretionary
+    confidence: low
+    notes: >-
+      L2.3: for applications 'which propose affordable housing to meet local need or affect existing
+      affordable housing', which no field expresses. Types from the audit's 2025 matrix.
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, s73]
+        - discretionary
+    confidence: low
+    notes: >-
+      L4.1: the workbook's excerpt gives the purpose but not when an FRA is needed. Types from the
+      audit's 2025 matrix.
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, s73, reserved-matters]
+        - discretionary
+    source-url: https://www.peakdistrict.gov.uk/__data/assets/pdf_file/0028/180946/Local_validation_list_guidance_Aug_2026.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the workbook's excerpt was the site plan contents list
+      (now in site-plan). L6 Tree survey is ticked for these types in the 2025 matrix; the trigger
+      wasn't captured. The list also describes an Arboricultural Method Statement covering
+      construction specifics and specialist foundations or surfacing within root protection areas.
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, s73, lbc]
+        - discretionary
+    source-url: https://www.peakdistrict.gov.uk/__data/assets/pdf_file/0028/180946/Local_validation_list_guidance_Aug_2026.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the workbook's excerpt was a fragment ('trees then
+      ecological surveys may also be required (L7.1)'). L7.2 Ecological survey is ticked for these
+      types in the 2025 matrix; the trigger wasn't captured.
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, s73, reserved-matters, non-material-amendment, ldc]
+        - any:
+            - condition:
+                field: new-boundary-treatment
+                value: true
+                description: New or altered walls, fences or other hard landscaping.
+            - discretionary
+    confidence: medium
+    notes: >-
+      L9: for development 'that involves altered or new hard landscaping (for example, walls,
+      fences, hard surfaces, bunds or retaining structures) or new or replacement turfing, seeding
+      or planting'; the parts no field expresses are shown as officer discretion. Types from the
+      audit's 2025 matrix.
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, s73, advertising]
+        - condition:
+            field: external-lighting
+            value: true
+            description: External lighting likely to impact neighbouring properties, dark skies,
+              protected species or nature conservation sites.
+    confidence: medium
+    notes: "L10: types from the audit's 2025 matrix (the workbook had Full planning only)."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, s73, lbc]
+        - site:
+            in: [archaeological-priority-area, scheduled-monument]
+            description: The site includes, or has the potential to include, heritage assets with
+              archaeological interest.
+    confidence: medium
+    notes: "L11.1: types from the audit's 2025 matrix (the workbook had listed building consent only)."
+
+  - id: heritage-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, s73, reserved-matters, lbc, advertising]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, locally-listed-building, scheduled-monument, park-and-garden]
+            description: The proposal impacts a heritage asset or its setting.
+    confidence: medium
+    notes: "L11.3: types from the audit's 2025 matrix (the workbook had listed building and advertisement consent only)."
+
+  - id: design-and-access-statement
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a Conservation Area.
+            - discretionary
+    confidence: low
+    notes: >-
+      The Authority's text lists '(a) Any application for major development (b) Any application in
+      a Conservation Area where the proposed development consists of: …', but the excerpt is cut off
+      before the conservation-area details, so that limb is shown as officer discretion.
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, s73]
+        - discretionary
+    confidence: low
+    notes: >-
+      For development 'which involves processes or activities that would result in the release of
+      emissions to air' potentially damaging to health or the environment; no field expresses this.
+      Types from the audit's 2025 matrix (Outline and VC ticked for all L-items).
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, s73]
+        - site:
+            in: [contaminated-land]
+            description: Contaminated land or buildings are known or suspected to exist on the site.
+    confidence: medium
+    notes: "Types from the audit's 2025 matrix (Outline and VC ticked for all L-items)."
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, s73]
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The development generates noise that could cause a loss of amenity for
+              residential and other noise-sensitive uses.
+    confidence: medium
+    notes: "Types from the audit's 2025 matrix (Outline and VC ticked for all L-items)."
+
+  - id: sci
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, s73]
+        - discretionary
+    confidence: medium
+    notes: "'Can be required for larger planning applications which have the potential to affect the wider community.'"
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, s73]
+        - discretionary
+    confidence: medium
+    notes: >-
+      For applications that 'would generate significant amounts of additional traffic', or existing
+      high-traffic sites with a new or altered access; 'significant' is officer discretion.
+
+  - id: travel-plan
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, s73]
+        - discretionary
+    confidence: medium
+    notes: "Needed with any application accompanied by a Transport Assessment or Transport Statement."
+
+  - id: viability-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, s73]
+        - discretionary
+    confidence: medium
+    notes: >-
+      For housing schemes (mixed market/affordable or 100% market) 'where a viability appraisal is
+      required to demonstrate compliance with housing policies'.
+
+  - id: waste-management-plan
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, s73]
+        - condition:
+            field: earthworks
+            value: true
+            description: The development involves or requires significant ground excavations.
+    confidence: medium
+    notes: "Types from the audit's 2025 matrix (Outline and VC ticked for all L-items)."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development would be subject to the biodiversity gain condition.
+    confidence: medium
+    notes: "The Authority repeats the national Article 7 minimum information; no local type limit."
+
+unmapped:
+  - local-name: Hydrology / Hydrogeology statement (L5)
+    source-text: >-
+      A hydrology / hydrogeology statement is required for all applications for planning permission
+      which involve disturbance to the ground that could affect the water table and the movement of
+      water under and around the site or that involves the use of materials and processes that could
+      result in pollution of the water environment.
+    source-url: https://www.peakdistrict.gov.uk/__data/assets/pdf_file/0028/180946/Local_validation_list_guidance_Aug_2026.pdf
+    suggested-id: hydrology-statement
+  - local-name: Agricultural development statement (L2.4)
+    source-text: >-
+      For rural worker dwellings (often agricultural worker dwellings) the statement must demonstrate
+      that there is an essential functional need for the dwelling (in all cases) and the business is
+      financially capable of supporting the dwelling (for permanent dwellings) in accordance with
+      relevant policies.
+    source-url: https://www.peakdistrict.gov.uk/__data/assets/pdf_file/0028/180946/Local_validation_list_guidance_Aug_2026.pdf
+    suggested-id: agricultural-appraisal
+  - local-name: Protected species form (L7.1)
+    source-text: "From the audit: ticked for householder, full, outline, variation of condition and listed building consent"
+    source-url: https://www.peakdistrict.gov.uk/__data/assets/pdf_file/0028/180946/Local_validation_list_guidance_Aug_2026.pdf
+    suggested-id: protected-species-form
+  - local-name: Geological survey and assessment (L7.3)
+    source-text: "From the audit: listed in the 2025 matrix; no trigger given"
+    source-url: https://www.peakdistrict.gov.uk/__data/assets/pdf_file/0028/180946/Local_validation_list_guidance_Aug_2026.pdf
+    suggested-id: ""
+  - local-name: Landscape visual appraisal (L8.2)
+    source-text: "From the audit: listed in the 2025 matrix, distinct from the LVIA; no trigger given"
+    source-url: https://www.peakdistrict.gov.uk/__data/assets/pdf_file/0028/180946/Local_validation_list_guidance_Aug_2026.pdf
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Archaeological evaluation (L11.2)
+    source-text: "From the audit: ticked for householder, full, outline, variation of condition and listed building consent"
+    source-url: https://www.peakdistrict.gov.uk/__data/assets/pdf_file/0028/180946/Local_validation_list_guidance_Aug_2026.pdf
+    suggested-id: archaeological-assessment
+  - local-name: Detailed elevation drawings (L1.3)
+    source-text: "From the audit: ticked for householder, full, outline, reserved matters, variation of condition, LBC and advertisement consent"
+    source-url: https://www.peakdistrict.gov.uk/__data/assets/pdf_file/0028/180946/Local_validation_list_guidance_Aug_2026.pdf
+    suggested-id: elevation-proposed

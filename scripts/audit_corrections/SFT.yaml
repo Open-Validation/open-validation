@@ -1,0 +1,465 @@
+# Corrections for Sefton Metropolitan Borough Council, from
+# inputs/audit/sefton-metropolitan-borough-council.json.
+# The 2025 Planning Validation Checklist (cover dated August 2025; the URL says July) is current.
+# It has per-type checklists (3.1 Householder, 3.2 Full or Reserved Matters, 3.3 LBC, 3.4 Adverts,
+# 3.5 Outline, 3.6 Tree works, 3.7 LDC, 3.8 Other). The conditional local items apply to full,
+# outline and reserved matters applications, so their rules are scoped to those types below.
+# The council tab's drawing standards came from the superseded July 2023 checklist; only the rule
+# that also appears in the 2025 workbook text is kept.
+local-authority: SFT
+
+submission-standards:
+  - item: All plans and drawings require a scale bar or a minimum of one dimension written on each plan
+    level: must
+
+drop:
+  - id: design-and-access-statement
+    sheets: [Advertisement consent]
+    reason: "wrong_app_type: the excerpt is the tail of the 3.3 LBC checklist; re-added below for its real types"
+  - id: heritage-statement
+    sheets: [Advertisement consent]
+    reason: "wrong_app_type: as above; re-added below"
+  - id: landscaping-plan
+    reason: "missing_requirement / wrong_trigger: the row quotes an unrelated ecology line; Landscaping Principles is added as unmapped"
+  - id: waste-management-plan
+    reason: "not_a_requirement: the excerpt is the Noise Assessment's what-to-include guidance"
+
+drop-unmapped:
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_app_type: also filed under prior approval because of the 'change of use' exclusion; re-added below once"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "not_a_requirement: a fragment inside the Ecological Survey guidance"
+  - local-name: Highways / access details (visibility splays)
+    reason: "not_a_requirement: the block plan description (now in site-plan) and the sections rule"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "not_a_requirement: the Noise Assessment's what-to-include guidance (now in noise-assessment)"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "not_a_requirement: a note that Heads of Terms 'may be required' during consideration"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "duplicate: reuses the town centre sequential test text; the list has no flood sequential test item"
+
+requirements:
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 15
+            description: Housing schemes or conversions with 15 or more (additional, net) dwellings.
+    confidence: medium
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - any:
+            - all:
+                - ref: major-development
+                - site:
+                    in: [air-quality-management-area]
+                    description: Within or adjacent to an AQMA or Air Quality Threshold Area.
+            - condition:
+                field: dwelling-count
+                operator: ">"
+                value: 100
+                description: Development in excess of 100 dwellings.
+            - discretionary
+    confidence: medium
+    notes: >-
+      The use-specific thresholds (offices 3,500m2+, industrial estates 7,500m2+, warehousing
+      15,500m2+, hotels 150+ bedrooms, leisure or exhibition 9,000m2+), impacts on designated sites
+      and (from the audit) agricultural development posing a significant air-quality risk have no
+      matching field, so they are shown as officer discretion.
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [hh, full, outline, reserved-matters]
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Development within two metres of the canopy spread of a tree, or trees on or
+              adjacent to the site (including street trees) that could be affected.
+    source-text: Any proposals involving development within two metres of the canopy spread of a tree…
+    source-url: https://www.sefton.gov.uk/media/jhudnmux/validation-checklist-july-2025.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger / missing_requirement): the workbook's excerpt mixed tree-works text with
+      the LDC checklist. The Householder checklist (3.1) also requires a Tree Survey.
+
+  - id: condition-of-trees
+    action: add
+    required-if:
+      application-type:
+        in: [consent-under-tpo]
+    source-text: a qualified arboricultural expert
+    source-url: https://www.sefton.gov.uk/media/jhudnmux/validation-checklist-july-2025.pdf
+    confidence: medium
+    notes: >-
+      From the audit (wrong_app_type): the 3.6 Tree Works checklist needs a written report from a
+      qualified arboricultural expert for removal on grounds of condition. It also needs a sketch
+      plan, a specification of works, and reasons and supporting evidence.
+
+  - id: structural-damage
+    action: add
+    required-if:
+      application-type:
+        in: [consent-under-tpo]
+    source-text: >-
+      If the applicant is alleging damage to property, then again reports are required from the
+      appropriate technical experts
+    source-url: https://www.sefton.gov.uk/media/jhudnmux/validation-checklist-july-2025.pdf
+    confidence: medium
+    notes: "The council's wording was found in the workbook's arboricultural row (3.6 Tree Works text)."
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      site:
+        in: [archaeological-priority-area]
+        description: Works on or adjoining a site of known or suspected archaeological interest.
+    confidence: medium
+
+  - id: site-plan
+    action: update
+    must-include:
+      - item: A metric scale (suggested 1:200 or 1:500)
+        level: should
+      - item: Access arrangements
+        level: must
+      - item: All public rights of way crossing or adjoining the site
+        level: must
+      - item: The position of all trees on the site and on adjacent land
+        level: must
+      - item: The extent and type of any hard surfacing
+        level: must
+      - item: Boundary treatment, including walls or fencing, where proposed
+        level: must
+    notes: "The block plan contents were found in the workbook's 'Highways / access details' row."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - any:
+            - condition:
+                field: protected-species
+                value: true
+                description: Protected species are known to be present.
+            - site:
+                in: [special-protection-area, special-area-of-conservation,
+                  site-of-special-scientific-interest, local-wildlife-site]
+                description: Likely significant effects on a Ramsar site, SPA or SAC, or a site within
+                  or adjacent to a designated nature or geological site.
+            - discretionary
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt kept only the protected species case. From the audit, it
+      also covers Ramsar sites, SPAs, SACs, designated nature or geological sites and Nature
+      Improvement Areas (shown as discretion where no field exists).
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: Schedule 1 or Schedule 2 development likely to have a significant effect on the
+          environment.
+    confidence: medium
+
+  - id: section-existing
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: The proposal involves a change in levels or is on a sloping site.
+        - condition:
+            field: basement
+            value: true
+            description: A basement conversion.
+        - discretionary
+    source-text: Sections – required where any proposal involves a change in levels or are on a sloping site.
+    source-url: https://www.sefton.gov.uk/media/jhudnmux/validation-checklist-july-2025.pdf
+    must-include:
+      - item: Finished floor levels
+        level: should
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): from the audit, also required for basement and attic conversions (attic
+      shown as officer discretion). The workbook's excerpt was the drawing-standards line on finished
+      floor levels.
+
+  - id: section-proposed
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: change-in-ground-levels
+            value: true
+            description: The proposal involves a change in levels or is on a sloping site.
+        - condition:
+            field: basement
+            value: true
+            description: A basement conversion.
+        - discretionary
+    source-text: Sections – required where any proposal involves a change in levels or are on a sloping site.
+    source-url: https://www.sefton.gov.uk/media/jhudnmux/validation-checklist-july-2025.pdf
+    must-include:
+      - item: Finished floor levels
+        level: should
+    confidence: medium
+    notes: "Audit (wrong_trigger): as for section-existing."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - any:
+            - site:
+                in: [flood-risk-zone]
+                description: Development within Flood Zone 2 or Flood Zone 3.
+            - condition:
+                field: site-area-residential
+                operator: ">"
+                value: 1
+                description: Development over 1 hectare.
+            - condition:
+                field: site-area-non-residential
+                operator: ">"
+                value: 1
+                description: Development over 1 hectare.
+            - all:
+                - site:
+                    in: [critical-drainage-area]
+                    description: The site is in a Critical Drainage Area.
+                - any:
+                    - condition:
+                        field: site-area-residential
+                        operator: ">="
+                        value: 0.5
+                        description: The site is 0.5 hectares or more.
+                    - condition:
+                        field: site-area-non-residential
+                        operator: ">="
+                        value: 0.5
+                        description: The site is 0.5 hectares or more.
+    confidence: medium
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - any:
+            - condition:
+                field: noise-generating-use
+                value: true
+                description: A potentially noise generating development (pubs, clubs, takeaways,
+                  industrial/commercial uses, recreation) near existing noise sensitive development.
+            - discretionary
+    must-include:
+      - item: Plant such as extract ventilation systems and refrigeration equipment likely to be installed
+        level: should
+      - item: Where noise-generating plant or equipment will be located and installed to reduce noise
+          impacts on neighbouring properties
+        level: should
+      - item: Delivery times and opening hours for commercial premises within noise sensitive areas
+        level: should
+      - item: Details of waste collection, for example pubs/clubs where glass collection could be noisy
+        level: should
+    confidence: medium
+    notes: >-
+      The excerpt is cut off after the first case, so further cases are shown as officer discretion.
+      The must-include items are the council's guidance, found in the workbook's ventilation and
+      waste rows.
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      application-type:
+        in: [ldc-prospective-use]
+    source-text: plan and a planning statement.
+    source-url: https://www.sefton.gov.uk/media/jhudnmux/validation-checklist-july-2025.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_app_type): the row came from the 3.7 Lawful Use or Development checklist, which
+      for a proposed development requires elevations, a block plan, floor plans, a survey plan and
+      a planning statement.
+
+  - id: town-centre-impact-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - condition:
+                field: out-of-centre-town-centre-use
+                value: true
+                description: Outside Primary Shopping Areas or centres.
+            - condition:
+                field: town-centre-use-floorspace
+                operator: ">"
+                value: 500
+                description: Over 500 square metres.
+        - discretionary
+    source-url: https://www.sefton.gov.uk/media/jhudnmux/validation-checklist-july-2025.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt stopped at 'Sequential Test 1.'. From the audit: impact
+      assessment over 500 sqm outside Primary Shopping Areas or centres, over 300 sqm within 800m of
+      a district centre and over 200 sqm within 800m of a local centre (shown as officer discretion,
+      no field). The sequential test is an unmapped item.
+
+  - id: transport-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - discretionary
+    confidence: medium
+    notes: "Where a new development is likely to have significant transportation implications (council's wording)."
+
+  - id: travel-plan
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - discretionary
+    confidence: medium
+    notes: "Where a new development is likely to have significant transportation implications (council's wording)."
+
+  - id: viability-assessment
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - discretionary
+    source-text: >-
+      For all minor, other or major applications where on site works or affordable housing is
+      required in accordance with adopted policy
+    source-url: https://www.sefton.gov.uk/media/jhudnmux/validation-checklist-july-2025.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt stopped at '1.'. From the audit, it also covers cases where a
+      policy financial contribution (off-site works, affordable housing or education) cannot be met.
+      Whether policy requires on-site works has no field, so it is shown as discretion.
+
+  - id: design-and-access-statement
+    action: add
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - any:
+                - condition:
+                    field: dwelling-count
+                    operator: ">="
+                    value: 1
+                    description: One or more dwellings.
+                - condition:
+                    field: floorspace
+                    operator: ">"
+                    value: 100
+                    description: A building or extension over 100 square metres.
+    source-url: https://www.sefton.gov.uk/media/jhudnmux/validation-checklist-july-2025.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement / wrong_app_type): the 3.2, 3.3 and 3.5 checklists include
+      it, for 10+ dwellings or 0.5ha+, 1,000 sqm+, 1ha+, conservation area development of 1+
+      dwellings or over 100 sqm, and Listed Building Consent.
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [conservation-area, listed-building, listed-building-setting, locally-listed-building,
+              scheduled-monument, park-and-garden, archaeological-priority-area]
+            description: The application may affect the significance of a heritage asset or its setting,
+              a conservation area, or a site with potential archaeological interest.
+    source-text: >-
+      Listed Building Consent applications; Major planning applications within, adjacent or
+      otherwise affecting conservation areas; …
+    source-url: https://www.sefton.gov.uk/media/jhudnmux/validation-checklist-july-2025.pdf
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement / wrong_app_type): required for LBC, majors within, adjacent to or
+      affecting conservation areas, conservation area development (including demolition) that
+      would materially affect appearance, anything affecting a heritage asset or its setting, and
+      sites with potential archaeological interest. Not an advertisement requirement.
+
+  - id: coastal-change-assessment
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - site:
+            in: [coastal-erosion-zone]
+            description: Development in the Coastal Change Management Area (CCMA).
+    source-text: Development in the Coastal Change Management Area (CCMA)
+    source-url: https://www.sefton.gov.uk/media/jhudnmux/validation-checklist-july-2025.pdf
+    confidence: low
+    notes: >-
+      Audit (missing_requirement): 'this does not apply to householder applications'. The rules
+      can't say 'not householder', so the main planning types are listed.
+
+unmapped:
+  - local-name: Sustainable Drainage Strategy
+    source-text: >-
+      Sustainable Drainage Strategy Where or when this item is required: All major developments
+      (except a change of use where no increase in permeable area is proposed) Development on land
+      of 0.5ha or more in critical drainage areas
+    source-url: https://www.sefton.gov.uk/media/jhudnmux/validation-checklist-july-2025.pdf
+    suggested-id: drainage-strategy
+  - local-name: Landscaping Principles
+    source-text: >-
+      Residential development of 150 or more new build homes where public open space is being
+      provided.
+    source-url: https://www.sefton.gov.uk/media/jhudnmux/validation-checklist-july-2025.pdf
+    suggested-id: landscaping-principles
+  - local-name: Town centre uses - Sequential Test
+    source-text: >-
+      From the audit: main town centre uses outside an existing centre that are not in accordance
+      with an up-to-date plan
+    source-url: https://www.sefton.gov.uk/media/jhudnmux/validation-checklist-july-2025.pdf
+    suggested-id: sequential-test
+  - local-name: Advertisement drawing
+    source-text: >-
+      The drawing of the proposed advertisement must: Be at a scale of 1:20 or 1:50, show the size of
+      the advertisement and its position on the land or the building in question, show how you
+      propose to either attach the advertisement to the building or how it will stand within the
+      site
+    source-url: https://www.sefton.gov.uk/media/jhudnmux/validation-checklist-july-2025.pdf
+    suggested-id: advertisement-drawings
+  - local-name: Lawful development evidence (existing use)
+    source-text: >-
+      For existing development, as much information and evidence as possible must be supplied to
+      verify the information inc…
+    source-url: https://www.sefton.gov.uk/media/jhudnmux/validation-checklist-july-2025.pdf
+    suggested-id: lawful-development-evidence

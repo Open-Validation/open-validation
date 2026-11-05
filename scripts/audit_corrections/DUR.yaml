@@ -1,0 +1,537 @@
+# Corrections for Durham County Council, from inputs/audit/durham-county-council.json.
+# Grokbot read the 'Planning Validation Requirements' PDF (July 2025, 43 checklist items). The
+# council's pages now link only the web version (article/37046; checklist section article/37122),
+# which adds item 19 'Houses in Multiple Occupation (HMO) Checklist and Management Plan' and
+# renumbers the rest (44 items). The build uses the web url; the web version shows no date.
+# Grokbot placed almost every row under Full planning ('INFERRED') and several rows carry another
+# item's trigger. Item numbers below are the PDF's. Items without the council's own words use the
+# audit's paraphrase ("From the audit").
+local-authority: DUR
+
+validation-list:
+  date: 2025-07
+  date-basis: >-
+    audit: the web checklist (article/37122) shows no date; it revises the July 2025 PDF (adds the
+    HMO item), so it dates from July 2025 or later
+
+submission-standards:
+  - item: Plans emailed for submission must be in .pdf or .tif format
+    level: must
+
+drop:
+  - id: photos
+    reason: "wrong_trigger: 'using 15 photomontages or artist's impressions.' is a fragment of the Visual Impact Assessment row"
+
+drop-unmapped:
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_trigger: the Lighting Assessment floodlighting text (now in lighting-assessment's must-include)"
+  - local-name: Employment / Economic Statement
+    reason: "wrong_trigger: the Active Travel Audit text; the list has no employment statement (Active Travel Audit re-added below)"
+  - local-name: Agricultural / rural workers' dwelling appraisal
+    reason: "wrong_trigger/duplicate: the Agricultural Land Classification text; the list has no rural workers' dwelling item"
+  - local-name: Foul Sewage / Utilities Statement
+    reason: "duplicate: the item 34 Flood Risk Assessment text"
+  - local-name: Sequential / Exception Test (flood)
+    reason: "wrong_trigger: the town centre uses sequential test text, not flood risk"
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_trigger: carries the Building for Life trigger; both re-added below"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: a fragment; re-added below with the audit's trigger"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: The major development includes housing.
+        - discretionary
+    source-url: https://www.durham.gov.uk/media/3760/Planning-Application-Validation-Checklist/pdf/PlanningApplicationValidationChecklist.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was column-interleaved. From the audit: major
+      housing development, and 5+ units in West Durham. West Durham has no field, so that case is
+      shown as officer discretion.
+
+  - id: air-quality-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 10
+            description: 10 or more residential units.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 0.5
+            description: A residential site of 0.5 hectares or more.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 1000
+            description: 1,000 square metres or more of other floorspace.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: A non-residential site of 1 hectare or more.
+        - discretionary
+    source-url: https://www.durham.gov.uk/media/3760/Planning-Application-Validation-Checklist/pdf/PlanningApplicationValidationChecklist.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): air quality screening for 10+ units or 0.5ha+
+      residential, or 1,000 sqm+ or 1ha+ other development, with parking or centralised energy,
+      or conflict with an Air Quality Action Plan. The parking/energy qualifier cannot be
+      expressed, so the size thresholds are shown alone.
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Mature or semi-mature trees or hedges on or adjacent to the site could be
+          affected.
+    source-url: https://www.durham.gov.uk/media/3760/Planning-Application-Validation-Checklist/pdf/PlanningApplicationValidationChecklist.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): a Tree and Hedgerow Assessment where mature or
+      semi-mature trees or hedges on or adjacent to the site could be affected (householder
+      included).
+
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      site:
+        in: [archaeological-priority-area]
+        description: The site is in, or adjacent to and could affect, an area of archaeological
+          interest.
+    confidence: medium
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the biodiversity gain condition (householder and
+          de minimis development are exempt).
+    source-url: https://www.durham.gov.uk/media/3760/Planning-Application-Validation-Checklist/pdf/PlanningApplicationValidationChecklist.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was a fragment. From the audit: most development, householder and de minimis exempt."
+
+  - id: construction-management-plan
+    action: add
+    required-if:
+      all:
+        - application-type:
+            in: [full, reserved-matters]
+        - ref: major-development
+        - discretionary
+    source-url: https://www.durham.gov.uk/media/3760/Planning-Application-Validation-Checklist/pdf/PlanningApplicationValidationChecklist.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): detailed major proposals with sensitive receptors
+      within 100m. 'Sensitive receptors within 100m' is shown as officer discretion.
+
+  - id: design-and-access-statement
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - all:
+            - site:
+                in: [conservation-area, world-heritage-site]
+                description: The site is in a conservation area or World Heritage Site.
+            - condition:
+                field: floorspace
+                operator: ">"
+                value: 100
+                description: Over 100 square metres of floorspace (householder included).
+    source-url: https://www.durham.gov.uk/media/3760/Planning-Application-Validation-Checklist/pdf/PlanningApplicationValidationChecklist.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement, wrong_app_type): item 5 sets local Design and Access
+      Statement thresholds, including listed building consent and householder works over 100 sqm
+      in a conservation area or WHS. The audit does not give the full item.
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: An Environmental Statement is required.
+    confidence: medium
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building 18m or more in height.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building of 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains two or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    confidence: medium
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: A site of 1 hectare or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: A site of 1 hectare or more.
+        - site:
+            in: [flood-risk-zone]
+            description: The site is in Flood Zone 2 or 3.
+    source-text: "Flood Risk Assessment required for: All development on sites of 1 hectare or more"
+    source-url: https://www.durham.gov.uk/media/3760/Planning-Application-Validation-Checklist/pdf/PlanningApplicationValidationChecklist.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the excerpt gives only the 1ha+ trigger. From the audit: also Flood
+      Zones 2/3 and vulnerable changes of use (the latter is not shown separately).
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, listed-building-setting, conservation-area, scheduled-monument,
+              park-and-garden, world-heritage-site]
+            description: The proposal affects a heritage asset, including householder works in or
+              next to a conservation area.
+    source-url: https://www.durham.gov.uk/media/3760/Planning-Application-Validation-Checklist/pdf/PlanningApplicationValidationChecklist.pdf
+    must-include:
+      - item: A Statement of Significance, including a description of the significance of the
+          affected assets and the contribution of their setting to that significance
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the excerpt was content text. Item 18 expressly
+      requires it for listed building consent, and for householder works in or next to a
+      conservation area. The designations shown for other cases are the usual heritage assets.
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      condition:
+        field: external-lighting
+        value: true
+        description: Significant external lighting (e.g. floodlights or security lighting) that may
+          have an adverse impact on residential amenity, the open countryside or a heritage asset.
+    must-include:
+      - item: Light spillage, hours of illumination, light levels and column heights
+        level: must
+        required-if:
+          condition:
+            field: floodlighting
+            value: true
+            description: The scheme involves floodlighting.
+      - item: Specification and colour, treatment for lamps and luminaries, and the need for full
+          horizontal cut-off
+        level: must
+        required-if:
+          condition:
+            field: floodlighting
+            value: true
+            description: The scheme involves floodlighting.
+      - item: No distraction to the highway, and levels of impact on nearby dwellings
+        level: must
+        required-if:
+          condition:
+            field: floodlighting
+            value: true
+            description: The scheme involves floodlighting.
+      - item: Use of demountable columns, retention of screening vegetation, and use of planting and
+          bunding to contain lighting effects
+        level: must
+        required-if:
+          condition:
+            field: floodlighting
+            value: true
+            description: The scheme involves floodlighting.
+    confidence: medium
+    notes: >-
+      The floodlighting items are the council's list ("Schemes involving floodlighting need to
+      provide an assessment covering: ..."); the workbook had part of it under an advert row.
+
+  - id: noise-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Noise-generating development.
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise-sensitive development.
+    source-url: https://www.durham.gov.uk/media/3760/Planning-Application-Validation-Checklist/pdf/PlanningApplicationValidationChecklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): noise-generating or noise-sensitive development."
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [s73]
+        - discretionary
+    source-text: >-
+      A Planning Statement would be particularly useful where a detailed understanding of specific
+      relevant policy and context is required, such as proposals which may not accord with Local
+      Plan Policies.
+    source-url: https://www.durham.gov.uk/media/3760/Planning-Application-Validation-Checklist/pdf/PlanningApplicationValidationChecklist.pdf
+    confidence: medium
+    notes: "Audit (wrong_app_type): item 30 requires a Planning Statement for variation or removal of conditions."
+
+  - id: recreation-facilities-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: loss-of-open-space
+            value: true
+            description: The proposal would result in the loss of open space.
+        - all:
+            - ref: major-development
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: Major housing development.
+        - discretionary
+    source-url: https://www.durham.gov.uk/media/3760/Planning-Application-Validation-Checklist/pdf/PlanningApplicationValidationChecklist.pdf
+    confidence: medium
+    notes: >-
+      From the audit (missing_requirement): an Open Space, Sport, Play and Leisure Assessment for
+      the creation or loss of open space and all major housing. Creation of open space has no
+      field, so it is shown as officer discretion.
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: A change in ground levels, or ground levels outside the site are noticeably
+          different.
+    confidence: medium
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: A change in ground levels, or ground levels outside the site are noticeably
+          different.
+    confidence: medium
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      ref: major-development
+    confidence: medium
+    notes: "Item 35: all new major development, excluding equestrian and agricultural developments (the exclusion cannot be expressed)."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: A telecommunications application.
+    source-url: https://www.durham.gov.uk/media/3760/Planning-Application-Validation-Checklist/pdf/PlanningApplicationValidationChecklist.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): a Telecommunications Assessment for all telecoms applications."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: Main town centre uses outside town centres (excluding small scale rural).
+    confidence: low
+    notes: >-
+      Item 31 'Sequential Test and Impact Assessment for Town Centre Uses'. The excerpt gives the
+      sequential test trigger (main town centre uses outside town centres, excluding small scale
+      rural); the impact assessment threshold is not in the workbook or the audit.
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 50
+            description: C3 residential of 50 or more units (Transport Statement 50-80; Transport
+              Assessment over 80).
+        - condition:
+            field: parking-spaces
+            operator: ">="
+            value: 100
+            description: 100 or more parking spaces.
+        - discretionary
+    source-text: The Transport Assessment shall include a completed Active Travel England planning application toolkit
+    source-url: https://www.durham.gov.uk/media/3760/Planning-Application-Validation-Checklist/pdf/PlanningApplicationValidationChecklist.pdf
+    must-include:
+      - item: A completed Active Travel England planning application toolkit
+        level: must
+        required-if:
+          any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 150
+                description: 150 or more dwellings.
+            - condition:
+                field: floorspace
+                operator: ">="
+                value: 7500
+                description: 7,500 square metres or more.
+            - condition:
+                field: site-area-residential
+                operator: ">="
+                value: 5
+                description: A site of 5 hectares or more.
+            - condition:
+                field: site-area-non-residential
+                operator: ">="
+                value: 5
+                description: A site of 5 hectares or more.
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt ran into the Agricultural Land Classification
+      text. From the audit: Transport Statement for C3 50-80 units, 30+ two-way peak movements,
+      100+ daily movements, 100+ parking spaces, AQMA etc.; Transport Assessment for larger
+      schemes by use class (e.g. C3 over 80 units, B8 over 5,000 sqm, food retail over 800 sqm).
+      Movement and use-class thresholds cannot be expressed and are shown as officer discretion.
+      The toolkit thresholds (150 dwellings, 7,500 sqm or 5ha+) are the audit's summary.
+
+  - id: travel-plan
+    action: replace
+    source-text: >-
+      There are 4 different types of Travel Plan which are defined as Outline, Framework, Full and
+      STARS; these are expected at different stages of the planning process.
+    source-url: https://www.durham.gov.uk/media/3760/Planning-Application-Validation-Checklist/pdf/PlanningApplicationValidationChecklist.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_app_type): placed under Outline only because the text names an 'Outline'
+      Travel Plan type. The trigger is not in the workbook or the audit.
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    must-include:
+      - item: Sufficient information to enable an objective review of the scheme, having regard to
+          the checklist at Appendix C of the RICS guidance note 'Financial Viability in Planning'
+        level: should
+    confidence: medium
+    notes: "Item 42: for applications where policy-compliant development is not being proposed for viability reasons."
+
+unmapped:
+  - local-name: Coal Mining Risk Assessment
+    source-text: "From the audit: development in a Coal Mining High Risk Area (householder, reserved matters and others exempt)"
+    source-url: https://www.durham.gov.uk/media/3760/Planning-Application-Validation-Checklist/pdf/PlanningApplicationValidationChecklist.pdf
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Building for Life Assessment
+    source-text: All residential developments of 50+ … units or 1.5ha+ if outline.
+    source-url: https://www.durham.gov.uk/media/3760/Planning-Application-Validation-Checklist/pdf/PlanningApplicationValidationChecklist.pdf
+    suggested-id: building-for-life-assessment
+  - local-name: Active Travel Audit
+    source-text: >-
+      Applications should be supported by an Active Travel Audit assessing the availability,
+      quality and safety of short neighbourhood journeys to local services, amenities and transport
+      infrastructure likely to be made on foot or bike by a new development's users (from the
+      audit: residential 10+ units or 1ha outline; 5,000 sqm employment/leisure)
+    source-url: https://www.durham.gov.uk/media/3760/Planning-Application-Validation-Checklist/pdf/PlanningApplicationValidationChecklist.pdf
+    suggested-id: active-travel-audit
+  - local-name: Drainage Strategy / SuDS
+    source-text: "From the audit: 10+ dwellings or 0.5ha+ residential, 1,000 sqm+ or 1ha+ non-residential"
+    source-url: https://www.durham.gov.uk/media/3760/Planning-Application-Validation-Checklist/pdf/PlanningApplicationValidationChecklist.pdf
+    suggested-id: drainage-strategy
+  - local-name: Glint and Glare Assessment
+    source-text: "From the audit: large grid-connected solar, Fishburn/Shotton-Peterlee safeguarding areas, tracking panels"
+    source-url: https://www.durham.gov.uk/media/3760/Planning-Application-Validation-Checklist/pdf/PlanningApplicationValidationChecklist.pdf
+    suggested-id: glint-glare-assessment
+  - local-name: Houses in Multiple Occupation (HMO) Checklist and Management Plan
+    source-text: "From the audit: new item 19 in the web checklist; no trigger given"
+    source-url: https://www.durham.gov.uk/article/37122/Validation-checklist
+    suggested-id: hmo-management-plan
+  - local-name: Hydrogeological Risk Assessment
+    source-text: "Mineral, landfill, and landraise applications"
+    source-url: https://www.durham.gov.uk/media/3760/Planning-Application-Validation-Checklist/pdf/PlanningApplicationValidationChecklist.pdf
+    suggested-id: hydrogeological-risk-assessment
+  - local-name: Internal Space Standards Assessment
+    source-text: "From the audit: C3/C4 residential, excluding C3 to C4"
+    source-url: https://www.durham.gov.uk/media/3760/Planning-Application-Validation-Checklist/pdf/PlanningApplicationValidationChecklist.pdf
+    suggested-id: space-standards-statement
+  - local-name: Minerals and/or Waste Infrastructure Assessment
+    source-text: "From the audit: in or adjoining a minerals or waste safeguarding zone"
+    source-url: https://www.durham.gov.uk/media/3760/Planning-Application-Validation-Checklist/pdf/PlanningApplicationValidationChecklist.pdf
+    suggested-id: mineral-assessment
+  - local-name: Minerals Assessment
+    source-text: "From the audit: in or adjoining a Mineral Safeguarding Area"
+    source-url: https://www.durham.gov.uk/media/3760/Planning-Application-Validation-Checklist/pdf/PlanningApplicationValidationChecklist.pdf
+    suggested-id: mineral-assessment
+  - local-name: Soil Resource Management Strategy
+    source-text: "From the audit: 1ha+ not on previously developed land"
+    source-url: https://www.durham.gov.uk/media/3760/Planning-Application-Validation-Checklist/pdf/PlanningApplicationValidationChecklist.pdf
+    suggested-id: soil-management-plan
+  - local-name: Structural Survey
+    source-text: "From the audit: conversions such as barns, listed buildings, and substantial demolition of heritage assets"
+    source-url: https://www.durham.gov.uk/media/3760/Planning-Application-Validation-Checklist/pdf/PlanningApplicationValidationChecklist.pdf
+    suggested-id: structural-survey
+  - local-name: Ventilation / Extraction Statement
+    source-text: "From the audit: substantial ventilation or extraction equipment"
+    source-url: https://www.durham.gov.uk/media/3760/Planning-Application-Validation-Checklist/pdf/PlanningApplicationValidationChecklist.pdf
+    suggested-id: ventilation-extraction-statement
+  - local-name: Visual Impact Assessment
+    source-text: >-
+      using photomontages or artist's impressions. (From the audit: all majors; World Heritage
+      Site, North Pennines AONB and Heritage Coast; all solar farms and wind turbines)
+    source-url: https://www.durham.gov.uk/media/3760/Planning-Application-Validation-Checklist/pdf/PlanningApplicationValidationChecklist.pdf
+    suggested-id: landscape-visual-impact-assessment
+
+low-confidence:
+  - id: land-contamination-assessment
+    note: "Audit (wrong_trigger): the excerpt is content text, not a trigger."
+  - id: biodiversity-survey-report
+    note: "Audit (wrong_trigger): the excerpt is method text, not a trigger."

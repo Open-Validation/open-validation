@@ -1,0 +1,479 @@
+# Corrections for Sunderland City Council, from the council's audit.
+# The list is the Validation Checklist Version 2, adopted January 2024 (council page article
+# 14012; the PDF footer reads 'Version 3 TS 15.01.2024'). Article 18176 still holds the
+# superseded October 2016 version. The audit read the HTML checklist but not items 31-40 in
+# full, so other omissions are possible.
+local-authority: SND
+
+drop:
+  - id: schedule-of-works
+    reason: "wrong_trigger: the excerpt is the arboricultural method statement sentence"
+  - id: waste-management-plan
+    reason: "wrong_trigger: a servicing-plan bullet from the transport item"
+
+drop-unmapped:
+  - local-name: Minerals / Waste specific statements (county matters)
+    reason: "duplicate: reuses the coal mining excerpt"
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_app_type: filed under Householder, which the trigger excludes; re-added below"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_app_type: the excerpt runs on into protected-species text; re-added below"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: the document's table of contents"
+  - local-name: Tall buildings / Wind microclimate assessment
+    reason: "duplicate: item 33, same excerpt as daylight-sunlight-assessment"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "duplicate: a fragment of item 33"
+  - local-name: Employment / Economic Statement
+    reason: "wrong_trigger: the fragment 'on designated employment land.' from the Marketing Information item"
+  - local-name: Marketing / vacancy evidence (loss of use)
+    reason: "not_a_requirement: a caveat about agreeing marketing scope at pre-app; re-added below"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: carries the Flood Risk Assessment trigger (used there); re-added below"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "wrong_trigger: boilerplate; re-added below with the council's policy text"
+  - local-name: Structural Survey
+    reason: "wrong_app_type: filed under Change of use - prior approval only; re-added below with all its
+      triggers"
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_app_type: an advertisement item filed under Full planning; re-added below"
+
+requirements:
+  - id: landscaping-plan
+    action: replace
+    required-if: discretionary
+    source-text: Landscaping Details When is this required? Planning applications (except those for
+      the change of use or alteration to an existing building), where landscaping would be a
+      significant consideration in the assessment of the application.
+    source-url: &list https://www.sunderland.gov.uk/media/19622/Validation-Checklist/pdf/Validation_Checklist.pdf?m=1652111555597
+    confidence: medium
+    notes: "Audit (wrong_app_type): the workbook filed this under Change of use - prior approval, which the
+      source excludes. Shown as officer discretion (item 19)."
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, demolition-con-area]
+        - all:
+            - ref: major-development
+            - site:
+                in: [conservation-area]
+                description: The scheme is in or affects a conservation area.
+    source-text: Listed Building Consent, Conservation Area Consent, major schemes in or affecting
+      conservation areas…
+    source-url: *list
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the workbook's excerpt was a cross-reference ('see
+      requirement 16') and LBC and conservation area demolition were left empty. The council's
+      list continues beyond the quoted cases.
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [scheduled-monument, archaeological-priority-area]
+            description: The site is near a Scheduled Monument or a Historic Environment Record site.
+        - all:
+            - condition:
+                field: greenfield-site
+                value: true
+                description: A greenfield site.
+            - any:
+                - condition:
+                    field: site-area-residential
+                    operator: ">="
+                    value: 1
+                    description: The site is 1 hectare or more.
+                - condition:
+                    field: site-area-non-residential
+                    operator: ">="
+                    value: 1
+                    description: The site is 1 hectare or more.
+        - all:
+            - site:
+                in: [listed-building, locally-listed-building]
+                description: A historic building.
+            - any:
+                - condition:
+                    field: demolition
+                    value: true
+                    description: Demolition of the building.
+                - condition:
+                    field: structural-alteration
+                    value: true
+                    description: Major alteration of the building.
+    source-url: *list
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the workbook's excerpt had no trigger. From the audit:
+      near Scheduled Monuments or HER sites, greenfield sites of 1 ha+, and demolition or major
+      alteration of historic buildings (shown as listed or locally listed buildings).
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, reserved-matters]
+        - ref: major-development
+    confidence: medium
+    notes: "The council's item 27: 'Most major full planning applications and major reserved matter applications'."
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the biodiversity gain condition.
+    source-text: for measurable biodiversity net gain as set out in the NPPF and local policy.
+    source-url: *list
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): item 15 applies BNG to all non-householder applications;
+      the rules can't express 'not householder', so the biodiversity gain condition is used."
+
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 10
+                description: 10 or more homes.
+            - condition:
+                field: site-area-residential
+                operator: ">="
+                value: 0.5
+                description: A residential site of 0.5 hectares or more.
+            - condition:
+                field: floorspace-non-residential
+                operator: ">="
+                value: 1000
+                description: 1,000 square metres or more of floorspace.
+            - condition:
+                field: site-area-non-residential
+                operator: ">="
+                value: 1
+                description: A site of 1 hectare or more.
+        - any:
+            - condition:
+                field: parking-spaces
+                operator: ">="
+                value: 10
+                description: 10 or more parking spaces.
+            - discretionary
+    source-url: *list
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was 'where the proposal will;'. From the audit
+      (item 12): 10+ homes or 0.5 ha+, or 1,000 sq m+ or 1 ha+, combined with factors such as 10+
+      parking spaces or centralised combustion (other factors shown as officer discretion).
+
+  - id: flood-risk-assessment
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone, critical-drainage-area]
+            description: The site is in Flood Zone 2 or 3, or in a critical drainage area.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more.
+    source-text: >-
+      Flood Risk Assessment When is this required? All planning applications for: Development
+      within a local authority’s own identified critical drainage area and Flood Zones 2 & 3;
+    source-url: *list
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the workbook's FRA excerpt was boilerplate; the real trigger was in
+      its Drainage row. From the audit: Flood Zones 2/3, sites of 1 ha+ and critical drainage
+      areas. Includes the sequential and exception tests where necessary.
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is EIA development.
+    source-url: *list
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was boilerplate shared with the HRA and FRA rows."
+
+  - id: site-plan
+    action: replace
+    source-text: Site Plan (Existing and Proposed) All applications should normally include existing
+      and proposed site plans at a standard metric scale (typically 1:100 or 1:200).
+    source-url: *list
+    must-include:
+      - item: Existing and proposed site plans at a standard metric scale (typically 1:100 or 1:200)
+        level: should
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt was a list of national requirements; the council's
+      site plan text comes from its drawing standards."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: Protected species are known or considered likely to be present, where
+              buildings are converted, demolished, removed or modified, or trees removed or pruned.
+        - discretionary
+    source-text: >-
+      Protected Species Survey and Report When could these be required? All applications (including
+      householders) which include conversion, demolition, removal, or modification of existing
+      buildings or removal or pruning of trees as follows: Where protected species are known or
+      considered likely to be present (confirmed by a data search or local knowledge).
+    source-url: *list
+    confidence: medium
+    notes: >-
+      Applies to all application types, including householder. From the audit (missing_requirement):
+      item 15 also asks for an Ecological Impact Assessment for non-householder schemes affecting
+      semi-natural habitats (shown as officer discretion).
+
+  - id: affordable-housing-statement
+    action: update
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: Housing development of 10 units or more.
+    confidence: medium
+
+  - id: planning-statement
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 100
+            description: 100 dwellings or more.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 10000
+            description: A minimum of 10,000 square metres of commercial/retail development.
+        - all:
+            - ref: major-development
+            - condition:
+                field: departure-from-development-plan
+                value: true
+                description: The application would be a departure from the development plan.
+    must-include:
+      - item: A statement of need for waste facilities
+        level: must
+        required-if:
+          application-type:
+            in: [waste-dev]
+    confidence: medium
+    notes: "The must-include item is from the audit (missing_requirement, item 24)."
+
+  - id: sci
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - discretionary
+    confidence: medium
+    notes: "Some major applications, as advised at pre-application stage (council's wording)."
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Mast and antenna development by mobile phone network operators.
+    confidence: medium
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      site:
+        in: [open-space]
+        description: Development on existing open space.
+    confidence: medium
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: >-
+      The council's item 33 triggers are judgements: development close to habitable-room windows
+      of existing homes likely to significantly affect their light, and residential development
+      likely to receive low light. The workbook's microclimate and amenity-space rows were
+      duplicates of this item.
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: external-lighting
+                value: true
+                description: A detailed lighting scheme such as area or security lighting.
+            - condition:
+                field: floodlighting
+                value: true
+                description: Flood lighting.
+        - discretionary
+    confidence: medium
+    notes: "Where the lighting could impact upon a sensitive area, such as residential areas (council's wording),
+      shown as officer discretion."
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: roof-alteration
+            value: true
+            description: An alteration to an existing roof.
+        - discretionary
+    confidence: medium
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: roof-alteration
+            value: true
+            description: An alteration to an existing roof.
+        - discretionary
+    confidence: medium
+
+  - id: floor-plan-existing
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Where this would be expected to add to the understanding of the proposal (council's wording)."
+
+  - id: floor-plan-proposed
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Where this would be expected to add to the understanding of the proposal (council's wording)."
+
+  - id: section-existing
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Where this would be expected to add to the understanding of the proposal (council's wording)."
+
+  - id: section-proposed
+    action: update
+    required-if: discretionary
+    confidence: medium
+    notes: "Where this would be expected to add to the understanding of the proposal (council's wording)."
+
+  - id: arboriculturist-report
+    action: update
+    must-include:
+      - item: Tree survey
+        level: must
+      - item: Tree Constraint Plan (TCP)
+        level: must
+      - item: Arboricultural Implications Assessment (AIA)
+        level: must
+      - item: Arboricultural Method Statement (AMS) with a Tree Protection Plan, where appropriate
+        level: should
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      condition:
+        field: out-of-centre-town-centre-use
+        value: true
+        description: Main town centre uses outside existing centres.
+    must-include:
+      - item: Sequential test
+        level: must
+      - item: Impact assessment
+        level: must
+        required-if:
+          condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 2500
+            description: Above 2,500 square metres.
+    source-url: *list
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 29 Town Centre Use Assessment."
+
+unmapped:
+  - local-name: Coal Mining Risk Assessment / Mineral Safeguarding
+    source-text: "This is normally only required for development in Coal Mining Development High Risk Areas with
+      the exception of householder extensions or alterations, changes of use and shop front alterations."
+    source-url: *list
+    suggested-id: coal-mining-risk-assessment
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    source-text: "From the audit: where pre-application advice says a S106 is needed"
+    source-url: *list
+    suggested-id: planning-obligations-statement
+  - local-name: Marketing information
+    source-text: "From the audit: includes demolition of listed or locally listed buildings and loss of designated
+      employment land; the need and scope are to be clarified at pre-application stage"
+    source-url: *list
+    suggested-id: marketing-evidence
+  - local-name: Drainage Assessment
+    source-text: "From the audit: all major development"
+    source-url: *list
+    suggested-id: drainage-strategy
+  - local-name: Shadow Habitat Regulation Assessment
+    source-text: "Where a development could impact upon a designated or possible Special Area of Conservation (SAC)
+      and/or classified or potential Special Protection Area (SPA) a shadow Habitat Regulation Assessment
+      (HRA) will be required."
+    source-url: *list
+    suggested-id: habitats-regulations-assessment
+  - local-name: Structural Survey
+    source-text: "Structural Survey When is this required? All applications that involve: The change of use or
+      conversion of rural buildings (e.g. barn conversions); (From the audit: also demolition affecting conservation-area
+      buildings and works affecting a listed building's structure)"
+    source-url: *list
+    suggested-id: structural-survey
+  - local-name: Advertisement illumination details
+    source-text: "Predicted luminance on neighbouring land must be clearly shown in relation to surrounding premises,
+      especially where it affects residential living conditions. (From the audit: an advertisement consent item)"
+    source-url: *list
+    suggested-id: ""
+  - local-name: Masterplan
+    source-text: "Masterplans for 250+ homes or non-residential sites over 5ha"
+    source-url: *list
+    suggested-id: masterplan
+
+low-confidence:
+  - id: land-contamination-assessment
+    note: "Audit (wrong_trigger): the workbook quoted content (Phase 1 / Phase 2), not the trigger."
+  - id: noise-assessment
+    note: "Audit (wrong_trigger): the workbook quoted a list of standards, not the trigger."
+  - id: arboriculturist-report
+    note: "Audit (wrong_trigger): the workbook quoted content, not the trigger; the must-include items are that
+      content."
+  - id: transport-assessment
+    note: "Audit (wrong_trigger): the workbook's excerpt is a cut-off fragment."
+  - id: fire-statement
+    note: "Audit (wrong_trigger): the workbook's excerpt is a cut-off fragment from the national list."
+  - id: elevation-existing
+    note: "Audit (duplicate): the excerpt is about floor plans, sections and levels, not elevations."
+  - id: elevation-proposed
+    note: "Audit (duplicate): the excerpt is about floor plans, sections and levels, not elevations."

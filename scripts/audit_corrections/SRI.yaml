@@ -1,0 +1,497 @@
+# Corrections for South Ribble Borough Council, from the council's audit.
+# The audit read 'Validation August 2026', the only list on the council's Planning validation
+# downloads page (the date is from the link title; the document itself is undated). About 35 workbook
+# rows were 'INFERRED' under Full planning, many with swapped or garbled triggers. Clear triggers from
+# the list are structured below; items marked "From the audit" use the audit's paraphrase.
+local-authority: SRI
+
+submission-standards:
+  - item: Any revision clearly marked and dated
+    level: must
+
+drop-unmapped:
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "duplicate: a fragment with no matching item in the list"
+  - local-name: Sunlight to gardens/amenity space / outdoor amenity
+    reason: "duplicate: repeats the Daylight/Sunlight Assessment text"
+  - local-name: Habitats Regulations Assessment information / SPA mitigation
+    reason: "duplicate: the Ecological/Geological Assessment trigger (now in biodiversity-survey-report)"
+  - local-name: Employment / Economic Statement
+    reason: "wrong_trigger: quotes noise text (now in noise-assessment); re-added below"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: quotes the Secured by Design trigger; re-added below"
+  - local-name: Lawful development evidence (statutory declarations etc.)
+    reason: "wrong_app_type: belongs to lawful development certificates, not Full planning; re-added below"
+  - local-name: Structural Survey
+    reason: "wrong_app_type: placed under LBC with the Lighting Assessment trigger; re-added below"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: a fragment; re-added below"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_app_type: placed only under Outline with a garbled trigger; re-added below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 15
+            description: Residential development of 15 or more dwellings (urban areas).
+        - all:
+            - site:
+                in: [rural-area]
+                description: The site is in a rural area.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 10
+                description: Residential development of 10 or more dwellings.
+        - discretionary
+    source-text: >-
+      For residential developments of 15 dwellings or more in urban areas where a 30% affordable
+      provision is required
+    source-url: https://southribble.gov.uk/downloads/file/763/validation-august-2026
+    confidence: medium
+    notes: "From the audit (missing_requirement): 15+ dwellings in urban areas (30%), 10+ in rural areas (35%),
+      and 100% on rural exception or Green Belt sites (shown as discretionary)."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: The site is in an Air Quality Management Area.
+        - discretionary
+    confidence: low
+    notes: "Audit (wrong_trigger): the excerpt describes contents only. From the audit: the list's trigger
+      covers AQMAs and traffic, HGV and parking thresholds, which the audit does not give."
+
+  - id: arboriculturist-report
+    action: replace
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees within the site, on adjacent land within 15 metres of the boundary, or street
+          trees between the site and the highway.
+    source-text: >-
+      Where there are trees within the application site, trees on adjacent land within 15 metres of the
+      boundary
+    source-url: https://southribble.gov.uk/downloads/file/763/validation-august-2026
+    confidence: medium
+    notes: "Audit (wrong_trigger, missing_requirement): the workbook's trigger was garbled. The Householder
+      checklist asks for it 'if Yes to Question 7' of the application form."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [site-of-special-scientific-interest, special-protection-area, priority-habitat,
+              local-wildlife-site]
+            description: The site is in or affects a SSSI, SPA, priority habitat, Biological Heritage Site or
+              Local Nature Reserve.
+        - condition:
+            field: greenfield-site
+            value: true
+            description: Greenfield sites.
+        - condition:
+            field: protected-species
+            value: true
+            description: Protected species may be affected.
+        - discretionary
+    source-text: >-
+      Interest or Special Protection Area (SPA), or a priority habitat; on Greenfield sites or sites
+      where natural features exists; on locally designated Biological Heritage Sites and Local Nature
+      Reserves An Ecological/ Geological Assessment and Survey should be undertaken and prepared by a
+      suitably qualified person
+    source-url: https://southribble.gov.uk/downloads/file/763/validation-august-2026
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, duplicate): the workbook's ecology row quoted the EPS licence sentence; the
+      trigger was filed under its Habitats Regulations row and is cut at the start. Sites with natural
+      features are shown as discretionary. The list also has a separate Protected Species Assessment
+      and Survey.
+
+  - id: bng-metric
+    action: update
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: minor-development
+            value: true
+            description: Minor development.
+    notes: "Audit (wrong_trigger): the list says 'Mandatory for Major and Minor Development'; the excerpt's
+      NSIP date note is stale."
+
+  - id: construction-management-plan
+    action: replace
+    required-if:
+      all:
+        - application-type:
+            in: [full, reserved-matters]
+        - ref: major-development
+        - discretionary
+    source-text: Full and Reserved Matters Major applications within residential areas
+    source-url: https://southribble.gov.uk/downloads/file/763/validation-august-2026
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type): the workbook quoted a table-of-contents line. 'Within
+      residential areas' has no field, so it is shown as discretionary."
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+    notes: "Needed where there is an impact on sunlight/daylight enjoyed by adjoining properties, including
+      gardens or amenity space. The Householder checklist also lists it (audit missing_requirement)."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: An EIA is required.
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: Development in Flood Zone 2 or 3.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: A Flood Zone 1 site of 1 hectare or more.
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: A Flood Zone 1 site of 1 hectare or more.
+    notes: "Audit (wrong_trigger): the excerpt omits Flood Zone 1 sites of 1 ha or more (audit's summary)."
+
+  - id: floor-plan-existing
+    action: update
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: must
+        source-text: and Proposed Floor Plans At a scale of 1:50 or 1:100 must be submitted.
+
+  - id: floor-plan-proposed
+    action: update
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: must
+        source-text: and Proposed Floor Plans At a scale of 1:50 or 1:100 must be submitted.
+
+  - id: section-existing
+    action: update
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: must
+      - item: Finished floor and site levels
+        level: must
+
+  - id: section-proposed
+    action: update
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: must
+      - item: Finished floor and site levels
+        level: must
+      - item: A cross section through the proposed building(s)
+        level: should
+
+  - id: roof-plan-proposed
+    action: update
+    must-include:
+      - item: Scale of 1:50 or 1:100
+        level: should
+        source-text: f) Roof plans At a scale of 1:50 or 1:100 should be submitted.
+
+  - id: heritage-statement
+    action: replace
+    required-if:
+      any:
+        - application-type:
+            in: [lbc]
+        - site:
+            in: [listed-building, conservation-area]
+            description: The works affect a Listed Building or structure, or the site is within a Conservation
+              Area.
+    source-text: >-
+      For all works affecting a Listed Building or structure … Heritage Statement (if within a
+      Conservation Area)
+    source-url: https://southribble.gov.uk/downloads/file/763/validation-august-2026
+    confidence: medium
+    notes: "Audit (wrong_trigger, wrong_app_type, missing_requirement): the workbook quoted Design and Access
+      Statement content and left out listed building consent; the Householder checklist asks for it within
+      a Conservation Area."
+
+  - id: land-contamination-assessment
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: The proposed use is particularly sensitive to contamination (housing, schools, health,
+              play areas).
+        - site:
+            in: [near-landfill-site]
+            description: The site is within 250 metres of a former landfill.
+    source-text: Where the proposed development is particularly sensitive to land contamination.
+    source-url: https://southribble.gov.uk/downloads/file/763/validation-august-2026
+    confidence: medium
+    notes: "From the audit (missing_requirement)."
+
+  - id: landscaping-plan
+    action: update
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 1
+        description: All new residential development.
+    must-include:
+      - item: A survey of existing site features of landscape, amenity or nature conservation interest to be
+          retained, identifying those intended for removal
+        level: must
+
+  - id: lighting-assessment
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: external-lighting
+            value: true
+            description: External lighting would be provided or made necessary by the development.
+        - discretionary
+    source-text: >-
+      Where external lighting would be provided or made necessary by the development; development for the
+      provision of new lighting; publicly accessible developments; those in the vicinity of residential
+      properties; a Listed Building or Conservation Area; within the open countryside where it is likely
+      to affect wildlife, such as bats.
+    source-url: https://southribble.gov.uk/downloads/file/763/validation-august-2026
+    confidence: medium
+    notes: "Audit (wrong_app_type): this trigger was filed under the workbook's Structural Survey row; its
+      Lighting row quoted Construction Management Plan text. The other cases are shown as discretionary."
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise-sensitive uses such as schools or care homes.
+        - condition:
+            field: plant-equipment
+            value: true
+            description: Air conditioning units on dwellinghouses, or on commercial premises in a residential area.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: Extensions to existing premises and renewable energy schemes likely to cause noise.
+        - discretionary
+    source-text: >-
+      noise sensitive uses such as schools, care homes etc adjacent to existing residential development,
+      extension to existing premises, air conditioning units on dwellinhouses and on commercial premises
+      in residential area and renewable energy schemes I developments.
+    notes: "This trigger was filed under the workbook's Employment row (audit wrong_trigger). From the audit:
+      the list also covers uses near homes, roads, railways and industry."
+
+  - id: photos
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: demolition
+            value: true
+            description: The proposal involves demolition.
+        - site:
+            in: [conservation-area, listed-building]
+            description: Schemes in a conservation area or affecting a listed building.
+        - discretionary
+    source-url: https://southribble.gov.uk/downloads/file/763/validation-august-2026
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted telecoms text. From the audit: major, demolition,
+      infill (shown as discretionary), and conservation area or listed building schemes."
+
+  - id: planning-statement
+    action: add
+    required-if:
+      application-type:
+        in: [hh]
+    source-url: https://southribble.gov.uk/downloads/file/763/validation-august-2026
+    confidence: low
+    notes: "From the audit (missing_requirement): listed in the Section 8 Householder checklist; the audit
+      gives no condition and the list's general Planning Statement trigger was not captured."
+
+  - id: recreation-facilities-assessment
+    action: update
+    required-if:
+      condition:
+        field: dwelling-count
+        operator: ">="
+        value: 10
+        description: Residential development with a net gain of ten or more dwellings.
+    notes: "Open Space Assessment: provision or a financial contribution is only required for a net gain of
+      ten or more dwellings."
+
+  - id: sci
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-text: Major applications, those with wider implications, community facilities.
+    source-url: https://southribble.gov.uk/downloads/file/763/validation-august-2026
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook quoted tree-protection text. Wider implications and community
+      facilities are shown as discretionary."
+
+  - id: sustainability-statement
+    action: replace
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 1
+            description: All residential development.
+        - all:
+            - ref: major-development
+            - condition:
+                field: floorspace-non-residential
+                operator: ">"
+                value: 0
+                description: Major non-residential development.
+    source-text: All residential development and all major non-residential development
+    source-url: https://southribble.gov.uk/downloads/file/763/validation-august-2026
+    must-include:
+      - item: How the development will connect to existing utility services, including electricity and gas,
+          telecommunications and water supply
+        level: must
+    confidence: medium
+    notes: "Audit (wrong_app_type): not only Outline; it applies to Full planning too."
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Mast and antenna development by mobile phone network operators.
+    notes: "Audit (wrong_app_type): applies to mast and antenna applications, not Full planning generally."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: Retail, leisure or office development outside the centres, not in accordance with the
+              development plan.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: ">"
+            value: 2500
+            description: Over the default threshold of 2,500 square metres.
+
+  - id: transport-assessment
+    action: update
+    required-if: discretionary
+
+  - id: travel-plan
+    action: update
+    required-if: discretionary
+    notes: "All developments which generate significant amounts of movement."
+
+  - id: waste-management-plan
+    action: update
+    required-if: discretionary
+    notes: "Construction projects costing over £300,000, residential apartments, retail, commercial and
+      industrial development, and storage of hazardous or clinical waste. There are no fields for these,
+      so it is shown as discretionary."
+
+unmapped:
+  - local-name: SuDS Strategy and SuDS Pro-forma
+    source-text: "A SuDS Strategy and SuDS Pro-forma are both a requirement for any application for major
+      development."
+    source-url: https://southribble.gov.uk/downloads/file/763/validation-august-2026
+    suggested-id: drainage-strategy
+  - local-name: Structural Survey (conversions)
+    source-text: "For applications for building conversion to residential such as barn, stable, piggery,
+      outhouse, garage"
+    source-url: https://southribble.gov.uk/downloads/file/763/validation-august-2026
+    suggested-id: structural-survey
+  - local-name: Lawful Development Certificate evidence
+    source-text: "statements from owners or applicants which give crucial evidence should always be sworn in
+      the proper form"
+    source-url: https://southribble.gov.uk/downloads/file/763/validation-august-2026
+    suggested-id: lawful-development-evidence
+  - local-name: Employment and Skills Statement
+    source-text: "For all applications for residential development over 30 units."
+    source-url: https://southribble.gov.uk/downloads/file/763/validation-august-2026
+    suggested-id: employment-statement
+  - local-name: Ventilation / extraction details
+    source-text: "From the audit: change of use to A3-A5 and significant developments with ventilation or
+      extraction"
+    source-url: https://southribble.gov.uk/downloads/file/763/validation-august-2026
+    suggested-id: ventilation-extraction-details
+  - local-name: Planning Obligations / Draft Heads of Terms
+    source-text: "From the audit: 10 or more dwellings for open space, and major schemes of 10 or more
+      dwellings for affordable housing"
+    source-url: https://southribble.gov.uk/downloads/file/763/validation-august-2026
+    suggested-id: heads-of-terms
+  - local-name: Lifetime Homes Statement
+    source-text: "For new residential development, both new build and conversion."
+    source-url: https://southribble.gov.uk/downloads/file/763/validation-august-2026
+    suggested-id: accessible-housing-statement
+  - local-name: Public Rights of Way Statement
+    source-text: "From the audit: development affecting a public right of way or its setting"
+    source-url: https://southribble.gov.uk/downloads/file/763/validation-august-2026
+    suggested-id: public-rights-of-way-statement
+  - local-name: Renewable Energy Statement
+    source-text: "From the audit: renewable or low-carbon schemes such as solar, wind, heat pumps and biomass"
+    source-url: https://southribble.gov.uk/downloads/file/763/validation-august-2026
+    suggested-id: renewable-energy-statement
+  - local-name: Agricultural Buildings Statement
+    source-text: "From the audit: all new agricultural buildings, with the Appendix 7 ADAS form"
+    source-url: https://southribble.gov.uk/downloads/file/763/validation-august-2026
+    suggested-id: agricultural-buildings-statement
+  - local-name: Employment Assessment
+    source-text: "From the audit: development on current or last-used employment sites; residential schemes
+      also need marketing and notification evidence"
+    source-url: https://southribble.gov.uk/downloads/file/763/validation-august-2026
+    suggested-id: employment-land-assessment
+  - local-name: Regeneration and Economic Statement
+    source-text: "From the audit: new employment uses, loss of employment land, or partial redevelopment of
+      employment sites"
+    source-url: https://southribble.gov.uk/downloads/file/763/validation-august-2026
+    suggested-id: regeneration-statement
+  - local-name: Fee Calculation Summary
+    source-text: "From the audit: major and complicated applications"
+    source-url: https://southribble.gov.uk/downloads/file/763/validation-august-2026
+    suggested-id: ""
+  - local-name: Utilities Statement
+    source-text: "From the audit: major development connecting to existing utilities"
+    source-url: https://southribble.gov.uk/downloads/file/763/validation-august-2026
+    suggested-id: utilities-statement
+  - local-name: Sequential Assessment (town centre uses)
+    source-text: "From the audit: main town centre uses outside centres; separate from the Retail Impact
+      Assessment"
+    source-url: https://southribble.gov.uk/downloads/file/763/validation-august-2026
+    suggested-id: sequential-test
+  - local-name: Supporting Statement
+    source-text: "From the audit: developments that do not need a Design and Access Statement"
+    source-url: https://southribble.gov.uk/downloads/file/763/validation-august-2026
+    suggested-id: ""

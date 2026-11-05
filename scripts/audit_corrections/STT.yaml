@@ -1,0 +1,536 @@
+# Corrections for Stockton-on-Tees Borough Council, from the audit of Stockton-on-Tees.
+# The list is the National and Local Validation Requirements List approved by Planning Committee on
+# 5 March 2025 (51 items, 43 local). The council's PDF could not be fetched, so the audit checked
+# the committee-approved Appendix 1 on moderngov. Grokbot captured about 25 items, mostly filed
+# under Full planning ('INFERRED'), with many triggers taken from neighbouring items. Item numbers
+# are the list's. Items marked "From the audit" use the audit's paraphrase.
+local-authority: STT
+
+drop-unmapped:
+  - local-name: Biodiversity Checklist / Questionnaire
+    reason: "duplicate: same BNG Strategy item (4) as bng-metric"
+  - local-name: Design Code / Masterplan / Parameter plans
+    reason: "wrong_trigger: the drainage masterplan sentence from the SuDS item (re-added below)"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_app_type: FRA text filed under prior approval; SuDS item 27 re-added below"
+  - local-name: Health Impact Assessment
+    reason: "wrong_trigger: fragment; re-added below with item 49's trigger"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: fragment of the site plan contents"
+  - local-name: Nutrient Neutrality statement / calculator
+    reason: "wrong_trigger: explanatory text; re-added below with item 51's trigger"
+  - local-name: Parking provision / Parking plan
+    reason: "wrong_trigger: table headers and URLs; item 9 parking is now a must-include of site-plan"
+  - local-name: Planning Obligations / S106 draft Heads of Terms
+    reason: "wrong_trigger: fragment; re-added below"
+  - local-name: Ground investigation / Geotechnical / Basement Impact Assessment
+    reason: "wrong_trigger: this is item 43, Hydrogeological Risk Assessment (now water-impact-assessment)"
+  - local-name: Structural Survey
+    reason: "wrong_app_type: runs on into item 43; item 42 re-added below"
+
+requirements:
+  - id: affordable-housing-statement
+    action: replace
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: Major housing development.
+        - condition:
+            field: housing-type
+            value: student
+            description: Purpose-built student accommodation.
+        - discretionary
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    confidence: medium
+    notes: >-
+      Audit (missing_requirement, wrong_trigger): item 18 Housing Statement, for major housing,
+      schemes of 2+ affordable and market dwellings, and PBSA. The workbook's excerpt contained
+      reviewer wording. The '2+ affordable and market dwellings' case is shown as officer
+      discretion.
+
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-text: >-
+      If the transport assessment demonstrates there will be more than 500AADT car movements and/or
+      more than 100AADT HGV movements then an Air Quality Assessment is required
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    must-include:
+      - item: Total levels of NO2, PM2.5 and PM10 with and without the development, compared against
+          the national air quality objectives
+        level: should
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): item 35 also covers 'all major developments'. The AADT thresholds have
+      no field, so they are shown as officer discretion. The workbook had this sentence in its
+      transport row.
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: There are trees on or within 10m of the site boundary.
+    confidence: medium
+    notes: "Audit (wrong_app_type): item 24 (trees on or within 10m of the site) also applies to
+      Householder."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      all:
+        - ref: major-development
+        - condition:
+            field: biodiversity-gain-condition
+            value: true
+            description: The development is not exempt from the biodiversity gain condition.
+    confidence: medium
+    notes: "Audit (duplicate): item 4 BNG Strategy, 'all major applications, excluding exempt development'."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      site:
+        in: [contaminated-land]
+        description: The site could be affected by a former potentially contaminative land use.
+    confidence: medium
+    notes: "From the audit: item 32 also asks for a land contamination screening form for small schemes,
+      including Householder."
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - application-type:
+            in: [lbc]
+    source-text: Applications for major development.
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    confidence: low
+    notes: "Audit (duplicate, wrong_trigger): the Full and LBC excerpts are the same garbled text. Only 'major
+      development' is legible; LBC is from the workbook's placement."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+    confidence: medium
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: A roof would be created or altered by the proposed development.
+    source-text: Required where a roof would be created or altered by the proposed development.
+    confidence: medium
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: A roof would be created or altered by the proposed development.
+    source-text: Required where a roof would be created or altered by the proposed development. A roof
+      plan should show the shape of the roof and details of the roofing materials and any features such
+      as chimney positions or windows.
+    must-include:
+      - item: The shape of the roof
+        level: should
+      - item: Details of the roofing materials
+        level: should
+      - item: Features such as chimney positions or windows
+        level: should
+    confidence: medium
+
+  - id: floor-plan-proposed
+    action: update
+    must-include:
+      - item: At 1:50 or 1:100, with written dimensions showing the overall size of any new buildings or
+          extensions
+        level: should
+        source-text: The drawings should be at a Scale 1:50 or 1:100 with written dimensions to show the
+          overall size of any new buildings or extensions, show the direction of North, and include a
+          scale bar.
+
+  - id: fire-statement
+    action: replace
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building is 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building has 7 or more storeys.
+        - any:
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 2
+                description: The building contains 2 or more dwellings.
+            - condition:
+                field: educational-accommodation
+                value: true
+                description: The building contains educational accommodation.
+    source-text: >-
+      Applications to build or convert 'High Rise' building(s) of 18m in height or more or 7 storeys
+      or more containing or proposing to contain either 2 or more dwellings OR educational
+      accommodation (such as classrooms).
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    confidence: medium
+
+  - id: recreation-facilities-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - site:
+            in: [open-space]
+            description: Development in designated open space, playing fields or sports facilities.
+    source-text: development in designated open space, and major applications
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): item 29 Open Space; the workbook quoted viability text. Item 38 (Playing
+      Fields / Loss of Sports Facilities Statement) is covered by the open space designation."
+
+  - id: planning-statement
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - condition:
+            field: departure-from-development-plan
+            value: true
+            description: The application is a departure from the development plan.
+    source-text: all major applications and any departure from the development plan
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): item 16; the workbook quoted EIA text."
+
+  - id: transport-assessment
+    action: replace
+    required-if:
+      any:
+        - ref: major-development
+        - discretionary
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): a Transport Assessment for majors, and a Transport Statement for smaller
+      schemes with significant traffic. The workbook quoted the air quality sentence."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    source-text: >-
+      Any application where s106 planning obligations are not proposed to be met in full, including
+      the policy requirement for affordable housing provision, contributions towards highways, play
+      space, ecology/biodiversity, art, schools etc.
+    policy: SD7, H4
+    confidence: medium
+    notes: "Item 18 in the excerpt's numbering; the trigger depends on the obligations offered."
+
+  - id: water-impact-assessment
+    action: add
+    required-if:
+      application-type:
+        in: [mineral-app, waste-dev]
+    source-text: Mineral planning applications and al… landfill and landraise planning … applications.
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    policy: NPPF paragraphs 187, 196
+    confidence: medium
+    notes: "Audit (wrong_trigger): item 43 Hydrogeological Risk Assessment. For waste, only landfill and
+      landraise applications."
+
+  - id: site-plan
+    action: add
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    must-include:
+      - item: Existing and proposed parking arrangements
+        level: must
+        required-if:
+          any:
+            - condition:
+                field: parking-change
+                value: true
+                description: The proposal affects existing parking arrangements.
+            - condition:
+                field: bedroom-count
+                operator: ">"
+                value: 0
+                description: The proposal provides additional bedrooms.
+        source-text: Any householder application affecting the existing parking arrangements or the
+          provision of additional bedrooms.
+    confidence: medium
+    notes: "Audit (missing_requirement, wrong_app_type): item 9 Site/Block Plan with parking."
+
+  - id: sci
+    action: add
+    required-if:
+      any:
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 30
+            description: The proposal creates 30 or more dwellings.
+        - condition:
+            field: floorspace-non-residential
+            operator: ">="
+            value: 10000
+            description: The proposal creates 10,000 square metres or more of non-residential floorspace.
+        - discretionary
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 15, 30+ dwellings, 10,000 sq m+ non-residential, or
+      controversial schemes (officer discretion)."
+
+  - id: town-centre-impact-assessment
+    action: add
+    required-if:
+      condition:
+        field: town-centre-use-floorspace
+        operator: ">"
+        value: 0
+        description: Retail or leisure development.
+    source-text: 19 Local Retail or Leisure Impact Assessment All retail and leisure developments
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    confidence: medium
+    notes: "Audit (missing_requirement): item 19. The wording was in a tab item."
+
+  - id: travel-plan
+    action: add
+    required-if:
+      ref: major-development
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 23, all majors."
+
+  - id: flood-risk-assessment
+    action: add
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone, critical-drainage-area]
+            description: The site is in flood zone 2, 3 or 3b, or in a critical drainage area.
+        - condition:
+            field: site-area-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (in flood zone 1).
+        - condition:
+            field: site-area-non-residential
+            operator: ">="
+            value: 1
+            description: The site is 1 hectare or more (in flood zone 1).
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 26, flood zones 2/3/3b, 1ha+ in flood zone 1, and
+      critical drainage areas."
+
+  - id: sustainability-statement
+    action: add
+    required-if:
+      condition:
+        field: floorspace-non-residential
+        operator: ">"
+        value: 0
+        description: Non-residential development.
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    must-include:
+      - item: BREEAM assessment
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 31 Sustainability Standards / BREEAM, all
+      non-residential."
+
+  - id: noise-assessment
+    action: add
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): item 34 Noise Impact and Vibration Assessment; the audit
+      gives no trigger."
+
+  - id: telecommunications-report
+    action: add
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: Telecommunications development.
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    must-include:
+      - item: ICNIRP certificate
+        level: must
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 39 ICNIRP Certificate (telecoms)."
+
+  - id: heritage-statement
+    action: add
+    required-if:
+      any:
+        - application-type:
+            in: [lbc, demolition-con-area]
+        - site:
+            in: [listed-building]
+            description: The proposal affects a listed building.
+        - all:
+            - site:
+                in: [conservation-area]
+                description: The site is in a conservation area.
+            - condition:
+                field: dwelling-count
+                operator: ">="
+                value: 1
+                description: The proposal creates one or more dwellings.
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    must-include:
+      - item: Archaeology
+        level: must
+        required-if: discretionary
+    confidence: medium
+    notes: "From the audit (missing_requirement): item 40 Heritage Statement including archaeology, for
+      listed buildings, LBC, conservation area demolition and conservation area schemes of 1+ dwelling."
+
+  - id: lighting-assessment
+    action: add
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    confidence: low
+    notes: "From the audit (missing_requirement): item 44 Lighting Assessment; the audit gives no trigger."
+
+unmapped:
+  - local-name: Sustainable Drainage Systems (SuDS)
+    source-text: "From the audit: item 27, 10+ dwellings or 0.5 ha+, or 1,000 sq m+ non-residential"
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    suggested-id: drainage-strategy
+  - local-name: Drainage masterplan
+    source-text: "A drainage masterplan must be provided for large, phased developments and include details
+      of the proposed phasing of the SuDS system, individual site discharge and storages, the
+      responsibilities for construction, maintenance and adoption and adoption of each element of the
+      scheme."
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    suggested-id: drainage-strategy
+  - local-name: Health Impact Assessment
+    source-text: "residential schemes of 100+ dwellings, other major non-residential schemes..."
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    suggested-id: health-impact-assessment
+  - local-name: Nutrient Mitigation Strategy
+    source-text: "Applications for all new residential … A Nutrient Migration Stratgy should include a
+      statement, which comprises of - completed Nutrient Budget from Natural Englands Nutrient
+      Neutrality Calculator - identify the levels of mitigation required - the proposed mitigation
+      options and proposed mitigation secured"
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    suggested-id: nutrient-neutrality-statement
+  - local-name: Planning Obligations
+    source-text: "All major applications as required … from the S106 agreement."
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    suggested-id: heads-of-terms
+  - local-name: Structural Survey
+    source-text: "From the audit: item 42, conversions outside development limits, agricultural buildings
+      and listed building demolition"
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    suggested-id: structural-survey
+  - local-name: Active Travel England Planning Assessment Toolkit
+    source-text: "47 Local Active Travel England Planning Assessment Toolkit Policy SD8 – Sustainable Design
+      Principles All major planning applications"
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    suggested-id: ""
+  - local-name: Farm Diversification Plan
+    source-text: "From the audit: item 20 (no trigger given)"
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    suggested-id: ""
+  - local-name: Employment Land Statement
+    source-text: "From the audit: item 21, loss of B1/B2/B8 land"
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    suggested-id: employment-statement
+  - local-name: Agricultural Land Classification
+    source-text: "From the audit: item 28 (no trigger given)"
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    suggested-id: agricultural-land-classification
+  - local-name: Landscape Character / Landscape and Visual Impact Assessment
+    source-text: "From the audit: item 30, buildings over 20m, masts over 25m in open countryside, EIA
+      cases"
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    suggested-id: landscape-visual-impact-assessment
+  - local-name: Connectivity Statement (broadband)
+    source-text: "From the audit: item 36 (no trigger given)"
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    suggested-id: ""
+  - local-name: Sequential Test (main town centre uses)
+    source-text: "From the audit: item 45, main town centre uses (Policy EG3)"
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    suggested-id: sequential-test
+  - local-name: Design Checklist / Building for a Healthy Life
+    source-text: "From the audit: item 46, major housing"
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    suggested-id: ""
+  - local-name: Dust Control Assessment
+    source-text: "From the audit: item 48, demolition, earthworks, construction and trackout"
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    suggested-id: dust-assessment
+  - local-name: Hot Food Takeaway Impact Statement
+    source-text: "From the audit: item 50, hot food takeaways outside defined centres"
+    source-url:
+      https://moderngov.stockton.gov.uk/documents/s16360/Appendix%201%20Local%20and%20National%20Information%20requirements.pdf
+    suggested-id: takeaway-statement
+
+low-confidence:
+  - id: biodiversity-survey-report
+    note: "Audit (wrong_trigger): fragment ('of any protected species.'); no trigger captured."
+  - id: section-existing
+    note: "Audit (wrong_trigger): the excerpt runs items 12 (site sections and levels) and 13 (roof plans)
+      together; item 12's trigger was not captured."
+  - id: section-proposed
+    note: "Audit (wrong_trigger): the excerpt runs items 12 and 13 together; item 12's trigger was not
+      captured."

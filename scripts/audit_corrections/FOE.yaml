@@ -1,0 +1,207 @@
+# Corrections for Forest of Dean District Council, from the audit of Forest of Dean.
+# The audit could not fetch the council's checklists (fetch budget exhausted), so contents were
+# not checked; it worked from the workbook's own text. Forest of Dean publishes one checklist per
+# application type. Grokbot read the Full planning, s73, NMA and lawful development checklists
+# only; its 'Listed building consent' rows are copies of the s73 checklist and are dropped here.
+# The list date (2026-07-01) rests on PDF metadata; the audit had no better date.
+local-authority: FOE
+
+submission-standards:
+  - item: All plans and drawings include the paper size, the address of the proposal, a metric scale
+      and a title; plans show the direction of north
+    level: must
+  - item: All drawings include a title, drawing number, confirmation of the scale and a scale bar
+    level: must
+  - item: Drawings supplied in a scalable format, ideally PDF, and not in draft format
+    level: should
+
+drop:
+  - id: cil-form
+    reason: "wrong_trigger: boilerplate; the checklist says only West Oxfordshire and Cotswold have adopted
+      CIL charging schedules"
+  - id: bng-metric
+    sheets: [Listed building consent, Non-material amendment]
+    reason: "wrong_app_type: LBC rows are copies of the s73 checklist; statutory BNG does not apply to
+      non-material amendments"
+  - id: biodiversity-survey-report
+    sheets: [Non-material amendment]
+    reason: "wrong_app_type: the NMA row is a BNG fragment"
+  - id: site-plan
+    sheets: [Listed building consent, Variation of condition s73]
+    reason: "wrong_trigger: the excerpt is the roof plan trigger; LBC rows are copies of the s73 checklist"
+  - id: section-existing
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: copy of the s73 checklist"
+  - id: section-proposed
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: copy of the s73 checklist"
+  - id: floor-plan-existing
+    sheets: [Listed building consent, Full planning]
+    reason: "wrong_app_type: LBC row is a copy of the s73 checklist; the Full row is joinery-detail scales"
+  - id: floor-plan-proposed
+    sheets: [Listed building consent, Full planning]
+    reason: "as above"
+  - id: elevation-existing
+    sheets: [Listed building consent, Full planning]
+    reason: "as above"
+  - id: elevation-proposed
+    sheets: [Listed building consent, Full planning]
+    reason: "as above"
+  - id: planning-statement
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: copy of the s73 checklist"
+  - id: roof-plan-existing
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: copy of the s73 checklist"
+  - id: roof-plan-proposed
+    sheets: [Listed building consent]
+    reason: "wrong_app_type: copy of the s73 checklist"
+
+drop-unmapped:
+  - local-name: Pre-application advice / engagement details
+    reason: "wrong_trigger: fragment ('of the pre-application advice process.'), not a requirement"
+  - local-name: Self-build / custom build information
+    reason: "wrong_trigger: fragment of the CIL exemptions text ('CIL e.g. self-build.')"
+  - local-name: Highways / access details (visibility splays)
+    reason: "wrong_trigger: fragment of the site plan contents, not a separate requirement"
+
+requirements:
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: Site levels are proposed to be altered.
+    source-text: >-
+      Where site levels are proposed to be altered What information is required? Existing and
+      proposed site levels and finished floor levels, related to a defined datum point.
+    notes: "Audit (wrong_trigger): the s73 rows had CIL text pasted into this trigger."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: Site levels are proposed to be altered.
+    source-text: >-
+      Where site levels are proposed to be altered What information is required? Existing and
+      proposed site levels and finished floor levels, related to a defined datum point.
+    must-include:
+      - item: Existing and proposed site levels and finished floor levels, related to a defined datum
+          point
+        level: must
+    notes: "Audit (wrong_trigger): the s73 rows had CIL text pasted into this trigger."
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: A roof is being altered and the change cannot be adequately shown on the
+          elevations.
+    source-text: Where any roof is being altered and the change cannot be adequately shown on the
+      elevation plans.
+    notes: "Audit (wrong_trigger): this trigger was filed under the block/site plan row."
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      condition:
+        field: roof-alteration
+        value: true
+        description: A roof is being altered and the change cannot be adequately shown on the
+          elevations.
+    source-text: Where any roof is being altered and the change cannot be adequately shown on the
+      elevation plans.
+    notes: "Audit (wrong_trigger): this trigger was filed under the block/site plan row."
+
+  - id: bng-metric
+    action: update
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The development is subject to the statutory biodiversity gain condition.
+    notes: "Audit (wrong_trigger): the workbook quoted methodology text; statutory BNG applies where the
+      biodiversity gain condition does."
+
+  - id: biodiversity-survey-report
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: protected-species
+            value: true
+            description: Protected or priority species are affected.
+        - discretionary
+    notes: "The excerpt's list of triggers is cut off; only protected and priority species are visible."
+
+  - id: environmental-statement
+    action: update
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment.
+
+  - id: town-centre-impact-assessment
+    action: replace
+    source-url: https://www.fdean.gov.uk/media/52maob1q/full-planning-permission-validation-checklist.pdf
+    confidence: low
+    notes: "Audit (wrong_trigger): the workbook quoted Heads of Terms text ('Desirable for a variation of an
+      existing legal agreement'). The Retail Impact Assessment's own trigger was not captured."
+
+  - id: arboriculturist-report
+    action: add
+    required-if:
+      condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees and hedges within the site or on adjoining properties are within falling
+          distance of the proposed development.
+    source-text: Trees and hedges within the application site or on adjoining properties, which are
+      within falling distance of the proposed development
+    source-url: https://www.fdean.gov.uk/media/52maob1q/full-planning-permission-validation-checklist.pdf
+    confidence: low
+    notes: "Audit (missing_requirement): the wording is in the Full checklist text Grokbot read, but not
+      verified against the source."
+
+unmapped:
+  - local-name: Biodiversity Self-Assessment Form
+    source-text: "Our biodiversity requirement asks an applicant to submit a self-assessment form as part of
+      their supporting documentation."
+    source-url:
+      https://www.fdean.gov.uk/planning-and-building/planning-permission/make-a-planning-application/planning-application-supporting-information/
+    suggested-id: biodiversity-checklist
+  - local-name: Joinery details (listed buildings)
+    source-text: "These should include elevations at metric scale of 1:5, horizontal and vertical sections
+      at a scale 1:5, and glazing bar profiles/ sections at a scale of 1:1."
+    source-url: https://www.fdean.gov.uk/media/52maob1q/full-planning-permission-validation-checklist.pdf
+    suggested-id: joinery-details
+  - local-name: Schedule / layout of homes
+    source-text: "A schedule/layout of homes"
+    source-url: https://www.fdean.gov.uk/media/52maob1q/full-planning-permission-validation-checklist.pdf
+    suggested-id: accommodation-schedule
+  - local-name: Heads of Terms
+    source-text: "Desirable for a variation of an existing legal agreement."
+    source-url: https://www.fdean.gov.uk/media/52maob1q/full-planning-permission-validation-checklist.pdf
+    suggested-id: heads-of-terms
+
+low-confidence:
+  - id: heritage-statement
+    note: "Audit (wrong_trigger): fragment ('to the Heritage Statement requirement.'); the trigger was not
+      captured, and the LBC checklist was not read."
+  - id: planning-statement
+    note: "Audit (wrong_trigger): fragment ('countryside Supporting Planning Statement'); no trigger
+      captured."
+  - id: archaeological-assessment
+    note: "Audit (wrong_trigger): the workbook quoted methodology text, not when the assessment is needed."
+  - id: fire-statement
+    note: "Audit (wrong_trigger): the trigger runs into Design and Access Statement text."
+  - id: "*"
+    note: "Audit (wrong_document): the Householder, Outline/Reserved matters, Listed building consent,
+      Advertisement and Approval of Details checklists were never read; those types are unaudited, not
+      national-only."

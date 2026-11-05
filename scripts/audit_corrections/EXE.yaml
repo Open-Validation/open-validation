@@ -1,0 +1,323 @@
+# Corrections for Exeter City Council, from the council's audit.
+# The audit could not read the list (web budget exhausted), so whether the July 2024 Local List is
+# still current is unknown, and its issues come only from Grokbot's own extracted text. Many
+# workbook triggers belong to a neighbouring requirement; the type-specific tables (section 3,
+# Householder and others) were never parsed. This file drops the cross-wired rows, moves
+# triggers to the requirements they belong to, and structures the clear ones. Exeter is not the
+# minerals and waste authority, so nothing is filed under minerals and waste.
+local-authority: EXE
+
+submission-standards:
+  - item: Maximum file size 5MB
+    level: must
+  - item: No .zip or .exe files
+    level: must
+  - item: Files preferably submitted as PDF
+    level: should
+  - item: Minimum resolution of 200 dpi
+    level: must
+  - item: Drawings correctly orientated for on-screen display
+    level: must
+  - item: File names reflect their content
+    level: must
+
+drop:
+  - id: schedule-of-works
+    reason: "duplicate / wrong_trigger: the excerpt is the arboricultural method statement text"
+  - id: floor-plan-existing
+    reason: >-
+      wrong_app_type / wrong_trigger: filed under Listed building consent and Lawful development
+      certificate with an unrelated, garbled excerpt (LDC and fee-exemption text)
+  - id: floor-plan-proposed
+    reason: "wrong_app_type / wrong_trigger: as above"
+  - id: elevation-existing
+    reason: "wrong_app_type / wrong_trigger: as above"
+  - id: elevation-proposed
+    reason: "wrong_app_type / wrong_trigger: as above"
+
+drop-unmapped:
+  - local-name: Advertisement drawings / illumination details
+    reason: "wrong_trigger: the excerpt is the Air Quality Assessment text (now in air-quality-assessment)"
+  - local-name: Cycle parking details
+    reason: "wrong_trigger / duplicate: the excerpt is the roof plans text"
+  - local-name: Ventilation / Extraction details (odour)
+    reason: "wrong_trigger: the excerpt is the site sections text"
+  - local-name: Coal Mining / Land Stability Risk Assessment
+    reason: "wrong_trigger: the excerpt is the LVIA text and contact details (LVIA is its own row)"
+  - local-name: Tall buildings / Wind microclimate assessment
+    reason: "duplicate: the tall-buildings limb of the LVIA trigger (LVIA is its own row)"
+  - local-name: Design Code / Masterplan / Parameter plans
+    reason: "wrong_trigger: the excerpt is the Green Infrastructure text; recorded below under that name"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: encouragement to use the pre-application service"
+
+requirements:
+  - id: air-quality-assessment
+    action: replace
+    required-if:
+      any:
+        - all:
+            - ref: major-development
+            - condition:
+                field: car-free
+                value: false
+                description: The development is not car-free residential development.
+        - site:
+            in: [air-quality-management-area]
+            description: The site is within 20 metres of the Air Quality Management Area.
+    policy: Core Strategy Policy CP11; Local Plan First Review Policy EN3
+    source-text: >-
+      All applications for major development, except car-free residential development, must be
+      supported by an Air Quality Assessment (AQA), addressing the air quality impacts of both the
+      construction and operational phases of the development on human health and ecological
+      receptors.
+    source-url: https://exeter.gov.uk/media/2dphlnlo/ecc-final-local-list-july-2024.pdf
+    must-include:
+      - item: The air quality impacts of both the construction and operational phases on human health
+          and ecological receptors
+        level: must
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): the council's wording was in the workbook's advertisement row. The
+      20m AQMA limb ('unless Environmental Health has already agreed it is not needed') was in the
+      daylight and ecology rows.
+
+  - id: archaeological-assessment
+    action: replace
+    required-if:
+      all:
+        - condition:
+            field: ground-disturbance
+            value: true
+            description: The development involves ground works.
+        - site:
+            in: [archaeological-priority-area]
+            description: The site is in the Area of Archaeological Importance.
+    source-text: "Applications for: Development involving ground works in the Area of Archaeological Importance"
+    source-url: https://exeter.gov.uk/media/2dphlnlo/ecc-final-local-list-july-2024.pdf
+    confidence: medium
+    notes: "Audit (wrong_trigger): the workbook's excerpt mixed in CIL form names and fee text."
+
+  - id: biodiversity-survey-report
+    action: replace
+    required-if:
+      any:
+        - site:
+            in: [special-protection-area, site-of-special-scientific-interest, local-wildlife-site]
+            description: The site is within or adjoining an environmentally sensitive area (SPA,
+              SSSI, County Wildlife Site, Special Verge, Devon Wildlife Trust Nature Reserve or Exeter
+              Valley Park).
+        - discretionary
+    policy: Local Plan First Review Policy DG7; NPPF 186
+    source-text: Development on sites within or adjoining an environmentally sensitive area (see page
+      8)
+    source-url: https://exeter.gov.uk/media/2dphlnlo/ecc-final-local-list-july-2024.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, missing_requirement): this is the Ecology Report - Bats and Birds
+      trigger, which the workbook had put on its heritage and flood rows. Special Verges, nature
+      reserves and Exeter Valley Park have no designation field, so they are officer discretion.
+
+  - id: design-and-access-statement
+    action: replace
+    required-if:
+      ref: major-development
+    source-text: >-
+      Design and Access Statement … When Required? Development which is major development (except
+      engineering or mining operations, material changes in use, or waste development)
+    source-url: https://exeter.gov.uk/media/2dphlnlo/ecc-final-local-list-july-2024.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger): this trigger had been copied onto the Fire Statement and Environmental
+      Statement rows. The excerpt is cut off, so any other cases the list gives are not captured.
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development needs an Environmental Impact Assessment (EIA screening).
+    source-url: https://exeter.gov.uk/media/2dphlnlo/ecc-final-local-list-july-2024.pdf
+    confidence: medium
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the workbook used the Design and Access Statement
+      trigger and filed a row under minerals and waste; Exeter is not the minerals and waste
+      authority. An ES depends on EIA screening.
+
+  - id: fire-statement
+    action: replace
+    source-url: https://exeter.gov.uk/media/2dphlnlo/ecc-final-local-list-july-2024.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger, wrong_app_type): the workbook used the Design and Access Statement
+      trigger and filed a row under minerals and waste. From the audit: it depends on building
+      height or storeys with dwellings; the list's own thresholds were not captured.
+
+  - id: flood-risk-assessment
+    action: replace
+    policy: Local Plan First Review Policy EN4; NPPF 173
+    source-url: https://exeter.gov.uk/media/2dphlnlo/ecc-final-local-list-july-2024.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was the ecology trigger ('environmentally
+      sensitive area'). The list's own FRA trigger was not captured.
+
+  - id: heritage-statement
+    action: replace
+    policy: Local Plan First Review Policies C1, C2, C3, C4 and C5; NPPF 200
+    source-url: https://exeter.gov.uk/media/2dphlnlo/ecc-final-local-list-july-2024.pdf
+    confidence: low
+    notes: >-
+      Audit (wrong_trigger): the workbook's excerpt was the ecology trigger ('environmentally
+      sensitive area'). The list's own heritage trigger was not captured.
+
+  - id: noise-assessment
+    action: add
+    source-url: https://exeter.gov.uk/media/2dphlnlo/ecc-final-local-list-july-2024.pdf
+    confidence: low
+    notes: >-
+      From the audit (missing_requirement): a Noise Impact Assessment is named in the extract
+      (citing ProPG: Planning & Noise, New Residential Development, May 2017), with no trigger.
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New or replacement buildings.
+        - condition:
+            field: footprint-increase
+            value: true
+            description: Extended buildings.
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Alterations to existing roofs.
+    source-text: Roof plans are required for all applications for new, replacement or extended
+      buildings, or where there are alterations to existing roofs.
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New or replacement buildings.
+        - condition:
+            field: footprint-increase
+            value: true
+            description: Extended buildings.
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Alterations to existing roofs.
+    source-text: Roof plans are required for all applications for new, replacement or extended
+      buildings, or where there are alterations to existing roofs.
+
+  - id: section-existing
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: New buildings on sloping sites, or changes in levels on the site or between the
+          site and surrounding properties.
+    source-text: >-
+      Site Sections (existing and proposed) Site sections are required for applications for new
+      buildings on sloping sites, or where there are changes in levels on the site or between the
+      site and surrounding properties.
+
+  - id: section-proposed
+    action: update
+    required-if:
+      condition:
+        field: change-in-ground-levels
+        value: true
+        description: New buildings on sloping sites, or changes in levels on the site or between the
+          site and surrounding properties.
+    source-text: >-
+      Site Sections (existing and proposed) Site sections are required for applications for new
+      buildings on sloping sites, or where there are changes in levels on the site or between the
+      site and surrounding properties.
+
+  - id: site-plan
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New buildings.
+        - condition:
+            field: footprint-increase
+            value: true
+            description: Building extensions.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: Changes of use.
+        - discretionary
+    notes: "Council's wording: for new buildings, extensions, changes of use and other development where physical
+      changes to the site layout are proposed."
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      ref: major-development
+    policy: Core Strategy Policies CP13, CP14 and CP15
+    notes: "Audit (wrong_app_type): the Sustainability/Net Zero Carbon Statement is for major development."
+
+  - id: town-centre-impact-assessment
+    action: update
+    required-if:
+      all:
+        - condition:
+            field: out-of-centre-town-centre-use
+            value: true
+            description: A main town centre use outside the City Centre or the District and Local
+              Centres listed in Appendix 6 of the Core Strategy.
+        - condition:
+            field: departure-from-development-plan
+            value: true
+            description: The proposal is not in accordance with the adopted development plan.
+    notes: "The excerpt is the sequential test assessment trigger; any separate impact threshold was not captured."
+
+  - id: viability-assessment
+    action: update
+    required-if: discretionary
+    policy: Core Strategy Policy CP7
+    notes: >-
+      Audit (wrong_app_type): needed if the application does not offer the appropriate level of
+      affordable housing under Policy CP7 (council's wording); there is no field for that, so it is
+      shown as officer discretion.
+
+unmapped:
+  - local-name: Green Infrastructure Statement
+    source-text: "A Green Infrastructure Masterplan is required to identify and define green infrastructure
+      provision within the proposed development and how these proposed GI assets connect to the wider
+      GI network."
+    source-url: https://exeter.gov.uk/media/2dphlnlo/ecc-final-local-list-july-2024.pdf
+    suggested-id: ""
+  - local-name: Designing Out Crime Statement
+    source-text: "4.11 Designing Out Crime Statement (Contents page) The Designing Out Crime Statement should
+      detail how Crime Prevention Through Environmental Design principles are to be incorporated into
+      the development."
+    source-url: https://exeter.gov.uk/media/2dphlnlo/ecc-final-local-list-july-2024.pdf
+    suggested-id: crime-prevention-statement
+
+low-confidence:
+  - id: daylight-sunlight-assessment
+    note: "Audit (wrong_trigger): the excerpt is a jumble of table headers (shared with the ecology row); no trigger."
+  - id: cil-form
+    note: "Audit (wrong_trigger): the excerpt is garbled (form names and fee text); no trigger."
+  - id: recreation-facilities-assessment
+    note: "Audit (wrong_trigger): the excerpt quotes an NPPF paragraph instead of the council's trigger."
+  - id: "*"
+    note: >-
+      Audit (other): the audit could not read the list or the council's planning page, so whether
+      the July 2024 list is still current is unknown; the Householder and other type-specific
+      tables (section 3) were never parsed.

@@ -88,6 +88,15 @@ emails the repo owner.
   Without a GitHub token, Submit opens an issue instead; save its YAML into `reviews/pending/` and
   run `python scripts/apply_reviews.py`.
 
+### Merge rules for review mode
+
+Marks submitted from the explorer arrive as a pull request. The `apply-reviews` workflow applies
+them, then turns on auto-merge only if the person has write access, the batch is 50 cells or
+fewer for one council, and it has no council statuses. Everything else waits for a maintainer.
+One-off settings: **Settings → General → Allow auto-merge**, protect `main` so the `check`
+workflow must pass, and add a repository secret **`REVIEW_BOT_TOKEN`** (a fine-grained token for
+this repo with Contents: read and write) so the workflow's own commit re-runs the checks.
+
 ### Turning issues into statuses (for maintainers)
 
 The explorer's buttons open GitHub issues from the forms in `.github/ISSUE_TEMPLATE/`:
