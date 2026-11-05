@@ -1,0 +1,398 @@
+# Corrections for Doncaster Metropolitan Borough Council, from
+# inputs/audit/doncaster-metropolitan-borough-council.json.
+# The audit could not fetch any Doncaster PDF (contents_checked: false), so this file only drops
+# rows the workbook's own text contradicts, removes junk and structures triggers the excerpts state
+# clearly; everything stays low confidence. The workbook mixes the 2025 'Local Validation
+# Requirements Final' list (with type-specific Householder and Advertisement lists) and the
+# superseded 'Planning Application Information Requirements and Validation Checklist - Reviewed
+# August 2023' (audit, other); rows sourced from the 2023 document are noted. Doncaster also
+# publishes LDC (existing), Listed Building and Works to Trees checklists that were not read.
+local-authority: DNC
+
+validation-list:
+  url: https://www.doncaster.gov.uk/Documents/DocumentView/Stream/Media/Default/Planning/Documents/DM%20Planning/Local%20Validation%20Requirements%20Final.pdf
+  date: 2025-10-01
+  date-basis: "audit (claude_response): the captured PDF is headed 'Local Validation Requirements 1 Oct 2025'; the workbook's 2025-09-01 was PDF metadata. Not re-checked: the PDF could not be fetched"
+
+submission-standards:
+  - item: All drawings attached as PDF files (where original files such as BNG calculation
+      spreadsheets are required, a PDF copy as well)
+    level: must
+  - item: Maximum single attachment file size 5MB; maximum application file size 25MB
+    level: must
+  - item: Drawings include a scale bar and a North arrow
+    level: must
+  - item: Drawings clearly annotated, always showing a distinction between existing and proposed plans
+    level: must
+
+drop:
+  - id: archaeological-assessment
+    sheets: [Householder]
+    reason: "wrong_app_type: its own excerpt excludes householder developments"
+  - id: bng-metric
+    sheets: [Householder, Change of use - prior approval]
+    reason: "wrong_app_type: its own excerpt excludes permitted development and householder applications"
+  - id: fire-statement
+    sheets: [Householder, Advertisement consent]
+    reason: "wrong_app_type: fire statements apply only to relevant high-rise residential buildings; the excerpts are boilerplate and location plan text"
+  - id: floor-plan-existing
+    sheets: [Change of use - prior approval, Advertisement consent]
+    reason: "wrong_app_type: generic 2023 checklist text under prior approval; the advert row is about elevations"
+  - id: floor-plan-proposed
+    sheets: [Change of use - prior approval, Advertisement consent]
+    reason: "wrong_app_type: as above"
+  - id: elevation-existing
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: generic floor plan text from the superseded 2023 checklist"
+  - id: elevation-proposed
+    sheets: [Change of use - prior approval]
+    reason: "wrong_app_type: as above"
+
+drop-unmapped:
+  - local-name: Design Code / Masterplan / Parameter plans
+    reason: "wrong_app_type: outline parameter-plan text spliced with the external lighting trigger, filed under LBC"
+  - local-name: Minerals / Waste specific statements (county matters)
+    reason: "wrong_app_type / wrong_trigger: merged with the Structural Survey column and filed under prior approval; re-added below"
+  - local-name: Structural Survey
+    reason: "the prior-approval row is a merged column; the clean Full planning wording is re-added below"
+  - local-name: Drainage Strategy / SuDS
+    reason: "wrong_trigger: garbled excerpt mixing HIA and Heritage Statement text"
+  - local-name: Foul Sewage / Utilities Statement
+    reason: "wrong_trigger: same garbled excerpt; re-added below with the trigger"
+  - local-name: Pre-application advice / engagement details
+    reason: "not_a_requirement: advice to re-read a pre-application letter"
+
+requirements:
+  - id: archaeological-assessment
+    action: update
+    required-if:
+      all:
+        - application-type:
+            in: [full, outline, reserved-matters]
+        - site:
+            in: [archaeological-priority-area]
+            description: An area designated as being of Archaeological Interest or Potential.
+        - condition:
+            field: building-works
+            value: true
+            description: The proposal involves operational development.
+    policy: CDC Policy 39
+    confidence: low
+    notes: "Not for householder developments, or material changes of use and minor developments involving no operational development (council's wording)."
+
+  - id: bng-metric
+    action: replace
+    required-if:
+      condition:
+        field: biodiversity-gain-condition
+        value: true
+        description: The application is subject to the biodiversity gain condition.
+    source-url: https://dmbcwebstolive01.blob.core.windows.net/media/Default/Planning/Documents/DM%20Planning/Planning%20Application%20Information%20Requirements%20and%20Validation%20Checklist%20-%20Reviewed%20August%202023.pdf
+    source-text: >-
+      A Biodiversity Net Gain Report will also be required to support most planning applications
+      with the exception of permitted developments and householder applications.
+    confidence: low
+    notes: "Audit (wrong_app_type, wrong_trigger): the Full planning excerpt was a file-format note. The wording above is from the superseded August 2023 checklist."
+
+  - id: fire-statement
+    action: update
+    required-if:
+      all:
+        - any:
+            - condition:
+                field: building-height
+                operator: ">="
+                value: 18
+                description: A building 18 metres or more tall.
+            - condition:
+                field: storey-count
+                operator: ">="
+                value: 7
+                description: A building of 7 or more storeys.
+        - condition:
+            field: dwelling-count
+            operator: ">="
+            value: 2
+            description: A relevant high-rise residential building.
+    confidence: low
+    notes: "'For schemes involving a relevant high-rise residential building' (2023 checklist); the thresholds are the national definition."
+
+  - id: arboriculturist-report
+    action: update
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [hh]
+            - site:
+                in: [tree-preservation-zone]
+                description: Protected trees on the site or the adjacent site would be affected.
+        - all:
+            - application-type:
+                in: [full]
+            - condition:
+                field: trees-on-or-near-site
+                value: true
+                description: The development is within 12m of any above-ground part of a tree on or adjacent to the site.
+    must-include:
+      - item: Trees to be retained, removed and planted
+        level: should
+      - item: An assessment of the direct and indirect impacts of the development
+        level: should
+    confidence: low
+    notes: "The Full planning trigger (12m) is from the superseded August 2023 checklist."
+
+  - id: section-existing
+    action: update
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [hh]
+            - condition:
+                field: basement
+                value: true
+                description: The creation of a new basement or the enlargement of an existing basement.
+        - application-type:
+            in: [full]
+    confidence: low
+    notes: "Householder list: basements only. The Full planning trigger was not captured."
+
+  - id: section-proposed
+    action: update
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [hh]
+            - condition:
+                field: basement
+                value: true
+                description: The creation of a new basement or the enlargement of an existing basement.
+        - application-type:
+            in: [full]
+    confidence: low
+    notes: "Householder list: basements only. The Full planning trigger was not captured."
+
+  - id: flood-risk-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [flood-risk-zone]
+            description: Flood Zone 2 or 3.
+        - site:
+            in: [critical-drainage-area]
+            description: Flood Zone 1 with critical drainage problems.
+        - discretionary
+    confidence: low
+    notes: "The excerpts are cut off and interleaved; they also mention sites the SFRA shows at increased risk during their lifetime, and proposals that increase the vulnerability classification (shown as officer discretion)."
+
+  - id: roof-plan-existing
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New buildings or floorspace.
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Extensions or alterations that include works to a roof.
+    confidence: low
+
+  - id: roof-plan-proposed
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: new-build
+            value: true
+            description: New buildings or floorspace.
+        - condition:
+            field: roof-alteration
+            value: true
+            description: Extensions or alterations that include works to a roof.
+    confidence: low
+
+  - id: affordable-housing-statement
+    action: update
+    required-if: discretionary
+    must-include:
+      - item: The total number of residential units proposed
+        level: must
+      - item: The mix of market and affordable units, with numbers and floorspace of habitable rooms
+          and bedrooms
+        level: must
+      - item: Plans showing the location of the affordable units
+        level: must
+    confidence: low
+    notes: "Where residential development generates a requirement for affordable housing under prevailing policy (2023 checklist)."
+
+  - id: air-quality-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [air-quality-management-area]
+            description: Within, or adjacent to, an AQMA and/or national exceedance area.
+        - discretionary
+    confidence: low
+    notes: "Case (b), proposals that could themselves lead to the designation of an AQMA, is cut off and shown as officer discretion."
+
+  - id: land-contamination-assessment
+    action: update
+    required-if:
+      any:
+        - site:
+            in: [contaminated-land]
+            description: The site is known to be contaminated, or contamination is likely because of its existing or previous use.
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: A use particularly vulnerable to contamination is proposed.
+    confidence: low
+
+  - id: daylight-sunlight-assessment
+    action: update
+    required-if: discretionary
+    confidence: low
+    notes: "New built development (including extensions) with the potential to adversely affect light to adjoining sensitive land uses."
+
+  - id: sustainability-statement
+    action: update
+    required-if:
+      ref: major-development
+    confidence: low
+    notes: "'A Sustainability Statement must be submitted for all major applications' (2023 checklist)."
+
+  - id: environmental-statement
+    action: replace
+    required-if:
+      condition:
+        field: eia-development
+        value: true
+        description: The development is EIA development.
+    source-url: https://dmbcwebstolive01.blob.core.windows.net/media/Default/Planning/Documents/DM%20Planning/Planning%20Application%20Information%20Requirements%20and%20Validation%20Checklist%20-%20Reviewed%20August%202023.pdf
+    confidence: low
+    notes: "Audit (wrong_trigger): the excerpt was the fragment 'it is EIA development (16 weeks)'."
+
+  - id: noise-assessment
+    action: update
+    required-if:
+      any:
+        - condition:
+            field: noise-sensitive-use
+            value: true
+            description: Noise-sensitive development close to a significant source of noise.
+        - condition:
+            field: noise-generating-use
+            value: true
+            description: The development is likely to generate noise.
+    confidence: low
+    notes: "From the superseded August 2023 checklist."
+
+  - id: lighting-assessment
+    action: update
+    required-if:
+      any:
+        - all:
+            - application-type:
+                in: [advertising]
+            - condition:
+                field: illuminated
+                value: true
+                description: Illuminated adverts.
+        - all:
+            - any:
+                - condition:
+                    field: external-lighting
+                    value: true
+                    description: External lighting such as car-park lighting or a ménage.
+                - condition:
+                    field: floodlighting
+                    value: true
+                    description: Floodlighting of sports facilities.
+            - any:
+                - site:
+                    in: [listed-building, listed-building-setting, conservation-area]
+                    description: Within or in the vicinity of a listed building or conservation area.
+                - condition:
+                    field: outside-urban-area
+                    value: true
+                    description: Within or in the vicinity of open countryside.
+                - discretionary
+    must-include:
+      - item: Technical specification of all forms of illumination, including beam orientation and
+          lighting spill
+        level: must
+        required-if:
+          application-type:
+            in: [advertising]
+      - item: The proposed hours of illumination
+        level: must
+        required-if:
+          application-type:
+            in: [advertising]
+    confidence: low
+    notes: "The 2025 lighting trigger was in the workbook's LBC 'Design Code' row; 'residential areas' is shown as officer discretion."
+
+  - id: telecommunications-report
+    action: update
+    required-if:
+      condition:
+        field: telecommunications-development
+        value: true
+        description: New masts and/or antenna development by a mobile phone network operator.
+    must-include:
+      - item: Details of the site selection process, including the availability of any alternative sites
+        level: must
+    confidence: low
+
+  - id: elevation-proposed
+    action: update
+    must-include:
+      - item: Position, size, extent of projection and appearance of the proposed adverts in relation to
+          the building or structure
+        level: must
+        required-if:
+          application-type:
+            in: [advertising]
+    confidence: low
+
+low-confidence:
+  - id: construction-management-plan
+    note: "Audit (wrong_trigger): the excerpt is only a table header naming the CTMP and the Custom and Self-Build Delivery Statement."
+  - id: design-and-access-statement
+    note: "The excerpts are cut off ('only required for householder development in the following circumstances:') or header text."
+  - id: heritage-statement
+    note: "Audit (wrong_trigger): the excerpts are table headers or content, not the trigger."
+  - id: landscaping-plan
+    note: "Audit (wrong_trigger): the excerpt is only a table header."
+  - id: transport-assessment
+    note: "Audit (wrong_trigger): the excerpt is only a table header."
+  - id: planning-statement
+    note: "Audit (wrong_trigger): the excerpt is only a table header."
+  - id: viability-assessment
+    note: "The excerpt is footnote and header text; the trigger was not captured."
+
+unmapped:
+  - local-name: Structural Survey
+    source-text: >-
+      Structural Survey Structural surveys will be required where it needs to be demonstrated that
+      either a building is capable of being retained and converted, or that a building is incapable
+      of conversion and needs to be removed.
+    source-url: https://dmbcwebstolive01.blob.core.windows.net/media/Default/Planning/Documents/DM%20Planning/Planning%20Application%20Information%20Requirements%20and%20Validation%20Checklist%20-%20Reviewed%20August%202023.pdf
+    suggested-id: structural-survey
+  - local-name: Sand and Gravel Mineral Safeguarding Assessment
+    source-text: All applications for major nonmineral development within mineral safeguarding areas.
+    source-url: https://www.doncaster.gov.uk/Documents/DocumentView/Stream/Media/Default/Planning/Documents/DM%20Planning/Local%20Validation%20Requirements%20Final.pdf
+    suggested-id: minerals-assessment
+  - local-name: Foul Sewerage Details
+    source-text: >-
+      Foul Sewerage Details Where proposed development would be served by new or altered non-mains
+      drainage arrangements … Scaled plans showing the location of the proposed installation,
+      including any drainage field or outfall.
+    source-url: https://www.doncaster.gov.uk/Documents/DocumentView/Stream/Media/Default/Planning/Documents/DM%20Planning/Local%20Validation%20Requirements%20Final.pdf
+    suggested-id: foul-sewage-utilities-statement
