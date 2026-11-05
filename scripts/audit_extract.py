@@ -1,6 +1,7 @@
 """Print everything you need to write one council's corrections file.
 
 Run:  python scripts/audit_extract.py CMD [--out <file.md>]
+      python scripts/audit_extract.py CMD,SHR,... --out-dir <folder>   (one <CODE>.md each)
 
 It shows, for the council:
   - its workbook rows (requirement, MHCLG id, sheet, trigger excerpt, notes, link)
@@ -34,29 +35,48 @@ def tab_items(wb, tab_name):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("code")
-    p.add_argument("--out")
+    p.add_argument("code", help="a council code, or several separated by commas")
+    p.add_argument("--out", help="file to write (one council)")
+    p.add_argument("--out-dir", help="folder to write <CODE>.md into (several councils)")
     a = p.parse_args()
 
-    match = {r["code"]: r["workbook-name"] for r in read_csv(SCRIPTS / "lpa_match.csv") if r.get("code")}
-    name = match[a.code]
-    req_map = {r["workbook-name"]: r for r in read_csv(SCRIPTS / "requirement_map.csv")}
-    sheets = [r["sheet"] for r in read_csv(SCRIPTS / "sheet_map.csv")]
     wb = openpyxl.load_workbook(WORKBOOK, read_only=True)
-
-    lines = [f"# {a.code}: {name}", "", "## Workbook rows (18 application-type sheets)", ""]
-    tab = None
-    for s in sheets:
+    sheets = [r["sheet"] for r in read_csv(SCRIPTS / "sheet_map.csv")]
+    rows_by_council = {}
+    for s in sheets:  # read every sheet once
         for r in sheet_rows(wb[s]):
-            if r["Council"] != name:
-                continue
-            tab = tab or str(r.get("Council tab") or "")
-            if r.get("Requirement") in (None, "(none)"):
-                continue
-            ids = req_map.get(r["Requirement"], {}).get("planning-requirement") or "UNMAPPED"
-            lines += [f"- [{s}] **{r['Requirement']}** -> `{ids}`",
-                      f"  - excerpt: {str(r.get('Trigger / when required (verbatim excerpt)') or '').strip()}",
-                      f"  - notes: {r.get('Notes') or ''} | link: {link_url(r.get('Source document (link)'))}"]
+            rows_by_council.setdefault(r["Council"], []).append((s, r))
+    audits = {}
+    for f in AUDIT.glob("*.json"):
+        d = json.loads(f.read_text(encoding="utf-8"))
+        audits[d["council"]] = d
+    codes = [c.strip() for c in a.code.split(",") if c.strip()]
+    for code in codes:
+        text = extract(code, wb, rows_by_council, audits)
+        out = a.out if len(codes) == 1 and a.out else (f"{a.out_dir}/{code}.md" if a.out_dir else None)
+        if out:
+            open(out, "w", encoding="utf-8").write(text)
+            print(f"Wrote {out}")
+        else:
+            print(text)
+
+
+def extract(code, wb, rows_by_council, audits):
+    """The Markdown summary for one council."""
+    match = {r["code"]: r["workbook-name"] for r in read_csv(SCRIPTS / "lpa_match.csv") if r.get("code")}
+    name = match[code]
+    req_map = {r["workbook-name"]: r for r in read_csv(SCRIPTS / "requirement_map.csv")}
+
+    lines = [f"# {code}: {name}", "", "## Workbook rows (18 application-type sheets)", ""]
+    tab = None
+    for s, r in rows_by_council.get(name, []):
+        tab = tab or str(r.get("Council tab") or "")
+        if r.get("Requirement") in (None, "(none)"):
+            continue
+        ids = req_map.get(r["Requirement"], {}).get("planning-requirement") or "UNMAPPED"
+        lines += [f"- [{s}] **{r['Requirement']}** -> `{ids}`",
+                  f"  - excerpt: {str(r.get('Trigger / when required (verbatim excerpt)') or '').strip()}",
+                  f"  - notes: {r.get('Notes') or ''} | link: {link_url(r.get('Source document (link)'))}"]
     tab_name = tab.split('","')[-1].rstrip('")') if tab else ""
     lines += ["", f"## Council tab '{tab_name}'", ""]
     for heading, items in tab_items(wb, tab_name).items():
@@ -64,8 +84,7 @@ def main():
         lines += [f"{i}. {t}" for i, t in enumerate(items, 1)]
         lines.append("")
 
-    audit = next((json.loads(f.read_text(encoding="utf-8")) for f in AUDIT.glob("*.json")
-                  if json.loads(f.read_text(encoding="utf-8"))["council"] == name), None)
+    audit = audits.get(name)
     lines += ["## Audit", ""]
     if not audit:
         lines.append("No audit file.")
@@ -82,12 +101,7 @@ def main():
             for k in ("claude_response", "grok_comment"):
                 if i.get(k):
                     lines.append(f"   - {k}: {i[k]}")
-    text = "\n".join(lines) + "\n"
-    if a.out:
-        open(a.out, "w", encoding="utf-8").write(text)
-        print(f"Wrote {a.out}")
-    else:
-        print(text)
+    return "\n".join(lines) + "\n"
 
 
 if __name__ == "__main__":
