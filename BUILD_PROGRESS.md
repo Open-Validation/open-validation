@@ -18,20 +18,19 @@ Working branch: `ccr-f743743a-pji9c0` (the session's designated branch, used ins
   - [x] Checkpoint 1 approved: branch OK; national parks use short codes (BROADS, DNPA, ... YDNPA)
     instead of MHCLG's Wikidata ids (ids kept in lpa_match.csv `organisation`)
   - [x] Licence: MIT code + CC BY 4.0 data (confirmed); build_lpas.py kept as a separate script
-- [ ] **B. Fill in every council's requirements** (`build_from_workbook.py`)
+- [x] **B. Fill in every council's requirements** (`build_from_workbook.py`)
   - How it works: workbook rows -> requirement files; each council's audit (prose) is turned into
     `scripts/audit_corrections/<CODE>.yaml` (format: that folder's README), which the build applies.
     `python scripts/audit_extract.py <CODE>` prints everything needed to write one;
     `build_from_workbook.py --lpa <CODE> --validate` checks it without writing anything.
-  - [x] Camden written by hand (the worked example)
-  - [x] London (34) and South East (72) corrections written (12 parallel helpers, brief in the
-    session scratchpad), synonym fields merged, built: 106 councils, 2669 files, check passes
-  - [ ] Checkpoint 2: Camden + London + South East (shown to the user; waiting for OK)
-  - [ ] Remaining regions: East Midlands, East of England, North East, North West,
-    South West, West Midlands, Yorkshire and the Humber (222 councils), same method
-  - Open questions for the user: GLA row is really OPDC (rename folder?); helpers added the
-    national major-development branch to some local design-and-access-statement rules;
-    requirements with no trigger show as "Check" in the explorer
+  - Camden written by hand (the worked example); the other 327 by parallel helpers (32 batches)
+    following briefs in the session scratchpad; synonym fields merged after round 1.
+  - Built one region per commit. Result: 328 councils, 7971 requirement files (4273 medium,
+    3698 low), 316 covered, 12 not covered, 4694 unmapped local items; check.py passes.
+  - Checkpoint 2 approved (user asked to do all remaining regions with 20 helpers).
+  - Open questions for the user (defaults kept): GLA row is really OPDC; some local
+    design-and-access-statement rules repeat the national major-development branch;
+    Central Lincolnshire: one audit says 2026 lists adopted 24 Aug 2026, two say 2024 still in force.
 - [ ] **C. Map data** (blocked: ONS boundary download needs the user; see README)
    (`build_map.py`, `docs/map/uk-lpa.geojson`)
 - [ ] **D. Explorer tool** (`docs/index.html`; done so far: `evaluate.test.html` 26/26, `STYLE.md`, issue forms)
