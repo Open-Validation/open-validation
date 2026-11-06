@@ -2,34 +2,115 @@ reference: design-and-access-statement
 local-authority: CON
 required-if:
   any:
-  - ref: major-development
-  - application-type:
-      in:
-      - lbc
   - all:
+    - application-type:
+        in:
+        - full
+        - outline
+        - reserved-matters
+        - technical-details-consent
+    - ref: major-development
+    - condition:
+        field: building-works
+        value: true
+        description: Not a change of use with no building works, not engineering or mining operations
+          and not waste development.
+  - all:
+    - application-type:
+        in:
+        - hh
+        - full
+        - outline
+        - reserved-matters
+        - technical-details-consent
     - site:
         in:
         - world-heritage-site
         - conservation-area
-        description: The site is in a World Heritage Site or a Conservation Area.
+        description: Within the World Heritage Site or a conservation area.
     - any:
       - condition:
           field: floorspace
           operator: '>='
           value: 100
-          description: The development creates 100 square metres or more of floor space.
+          description: Creating 100 sq m or more of floor space.
       - condition:
           field: dwelling-count
-          operator: '>='
+          operator: '>'
           value: 1
-          description: The development creates one or more dwellings.
+          description: Creating more than one dwelling (full applications).
+  - application-type:
+      in:
+      - lbc
+  - all:
+    - application-type:
+        in:
+        - full
+        - outline
+        - reserved-matters
+        - technical-details-consent
+    - condition:
+        field: dwelling-count
+        operator: '>='
+        value: 1
+        description: One or more dwelling houses (local Design Statement, which can be within the Design
+          and Access Statement).
 source-url: https://www.cornwall.gov.uk/media/wadiaqe0/validation-guide-17-web.pdf
-source-text: 'Design and Access Statement NR When required: Developments within World Heritage Site (WHS)
-  or Conservation Area (CA) creating 100sqm or more floor space.'
-confidence: low
-notes: 'Audit (wrong_trigger): the workbook gave only the WHS/Conservation Area 100sqm case and left out
-  major development, 1+ dwellings in designated areas and listed building consent. Audit (other): a ''Validation
-  Guide 2026 DRAFT'' was consulted on in July-August 2026 and is being finalised; recheck once it is adopted.
-  The audit couldn''t read this council''s list, so its contents weren''t checked.'
+policy: Town and Country Planning (Development Management Procedure) (England) Order 2015; National Planning
+  Policy Framework section 12; Cornwall Design Guide
+source-text: Developments within World Heritage Site (WHS) or Conservation Area (CA) creating 100sqm or
+  more floor space or more than one dwelling. ... Required for all major developments except change of
+  use of building or land where no building works for physical alterations are proposed; engineering or
+  mining operations; waste developments. ... Required for all Listed Building Consents. ... Applications
+  for one or more dwelling houses.
+must-include:
+- item: 'Design: design principles and concepts; amount, layout, scale, landscaping and appearance; awareness
+    of the context and how it has influenced the proposal'
+  level: should
+- item: 'For a listed building: how the historic character and setting have been considered in the design'
+  level: should
+  required-if:
+    site:
+      in:
+      - listed-building
+      description: The proposal relates to a listed building.
+- item: 'Access: how users will have easy and equal access, including emergency vehicle access where relevant'
+  level: should
+- item: 'For 10 or more dwellings: the means of access to the accessible homes, sufficient to meet the
+    needs of occupiers with differing needs'
+  level: should
+  required-if:
+    condition:
+      field: dwelling-count
+      operator: '>='
+      value: 10
+      description: 10 or more dwellings.
+  source-text: If the development relates to 10 or more dwellings, the statement should include the means
+    of access to the accessible homes, sufficient to meet the needs of occupiers with differing needs.
+- item: 'Design Statement for dwellings: proportionate, referring to the Cornwall Design Guide, NPPF section
+    12 and any designated areas, and considering the sustainability of the development'
+  level: should
+  required-if:
+    condition:
+      field: dwelling-count
+      operator: '>='
+      value: 1
+      description: One or more dwelling houses.
+  source-text: Reference should be made to the Cornwall Design Guide and NPPF section 12 – Achieving well-designed
+    places, any designated areas and consideration should be given to the sustainability of the development.
+- item: One joint statement where listed building consent and planning permission are both needed
+  level: must
+  required-if:
+    application-type:
+      in:
+      - lbc
+  source-text: Submission of one joint statement when submitting a Listed Building application where planning
+    permission is also required.
+confidence: medium
+notes: 'From the council''s list (adopted, version 1.7 of 10 April 2024), pages 18, 59, 78, 114, 134,
+  237. Householder: only in the WHS or a conservation area creating 100 sq m or more of floor space (page
+  18). The local ''Design Statement'' (LR, one or more dwelling houses, pages 78 and 134) has no id of
+  its own; the list says it ''can be provided within the Design and Access Statement'', so it is folded
+  in here.'
 review-status: unverified
 field-status: {}
