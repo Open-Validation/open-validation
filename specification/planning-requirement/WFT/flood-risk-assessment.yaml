@@ -5,21 +5,96 @@ required-if:
   - site:
       in:
       - flood-risk-zone
-      description: The site is in Flood Zone 2 or 3.
+      description: In Flood Zone 2 or 3, including minor development or change of use.
+  - any:
+    - condition:
+        field: site-area-residential
+        operator: '>'
+        value: 1
+        description: Site area of more than 1 hectare (Flood Zone 1).
+    - condition:
+        field: site-area-non-residential
+        operator: '>'
+        value: 1
+        description: Site area of more than 1 hectare (Flood Zone 1).
+  - all:
+    - condition:
+        field: involves-change-of-use
+        value: true
+        description: A change to a more vulnerable use (e.g. commercial to residential).
+    - any:
+      - site:
+          in:
+          - surface-water-flood-risk
+          description: Could be affected by surface water flooding.
+      - discretionary
   - site:
       in:
       - critical-drainage-area
-      description: The site is in a critical drainage area.
+      description: Within an area of critical drainage identified by the Environment Agency.
   - all:
     - condition:
         field: basement
         value: true
-        description: The proposal includes a basement.
-    - discretionary
+        description: Includes basements or underground structures.
+    - site:
+        in:
+        - groundwater-flood-risk
+        description: In a groundwater flood risk area.
+  - site:
+      in:
+      - surface-water-flood-risk
+      description: An area of medium or high flood risk in the latest National Flood Risk Assessment (NaFRA)
+        or borough-wide modelling updates.
 source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
+source-text: 'Developments: In Flood Zone 2 or 3 including minor development or change of use Site area
+  of more than 1 Ha in Flood Zone 1 Site area of less than 1 hectare in Flood Zone 1, involving a change
+  to a more vulnerable use (e.g. commercial to residential), and could be affected by other flood sources
+  (e.g. surface water, ... reservoirs) Within an area of critical drainage as identified by the Environment
+  Agency Proposals including basements or underground structures in groundwater flood risk areas Sites
+  in an area of medium or high flood risk based on the latest National Flood Risk Assessment (NaFRA) or
+  boroughwide modelling updates'
+must-include:
+- item: Undertaken by a suitably qualified specialist
+  level: must
+- item: The sources of flooding and the risks to and from the development, how they will be managed and
+    mitigated, taking climate change into account
+  level: must
+- item: Opportunities to reduce the probability and consequences of flooding
+  level: must
+- item: The design of surface water management systems, including SuDS
+  level: must
+- item: Mitigation incorporated into the plans (e.g. finished floor levels, living roofs)
+  level: must
+- item: A Flood Evacuation Management Plan where a safe and dry means of escape cannot be provided
+  level: must
+  required-if: discretionary
+- item: 'Minor extensions under 250 sq m in Flood Zone 2 or 3 (and householder extensions): a flood map
+    with the site identified, and a statement that floor levels are no lower than existing with flood
+    proofing (with supporting details), or that floor levels are 300 mm above the 1% river / 0.5% sea
+    flood level (with a plan of finished floor levels relative to Ordnance Datum)'
+  level: must
+  required-if:
+    all:
+    - site:
+        in:
+        - flood-risk-zone
+        description: Flood Zone 2 or 3.
+    - any:
+      - application-type:
+          in:
+          - hh
+      - condition:
+          field: minor-development
+          value: true
+          description: Minor (non-major) development.
+  source-text: Development in Flood Zone 2 or 3 including minor development which relates to extensions
+    with a footprint less than 250sq.m.
 confidence: medium
-notes: 'Audit (wrong_trigger): the workbook''s excerpts were fragments. From the audit: Flood Zones 2/3,
-  critical drainage areas, and basements in groundwater flood risk areas (shown as basement plus officer
-  discretion).'
+notes: From the council's list (published 26 November 2025, enforced from 1 January 2026), page 26-27.
+  Whether a site 'could be affected by other flood sources' and whether safe escape is possible are judgements,
+  so discretionary. The flood-map-plus-statement route for small extensions is in the main list (page
+  27) and the householder checklist (page 12, https://www.walthamforest.gov.uk/sites/default/files/2025-12/Householder-%20Applications%20Checklist-V1-2025.pdf).
+  Also in the listed building consent checklist.
 review-status: unverified
 field-status: {}
