@@ -1,16 +1,117 @@
 reference: flood-risk-assessment
 local-authority: CAS
 required-if:
-  site:
-    in:
-    - flood-risk-zone
-    description: The site is in flood zone 2 or 3.
+  any:
+  - all:
+    - application-type:
+        in:
+        - hh
+    - site:
+        in:
+        - flood-risk-zone
+        description: Development situated in flood zone 2 or 3.
+  - all:
+    - application-type:
+        in:
+        - full
+        - technical-details-consent
+        - outline
+    - any:
+      - site:
+          in:
+          - flood-risk-zone
+          description: Within flood zone 2 or 3.
+      - site:
+          in:
+          - surface-water-flood-risk
+          description: At risk of surface water flooding.
+      - condition:
+          field: site-area-residential
+          operator: '>'
+          value: 1
+          description: More than 1 hectare in flood zone 1.
+      - condition:
+          field: site-area-non-residential
+          operator: '>'
+          value: 1
+          description: More than 1 hectare in flood zone 1.
+      - condition:
+          field: more-vulnerable-use-change
+          value: true
+          description: Less than 1 ha in flood zone 1, including a change of use to a more vulnerable
+            class, where it could be affected by flooding from any other source.
+      - condition:
+          field: near-watercourse
+          value: true
+          description: Within 20 metres of any watercourse.
+      - condition:
+          field: near-flood-defence
+          value: true
+          description: Adjacent to or including any flood bank or other flood control structure.
+  - all:
+    - ref: major-development
+    - any:
+      - site:
+          in:
+          - flood-risk-zone
+          description: Within flood zone 2 or 3.
+      - site:
+          in:
+          - surface-water-flood-risk
+          description: At risk of surface water flooding.
+      - condition:
+          field: site-area-residential
+          operator: '>'
+          value: 1
+          description: More than 1 hectare in flood zone 1.
+      - condition:
+          field: site-area-non-residential
+          operator: '>'
+          value: 1
+          description: More than 1 hectare in flood zone 1.
+      - condition:
+          field: more-vulnerable-use-change
+          value: true
+          description: Less than 1 ha in flood zone 1, including a change of use to a more vulnerable
+            class, where it could be affected by flooding from any other source.
+      - condition:
+          field: near-watercourse
+          value: true
+          description: Within 20 metres of any watercourse.
+      - condition:
+          field: near-flood-defence
+          value: true
+          description: Adjacent to or including any flood bank or other flood control structure.
 source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
-source-text: ▪ ▪ ▪ Flood Risk Assessment The level of detail will depend on what flood zone the site is
-  in, and the nature of the development.
-confidence: low
-notes: 'The workbook guessed the application type (''INFERRED''), so no type is given. The excerpt does
-  not give the trigger. From the audit: the Householder section asks for a Flood Risk Worksheet in flood
-  zones 2 and 3 (listed as unmapped) and a Flood Zone 3 assessment. The full and major triggers need checking.'
+source-text: Flood Risk Worksheet development situated in Flood Zone 2 or 3 ... demonstrate that floor
+  levels are either no lower than existing floor levels or 300mm above the estimated flood level. ...
+  Flood Risk Assessment within flood zones 2 / 3 or at risk of surface water; more than 1 hectare (ha)
+  in flood zone 1; less than 1 ha in flood zone 1, which includes a change of use in development type
+  to a more vulnerable class, where they could be affected by flooding from any other source; within 20
+  metres of any watercourse; adjacent to or including, any flood bank or other flood control structure
+  (link for more info)
+must-include:
+- item: 'Flood zone 3 (householder): shows that floor levels are either no lower than existing floor levels
+    or 300mm above the estimated flood level'
+  level: must
+  required-if:
+    all:
+    - application-type:
+        in:
+        - hh
+    - site:
+        in:
+        - flood-risk-zone
+        description: Flood zone 3.
+- item: Level of detail depends on the flood zone and the nature of the development; for larger or more
+    vulnerable developments likely to be produced by a specialist flood risk consultant
+  level: should
+  required-if:
+    ref: major-development
+confidence: medium
+notes: 'From the council''s list (published 11 May 2026), page 9, 17, 21. Householder: ''Flood Risk Worksheet''
+  in flood zone 2 or 3 and ''Flood Zone 3 Assessment'' (both under ''may be required where it would be
+  relevant''). Full and outline (''Other documents'') and major (''Documents required'') give the same
+  triggers. near-flood-defence is a new field (see CAS-new-fields.csv).'
 review-status: unverified
 field-status: {}
