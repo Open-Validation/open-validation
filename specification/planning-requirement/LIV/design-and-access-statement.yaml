@@ -2,29 +2,97 @@ reference: design-and-access-statement
 local-authority: LIV
 required-if:
   any:
-  - ref: major-development
-  - application-type:
-      in:
-      - lbc
+  - all:
+    - application-type:
+        in:
+        - full
+        - outline
+    - any:
+      - condition:
+          field: floorspace
+          operator: '>='
+          value: 1000
+          description: 1,000 sq m or more of floorspace.
+      - condition:
+          field: dwelling-count
+          operator: '>='
+          value: 10
+          description: 10 or more new dwellings.
+      - condition:
+          field: student-units
+          operator: '>='
+          value: 10
+          description: 10 or more student units.
+  - condition:
+      field: tall-building
+      value: true
+      description: The application involves a tall building.
   - all:
     - site:
         in:
         - conservation-area
-        - world-heritage-site
-        description: The property is in a Designated Area.
-    - condition:
-        field: floorspace
-        operator: '>'
-        value: 100
-        description: The floor area to be created would exceed 100 sqm.
-source-url: https://liverpool.gov.uk/media/mcel4e4y/household-planning-permission.pdf
-source-text: Design and Access Statement Required for all householder planning applications relating to
-  properties in a Designated Area for the provision of a building or buildings where the floor area to
-  be created would exceed 100 sqm.
-confidence: low
-notes: 'Audit (wrong_trigger, wrong_document): the current list''s row carried the item 8 BNG text. The
-  triggers here are from the 2013 householder, outline and listed building checklists (majors under the
-  2010/2012 Order, listed building consent, Designated Areas over 100 sqm). The audit couldn''t read this
-  council''s list, so its contents weren''t checked.'
+        description: In a conservation area.
+    - any:
+      - condition:
+          field: dwelling-count
+          operator: '>='
+          value: 1
+          description: One or more dwellings.
+      - condition:
+          field: floorspace
+          operator: '>='
+          value: 100
+          description: A building or buildings creating 100 sq m or more of floorspace.
+  - application-type:
+      in:
+      - lbc
+source-url: https://liverpool.gov.uk/media/yrwlyaiw/validation-checklist-oct-25.pdf
+policy: Town and Country Planning (Development Management Procedure) (England) Order 2015; Tall Buildings
+  SPD
+source-text: Development proposing 1000sq.m. of floorspace and 10 or more new dwellings, or 10 or more
+  student units (outline and full). Applications that involve a tall building. In a conservation area,
+  for one or more dwellings, or a building or buildings where the floor space created by development is
+  100sq.m. or more. Applications for Listed Building Consent.
+must-include:
+- item: A description of the existing property or site (key features, character, age, previous alterations)
+  level: should
+- item: The steps taken to appraise the context and how local context has influenced the design
+  level: should
+- item: The design principles and concepts behind the proposal
+  level: should
+- item: All options considered in the evolution of the scheme, with why other options were discounted
+  level: should
+- item: The intended use, and the appearance, layout and scale (materials and styles, arrangement of properties
+    and spaces, height, width and length)
+  level: should
+- item: How public/private spaces will be landscaped
+  level: should
+- item: Details of access, including vehicular and disabled access to buildings, spaces and public transport,
+    and how specific uses affecting access have been addressed
+  level: should
+- item: Explanation of applicable policies
+  level: should
+- item: 'Works to a listed building: how its historical and architectural importance, physical features
+    and setting have been considered'
+  level: should
+  required-if:
+    application-type:
+      in:
+      - lbc
+- item: 'Tall building: a Tall Building Statement evaluating the benefits and justification for a tall
+    building on the site against the principles and design criteria'
+  level: must
+  required-if:
+    condition:
+      field: tall-building
+      value: true
+      description: The application involves a tall building.
+- item: Supported by photographs, maps and drawings illustrating the points made
+  level: should
+confidence: medium
+notes: From the council's list (published 24 October 2025), page 15-16. The list writes the size trigger
+  as 'Development proposing 1000sq.m. of floorspace and 10 or more new dwellings, or 10 or more student
+  units'; it is read as alternatives (the major-development thresholds), as the list itself sets them
+  out with 'or' in its façade and materials rows.
 review-status: unverified
 field-status: {}
