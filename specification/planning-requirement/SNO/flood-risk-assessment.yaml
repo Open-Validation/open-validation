@@ -1,22 +1,115 @@
 reference: flood-risk-assessment
 local-authority: SNO
 required-if:
-  site:
-    in:
-    - flood-risk-zone
-    description: The site is within an area at risk of flooding.
-source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-householder.pdf
-source-text: Flood risk assessment and drainage strategy If the site is within an area at risk of flooding
-  a Flood Risk Assessment (FRA) will be required to demonstrate how flood risk from all sources of flooding
-  to the development itself and flood risk to others will be managed now and in the future, taking climate
-  change into account
+  any:
+  - all:
+    - application-type:
+        in:
+        - change-of-use
+        - full
+        - outline
+        - s73
+        - reserved-matters
+    - any:
+      - all:
+        - condition:
+            field: operational-development
+            value: true
+            description: The proposal is operational development.
+        - any:
+          - condition:
+              field: site-area-residential
+              operator: '>'
+              value: 1
+              description: Site over 1 hectare.
+          - condition:
+              field: site-area-non-residential
+              operator: '>'
+              value: 1
+              description: Site over 1 hectare.
+      - all:
+        - condition:
+            field: operational-development
+            value: true
+            description: The proposal is operational development.
+        - site:
+            in:
+            - flood-risk-zone
+            description: The site is in flood zone 2 or 3.
+      - all:
+        - condition:
+            field: more-vulnerable-use-change
+            value: true
+            description: A change of use to 'highly vulnerable' or 'more vulnerable' development (NPPF
+              Technical Guide).
+        - site:
+            in:
+            - flood-risk-zone
+            description: The site is in flood zone 2 or 3.
+      - condition:
+          field: near-watercourse
+          value: true
+          description: Development within 20m of the top of a bank of a main river.
+      - condition:
+          field: watercourse-culverting
+          value: true
+          description: The culverting of, or control of the flow of, any river or stream.
+      - discretionary
+  - all:
+    - application-type:
+        in:
+        - hh
+    - site:
+        in:
+        - flood-risk-zone
+        description: The site is within an area at risk of flooding.
+source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+source-text: 'All operational development over 1 hectare. • All operational development within flood zones
+  2 or 3. • Change of use resulting in development which is defined as ‘highly vulnerable,’ or ‘more vulnerable’
+  in NPPF Technical Guide unless in Flood Risk Zone 1. • Any development within 20m of the top of a bank
+  of a main river. • The culverting of or control of the flow of any river or stream. … A FRA may be required
+  for: • Other changes of use. • Non-residential extensions. … If the site is within an area at risk of
+  flooding a Flood Risk Assessment (FRA) will be required'
 must-include:
-- item: How flood risk from all sources to the development itself, and to others, will be managed now
-    and in the future, taking climate change into account
+- item: How flood risk from all sources to the development itself, and flood risk to others, will be managed
+    now and in the future, taking climate change into account
   level: must
+- item: Flood evacuation and response management plans
+  level: should
+  required-if:
+    application-type:
+      in:
+      - change-of-use
+      - full
+      - outline
+      - s73
+      - reserved-matters
+- item: Porosity test
+  level: should
+  required-if:
+    all:
+    - application-type:
+        in:
+        - hh
+    - any:
+      - condition:
+          field: soakaways-proposed
+          value: true
+          description: The proposal involves soakaways.
+      - condition:
+          field: hard-surfacing
+          value: true
+          description: An area of hard surfacing is proposed.
+    - discretionary
+  source-text: A porosity test may be required for any proposal involving soakaways or where an area of
+    hard surfacing is being proposed.
 confidence: medium
-notes: 'The Full planning excerpt gave no trigger; the householder list''s trigger is used for all types.
-  Householder rows were missing for South Norfolk (audit missing_requirement): the householder list is
-  shared with Broadland.'
+notes: From the council's list (published January 2025), page 20-21. Householder wording from the Householder
+  Local Validation List (https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-householder.pdf),
+  page 5. 'A FRA may be required for other changes of use and non-residential extensions' shows as discretionary.
+  A change of use to 'highly vulnerable' or 'more vulnerable' needs an FRA 'unless in Flood Risk Zone
+  1'. The matrix (pages 9-12) marks it '?' ('may be needed') for these application types; it is shown
+  for them only when the trigger applies. The list is shared by Broadland District Council and South Norfolk
+  Council (same file for both).
 review-status: unverified
 field-status: {}

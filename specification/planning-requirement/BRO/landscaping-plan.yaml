@@ -1,13 +1,113 @@
 reference: landscaping-plan
 local-authority: BRO
-required-if: discretionary
+required-if:
+  all:
+  - application-type:
+      in:
+      - change-of-use
+      - full
+      - outline
+      - s73
+      - reserved-matters
+  - any:
+    - condition:
+        field: eia-development
+        value: true
+        description: An Environmental Impact Assessment is required.
+    - all:
+      - condition:
+          field: telecommunications-development
+          value: true
+          description: A telecommunications mast.
+      - condition:
+          field: building-height
+          operator: '>'
+          value: 20
+          description: Above 20m in height.
+      - site:
+          in:
+          - rural-area
+          description: In the countryside.
+    - any:
+      - all:
+        - site:
+            in:
+            - conservation-area
+            - site-of-special-scientific-interest
+            description: The site is in a conservation area or a site of special scientific interest.
+        - any:
+          - condition:
+              field: dwelling-count
+              operator: '>='
+              value: 1
+              description: New dwellings.
+          - condition:
+              field: floorspace
+              operator: '>'
+              value: 100
+              description: New buildings bigger than 100 sq m.
+      - site:
+          in:
+          - listed-building
+          - listed-building-setting
+          description: The proposal affects a listed building.
+      - ref: major-development
+    - all:
+      - application-type:
+          in:
+          - outline
+      - condition:
+          field: landscaping-reserved-matter
+          value: false
+          description: Landscaping is not a reserved matter.
+    - all:
+      - application-type:
+          in:
+          - reserved-matters
+      - condition:
+          field: landscaping-reserved-matter
+          value: true
+          description: Landscaping is a reserved matter.
+    - site:
+        in:
+        - rural-area
+        description: Development proposed in open countryside.
+    - condition:
+        field: new-settlement-edge
+        value: true
+        description: Development forming a new settlement edge.
+    - discretionary
 source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
-source-text: of the landscape proposals and where necessary screened to offset their appearance When is
-  it needed ? All applications which are likely to have a significant impact on landscape character and
-  will incur visual impact;
+source-text: All applications which are likely to have a significant impact on landscape character and
+  will incur visual impact. • All applications where an Environmental Impact Assessment is required. •
+  All Telecommunications masts above 20m in height in the countryside. … On all Planning Applications
+  with a Design and Access Statement. • On all Outline Planning Applications where Landscaping is not
+  a reserved matter. • On all Reserved Matters Applications where Landscaping is a reserved matter. •
+  Development proposed in open countryside. • Development forming a new settlement edge.
+must-include:
+- item: Existing trees, habitats or other features to be retained
+  level: should
+- item: New hard and soft landscaping, with the location of proposed soft planting, hard surfaces and
+    boundary treatments, on a plan of the proposed site layout
+  level: must
+- item: Existing and proposed means of enclosure (walls, fencing), refuse storage areas and cycle stores,
+    screened where necessary
+  level: should
+- item: Short statement on future management and maintenance of soft landscaping
+  level: must
+- item: How the soft landscaping strategy meets Biodiversity Net Gain requirements and management objectives
+  level: should
+  required-if:
+    condition:
+      field: biodiversity-gain-condition
+      value: true
+      description: The development is subject to the biodiversity gain condition.
 confidence: medium
-notes: The workbook guessed the application type ('INFERRED'), so no type is given. Needed for applications
-  likely to have a significant impact on landscape character (wording from the joint list as captured
-  for South Norfolk).
+notes: From the council's list (published January 2025), page 23-24. Combines the list's Landscape Statement
+  and Landscape Details. 'Planning applications with a Design and Access Statement' uses the list's design
+  and access statement triggers (page 8). A significant impact on landscape character is a matter of judgement,
+  so that part shows as discretionary. The matrix (pages 9-12) marks it '?' ('may be needed') for these
+  application types; it is shown for them only when the trigger applies. The list is shared by Broadland
+  District Council and South Norfolk Council (same file for both).
 review-status: unverified
 field-status: {}
