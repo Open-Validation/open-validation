@@ -2,23 +2,68 @@ reference: flood-risk-assessment
 local-authority: SHR
 required-if:
   any:
-  - site:
-      in:
-      - flood-risk-zone
-      description: The site is in Flood Zone 2 or 3 (including minor development).
-  - condition:
-      field: site-area-residential
-      operator: '>'
-      value: 1
-      description: The site is over 1 hectare in Flood Zone 1.
-  - condition:
-      field: site-area-non-residential
-      operator: '>'
-      value: 1
-      description: The site is over 1 hectare in Flood Zone 1.
+  - all:
+    - application-type:
+        in:
+        - cho-agri-to-dwh
+        - cho-commercial-to-dwh
+        - cho-commercial-to-mixed
+        - cho-sui-to-dwh
+        - cho-agri-to-flexcom
+        - cho-agri-to-school
+        - cho-comm-to-school
+        - cho-amusements-to-dwh
+    - site:
+        in:
+        - flood-risk-zone
+        description: Prior approval change of use in a flood zone ('if relevant').
+  - all:
+    - application-type:
+        in:
+        - full
+        - outline
+        - reserved-matters
+        - demolition-con-area
+        - mineral-extraction
+    - any:
+      - site:
+          in:
+          - flood-risk-zone
+          description: Flood zone 2 or 3, including minor development.
+      - condition:
+          field: site-area-residential
+          operator: '>'
+          value: 1
+          description: More than 1 hectare in flood zone 1.
+      - condition:
+          field: site-area-non-residential
+          operator: '>'
+          value: 1
+          description: More than 1 hectare in flood zone 1.
+      - condition:
+          field: more-vulnerable-use-change
+          value: true
+          description: Under 1 ha in flood zone 1, a change to a more vulnerable use that could be affected
+            by other sources of flooding.
+      - site:
+          in:
+          - critical-drainage-area
+          description: Flood zone 1 with critical drainage problems notified by the Environment Agency.
+    - discretionary
 source-url: https://next.shropshire.gov.uk/media/xsnj0cye/validation-checklist-2022.pdf
+policy: Core Strategy CS6, CS18; SAMDev MD2
+source-text: 'You need to do a Flood Risk Assessment (FRA) for most developments if within one of the
+  flood zones. This includes developments : - in flood zone 2 or 3 including minor development - more
+  than 1 hectare (ha) in flood zone 1 - less than 1 ha in flood zone 1, including a change of use in development
+  type to a more vulnerable class (for example from commercial to residential), where they could be affected
+  by sources of flooding other than rivers and the sea (for example surface water drains, reservoirs)
+  - in an area within flood zone 1 which has critical drainage problems as notified by the Environment
+  Agency'
 confidence: medium
-notes: 'Audit (wrong_trigger): the excerpt was boilerplate. The drainage note requires an FRA ''in flood
-  zone 2 or 3 including minor development'' or over 1 ha in Flood Zone 1.'
+notes: 'From the council''s list (2022), page 67. Listed in checklists 4-9, 19 and 22 (local) and 24 (national,
+  ''if relevant''). Local requirement: the list (page 5) validates applications without formal pre-application
+  advice on the national requirements only, and asks for local documents at validation only where the
+  pre-application response listed them (otherwise the officer may ask during determination), so the rule
+  ends with ''discretionary''.'
 review-status: unverified
 field-status: {}
