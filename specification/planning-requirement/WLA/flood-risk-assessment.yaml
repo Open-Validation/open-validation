@@ -1,10 +1,95 @@
 reference: flood-risk-assessment
 local-authority: WLA
-source-url: https://www.westlancs.gov.uk/media/545649/validation-criteria-update-july-2020.pdf
-source-text: FLOOD RISK ASSESSMENT (FRA) When is this required? .
-confidence: low
-notes: 'The workbook guessed the application type (''INFERRED''), so no type is given. Audit (wrong_trigger):
-  the excerpt is empty (''When is this required? .''). The audit couldn''t read this council''s list,
-  so its contents weren''t checked.'
+required-if:
+  any:
+  - condition:
+      field: site-area-residential
+      operator: '>='
+      value: 1
+      description: Sites of 1 hectare or more (Flood Zone 1).
+  - condition:
+      field: site-area-non-residential
+      operator: '>='
+      value: 1
+      description: Sites of 1 hectare or more (Flood Zone 1).
+  - site:
+      in:
+      - critical-drainage-area
+      description: Land identified by the Environment Agency as having critical drainage problems.
+  - site:
+      in:
+      - future-flood-risk
+      description: Land identified in a strategic flood risk assessment as being at increased flood risk
+        in future.
+  - all:
+    - site:
+        in:
+        - surface-water-flood-risk
+        - groundwater-flood-risk
+        description: Land that may be subject to other sources of flooding.
+    - condition:
+        field: more-vulnerable-use-change
+        value: true
+        description: The development would introduce a more vulnerable use.
+  - site:
+      in:
+      - flood-risk-zone
+      description: New development in Flood Zones 2 and 3.
+  - all:
+    - discretionary
+    - condition:
+        field: new-build
+        value: true
+        description: Areas with specific localised flooding issues where the proposal could contribute
+          to flooding.
+  - application-type:
+      in:
+      - cho-agri-to-dwh
+      - cho-commercial-to-dwh
+      - cho-commercial-to-mixed
+      - cho-sui-to-dwh
+      - cho-agri-to-flexcom
+      - cho-agri-to-school
+      - cho-comm-to-school
+      - cho-amusements-to-dwh
+source-url: https://www.westlancs.gov.uk/media/548069/validation-criteria-checklist.pdf
+policy: West Lancashire Local Plan 2012-2027 policy GN3
+source-text: 'In Flood Zone 1, an assessment should accompany all proposals involving: sites of 1 hectare
+  or more; land which has been identified by the Environment Agency as having critical drainage problems;
+  land identified in a strategic flood risk assessment as being at increased flood risk in future; or
+  land that may be subject to other sources of flooding, where its development would introduce a more
+  vulnerable use. All proposals for new development located in Flood Zones 2 and 3 as designated by the
+  Environment Agency Development within areas where there are specific localised flooding issues and where
+  the proposal could contribute to flooding problems within or outside the development site'
+must-include:
+- item: The risks of all forms of flooding to and from the development and how they will be managed, taking
+    climate change into account
+  level: must
+- item: Sequential and exception tests, for development other than minor development (as defined in flood
+    risk guidance)
+  level: must
+  required-if:
+    condition:
+      field: minor-development
+      value: false
+      description: Not 'minor development' in flood risk terms.
+- item: 'Prior approval for change of use: the flooding risks on the site and how they will be mitigated'
+  level: must
+  required-if:
+    application-type:
+      in:
+      - cho-agri-to-dwh
+      - cho-commercial-to-dwh
+      - cho-commercial-to-mixed
+      - cho-sui-to-dwh
+      - cho-agri-to-flexcom
+      - cho-agri-to-school
+      - cho-comm-to-school
+      - cho-amusements-to-dwh
+confidence: medium
+notes: From the council's list (Validation Criteria, December 2024), page 38-39, 95, Part 2 item 10 and
+  the prior notification of change of use checklist. Areas with specific localised flooding issues are
+  not mapped in the list, so that part is discretionary. The list asks that the flood risk assessment
+  is not combined with the drainage statement.
 review-status: unverified
 field-status: {}

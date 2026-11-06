@@ -2,14 +2,19 @@ reference: biodiversity-survey-report
 local-authority: BPL
 required-if:
   any:
+  - condition:
+      field: pond-on-or-near-site
+      value: true
+      description: The site includes or is within 500 m of a pond.
   - site:
       in:
-      - site-of-special-scientific-interest
       - local-wildlife-site
+      - site-of-special-scientific-interest
       - special-protection-area
       - special-area-of-conservation
-      description: The site includes or is within 500m of a pond, Biological Heritage Site, SSSI or habitats
-        site.
+      - ramsar
+      description: The site includes or is within 500 m of a Biological Heritage Site, a Site of Special
+        Scientific Interest or a 'habitats' site (as defined by the NPPF).
   - all:
     - condition:
         field: greenfield-site
@@ -18,15 +23,70 @@ required-if:
     - condition:
         field: trees-on-or-near-site
         value: true
-        description: The site has trees, hedgerows or shrubs.
-  - condition:
+        description: The greenfield site includes trees, hedgerows or shrubs.
+  - all:
+    - condition:
+        field: demolition
+        value: true
+        description: The application involves full or partial demolition of a building.
+    - application-type:
+        in:
+        - full
+        - outline
+        - reserved-matters
+        - lbc
+        - demolition-con-area
+        - pa-demo-building
+        - s73
+source-url: https://www.blackpool.gov.uk/Residents/Planning-environment-and-community/Planning/Planning-applications/Local-validation-checklist.aspx
+source-text: 'Ecologically sensitive locations – if your site includes or is within 500m of a pond, Biological
+  Heritage Site, a Site of Special Scientific Interest, or ‘habitats’ site as defined by the NPPF, or
+  if your site is a greenfield site including trees, hedgerows or shrubs, an appropriate ecological appraisal
+  will be required or confirmation from a suitably qualified and experienced ecologist that no such is
+  needed. … All applications that involve full or partial demolition of a building must be accompanied
+  by: A bat survey or a statement from a suitably qualified and experienced ecologist to confirm that
+  no such survey is required'
+must-include:
+- item: An appropriate ecological appraisal, or confirmation from a suitably qualified and experienced
+    ecologist that none is needed
+  level: must
+  required-if:
+    any:
+    - condition:
+        field: pond-on-or-near-site
+        value: true
+        description: Pond within 500 m.
+    - site:
+        in:
+        - local-wildlife-site
+        - site-of-special-scientific-interest
+        - special-protection-area
+        - special-area-of-conservation
+        - ramsar
+        description: The site includes or is within 500 m of a Biological Heritage Site, a Site of Special
+          Scientific Interest or a 'habitats' site (as defined by the NPPF).
+    - all:
+      - condition:
+          field: greenfield-site
+          value: true
+          description: A greenfield site.
+      - condition:
+          field: trees-on-or-near-site
+          value: true
+          description: With trees, hedgerows or shrubs.
+- item: 'For demolition: a bat survey, or a statement from a suitably qualified and experienced ecologist
+    confirming that no survey is required'
+  level: must
+  required-if:
+    condition:
       field: demolition
       value: true
-      description: The proposal involves demolition (bat survey or ecologist's statement).
-source-url: https://www.blackpool.gov.uk/Residents/Planning-environment-and-community/Planning/Planning-applications/Local-validation-checklist.aspx
+      description: Full or partial demolition of a building.
 confidence: medium
-notes: 'From the audit (missing_requirement): in ecologically sensitive locations, an ecological appraisal
-  or an ecologist''s confirmation; for proposals involving demolition, a bat survey or ecologist statement.
-  Ponds have no designation id, so they are named in the description.'
+notes: 'From the council''s list (Local validation checklist web page, last modified 17 October 2025),
+  page 1, ''By area: Ecologically sensitive locations; Proposals involving demolition''. The demolition
+  requirement ''does not apply to householder schemes'' (the information may still be needed before a
+  decision), so householder applications are left out of that part. The 500 m distance is given in each
+  condition''s description.'
 review-status: unverified
 field-status: {}
