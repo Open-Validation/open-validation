@@ -1,10 +1,101 @@
 reference: air-quality-assessment
 local-authority: NEC
+required-if:
+  any:
+  - all:
+    - ref: major-development
+    - any:
+      - condition:
+          field: dwelling-count
+          operator: '>='
+          value: 1
+          description: Dwellings.
+      - condition:
+          field: use-class
+          value: B2, B8
+          description: General industry, storage or warehousing.
+  - condition:
+      field: floorspace
+      operator: '>'
+      value: 10000
+      description: More than 10,000 sq m of new floor space.
+  - all:
+    - condition:
+        field: parking-spaces
+        operator: '>'
+        value: 300
+        description: More than 300 new car parking spaces (not residential parking).
+    - condition:
+        field: dwelling-count
+        operator: ==
+        value: 0
+        description: Not residential development parking.
+  - condition:
+      field: direct-air-emissions
+      value: true
+      description: A standby emergency generator for a centralised energy centre (tested/used over 18
+        hours a year), or new Short Term Operating Reserve (STOR) facilities.
+  - condition:
+      field: combustion-plant-thermal-input
+      operator: '>'
+      value: 1000
+      description: Combustion plant with single or combined thermal input over 1 MW.
+  - all:
+    - site:
+        in:
+        - air-quality-management-area
+        description: Within an Air Quality Management Area, including a 1 km buffer.
+    - any:
+      - condition:
+          field: dwelling-count
+          operator: '>='
+          value: 50
+          description: 50 or more dwellings.
+      - condition:
+          field: parking-spaces
+          operator: '>='
+          value: 50
+          description: 50 or more new car parking spaces.
+      - condition:
+          field: use-class
+          value: lorry park or bus station
+          description: A lorry park with more than 25 spaces, or a bus station.
+      - condition:
+          field: combustion-plant-thermal-input
+          operator: '>'
+          value: 300
+          description: Substantial combustion processes, with plant over 300 kW.
+  - all:
+    - condition:
+        field: agricultural-holding
+        value: true
+        description: Agricultural development.
+    - site:
+        in:
+        - sssi-impact-risk-zone
+        description: Exceeding Natural England's Impact Risk Zones.
 source-url: https://www.newcastle-staffs.gov.uk/downloads/file/1938/draft-list-of-local-validation-requirements-1-october-2023-
-source-text: 'Air Quality Assessment WHAT INFORMATION IS REQUIRED NPPF – paragraphs 8, 105, 174, 185,
-  and 186 and Annex 2: Glossary CSS Policy SP1, SP3 and CSP1.'
-confidence: low
-notes: 'The workbook guessed the application type (''INFERRED''), so no type is given. Audit (wrong_trigger):
-  the workbook quoted only the policy-driver references; the source''s trigger wasn''t captured.'
+policy: NPPF paragraphs 8, 105, 174, 185, 186 and Annex 2; CSS Policies SP1, SP3 and CSP1; Betley, Balterley
+  and Wrinehill Neighbourhood Development Plan Policy BBW1
+source-text: 'All major developments1 involving Dwellings and general Industry/Storage/Warehousing; ...
+  Any development in excess 10,000m2 new floor space (usually largescale major: offices industry and retail/distribution;
+  ... Where >300 new car parking spaces are proposed (e.g. retail, visitor attraction, multi-story car
+  park), excluding residential development car parking space provision; ... Within Air Quality Management
+  Area (AQMA) including a 1 km buffer ... Small-scale Major Dwellings of 50 or more dwellings ; 50 or
+  more new car parking spaces; Lorry park with more than 25 spaces; Bus station;'
+must-include:
+- item: The impacts of the development on environmental receptors and the extent to which mitigation may
+    be required
+  level: must
+- item: A Damage Cost Assessment where there is an increase in emissions associated with the development
+  level: must
+  required-if: discretionary
+confidence: medium
+notes: From the council's list (dated 1 October 2023, still titled 'Draft'), page 2-4. Item 3. The list
+  also names standby generators/STOR, combustion plant over 1 MW (or over 300 kW within the AQMA buffer)
+  and agricultural development exceeding Natural England's Impact Risk Zones. The small-scale criteria
+  (50+ dwellings, 50+ parking spaces, lorry parks, bus stations) are read as applying within the AQMA
+  and 1 km buffer, as the list sets them out under it. 'Major' is defined in the list's footnote as 10+
+  dwellings (or 0.5 ha) or 1,000 sq m (or 1 ha), the national definition.
 review-status: unverified
 field-status: {}
