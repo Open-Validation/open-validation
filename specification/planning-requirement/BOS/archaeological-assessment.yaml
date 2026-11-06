@@ -1,13 +1,165 @@
 reference: archaeological-assessment
 local-authority: BOS
 required-if:
-  site:
-    in:
-    - archaeological-priority-area
-    description: The site is in an area of archaeological interest (the checklist's site tiers).
+  all:
+  - application-type:
+      in:
+      - hh
+      - full
+      - outline
+      - reserved-matters
+  - any:
+    - condition:
+        field: archaeological-tier
+        operator: <=
+        value: 1
+        description: 'Tier 1: Scheduled Monument on or immediately adjacent to the site.'
+    - all:
+      - condition:
+          field: archaeological-tier
+          operator: <=
+          value: 2
+          description: Tier 2 (or Tier 1) site.
+      - any:
+        - ref: major-development
+        - all:
+          - condition:
+              field: minor-development
+              value: true
+              description: Minor development (1-9 dwellings, under 1,000 sq m, or a site under 1 ha).
+          - condition:
+              field: floorspace
+              operator: '>'
+              value: 100
+              description: Minor development with new build or extended floorspace over 100 sq m (otherwise
+                treated as householder).
+    - all:
+      - condition:
+          field: archaeological-tier
+          operator: <=
+          value: 3
+          description: Tier 3 (or higher) site.
+      - ref: major-development
+    - all:
+      - condition:
+          field: archaeological-tier
+          operator: <=
+          value: 4
+          description: Tier 4 (or higher) site.
+      - any:
+        - condition:
+            field: site-area-residential
+            operator: '>'
+            value: 5
+            description: Very large major over 5 ha.
+        - condition:
+            field: site-area-non-residential
+            operator: '>'
+            value: 5
+            description: Very large major over 5 ha.
+    - discretionary
 source-url: https://committees.bolsover.gov.uk/documents/s27228/Appendix+2.pdf
-confidence: low
-notes: 'From the audit (missing_requirement): Archaeological Information, tiered by the site''s tier,
-  with Householder applications at Tier 1. The audit does not say how the tiers are defined.'
+policy: Local Plan for Bolsover District (2020) policies SC18 and SC19
+source-text: When making a planning application you must provide sufficient information to establish the
+  significance of any archaeological remains within your site. … Once you’ve worked out which tier your
+  site is in, check the table below to see whether you need to submit archaeological information with
+  your planning application. … Archaeological potential varies on a case by case basis. The above table
+  is intended as a best-fit guide but may not identify every site where an archaeological input is needed.
+must-include:
+- item: 'Householder, Tier 1: a professional heritage impact assessment (may need evaluation trenching
+    or test pitting where there is a new build element)'
+  level: must
+  required-if:
+    all:
+    - application-type:
+        in:
+        - hh
+    - condition:
+        field: archaeological-tier
+        operator: <=
+        value: 1
+        description: Tier 1 site.
+- item: 'Tier 1 (minor with new or extended floorspace over 100 sq m, major, large major): desk-based
+    assessment (DBA) and field evaluation'
+  level: must
+  required-if:
+    all:
+    - condition:
+        field: archaeological-tier
+        operator: <=
+        value: 1
+        description: Tier 1 site.
+    - any:
+      - ref: major-development
+      - all:
+        - condition:
+            field: minor-development
+            value: true
+            description: Minor development (1-9 dwellings, under 1,000 sq m, or a site under 1 ha).
+        - condition:
+            field: floorspace
+            operator: '>'
+            value: 100
+            description: Minor development with new build or extended floorspace over 100 sq m (otherwise
+              treated as householder).
+- item: 'Tier 2: DBA for minor development (some cases may need evaluation trenching); DBA and field evaluation
+    for major and large major development'
+  level: must
+  required-if:
+    all:
+    - condition:
+        field: archaeological-tier
+        operator: ==
+        value: 2
+        description: Tier 2 site.
+    - any:
+      - ref: major-development
+      - all:
+        - condition:
+            field: minor-development
+            value: true
+            description: Minor development (1-9 dwellings, under 1,000 sq m, or a site under 1 ha).
+        - condition:
+            field: floorspace
+            operator: '>'
+            value: 100
+            description: Minor development with new build or extended floorspace over 100 sq m (otherwise
+              treated as householder).
+- item: 'Tier 3: DBA for major development, with a built heritage appraisal for undesignated buildings;
+    DBA and geophysics for large major development (some cases may need evaluation trenching)'
+  level: must
+  required-if:
+    all:
+    - condition:
+        field: archaeological-tier
+        operator: ==
+        value: 3
+        description: Tier 3 site.
+    - ref: major-development
+- item: 'Tier 4: DBA/geophysics for very large majors over 5 ha'
+  level: must
+  required-if:
+    condition:
+      field: archaeological-tier
+      operator: ==
+      value: 4
+      description: Tier 4 site.
+- item: Prepared by suitably accredited and experienced heritage professionals (CIfA for archaeology,
+    IHBC for historic buildings)
+  level: should
+- item: For sites with built heritage, the DBA includes a built heritage appraisal with internal/external
+    photography, interpretation and a statement of significance
+  level: should
+confidence: medium
+notes: From the council's list (adopted 16 April 2025, in force 1 June 2025), page 14-17. Part 2 item
+  7 (Householder, Minor, Major and Large Scale Major). The council ranks sites in five archaeological
+  tiers (Tier 1 = Scheduled Monument on or next to the site; Tier 2 = known medieval or earlier archaeology,
+  a Scheduled Monument within 100 m, Bolsover Town Area of Archaeological Interest or Clowne, Grade I/II*
+  listed buildings or parks; Tier 3 = post-medieval archaeology, ridge and furrow, other historic settlement
+  cores, Grade II (pre-1700) listed buildings; Tier 4 = undeveloped greenfield; Tier 5 = no potential)
+  and a table says what to submit for each tier and application size. Also shown as 'check' because the
+  list says the table may not identify every site. The list marks each item with the application types
+  it applies to (Householder; Minor, Major and Large Scale Major, shown here as full, outline and reserved
+  matters; 'Other' = changes of use, advertisement consent and listed building consent).
 review-status: unverified
 field-status: {}

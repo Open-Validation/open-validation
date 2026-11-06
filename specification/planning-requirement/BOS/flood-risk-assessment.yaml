@@ -1,25 +1,64 @@
 reference: flood-risk-assessment
 local-authority: BOS
 required-if:
-  any:
-  - site:
+  all:
+  - application-type:
       in:
-      - flood-risk-zone
-      - critical-drainage-area
-      description: The site is in flood zone 2, 3 or 3b, or in a critical drainage area.
-  - condition:
-      field: site-area-residential
-      operator: '>='
-      value: 1
-      description: The site is 1 hectare or more (in flood zone 1).
-  - condition:
-      field: site-area-non-residential
-      operator: '>='
-      value: 1
-      description: The site is 1 hectare or more (in flood zone 1).
+      - hh
+      - full
+      - outline
+      - reserved-matters
+      - change-of-use
+      - advertising
+      - lbc
+  - any:
+    - site:
+        in:
+        - flood-risk-zone
+        description: In flood zones 2, 3 or 3b.
+    - condition:
+        field: site-area-residential
+        operator: '>='
+        value: 1
+        description: Within flood zone 1 with a site area of 1 hectare or more.
+    - condition:
+        field: site-area-non-residential
+        operator: '>='
+        value: 1
+        description: Within flood zone 1 with a site area of 1 hectare or more.
+    - site:
+        in:
+        - critical-drainage-area
+        description: In an area with critical drainage problems.
+    - site:
+        in:
+        - future-flood-risk
+        description: Within flood zone 1 where the SFRA shows increased risk of flooding during its lifetime.
+    - all:
+      - condition:
+          field: more-vulnerable-use-change
+          value: true
+          description: Development that increases the vulnerability classification.
+      - discretionary
 source-url: https://committees.bolsover.gov.uk/documents/s27228/Appendix+2.pdf
+policy: Local Plan for Bolsover District (2020) policy SC7
+source-text: 'A site-specific flood Risk Assessment will be required for all development proposed: … in
+  flood zones 2, 3 or 3b … within flood zone 1 with a site area of 1 hectare or more … in areas with critical
+  drainage problems … within flood zone 1 where the LPA’s strategic flood risk assessment (SFRA) shows
+  it will be at increased risk of flooding during its lifetime … that increases the vulnerability classification
+  and may be subject to sources of flooding other than rivers or sea'
+must-include:
+- item: Where applicable, evidence that the proposal can pass the Sequential Test
+  level: should
+  required-if: discretionary
+  source-text: Where applicable, evidence that a proposal can pass the Sequential Test should be submitted
+    as part of the Flood Risk Assessment.
 confidence: medium
-notes: 'From the audit (missing_requirement): a site-specific FRA in flood zones 2, 3 and 3b, in flood
-  zone 1 on sites of 1ha or more, and in critical drainage areas. Includes Householder.'
+notes: From the council's list (adopted 16 April 2025, in force 1 June 2025), page 12-13. Part 2 item
+  4 (Householder, Minor, Other, Major and Large Scale Major). A change to a more vulnerable use shows
+  as 'check' because it also depends on whether the site 'may be subject to sources of flooding other
+  than rivers or sea'. The list marks each item with the application types it applies to (Householder;
+  Minor, Major and Large Scale Major, shown here as full, outline and reserved matters; 'Other' = changes
+  of use, advertisement consent and listed building consent).
 review-status: unverified
 field-status: {}
