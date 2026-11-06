@@ -1,16 +1,85 @@
 reference: flood-risk-assessment
 local-authority: RUS
 required-if:
-  application-type:
-    in:
-    - full
+  all:
+  - application-type:
+      in:
+      - hh
+      - full
+      - outline
+      - reserved-matters
+      - lbc
+      - s73
+  - any:
+    - site:
+        in:
+        - flood-risk-zone
+        description: In Flood Zone 2 or 3 (including a change of use to a more vulnerable use).
+    - any:
+      - condition:
+          field: site-area-residential
+          operator: '>'
+          value: 1
+          description: Site area greater than 1 hectare.
+      - condition:
+          field: site-area-non-residential
+          operator: '>'
+          value: 1
+          description: Site area greater than 1 hectare.
+    - all:
+      - condition:
+          field: near-watercourse
+          value: true
+          description: Adjacent to a main river.
+      - any:
+        - condition:
+            field: new-build
+            value: true
+            description: New buildings.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: Changes of use.
+        - discretionary
+    - site:
+        in:
+        - critical-drainage-area
+        description: In Flood Zone 1 with critical drainage problems notified by the Environment Agency.
 source-url: https://www.rushcliffe.gov.uk/about-us/about-the-council/policies-strategies-and-other-documents/accessible-documents/local-scheme-of-validation/
-source-text: 'see also Flood Risk Assessment Required for all the below: All major applications Applications
-  adjacent to areas at risk of flooding Developments creating new areas of hardstanding Developments involving
-  the disposal of foul sewage effluent other than to the public sewer Developments involving the disposal
-  of trade waste And must include Details of Sustainable Drainage systems proposed.'
-confidence: low
-notes: The excerpt is the Drainage Assessment / Drainage Strategy trigger ('see also Flood Risk Assessment'),
-  not the FRA's own trigger. The scheme lists an FRA for householder applications too.
+policy: 'Local Plan Part 1: Policy 2; Local Plan Part 2: Policy 1, Policy 17 Managing Flood Risk; NPPF
+  14'
+source-text: 'All applications which fall within any on the below criteria will need to be supported by
+  a Flood Risk Assessment: Every application in Flood Zones 2 and 3 including change of use to a more
+  vulnerable use Any application with a site area greater than 1 Hectare All new buildings, significant
+  extensions and changes of use within the floodplain or adjacent to a main river In an area within flood
+  zone 1 which has critical drainage problems as notified by the Environment Agency'
+must-include:
+- item: Detail proportionate to the scale, nature and location of the development
+  level: should
+- item: Evidence on the Sequential and Exception Tests where relevant
+  level: should
+  required-if:
+    site:
+      in:
+      - flood-risk-zone
+      description: In a flood risk area.
+- item: Mitigation measures protecting the site and managing residual risk (flood resistance/resilience,
+    safe access and escape routes)
+  level: must
+- item: 'Householder in Flood Zone 2 or 3: the Environment Agency Minor Extensions form'
+  level: must
+  required-if:
+    all:
+    - application-type:
+        in:
+        - hh
+    - site:
+        in:
+        - flood-risk-zone
+        description: Flood Zone 2 or 3.
+confidence: medium
+notes: From the council's list (adopted January 2024, revised January 2026), page 12. 'Significant extensions'
+  next to a main river need judgement, so they show as discretionary. Application types are those the
+  scheme's application-type grid lists it for.
 review-status: unverified
 field-status: {}
