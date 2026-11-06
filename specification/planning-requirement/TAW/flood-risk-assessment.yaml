@@ -1,18 +1,65 @@
 reference: flood-risk-assessment
 local-authority: TAW
 required-if:
-  any:
-  - ref: major-development
-  - site:
+  all:
+  - application-type:
+      in:
+      - full
+      - outline
+      - reserved-matters
+  - any:
+    - ref: major-development
+    - condition:
+        field: site-area-residential
+        operator: '>='
+        value: 1
+        description: Site of 1 hectare or more in Flood Zone 1.
+    - condition:
+        field: site-area-non-residential
+        operator: '>='
+        value: 1
+        description: Site of 1 hectare or more in Flood Zone 1.
+    - site:
+        in:
+        - critical-drainage-area
+        description: Site under 1 hectare with critical drainage problems.
+    - condition:
+        field: more-vulnerable-use-change
+        value: true
+        description: Change of use to a more vulnerable class where other sources of flooding (e.g. surface
+          water, drains) can affect it.
+    - all:
+      - site:
+          in:
+          - flood-risk-zone
+          description: In Flood Zone 2 or 3.
+      - condition:
+          field: new-build
+          value: true
+          description: New built development.
+source-url: https://www.tamworth.gov.uk/sites/default/files/planning_docs/Planning-Application-Validation-Checklist.pdf
+policy: Tamworth Local Plan 2006-2031 policy SU4; NPPF part 14
+source-text: 'All Major Developments; All developments in Floodzone 1 when: • The site is 1 hectare or
+  greater; • The site is less than 1 hectare but has critical drainage problems; • The site is less than
+  1 hectare and includes the change of use of development type to a more vulnerable class where they can
+  be affected by sources of flooding other than rivers and sea (e.g. surface ... water, drains); All new
+  built development within Flood Zones 2 and 3.'
+must-include:
+- item: 'In Flood Zones 2 and 3: the flood risk sequential test / exception test as set out in the NPPF
+    and PPG'
+  level: must
+  required-if:
+    site:
       in:
       - flood-risk-zone
-      description: New built development in Flood Zone 2 or 3.
-  - discretionary
-source-url: https://www.tamworth.gov.uk/sites/default/files/planning_docs/Planning-Application-Validation-Checklist.pdf
+      description: In Flood Zone 2 or 3.
+- item: Opportunities to reduce the probability and consequences of flooding
+  level: should
+- item: Design of surface water management systems, including Sustainable Drainage (SuDS)
+  level: should
 confidence: medium
-notes: 'Audit (wrong_trigger): the workbook''s excerpt (''where one is required under the NPPF'') omits
-  the triggers. From the audit: all major development, specified Flood Zone 1 sites (shown as officer
-  discretion) and all new built development in Flood Zones 2/3. The Flood Risk sequential test / exception
-  test is part of this item.'
+notes: From the council's list (published July 2024), page 14-15. Table Two, 2.10 Flood Risk Assessment
+  and Drainage Strategy. Application types follow Table Three, the council's application checklist matrix
+  (https://www.tamworth.gov.uk/sites/default/files/planning_docs/Validation-Checklist.pdf).
 review-status: unverified
 field-status: {}

@@ -1,33 +1,75 @@
 reference: land-contamination-assessment
 local-authority: LDS
 required-if:
-  any:
-  - condition:
-      field: sensitive-end-use
-      value: true
-      description: A vulnerable use, including a single house in a garden.
-  - condition:
-      field: previously-developed-land
-      value: true
-      description: A low-vulnerability use on brownfield land.
-  - site:
+  all:
+  - application-type:
       in:
-      - near-landfill-site
-      description: The site is within 250m of a landfill.
+      - full
+      - outline
+      - reserved-matters
+      - change-of-use
+  - any:
+    - condition:
+        field: sensitive-end-use
+        value: true
+        description: Vulnerable end uses such as allotments, schools, nurseries, or residential development
+          (including a single house in a pre-existing garden).
+    - all:
+      - any:
+        - condition:
+            field: previously-developed-land
+            value: true
+            description: Brownfield land.
+        - site:
+            in:
+            - near-landfill-site
+            description: Within 250m of a landfill site.
+      - discretionary
 source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+policy: Environmental Protection Act 1990
+source-text: 'A single house in a pre-existing garden You must submit: ... Vulnerable end uses such as
+  allotments, schools, nurseries, or residential development You must submit: ... Low vulnerability end
+  uses such as offices, shops and industrial premises You may be required to provide: a Phase 1 Preliminary
+  Risk Assessment (Desk Study Report) if on brownfield land, or within 250m of a Landfill site'
 must-include:
-- item: A Phase 1 report
+- item: 'Single house in a pre-existing garden: a written review of historical maps dating back to 1850
+    as a minimum'
+  level: must
+  required-if:
+    condition:
+      field: dwelling-count
+      operator: ==
+      value: 1
+      description: A single house in a pre-existing garden.
+- item: 'Single house in a pre-existing garden: a statement on whether contamination may have occurred
+    and whether further investigation is needed'
+  level: must
+  required-if:
+    condition:
+      field: dwelling-count
+      operator: ==
+      value: 1
+      description: A single house in a pre-existing garden.
+- item: 'Single house in a pre-existing garden: a landfill search and/or a Phase 1 Preliminary Risk Assessment
+    if asked'
+  level: should
+  required-if:
+    condition:
+      field: dwelling-count
+      operator: ==
+      value: 1
+      description: A single house in a pre-existing garden.
+- item: 'Other vulnerable end uses: a Phase 1 Preliminary Risk Assessment (Desk Study Report)'
   level: must
   required-if:
     condition:
       field: sensitive-end-use
       value: true
-      description: A vulnerable use.
-- item: A historic map review from 1850 (single houses in gardens)
-  level: must
-confidence: low
-notes: 'From the audit (missing_requirement): vulnerable uses need a Phase 1; single houses in gardens
-  need a historic map review from 1850; low-vulnerability uses on brownfield land or within 250m of a
-  landfill. The exact wording needs checking on the page.'
+      description: Allotments, schools, nurseries or residential development.
+confidence: medium
+notes: From the council's list (published as a web page, last modified 9 September 2026), section 'Land
+  contamination'. Low vulnerability uses (offices, shops, industry) 'may be required' to provide a Phase
+  1 report on brownfield land or within 250m of a landfill site, so that part is discretionary. A Phase
+  2 or Phase 3 report may follow after validation.
 review-status: unverified
 field-status: {}

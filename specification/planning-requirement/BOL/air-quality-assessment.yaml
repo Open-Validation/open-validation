@@ -1,9 +1,74 @@
 reference: air-quality-assessment
 local-authority: BOL
-source-url: https://www.bolton.gov.uk/downloads/file/4686/validation-checklist-2023
-source-text: above, an Air Quality Assessment will be required in order for the application to be validated.
-confidence: low
-notes: 'The workbook guessed the application type (''INFERRED''), so no type is given. Audit (wrong_trigger):
-  the excerpt starts ''above, an Air Quality Assessment will be required'', so the criteria were lost.'
+required-if:
+  any:
+  - all:
+    - ref: major-development
+    - any:
+      - condition:
+          field: dwelling-count
+          operator: '>'
+          value: 50
+          description: More than 50 dwellings (including changes of use).
+      - condition:
+          field: floorspace
+          operator: '>'
+          value: 5000
+          description: More than 5,000 square metres of floorspace created.
+  - all:
+    - any:
+      - ref: major-development
+      - condition:
+          field: minor-development
+          value: true
+          description: Minor development (below the major development thresholds).
+    - any:
+      - condition:
+          field: sensitive-end-use
+          value: true
+          description: Residential development or facilities for children (including education and play).
+      - condition:
+          field: dwelling-count
+          operator: '>='
+          value: 1
+          description: Residential development.
+    - site:
+        in:
+        - air-quality-management-area
+        description: Inside or within 50 metres of one of Bolton's Air Quality Management Areas.
+  - all:
+    - ref: major-development
+    - condition:
+        field: use-class
+        value: B2
+        description: Class B2 industrial use.
+  - condition:
+      field: parking-spaces
+      operator: '>'
+      value: 50
+      description: More than 50 car parking spaces.
+  - condition:
+      field: direct-air-emissions
+      value: true
+      description: Development involving combustion, such as power stations, biomass and incineration.
+source-url: https://www.bolton.gov.uk/downloads/file/4686/local-validation-checklist
+policy: Places for Everyone Policy JP-S5 Clean Air
+source-text: • All Major Development of more than 50 dwellings (including changes of use) or that would
+  create more than 5,000 square metres of floorspace • All Major and Minor residential development or
+  facilities for children (including education and play) either inside or within 50 metres of one of Bolton’s
+  Air Quality Management Areas, as defined on the Defra AQMAs Interactive Map • All Major development
+  for Class B2 Industrial Uses • Any development proposing more than 50 car parking spaces • Development
+  involving combustion, such as power stations, biomass and incineration
+must-include:
+- item: Shows that future occupants of the residential development would not be at risk of harm from poor
+    air quality, and how any residual risks would be mitigated
+  level: must
+- item: Shows that the development would not make existing air quality issues worse, and how any residual
+    risks would be mitigated
+  level: must
+confidence: medium
+notes: From the council's list (adopted 5 December 2024), page 27. Not required for house extensions.
+  Development inside or within 50 metres of an AQMA also needs a Transport Statement unless the impact
+  on vehicle movements would be zero.
 review-status: unverified
 field-status: {}

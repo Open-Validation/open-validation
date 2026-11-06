@@ -1,25 +1,86 @@
 reference: flood-risk-assessment
 local-authority: BRD
 required-if:
-  application-type:
-    in:
-    - hh
-source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-flood-risk-assessment-householder/
-source-text: 'A Flood Risk Assessment must be submitted which includes: your site address a description
-  of your development the estimated flood level for your development, taking into account the impacts
-  of climate change over its lifetime details of the finished floor levels details of your flood resistance
-  and resilience plans any supporting plans and drawings any other information the relevant standing advice
-  tells you to include Further information Find out what flood zone you are in : Bradford District S'
+  any:
+  - all:
+    - application-type:
+        in:
+        - hh
+    - site:
+        in:
+        - flood-risk-zone
+        description: In flood zone 2 or 3 (including 3b).
+    - condition:
+        field: floorspace
+        operator: '>'
+        value: 0
+        description: Creates new floor space (external alterations that create no new floor space are
+          excluded).
+  - all:
+    - application-type:
+        in:
+        - full
+        - outline
+        - reserved-matters
+        - s73
+    - site:
+        in:
+        - flood-risk-zone
+        description: In flood zone 2 or 3 (including 3b).
+  - all:
+    - application-type:
+        in:
+        - full
+        - outline
+        - reserved-matters
+        - s73
+    - any:
+      - condition:
+          field: site-area-residential
+          operator: '>='
+          value: 1
+          description: Site of 1 hectare or more (in flood zone 1).
+      - condition:
+          field: site-area-non-residential
+          operator: '>='
+          value: 1
+          description: Site of 1 hectare or more (in flood zone 1).
+source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-flood-risk-assessment/
+policy: Bradford Core Strategy (2017) policy EN7; NPPF chapter 14
+source-text: 'Sites of 1ha or more in Flood Zone 1 Development in flood zones 2 and 3 (including minor
+  extensions with a footprint less than 250 square metres and also changes of use) Non householder developments
+  in high and medium flood extents ... Householder development in flood zones 2, 3 and 3B (including sheds,
+  garages and games rooms etc within the curtilage) Excluding proposals for: External alterations to buildings
+  that create no new floor space'
 must-include:
-- item: The estimated flood level for the development, taking into account the impacts of climate change
-    over its lifetime
+- item: 'Minor non-domestic extensions under 250 sq m in flood zones 2 and 3: a simple assessment following
+    the Environment Agency''s Standing Advice for Minor Developments'
   level: must
-- item: Details of the finished floor levels
+  required-if:
+    all:
+    - application-type:
+        in:
+        - full
+        - outline
+        - reserved-matters
+        - s73
+    - condition:
+        field: footprint-area
+        operator: <
+        value: 250
+        description: A minor non-domestic extension with a footprint under 250 square metres.
+- item: 'Householder: site address, description of the development, estimated flood level allowing for
+    climate change, finished floor levels, flood resistance and resilience plans, supporting plans and
+    drawings'
   level: must
-- item: Details of flood resistance and resilience plans
-  level: must
-confidence: low
-notes: 'Audit (missing_requirement): the workbook has only the householder FRA page; the FRA is also a
-  local requirement on the major checklist. The excerpt lists contents, not the trigger.'
+  required-if:
+    application-type:
+      in:
+      - hh
+confidence: medium
+notes: From the council's list (web pages, last updated 5 October 2026), page 'Local Requirements - Flood
+  Risk Assessment'. Also page 'Flood Risk Assessment (Householder)'. Larger proposals follow the Environment
+  Agency's standing advice for vulnerable developments or its detailed FRA advice; the FRA forms part
+  of any Environmental Statement.
 review-status: unverified
 field-status: {}

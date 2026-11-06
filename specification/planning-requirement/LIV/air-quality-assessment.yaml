@@ -1,24 +1,56 @@
 reference: air-quality-assessment
 local-authority: LIV
 required-if:
-  any:
-  - condition:
-      field: eia-development
-      value: true
-      description: All development requiring an Environmental Impact Assessment.
-  - condition:
-      field: parking-spaces
-      operator: '>'
-      value: 300
-      description: New car parking of more than 300 spaces, or coach/lorry parks.
-  - discretionary
-source-url: https://liverpool.gov.uk/media/03qcrbku/outline-with-all-matters-reserved.pdf
-source-text: Air Quality Assessment for All development requiring an Environmental Impact Assessment All
-  development significantly altering the traffic composition in an area (ie. bus stations, HGV Parks etc),
-  All development include proposals for new car parking (>300 spaces) or coach/lorry parks.
-confidence: low
-notes: 'Audit (wrong_trigger, wrong_document): the current list''s row was a fragment; this trigger is
-  from the 2013 outline checklist. Development significantly altering traffic composition is shown as
-  officer discretion. The audit couldn''t read this council''s list, so its contents weren''t checked.'
+  all:
+  - application-type:
+      in:
+      - approval-condition
+      - reserved-matters
+      - full
+      - outline
+      - s73
+  - any:
+    - any:
+      - condition:
+          field: floorspace
+          operator: '>='
+          value: 1000
+          description: 1,000 sq m or more of floorspace.
+      - condition:
+          field: dwelling-count
+          operator: '>='
+          value: 10
+          description: 10 or more new dwellings.
+      - condition:
+          field: student-units
+          operator: '>='
+          value: 10
+          description: 10 or more student units.
+    - condition:
+        field: tall-building
+        value: true
+        description: The application involves a tall building.
+    - discretionary
+source-url: https://liverpool.gov.uk/media/yrwlyaiw/validation-checklist-oct-25.pdf
+source-text: Development proposing 1000sqm of floorspace and 10 or more new dwellings, or 10 or more student
+  units. Any application that involves a tall building.
+must-include:
+- item: Written in accordance with IAQM/EPUK guidance
+  level: must
+- item: 'Where increased building and/or transport emissions are likely: reduction/mitigation measures
+    set out in a detailed emissions statement'
+  level: should
+- item: 'If the developer considers an assessment is not required: justification for that position'
+  level: must
+  source-text: If the developer considers that an air quality assessment is not required, then justification
+    for this position must be provided to the Local Planning Authority.
+confidence: medium
+notes: 'From the council''s list (published 24 October 2025), page 29-30. ''An AQA may be required even
+  if the criteria are not met'' where the public perceives a detrimental impact, so there is a discretionary
+  part; the list also points to the IAQM/EPUK criteria. The list writes the size trigger as ''Development
+  proposing 1000sq.m. of floorspace and 10 or more new dwellings, or 10 or more student units''; it is
+  read as alternatives (the major-development thresholds), as the list itself sets them out with ''or''
+  in its façade and materials rows. Application types follow the Table 1 matrix (pages 8-11), which ticks:
+  approval of details (conditions), reserved matters, full, outline, removal or variation of conditions.'
 review-status: unverified
 field-status: {}

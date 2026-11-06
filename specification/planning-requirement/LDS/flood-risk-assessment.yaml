@@ -1,34 +1,98 @@
 reference: flood-risk-assessment
 local-authority: LDS
 required-if:
-  any:
-  - site:
+  all:
+  - application-type:
       in:
-      - flood-risk-zone
-      description: The site is in flood zone 2 or 3 (including 3b).
-  - condition:
-      field: site-area-residential
-      operator: '>='
-      value: 1
-      description: The site (in flood zone 1) is 1 hectare or more.
-  - condition:
-      field: site-area-non-residential
-      operator: '>='
-      value: 1
-      description: The site (in flood zone 1) is 1 hectare or more.
-  - site:
-      in:
-      - critical-drainage-area
-      description: The site is in a critical drainage area.
-source-url: https://www.leeds.gov.uk/sites/default/files/files-imported/341736a87955719f4a68ea1e04b211698011f40b943e4b243d187bf13dab2827.pdf
-source-text: size, then a Flood Risk Assessment will also be required which should include details of
-  the proposed surface water management strategy.
+      - hh
+      - full
+      - outline
+      - reserved-matters
+      - change-of-use
+  - any:
+    - site:
+        in:
+        - flood-risk-zone
+        description: In flood zones 2, 3 or 3b.
+    - any:
+      - condition:
+          field: site-area-residential
+          operator: '>='
+          value: 1
+          description: Site area of 1 hectare or more.
+      - condition:
+          field: site-area-non-residential
+          operator: '>='
+          value: 1
+          description: Site area of 1 hectare or more.
+    - site:
+        in:
+        - critical-drainage-area
+        description: In an area with critical drainage problems.
+    - site:
+        in:
+        - future-flood-risk
+        description: In flood zone 1 but shown by the SFRA to be at risk of flooding from rivers or the
+          sea in future.
+    - all:
+      - condition:
+          field: more-vulnerable-use-change
+          value: true
+          description: The proposal increases the vulnerability classification.
+      - site:
+          in:
+          - surface-water-flood-risk
+          - groundwater-flood-risk
+          description: In flood zone 1 where the SFRA shows a risk from other sources of flooding.
+source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
+policy: Natural Resources and Waste Local Plan – Policies WATER 6 and 7; Leeds Strategic Flood Risk Assessment
+source-text: 'You must provide a flood risk assessment if your property is within: flood zones 2, 3 or
+  3b flood zone 1 with a site area of 1 hectare or more areas with critical drainage problems flood zone
+  1 where your sweep frequency response analysis shows it will be at risk of flooding from rivers or the
+  sea in future an area that increases the vulnerability classification and is in flood zone 1 where your
+  SFRA shows it is at risk from other sources of flooding'
 must-include:
+- item: Finished floor levels in accordance with the council's Minimum Development Control Standards for
+    Flood Risk
+  level: must
+  required-if:
+    application-type:
+      in:
+      - full
+      - outline
+      - reserved-matters
+      - change-of-use
+  source-text: The Finished Floor levels will need to be in accordance with our Minimum Development Control
+    Standards for Flood Risk on page 2.
+- item: Sequential/exception tests
+  level: must
+  required-if:
+    application-type:
+      in:
+      - full
+      - outline
+      - reserved-matters
+      - change-of-use
+  source-text: Flood Risk Assessment and Sequential/Exception tests.
 - item: Details of the proposed surface water management strategy
   level: should
+  required-if:
+    application-type:
+      in:
+      - full
+      - outline
+      - reserved-matters
+      - change-of-use
+  source-text: a Flood Risk Assessment will also be required which should include details of the proposed
+    surface water management strategy.
 confidence: medium
-notes: 'The workbook guessed the application type (''INFERRED''), so no type is given. Audit (wrong_trigger):
-  the excerpt started mid-sentence. From the audit: flood zones 2/3, zone 1 sites of 1 ha or more, and
-  critical drainage areas; this also applies to householder applications.'
+notes: 'From the council''s list (published as a web page, last modified 9 September 2026), section ''Householder
+  applications: Flood Risk assessment; Planning applications: Flood risk assessment''. The criteria are
+  from the householder section; the planning section asks for ''Consideration of flood risk, according
+  to the scale and impact of the development'' for all new development, and the drainage section asks
+  for an FRA for sites in Flood Zone 2 or 3 ''or generally greater than 1 ha''. The page''s ''sweep frequency
+  response analysis'' is its own slip for the Strategic Flood Risk Assessment (SFRA). The linked Flood
+  Risk requirements table (https://www.leeds.gov.uk/sites/default/files/files-imported/341736a87955719f4a68ea1e04b211698011f40b943e4b243d187bf13dab2827.pdf,
+  June 2022) sets the same categories.'
 review-status: unverified
 field-status: {}

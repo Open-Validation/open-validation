@@ -2,46 +2,154 @@ reference: arboriculturist-report
 local-authority: BRD
 required-if:
   any:
-  - condition:
+  - all:
+    - application-type:
+        in:
+        - full
+        - outline
+        - reserved-matters
+        - s73
+    - condition:
+        field: floorspace
+        operator: '>'
+        value: 0
+        description: Creates new floor space (changes of use with no building works, and external alterations
+          creating no new floor space, are excluded).
+    - any:
+      - site:
+          in:
+          - tree-preservation-zone
+          description: Site contains trees protected by a Tree Preservation Order, or protected trees
+            on adjoining land are within falling distance.
+      - all:
+        - site:
+            in:
+            - conservation-area
+            description: Site in a conservation area.
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: The site contains trees, or protected trees on adjoining land are within falling
+              distance.
+      - condition:
+          field: veteran-trees
+          value: true
+          description: Development planned within 15m of a veteran or ancient tree.
+      - site:
+          in:
+          - ancient-woodland
+          description: Development planned within 25m of ancient woodland, semi-natural ancient woodland
+            or ancient replanted woodland.
+      - all:
+        - condition:
+            field: trees-on-or-near-site
+            value: true
+            description: Non-protected trees are present on the site.
+        - discretionary
+  - all:
+    - application-type:
+        in:
+        - hh
+    - condition:
+        field: floorspace
+        operator: '>'
+        value: 0
+        description: Creates new floor space (changes of use with no building works, and external alterations
+          creating no new floor space, are excluded).
+    - any:
+      - condition:
+          field: trees-on-or-near-site
+          value: true
+          description: The proposal would affect trees on the site and/or trees on adjoining land within
+            falling distance.
+      - condition:
+          field: veteran-trees
+          value: true
+          description: Development proposed within 15m of a veteran or ancient tree.
+      - site:
+          in:
+          - ancient-woodland
+          description: Development proposed within 25m of ancient woodland.
+source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-tree-survey/
+policy: Bradford Core Strategy (2017) policies EN3, EN5, DS2 and DS3; BS 5837:2012
+source-text: 'Planning applications on sites containing tree(s) protected by a Tree Preservation Order
+  and/or where protected trees on adjoining land are within falling distance of the application site Planning
+  applications on sites in a conservation area containing trees and/or where protected trees on adjoining
+  land which are within falling distance of the application site Planning applications where development
+  is planned within 15m of a veteran or ancient tree Planning applications where development is planned
+  within 25m of Ancient woodland, semi natural ancient woodland or ancient replanted woodland Excluding
+  proposals for: Changes of use where no building works are proposed External alterations to buildings
+  that create no new floor space ... Householder applications where the proposals would affect existing
+  trees on the site and/or where trees on adjoining land are within falling distance of the proposal.
+  Householder applications where development is proposed within 15m of a veteran or ancient tree Householder
+  applications where development is proposed within 25m of Ancient woodland, semi natural ancient woodland
+  or ancient replanted woodland Excluding proposals for: External alterations to buildings that create
+  no new floor space'
+must-include:
+- item: Prepared by a professional arboriculturist in accordance with BS 5837:2012
+  level: must
+- item: 'Tree survey: species, age class, canopy radius and height, physiological and structural condition
+    and retention category of all trees on or adjoining the site'
+  level: must
+  required-if:
+    application-type:
+      in:
+      - full
+      - outline
+      - reserved-matters
+      - s73
+- item: 'Tree Constraints Plan: survey details plus trees to be removed (with reasons) and retained, and
+    estimated Root Protection Areas, superimposed on the proposed layout'
+  level: must
+  required-if:
+    application-type:
+      in:
+      - full
+      - outline
+      - reserved-matters
+      - s73
+- item: Arboricultural Impact Assessment of direct and indirect effects, including below-ground services,
+    hard surfaces, level changes, working and storage areas
+  level: must
+  required-if:
+    any:
+    - application-type:
+        in:
+        - full
+        - outline
+        - reserved-matters
+        - s73
+    - all:
+      - application-type:
+          in:
+          - hh
+      - site:
+          in:
+          - tree-preservation-zone
+          description: Householder development with more direct consequences for high-amenity trees, including
+            TPO trees.
+- item: Tree Protection Plan establishing Construction Exclusion Zones and showing protection of Root
+    Protection Areas by BS 5837 fencing or ground protection
+  level: must
+- item: 'Householder: a dimensioned Tree Protection Plan plotting trees near the development, distances
+    from trunk centres to the development and the proposed protection barriers'
+  level: must
+  required-if:
+    application-type:
+      in:
+      - hh
+- item: Arboricultural Method Statement where buildings, access, parking or engineering works cannot be
+    kept outside Root Protection Areas
+  level: must
+  required-if:
+    condition:
       field: trees-on-or-near-site
       value: true
-      description: Trees on the application site (excluding changes of use where no building works are
-        proposed).
-  - all:
-    - site:
-        in:
-        - conservation-area
-        description: The site is in a conservation area.
-    - condition:
-        field: trees-on-or-near-site
-        value: true
-        description: The site contains trees.
-  - site:
-      in:
-      - tree-preservation-zone
-      description: Protected trees on adjoining land within falling distance of the site.
-  - condition:
-      field: veteran-trees
-      value: true
-      description: Development within 15m of a veteran or ancient tree.
-  - site:
-      in:
-      - ancient-woodland
-      description: Development within 25m of ancient woodland, semi natural ancient woodland or ancient
-        replanted woodland.
-source-url: https://www.bradford.gov.uk/planning-and-building-control/national-and-local-validation-requirements/local-requirements-tree-survey/
-source-text: 'the application site Planning applications on sites in a conservation area containing trees
-  and/or where protected trees on adjoining land which are within falling distance of the application
-  site Planning applications where development is planned within 15m of a veteran or ancient tree Planning
-  applications where development is planned within 25m of Ancient woodland, semi natural ancient woodland
-  or ancient replanted woodland Excluding proposals for: Changes of use where no building works are p…'
-must-include:
-- item: A Tree Protection Plan showing how Root Protection Areas will be protected through fencing to
-    the BS 5837 specifications, or by other means such as ground protection
-  level: must
+      description: Development within Root Protection Areas identified by the Tree Constraints Plan.
 confidence: medium
-notes: 'Audit (wrong_app_type): the Tree Survey page is for planning applications near trees, not tree
-  works. The start of the trigger is cut off in the excerpt. The audit says the householder checklist
-  also lists a tree survey.'
+notes: From the council's list (web pages, last updated 5 October 2026), page 'Local Requirements - Tree
+  Survey'. Also page 'Tree Survey and Arboricultural Impact Assessment' (householder). Where non-protected
+  trees are on the site, officers 'will usually require' the survey, so that part shows as check. Listed
+  on the planning, major and householder checklists.
 review-status: unverified
 field-status: {}

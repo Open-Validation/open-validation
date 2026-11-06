@@ -1,26 +1,111 @@
 reference: air-quality-assessment
 local-authority: HPL
 required-if:
-  any:
-  - all:
-    - site:
-        in:
-        - air-quality-management-area
-        description: The site is in an Air Quality Management Area.
+  all:
+  - application-type:
+      in:
+      - full
+      - change-of-use
+      - outline
+      - reserved-matters
+  - any:
+    - all:
+      - site:
+          in:
+          - air-quality-management-area
+          description: Within an Air Quality Management Area (AQMA).
+      - condition:
+          field: traffic-aadt-increase
+          operator: '>='
+          value: 5
+          description: A minimum 5% increase in traffic.
     - condition:
         field: traffic-aadt-increase
         operator: '>='
-        value: 5
-        description: The development would lead to a minimum 5% increase in traffic within the AQMA.
-  - condition:
-      field: biomass-or-chp
-      value: true
-      description: The proposal includes biomass boilers or CHP plant.
+        value: 10
+        description: A 10% increase in traffic elsewhere.
+    - condition:
+        field: hgv-movements-daily
+        operator: '>'
+        value: 200
+        description: Increase the number of Heavy Goods Vehicle journeys by more than 200 per day.
+    - all:
+      - site:
+          in:
+          - air-quality-management-area
+          description: Within an AQMA.
+      - condition:
+          field: parking-spaces
+          operator: '>='
+          value: 50
+          description: An increase of 50 parking spaces.
+    - condition:
+        field: parking-spaces
+        operator: '>='
+        value: 100
+        description: An increase of 100 parking spaces elsewhere.
+    - all:
+      - ref: major-development
+      - site:
+          in:
+          - air-quality-management-area
+          description: Major development within or adjacent to an AQMA.
+    - condition:
+        field: dwelling-count
+        operator: '>'
+        value: 100
+        description: Development in excess of 100 dwellings.
+    - condition:
+        field: floorspace
+        operator: '>'
+        value: 10000
+        description: 10,000 square metres floorspace (or an equivalent combination).
+    - condition:
+        field: biomass-or-chp
+        value: true
+        description: Biomass boilers or a Combined Heat and Power Plant.
+    - condition:
+        field: direct-air-emissions
+        value: true
+        description: Industrial processes where there are direct emissions to the air.
+    - discretionary
 source-url: https://www.hartlepool.gov.uk/downloads/file/356/local-validation-requirements-august-2025-appendix-1
-source-text: Where a development would lead to a minimum 5% increase in traffic within an Air Quality
-  Management Area (AQMA)
+policy: Hartlepool Local Plan (2018) Policies EMP4, CC1, QP6
+source-text: 'The following criteria are provided to help establish when an air quality assessment is
+  likely to be considered necessary, but they are by no means exhaustive: • Where a development would
+  lead to a minimum 5% increase in traffic within an Air Quality Management Area (AQMA) or 10% elsewhere;
+  • Where the Average Annual Daily Traffic (AADT) would exceed 10,000 vehicles (or 5,000 if narrow and
+  congested); • Where a development would increase the number of Heavy Goods Vehicle journeys by more
+  than 200 per day; • Where there would be an increase of 50 parking spaces within an AQMA or 100 spaces
+  elsewhere; • Major development (greater than 10 dwellings/1,000 square metres floorspace) within or
+  adjacent to an AQMA; • Development in excess of 100 dwellings or 10,000 square metres floorspace (or
+  an equivalent combination); • Where a development would include Biomass boilers or a Combined Heat and
+  Power Plant; • Proposals for industrial processes where there are direct emissions to the air.'
+must-include:
+- item: Existing baseline, future baseline without the development, and future air quality with the development
+  level: must
+- item: Relevant details of the development; relevant air quality standards and objectives
+  level: must
+- item: 'Methodology and input data: traffic, emissions and meteorological data, baseline pollutant concentrations,
+    other parameters'
+  level: must
+- item: Modelling results and their significance
+  level: must
+- item: 'Summary: construction phase impacts; effect on ambient concentrations; any exceedance of objectives
+    or worsening; verification of model outputs; impacts on sensitive ecological habitats from deposition'
+  level: must
+- item: Whether any actions of an adopted Air Quality Action Plan or Air Quality Strategy would be compromised
+    or made ineffective
+  level: must
+  required-if:
+    site:
+      in:
+      - air-quality-action-plan-area
+      description: An Air Quality Action Plan or Strategy applies.
 confidence: medium
-notes: 'Audit (wrong_trigger): the workbook gave contact details. From the audit: s9 also covers biomass
-  boilers or CHP plant.'
+notes: From the council's list (updated December 2025), Appendix 1 note 9 (Air Quality Assessment), page
+  17. Listed in Appendix 2 checklists 1 (full), 2 (outline and reserved matters). The criteria are 'by
+  no means exhaustive', and also include traffic over 10,000 vehicles AADT (5,000 if narrow and congested),
+  so a discretionary part is kept.
 review-status: unverified
 field-status: {}

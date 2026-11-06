@@ -1,47 +1,94 @@
 reference: flood-risk-assessment
 local-authority: STE
 required-if:
-  any:
-  - site:
+  all:
+  - application-type:
+      in:
+      - hh
+      - full
+      - change-of-use
+  - any:
+    - site:
+        in:
+        - flood-risk-zone
+        description: In Flood Zone 2 or 3.
+    - condition:
+        field: site-area-residential
+        operator: '>'
+        value: 1
+        description: More than 1 hectare in Flood Zone 1.
+    - condition:
+        field: site-area-non-residential
+        operator: '>'
+        value: 1
+        description: More than 1 hectare in Flood Zone 1.
+    - site:
+        in:
+        - future-flood-risk
+        description: In Flood Zone 1 where the strategic flood risk assessment shows increased risk during
+          its lifetime.
+    - all:
+      - condition:
+          field: more-vulnerable-use-change
+          value: true
+          description: A change to a more vulnerable use.
+      - discretionary
+    - all:
+      - site:
+          in:
+          - critical-drainage-area
+          description: In a Critical Drainage Area.
+      - any:
+        - condition:
+            field: site-area-residential
+            operator: '>'
+            value: 0.5
+            description: Site over 0.5 hectares.
+        - condition:
+            field: site-area-non-residential
+            operator: '>'
+            value: 0.5
+            description: Site over 0.5 hectares.
+    - site:
+        in:
+        - surface-water-flood-risk
+        description: In an area of surface water (pluvial) flooding.
+source-url: https://www.stoke.gov.uk/download/downloads/id/2872/planning_validation_list_-_printable_version.pdf
+source-text: 'All applications for development proposals: In flood zone 2 or 3, including minor extensions
+  and change of use. More than 1 hectare in flood zone 1. Less than 1 hectare in flood zone 1, including
+  a change of use in development type to a more vulnerable class where they could be affected by sources
+  of flooding other than rivers and the sea (for example surface water drains, reservoirs). In areas of
+  surface water flooding (pluvial flooding). On a site over 0.5 hectares in size in Critical Drainage
+  Areas.'
+must-include:
+- item: The likelihood of the development being affected by all sources of flooding (tidal/sea, fluvial,
+    surface water, groundwater, other)
+  level: must
+- item: Historical flooding events
+  level: must
+- item: The impacts of climate change, in line with government guidance
+  level: must
+- item: Flood warning and evacuation, ensuring safe access and egress
+  level: must
+- item: 'In Flood Zone 2 or 3: Environment Agency flood level data (product 4)'
+  level: must
+  required-if:
+    site:
       in:
       - flood-risk-zone
       description: In Flood Zone 2 or 3.
-  - condition:
-      field: site-area-residential
-      operator: '>'
-      value: 1
-      description: A Flood Zone 1 site over 1 hectare.
-  - condition:
-      field: site-area-non-residential
-      operator: '>'
-      value: 1
-      description: A Flood Zone 1 site over 1 hectare.
-  - site:
-      in:
-      - surface-water-flood-risk
-      description: In an area at risk of surface-water flooding.
-  - all:
-    - site:
-        in:
-        - critical-drainage-area
-        description: In a Critical Drainage Area.
-    - any:
-      - condition:
-          field: site-area-residential
-          operator: '>'
-          value: 0.5
-          description: The site is over 0.5 hectares.
-      - condition:
-          field: site-area-non-residential
-          operator: '>'
-          value: 0.5
-          description: The site is over 0.5 hectares.
-source-url: https://www.stoke.gov.uk/download/downloads/id/2872/planning_validation_list_-_printable_version.pdf
-source-text: '. 4.10 Flood Risk Assessment All development proposals: In flood zone 2 or 3.'
+- item: Construction in accordance with the Government's standing advice
+  level: must
+- item: Details of all watercourses and their treatment within the site boundary, if applicable
+  level: must
+- item: An existing site (topographic) survey
+  level: must
+- item: A surface water drainage strategy
+  level: must
 confidence: medium
-notes: 'The workbook guessed the application type (''INFERRED''), so no type is given. Audit (wrong_trigger,
-  missing_requirement): the excerpt gives only ''In flood zone 2 or 3''. From the audit: also Zone 1 sites
-  over 1ha, surface-water flood areas and Critical Drainage Areas over 0.5ha; it is on the Householder
-  table too.'
+notes: From the council's list (published November 2025), page 66-67. Section 4.10. A more vulnerable
+  use in Flood Zone 1 needs one only where it could be affected by flooding from sources other than rivers
+  and the sea, so that part shows as discretionary. Listed in the tables for householder, all development
+  and change of use.
 review-status: unverified
 field-status: {}

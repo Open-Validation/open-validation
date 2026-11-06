@@ -1,14 +1,61 @@
 reference: land-contamination-assessment
 local-authority: CHE
 required-if:
-  application-type:
-    in:
-    - mineral-app
-source-url: https://www.cheshireeast.gov.uk/pdf/planning/validation-checklists/vc3-minerals-validation-checklist-2024.pdf
-source-text: 'soakage tests  Contaminated Land Assessment for: Validation Checklist_VC3_February 2024'
-confidence: low
-notes: 'The workbook guessed the application type (''INFERRED''), so no type is given. Audit (wrong_app_type):
-  from the VC3 minerals checklist; the trigger was cut off. The audit couldn''t read this council''s list,
-  so its contents weren''t checked.'
+  any:
+  - all:
+    - application-type:
+        in:
+        - full
+        - outline
+        - reserved-matters
+        - approval-condition
+    - any:
+      - ref: major-development
+      - all:
+        - condition:
+            field: minor-development
+            value: true
+            description: Minor applications.
+        - any:
+          - all:
+            - condition:
+                field: involves-change-of-use
+                value: true
+                description: Change of use.
+            - condition:
+                field: dwelling-count
+                operator: '>='
+                value: 1
+                description: To residential.
+          - condition:
+              field: new-build
+              value: true
+              description: Development of brownfield or greenfield sites.
+      - site:
+          in:
+          - near-landfill-site
+          description: On a former landfill site or within 50 metres of a current landfill site.
+  - all:
+    - application-type:
+        in:
+        - mineral-app
+        - mineral-extraction
+        - waste-dev
+    - ref: major-development
+source-url: https://www.cheshireeast.gov.uk/pdf/planning/validation-checklists/vc1-draft-general-validation-checklist-2024.pdf
+policy: Cheshire East Local Plan Strategy policies SD2, IN1, IN2 and SE12
+source-text: 'Contaminated Land Assessment for: • All major residential, commercial, industrial or leisure
+  applications • Minor applications for change of use to residential or development of brownfield / greenfield
+  sites • Developments on a former landfill site or within 50 metres of a current landfill site'
+must-include:
+- item: Potential for contamination and areas that may need remediation to make the site suitable for
+    its end use
+  level: must
+  source-text: The contaminated land assessment procedure will identify the potential for contamination
+    and identify possible areas that may require remedial works to make a site
+confidence: medium
+notes: From the council's list (adopted 11 March 2024), VC1 page 4; VC3 page 5. Major residential, commercial,
+  industrial or leisure applications are shown as major development. Application types follow the checklist
+  matrix (Guidance Appendix 01) plus the minerals (VC3) and waste (VC4) checklists.
 review-status: unverified
 field-status: {}

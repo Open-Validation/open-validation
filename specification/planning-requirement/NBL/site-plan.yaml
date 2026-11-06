@@ -1,14 +1,101 @@
 reference: site-plan
 local-authority: NBL
 required-if:
-  application-type:
-    in:
-    - hh
-source-url: https://www.northumberland.gov.uk/NorthumberlandCountyCouncil/media/Planning-and-Building/ValidationChecklistHouseholderPlanningPermission.pdf
-source-text: 'Site plans Note 4 Yes, unless: the building footprint or site layout won''t change.'
-confidence: low
-notes: 'Rows from Full planning were dropped after the audit. Householder checklist: ''Yes, unless: the
-  building footprint or site layout won''t change.'' The general list''s trigger wasn''t captured. The
-  audit couldn''t read this council''s list, so its contents weren''t checked.'
+  any:
+  - all:
+    - application-type:
+        in:
+        - hh
+        - full
+        - lbc
+        - demolition-con-area
+    - any:
+      - condition:
+          field: site-layout-change
+          value: true
+          description: The site layout or boundary is affected.
+      - condition:
+          field: footprint-change
+          value: true
+          description: The building footprint changes.
+      - condition:
+          field: openings-alteration
+          value: true
+          description: Door or window openings change (position or size).
+  - all:
+    - application-type:
+        in:
+        - s73
+        - non-material-amendment
+    - condition:
+        field: site-layout-change
+        value: true
+        description: The variation or amendment changes the site layout.
+  - all:
+    - application-type:
+        in:
+        - outline
+    - condition:
+        field: reserved-matters-sought
+        value: layout
+        description: Layout is applied for (not a reserved matter).
+  - all:
+    - application-type:
+        in:
+        - reserved-matters
+    - condition:
+        field: reserved-matters-sought
+        value: layout
+        description: Layout is applied for.
+  - all:
+    - application-type:
+        in:
+        - advertising
+    - condition:
+        field: advert-count
+        operator: '>'
+        value: 1
+        description: More than one sign is proposed.
+source-url: https://www.northumberland.gov.uk/planning-and-building/planning/apply-planning-permission/planning-application-requirements
+policy: Town and Country Planning (Development Management Procedure) (England) Order 2015
+source-text: 'You need site plans if you are applying for: householder planning permission full planning
+  permission listed building consent removal or variation of a condition if the site layout will change
+  non-material amendment if the site layout will change outline planning permission, unless layout is
+  a reserved matter approval of reserved matters if layout is applied for consent to display an advertisement
+  if more than one sign is proposed demolition in a conservation area'
+must-include:
+- item: Separate existing and proposed site plans, labelled 'Existing site plan' and 'Proposed site plan'
+  level: must
+  source-text: be separate plans, labelled as 'Existing site plan' and 'Proposed site plan'
+- item: A clear metric scale, usually 1:100, 1:200 or 1:500
+  level: should
+- item: A north arrow
+  level: should
+- item: A current, up-to-date map as the base
+  level: should
+- item: Parking and access, where affected by the proposal
+  level: should
+- item: Hard surfaces, where affected
+  level: should
+- item: Site boundaries, including their type and height, where affected
+  level: should
+- item: Trees, where affected
+  level: should
+- item: Roads, footpaths and public rights of way, where affected
+  level: should
+- item: The location of advertisements
+  level: should
+  required-if:
+    condition:
+      field: advert-count
+      operator: '>'
+      value: 1
+      description: More than one sign is proposed.
+confidence: medium
+notes: From the council's list (web page, republished 1 April 2026), Note 4. The page says 'We do not
+  need a site plan if the site layout or boundary is unaffected. Or if there's no change proposed to the
+  building footprint, door or window openings.' The householder and listed building checklists say a site
+  plan is not needed for replacement windows in existing openings. For lawful development certificates,
+  prior approvals and hedgerow removal notices a location plan or site plan is accepted.
 review-status: unverified
 field-status: {}

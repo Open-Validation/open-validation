@@ -1,19 +1,60 @@
 reference: flood-risk-assessment
 local-authority: RUG
 required-if:
-  any:
-  - ref: major-development
-  - discretionary
+  all:
+  - application-type:
+      in:
+      - full
+      - outline
+      - reserved-matters
+  - any:
+    - ref: major-development
+    - site:
+        in:
+        - flood-risk-zone
+        description: Within flood zone 2 or 3.
+    - condition:
+        field: site-area-residential
+        operator: '>'
+        value: 1
+        description: More than 1 hectare in flood zone 1.
+    - condition:
+        field: site-area-non-residential
+        operator: '>'
+        value: 1
+        description: More than 1 hectare in flood zone 1.
+    - all:
+      - condition:
+          field: more-vulnerable-use-change
+          value: true
+          description: Less than 1 ha in flood zone 1 with a change of use to a more vulnerable class.
+      - discretionary
+    - condition:
+        field: near-watercourse
+        value: true
+        description: Within 20 metres of any watercourse.
+    - condition:
+        field: near-flood-defence
+        value: true
+        description: Adjacent to, or including, any flood bank or other flood control structure.
 source-url: https://www.rugby.gov.uk/documents/20124/6589626/Validation+Checklist+Feb+2024.pdf/0e5c8781-9b91-e1b7-1a18-f762bd430f97?t=1750866323611
-policy: Rugby Borough Local Plan Policies SDC5 and SDC6
-source-text: 6.13 Flood Risk Assessment All major development; and … A flood risk assessment (FRA) is
-  required, appropriate to the scale and nature of the development proposed, assessing the level of flood
-  risk from all sources.
+policy: Rugby Borough Local Plan 2019 policies SDC5 and SDC6
+source-text: 'Any development falling into the following categories: … within flood zone 2 or 3; … more
+  than 1 hectare … All major development; and'
 must-include:
-- item: An assessment of the level of flood risk from all sources
+- item: Flood risk mapping; existing drainage infrastructure; site history including flooding events;
+    topographical survey; drainage area plans and greenfield runoff calculations; surface water drainage
+    strategy with hydraulic calculations; site ground conditions
+  level: should
+- item: Opportunities to reduce flood risk, SuDS design and safe access and egress
   level: must
-confidence: low
-notes: 'Audit (wrong_trigger): the trigger is cut off after ''All major development; and''; the rest is
-  shown as officer discretion and needs checking in the list.'
+- item: Sequential testing, exception testing and hydraulic modelling details
+  level: must
+confidence: medium
+notes: From the council's list (Version 2, February 2024), items 5.7 and 6.13. For minor development in
+  flood zone 1 under 1 ha, a change to a more vulnerable class 'where they could be affected by flooding
+  from any other source' is a judgement, so that part is discretionary. Sections 5 (minor development)
+  and 6 (major development) apply to full, outline and reserved matters applications; for outline the
+  list says detail may be more appropriate at reserved matters.
 review-status: unverified
 field-status: {}

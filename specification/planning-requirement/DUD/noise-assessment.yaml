@@ -2,24 +2,77 @@ reference: noise-assessment
 local-authority: DUD
 required-if:
   any:
+  - all:
+    - condition:
+        field: dwelling-count
+        operator: '>='
+        value: 1
+        description: New residential development.
+    - any:
+      - condition:
+          field: near-licensed-premises
+          value: true
+          description: Near licensed premises.
+      - condition:
+          field: noise-sensitive-use
+          value: true
+          description: Adjacent to existing commercial premises.
+  - all:
+    - condition:
+        field: class-b2-b8-floorspace
+        operator: '>'
+        value: 0
+        description: New commercial development in Use Classes B2 or B8.
+    - condition:
+        field: near-noise-sensitive-use
+        value: true
+        description: Adjacent to existing residential development.
   - condition:
-      field: noise-sensitive-use
+      field: entertainment-leisure-use
       value: true
-      description: New residential development near licensed premises or next to existing commercial premises.
-  - condition:
-      field: noise-generating-use
-      value: true
-      description: New B2 or B8 development next to housing, entertainment and licensed premises, and
-        similar noisy uses.
+      description: An entertainment and licensed premises.
+  - all:
+    - ref: major-development
+    - any:
+      - condition:
+          field: floorspace-non-residential
+          operator: '>'
+          value: 0
+          description: Major industrial or commercial development.
+      - condition:
+          field: noise-sensitive-use
+          value: true
+          description: Introduces noise- or vibration-sensitive development where noise or vibration is
+            likely to have an adverse impact.
   - discretionary
 source-url: https://www.dudley.gov.uk/media/2lvh1ahe/planning_validation_checklist__-nov_2024-1.pdf
+policy: Dudley Borough Development Strategy (2017) policy D2
 source-text: 'The following developments should include a noise impact assessment / noise mitigation scheme
   for the impact of noise on nearby residential uses: new residential development nearby to licensed premises,
   or adjacent to existing commercial premises. new commercial development within Use Classes B2 or B8
   adjacent to existing residential development any application for an entertainment and licensed premise
-  Other developments (including day nurseries, sports facilities, smoking areas, places of worsh'
-confidence: low
-notes: The workbook guessed the application type ('INFERRED'), so no type is given. Rows from Outline
-  were dropped after the audit. The audit couldn't read this council's list, so its contents weren't checked.
+  Other developments (including day nurseries, sports facilities, smoking areas, places of worship) can
+  generate noise and may warrant a noise impact assessment / noise mitigation scheme, this will be determined
+  on a site to site basis. … All major industrial or commercial applications. All major applications that
+  introduce or expose noise and/or vibration-sensitive development(s) into areas and locations where noise
+  and/or vibration is likely to have an adverse impact.'
+must-include:
+- item: The potential sources of noise generation and how they may affect local amenity
+  level: should
+- item: How the developer mitigates any adverse issues identified
+  level: should
+- item: Recommended noise mitigation incorporated into the submitted plans
+  level: should
+- item: Vibration surveys having regard to BS 6472:2008 and BS 7385-2:1993
+  level: should
+  required-if:
+    ref: major-development
+  source-text: Vibration surveys in particular shall be conducted having regard to the advice
+confidence: medium
+notes: 'From the council''s list (published 1 November 2024), page 19, 43. V15 ''Noise impact assessment/noise
+  survey'' (mandatory local requirement) and V36 ''Noise and Vibration Assessment'' (major applications,
+  a non-mandatory supporting document). Discretionary: V15''s ''other developments (including day nurseries,
+  sports facilities, smoking areas, places of worship)'', decided ''on a site to site basis'', and whether
+  a major scheme''s area has adverse noise. The guide (2.1) calls V15 ''Noise/Odour Impact Assessment''.'
 review-status: unverified
 field-status: {}

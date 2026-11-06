@@ -1,28 +1,75 @@
 reference: flood-risk-assessment
 local-authority: SKP
 required-if:
-  all:
-  - application-type:
-      in:
-      - full
-      - reserved-matters
-      - outline
-      - hh
-      - lbc
-      - prior-approval
-      - s73
+  any:
   - any:
-    - site:
-        in:
-        - flood-risk-zone
-        - surface-water-flood-risk
-        description: The development may be at risk of flooding from any source.
+    - condition:
+        field: site-area-residential
+        operator: '>='
+        value: 1
+        description: Proposals of 1 hectare or greater in Flood Zone 1.
+    - condition:
+        field: site-area-non-residential
+        operator: '>='
+        value: 1
+        description: Proposals of 1 hectare or greater in Flood Zone 1.
+  - site:
+      in:
+      - flood-risk-zone
+      description: Flood Zones 2 and 3 (all new development, including minor development and change of
+        use).
+  - site:
+      in:
+      - critical-drainage-area
+      description: An area within Flood Zone 1 with identified critical drainage problems.
+  - all:
+    - any:
+      - condition:
+          field: new-build
+          value: true
+          description: New development.
+      - condition:
+          field: more-vulnerable-use-change
+          value: true
+          description: A change of use to a more vulnerable class.
     - discretionary
 source-url: https://assets.ctfassets.net/ii3xdrqc6nfw/232qQtBo9Tuy7K5c6NqFqJ/f2043c57a8df84406dc8df67cf1792d4/Validation_Checklist_Explanatory_Notes_2024.pdf
-source-text: 'FLOOD RISK ASSESSMENT When Required A Flood Risk Assessment (FRA) should be submitted where
-  the development may: be at risk of flooding (any source): increase flooding elsewhere'
+policy: Stockport UDP Review (2006) saved policy EP1.7; Sustainable Design and Construction SPD
+source-text: A site-specific flood risk assessment is required for proposals of 1 hectare or greater in
+  Flood Zone 1; all proposals for new development (including minor development and change of use) in Flood
+  Zones 2 and 3, or in an area within Flood Zone 1 which has identified critical drainage problems; and
+  where proposed development or a change of use to a more vulnerable class may be subject to other sources
+  of flooding.
+must-include:
+- item: The risks of all forms of flooding to and from the development, identified and assessed
+  level: must
+- item: How flood risks to the development and to others will be managed, taking climate change into account
+  level: must
+- item: Design of surface water management systems, including SuDS
+  level: must
+- item: Measures for safe access to and from the development in areas at risk, with an evacuation plan
+    informed by the emergency services
+  level: must
+  required-if:
+    site:
+      in:
+      - flood-risk-zone
+      description: Areas at risk of flooding.
+- item: 'For major development in Flood Zone 1: opportunities to reduce the probability and consequences
+    of flooding'
+  level: must
+  required-if:
+    ref: major-development
+- item: 'In Flood Zones 2 and 3: evidence of the Sequential Test (unless already applied at strategic
+    level) and, where needed, the Exception Test'
+  level: must
+  required-if:
+    site:
+      in:
+      - flood-risk-zone
+      description: Flood Zones 2 and 3.
 confidence: medium
-notes: 'The workbook guessed the application type (''INFERRED''), so no type is given. Audit (wrong_app_type):
-  F, RM, O, H, LB, PN and RC. ''Increase flooding elsewhere'' is shown as officer discretion.'
+notes: From the council's list (adopted 19 June 2024), page 67. Development that may be subject to other
+  sources of flooding shows as discretionary.
 review-status: unverified
 field-status: {}

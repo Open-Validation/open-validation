@@ -1,11 +1,83 @@
 reference: air-quality-assessment
 local-authority: LIF
-required-if: discretionary
+required-if:
+  all:
+  - application-type:
+      in:
+      - full
+      - outline
+      - s73
+  - any:
+    - condition:
+        field: parking-spaces
+        operator: '>'
+        value: 100
+        description: New car parking with more than 100 spaces outside an Air Quality Management Area.
+    - all:
+      - site:
+          in:
+          - air-quality-management-area
+          description: Inside an Air Quality Management Area.
+      - condition:
+          field: parking-spaces
+          operator: '>'
+          value: 50
+          description: New car parking with more than 50 spaces.
+    - condition:
+        field: traffic-aadt-increase
+        operator: '>'
+        value: 5
+        description: Changes traffic flows by more than 5% on roads with more than 5,000 AADT.
+    - condition:
+        field: hgv-movements-daily
+        operator: '>='
+        value: 200
+        description: Increases heavy duty vehicles by 200 or more movements per day.
+    - condition:
+        field: biomass-or-chp
+        value: true
+        description: Biomass installation, biomass-fuelled CHP or CHP plant.
+    - condition:
+        field: combustion-plant-thermal-input
+        operator: '>='
+        value: 366.4
+        description: Boiler or furnace plant burning liquid or gaseous matter at 366.4 kW or more.
+    - condition:
+        field: environmental-permit
+        value: true
+        description: Industrial or commercial operations that need an Environmental Permit.
+    - discretionary
 source-url: https://www.lichfielddc.gov.uk/downloads/file/1682/local-planning-validation-guidance
+policy: Environment Act 1995; Air Quality Standards Regulations 2010; NPPF; Air Quality Strategy 2007;
+  Lichfield Local Plan Strategy 2008-2029 policy BE1; Developer Contributions SPD
 source-text: Applications that will give rise to emissions to air of pollutants for which there is a national
-  air quality objective
+  air quality objective, or for which there may otherwise be a significant impact upon local air quality
+  meeting the criteria set out below, including – • New car parking areas with more than 100 spaces outside
+  an Air Quality Management Area or more than 50 spaces inside an Air Quality Management Area. • Proposals
+  that will give rise to a change in traffic volumes of greater than +/- 5% in annual average daily traffic
+  flows and/or peak daily traffic flows on roads with more than 5,000 annual average daily traffic flows.
+  • Proposals that will give rise to a change in vehicle speed of more than +/- 10 kph on roads with more
+  than 5,000 annual average daily traffic flows. • Proposals that will increase the number of heavy duty
+  vehicles by 200 or more movements per day, including in relation to construction and demolition activities.
+  • Proposals for a bus station or goods vehicle park. • Proposal for any biomass installation or biomass-fuelled
+  CHP plant. • CHP plant. • Incinerator plant. • Significant construction and demolition schemes. • Regular
+  exposure of members of the public (including residential properties, schools, hospitals, care homes,
+  playgrounds, gardens, shopping areas) at locations where annual, daily, 8 hours, 1 hour or 15 minutes
+  air quality objective values will, or may be, breached. • Boiler and furnace plant capable of burning
+  pulverised fuel, and/or solid matter at a rate of 45.4 hg per hour, and /or at a rate equivalent to
+  366.4 kW per hour any liquid or gaseous matter. • Applications for specified industrial and commercial
+  operations that require an Environmental Permit.
+must-include:
+- item: 'Where the assessment shows a negative impact: the financial costing of the level of emissions
+    generated'
+  level: must
+  required-if: discretionary
 confidence: medium
-notes: 'Audit (wrong_trigger): the workbook excerpt was column headings. From the audit: also large car
-  parks and major construction. No field records pollutant emissions, so this is shown as officer judgement.'
+notes: 'From the council''s list (published March 2023), page 15. Application types follow the validation
+  matrix on the last page of the list, where this document is marked ''C'' (conditional: dependent on
+  site and application context). Speed changes, bus stations and goods vehicle parks, incinerators, significant
+  construction and demolition schemes, public exposure where objectives may be breached and solid fuel
+  plant have no matching field, so they show as ''check''. A separate assessment may not be needed where
+  one is part of a formal EIA.'
 review-status: unverified
 field-status: {}

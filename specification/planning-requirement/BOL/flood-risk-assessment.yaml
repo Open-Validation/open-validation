@@ -1,10 +1,60 @@
 reference: flood-risk-assessment
 local-authority: BOL
-source-url: https://www.bolton.gov.uk/downloads/file/4686/validation-checklist-2023
-source-text: a site-specific Flood Risk Assessment will be required in order for the application to be
-  validated.
-confidence: low
-notes: 'The workbook guessed the application type (''INFERRED''), so no type is given. Audit (wrong_trigger):
-  the excerpt starts mid-sentence, so the criteria were lost.'
+required-if:
+  any:
+  - all:
+    - any:
+      - ref: major-development
+      - condition:
+          field: minor-development
+          value: true
+          description: Minor development (below the major development thresholds).
+    - site:
+        in:
+        - flood-risk-zone
+        description: Flood Zone 2 or 3.
+  - all:
+    - any:
+      - ref: major-development
+      - condition:
+          field: minor-development
+          value: true
+          description: Minor development (below the major development thresholds).
+    - site:
+        in:
+        - surface-water-flood-risk
+        description: An area affected by surface water flooding.
+    - condition:
+        field: more-vulnerable-use-change
+        value: true
+        description: Introduces a more vulnerable use, such as residential, compared with the existing
+          use.
+  - condition:
+      field: site-area-residential
+      operator: '>'
+      value: 1
+      description: Site area of more than 1 hectare.
+  - condition:
+      field: site-area-non-residential
+      operator: '>'
+      value: 1
+      description: Site area of more than 1 hectare.
+source-url: https://www.bolton.gov.uk/downloads/file/4686/local-validation-checklist
+policy: Places for Everyone Policy JP-S4 Flood Risk and the Water Environment
+source-text: • All Major Development and Minor Development within Flood Zones 2 and 3 • All Major Development
+  and Minor Development in areas affected by surface water flooding issues, where this would introduce
+  a more vulnerable use, such as residential, compared to the existing use You can find out whether the
+  site is within Flood Zone 2 or 3 of it is affected by surface water flooding issues from pluvial (rainwater)
+  sources by using the Flood Map For Planning • All development with a site area of more than 1 hectare
+must-include:
+- item: Identifies and assesses the risks of all forms of flooding to and from the development, and how
+    they will be managed, taking climate change into account
+  level: must
+- item: Addresses safe access to and from the development in areas at risk of flooding
+  level: must
+- item: Sequential and exception tests where needed, in line with Government guidance
+  level: should
+confidence: medium
+notes: From the council's list (adopted 5 December 2024), page 57. Not required for house extensions.
 review-status: unverified
 field-status: {}

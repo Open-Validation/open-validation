@@ -1,14 +1,51 @@
 reference: flood-risk-assessment
 local-authority: TAM
 required-if:
-  all:
-  - application-type:
+  any:
+  - condition:
+      field: site-area-residential
+      operator: '>='
+      value: 1
+      description: 1 hectare or greater in Flood Zone 1.
+  - condition:
+      field: site-area-non-residential
+      operator: '>='
+      value: 1
+      description: 1 hectare or greater in Flood Zone 1.
+  - site:
       in:
-      - full
-  - discretionary
-source-url: https://www.tameside.gov.uk/planning/local-list-full-applications
+      - flood-risk-zone
+      description: New development in Flood Zones 2 and 3.
+  - all:
+    - condition:
+        field: more-vulnerable-use-change
+        value: true
+        description: Development or a change of use to a more vulnerable class.
+    - site:
+        in:
+        - surface-water-flood-risk
+        description: May be subject to other sources of flooding.
+  - site:
+      in:
+      - critical-drainage-area
+      description: The Environment Agency, Internal Drainage Board or other bodies have indicated there
+        may be drainage problems.
+source-url: https://tameside.gov.uk/documents/d/guest/local-validation-requirements-july-2025-pdf
+policy: NPPF Chapter 14; UDP Policy U4; PfE Policy JP-S4
+source-text: Planning applications for development proposals of 1 hectare or greater in Flood Zone 1 and
+  all proposals for new development located in Flood Zones 2 and 3 should be accompanied by a FRA.
+must-include:
+- item: The risks of all forms of flooding to and from the development and how they will be managed, taking
+    climate change into account
+  level: should
+- item: 'For major development in Flood Zone 1: opportunities to reduce the probability and consequences
+    of flooding'
+  level: should
+  required-if:
+    ref: major-development
 confidence: medium
-notes: 'From the audit (missing_requirement): ''may be required depending on the proposal'' on the Full-applications
-  list; the audit gives no trigger.'
+notes: From the council's Validation Checklist July 2025 (approved 23 July 2025), page 12. Called 'Flood
+  Risk Assessment & Sequential Test'. The other-sources and drainage-problem parts come from the guidance
+  column.
 review-status: unverified
 field-status: {}

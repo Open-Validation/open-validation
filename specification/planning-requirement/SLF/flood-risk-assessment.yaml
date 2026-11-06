@@ -5,39 +5,78 @@ required-if:
   - site:
       in:
       - flood-risk-zone
-      description: The site is in Flood Zone 2 or 3.
-  - condition:
-      field: site-area-residential
-      operator: '>='
-      value: 1
-      description: Operational development on a site of 1 hectare or more (Flood Zone 1).
-  - condition:
-      field: site-area-non-residential
-      operator: '>='
-      value: 1
-      description: Operational development on a site of 1 hectare or more (Flood Zone 1).
+      description: In Flood Zone 2 (medium risk) or Flood Zone 3 (high risk).
+  - all:
+    - condition:
+        field: operational-development
+        value: true
+        description: Operational development.
+    - any:
+      - condition:
+          field: site-area-residential
+          operator: '>='
+          value: 1
+          description: A site of 1 ha or above (in Flood Zone 1).
+      - condition:
+          field: site-area-non-residential
+          operator: '>='
+          value: 1
+          description: A site of 1 ha or above (in Flood Zone 1).
   - all:
     - site:
         in:
         - critical-drainage-area
-        description: The site is in a Critical Drainage Area.
+        description: In a Critical Drainage Area.
     - any:
       - condition:
           field: site-area-residential
           operator: '>'
           value: 0.5
-          description: The site is over 0.5 hectares.
+          description: A site over 0.5 hectares.
       - condition:
           field: site-area-non-residential
           operator: '>'
           value: 0.5
-          description: The site is over 0.5 hectares.
+          description: A site over 0.5 hectares.
 source-url: https://www.salford.gov.uk/planning-building-and-regeneration/planning-applications/apply-for-planning-permission/validation-checklist/local-information-requirements/flood-risk-assessment/
-source-text: Any operational development of 1ha or above in Low Flood Risk Zone 1 … Development proposals
-  on sites over 0.5 hectares in size located within Critical Drainage Areas
+policy: Salford Flood Risk and Development Planning Guidance (2008); NPPF
+source-text: Any development proposals in High Flood Risk Zone (Zone 3) Any development proposals in Medium
+  Flood Risk Zone (Zone 2) Any operational development of 1ha or above in Low Flood Risk Zone 1 Development
+  proposals on sites over 0.5 hectares in size located within ‘Critical Drainage Areas’
+must-include:
+- item: Proportionate to the degree of flood risk and appropriate to the scale, nature and location of
+    the development
+  level: must
+- item: 'As a minimum, answers to: the type and location of development; its vulnerability classification;
+    sources of flooding; the flood zone; for Flood Zones 2 and 3 the predicted flood depth; what the Strategic
+    Flood Risk Assessment shows; compliance with Salford''s 2008 Flood Risk and Development Planning Guidance'
+  level: should
+- item: 'For at least one dwelling, or non-residential development over 250 m², in Flood Zone 2 or 3:
+    a more detailed (Level 2 or 3) study covering the site and proposals, the Sequential Test, the flood
+    hazard including climate change, flood risk management measures, residual risks and the Exception
+    Test where necessary'
+  level: should
+  required-if:
+    all:
+    - site:
+        in:
+        - flood-risk-zone
+        description: In Flood Zone 2 or 3.
+    - any:
+      - condition:
+          field: dwelling-count
+          operator: '>='
+          value: 1
+          description: At least one dwelling.
+      - condition:
+          field: floorspace-non-residential
+          operator: '>'
+          value: 250
+          description: Non-residential development of greater than 250 square metres floorspace.
 confidence: medium
-notes: 'From the audit (missing_requirement): any development in Flood Zone 3 or Flood Zone 2; any operational
-  development of 1ha or more in Flood Zone 1; sites over 0.5ha in Critical Drainage Areas. Householder
-  schemes in Flood Zones 2 and 3 are included (audit issue 7).'
+notes: From the council's list (undated web pages, read 2026-11-06; the 'Apply for planning permission'
+  page calling it the council's adopted validation checklist was last updated 30 October 2026), page 'Flood
+  Risk Assessment'. The minimum questions are 'suggested', and the detailed study is 'likely to be required',
+  so both are 'should'.
 review-status: unverified
 field-status: {}

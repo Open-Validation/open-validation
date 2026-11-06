@@ -2,36 +2,107 @@ reference: flood-risk-assessment
 local-authority: WNUA
 required-if:
   any:
-  - site:
-      in:
-      - flood-risk-zone
-      description: Within flood zone 2 or 3.
-  - condition:
-      field: site-area-residential
-      operator: '>'
-      value: 1
-      description: Over 1 hectare in flood zone 1.
-  - condition:
-      field: site-area-non-residential
-      operator: '>'
-      value: 1
-      description: Over 1 hectare in flood zone 1.
-  - condition:
-      field: near-watercourse
-      value: true
-      description: Within 10m of a watercourse.
-  - condition:
-      field: change-in-ground-levels
-      value: true
-      description: The proposal raises land levels.
-  - discretionary
+  - all:
+    - application-type:
+        in:
+        - hh
+        - full
+        - outline
+        - reserved-matters
+        - prior-approval
+        - s73
+    - any:
+      - site:
+          in:
+          - flood-risk-zone
+          description: Within flood zone 2 or 3.
+      - condition:
+          field: site-area-residential
+          operator: '>'
+          value: 1
+          description: More than 1 hectare in flood zone 1.
+      - condition:
+          field: site-area-non-residential
+          operator: '>'
+          value: 1
+          description: More than 1 hectare in flood zone 1.
+      - all:
+        - condition:
+            field: more-vulnerable-use-change
+            value: true
+            description: Less than 1 ha in flood zone 1 with a change of use to a more vulnerable class.
+        - discretionary
+      - condition:
+          field: near-watercourse
+          value: true
+          description: Within 10 metres of any watercourse.
+      - condition:
+          field: near-flood-defence
+          value: true
+          description: Adjacent to, or including, any flood bank or other flood risk asset.
+      - all:
+        - condition:
+            field: engineering-operations
+            value: true
+            description: Engineering operations raising the level of land or significantly increasing
+              surface water run-off to non-mains systems.
+        - discretionary
+  - all:
+    - application-type:
+        in:
+        - mineral-extraction
+        - mineral-app
+        - waste-dev
+    - any:
+      - condition:
+          field: site-area-non-residential
+          operator: '>='
+          value: 1
+          description: 1 hectare or greater in Flood Zone 1.
+      - site:
+          in:
+          - flood-risk-zone
+          description: New development in Flood Zones 2, 3a or 3b.
 source-url: https://cms.westnorthants.gov.uk/media/30003/download
-source-text: 'Flood Risk Assessment Any development falling into the following categories: - within flood
-  zone 2 or 3...'
+policy: West Northamptonshire Joint Core Strategy (Part 1) policy BN7; Local Plans Part 2 (Daventry Settlements
+  and Countryside Local Plan, South Northamptonshire Local Plan, Northampton Local Plan)
+source-text: 'Any development falling into the following categories: - within flood zone 2 or 3; - more
+  than 1 hectare (ha) in flood zone 1; - less than 1 ha in flood zone 1, which includes a change of use
+  in development type to a more vulnerable class, where they could be affected by flooding from any other
+  source or ; - within 10 metres of any watercourse; - Adjacent to, or including, any flood bank or other
+  flood risk asset - Engineering operations that involve raising the level of land or significantly increasing
+  surface water run-off to non mains sewer systems such as watercourses and soakaways … Proposals of 1
+  hectare or greater in Flood Zone 1 and all proposals for new development located in Flood Zones 2, 3a
+  and 3b designated by the Environment Agency shall be accompanied by an FRA.'
+must-include:
+- item: Surface water management during construction and post-development, maximising sustainable drainage,
+    with a statement of compliance with policy
+  level: must
+- item: 'For householder and minor extensions (up to 250 sq m) in flood zones 2 and 3: the chosen flood
+    mitigation measure (floor levels no lower than existing with flood proofing, or 300 mm above the 1%
+    / 0.5% flood level), flood resilience details and a plan of finished floor levels relative to the
+    flood level (to Ordnance Datum)'
+  level: must
+  required-if:
+    all:
+    - application-type:
+        in:
+        - hh
+        - full
+    - site:
+        in:
+        - flood-risk-zone
+        description: Flood zone 2 or 3.
+    - condition:
+        field: floorspace
+        operator: <=
+        value: 250
+        description: Extension not exceeding 250 sq m.
 confidence: medium
-notes: 'Audit (wrong_trigger): the workbook used the bat roost text. From the audit, the trigger also
-  covers a change to a more vulnerable use and sites next to a flood defence (shown as officer discretion).
-  For householder and minor extensions up to 250sqm in Flood Zones 2 and 3 it sets out floor levels or
-  flood-proofing.'
+notes: 'From the council''s list (adopted 25 February 2026), sections 5, 8-10, 12 and 15 and the Definitions
+  (page 123). A more vulnerable change of use in flood zone 1 ''where they could be affected by flooding
+  from any other source'', and engineering operations ''significantly'' increasing run-off, are judgements,
+  so those parts are discretionary. Minerals and waste: from the county matter list (https://minerals-waste-planning.westnorthants.digital/councilservices/environment-and-planning/planning/planning-applications/making-a-planning-application/Documents/Local%20Validation%20List%20-%20Minerals%20and%20Waste%20Applications.pdf),
+  page 16 and 34.'
 review-status: unverified
 field-status: {}

@@ -1,31 +1,59 @@
 reference: flood-risk-assessment
 local-authority: LIV
 required-if:
-  any:
-  - condition:
-      field: near-watercourse
-      value: true
-      description: Development adjacent to brooks, ditches or canals.
-  - site:
+  all:
+  - application-type:
       in:
-      - flood-risk-zone
-      description: Development within Flood Zones 2 and 3.
-  - condition:
-      field: site-area-residential
-      operator: '>'
-      value: 1
-      description: A site of over 1.0 hectare in Flood Zone 1.
-  - condition:
-      field: site-area-non-residential
-      operator: '>'
-      value: 1
-      description: A site of over 1.0 hectare in Flood Zone 1.
-source-url: https://liverpool.gov.uk/media/03qcrbku/outline-with-all-matters-reserved.pdf
-source-text: Flood Risk Assessment for all development adjacent to brooks, ditches or canals, and for
-  all development on sites of over 1.0 hectare within Zone 1 and all development within Zones 2 & 3 on
-  the Environment Agency Flood Plain.
-confidence: low
-notes: 'Audit (wrong_document): this trigger is from the 2013 checklists; the current list''s FRA trigger
-  wasn''t captured. The audit couldn''t read this council''s list, so its contents weren''t checked.'
+      - approval-condition
+      - reserved-matters
+      - full
+      - outline
+      - s73
+  - any:
+    - all:
+      - any:
+        - condition:
+            field: site-area-residential
+            operator: '>='
+            value: 1
+            description: Site of 1 ha or more.
+        - condition:
+            field: site-area-non-residential
+            operator: '>='
+            value: 1
+            description: Site of 1 ha or more.
+      - site:
+          in:
+          - flood-risk-zone
+          description: In Flood Zone 1.
+    - all:
+      - site:
+          in:
+          - flood-risk-zone
+          description: In Flood Zone 2 or 3.
+      - condition:
+          field: minor-development
+          value: false
+          description: Not 'minor development' as defined by the Environment Agency (householder and other
+            minor extensions).
+source-url: https://liverpool.gov.uk/media/yrwlyaiw/validation-checklist-oct-25.pdf
+policy: Liverpool Local Plan policy R3
+source-text: Sites of 1Ha or more in Flood Zone 1 and any development in Flood Zones 2 & 3 except “minor
+  development” as defined by the Environment Agency.
+must-include:
+- item: The risks of all forms of flooding to and from the development and how they will be managed, taking
+    climate change into account
+  level: must
+- item: Opportunities to reduce the probability and consequences of flooding
+  level: should
+- item: Design of surface water management systems including SuDS
+  level: should
+- item: Safe access to and from the development in areas at risk of flooding
+  level: should
+confidence: medium
+notes: 'From the council''s list (published 24 October 2025), page 41. Householder and other minor extensions
+  in Flood Zone 2/3 need a declaration instead (see the unmapped list). Application types follow the Table
+  1 matrix (pages 8-11), which ticks: approval of details (conditions), reserved matters, full, outline,
+  removal or variation of conditions.'
 review-status: unverified
 field-status: {}

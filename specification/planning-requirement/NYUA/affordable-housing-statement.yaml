@@ -1,13 +1,166 @@
 reference: affordable-housing-statement
 local-authority: NYUA
-required-if: discretionary
-source-url: https://www.northyorks.gov.uk/sites/default/files/2023-07/Application%20validation%20requirements%20-%20accessible_1.pdf
-source-text: This will be required for housing developments where the number of units exceeds the threshold
-  set out in the Authority’s Affordable Housing Policy
-confidence: low
-notes: 'Audit (wrong_trigger): the excerpt merged three headings. The threshold is in the authority''s
-  affordable housing policy, not the list. Audit (wrong_document): this is the 2016 County Planning Authority
-  list, now used for minerals, waste and the council''s own development; most applications are validated
-  against the former district areas'' own lists, which are not captured yet.'
+required-if:
+  any:
+  - all:
+    - any:
+      - application-type:
+          in:
+          - reg-3
+      - condition:
+          field: former-district
+          value: selby
+          description: Site in the former Selby district area.
+      - condition:
+          field: former-district
+          value: ryedale
+          description: Site in the former Ryedale district area.
+    - discretionary
+  - all:
+    - condition:
+        field: former-district
+        value: ryedale
+        description: Site in the former Ryedale district area.
+    - discretionary
+  - all:
+    - condition:
+        field: former-district
+        value: harrogate
+        description: Site in the former Harrogate district area.
+    - any:
+      - all:
+        - condition:
+            field: settlement-type
+            value: harrogate-knaresborough-ripon
+            description: Site in Harrogate, Knaresborough or Ripon.
+        - any:
+          - condition:
+              field: dwelling-count
+              operator: '>='
+              value: 15
+              description: 15 dwellings.
+          - condition:
+              field: site-area-residential
+              operator: '>='
+              value: 0.5
+              description: 0.5 ha.
+      - any:
+        - condition:
+            field: dwelling-count
+            operator: '>='
+            value: 3
+            description: 3 dwellings (elsewhere).
+        - condition:
+            field: site-area-residential
+            operator: '>='
+            value: 0.1
+            description: 0.1 ha (elsewhere).
+  - all:
+    - condition:
+        field: former-district
+        value: craven
+        description: Site in the former Craven district area.
+    - any:
+      - condition:
+          field: dwelling-count
+          operator: '>='
+          value: 11
+          description: 11 units or more.
+      - condition:
+          field: housing-floorspace
+          operator: '>='
+          value: 1000
+          description: 1,000 sq m gross floor space or more.
+      - all:
+        - site:
+            in:
+            - designated-rural-area
+            description: Designated rural area.
+        - condition:
+            field: dwelling-count
+            operator: '>='
+            value: 6
+            description: Six to 10 dwellings.
+      - condition:
+          field: housing-type
+          value: older-people
+          description: Specialist housing for older people (C3), age-restricted/sheltered housing, or
+            assisted living/extra care housing.
+  - all:
+    - condition:
+        field: former-district
+        value: scarborough
+        description: Site in the former Scarborough district area.
+    - any:
+      - condition:
+          field: dwelling-count
+          operator: '>='
+          value: 10
+          description: '''Major'' residential schemes of 10+ new dwellings.'
+      - condition:
+          field: site-area-residential
+          operator: '>'
+          value: 0.5
+          description: Site area exceeds 0.5 ha.
+source-url: https://www.northyorks.gov.uk/sites/default/files/2023-10/NYPA2%20Application%20for%20outline%20or%20full%20planning%20permission%20-%20accessible.pdf
+policy: Craven Local Plan policy H2 (Craven); Scarborough Local Plan policy HC3 (Scarborough); saved policy
+  H5 of the Harrogate District Local Plan (Harrogate)
+source-text: 'This will be required for housing developments where the number of units exceeds the threshold
+  set out in the Authority’s Affordable Housing Policy ... for on-site provision of affordable housing,
+  or it is a type of development where a commuted sum is required. ... Affordable housing - all planning
+  applications for residential development on sites of 15 dwellings/0.5ha in Harrogate, Knaresborough
+  and Ripon, and sites of 3 dwellings/0.1ha elsewhere, are subject to Saved Policy H5 of the Harrogate
+  and District Local Plan as amended 2004, which requires an element of affordable housing subject to
+  financial viability. ... In accordance with the NPPF and NPPG, this applies to all applications proposing:
+  - 11 units or 1,000 square gross floor space or more - developments of six to 10 dwellings in designated
+  rural areas - specialist housing developments for older people, where falling within Use Class C3 -
+  developments of age restricted/sheltered housing or similar housing; and - developments of assisted
+  living/extra care housing ... ‘Major’ residential schemes of 10+ new dwellings or where its site area
+  exceeds 0.5ha.'
+must-include:
+- item: 'Number of residential units, the mix of units and the proposed tenure (Craven: through the council''s
+    affordable housing ''Heads of Terms'' pro forma)'
+  level: must
+  required-if:
+    any:
+    - condition:
+        field: former-district
+        value: craven
+        description: Site in the former Craven district area.
+    - condition:
+        field: former-district
+        value: scarborough
+        description: Site in the former Scarborough district area.
+- item: 'Scarborough full and reserved matters: unit locations marked on a plan, floor plans showing number,
+    size and layout of habitable rooms and bedrooms, tenure types, and any Registered Providers'
+  level: must
+  required-if:
+    all:
+    - condition:
+        field: former-district
+        value: scarborough
+        description: Site in the former Scarborough district area.
+    - application-type:
+        in:
+        - full
+        - reserved-matters
+- item: 'Scarborough outline: at least the proposed number or percentage of affordable units'
+  level: must
+  required-if:
+    all:
+    - condition:
+        field: former-district
+        value: scarborough
+        description: Site in the former Scarborough district area.
+    - application-type:
+        in:
+        - outline
+confidence: medium
+notes: 'From the council''s lists (published 2011 to 2023; see _lpa.yaml), by area: county (Regulation
+  3), Selby and Ryedale: county NYPA2 full planning checklist (April 2023); Selby: Selby area NYPA2 checklist
+  (North Yorkshire Local List, April 2011); Ryedale: Ryedale area RDC2 checklist (May 2017); Harrogate:
+  Harrogate area validation criteria page; Craven: Craven area ''What to submit'' page; Scarborough: Scarborough
+  area validation requirements (May 2021). The county, Selby and Ryedale checklists refer to the threshold
+  in the authority''s affordable housing policy without stating it, so discretionary.'
 review-status: unverified
 field-status: {}

@@ -5,18 +5,70 @@ required-if:
   - site:
       in:
       - air-quality-management-area
-      description: Development within or adjacent to an Air Quality Management Area.
+      description: Within or adjacent to an Air Quality Management Area.
+  - all:
+    - condition:
+        field: sensitive-end-use
+        value: true
+        description: Residential (C1, C2, C3, C4) or F1 learning and non-residential institution development.
+    - condition:
+        field: distance-to-busy-road
+        operator: <=
+        value: 20
+        description: Within 20m of a road with 10,000 Annual Average Daily Traffic (AADT).
+  - condition:
+      field: direct-air-emissions
+      value: true
+      description: Industrial development where emissions could affect the surrounding neighbourhood.
+  - all:
+    - site:
+        in:
+        - air-quality-management-area
+        description: Inside an AQMA.
+    - condition:
+        field: parking-spaces
+        operator: '>='
+        value: 50
+        description: 50 or more new car parking spaces inside an AQMA.
+  - condition:
+      field: parking-spaces
+      operator: '>='
+      value: 100
+      description: 100 or more new car parking spaces outside an AQMA.
   - condition:
       field: biomass-or-chp
       value: true
-      description: The proposal includes a biomass boiler.
+      description: Biomass boilers or biomass fuelled plant.
+  - condition:
+      field: hgv-movements-daily
+      operator: '>'
+      value: 200
+      description: Construction sites generating more than 200 HGV movements per day over a year or more.
   - discretionary
 source-url: https://www.kirklees.gov.uk/beta/planning-applications/pdf/validation-requirements-submission-of-planning-applications.pdf
-source-text: Air Quality Impact Assessment (AQIA) (including Monetary Damage Cost Assessments) Development
-  that is within or adjacent to an Air Quality Management Area (AQMA)
+policy: Kirklees Local Plan (2019) policy LP51; West Yorkshire Low Emissions Strategy Planning Guidance
+source-text: Development that is within or adjacent to an Air Quality Management Area (AQMA) Development
+  of C1, C2, C3, C4 (residential) & F1 (learning and non-residential institution) within 20m ... of a
+  road with 10,000 Annual Average Daily Traffic (AADT) Development defined as Major development in accordance
+  with the West Yorkshire Low Emission Strategy (WYLES) Planning Guidance Document Industrial development
+  where emissions could affect the surrounding neighbourhood Significant new car parking of 100 or more
+  spaces outside an AQMA or 50 or more spaces inside an AQMA Biomass boilers or biomass fuelled plant
+  Construction sites that would generate large HGV flows (>200 movements per day) ... over a period of
+  a year or more
+must-include:
+- item: Demonstrates the development will not impact existing air quality or subject sensitive receptors
+    to harmful concentrations of air pollutants
+  level: must
+- item: 'WYLES ''major'' developments: a monetary damage cost assessment with proposed mitigation measures,
+    whose value reflects the predicted damage cost'
+  level: must
+  required-if: discretionary
+- item: Proportionate to the nature and scale of the development as defined in the WYLES Planning Guidance
+    Document
+  level: must
 confidence: medium
-notes: 'Audit (wrong_trigger): the excerpt ran into agricultural building text. Other triggers (sites
-  within 20m of roads with 10,000+ AADT, car parks of 100+/50+ spaces, 200+ HGV movements a day) are shown
-  as officer discretion because the audit doesn''t say how they split.'
+notes: From the council's list (effective 24 May 2024), Table 4 (Air Quality Impact Assessment), page
+  23-25. 'Major' under the WYLES guidance is that document's own definition, not the planning one, so
+  it shows as discretionary.
 review-status: unverified
 field-status: {}

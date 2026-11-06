@@ -2,28 +2,147 @@ reference: biodiversity-survey-report
 local-authority: NYUA
 required-if:
   any:
-  - condition:
-      field: protected-species
-      value: true
-      description: Protected species are likely to be affected.
-  - site:
-      in:
-      - site-of-special-scientific-interest
-      - special-protection-area
-      - special-area-of-conservation
-      - local-wildlife-site
-      - priority-habitat
-      description: Designated sites or priority habitats are likely to be affected.
-  - discretionary
-source-url: https://www.northyorks.gov.uk/sites/default/files/2023-07/Application%20validation%20requirements%20-%20accessible_1.pdf
-source-text: may affect protected species and will need to provide information on them, any potential
-  impacts for them and any mitigation proposals for such impacts.
-confidence: low
-notes: 'The workbook guessed the application type (''INFERRED''), so no type is given. Audit (missing_requirement):
-  NYPA1 householder: where protected species, designated sites, priority habitats or geological features
-  are likely to be affected (geological features shown as officer discretion). Audit (wrong_document):
-  this is the 2016 County Planning Authority list, now used for minerals, waste and the council''s own
-  development; most applications are validated against the former district areas'' own lists, which are
-  not captured yet.'
+  - all:
+    - any:
+      - application-type:
+          in:
+          - reg-3
+      - condition:
+          field: former-district
+          value: selby
+          description: Site in the former Selby district area.
+      - condition:
+          field: former-district
+          value: ryedale
+          description: Site in the former Ryedale district area.
+    - condition:
+        field: protected-species
+        value: true
+        description: Likely to affect protected species, a designated site, priority habitat or geological
+          feature.
+  - all:
+    - application-type:
+        in:
+        - mineral-extraction
+        - mineral-app
+        - waste-dev
+        - romp
+    - condition:
+        field: protected-species
+        value: true
+        description: Likely to affect protected species, a designated site, priority habitat or geological
+          feature.
+  - all:
+    - condition:
+        field: former-district
+        value: craven
+        description: Site in the former Craven district area.
+    - any:
+      - site:
+          in:
+          - special-area-of-conservation
+          - special-protection-area
+          - ramsar
+          - site-of-special-scientific-interest
+          - national-nature-reserve
+          - local-wildlife-site
+          - local-nature-reserve
+          - priority-habitat
+          description: In or adjacent to a European site, SSSI, NNR, SNCI, LNR, wildlife corridor or priority
+            habitat.
+      - condition:
+          field: geodiversity-interest
+          value: true
+          description: In or adjacent to a Regionally Important Geological Site.
+      - condition:
+          field: greenfield-site
+          value: true
+          description: Development of a greenfield site.
+      - all:
+        - condition:
+            field: vacant-building
+            value: true
+            description: Redevelopment of disused, redundant or buildings in disrepair in the main urban
+              area, or of outbuildings in the countryside.
+        - discretionary
+  - all:
+    - condition:
+        field: former-district
+        value: scarborough
+        description: Site in the former Scarborough district area.
+    - any:
+      - all:
+        - ref: major-development
+        - discretionary
+      - site:
+          in:
+          - special-area-of-conservation
+          - special-protection-area
+          - ramsar
+          - site-of-special-scientific-interest
+          - national-nature-reserve
+          - local-wildlife-site
+          - local-nature-reserve
+          - priority-habitat
+          description: In or adjacent to a European site, SSSI, NNR, SNCI, LNR, wildlife corridor or priority
+            habitat.
+      - condition:
+          field: protected-species
+          value: true
+          description: Potential impact on protected species, priority habitats or Ancient Woodlands.
+      - condition:
+          field: structural-demolition
+          value: true
+          description: Demolition of older buildings (pre-1945).
+      - condition:
+          field: potential-roost-features
+          value: true
+          description: Removal or alteration of certain roof spaces, or barn conversions.
+      - condition:
+          field: hedgerows-affected
+          value: true
+          description: Removal of mature trees, scrub or hedgerows.
+      - condition:
+          field: geodiversity-interest
+          value: true
+          description: Sites of geological interest.
+source-url: https://www.northyorks.gov.uk/sites/default/files/2023-10/NYPA2%20Application%20for%20outline%20or%20full%20planning%20permission%20-%20accessible.pdf
+source-text: 'Where a proposed development is likely to affect protected species, a designated site, priority
+  habitat or geological feature, the application must be accompanied by a Biodiversity/Geological Survey
+  and Report. ... All developments in or adjacent to: - European site (for instance, SAC/SPA/Ramsar) -
+  Site of Special Scientific Interest (SSSI) - in or adjacent to National Nature Reserve (NNR) - Site
+  of Nature Conservation Interest (SNCI) - Regionally Important Geological Sites (RIGS) - Local Nature
+  Reserve (LNR) - wildlife corridors - priority habitats - development of greenfield sites - redevelopment
+  of disused, redundant or buildings in disrepair in the main urban area - redevelopment of outbuildings
+  within the countryside ... Most applications for ‘major development’  Any development directly or indirectly
+  affecting a statutory or non-statutory protected site  Proposals with potential impact on protected
+  species, priority habitats, or Ancient Woodlands  Demolition of older buildings (pre-1945)  Removal
+  or alteration of certain roof spaces  Barn conversions  Natural habitat directly affected or nearby
+  e.g. woodland, ponds, watercourses)  Removal of mature trees, scrub or hedgerows  Sites of geological
+  interest'
+must-include:
+- item: 'Craven: existing biodiversity interests on and near the land, possible impacts, and avoidance,
+    mitigation and/or compensation; in most cases a Preliminary Ecological Appraisal'
+  level: must
+  required-if:
+    condition:
+      field: former-district
+      value: craven
+      description: Site in the former Craven district area.
+- item: 'Scarborough: undertaken by a suitably qualified ecologist; surveys up to date'
+  level: must
+  required-if:
+    condition:
+      field: former-district
+      value: scarborough
+      description: Site in the former Scarborough district area.
+confidence: medium
+notes: 'From the council''s lists (published 2011 to 2023; see _lpa.yaml), by area: county (Regulation
+  3), Selby and Ryedale: county NYPA2 full planning checklist (April 2023); minerals and waste: NYPA15
+  minerals and waste checklist (April 2023); Craven: Craven area ''What to submit'' page; Scarborough:
+  Scarborough area validation requirements (May 2021). The joint checklist refers to its Biodiversity
+  and Geological Assessments appendix for when protected species surveys are needed. Harrogate asks for
+  its biodiversity pro forma in every case (see the unmapped list). Scarborough''s ''most applications
+  for major development'' is discretionary.'
 review-status: unverified
 field-status: {}

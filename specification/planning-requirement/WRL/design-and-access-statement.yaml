@@ -1,36 +1,74 @@
 reference: design-and-access-statement
 local-authority: WRL
 required-if:
-  any:
-  - ref: major-development
-  - all:
-    - site:
+  all:
+  - any:
+    - ref: major-development
+    - all:
+      - site:
+          in:
+          - world-heritage-site
+          - conservation-area
+          description: Within a World Heritage Site or a Conservation Area.
+      - any:
+        - condition:
+            field: dwelling-count
+            operator: '>='
+            value: 1
+            description: One or more dwellings.
+        - condition:
+            field: floorspace
+            operator: '>='
+            value: 100
+            description: A building or buildings with 100 sq m or more of floor space.
+    - application-type:
         in:
-        - conservation-area
-        - world-heritage-site
-        description: The site is in a conservation area or World Heritage Site.
-    - any:
-      - condition:
-          field: dwelling-count
-          operator: '>='
-          value: 1
-          description: The proposal creates one or more dwellings.
-      - condition:
-          field: floorspace
-          operator: '>='
-          value: 100
-          description: The proposal creates 100 square metres or more of floorspace.
-  - application-type:
+        - lbc
+  - condition:
+      field: involves-change-of-use
+      value: false
+      description: Not a material change of use (nor waste development or engineering or mining operations).
+  - any:
+    - application-type:
+        in:
+        - full
+        - outline
+        - reserved-matters
+        - lbc
+source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
+policy: Town and Country Planning (Development Management Procedure) (England) Order 2015 article 9
+source-text: All major applications. Applications within a World Heritage Site or a Conservation Area
+  where the proposed development consists of one or more dwellings; or a building or buildings with a
+  floor space of 100 square metres or more. Applications for Listed Building Consent.
+must-include:
+- item: The design principles and concepts applied
+  level: must
+- item: The steps taken to appraise the context and how the design takes it into account
+  level: must
+- item: The approach to access, how Local Plan policies were considered, any consultation on access and
+    how specific access issues were addressed
+  level: must
+- item: 'Listed building consent: how the design takes account of the building''s special importance,
+    its physical features and its setting'
+  level: must
+  required-if:
+    application-type:
       in:
       - lbc
-source-url: https://www.wirral.gov.uk/files/adopted-local-validation-checklist.pdf/download?inline
-source-text: 'Design and Access Statements accompanying applications for listed building consent must
-  include an explanation of the design principles and concepts that have been applied to the proposed
-  works, and how they have taken account of: (a) the special architectural or historic importance of the
-  building; (b) the particular physical features of the building that justify its designation as a listed
-  building; and (c) the building’s setting.'
+- item: 'Listed building consent (unless works only affect the interior): the approach to access, alternatives
+    considered, policies, consultation and specific access issues'
+  level: must
+  required-if:
+    all:
+    - application-type:
+        in:
+        - lbc
+    - condition:
+        field: external-alterations
+        value: true
+        description: The works affect more than the interior.
 confidence: medium
-notes: 'Audit (missing_requirement): item 11 also covers all majors, and dwellings or 100 sqm+ in a conservation
-  area or World Heritage Site; the workbook had it under Listed building consent only.'
+notes: From the council's list (adopted May 2025), page 7-9. Waste development, material changes of use,
+  engineering or mining operations and applications to amend conditions (s73) don't need one.
 review-status: unverified
 field-status: {}
