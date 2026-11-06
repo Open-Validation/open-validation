@@ -196,6 +196,14 @@ table.grid td.pending { outline: 2px dashed var(--text); outline-offset: -4px; }
 body.reviewing table.grid td.cell { cursor: pointer; }
 table.grid td .clip { display: block; max-width: 340px; }
 table.grid td.wide .clip { max-width: 460px; }
+/* Column widths: drag the grip on a heading's right edge (or focus it and use the arrow keys) */
+table.grid .colgrip { position: absolute; top: 0; right: -5px; width: 10px; height: 100%; cursor: col-resize; z-index: 4; touch-action: none; }
+table.grid .colgrip::after { content: ""; position: absolute; left: 4px; top: 22%; bottom: 22%; width: 2px; border-radius: 2px; background: var(--line); }
+table.grid .colgrip:hover::after, table.grid .colgrip:focus-visible::after, body.col-resizing table.grid .colgrip::after { background: var(--accent); }
+table.grid .colgrip:focus-visible { outline: none; }
+body.col-resizing { cursor: col-resize; user-select: none; }
+.colw-bar { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin: 0 0 6px; font-size: 13px; }
+.colw-bar[hidden] { display: none; }
 table.grid td button.linkish { background: none; border: none; color: var(--accent); cursor: pointer; padding: 0; text-align: left; text-decoration: underline; }
 .counts { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px; }
 .progress { height: 6px; background: var(--line-soft); border-radius: 999px; overflow: hidden; margin: 8px 0; }
@@ -517,6 +525,15 @@ function appliesTo(rule) {
 function moreHTML(preview, full) {
   return '<details class="more"><summary title="Click to show the full wording"><span class="pv">' + esc(preview) + '… </span>' +
     '<span class="mlink">show more</span><span class="lless">show less</span></summary><span class="fulltext">' + esc(full) + "</span></details>";
+}
+// A table cell's text: in full when short, otherwise the first ~120 characters (cut at a word) with "show more"
+function clipHTML(t) {
+  if (!t) return "";
+  var first = t.split("\n")[0];
+  if (t.length <= 120 && first === t) return esc(t);
+  var pv = first.slice(0, 120), cut = pv.lastIndexOf(" ");
+  if (first.length > 120 && cut > 60) pv = pv.slice(0, cut);
+  return moreHTML(pv.replace(/[\s;,:]+$/, ""), t);
 }
 function tagsHTML(rule, clickable) {
   var t = appliesTo(rule);
@@ -1069,7 +1086,7 @@ function renderTable(panel, council) {
     if (key === "applies") return "<td>" + tagsHTML(row.d["required-if"], true) + "</td>";   // worked out from the rule, so not a cell of its own
     if (key === "requirement") return cellTD(row.d, row.code, row.file, key, badge(row.status) + "<br><strong>" + esc(row.cells.requirement) + '</strong> <span class="mono muted">' + esc(row.file) + "</span>");
     if (key === "source-url") return cellTD(row.d, row.code, row.file, key, row.cells[key] ? '<a href="' + esc(row.cells[key]) + '" target="_blank" rel="noopener">Council list</a>' : "");
-    if (key === "source-text") { var t = row.cells[key]; var first = t.split("\n")[0]; return cellTD(row.d, row.code, row.file, key, t ? (t.length > 120 || t.indexOf("\n") !== -1 ? moreHTML(first.slice(0, 120), t) : esc(t)) : "", "wide"); }
+    if (key === "source-text" || key === "required-if" || key === "must-include") return cellTD(row.d, row.code, row.file, key, clipHTML(row.cells[key]), key === "must-include" ? "" : "wide");
     if (key === "application-type") return cellTD(row.d, row.code, row.file, key, esc(row.cells[key] || (row.d["required-if"] ? "" : "")), "", !row.cells[key] && "all types");
     return cellTD(row.d, row.code, row.file, key, esc(row.cells[key]), key === "required-if" ? "wide" : "");
   }, "table");
@@ -1091,9 +1108,24 @@ function cellTD(data, code, file, cell, inner, cls, emptyText) {
   var label = STATUS_LABEL[st.status] + (st.pending ? " (pending)" : "") + (st.mark && st.mark.note ? ": " + st.mark.note : "");
   return '<td class="cell tint st-' + st.status + (st.pending ? " pending" : "") + (cls ? " " + cls : "") + '" title="' + esc(label) + '" data-lpa="' + esc(code) + '" data-file="' + esc(file) + '" data-cell="' + esc(cell) + '"' + (S.review ? ' tabindex="0"' : "") + '><span class="sr-only">' + esc(label) + ': </span><span class="clip">' + inner + "</span></td>";
 }
+// Column widths the viewer has set by dragging, per table: { table: { column: px } }, remembered in this browser
+function colW(id) { if (!S.colW) { try { S.colW = JSON.parse(localStorage.getItem("ov-colw")) || {}; } catch (e) { S.colW = {}; } } return S.colW[id] = S.colW[id] || {}; }
+function saveColW() { try { localStorage.setItem("ov-colw", JSON.stringify(S.colW)); } catch (e) {} }
+function colWidthCSS(id) {
+  var w = colW(id), sel = "#grid-" + id;
+  return (S.gridCols[id] || []).map(function (c, i) {
+    var px = w[c[0]], n = i + 1; if (!px) return "";
+    return sel + " tr > :nth-child(" + n + "){width:" + px + "px;min-width:" + px + "px;max-width:" + px + "px;white-space:normal;overflow-wrap:anywhere}" + sel + " td:nth-child(" + n + ") .clip{max-width:none}";
+  }).join("");
+}
 function tableHTML(cols, rows, cellFn, id) {
   var sort = S.sort[id] || {};
-  return '<div class="tablewrap"><table class="grid"><thead><tr>' + cols.map(function (c) { return '<th scope="col" data-sort="' + c[0] + '" tabindex="0"' + (sort.key === c[0] ? ' aria-sort="' + (sort.dir > 0 ? "ascending" : "descending") + '"' : "") + ">" + esc(c[1]) + "</th>"; }).join("") +
+  S.gridCols = S.gridCols || {}; S.gridCols[id] = cols;
+  var sized = Object.keys(colW(id)).length > 0;
+  return '<style id="gridw-' + id + '">' + colWidthCSS(id) + "</style>" +
+    '<div class="colw-bar" id="colwbar-' + id + '"' + (sized ? "" : " hidden") + '><button type="button" class="btn small" data-resetw="' + id + '">Reset column widths</button></div>' +
+    '<div class="tablewrap"><table class="grid" id="grid-' + id + '"><thead><tr>' + cols.map(function (c) { return '<th scope="col" data-sort="' + c[0] + '" tabindex="0"' + (sort.key === c[0] ? ' aria-sort="' + (sort.dir > 0 ? "ascending" : "descending") + '"' : "") + ">" + esc(c[1]) +
+      '<span class="colgrip" role="separator" aria-orientation="vertical" tabindex="0" data-col="' + c[0] + '" aria-label="Resize the ' + esc(c[1]) + ' column" title="Drag to change the width (or use the arrow keys); double-click to reset"></span></th>'; }).join("") +
     "</tr></thead><tbody>" + rows.map(function (r) { return "<tr>" + cols.map(function (c) { return cellFn(r, c[0]); }).join("") + "</tr>"; }).join("") + "</tbody></table></div>" +
     (rows.length ? "" : '<p class="muted">Nothing matches.</p>');
 }
@@ -1107,6 +1139,33 @@ function bindTable(panel, id, rerender) {
     th.addEventListener("click", go); th.addEventListener("keydown", function (e) { if (e.key === "Enter") go(); });
   });
   var f = panel.querySelector("#statusFilter"); if (f) f.addEventListener("change", function () { S.statusFilter = f.value; rerender(); });
+  bindColWidths(panel, id);
+}
+function bindColWidths(panel, id) {
+  var style = panel.querySelector("#gridw-" + id), bar = panel.querySelector("#colwbar-" + id);
+  function refresh() { if (style) style.textContent = colWidthCSS(id); if (bar) bar.hidden = !Object.keys(colW(id)).length; }
+  panel.querySelectorAll("#grid-" + id + " .colgrip").forEach(function (g) {
+    var th = g.parentElement, key = g.dataset.col;
+    function setW(px) { colW(id)[key] = Math.max(80, Math.min(1200, Math.round(px))); refresh(); }
+    g.addEventListener("click", function (e) { e.stopPropagation(); });   // don't sort
+    g.addEventListener("dblclick", function (e) { e.stopPropagation(); delete colW(id)[key]; saveColW(); refresh(); });
+    g.addEventListener("keydown", function (e) {
+      e.stopPropagation();
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      e.preventDefault(); setW(th.getBoundingClientRect().width + (e.key === "ArrowRight" ? 20 : -20)); saveColW();
+    });
+    g.addEventListener("pointerdown", function (e) {
+      e.preventDefault(); e.stopPropagation();
+      var x0 = e.clientX, w0 = th.getBoundingClientRect().width;
+      try { g.setPointerCapture(e.pointerId); } catch (err) {}
+      document.body.classList.add("col-resizing");
+      function move(ev) { setW(w0 + ev.clientX - x0); }
+      function up() { g.removeEventListener("pointermove", move); g.removeEventListener("pointerup", up); g.removeEventListener("pointercancel", up); document.body.classList.remove("col-resizing"); saveColW(); }
+      g.addEventListener("pointermove", move); g.addEventListener("pointerup", up); g.addEventListener("pointercancel", up);
+    });
+  });
+  var rb = panel.querySelector('[data-resetw="' + id + '"]');
+  if (rb) rb.addEventListener("click", function () { S.colW[id] = {}; saveColW(); refresh(); });
 }
 function statusFilterHTML() {
   return '<label class="field" style="flex-direction:row;align-items:center;gap:8px">Show <select id="statusFilter" class="input" style="width:auto"><option value="">all rows</option>' +
