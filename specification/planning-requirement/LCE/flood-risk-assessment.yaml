@@ -2,37 +2,64 @@ reference: flood-risk-assessment
 local-authority: LCE
 required-if:
   any:
-  - site:
-      in:
-      - flood-risk-zone
-      description: The site is in Flood Zone 2, 3a or 3b.
-  - condition:
-      field: near-watercourse
-      value: true
-      description: The site is next to an Ordinary Watercourse.
-  - condition:
-      field: site-area-residential
-      operator: '>='
-      value: 1
-      description: A site of 1 hectare or more in Flood Zone 1.
-  - condition:
-      field: site-area-non-residential
-      operator: '>='
-      value: 1
-      description: A site of 1 hectare or more in Flood Zone 1.
+  - all:
+    - application-type:
+        in:
+        - hh
+        - full
+        - outline
+        - reserved-matters
+    - site:
+        in:
+        - flood-risk-zone
+        description: Flood Zone 2, 3a or 3b, or in an Ordinary Watercourse (the council's flood map).
+  - all:
+    - application-type:
+        in:
+        - full
+        - outline
+        - reserved-matters
+    - any:
+      - condition:
+          field: site-area-residential
+          operator: '>='
+          value: 1
+          description: 'Flood Zone 1: site area of 1 hectare or more.'
+      - condition:
+          field: site-area-non-residential
+          operator: '>='
+          value: 1
+          description: 'Flood Zone 1: site area of 1 hectare or more.'
 source-url: https://www.leicester.gov.uk/sites/default/files/2026-01/local-validation-list-requirements-july-2025.pdf
+source-text: Flood Risk Assessment for developments in Flood Zones 2, 3a or 3b or in an Ordinary Watercourse
+  … or in within Flood Zone 1 where the development has a site area of 1 hectare or more
 must-include:
+- item: Considers flood risk from all sources, including climate change, the vulnerability of users, safe
+    access and egress and areas of refuge, and residual risk
+  level: should
+- item: Prepared by a suitably qualified individual
+  level: should
 - item: Sequential and exception tests, where appropriate
   level: must
-  source-text: The FRA must include sequential and exception tests, where appropriate.
-- item: Finished floor levels, on the council's Flood Risk template
+- item: Emergency flood planning procedures
   level: must
   required-if:
-    application-type:
-      in:
-      - hh
+    all:
+    - site:
+        in:
+        - flood-risk-zone
+        description: Flood Zone 2 or 3.
+    - condition:
+        field: more-vulnerable-use-change
+        value: true
+        description: '''More Vulnerable'', ''Highly Vulnerable'' or ''Essential Infrastructure'' development.'
 confidence: medium
-notes: 'Audit (wrong_trigger): the workbook''s excerpt was cut off at ''is required: 1.''. Triggers from
-  the audit: Flood Zones 2, 3a or 3b or an Ordinary Watercourse, or Flood Zone 1 sites of 1 ha or more.'
+notes: 'From the council''s list (published 7 July 2025), pages 6-7, 13, 15, 18-19, 21-23, 25-26, 52-53,
+  76-80. Where the development does not extend the ground-floor footprint (householder: or only adds a
+  porch of up to 3 sq m), the Appendix A template (Flood Risk Standard Template) will suffice. Change
+  of use in Flood Zones 2-3 only where the vulnerability classification is increased. Part 2 adds Flood
+  Zone 1 sites under 1 ha at risk from other sources or in a critical drainage area. The contents come
+  from Part 2 (''Document Types and Definitions''), which the list says is guidance and does not form
+  part of the adopted list.'
 review-status: unverified
 field-status: {}
