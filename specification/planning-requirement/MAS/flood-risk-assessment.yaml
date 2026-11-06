@@ -1,45 +1,69 @@
 reference: flood-risk-assessment
 local-authority: MAS
 required-if:
-  any:
-  - ref: major-development
-  - condition:
-      field: site-area-residential
-      operator: '>='
-      value: 1
-      description: The site is 1 hectare or greater (Flood Zone 1).
-  - condition:
-      field: site-area-non-residential
-      operator: '>='
-      value: 1
-      description: The site is 1 hectare or greater (Flood Zone 1).
-  - site:
+  all:
+  - application-type:
       in:
-      - critical-drainage-area
-      description: A site under 1 hectare with critical drainage problems.
-  - all:
+      - full
+      - outline
+      - reserved-matters
+  - any:
+    - ref: major-development
+    - condition:
+        field: site-area-residential
+        operator: '>='
+        value: 1
+        description: Site of 1 hectare or greater.
+    - condition:
+        field: site-area-non-residential
+        operator: '>='
+        value: 1
+        description: Site of 1 hectare or greater.
     - site:
         in:
-        - flood-risk-zone
-        description: The site is in Flood Zone 2 or 3.
-    - condition:
-        field: new-build
-        value: true
-        description: New built development.
-  - discretionary
+        - critical-drainage-area
+        description: Site less than 1 hectare with critical drainage problems.
+    - all:
+      - condition:
+          field: more-vulnerable-use-change
+          value: true
+          description: Change of use to a more vulnerable class.
+      - site:
+          in:
+          - surface-water-flood-risk
+          description: Can be affected by sources of flooding other than rivers and sea (e.g. surface
+            water, drains).
+    - all:
+      - site:
+          in:
+          - flood-risk-zone
+          description: Flood Zones 2 and 3.
+      - condition:
+          field: new-build
+          value: true
+          description: New built development.
 source-url: https://www.mansfield.gov.uk/downloads/file/3149/scheme-of-validation
-source-text: 'All Major Developments; All developments in Floodzone 1 when: - The site is 1 hectare or
-  greater … All new built development within Flood Zones 2 and 3.'
+policy: Mansfield District Local Plan 2013-2033 Policies CC2 and CC3; NPPF Part 14
+source-text: 'All Major Developments; All developments in Floodzone 1 when: The site is 1 hectare or greater;
+  The site is less than 1 hectare but has critical drainage problems; The site is less than 1 hectare
+  and includes the change of use of development type to a more vulnerable class where they can be affected
+  by sources of flooding other than rivers and sea (e.g. surface water, drains); All new built development
+  within Flood Zones 2 and 3.'
 must-include:
-- item: Flood risk sequential test / exception test as set out in NPPF & PPG
+- item: 'For Flood Zones 2 and 3: addresses the flood risk sequential test / exception test'
   level: must
   required-if:
     site:
       in:
       - flood-risk-zone
-      description: The site is in Flood Zone 2 or 3.
+      description: Flood Zones 2 and 3.
+- item: Opportunities to reduce the probability and consequences of flooding
+  level: should
+- item: Design of surface water management systems, including Sustainable Drainage (SuDS)
+  level: should
 confidence: medium
-notes: 'Audit (wrong_trigger): item 2.10. Officer discretion covers Flood Zone 1 sites under 1 ha changing
-  to a more vulnerable use.'
+notes: From the council's list (adopted August 2024), page 16. Table Two (2.10), 'Flood Risk Assessment
+  and Drainage Strategy'. Application types are those ticked in the Table Three checklist matrix (page
+  29-31).
 review-status: unverified
 field-status: {}
