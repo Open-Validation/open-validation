@@ -1,26 +1,79 @@
 reference: flood-risk-assessment
 local-authority: NUN
 required-if:
-  any:
-  - site:
+  all:
+  - application-type:
+      in:
+      - hh
+      - full
+      - outline
+      - prior-approval
+      - reserved-matters
+      - s73
+      - non-material-amendment
+  - any:
+    - site:
+        in:
+        - flood-risk-zone
+        description: Development within, in whole or in part, flood zone 2 and/or 3.
+    - condition:
+        field: site-area-residential
+        operator: '>='
+        value: 1
+        description: A site of 1 hectare or more.
+    - condition:
+        field: site-area-non-residential
+        operator: '>='
+        value: 1
+        description: A site of 1 hectare or more.
+source-url: https://www.nuneatonandbedworth.gov.uk/downloads/file/1470/validation-checklist-matrix
+policy: Nuneaton and Bedworth Borough Plan policy NE4; NPPF paragraphs 165-175
+source-text: development within, in whole or in part of flood zone 2 and/or flood zone 3; and … development
+  on sites with an area of 1 hectare or more (in flood zones 1, 2 or 3).
+must-include:
+- item: 'For development under 250 sq m in flood zones 2 and 3: a simple FRA with a plan showing finished
+    floor levels and estimated flood levels'
+  level: must
+  required-if:
+    all:
+    - site:
+        in:
+        - flood-risk-zone
+        description: Flood zone 2 or 3.
+    - condition:
+        field: floorspace
+        operator: <
+        value: 250
+        description: Less than 250 square metres.
+- item: 'Zone 1: existing flood risk from localised sources, the impact on run-off rates and design measures
+    to mitigate them'
+  level: must
+- item: 'Zones 2 and 3: existing flood risk from all sources, the impact of the development (including
+    off site/downstream in zone 3), and mitigation measures (floor levels, ground levels, evacuation routes,
+    SuDS) for the lifetime of the development'
+  level: must
+  required-if:
+    site:
       in:
       - flood-risk-zone
-      description: The site is in flood zone 2 or 3.
-  - condition:
-      field: site-area-residential
-      operator: '>='
-      value: 1
-      description: The site is 1 hectare or more.
-  - condition:
-      field: site-area-non-residential
-      operator: '>='
-      value: 1
-      description: The site is 1 hectare or more.
-source-url: https://www.nuneatonandbedworth.gov.uk/downloads/file/1470/validation-checklist-matrix
-source-text: a simple flood risk assessment, which includes a plan showing finished floor levels and estimated
-  flood levels, will be required.
+      description: Flood zone 2 or 3.
+- item: 'Sequential test statement (other than for minor extensions): the area of search, a map of other
+    sites at lower flood risk, and why they are not reasonably available'
+  level: must
+  required-if:
+    all:
+    - site:
+        in:
+        - flood-risk-zone
+        description: New development in flood zone 2 or 3.
+    - condition:
+        field: new-build
+        value: true
+        description: New development (not a minor extension).
+  source-text: Applications for new development in flood zones 2 and 3 must additionally include a sequential
+    test statement (other than for minor extensions),
 confidence: medium
-notes: 'The workbook guessed the application type (''INFERRED''), so no type is given. Audit (wrong_trigger):
-  the excerpt omitted ''flood zones 2 or 3, or sites of 1ha or more''.'
+notes: From the council's list (adopted 11 July 2024), page 33-35. The matrix (pages 83-84) marks it 'P'
+  (possible) for householder, full, outline, prior notification, reserved matters, s73, non-material amendments.
 review-status: unverified
 field-status: {}
