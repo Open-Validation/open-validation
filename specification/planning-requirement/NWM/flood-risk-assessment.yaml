@@ -4,20 +4,86 @@ required-if:
   all:
   - application-type:
       in:
+      - hh
       - full
       - outline
+      - reserved-matters
       - change-of-use
-  - site:
-      in:
-      - flood-risk-zone
-      description: The development is in Flood Zone 2 or 3.
+      - s73
+  - any:
+    - all:
+      - site:
+          in:
+          - flood-risk-zone
+          description: Flood Zone 2 or 3.
+      - application-type:
+          in:
+          - full
+          - outline
+          - reserved-matters
+          - change-of-use
+          - s73
+      - any:
+        - condition:
+            field: footprint-increase
+            value: true
+            description: The development increases the size of buildings.
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: A change of use.
+    - any:
+      - condition:
+          field: site-area-residential
+          operator: '>'
+          value: 1
+          description: Development of more than 1 ha (in Flood Zone 1).
+      - condition:
+          field: site-area-non-residential
+          operator: '>'
+          value: 1
+          description: Development of more than 1 ha (in Flood Zone 1).
+    - condition:
+        field: more-vulnerable-use-change
+        value: true
+        description: A change to a more vulnerable use on a site under 1 ha in Flood Zone 1.
+    - site:
+        in:
+        - critical-drainage-area
+        description: Within a Critical Drainage Area (Flood Zone 1).
 source-url: https://www.newham.gov.uk/downloads/file/8275/newham-par-december-2024-final
-source-text: 'A Flood Risk Assessment is required for: All development in Flood Zone 2 or 3 (including
-  minor development and changes of use) unless the development is a householder; or does not increase
-  the size of buildings (eg.'
+policy: Newham Local Plan (2018) SC3, SP9; London Plan (2021) SI12, SI13
+source-text: All development in Flood Zone 2 or 3 (including minor development and changes of use) unless
+  the development is a householder; or does not increase the size of buildings (eg. Altering just external
+  appearance); or non-residential extension of less than 250 sq. m (see Environment Agency’s standing
+  advice) Development of more than 1 hectare (ha) in Flood Zone 1 Development of less than 1 hectare in
+  Flood Zone 1 where a change to a more vulnerable use is proposed Development in Flood Zone 1 which is
+  also within a Critical Drainage Area.
+must-include:
+- item: Flood risk and surface water management meeting Newham's Surface Water Management Plan and Strategic
+    Flood Risk Assessment
+  level: must
+- item: 'In TE2100 areas (16 m safeguarding zones): land and access for renewing and maintaining flood
+    defences'
+  level: must
+  required-if: discretionary
+- item: 'Next to flood defences: a condition assessment/strategy for protection over the lifetime of the
+    development'
+  level: must
+  required-if: discretionary
+- item: A Sequential Test showing no alternative sites at lower flood risk
+  level: must
+  required-if:
+    all:
+    - ref: major-development
+    - site:
+        in:
+        - flood-risk-zone
+        description: Flood Zone 2 or 3.
 confidence: medium
-notes: 'Rows from Householder were dropped after the audit. Audit (wrong_app_type): the PAR does not require
-  an FRA for householder development. Not needed where the development does not increase the size of buildings
-  (the excerpt is cut off there).'
+notes: From the council's list (published December 2024), page 7 and 29-30. Non-residential extensions
+  under 250 sq m in Flood Zone 2 or 3 follow the Environment Agency's standing advice instead. The PAR
+  doesn't name application types for this document, so it is applied to planning applications (householder,
+  full, outline, reserved matters, change of use and s73).
 review-status: unverified
 field-status: {}

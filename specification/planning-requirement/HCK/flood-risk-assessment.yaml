@@ -1,36 +1,68 @@
 reference: flood-risk-assessment
 local-authority: HCK
 required-if:
-  any:
-  - site:
+  all:
+  - application-type:
       in:
-      - flood-risk-zone
-      description: The site is in Flood Zone 2 or 3.
-  - condition:
-      field: site-area-residential
-      operator: '>'
-      value: 1
-      description: The site is over 1 hectare (Flood Zone 1).
-  - condition:
-      field: site-area-non-residential
-      operator: '>'
-      value: 1
-      description: The site is over 1 hectare (Flood Zone 1).
-  - all:
+      - hh
+      - full
+      - outline
+      - s73
+  - any:
+    - site:
+        in:
+        - flood-risk-zone
+        description: Environment Agency Flood Zone 2 or 3.
+    - any:
+      - condition:
+          field: site-area-residential
+          operator: '>'
+          value: 1
+          description: A site greater than 1 ha (in Flood Zone 1).
+      - condition:
+          field: site-area-non-residential
+          operator: '>'
+          value: 1
+          description: A site greater than 1 ha (in Flood Zone 1).
+    - condition:
+        field: more-vulnerable-use-change
+        value: true
+        description: A change of use to a more vulnerable class (e.g. commercial to residential), on a
+          site under 1 ha in Flood Zone 1.
+    - all:
+      - any:
+        - ref: major-development
+        - condition:
+            field: basement
+            value: true
+            description: Basement development.
+      - any:
+        - site:
+            in:
+            - critical-drainage-area
+            description: A Critical Drainage Area.
+        - site:
+            in:
+            - surface-water-flood-risk
+            description: An area with a high risk of surface water flooding.
+        - site:
+            in:
+            - groundwater-flood-risk
+            description: An area with an elevated risk of groundwater flooding.
     - site:
         in:
         - critical-drainage-area
-        description: The site is in a Critical Drainage Area.
-    - any:
-      - ref: major-development
-      - condition:
-          field: basement
-          value: true
-          description: The proposal includes a basement.
-  - discretionary
+        description: Any development in a Critical Drainage Area (Flood Zone 1).
 source-url: https://docs.google.com/document/d/1T-STYwCkzNnVqOCE8Lyx-jm-nvbBBsqi2XkgJkRjAHY/edit?usp=sharing
+source-text: 'Required for: i) Development in Environment Agency Flood Zones 2 and 3 ii) Sites greater
+  than 1ha in size in Flood Zone 1. iii) Development on sites less than 1 ha in size in flood zone 1 which
+  include a change of use to a more vulnerable class (e.g. commercial to residential) iv) Major development
+  and basement development in Critical Drainage Areas and areas with a high risk of surface water flooding
+  or an elevated risk of groundwater flooding in flood zone 1 v) All development in flood zone 1 located
+  in a Critical Drainage Area'
 confidence: medium
-notes: 'From the audit (missing_requirement): Flood Zones 2/3; sites over 1 ha in FZ1; more vulnerable
-  uses (shown as officer discretion); majors and basements in Critical Drainage Areas.'
+notes: From the council's list (updated 16 July 2026), Local Requirements table. The checklist applies
+  to householder, full, outline and variation/removal of condition applications (and to listed building
+  consent only where it says so).
 review-status: unverified
 field-status: {}
