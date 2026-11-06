@@ -2,26 +2,96 @@ reference: flood-risk-assessment
 local-authority: SUA
 required-if:
   any:
-  - site:
-      in:
-      - flood-risk-zone
-      description: The site is in Flood Zone 2 or 3.
-  - condition:
-      field: near-watercourse
-      value: true
-      description: Works within 8 metres of a main river.
-source-url: https://www.somerset.gov.uk/planning-buildings-and-land/information-requirements-for-planning-applications/
-source-text: Flood Risk Assessment Required for development in Flood Zone 2 and 3 or works within 8 metres
-  of a main river.
+  - all:
+    - application-type:
+        in:
+        - hh
+        - full
+        - technical-details-consent
+        - outline
+        - outline-some
+        - outline-all
+    - any:
+      - site:
+          in:
+          - flood-risk-zone
+          description: Flood Zone 2 or 3.
+      - condition:
+          field: near-watercourse
+          value: true
+          description: Works within 8 metres of a main river.
+      - any:
+        - condition:
+            field: site-area-residential
+            operator: '>='
+            value: 1
+            description: Site area of 1 hectare or more.
+        - condition:
+            field: site-area-non-residential
+            operator: '>='
+            value: 1
+            description: Site area of 1 hectare or more.
+  - all:
+    - application-type:
+        in:
+        - full
+        - technical-details-consent
+        - outline
+        - outline-some
+        - outline-all
+    - ref: major-development
+  - all:
+    - application-type:
+        in:
+        - change-of-use
+    - site:
+        in:
+        - flood-risk-zone
+        description: Flood Zone 2 or 3.
+    - discretionary
+  - all:
+    - application-type:
+        in:
+        - reserved-matters
+        - s73
+    - discretionary
+source-url: https://somersetcc.sharepoint.com/:b:/s/SCCPublic/EXumNGRLz7tBh2yzrGBuimkBBUMpxpuI4wQ-UkB_z9MfWQ?e=wIIPMU
+policy: NPPF; PPG Flood risk and coastal change; Local Plans of the former district areas
+source-text: Required for development in Flood Zone 2 and 3 or works within 8m of a main river, and all
+  development of a site area of 1 hectare or over in Flood Zone 1,
 must-include:
-- item: The Householder Flood Risk Assessment form, for householder applications
+- item: For householder applications, the council's Householder Flood Risk Assessment information and
+    form
   level: must
   required-if:
     application-type:
       in:
       - hh
+  source-text: For Householder Planning Applications please download and complete the Householder Flood
+    Risk Assessment information and form
+- item: Reference to the Sequential Test guidance for development in Flood Zone 2 or 3
+  level: should
+  required-if:
+    all:
+    - application-type:
+        in:
+        - full
+        - technical-details-consent
+        - outline
+        - outline-some
+        - outline-all
+    - site:
+        in:
+        - flood-risk-zone
+        description: Flood Zone 2 or 3.
+- item: How flood risk will be managed now and over the development's lifetime, taking climate change
+    into account and having regard to the vulnerability of its users
+  level: should
 confidence: medium
-notes: 'Audit (wrong_app_type): not only full planning; the source also applies it to householder, change
-  of use, outline, reserved matters and s73 applications, and provides a householder FRA form.'
+notes: From the council's list (published 1 April 2025), page 18, 21, 30, 35, 43, 50, 60, 79, 110. Always
+  required for full and outline major applications. For change of use only essential infrastructure, highly
+  vulnerable and more vulnerable uses in Flood Zone 2 or 3 need one (no field for flood vulnerability,
+  so 'check'); reserved matters ('except if addressed under Outline permission') and section 73 (changes
+  to conditions on this issue) show as 'check'. The householder form is from the council's web page (https://www.somerset.gov.uk/planning-buildings-and-land/information-requirements-for-planning-applications/).
 review-status: unverified
 field-status: {}
