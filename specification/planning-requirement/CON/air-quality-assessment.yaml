@@ -2,33 +2,120 @@ reference: air-quality-assessment
 local-authority: CON
 required-if:
   any:
+  - condition:
+      field: dwelling-count
+      operator: '>='
+      value: 200
+      description: 200 or more dwellings (or a site area of 4 hectares or more where the number of dwellings
+        is not given).
   - all:
+    - any:
+      - condition:
+          field: floorspace-non-residential
+          operator: '>='
+          value: 1000
+          description: 1,000 sq m or more of new floor space.
+      - condition:
+          field: site-area-non-residential
+          operator: '>='
+          value: 2
+          description: A site area of 2 hectares or more.
     - condition:
-        field: dwelling-count
-        operator: '>='
-        value: 1
-        description: The application is for dwellings.
+        field: use-class
+        value: B2, B8 or retail and distribution
+        description: General industrial (B2), storage or distribution (B8), or retail and distribution
+          (shops, restaurants and cafes, drinking establishments, hot food takeaway).
+  - condition:
+      field: parking-spaces
+      operator: '>='
+      value: 300
+      description: Creates 300 or more car parking spaces.
+  - condition:
+      field: direct-air-emissions
+      value: true
+      description: A standby emergency generator for a centralised energy centre (if likely to be tested
+        or used more than 18 hours a year) or new Short Term Operating Reserve (STOR) facilities.
+  - condition:
+      field: combustion-plant-thermal-input
+      operator: '>'
+      value: 1000
+      description: Any combustion plant with single or combined thermal input greater than 1 MW.
+  - all:
     - site:
         in:
         - air-quality-management-area
-        description: Within an Air Quality Priority Area of concern, including a 1km buffer.
+        description: Within an Air Quality Management Area or Air Quality Area of Concern, including a
+          1 km buffer.
+    - any:
+      - condition:
+          field: dwelling-count
+          operator: '>='
+          value: 50
+          description: 50 or more dwellings.
+      - condition:
+          field: parking-spaces
+          operator: '>='
+          value: 50
+          description: 50 or more new parking spaces.
+      - condition:
+          field: use-class
+          value: lorry park or bus station
+          description: A lorry park with more than 25 spaces, or a bus station.
+      - condition:
+          field: combustion-plant-thermal-input
+          operator: '>'
+          value: 300
+          description: One or more substantial combustion processes, where any combustion plant has a
+            single or combined thermal input greater than 300 kW.
   - all:
-    - site:
-        in:
-        - special-protection-area
-        - special-area-of-conservation
-        - site-of-special-scientific-interest
-        description: The development is likely to affect a habitats site (SPA/SAC/Ramsar) or an SSSI.
+    - condition:
+        field: air-quality-screening-area
+        value: true
+        description: Within an Air Quality Priority Area of concern, including a 1 km buffer.
     - discretionary
 source-url: https://www.cornwall.gov.uk/media/wadiaqe0/validation-guide-17-web.pdf
-source-text: 'Air Quality Assessment LR When Required: Applications for dwellings within an Air Quality
-  Priority Area of concern including 1km buffer'
-confidence: low
-notes: 'Audit (wrong_trigger, missing_requirement): the workbook''s excerpt ran two sentences together.
-  From the audit: under Natural England standing advice of 16 October 2025, a detailed air quality assessment
-  with a mitigation plan is needed where agricultural, industrial or traffic-generating development (shown
-  as officer discretion) is likely to affect a habitats site or an SSSI. Audit (other): a ''Validation
-  Guide 2026 DRAFT'' was consulted on in July-August 2026 and is being finalised; recheck once it is adopted.
-  The audit couldn''t read this council''s list, so its contents weren''t checked.'
+policy: 'Chief Planning Officer''s Advice Note: Planning for Air Quality; National Planning Policy Framework'
+source-text: 'All applications for: 200 or more dwellings/where the number of dwellings is not given a
+  site area of 4 hectares or more; creation of new floor space of 1000sqm or more or a site area of 2
+  hectares or more to be used for general industrial (use class B2), storage or distribution (use class
+  B8), retail and distribution (shops, restaurants and cafes, drinking establishments, hot food takeaway);
+  creation of 300 or more car parking spaces; standby emergency generator associated with a centralised
+  energy centre (if likely to be tested/used >18 hours a year), or new Short Term Operating Reserve facilities
+  (STOR) ; Any combustion plant with single or combined thermal input greater than 1MW. Applications within
+  a Air Quality Management Area (AQMA) including a 1km buffer or a Air Quality Area of Concern (AQAC)
+  including a 1km buffer for: 50 or more dwellings; 50 or more new parking spaces; Lorry park with more
+  than 25 spaces; bus station; one or more substantial combustion processes, where any combustion plant
+  has single or combined thermal input greater than 300kWh Applications within a Air Quality Priority
+  Area of concern including 1km buffer, please refer to Chief Planning Office’s Advice Note: Planning
+  for Air Quality. ... Applications for dwellings within an Air Quality Priority Area of concern including
+  1km buffer, please refer to Chief Planning Office’s Advice Note: Planning for Air Quality such development
+  is not supported. Applications within Air Quality Management Area (AQMA) including a 1 km buffer or
+  with an Air Quality Area of Concern (AQAC) including a 1 km buffer for 50 or more new car parking spaces;
+  lorry park with more than 25 spaces; Bus station; Have one or more substantial combustion processes,
+  where any combustion plant has single or combined thermal input >300kWh'
+must-include:
+- item: Proportionate to the nature and scale of development, existing air quality conditions and potential
+    impacts
+  level: should
+- item: Baseline conditions and air quality concerns, and how they could change with and without the development
+  level: should
+- item: Sensitive habitats (including designated sites)
+  level: should
+- item: Assessment methods and any verification of air quality modelling; the basis for assessing impacts
+    and their significance
+  level: should
+- item: Cumulative or in-combination effects where relevant; construction phase impacts
+  level: should
+- item: Mitigation measures to reduce or remove adverse effects, and measures that could improve air quality
+  level: should
+confidence: medium
+notes: From the council's list (adopted, version 1.7 of 10 April 2024), pages 65, 120, 121, 122. The 200-dwelling,
+  300-space, generator and 1 MW triggers come from the major application section; full minor applications
+  use the AQMA/AQAC triggers (page 65). For an Air Quality Priority Area the list only refers to the Chief
+  Planning Officer's advice note (and for minor dwellings says 'such development is not supported'), so
+  that part is discretionary. The council's Validation updates page (Natural England standing advice,
+  16 October 2025) says a detailed air quality assessment with a mitigation plan is needed where emissions
+  would have a likely significant effect on a habitats site or an adverse effect on an SSSI, and that
+  the guide will be updated.
 review-status: unverified
 field-status: {}

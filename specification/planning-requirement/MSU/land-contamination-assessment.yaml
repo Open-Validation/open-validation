@@ -2,43 +2,110 @@ reference: land-contamination-assessment
 local-authority: MSU
 required-if:
   any:
-  - site:
-      in:
-      - contaminated-land
-      description: Contamination is known or suspected on site.
+  - all:
+    - application-type:
+        in:
+        - hh
+    - site:
+        in:
+        - contaminated-land
+        description: Contamination is suspected or known to exist on site.
   - site:
       in:
       - near-landfill-site
-      description: The site is within 250 metres of a landfill site.
+      description: The site lies within, or partly within, 250m of a current or former landfill site.
   - all:
     - condition:
         field: dwelling-count
         operator: '>='
         value: 1
-        description: New residential units, including replacement units.
+        description: 1-2 residential units (including replacement residential and holiday units).
     - condition:
-        field: greenfield-site
-        value: true
-        description: Land that has served as garden/domestic curtilage, or land not previously developed.
-  - discretionary
-source-url: https://www.midsuffolk.gov.uk/documents/d/asset-library-54706/joint-lvl-part-1-householder-v3-final-pdf
-source-text: The Land Contamination Report and Questionnaire are only required in the following situations
-  for householder development. o (1) Contamination is suspected on site. o (2) Contamination is known
-  to exist on site o (3) The proposed site is within 250 metres of a landfill site
+        field: dwelling-count
+        operator: <=
+        value: 2
+        description: 1-2 residential units (including replacement residential and holiday units).
+    - any:
+      - condition:
+          field: previously-developed-land
+          value: false
+          description: On land that has served as garden/domestic curtilage, and/or not previously developed
+            land in the NPPF.
+      - condition:
+          field: agricultural-building-reuse
+          value: true
+          description: Involves conversion of agricultural building/s.
+  - condition:
+      field: dwelling-count
+      operator: '>='
+      value: 3
+      description: 3 or more residential units (including replacement residential and holiday units).
+  - condition:
+      field: industrial-site
+      value: true
+      description: Any residential, commercial and/or industrial development on a site in previous or
+        current commercial and/or industrial use.
+source-url: https://www.midsuffolk.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+source-text: This Land Contamination Report is required for 1-2 residential units including replacement
+  residential units on Land that has served as garden/domestic curtilage, and/or not previously developed
+  land in the NPPF and/or involves conversion of agricultural building/s … The Land Contamination Report
+  and Questionnaire are only required in the following situations for householder development. … (1) Contamination
+  is suspected on site. … (2) Contamination is known to exist on site … (3) The proposed site is within
+  250 metres of a landfill site
 must-include:
-- item: A Phase I Site Walkover and Risk Assessment in accordance with BS10175:2011+A2:2017 (or the equivalent
-    current standard) by an appropriate person
+- item: 'For 1-2 units: a Phase 1 Desktop Study with an online environmental check covering, as a minimum,
+    historical land uses, landfill and mineral sites, sensitive land uses and recorded pollution incidents
+    within a 250m search radius'
+  level: must
+  required-if:
+    condition:
+      field: dwelling-count
+      operator: <=
+      value: 2
+      description: 1-2 residential units.
+- item: A completed and signed BMSDC approved Land Contamination Questionnaire
   level: must
   required-if:
     any:
     - application-type:
         in:
         - hh
-    - discretionary
+    - condition:
+        field: dwelling-count
+        operator: <=
+        value: 2
+        description: 1-2 residential units.
+- item: A Phase I Site Walkover and Risk Assessment to BS10175:2011+A2:2017 (or the equivalent standard
+    at the time) by an appropriate person
+  level: must
+  required-if:
+    any:
+    - application-type:
+        in:
+        - hh
+    - condition:
+        field: agricultural-building-reuse
+        value: true
+        description: Barn conversions.
+    - condition:
+        field: dwelling-count
+        operator: '>='
+        value: 3
+        description: 3 or more residential units.
+    - condition:
+        field: industrial-site
+        value: true
+        description: A site in previous or current commercial and/or industrial use.
+    - site:
+        in:
+        - near-landfill-site
+        description: Within 250m of a current or former landfill site.
+- item: Not more than 12 months old, or with a cover letter from an appropriately qualified person confirming
+    the findings still apply
+  level: must
 confidence: medium
-notes: 'Part Two: a Land Contamination Report ''for 1-2 residential units including replacement residential
-  units on Land that has served as garden/domestic curtilage, and/or not previously developed land in
-  the NPPF and/or involves conversion of agricultural building/s''. Barn conversions (officer discretion
-  here) also need the Phase I walkover.'
+notes: From the council's list (updated April 2024), Part Two (Major and Minor), page 11-13; Part One
+  (Householder), page 9. Part Two sections 16a-16d (1-2 units, 3 or more units, commercial/industrial
+  sites, sites near landfill). Part One covers householder development.
 review-status: unverified
 field-status: {}

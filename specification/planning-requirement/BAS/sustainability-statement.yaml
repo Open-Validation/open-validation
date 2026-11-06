@@ -3,54 +3,102 @@ local-authority: BAS
 required-if:
   any:
   - all:
-    - condition:
-        field: new-build
-        value: true
-        description: The proposal includes new-build residential development.
-    - condition:
-        field: dwelling-count
-        operator: '>='
-        value: 1
-        description: The proposal creates one or more dwellings (including replacements, co-living, student
-          accommodation, holiday lets and HMOs).
+    - application-type:
+        in:
+        - full
+        - outline
+        - reserved-matters
+        - approval-condition
+    - any:
+      - all:
+        - condition:
+            field: new-build
+            value: true
+            description: New build (including on the site of demolished buildings).
+        - condition:
+            field: dwelling-count
+            operator: '>='
+            value: 1
+            description: 'Residential: one dwelling or more (including co-living, student accommodation,
+              holiday lets and HMOs).'
+      - all:
+        - condition:
+            field: new-build
+            value: true
+            description: New build.
+        - condition:
+            field: floorspace-non-residential
+            operator: '>='
+            value: 1000
+            description: 'Major non-residential: 1000 m2 commercial floor space or more.'
+      - all:
+        - condition:
+            field: involves-change-of-use
+            value: true
+            description: Works on existing buildings, such as extensions, conversions or change of use.
+        - any:
+          - condition:
+              field: dwelling-count
+              operator: '>'
+              value: 5
+              description: Creating more than 5 dwellings.
+          - condition:
+              field: floorspace-non-residential
+              operator: '>='
+              value: 500
+              description: Or 500 m2 of commercial floor space.
+      - condition:
+          field: district-heating-network
+          value: true
+          description: A district heating network proposal.
   - all:
-    - condition:
-        field: new-build
-        value: true
-        description: The proposal includes new-build non-residential development.
-    - condition:
-        field: floorspace-non-residential
-        operator: '>='
-        value: 1000
-        description: 1,000 square metres or more of non-residential floorspace.
-  - condition:
-      field: dwelling-count
-      operator: '>='
-      value: 5
-      description: Medium-scale or larger works to existing buildings (5 or more dwellings).
-  - condition:
-      field: floorspace
-      operator: '>='
-      value: 500
-      description: Medium-scale or larger works to existing buildings (500 square metres or more).
-  - discretionary
+    - application-type:
+        in:
+        - mineral-extraction
+    - ref: major-development
 source-url: https://www.bathnes.gov.uk/policy-and-documents-library/sustainable-construction-checklist
-policy: Sustainable Construction Checklist SPD; Local Plan SCR6
+policy: B&NES Core Strategy and Placemaking Plan (incorporating the Local Plan Partial Update 2023) policies
+  SCR6, SCR7 and SCR8; Sustainable Construction Checklist SPD (2023)
+source-text: The following application types must complete and submit a Sustainable Construction Checklist.
+  Guidance on policy requirements and how to complete the Checklist is set out in the SPD itself. All
+  new build residential proposals (one dwelling or more). This includes new buildings erected on the site
+  of existing buildings that are demolished. Dwellings, co-living, student accommodation, holiday lets
+  and HMOs are considered residential development. All major new build non-residential proposals (1000m2
+  commercial floor space or more) All medium scale proposals or larger for works on existing buildings,
+  such as extensions that create more than 5 dwellings or 500m² of commercial floor space, or conversions/change
+  of use of buildings with more than 5 dwellings, or 500m² commercial floor space All district heating
+  network proposals Exemptions Proposals that are smaller than medium scale on existing buildings are
+  exempt. There is no exemption for listed buildings.
 must-include:
-- item: Energy Summary Tool
+- item: The appropriate Word document checklist for the development type (not a copy of the SPD tables)
+  level: must
+- item: 'Residential developments: the Energy Summary Tool as well'
   level: must
   required-if:
     condition:
       field: dwelling-count
       operator: '>='
       value: 1
-      description: The proposal is residential.
+      description: Residential development.
+- item: 'Major mineral applications: a sustainability statement outlining the elements of the scheme that
+    address sustainable development (environmental, social and economic)'
+  level: must
+  required-if:
+    application-type:
+      in:
+      - mineral-extraction
+  source-text: A sustainability statement should accompany all applications for major development* (see
+    definition). This should outline the elements of the scheme that address sustainable development issues,
+    including positive environmental, social and economic implications. For example, using locally sourced
+    or recycled building materials, renewable energy measures, sustainable drainage systems, sustainable
+    waste management etc.
 confidence: medium
-notes: 'From the audit (wrong_trigger): the Sustainable Construction Checklist is required for new-build
-  residential of 1+ dwellings (including replacements, co-living, student accommodation, holiday lets
-  and HMOs), major non-residential new build of 1,000 m2+, medium-scale or larger works to existing buildings
-  (5+ dwellings / 500 m2) and district heating proposals (shown as officer discretion). There is no exemption
-  for listed buildings. It should accompany Sustainability Statements or Energy Strategies. The workbook''s
-  excerpt was scrambled table text.'
+notes: From the council's list (web checklists, last updated 10 June 2026), 'Sustainable Construction
+  Checklist' page (updated 10 June 2025). The council calls it the Sustainable Construction Checklist.
+  Policy SCR8 is the embodied carbon policy; the embodied carbon assessment that feeds tables 6 and 7
+  of the checklist has no matching id (see the unmapped list). An older 'Local list' page for the checklist
+  (February 2023) said any amount of new commercial floorspace; the 2025 page used here says 1000 m2.
+  Also listed on the approval of details reserved by condition checklist, and the mineral checklist asks
+  major applications for a sustainability statement.
 review-status: unverified
 field-status: {}

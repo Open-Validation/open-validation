@@ -1,41 +1,73 @@
 reference: flood-risk-assessment
 local-authority: NWL
 required-if:
-  all:
-  - application-type:
-      in:
-      - full
-      - outline
-  - any:
-    - condition:
-        field: near-watercourse
-        value: true
-        description: Within Main river bye-law distance.
+  any:
+  - all:
+    - application-type:
+        in:
+        - full
+        - outline-some
+        - outline-all
+    - any:
+      - condition:
+          field: near-watercourse
+          value: true
+          description: The development is proposed within Main river bye-law distance.
+      - site:
+          in:
+          - flood-risk-zone
+          description: The development is within Flood Zones 2 and 3.
+      - condition:
+          field: site-area-residential
+          operator: '>'
+          value: 1
+          description: The site is greater than 1 hectare within Flood Zone 1.
+      - condition:
+          field: site-area-non-residential
+          operator: '>'
+          value: 1
+          description: The site is greater than 1 hectare within Flood Zone 1.
+      - all:
+        - site:
+            in:
+            - critical-drainage-area
+            description: A designated critical drainage area notified by the Environment Agency.
+        - ref: major-development
+  - all:
+    - application-type:
+        in:
+        - hh
     - site:
         in:
         - flood-risk-zone
-        description: Within flood zones 2 and 3.
-    - condition:
-        field: site-area-residential
-        operator: '>'
-        value: 1
-        description: A site greater than 1 hectare in Flood Zone 1.
-    - condition:
-        field: site-area-non-residential
-        operator: '>'
-        value: 1
-        description: A site greater than 1 hectare in Flood Zone 1.
-    - all:
-      - ref: major-development
-      - site:
-          in:
-          - critical-drainage-area
-          description: Non-minor development in a critical drainage area.
+        description: The proposal is in Flood Zone 2 or 3.
 source-url: https://www.nwleics.gov.uk/files/documents/national_and_local_requirements_for_planning_applications_july_2013/Adopted%20PAR%20list%20of%20requirements%20July%202013.doc
+policy: NPPF (2012) paragraphs 100 and 103; Environment Agency Flood Risk Standing Advice
 source-text: Where the development is proposed within Main river bye-law distance or where the development
-  is within flood zones 2 & 3 or the site is greater than 1 hectare within Flood Zone 1
+  is within flood zones 2 & 3 or the site is greater than 1 hectare within Flood Zone 1. … Any proposal
+  located in Flood Zones 2 or 3 a standard form is required to be completed to negate the need for a Flood
+  Risk Assessment. … A FRA will also be required for any development other than minor development in a
+  designated critical drainage area which has been notified to the Local Planning Authority by the Environment
+  Agency.
+must-include:
+- item: Identifies and assesses the risks of all forms of flooding to and from the development and how
+    they will be managed, taking climate change into account
+  level: should
+- item: Identifies opportunities to reduce the probability and consequences of flooding
+  level: should
+- item: The design of surface water management systems, including Sustainable Drainage Systems
+  level: should
+- item: Safe access to and from the development in areas at risk of flooding
+  level: should
+- item: 'Householder: the Environment Agency standing advice form completed instead of a full assessment'
+  level: must
+  required-if:
+    application-type:
+      in:
+      - hh
 confidence: medium
-notes: 'Audit (wrong_trigger): the workbook quoted the Householder proforma, where a standard form replaces
-  the FRA (listed as unmapped). The critical drainage area branch is from the list''s explanation.'
+notes: From the council's list (adopted 1 July 2013), pages 9-23, 48. Householder proposals in Flood Zones
+  2 or 3 complete the Environment Agency's standard form instead of a full FRA. 'Other than minor development'
+  in a critical drainage area is shown as major development.
 review-status: unverified
 field-status: {}

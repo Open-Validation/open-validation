@@ -2,24 +2,69 @@ reference: transport-assessment
 local-authority: WFT
 required-if:
   any:
+  - any:
+    - all:
+      - ref: major-development
+      - condition:
+          field: dwelling-count
+          operator: '>'
+          value: 50
+          description: Over 50 residential units.
+    - condition:
+        field: floorspace-non-residential
+        operator: '>'
+        value: 1000
+        description: Commercial development (including retail) over 1,000 sq m.
+  - discretionary
   - condition:
       field: dwelling-count
       operator: '>='
       value: 10
-      description: Residential development of 10 or more units (Transport Statement for 10-50 units; Transport
-        Assessment over 50).
-  - condition:
-      field: floorspace-non-residential
-      operator: '>'
-      value: 1000
-      description: Commercial development (including retail) over 1,000 square metres.
-  - discretionary
+      description: Residential development of 10-50 units (Transport Statement).
 source-url: https://www.walthamforest.gov.uk/sites/default/files/2025-12/Full%20National%20%20Local%20_%20Validation%20Checklist%202025%20Final%20key%20changes%20highlighted.pdf
-source-text: Transport Assessment (see also … Transport Statement) Major Applications for over 50 residential
-  units … Applications for commercial development (including retail) of over 1000 sqm … Applications proposing
-  residential development of 10-50 units
+source-text: Major Applications for over 50 residential units Applications for commercial development
+  (including retail) of over 1000 sq.m Applications for schools and nurseries, hospitals, places of worship
+  and others where ... the proposed development would have significant transport implications. Applications
+  proposing residential development of 10-50 units
+must-include:
+- item: 'Transport Assessment: baseline conditions (including PTAL), trip generation, distribution and
+    modal share, impacts on the road network (including loading), cycle and pedestrian routes, parking
+    and public transport, mitigation and planning obligations, and a Travel Plan'
+  level: must
+  required-if:
+    any:
+    - any:
+      - all:
+        - ref: major-development
+        - condition:
+            field: dwelling-count
+            operator: '>'
+            value: 50
+            description: Over 50 residential units.
+      - condition:
+          field: floorspace-non-residential
+          operator: '>'
+          value: 1000
+          description: Commercial development (including retail) over 1,000 sq m.
+    - discretionary
+- item: 'Transport Statement (10-50 units): PTAL, expected trip generation, access to public transport
+    and other sustainable modes, and expected impact on parking'
+  level: must
+  required-if:
+    all:
+    - condition:
+        field: dwelling-count
+        operator: '>='
+        value: 10
+        description: 10 or more units.
+    - condition:
+        field: dwelling-count
+        operator: <=
+        value: 50
+        description: 50 units or fewer.
 confidence: medium
-notes: 'Audit (wrong_trigger, missing_requirement): also schools, nurseries, hospitals and places of worship
-  (shown as officer discretion). The Transport Statement (10-50 units) had no row.'
+notes: From the council's list (published 26 November 2025, enforced from 1 January 2026), page 47-48.
+  Combines requirement 59 (Transport Assessment) and 60 (Transport Statement). Schools, hospitals, places
+  of worship and others with 'significant transport implications' is a judgement, so discretionary.
 review-status: unverified
 field-status: {}

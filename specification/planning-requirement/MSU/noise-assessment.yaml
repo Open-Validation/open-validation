@@ -3,31 +3,107 @@ local-authority: MSU
 required-if:
   any:
   - condition:
-      field: noise-generating-use
-      value: true
-      description: New or extended commercial uses (B, D, E and sui generis).
+      field: floorspace-non-residential
+      operator: '>'
+      value: 0
+      description: New or extended Class B, D, E or sui generis floorspace.
+  - all:
+    - condition:
+        field: dwelling-count
+        operator: '>='
+        value: 1
+        description: New residential development.
+    - condition:
+        field: distance-to-commercial-or-livestock-use
+        operator: <=
+        value: 250
+        description: New occupiers would be within 250 metres of existing (or granted) commercial development
+          (Class A, B and D or a mix) or intensive livestock use.
+  - all:
+    - condition:
+        field: dwelling-count
+        operator: '>='
+        value: 1
+        description: Residential development.
+    - condition:
+        field: distance-to-transport-noise-source
+        operator: <=
+        value: 0
+        description: Adjacent to and/or sharing a boundary with a railway line, trunk road and/or a road
+          with a speed limit of 40mph or more.
+  - all:
+    - condition:
+        field: dwelling-count
+        operator: '>='
+        value: 10
+        description: Major (10 units +) residential development.
+    - condition:
+        field: distance-to-transport-noise-source
+        operator: <=
+        value: 250
+        description: Within 250 metres of a railway line, trunk road and/or a road with a speed limit
+          of 40mph or more.
   - condition:
-      field: noise-sensitive-use
+      field: plant-equipment
       value: true
-      description: Residential within 250m of commercial uses or intensive livestock, or next to a railway
-        or roads of 40mph or more.
-  - discretionary
+      description: The proposal installs an air source heat pump.
 source-url: https://www.midsuffolk.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+source-text: Required for all applications relating to all new or extensions of Class B, D, E and sui
+  generis use and/or all new residential applications where new occupiers would be within 250metres of
+  existing (or granted) commercial development (comprising of Class A, B and D or mix of these uses) and
+  intensive livestock use. … The transport network noise assessment is required for all residential development
+  when adjacent to and/or shares boundary with a Railway Line, Trunk road and/or a road with an official
+  speed limit of 40mph or more The transport network noise assessment is required for all Major (10 units
+  +) residential development if with 250 metres of a Railway Line, Trunk road and/or a road with an official
+  speed limit of 40mph or more … Air Source Heat Pumps (Shall require a full acoustic assessment relating
+  to the air source heat pump noise from the site shall be undertaken in accordance with “MCS 020 - MCS
+  Planning Standards for permitted development installations of wind turbines and air source heat pumps
+  on domestic premises”)
 must-include:
-- item: A Transport Network Noise Assessment, for residential next to a railway, trunk road or road of
-    40mph or more
+- item: Position and design of all external plant
   level: must
   required-if:
     condition:
-      field: noise-sensitive-use
-      value: true
-      description: Residential development next to a railway or a road of 40mph or more.
-- item: A full acoustic assessment of air source heat pump noise, in accordance with MCS 020
+      field: floorspace-non-residential
+      operator: '>'
+      value: 0
+      description: Commercial uses.
+- item: Areas of goods vehicle manoeuvring, including loading bays when proposed
   level: must
-  required-if: discretionary
+  required-if:
+    condition:
+      field: floorspace-non-residential
+      operator: '>'
+      value: 0
+      description: Commercial uses.
+- item: An acoustic noise assessment to the current BS 4142, including all on-site vehicle movement activities
+  level: must
+  required-if:
+    condition:
+      field: floorspace-non-residential
+      operator: '>'
+      value: 0
+      description: Commercial uses.
+- item: 'Transport network noise assessments follow the principles of ProPG: Planning & Noise – New Residential
+    Development'
+  level: must
+  required-if:
+    condition:
+      field: distance-to-transport-noise-source
+      operator: <=
+      value: 250
+      description: Near a railway line, trunk road or 40mph+ road.
+- item: 'Air source heat pumps: a full acoustic assessment to MCS 020'
+  level: must
+  required-if:
+    condition:
+      field: plant-equipment
+      value: true
+      description: The proposal installs an air source heat pump.
 confidence: medium
-notes: 'From the audit (missing_requirement, wrong_trigger): Part Two items 24a and 24b. The workbook
-  quoted the air source heat pump acoustic assessment from Manufacturers'' Specifications (shown here
-  as a discretionary item).'
+notes: From the council's list (updated April 2024), Part Two (Major and Minor), page 18-20; Part One
+  (Householder), page 12. Sections 24a (noise assessment) and 24b (transport network noise assessment)
+  of Part Two; the air source heat pump acoustic assessment comes from the Manufacturers Specification
+  section of both parts.
 review-status: unverified
 field-status: {}

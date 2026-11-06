@@ -3,20 +3,101 @@ local-authority: BUC
 required-if:
   any:
   - condition:
-      field: floorspace-non-residential
-      operator: '>'
-      value: 2000
-      description: Aylesbury Vale area - retail or leisure over 2,000 square metres.
-  - condition:
-      field: floorspace-non-residential
-      operator: '>'
-      value: 1000
-      description: Chiltern/South Bucks and Wycombe areas - retail or leisure over 1,000 square metres.
-  - discretionary
+      field: out-of-centre-town-centre-use
+      value: true
+      description: Main town centre uses outside a designated town centre or primary shopping area, not
+        in accordance with the up-to-date Development Plan.
+  - all:
+    - condition:
+        field: former-district
+        value: aylesbury-vale
+        description: Site in the Aylesbury Vale local area.
+    - condition:
+        field: town-centre-use-floorspace
+        operator: '>'
+        value: 2000
+        description: Retail or leisure development over 2,000 sq m (gross).
+  - all:
+    - any:
+      - condition:
+          field: former-district
+          value: chiltern
+          description: Site in the Chiltern local area.
+      - condition:
+          field: former-district
+          value: south-bucks
+          description: Site in the South Bucks local area.
+    - condition:
+        field: town-centre-use-floorspace
+        operator: '>'
+        value: 1000
+        description: Retail or leisure development over 1,000 sq m (gross).
+  - all:
+    - condition:
+        field: former-district
+        value: wycombe
+        description: Site in the Wycombe local area.
+    - discretionary
 source-url: https://www.buckinghamshire.gov.uk/planning-building-and-environment/applications-permission-and-advice/how-to-prepare-a-valid-planning-application/supporting-information/
-confidence: low
-notes: 'From the audit (missing_requirement): retail/leisure over AV 2,000 sq m; Chiltern/South Bucks
-  1,000 sq m; Wycombe 1,000/500/250 sq m or all, depending on location (shown as officer discretion).
-  The workbook''s excerpt is the sequential test text (now unmapped).'
+policy: 'NPPF paragraphs 86-90; Aylesbury Vale: E5 (VALP); Chiltern: CS3 (CDCCS), S1 (CDCLP); South Bucks:
+  CP11 (SBDCCS); Wycombe: DM7 DM10 (DSA), CP6 (WDLP)'
+source-text: It is required for proposals for 'main town centre uses' uses (below) that are outside of
+  a designated town centre or primary shopping area, unless the main town centre uses are proposed in
+  accordance with the up-to-date Development Plan. ... This is required for proposals for retail or leisure
+  development of certain thresholds (shown below). This excludes proposals in accordance with the up-to-date
+  development plan.
+must-include:
+- item: 'Sequential assessment: a thorough assessment of all town centre sites and of any sequentially
+    preferable out-of-centre sites, showing their availability, suitability and viability'
+  level: must
+  required-if:
+    condition:
+      field: out-of-centre-town-centre-use
+      value: true
+      description: Main town centre uses outside a centre.
+- item: 'Impact assessment: impact on existing, committed and planned investment, town centre vitality
+    and viability, and local consumer choice and trade (up to 5 years for non-major, 10 years for major
+    applications)'
+  level: must
+  required-if:
+    any:
+    - all:
+      - condition:
+          field: former-district
+          value: aylesbury-vale
+          description: Site in the Aylesbury Vale local area.
+      - condition:
+          field: town-centre-use-floorspace
+          operator: '>'
+          value: 2000
+          description: Over 2,000 sq m.
+    - all:
+      - any:
+        - condition:
+            field: former-district
+            value: chiltern
+            description: Site in the Chiltern local area.
+        - condition:
+            field: former-district
+            value: south-bucks
+            description: Site in the South Bucks local area.
+      - condition:
+          field: town-centre-use-floorspace
+          operator: '>'
+          value: 1000
+          description: Over 1,000 sq m.
+    - all:
+      - condition:
+          field: former-district
+          value: wycombe
+          description: Site in the Wycombe local area.
+      - discretionary
+confidence: medium
+notes: 'From the council''s list (in effect from 1 April 2020), page ''Supporting information''. Covers
+  ''Town centre uses: sequential assessment'' and ''Town centre uses: impact assessment''. Wycombe impact
+  thresholds depend on location (High Wycombe 1,000 sq m or above; Marlow and Princes Risborough 500 sq
+  m or above; district centres and 3km radius 250 sq m or above; elsewhere all retail or leisure proposals),
+  which the map can''t tell yet, so Wycombe shows as ''check''. The floorspace field counts main town
+  centre uses; the impact thresholds are for retail or leisure only.'
 review-status: unverified
 field-status: {}

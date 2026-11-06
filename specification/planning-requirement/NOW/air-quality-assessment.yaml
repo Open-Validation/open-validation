@@ -2,30 +2,74 @@ reference: air-quality-assessment
 local-authority: NOW
 required-if:
   any:
-  - discretionary
   - all:
-    - site:
+    - application-type:
         in:
-        - air-quality-management-area
-        description: The site is in or adjacent to an air quality management area.
+        - change-of-use
+        - full
+        - outline
     - any:
       - condition:
-          field: traffic-movements-peak-hour
-          operator: '>'
-          value: 100
-          description: More than 100 traffic movements an hour at peak times.
-      - condition:
-          field: traffic-movements-daily
-          operator: '>'
-          value: 1000
-          description: More than 1,000 movements over 24 hours.
-source-url: https://www.norwich.gov.uk/downloads/file/1558/validation_requirements
-source-text: 'Air quality assessment required for: o development proposals which would give rise to air-borne
-  emissions including harmful substances, smoke, grit and dust; o developments expected to generate more
+          field: direct-air-emissions
+          value: true
+          description: Would give rise to air-borne emissions including harmful substances, smoke, grit
+            and dust.
+      - all:
+        - any:
+          - condition:
+              field: traffic-movements-peak-hour
+              operator: '>'
+              value: 100
+              description: More than 100 traffic movements an hour at peak times.
+          - condition:
+              field: traffic-movements-daily
+              operator: '>'
+              value: 1000
+              description: More than 1,000 movements over 24 hours.
+        - site:
+            in:
+            - air-quality-management-area
+            description: In or adjacent to an air quality management area.
+  - all:
+    - application-type:
+        in:
+        - s73
+    - condition:
+        field: varied-condition-topic
+        value: air-quality
+        description: The condition in question relates to air quality.
+source-url: https://www.norwich.gov.uk/sites/default/files/2026-03/Validation-Requirements.pdf
+source-text: 'Air quality assessment required for: development proposals which would give rise to air-borne
+  emissions including harmful substances, smoke, grit and dust; developments expected to generate more
   than 100 traffic movements an hour at peak times or more than 1,000 movements over 24 hours in or adjacent
-  to an air quality management area.'
+  to an air quality management area. … Air quality assessment. Required where the condition in question
+  relates to air quality.'
+must-include:
+- item: A full assessment of the likely impact on the surrounding external environment and the indoor
+    environment of nearby properties
+  level: must
+- item: Full details of mitigation measures where the development would lead to unacceptable levels of
+    air pollution
+  level: must
+- item: Supported by a transport assessment where the trigger is traffic movements in or adjacent to an
+    air quality management area
+  level: must
+  required-if:
+    any:
+    - condition:
+        field: traffic-movements-peak-hour
+        operator: '>'
+        value: 100
+        description: More than 100 traffic movements an hour at peak times.
+    - condition:
+        field: traffic-movements-daily
+        operator: '>'
+        value: 1000
+        description: More than 1,000 movements over 24 hours.
 confidence: medium
-notes: The workbook guessed the application type ('INFERRED'), so no type is given. Officer discretion
-  covers proposals giving rise to air-borne emissions including harmful substances, smoke, grit and dust.
+notes: From the council's list (published March 2026), page 5, 11, 16, 26, 49. Listed for change of use,
+  full and outline applications and for variations of condition about air quality. The emissions trigger
+  is 'primarily aimed at industrial uses as opposed to café/restaurant uses'. Norwich has one AQMA, covering
+  the city centre.
 review-status: unverified
 field-status: {}

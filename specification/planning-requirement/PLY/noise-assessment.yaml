@@ -2,25 +2,104 @@ reference: noise-assessment
 local-authority: PLY
 required-if:
   any:
-  - condition:
-      field: noise-generating-use
-      value: true
-      description: Potentially noise generating development (pubs, clubs, takeaways, industrial/commercial
-        uses, recreation) near existing noise sensitive development.
+  - all:
+    - condition:
+        field: noise-generating-use
+        value: true
+        description: Potentially noise generating development (pubs, clubs, takeaways, industrial/commercial
+          uses, recreation).
+    - condition:
+        field: near-noise-sensitive-use
+        value: true
+        description: In the vicinity of existing noise sensitive development (residential, schools and
+          hospitals).
   - condition:
       field: noise-sensitive-use
       value: true
-      description: Noise sensitive uses near existing noise generating uses, classified roads, railways
-        or in a noisy environment such as the city centre.
+      description: Noise sensitive uses in the vicinity of existing noise generating uses, classified
+        roads, railways or a noisy environment such as the city centre.
+  - all:
+    - condition:
+        field: noise-generating-use
+        value: true
+        description: 'Mixed use: noise generating uses ...'
+    - condition:
+        field: noise-sensitive-use
+        value: true
+        description: '... together with noise sensitive uses.'
+  - all:
+    - condition:
+        field: plant-equipment
+        value: true
+        description: Commercial applications including extractor or cooling units.
+    - condition:
+        field: near-noise-sensitive-use
+        value: true
+        description: In the vicinity of noise sensitive uses.
+  - all:
+    - condition:
+        field: night-time-servicing
+        value: true
+        description: Deliveries and waste collection during the night-time period (between 11pm and 7am).
+    - condition:
+        field: distance-to-noise-sensitive-use
+        operator: <=
+        value: 100
+        description: The site is within 100m of noise sensitive (residential) use.
 source-url: https://www.plymouth.gov.uk/sites/default/files/2025-02/Local-Validation-List.pdf
-source-text: 'Noise Assessment Where or when this item is required: ▪ Potentially noise generating developments
-  (i.e. pubs, clubs, takeaways, industrial/commercial uses, recreation) in the vicinity of existing noise
-  sensitive developments - residential, schools and hospitals; or ▪ Noise sensitive uses in the vicinity
-  of existing noise generating uses, classified roads, railways or in areas with an existing noisy environment
-  such as the city centre; or ▪ Mixed use applications comprising both noise generating'
-confidence: low
-notes: The workbook guessed the application type ('INFERRED'), so no type is given. The excerpt is cut
-  off in the third case (mixed use applications). The audit couldn't read this council's list, so its
-  contents weren't checked.
+policy: Plymouth and South West Devon Joint Local Plan policies DEV2; National Planning Policy Framework
+source-text: Potentially noise generating developments (i.e. pubs, clubs, takeaways, industrial/commercial
+  uses, recreation) in the vicinity of existing noise sensitive developments - residential, schools and
+  hospitals; or ... Noise sensitive uses in the vicinity of existing noise generating uses, classified
+  roads, railways or in areas with an existing noisy environment such as the city centre; or ... Mixed
+  use applications comprising both noise generating and noise sensitive uses; or ... Commercial applications
+  including extractor or cooling units in the vicinity of noise sensitive uses. ... Applications to enable
+  the operation of deliveries and waste collection activity during the night-time period (between 11pm
+  and 7am), and where the site is located within 100m of noise sensitive (residential) use.
+must-include:
+- item: Prepared by a suitably qualified acoustician
+  level: should
+- item: The existing noise environment, the noise sources from or affecting the development, and mitigation
+  level: should
+- item: Sound power level and likely noise level at the site boundary of all noise-producing machinery
+    (extract ventilation, refrigeration etc.), and where it will be located and installed to reduce noise
+    impacts
+  level: must
+  required-if:
+    condition:
+      field: plant-equipment
+      value: true
+      description: Noise-producing plant or machinery is proposed.
+- item: Delivery times and opening hours for commercial premises in noise sensitive areas
+  level: must
+  required-if:
+    condition:
+      field: noise-generating-use
+      value: true
+      description: Commercial premises.
+- item: Waste collection details (for example glass collection at pubs/clubs)
+  level: must
+  required-if:
+    condition:
+      field: noise-generating-use
+      value: true
+      description: Pubs, clubs and similar.
+- item: Full details of sound insulation, position and design of entrances/exits and car parking, where
+    the development adjoins (including below or above) residential premises
+  level: should
+  required-if:
+    condition:
+      field: near-noise-sensitive-use
+      value: true
+      description: The development adjoins residential premises.
+- item: 'For pubs and clubs: the location for smokers, to prevent noise impact from patrons outside'
+  level: should
+  required-if:
+    condition:
+      field: use-class
+      value: drinking-establishment
+      description: Pubs and clubs.
+confidence: medium
+notes: From the council's list (published February 2025), section 5, Local item 22, page 45-46.
 review-status: unverified
 field-status: {}

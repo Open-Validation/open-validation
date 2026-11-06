@@ -2,32 +2,87 @@ reference: design-and-access-statement
 local-authority: SNO
 required-if:
   any:
-  - site:
+  - application-type:
       in:
-      - site-of-special-scientific-interest
-      description: The development is within a Site of Special Scientific Interest.
+      - lbc
   - all:
-    - site:
+    - application-type:
         in:
-        - conservation-area
-        description: The site is in a conservation area.
-    - condition:
-        field: floorspace
-        operator: '>'
-        value: 100
-        description: A building bigger than 100 square metres.
-  - site:
+        - full
+        - outline
+        - s73
+    - any:
+      - all:
+        - site:
+            in:
+            - conservation-area
+            - site-of-special-scientific-interest
+            description: The site is in a conservation area or a site of special scientific interest.
+        - any:
+          - condition:
+              field: dwelling-count
+              operator: '>='
+              value: 1
+              description: New dwellings.
+          - condition:
+              field: floorspace
+              operator: '>'
+              value: 100
+              description: New buildings bigger than 100 sq m.
+      - site:
+          in:
+          - listed-building
+          - listed-building-setting
+          description: The proposal affects a listed building.
+      - ref: major-development
+  - all:
+    - application-type:
+        in:
+        - hh
+    - any:
+      - site:
+          in:
+          - site-of-special-scientific-interest
+          description: The development is within a site of special scientific interest.
+      - all:
+        - site:
+            in:
+            - conservation-area
+            description: The site is in a conservation area.
+        - condition:
+            field: floorspace
+            operator: '>'
+            value: 100
+            description: A building bigger than 100 sq m.
+      - site:
+          in:
+          - listed-building
+          - listed-building-setting
+          description: The proposal affects a listed building.
+source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+policy: Town and Country Planning (Development Management Procedure) (England) Order 2015
+source-text: 'Where the proposal is for: • New dwellings or buildings bigger than 100 sq m in a conservation
+  area or site of special scientific interest, • The proposal affects a listed building (in which case
+  it should also include a Heritage Statement) • Is for 10 or more dwellings or site of over 0.5 Hectares
+  or 1000sq m or more of non residential floorspace or 1 hectare or more … Design and Access Statement
+  are required where the proposed development is within a site of special scientific interest, is for
+  a building bigger than 100 sq m in a Conservation area or where the proposed development affects a Listed
+  Building.'
+must-include:
+- item: 'Where the proposal affects a listed building: a Heritage Statement as part of it'
+  level: should
+  required-if:
+    site:
       in:
       - listed-building
-      description: The development affects a listed building.
-source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-householder.pdf
-source-text: Design and Access Statement are required where the proposed development is within a site
-  of special scientific interest, is for a building bigger than 100 sq m in a Conservation area or where
-  the proposed development affects a Listed Building.
+      - listed-building-setting
+      description: The proposal affects a listed building.
 confidence: medium
-notes: 'Audit (wrong_trigger): the Full planning excerpt was a fragment (''... should one be required.'').
-  The rule is the householder list''s wording; national rules for other applications still apply. Householder
-  rows were missing for South Norfolk (audit missing_requirement): the householder list is shared with
-  Broadland.'
+notes: From the council's list (published January 2025), page 8, 9. Householder wording from the Householder
+  Local Validation List (https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-householder.pdf),
+  page 4. The matrix marks it 'Y' (always needed) for listed building consent and '?' for full, outline
+  and s73. '10 or more dwellings or site of over 0.5 Hectares or 1000sq m or more of non residential floorspace
+  or 1 hectare or more' is major development. The list is shared by Broadland District Council and South
+  Norfolk Council (same file for both).
 review-status: unverified
 field-status: {}

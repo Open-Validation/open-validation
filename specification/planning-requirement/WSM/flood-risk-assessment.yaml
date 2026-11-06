@@ -1,36 +1,75 @@
 reference: flood-risk-assessment
 local-authority: WSM
 required-if:
-  any:
-  - condition:
-      field: site-area-residential
-      operator: '>='
-      value: 1
-      description: Development of 1 hectare or greater.
-  - condition:
-      field: site-area-non-residential
-      operator: '>='
-      value: 1
-      description: Development of 1 hectare or greater.
-  - condition:
-      field: basement
-      value: true
-      description: Basement development.
-  - site:
+  all:
+  - application-type:
       in:
-      - flood-risk-zone
-      description: Development in Flood Zones 2 and 3.
-  - site:
-      in:
-      - critical-drainage-area
-      description: Development within a Surface Water Flood Risk Management Zone.
+      - hh
+      - full
+      - outline
+      - reserved-matters
+      - s73
+  - any:
+    - condition:
+        field: site-area-residential
+        operator: '>='
+        value: 1
+        description: Development of 1 hectare or greater.
+    - condition:
+        field: site-area-non-residential
+        operator: '>='
+        value: 1
+        description: Development of 1 hectare or greater.
+    - condition:
+        field: basement
+        value: true
+        description: Basement development.
+    - site:
+        in:
+        - flood-risk-zone
+        description: In Flood Zone 2 or 3.
+    - all:
+      - site:
+          in:
+          - surface-water-flood-risk
+          description: Within a Surface Water Flood Risk Management Zone.
+      - any:
+        - condition:
+            field: basement
+            value: true
+            description: Basement extension.
+        - condition:
+            field: dwelling-count
+            operator: '>='
+            value: 1
+            description: New dwellings.
+        - condition:
+            field: residential-extension
+            value: true
+            description: Other residential extensions.
+        - condition:
+            field: hard-surfacing
+            value: true
+            description: Landscaping work or front garden parking.
+        - discretionary
 source-url: https://www.westminster.gov.uk/sites/default/files/media/documents/wcc-local-list-of-validation-requirements-2026.pdf
-source-text: 'Flood Risk Assessment (FRA) 20 (Including Sustainable Drainage where not covered by separate
-  Sustainable Drainage Strategy) Required for: 1. all development of 1 hectare or greater; 2. all basement
-  development; 3. all development in Flood Zones 2 and 3 as defined by the Environment Agency; and 4.
-  all development within a Surface Water Flood Risk Management Zone where there may be…'
+policy: NPPF paras 181-182; Westminster City Plan 2019-2040 Policies 39 and 45; London Plan 2021 Policy
+  SI12; Westminster SFRA 2023
+source-text: 'Required for: 1. all development of 1 hectare or greater; 2. all basement development; 3.
+  all development in Flood Zones 2 and 3 as defined by the Environment Agency; and 4. all development
+  within a Surface Water Flood Risk Management Zone where there may be ... flood risk implications'
+must-include:
+- item: Sustainable drainage implications in a clearly identified separate section, where not covered
+    by a separate Sustainable Drainage Strategy
+  level: must
+- item: Flood Warning and Evacuation Plan for More Vulnerable Uses in areas at risk of tidal breach flooding
+    (especially the Rapid Inundation Zone)
+  level: must
+  required-if: discretionary
 confidence: medium
-notes: 'Applies to householder applications too (the householder page: basement excavation, Flood Zones
-  2 and 3, or a Surface Water Flood Risk Management Zone).'
+notes: 'From the council''s list (published July 2026), page 20-21 (L23). Footnote 21: flood risk implications
+  include basement extensions, highly or more vulnerable uses, change of use to a more vulnerable use,
+  new dwellings, other residential extensions and landscaping or front garden parking; vulnerable uses
+  show as discretionary. For extensions under 250 sq m in Flood Zones 2 and 3 a simple FRA is enough.'
 review-status: unverified
 field-status: {}

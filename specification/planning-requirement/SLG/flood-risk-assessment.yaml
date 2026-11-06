@@ -1,9 +1,45 @@
 reference: flood-risk-assessment
 local-authority: SLG
-required-if: discretionary
-source-url: https://www.slough.gov.uk/directory/27/local-validation-list-directory/category/61
-confidence: low
-notes: 'From the audit (missing_requirement): ''Often required'' for householder applications and listed
-  for major applications; the triggers weren''t captured.'
+required-if:
+  any:
+  - condition:
+      field: site-area-residential
+      operator: '>'
+      value: 1
+      description: Site exceeding 1 hectare.
+  - condition:
+      field: site-area-non-residential
+      operator: '>'
+      value: 1
+      description: Site exceeding 1 hectare.
+  - site:
+      in:
+      - flood-risk-zone
+      description: In Flood Zone 2 or 3, including minor development and change of use.
+  - site:
+      in:
+      - surface-water-flood-risk
+      - groundwater-flood-risk
+      description: At medium to high risk from other sources of flooding.
+source-url: https://www.slough.gov.uk/directory-record/35549/flood-risk-assessment
+policy: National Planning Policy Framework
+source-text: 'ONLY the following: Sites exceeding 1 hectare All proposals in Flood Zone 2 or 3 including
+  minor development and change of use Sites at medium to high risk from other sources of flooding.'
+must-include:
+- item: 'Minor extensions (household, or non-domestic under 250 sq m) in Flood Zone 2 or 3: following
+    the Environment Agency standing advice'
+  level: must
+  required-if:
+    all:
+    - site:
+        in:
+        - flood-risk-zone
+        description: Flood Zone 2 or 3.
+    - discretionary
+- item: Surface water not drained to the foul sewer
+  level: must
+confidence: medium
+notes: 'From the council''s list (adopted 1 January 2026), Local Validation List directory (record 35549;
+  record 35529). Other records: https://www.slough.gov.uk/directory-record/35529/flood-risk-assessment-fra-for-householder-applications.'
 review-status: unverified
 field-status: {}

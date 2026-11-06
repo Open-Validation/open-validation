@@ -1,11 +1,68 @@
 reference: land-contamination-assessment
 local-authority: SNO
-source-url: https://www.southnorfolkandbroadland.gov.uk/downloads/file/4235/making-a-planning-application-other
-source-text: or occupiers, a Contaminated Land Assessment, investigating the nature and extent of contamination
-  will be required.
-confidence: low
-notes: 'The workbook guessed the application type (''INFERRED''), so no type is given. Audit (wrong_trigger):
-  the excerpt omits the list''s sensitive-end-use and 10-dwelling screening/desk-study thresholds; the
-  audit doesn''t give them exactly, so re-read the list.'
+required-if:
+  all:
+  - application-type:
+      in:
+      - change-of-use
+      - full
+      - outline
+      - prior-approval
+      - s73
+  - any:
+    - site:
+        in:
+        - contaminated-land
+        description: Land known to be contaminated, or where contamination is suspected on all or part
+          of the site.
+    - condition:
+        field: sensitive-end-use
+        value: true
+        description: The proposed use would be particularly vulnerable to contamination (residential,
+          education, a children's nursery or play area, food production).
+    - discretionary
+source-url: https://www.southnorfolkandbroadland.gov.uk/asset-library/making-a-planning-application-2025-amends.pdf
+source-text: Where there is a possibility that the previous uses of the site could give rise to contamination.
+  • Applications on land which is known to be contaminated. • Applications on land where contamination
+  is suspected on all or part of the site. Applications where the proposed use would be particularly vulnerable
+  to the presence of contamination (i.e. residential, education, a children’s nursery or play area, food
+  production).
+must-include:
+- item: 'Sensitive end use of less than 10 dwellings (or equivalent): a completed Screening Assessment'
+  level: must
+  required-if:
+    all:
+    - condition:
+        field: sensitive-end-use
+        value: true
+        description: Sensitive end use.
+    - condition:
+        field: dwelling-count
+        operator: <
+        value: 10
+        description: Less than 10 dwellings (or equivalent).
+- item: '10 or more dwellings (including nursing homes): a desk study as the minimum'
+  level: must
+  required-if:
+    condition:
+      field: dwelling-count
+      operator: '>='
+      value: 10
+      description: 10 or more dwellings (including nursing homes).
+- item: 'On land known or suspected to be contaminated: the results of an investigation into the nature
+    and extent of contamination, with proposals for remediation measures'
+  level: must
+  required-if:
+    site:
+      in:
+      - contaminated-land
+      description: Land known or suspected to be contaminated.
+confidence: medium
+notes: 'From the council''s list (published January 2025), page 23. The possibility that previous uses
+  could give rise to contamination is a matter of judgement, so that part shows as discretionary. The
+  list says this also applies to barn conversions. The matrix (pages 9-12) marks it ''?'' (''may be needed'')
+  for these application types; it is shown for them only when the trigger applies. (Here: change of use,
+  full, outline, prior notification and s73.) The list is shared by Broadland District Council and South
+  Norfolk Council (same file for both).'
 review-status: unverified
 field-status: {}

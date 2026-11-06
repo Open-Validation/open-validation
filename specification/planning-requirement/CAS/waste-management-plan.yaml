@@ -1,9 +1,52 @@
 reference: waste-management-plan
 local-authority: CAS
-required-if: discretionary
+required-if:
+  any:
+  - all:
+    - application-type:
+        in:
+        - full
+        - technical-details-consent
+        - outline
+    - any:
+      - condition:
+          field: distance-to-highway
+          operator: '>'
+          value: 25
+          description: Single-family properties more than 25m from the highway.
+      - condition:
+          field: housing-type
+          value: flats
+          description: Flats.
+      - condition:
+          field: floorspace-non-residential
+          operator: '>'
+          value: 0
+          description: Commercial development.
+  - all:
+    - ref: major-development
+    - any:
+      - condition:
+          field: distance-to-highway
+          operator: '>'
+          value: 25
+          description: Single-family dwelling houses more than 25m from the highway.
+      - condition:
+          field: housing-type
+          value: flats
+          description: Flats.
 source-url: https://www.castlepoint.gov.uk/documents/d/guest/validation-checklist-v3-5-final-pdf
-confidence: low
-notes: 'From the audit (missing_requirement): Refuse and Recycling details for homes 25m or more from
-  the highway, flats and commercial development. These cases can''t be expressed with existing fields.'
+source-text: Refuse and Recycling indicates location and details of bin storage and enclosure for any
+  single-family properties situated more than 25m from the highway, flats or commercial development. ...
+  All developments that include single-family dwelling houses more than 25m from the highway or flats.
+must-include:
+- item: Location of bin storage
+  level: must
+- item: Details of the bin storage and enclosure, including the size of bins and the design and materials
+    of any proposed bin enclosure
+  level: must
+confidence: medium
+notes: From the council's list (published 11 May 2026), page 18, 23. Full ('Refuse and Recycling') and
+  major ('Refuse and Recycling Plan'). distance-to-highway is a new field (see CAS-new-fields.csv).
 review-status: unverified
 field-status: {}
