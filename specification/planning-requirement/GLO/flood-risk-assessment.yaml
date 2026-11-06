@@ -1,14 +1,163 @@
 reference: flood-risk-assessment
 local-authority: GLO
+required-if:
+  all:
+  - application-type:
+      in:
+      - hh
+      - full
+      - outline
+      - reserved-matters
+  - any:
+    - site:
+        in:
+        - flood-risk-zone
+        description: In Flood Zone 2 or 3.
+    - condition:
+        field: site-area-residential
+        operator: '>='
+        value: 1
+        description: Within Flood Zone 1 with a site area of 1 hectare or more.
+    - condition:
+        field: site-area-non-residential
+        operator: '>='
+        value: 1
+        description: Within Flood Zone 1 with a site area of 1 hectare or more.
+    - site:
+        in:
+        - future-flood-risk
+        description: Within 'Flood Zones plus Climate Change', or where the SFRA shows increased risk
+          of flooding during its lifetime.
+    - site:
+        in:
+        - surface-water-flood-risk
+        description: Within Flood Zone 1 where the flood map shows a high risk of surface water flooding
+          (climate change scenario).
+    - site:
+        in:
+        - critical-drainage-area
+        description: In an area with critical drainage problems.
+    - discretionary
 source-url: https://www.gloucester.gov.uk/media/ainn53uq/lvc-adopted.pdf
-source-text: Documents such as Heritage Statements, Flood Risk Assessments and Drainage Strategies and
-  any other assessments produced by the applicant must not be a placeholder but must be significant in
-  their content to allow for full and proper assessment without requiring further information.
-confidence: low
-notes: 'The workbook guessed the application type (''INFERRED''), so no type is given. Audit (wrong_trigger):
-  the excerpt is generic ''must not be a placeholder'' boilerplate. The list''s FRA requirements say ''You
-  should complete an FRA for all development (including minor development ... and changes of use) proposed:''
-  but the conditions were cut off. The audit couldn''t read this council''s list, so its contents weren''t
-  checked.'
+policy: NPPF; Gloucester, Cheltenham and Tewkesbury Joint Core Strategy (JCS) policies SD4, SD14, INF2,
+  INF3, INF6 and INF7; Gloucester City Plan (GCP) policy E4
+source-text: 'All development with flood or drainage implications. ... You should complete an FRA for
+  all development (including minor development [flood risk definition which is different to the planning
+  definition] and changes of use) proposed: - in Flood Zones 2 or 3 - see flood map for planning - within
+  Flood Zone 1 with a site area of 1 hectare or more - within ‘Flood Zones plus Climate Change’, showing
+  it is at increased risk of flooding from rivers or sea in future - see flood map for planning - within
+  Flood Zone 1 and the flood map for planning shows it is at a high risk of flooding from surface water
+  (climate change scenario) - in areas with critical drainage problems - within Flood Zone 1 where the
+  LPA’s strategic flood risk assessment (SFRA) shows it will be at increased risk of flooding during its
+  lifetime - that increases the vulnerability classification and may be subject to sources of flooding
+  other than rivers or sea'
+must-include:
+- item: A completed Flood Risk & Drainage Validation Checklist
+  level: must
+- item: Incorporates the content of the council's Flood Risk Assessment Template
+  level: should
+  required-if:
+    application-type:
+      in:
+      - full
+      - outline
+      - reserved-matters
+- item: The most up-to-date climate change allowances
+  level: must
+- item: Identification of the flood zone the site is in (flood maps for planning, including climate change)
+  level: must
+- item: 'Householder: a simple FRA following Government Flood Risk Standing Advice'
+  level: must
+  required-if:
+    application-type:
+      in:
+      - hh
+- item: 'Householder: an up-to-date design flood level (the 1% flood level with a 37% climate change allowance)'
+  level: must
+  required-if:
+    application-type:
+      in:
+      - hh
+- item: 'Householder: the finished floor level and external ground levels to Ordnance Datum (m AOD)'
+  level: must
+  required-if:
+    application-type:
+      in:
+      - hh
+- item: 'Householder: a brief assessment of flooding risk from other sources (surface water, groundwater,
+    sewer, reservoir, historic flooding)'
+  level: must
+  required-if:
+    application-type:
+      in:
+      - hh
+- item: 'Householder: flood resilience/resistance proposals to 600 mm above the design flood level'
+  level: must
+  required-if:
+    application-type:
+      in:
+      - hh
+- item: 'Where more than 5 m3 of floodplain storage is displaced: a proposal showing how it will be compensated
+    (''like for like'' and ''level for level'', with 20% betterment for major/minor development)'
+  level: must
+  required-if:
+    condition:
+      field: floodplain-storage-loss
+      operator: '>'
+      value: 5
+      description: More than 5 m3 of flood plain storage volume displaced.
+- item: 'Major/minor: the design flood level (1% river, 0.5% tidal or 1% surface water annual probability,
+    plus climate change)'
+  level: must
+  required-if:
+    application-type:
+      in:
+      - full
+      - outline
+      - reserved-matters
+- item: 'Major/minor: finished floor levels for ''more vulnerable'' and ''highly vulnerable'' development
+    at least 600 mm above the design flood level'
+  level: should
+  required-if:
+    application-type:
+      in:
+      - full
+      - outline
+      - reserved-matters
+- item: 'Major/minor: safe access/egress during a design flood event for ''more vulnerable'' and ''highly
+    vulnerable'' development'
+  level: must
+  required-if:
+    application-type:
+      in:
+      - full
+      - outline
+      - reserved-matters
+- item: A Flood Evacuation Management Plan where the site is at risk of flooding or access/egress crosses
+    Flood Zone 2 or 3 or high surface water risk areas
+  level: must
+  required-if:
+    application-type:
+      in:
+      - full
+      - outline
+      - reserved-matters
+- item: Flood resistance/resilience measures where finished floor level is under 600 mm above the design
+    flood level ('more vulnerable' and 'less vulnerable' development)
+  level: must
+  required-if:
+    application-type:
+      in:
+      - full
+      - outline
+      - reserved-matters
+confidence: medium
+notes: From the council's list (June 2026), page 14-16, item 23. Detailed items come from the Flood Risk
+  & Drainage Validation Checklist (appendix 3), pages 30-31. 'Flood or drainage implications' and development
+  that 'increases the vulnerability classification and may be subject to sources of flooding other than
+  rivers or sea' are not defined, so they show as discretionary. The sequential and exception tests in
+  the same item are in the unmapped list. Part B items 'will not necessarily be required in every case';
+  the list gives no application types for most of them, so they are shown for householder, full, outline
+  and reserved matters applications unless the item says otherwise.
 review-status: unverified
 field-status: {}
