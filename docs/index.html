@@ -493,7 +493,7 @@ function appliesTo(rule) {
   var tags = [], seen = {};
   function add(key, text) { if (!seen[key + text]) { seen[key + text] = 1; tags.push({ key: key, text: text }); } }
   (function walk(x) {
-    if (x === "discretionary") return add("discretionary", "Council's discretion");
+    if (x === "discretionary") return add("discretionary", "Any site – council's discretion");
     if (Array.isArray(x)) return x.forEach(walk);
     if (!x || typeof x !== "object") return;
     if (x.always === true) add("always", "All applications");
@@ -508,8 +508,9 @@ function appliesTo(rule) {
     }
     Object.keys(x).forEach(function (k) { if (k !== "condition" && k !== "site" && k !== "application-type") walk(x[k]); });
   })(rule);
-  // No site condition at all (only discretion, or nothing): it can apply to any site
-  if (!tags.some(function (t) { return t.key !== "discretionary"; })) tags.unshift({ key: "any-site", text: "Any site" });
+  // No condition at all (e.g. it depends only on the application type): it applies to all sites.
+  // A discretion-only rule already says "Any site – council's discretion", so it doesn't get a second tag.
+  if (!tags.length) tags.push({ key: "any-site", text: "All sites" });
   return tags;
 }
 // Long text: a short preview with "show more"; opened, the full text shows once with "show less"
@@ -1062,7 +1063,7 @@ function renderTable(panel, council) {
     .filter(function (r) { return !S.tagFilter || appliesTo(r.d["required-if"]).some(function (t) { return t.key === S.tagFilter; }); });
   var counts = {}; council.files.forEach(function (f) { REQ_CELLS.forEach(function (c) { if (!isEmpty(cellValue(f.data, c))) { var s = cellStatus(f.data, S.lpa, f.id, c).status; counts[s] = (counts[s] || 0) + 1; } }); });
   var html = councilPanel(council) + '<div class="toolbar"><div><h2 style="margin:0">Requirements</h2><p class="muted" style="margin:4px 0 0">' + council.files.length + " requirement files. Every cell is tinted by its review status" + (S.review ? "; tap a cell to mark it." : ".") + "</p></div>" + statusFilterHTML() + "</div>" + countsHTML(counts) +
-    (S.tagFilter ? '<p class="filterbar">Showing requirements that apply to: <span class="chip-ans">' + esc(S.tagFilter === "always" ? "All applications" : S.tagFilter === "discretionary" ? "Council's discretion" : S.tagFilter === "any-site" ? "Any site" : fieldLabel(S.tagFilter)) +
+    (S.tagFilter ? '<p class="filterbar">Showing requirements that apply to: <span class="chip-ans">' + esc(S.tagFilter === "always" ? "All applications" : S.tagFilter === "discretionary" ? "Any site – council's discretion" : S.tagFilter === "any-site" ? "All sites" : fieldLabel(S.tagFilter)) +
       '<button type="button" id="clearTag" aria-label="Show all requirements">✕</button></span></p>' : "");
   html += tableHTML(cols, sortRows(rows, "table", cols), function (row, key) {
     if (key === "applies") return "<td>" + tagsHTML(row.d["required-if"], true) + "</td>";   // worked out from the rule, so not a cell of its own
