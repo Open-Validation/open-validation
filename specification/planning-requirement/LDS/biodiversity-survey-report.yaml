@@ -1,23 +1,116 @@
 reference: biodiversity-survey-report
 local-authority: LDS
 required-if:
-  condition:
-    field: protected-species
-    value: true
-    description: The site is in or near a bat alert zone, or close to a known bat roost.
+  all:
+  - application-type:
+      in:
+      - hh
+      - full
+      - outline
+      - reserved-matters
+      - change-of-use
+      - lbc
+      - pa-demo-building
+  - any:
+    - condition:
+        field: protected-species
+        value: true
+        description: The proposal has an impact on bats or other protected species, or the site is a known
+          bat roost.
+    - site:
+        in:
+        - ecology-consultation-zone
+        description: Site is in or near a bat alert zone (Leeds bat alert layer).
+    - condition:
+        field: potential-roost-features
+        value: true
+        description: Other structures with suitable features for bats, as per the Bat Alert Layer flow
+          diagram.
+    - all:
+      - condition:
+          field: wind-turbine
+          value: true
+          description: A non-EIA wind turbine application.
+      - any:
+        - site:
+            in:
+            - special-protection-area
+            description: Within 1km of the South Pennine Moors Phase 2 SPA.
+        - site:
+            in:
+            - site-of-special-scientific-interest
+            description: Affects SSSIs notified for bird interest.
+        - discretionary
+    - all:
+      - application-type:
+          in:
+          - lbc
+      - site:
+          in:
+          - site-of-special-scientific-interest
+          - priority-habitat
+          description: Likely to affect a designated site or priority habitat.
 source-url: https://www.leeds.gov.uk/planning/planning-permission/find-out-if-you-need-planning-permission/apply-for-planning-permission/validation-requirements
-source-text: Bat survey If the site is in an area where bats are known to be present or close to a bat
-  roost, you will need to provide a bat scoping survey.
+policy: Core Strategy Policies G7 and G8; Biodiversity and waterfront development SPD
+source-text: 'If the site is in an area where bats are known to be present or close to a bat roost, you
+  will need to provide a bat scoping survey. ... A Bat Survey Report as part of EcIA or stand-alone document
+  is needed if any of these apply: all applications with an impact on bats the site is within a bat alert
+  layer the site is a known bat roost any other structures with suitable features as per the Flow Diagram
+  ... Appropriate bird surveys to be submitted as part of EcIA if any of these apply: any non-EIA wind
+  turbine applications within 1km of South Pennine Moors Phase 2 SPA any SSSIs notified for bird interest
+  and other sites with records of notable bird interest ... A Protected Species Survey and Assessment
+  must be provided where a proposal is likely to affect protected species.'
 must-include:
-- item: A bat scoping survey
+- item: Bat scoping survey confirming whether bats are or have been present in the building or its curtilage,
+    using photographs of the soffits, ridge line and fascia boards, and within the roof structure
   level: must
-- item: Where evidence of bats is found, a bat survey that meets the Minimum Standards for Bat Surveys
-    in West Yorkshire, undertaken by a licensed bat worker
+  required-if:
+    application-type:
+      in:
+      - hh
+      - pa-demo-building
+- item: 'If evidence of bats is found: a bat survey meeting the Minimum Standards for Bat Surveys in West
+    Yorkshire, undertaken by a licensed bat worker'
   level: must
+- item: Bat survey report as part of an Ecological Impact Assessment (EcIA) or a stand-alone document
+  level: must
+  required-if:
+    application-type:
+      in:
+      - full
+      - outline
+      - reserved-matters
+      - change-of-use
+- item: 'Wind turbines: appropriate bird surveys as part of the EcIA'
+  level: must
+  required-if:
+    condition:
+      field: wind-turbine
+      value: true
+      description: A wind turbine application.
+- item: Ecological/Geological Survey and Assessment where a designated site or priority habitat is likely
+    to be affected
+  level: must
+  required-if:
+    site:
+      in:
+      - site-of-special-scientific-interest
+      - priority-habitat
+      description: Likely to affect a designated site or priority habitat.
+  source-text: An Ecological/Geological Survey and Assessment must be submitted where a proposed development
+    is likely to affect a designated site or priority habitat.
+- item: A copy of the report lodged with West Yorkshire Ecology
+  level: should
+  required-if:
+    application-type:
+      in:
+      - hh
+      - pa-demo-building
 confidence: medium
-notes: 'The workbook guessed the application type (''INFERRED''), so no type is given. From the audit
-  (wrong_app_type): the bat scoping survey is in the householder section; it is also asked for with listed
-  building consent and prior notification of demolition where relevant. The second item is from the council''s
-  submission rules.'
+notes: From the council's list (published as a web page, last modified 9 September 2026), section 'Bat
+  survey (householder); Biodiversity - bats; Biodiversity – wind turbines and birds (planning); Protected
+  species report (listed building); Bat Survey (notification for demolition)'. The Leeds bat alert layer
+  is shown as an ecology consultation zone. 'Other sites with records of notable bird interest' shows
+  as discretionary.
 review-status: unverified
 field-status: {}
