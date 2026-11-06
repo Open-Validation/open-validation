@@ -39,10 +39,13 @@ h2 { font-size: 22px; margin-bottom: 12px; }
 h3 { font-size: 17px; }
 
 /* ===== Layout ===== */
-header.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
-.brand { display: flex; align-items: center; gap: 10px; }
-.brand h1 { font-size: 20px; letter-spacing: 0.02em; }
-.brand small { color: var(--text-muted); }
+header.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 22px 24px; border-bottom: 1px solid var(--line); }
+.brand { display: flex; align-items: center; gap: 14px; color: inherit; text-decoration: none; border-radius: 8px; }
+.brand:hover h1, .brand:focus-visible h1 { color: var(--accent); }
+.brand .icon { width: 34px; height: 34px; }
+.brand h1 { font-size: 30px; letter-spacing: 0.02em; margin: 0; line-height: 1.15; }
+.brand small { color: var(--text-muted); font-size: 16px; display: block; margin-top: 2px; }
+@media (max-width: 600px) { header.top { padding: 16px; } .brand h1 { font-size: 23px; } .brand small { font-size: 14px; } .brand .icon { width: 26px; height: 26px; } }
 .wrap { max-width: 1280px; margin: 0 auto; padding: 0 16px; }
 .pickbar { display: grid; grid-template-columns: minmax(0,2fr) minmax(0,2fr) minmax(0,1.5fr); gap: 12px; padding: 16px 0 8px; }
 @media (max-width: 760px) { .pickbar { grid-template-columns: 1fr; } }
@@ -152,6 +155,14 @@ body.patterns .badge.st-incorrect, body.patterns td.tint.st-incorrect { backgrou
 
 /* ===== Cards and results ===== */
 .card { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 14px 16px; margin-bottom: 12px; }
+.council-panel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 360px); gap: 16px; align-items: stretch; }
+@media (max-width: 760px) { .council-panel { grid-template-columns: 1fr; } }
+.minimap { position: relative; display: block; padding: 0; border: 1px solid var(--line); border-radius: 10px; background: rgba(11,31,58,0.6); cursor: pointer; overflow: hidden; min-height: 200px; }
+.minimap:hover, .minimap:focus-visible { border-color: var(--accent); }
+.minimap svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.minimap path.lpa { stroke: var(--bg); stroke-width: 0.5; }
+.minimap path.mini-outline { fill: none; stroke: #FFFFFF; stroke-width: 2.5; }
+.minimap-label { position: absolute; right: 8px; bottom: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; font-size: 13px; color: var(--text); }
 .council-panel h2 { margin: 0 0 8px; }
 .council-panel .kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 14px; margin: 0 0 8px; }
 .kv dt { color: var(--text-muted); font-size: 13px; padding-top: 1px; } .kv dd { margin: 0; }
@@ -182,8 +193,13 @@ body.patterns .badge.st-incorrect, body.patterns td.tint.st-incorrect { backgrou
 blockquote { margin: 6px 0; padding: 6px 10px; border-left: 2px solid var(--line-soft); color: var(--text-muted); white-space: pre-wrap; }
 
 /* ===== Tables ===== */
-.tablewrap { overflow: auto; max-height: 75vh; border: 1px solid var(--line); border-radius: 12px; }
-table.grid { border-collapse: separate; border-spacing: 0; min-width: 100%; font-size: 14px; }
+/* Tables use most of the screen width (wider than the centred column) and scroll with the page,
+   so the sticky heading row stays at the top of the window. Narrow screens scroll sideways instead. */
+.bleed { margin-inline: min(0px, calc((100% - 100vw + 64px) / 2)); }
+.tablewrap { overflow: visible; border: 1px solid var(--line); border-radius: 12px; }
+@media (max-width: 900px) { .tablewrap { overflow-x: auto; } }
+table.grid { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 14px; }
+table.grid thead th:first-child { border-top-left-radius: 11px; } table.grid thead th:last-child { border-top-right-radius: 11px; }
 table.grid th, table.grid td { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 7px 9px; vertical-align: top; text-align: left; background: var(--surface); }
 table.grid th { position: sticky; top: 0; z-index: 2; background: var(--bg); font-weight: 600; white-space: nowrap; cursor: pointer; }
 table.grid th[aria-sort="ascending"]::after { content: " ▲"; font-size: 10px; } table.grid th[aria-sort="descending"]::after { content: " ▼"; font-size: 10px; }
@@ -245,10 +261,10 @@ footer.foot { border-top: 1px solid var(--line); padding: 16px; color: var(--tex
 </head>
 <body>
 <header class="top">
-  <div class="brand">
+  <a class="brand" id="brandHome" href="#tab=map" title="Back to the map (no council selected)">
     <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="3" y="3" width="18" height="18"/><path d="M3 9h18M9 21V9M14 14h4M14 17h4"/></svg>
     <div><h1>open-validation</h1><small>Local planning validation requirements, England</small></div>
-  </div>
+  </a>
   <label class="switch" title="Review mode, for maintainers: mark cells as checked">
     <input type="checkbox" id="reviewToggle" aria-describedby="reviewHelp"> Review
     <span id="reviewHelp" class="sr-only">Review mode lets maintainers mark table cells as checked.</span>
@@ -991,6 +1007,9 @@ function drawMap() {
       tip.hidden = true; selectCouncil(f.properties.code, "table");
     })
     .on("keydown", function (e, f) { if ((e.key === "Enter" || e.key === " ") && f.properties.code) { e.preventDefault(); selectCouncil(f.properties.code, "table"); } });
+  // Clicking the sea (empty map, not a council) clears the chosen council. A drag to pan doesn't count:
+  // d3.zoom swallows the click that ends a drag.
+  svg.on("click", function (e) { if (e.target === svgEl && S.lpa) { tip.hidden = true; selectCouncil("", "map"); } });
   mapZoom = d3.zoom().scaleExtent([1, 60]).translateExtent([[-w, -hgt], [2 * w, 2 * hgt]]).on("zoom", function (e) { g.attr("transform", e.transform); });
   svg.call(mapZoom);
   $("#zoomIn").onclick = function () { svg.transition().duration(250).call(mapZoom.scaleBy, 1.8); };
@@ -1091,6 +1110,7 @@ function renderTable(panel, council) {
     return cellTD(row.d, row.code, row.file, key, esc(row.cells[key]), key === "required-if" ? "wide" : "");
   }, "table");
   panel.innerHTML = html;
+  drawMiniMap();
   bindTable(panel, "table", function () { renderTable(panel, council); });
   var officer = $("#officer"); if (officer) officer.addEventListener("click", function () { window.open(issueURL("council.yml", "Council: " + S.lpa + " ", { council: S.lpa, list: ((council.lpa["validation-list"] || {}).url) || "" }), "_blank", "noopener"); });
   panel.querySelectorAll("button[data-tag]").forEach(function (b) { b.addEventListener("click", function (e) { e.stopPropagation(); S.tagFilter = b.dataset.tag; renderTable(panel, council); }); });
@@ -1122,11 +1142,11 @@ function tableHTML(cols, rows, cellFn, id) {
   var sort = S.sort[id] || {};
   S.gridCols = S.gridCols || {}; S.gridCols[id] = cols;
   var sized = Object.keys(colW(id)).length > 0;
-  return '<style id="gridw-' + id + '">' + colWidthCSS(id) + "</style>" +
+  return '<style id="gridw-' + id + '">' + colWidthCSS(id) + '</style><div class="bleed">' +
     '<div class="colw-bar" id="colwbar-' + id + '"' + (sized ? "" : " hidden") + '><button type="button" class="btn small" data-resetw="' + id + '">Reset column widths</button></div>' +
     '<div class="tablewrap"><table class="grid" id="grid-' + id + '"><thead><tr>' + cols.map(function (c) { return '<th scope="col" data-sort="' + c[0] + '" tabindex="0"' + (sort.key === c[0] ? ' aria-sort="' + (sort.dir > 0 ? "ascending" : "descending") + '"' : "") + ">" + esc(c[1]) +
       '<span class="colgrip" role="separator" aria-orientation="vertical" tabindex="0" data-col="' + c[0] + '" aria-label="Resize the ' + esc(c[1]) + ' column" title="Drag to change the width (or use the arrow keys); double-click to reset"></span></th>'; }).join("") +
-    "</tr></thead><tbody>" + rows.map(function (r) { return "<tr>" + cols.map(function (c) { return cellFn(r, c[0]); }).join("") + "</tr>"; }).join("") + "</tbody></table></div>" +
+    "</tr></thead><tbody>" + rows.map(function (r) { return "<tr>" + cols.map(function (c) { return cellFn(r, c[0]); }).join("") + "</tr>"; }).join("") + "</tbody></table></div></div>" +
     (rows.length ? "" : '<p class="muted">Nothing matches.</p>');
 }
 function sortRows(rows, id, cols) {
@@ -1310,7 +1330,7 @@ function councilPanel(council) {
   var partners = (y["joint-list"] || {}).partners || [];
   var issues = audit["issues-open"] == null ? "" : ", " + audit["issues-open"] + " issue" + (audit["issues-open"] === 1 ? "" : "s") + " found";
   // Compact: one short row each for the list and the audit; standards fold away on small screens
-  return '<section class="card council-panel" aria-label="Council"><h2>' + esc(r.name) + ' <span class="mono muted" style="font-size:14px">' + esc(S.lpa) + "</span> " + badge(status) + "</h2>" + scrapingNote(S.lpa) +
+  return '<section class="card council-panel" aria-label="Council"><div class="cp-info"><h2>' + esc(r.name) + ' <span class="mono muted" style="font-size:14px">' + esc(S.lpa) + "</span> " + badge(status) + "</h2>" + scrapingNote(S.lpa) +
     '<dl class="kv"><dt>List</dt><dd>' + (vl.url ? '<a href="' + esc(vl.url) + '" target="_blank" rel="noopener">Open the council\'s list</a>' : "Not found") +
     (vl.date ? " · " + '<span' + (old ? ' class="warn" title="More than 2 years old: the NPPF expects a review every 2 years"' : "") + ">" + esc(vl.date) + (old ? " ⚠ over 2 years old" : "") + "</span>" : "") +
     (vl.status && vl.status !== "outdated" ? ' · <span class="muted">' + esc(vl.status) + "</span>" : "") + "</dd>" +
@@ -1318,7 +1338,28 @@ function councilPanel(council) {
     corpRows() +
     (partners.length ? "<dt>Shared list</dt><dd>" + partners.map(function (p) { return '<button class="linkish btn small" data-select="' + esc(p) + '">' + esc((S.lpaByCode[p] || {}).name || p) + "</button>"; }).join(" ") + "</dd>" : "") + "</dl>" +
     (stds.length ? '<details class="std"' + (window.innerWidth > 600 ? " open" : "") + "><summary>Submission standards (" + stds.length + ")</summary><ul>" + std + "</ul></details>" : '<p class="muted" style="margin:0">No submission standards recorded.</p>') +
-    '<p class="actions"><button class="btn small" id="officer">I work for this council</button></p></section>';
+    '<p class="actions"><button class="btn small" id="officer">I work for this council</button></p></div>' +
+    (S.geo ? '<button type="button" class="minimap" id="minimap" title="Open the map" aria-label="Open the map, zoomed to ' + esc(r.name) + '"><svg aria-hidden="true"></svg><span class="minimap-label">Open map ›</span></button>' : "") + "</section>";
+}
+// A small map in the council panel: the council and its neighbours, coloured like the big map. Click to open the map.
+function drawMiniMap() {
+  var btn = $("#minimap"); if (!btn || !S.geo) return;
+  var svgEl = btn.querySelector("svg"), w = svgEl.clientWidth || 360, h = svgEl.clientHeight || 220;
+  var chosen = S.geo.features.find(function (f) { return f.properties.code === S.lpa; });
+  var proj = d3.geoMercator();
+  if (chosen) {
+    proj.fitExtent([[0, 0], [w, h]], chosen);
+    // Zoom out around the council so its neighbours show too
+    var c = d3.geoCentroid(chosen); proj.scale(proj.scale() / 5);
+    var p = proj(c), t = proj.translate(); proj.translate([t[0] + w / 2 - p[0], t[1] + h / 2 - p[1]]);
+  } else proj.fitExtent([[6, 6], [w - 6, h - 6]], S.geo);
+  var path = d3.geoPath(proj), svg = d3.select(svgEl).attr("viewBox", "0 0 " + w + " " + h);
+  svg.html(PATTERN_DEFS);
+  svg.append("g").selectAll("path").data(S.geo.features).join("path").attr("d", path)
+    .attr("class", function (f) { return "lpa" + (f.properties.code && f.properties.code === S.lpa ? " selected" : ""); })
+    .attr("fill", function (f) { var s = mapStatus(f.properties.code, f.properties.nation); return s === "scraping" || (S.patterns && s !== "out" && s !== "unverified") ? "url(#p-" + s + ")" : FILL[s]; });
+  if (chosen) svg.append("path").datum(chosen).attr("d", path).attr("class", "mini-outline");
+  btn.addEventListener("click", function () { S.tab = "map"; writeHash(); render(); window.scrollTo(0, 0); });
 }
 
 // ======================================================================
@@ -1546,6 +1587,7 @@ function start() {
   if (!window.jsyaml) { panel.innerHTML = '<div class="error">Couldn\'t load the YAML reader from cdn.jsdelivr.net. Check your connection or any content blocker.</div>'; return; }
   loadBase().then(function () {
     loadPending(); readHash(); setupPickers(); setupTabs(); setupReview();
+    $("#brandHome").addEventListener("click", function (e) { e.preventDefault(); S.lpa = ""; S.tab = "map"; S.highlight = ""; writeHash(); render(); window.scrollTo(0, 0); });
     document.body.classList.toggle("patterns", S.patterns);
     window.addEventListener("hashchange", function () { readHash(); render(); });
     window.addEventListener("popstate", function () { readHash(); render(); });
