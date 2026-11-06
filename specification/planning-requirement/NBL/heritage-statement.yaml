@@ -5,31 +5,81 @@ required-if:
   - application-type:
       in:
       - lbc
-  - site:
-      in:
-      - listed-building
-      description: The red line boundary contains a listed building.
+      - demolition-con-area
+  - all:
+    - application-type:
+        in:
+        - hh
+        - full
+        - outline
+    - any:
+      - site:
+          in:
+          - listed-building
+          description: A listed building is within the red line boundary.
+      - all:
+        - site:
+            in:
+            - conservation-area
+            description: The site is in a conservation area ...
+        - condition:
+            field: external-alterations
+            value: true
+            description: '... and the proposal includes external works.'
+  - all:
+    - application-type:
+        in:
+        - full
+        - outline
+    - ref: major-development
+    - site:
+        in:
+        - listed-building
+        - conservation-area
+        - scheduled-monument
+        - park-and-garden
+        - battlefield
+        - world-heritage-site
+        description: A major application that includes a heritage asset (listed building, conservation
+          area, scheduled monument, registered park or garden, registered battlefield or Hadrian's Wall
+          World Heritage Site, not its buffer zone).
 source-url: https://www.northumberland.gov.uk/planning-and-building/planning/apply-planning-permission/planning-application-requirements
-source-text: 'Householder: a new or replacement non-mains sewerage system Heritage statement Note 23 Only
-  if: the red line boundary contains a listed building.
-
-
-  Full planning: include Your heritage statement must: explain the history and value of the site or building
-  describe how your proposal affects the heritage asset, and its setting include photos cover both the
-  inside and outside if the building is listed For small proposals, you can prepare the statement yourself.'
+policy: Northumberland Local Plan 2016-2036 policies ENV 7, ENV 8 and ENV 9; NPPF chapter 16, paragraphs
+  195 to 214
+source-text: 'You must submit a heritage statement for: Listed building consent for internal or external
+  works to a listed building Demolition in a conservation area where your proposal includes demolition
+  Householder planning permission if a listed building is within your red line boundary if your proposal
+  includes external works in a conservation area Full or outline planning permission if a listed building
+  is within your red line boundary if the site is in a conservation area and the proposal includes external
+  works if it is a major application and includes a heritage asset:'
 must-include:
 - item: The history and value of the site or building
   level: must
 - item: How the proposal affects the heritage asset and its setting
   level: must
-- item: Photos
+- item: Photographs
   level: must
+  source-text: Your statement must include photographs.
 - item: Both the inside and outside, if the building is listed
   level: must
-confidence: low
-notes: 'The workbook guessed the application type (''INFERRED''), so no type is given. Audit (wrong_trigger,
-  wrong_app_type): the householder trigger is ''Only if: the red line boundary contains a listed building'';
-  the Full row has only what-to-include text, and LBC had no row. Other heritage triggers may be missing.
-  The audit couldn''t read this council''s list, so its contents weren''t checked.'
+  required-if:
+    site:
+      in:
+      - listed-building
+      description: The building is listed.
+- item: Not just a copy of the National Heritage List description
+  level: must
+  source-text: Do not just copy the description from the National Heritage List.
+- item: Why demolition is needed, with evidence where appropriate (such as a structural survey)
+  level: should
+  required-if:
+    condition:
+      field: demolition
+      value: true
+      description: Demolition is proposed.
+confidence: medium
+notes: 'From the council''s list (web page, republished 1 April 2026), Note 23. For listed building consent:
+  internal or external works to a listed building; for demolition in a conservation area: where the proposal
+  includes demolition. It can be part of the Design and Access Statement if the front cover says so.'
 review-status: unverified
 field-status: {}
