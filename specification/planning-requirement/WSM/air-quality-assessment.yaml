@@ -1,17 +1,71 @@
 reference: air-quality-assessment
 local-authority: WSM
 required-if:
-  any:
-  - ref: major-development
-  - condition:
-      field: biomass-or-chp
-      value: true
-      description: The proposal includes combustion plant.
-  - discretionary
+  all:
+  - application-type:
+      in:
+      - full
+      - outline
+      - reserved-matters
+      - s73
+  - any:
+    - ref: major-development
+    - condition:
+        field: direct-air-emissions
+        value: true
+        description: Potentially air pollution generating uses.
+    - condition:
+        field: biomass-or-chp
+        value: true
+        description: Combustion-based technologies.
+    - condition:
+        field: sensitive-end-use
+        value: true
+        description: Sensitive uses (schools, hospitals, nurseries, elderly housing, care homes).
+    - all:
+      - condition:
+          field: dwelling-count
+          operator: '>='
+          value: 1
+          description: Creates new residential units.
+      - site:
+          in:
+          - air-quality-focus-area
+          description: Within an Air Quality Focus Area.
 source-url: https://www.westminster.gov.uk/sites/default/files/media/documents/wcc-local-list-of-validation-requirements-2026.pdf
+policy: Westminster City Plan 2019-2040 Policy 36; London Plan 2021 Policy SI1; Environment SPD (2026)
+source-text: 'Required for: • all major development; • proposals that include potentially air pollution
+  generating uses ... or combustion-based technologies; • proposals incorporating sensitive uses ... and
+  • development that creates new residential units within Air Quality Focus Areas.'
+must-include:
+- item: 'Follows the methodology in paragraphs 9.1.5 to 9.1.13 of the London Plan and the EPUK ''Land-Use
+    Planning & Development Control: Planning for Air Quality'' (2017) guidance'
+  level: should
+- item: Air Quality Positive Statement
+  level: must
+  required-if:
+    any:
+    - all:
+      - ref: major-development
+      - discretionary
+    - condition:
+        field: eia-development
+        value: true
+        description: Development subject to EIA.
+- item: Air Quality Neutral calculations
+  level: must
+  required-if:
+    any:
+    - ref: major-development
+    - condition:
+        field: biomass-or-chp
+        value: true
+        description: Development incorporating Combined Heat and Power (CHP).
 confidence: medium
-notes: 'From the audit (missing_requirement): L10 Air Quality Assessment and Air Quality Positive/Neutral
-  statements - all majors, polluting uses or combustion plant, sensitive uses, new homes in Air Quality
-  Focus Areas (the last three partly shown as officer discretion).'
+notes: 'From the council''s list (published July 2026), page 14 (L10). Footnote 11: potentially air pollution
+  generating uses include those changing traffic volumes or composition, bus or coach stations, underground
+  car parks with extract ventilation and combustion processes. The Air Quality Positive Statement is for
+  major developments in Opportunity Areas and Housing Renewal Areas (shown as discretionary) and developments
+  subject to EIA.'
 review-status: unverified
 field-status: {}
