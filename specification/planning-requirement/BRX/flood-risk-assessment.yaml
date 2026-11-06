@@ -2,22 +2,48 @@ reference: flood-risk-assessment
 local-authority: BRX
 required-if:
   any:
-  - site:
-      in:
-      - flood-risk-zone
-      description: All development in Flood Zone 2 or 3.
-  - condition:
-      field: site-area-residential
-      operator: '>='
-      value: 1
-      description: The site is 1 hectare or more in Flood Zone 1.
-  - condition:
-      field: site-area-non-residential
-      operator: '>='
-      value: 1
-      description: The site is 1 hectare or more in Flood Zone 1.
+  - all:
+    - application-type:
+        in:
+        - full
+        - outline
+        - reserved-matters
+    - any:
+      - all:
+        - site:
+            in:
+            - flood-risk-zone
+            description: The site is in Flood Zone 1.
+        - any:
+          - condition:
+              field: site-area-residential
+              operator: '>='
+              value: 1
+              description: Site area of 1 hectare or more.
+          - condition:
+              field: site-area-non-residential
+              operator: '>='
+              value: 1
+              description: Site area of 1 hectare or more.
+      - site:
+          in:
+          - flood-risk-zone
+          description: The site is in Flood Zone 2 or 3.
+  - all:
+    - application-type:
+        in:
+        - hh
+    - site:
+        in:
+        - flood-risk-zone
+        description: The site is located in Flood Zone 2 or 3.
 source-url: https://www.broxbourne.gov.uk/downloads/file/4492/appendix-c
+source-text: Applications on sites located in Flood Zone 1 with an area of 1Ha or more and for all development
+  within Flood Zones 2 and 3. … Flood risk assessment (required if the site is located in Flood zones
+  2 or 3)
 confidence: medium
-notes: 'From the audit (missing_requirement): FZ1 1ha+; all FZ2/3.'
+notes: From the council's list (published July 2024), page 6, 9. Appendix C (local list by development
+  type) is shown for full, outline and reserved matters applications; householder applications have their
+  own list (Appendix B). For householder applications (Appendix B) only in Flood Zones 2 or 3.
 review-status: unverified
 field-status: {}

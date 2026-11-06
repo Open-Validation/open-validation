@@ -1,16 +1,79 @@
 reference: flood-risk-assessment
 local-authority: HAR
 required-if:
-  site:
-    in:
-    - flood-risk-zone
-    description: The site is in flood zone 2 or 3.
+  any:
+  - all:
+    - any:
+      - ref: major-development
+      - condition:
+          field: minor-development
+          value: true
+          description: 'Minor development as the list defines it: 1 to 9 dwellings (or a site under 0.5
+            ha), a gypsy/traveller site of fewer than 10 pitches, or other floorspace under 1,000 sq m
+            or a site under 1 ha.'
+      - application-type:
+          in:
+          - change-of-use
+    - any:
+      - site:
+          in:
+          - flood-risk-zone
+          description: The property is in Flood Zone 2 or 3.
+      - site:
+          in:
+          - critical-drainage-area
+          description: The property is in a Critical Drainage Area.
+      - discretionary
+  - all:
+    - application-type:
+        in:
+        - advertising
+        - prior-approval
+    - discretionary
+  - all:
+    - application-type:
+        in:
+        - hh
+    - site:
+        in:
+        - flood-risk-zone
+        description: The property is in Flood Zone 2 or 3.
+    - condition:
+        field: residential-extension
+        value: true
+        description: The proposal includes a domestic extension.
 source-url: https://www.harlow.gov.uk/sites/default/files/documents/Main%20validation%20checklist.pdf
-policy: HLDP PL11
-source-text: Flood Risk Assessment … Any applications as required by the Flood Risk Assessment produced
-  by the Environment Agency and DEFRA.
+policy: Harlow Local Development Plan policy PL11
+source-text: 'Any applications as required by the Flood Risk Assessment produced by the Environment Agency
+  and DEFRA. … if your proposal includes a domestic extension within flood zones 2 or 3, you must provide
+  a flood risk assessment which details:'
+must-include:
+- item: Whether the property is in Flood Zone 2 or 3, and whether it is in a Critical Drainage Area (and
+    which one)
+  level: must
+- item: Whether the development increases flood risk (and if so, how)
+  level: must
+- item: Where relevant, how increased flood risk will be mitigated against and/or prevented
+  level: must
+- item: As per paragraph 13.87 of the Harlow Local Development Plan
+  level: must
+  required-if:
+    any:
+    - ref: major-development
+    - condition:
+        field: minor-development
+        value: true
+        description: 'Minor development as the list defines it: 1 to 9 dwellings (or a site under 0.5
+          ha), a gypsy/traveller site of fewer than 10 pitches, or other floorspace under 1,000 sq m or
+          a site under 1 ha.'
+    - application-type:
+        in:
+        - change-of-use
 confidence: medium
-notes: 'Includes Householder: the Householder checklist asks for one for a domestic extension in Flood
-  Zone 2 or 3 (from the audit).'
+notes: From the council's list (Main Validation Checklist, August 2026), page 4, 20. The list defers to
+  national flood risk standing advice without restating its thresholds, so cases beyond Flood Zones 2
+  and 3 and Critical Drainage Areas show as discretionary. Advertisement and prior approval applications
+  need it 'if the proposal would cause ... flooding ... impacts'. Householder applications follow the
+  council's Householder validation checklist web page (https://www.harlow.gov.uk/planning-and-building-control/planning-permission/submitting-householder-planning-application).
 review-status: unverified
 field-status: {}
