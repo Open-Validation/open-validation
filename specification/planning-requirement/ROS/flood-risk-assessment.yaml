@@ -2,25 +2,54 @@ reference: flood-risk-assessment
 local-authority: ROS
 required-if:
   any:
-  - condition:
-      field: site-area-residential
-      operator: '>='
-      value: 1
-      description: The site is 1 hectare or more in Flood Zone 1.
-  - condition:
-      field: site-area-non-residential
-      operator: '>='
-      value: 1
-      description: The site is 1 hectare or more in Flood Zone 1.
+  - any:
+    - condition:
+        field: site-area-residential
+        operator: '>='
+        value: 1
+        description: Development of one hectare or greater in Flood Zone 1.
+    - condition:
+        field: site-area-non-residential
+        operator: '>='
+        value: 1
+        description: Development of one hectare or greater in Flood Zone 1.
   - site:
       in:
       - flood-risk-zone
-      description: All new development in Flood Zones 2 and 3.
-  - discretionary
+      description: New development in Flood Zones 2 and 3.
+  - all:
+    - site:
+        in:
+        - surface-water-flood-risk
+        - groundwater-flood-risk
+        - critical-drainage-area
+        description: Any source of flooding (not just fluvial) poses a risk.
+    - discretionary
 source-url: https://www.rossendale.gov.uk/downloads/file/13886/planning-validation-checklist
+policy: NPPF; Environment Agency standing advice
+source-text: Planning applications for development proposals of one hectare or greater in Flood Zone 1
+  and all proposals for new developments located in Flood Zones 2 and 3, should be accompanied by a Flood
+  Risk Assessment (FRA). ... Flood Risk Assessments should also accompany applications for more vulnerable
+  development proposals where any source of flooding poses risk to the development (not just fluvial flood
+  risk).
+must-include:
+- item: Evidence of compliance with the flood risk sequential test and exception test, as required
+  level: must
+- item: 'Minor development in a flood zone: in line with the Environment Agency''s standing advice'
+  level: must
+  required-if:
+    all:
+    - condition:
+        field: minor-development
+        value: true
+        description: Minor development.
+    - site:
+        in:
+        - flood-risk-zone
+        description: In a flood zone.
 confidence: medium
-notes: 'Audit (wrong_trigger): the workbook''s excerpt was a fragment. From the audit (Local requirement
-  15): sites of 1ha+ in Flood Zone 1, all new development in Zones 2 and 3, and more-vulnerable development
-  at risk from any flood source (shown as officer discretion). Also on the householder checklist.'
+notes: From the council's list (adopted September 2026), pages 25 and 26. 'More vulnerable' development
+  at risk from other sources shows as 'check' (vulnerability is a judgement). Appendix A lists it for
+  householders where relevant.
 review-status: unverified
 field-status: {}
