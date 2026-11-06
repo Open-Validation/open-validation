@@ -1140,6 +1140,13 @@ function bindTable(panel, id, rerender) {
   });
   var f = panel.querySelector("#statusFilter"); if (f) f.addEventListener("change", function () { S.statusFilter = f.value; rerender(); });
   bindColWidths(panel, id);
+  // "show more" / "show less" in one cell opens or closes every long cell in the same row
+  panel.querySelectorAll("table.grid details.more").forEach(function (d) {
+    d.addEventListener("toggle", function () {
+      var row = d.closest("tr"); if (!row) return;
+      row.querySelectorAll("details.more").forEach(function (o) { if (o !== d && o.open !== d.open) o.open = d.open; });
+    });
+  });
 }
 function bindColWidths(panel, id) {
   var style = panel.querySelector("#gridw-" + id), bar = panel.querySelector("#colwbar-" + id);
