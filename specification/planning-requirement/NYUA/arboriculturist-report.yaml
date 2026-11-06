@@ -1,26 +1,109 @@
 reference: arboriculturist-report
 local-authority: NYUA
 required-if:
-  condition:
-    field: trees-on-or-near-site
-    value: true
-    description: There are trees within the site, or on adjacent land, that could influence or be affected
-      by the development (including street trees).
-source-url: https://www.northyorks.gov.uk/sites/default/files/2023-07/Application%20validation%20requirements%20-%20accessible_1.pdf
-source-text: Tree Survey/Arboricultural Implications Where there are trees within the application site,
-  or on land adjacent to it that could influence or be affected by the development (including street trees),
-  information will be required on which trees are to be retained and on the means of protecting these
-  trees during construction works.
+  any:
+  - all:
+    - application-type:
+        in:
+        - mineral-extraction
+        - mineral-app
+        - waste-dev
+        - romp
+    - any:
+      - condition:
+          field: trees-on-or-near-site
+          value: true
+          description: Trees on or adjacent to the site, or likely to be affected.
+      - condition:
+          field: hedgerows-affected
+          value: true
+          description: Hedgerows or hedgerow trees affected.
+  - all:
+    - condition:
+        field: former-district
+        value: harrogate
+        description: Site in the former Harrogate district area.
+    - any:
+      - site:
+          in:
+          - tree-preservation-zone
+          description: Works to protected tree(s) are required to facilitate the development.
+      - application-type:
+          in:
+          - consent-under-tpo
+  - all:
+    - condition:
+        field: former-district
+        value: craven
+        description: Site in the former Craven district area.
+    - condition:
+        field: trees-on-or-near-site
+        value: true
+        description: Trees within or adjacent to the site (including neighbouring gardens and street trees)
+          that could influence or be affected by the development.
+  - all:
+    - condition:
+        field: former-district
+        value: scarborough
+        description: Site in the former Scarborough district area.
+    - any:
+      - condition:
+          field: trees-on-or-near-site
+          value: true
+          description: Trees within or adjacent to the site that could influence or be affected by the
+            development.
+      - condition:
+          field: hedgerows-affected
+          value: true
+          description: Hedgerows within or adjacent to the site.
+      - application-type:
+          in:
+          - consent-under-tpo
+          - hedgerow-removal
+source-url: https://www.northyorks.gov.uk/sites/default/files/2023-10/NYC%20NYPA15%20Minerals%20and%20waste%20application%20validation%20requirements%20-%20accessible.pdf
+source-text: For applications where proposals are likely to affect existing trees, hedgerow trees or hedgerows
+  or where there are trees/hedgerow trees/hedgerows on or adjacent to the application site. ... Tree assessment
+  - when works to protected tree(s) are required to facilitate the development. ... An arboricultural
+  report must be submitted where there are trees within a proposed application site ... Where there are
+  trees or hedgerows within the application site, or on land adjacent to it that could influence or be
+  affected by the development (including street trees), information will be required on which trees/hedges
+  are to be removed and those to be | The assessment of impact on trees should be prepared by a suitably
+  qualified arboriculturist. Full guidance on the survey information, protection plan and method statement
+  that should be provided with an application is set out in the current BS5837 ‘Trees in Relation to Design,
+  Demolition and Construction’. Using the methodology set out in the BS should help to ensure that development
+  is suitably integrated with trees and that potential conflicts are avoided. 26 | | | retained and the
+  means of protecting them during construction. It also applies to applications to fell or lop protected
+  trees or to remove hedgerows (see paras. 3.22 & 3.23)
 must-include:
-- item: Which trees are to be retained
+- item: 'Craven: tree survey drawing and schedule, Arboricultural Constraints Plan, Tree Protection Plan
+    and Arboricultural Method Statement'
   level: must
-- item: The means of protecting retained trees during construction works
+  required-if:
+    condition:
+      field: former-district
+      value: craven
+      description: Site in the former Craven district area.
+- item: 'Scarborough: prepared by a suitably qualified arboriculturist following BS5837'
   level: must
-confidence: low
-notes: 'The workbook guessed the application type (''INFERRED''), so no type is given. Audit (missing_requirement):
-  NYPA1 (householder) also asks for it where works are within 10m of the crown spread of a TPO tree or
-  a conservation area tree. Audit (wrong_document): this is the 2016 County Planning Authority list, now
-  used for minerals, waste and the council''s own development; most applications are validated against
-  the former district areas'' own lists, which are not captured yet.'
+  required-if:
+    condition:
+      field: former-district
+      value: scarborough
+      description: Site in the former Scarborough district area.
+- item: 'Minerals and waste: height, canopy spread, trunk diameter, root spread, species and condition
+    of all trees/hedgerow specimens'
+  level: must
+  required-if:
+    application-type:
+      in:
+      - mineral-extraction
+      - mineral-app
+      - waste-dev
+      - romp
+confidence: medium
+notes: 'From the council''s lists (published 2011 to 2023; see _lpa.yaml), by area: minerals and waste:
+  NYPA15 minerals and waste checklist (April 2023); Harrogate: Harrogate area validation criteria page;
+  Craven: Craven area ''What to submit'' page; Scarborough: Scarborough area validation requirements (May
+  2021). Harrogate: always required for works to trees subject to a TPO.'
 review-status: unverified
 field-status: {}
