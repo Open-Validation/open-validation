@@ -265,7 +265,7 @@ footer.foot { border-top: 1px solid var(--line); padding: 16px; color: var(--tex
   <nav class="tabs" role="tablist" aria-label="Views">
     <button class="tab" role="tab" data-tab="map" id="tab-map">Map</button>
     <button class="tab" role="tab" data-tab="councils" id="tab-councils">Councils</button>
-    <button class="tab" role="tab" data-tab="results" id="tab-results">Results</button>
+    <button class="tab" role="tab" data-tab="results" id="tab-results" hidden>Results</button>
     <button class="tab" role="tab" data-tab="table" id="tab-table">Table</button>
     <button class="tab" role="tab" data-tab="browse" id="tab-browse">Browse files</button>
   </nav>
@@ -297,6 +297,7 @@ var GH_BLOB = "https://github.com/" + OWNER + "/" + REPO + "/blob/" + BRANCH + "
 var GH_NEW_ISSUE = "https://github.com/" + OWNER + "/" + REPO + "/issues/new";
 var API = "https://api.github.com/repos/" + OWNER + "/" + REPO;
 
+var SHOW_RESULTS = false;   // the Results (checklist) view is hidden for now; set true to bring it back
 var STATUSES = ["incorrect", "unverified", "human-verified", "council-verified", "council-updated"];
 var STATUS_LABEL = { "incorrect": "Incorrect", "unverified": "Unverified", "human-verified": "Human verified",
   "council-verified": "Council verified", "council-updated": "Council updated", "out": "Not covered yet",
@@ -702,7 +703,8 @@ function writeHash(replace) {
 function readHash() {
   var p = {}; location.hash.replace(/^#/, "").split("&").forEach(function (kv) { if (!kv) return; var i = kv.indexOf("="); p[decodeURIComponent(kv.slice(0, i))] = decodeURIComponent(kv.slice(i + 1)); });
   S.lpa = S.lpaByCode[p.lpa] ? p.lpa : ""; S.chosen = String(p.type || "").split(",").filter(function (t, i, a) { return S.typeById[t] && a.indexOf(t) === i; }); S.q = p.q || "";
-  S.tab = ["map", "councils", "results", "table", "browse"].indexOf(p.tab) !== -1 ? p.tab : (S.lpa ? "results" : "map");
+  S.tab = ["map", "councils", "results", "table", "browse"].indexOf(p.tab) !== -1 ? p.tab : (S.lpa ? (SHOW_RESULTS ? "results" : "table") : "map");
+  if (S.tab === "results" && !SHOW_RESULTS) S.tab = S.lpa ? "table" : "map";
   S.site = {};
   Object.keys(p).forEach(function (k) {
     if (["lpa", "type", "tab", "q"].indexOf(k) !== -1) return;
@@ -775,11 +777,11 @@ function renderTypeRows() {
   $("#addType").hidden = !S.chosen.length || S.addingType;
   S.addingType = false;
 }
-// Choosing a council on the map (or under it) opens its Table; the search box opens Results
+// Choosing a council opens its Table (the search box opened Results while that view was shown)
 function selectCouncil(code, tab) {
   S.lpa = code || ""; $("#councilList").hidden = true;
   if (tab) S.tab = tab;
-  else if (S.lpa && (S.tab === "map" || S.tab === "councils" || !S.tab)) S.tab = "results";
+  else if (S.lpa && (S.tab === "map" || S.tab === "councils" || !S.tab || (S.tab === "results" && !SHOW_RESULTS))) S.tab = SHOW_RESULTS ? "results" : "table";
   writeHash(); render();
 }
 
@@ -867,6 +869,7 @@ function renderTabs() {
 function renderPanel() {
   var panel = $("#panel");
   panel.setAttribute("aria-labelledby", "tab-" + S.tab);
+  if (S.tab === "results" && !SHOW_RESULTS) S.tab = S.lpa ? "table" : "map";
   if (S.tab === "map") return renderMap(panel);
   if (S.tab === "councils") return renderCouncils(panel);
   if (!S.lpa) { if (S.tab === "results") return renderResults(panel, null); panel.innerHTML = emptyState("Choose a council to see its " + (S.tab === "table" ? "table" : "files") + "."); return; }
@@ -1013,7 +1016,10 @@ function renderCouncils(panel) {
       "validation-list-status": vl.status || r["list-status"], "submission-standards": (y["submission-standards"] || []).length ? (y["submission-standards"] || []).length + " rules" : "",
       contact: y.contact ? Object.keys(y.contact).join(", ") : "", "joint-list": ((y["joint-list"] || {}).partners || []).join(", "), issues: r["issues-open"] } };
   });
-  var html = '<div class="toolbar"><div><h2 style="margin:0">Councils</h2><p class="muted" style="margin:4px 0 0">' + S.lpas.length + " English councils. Cells are tinted by how far they've been checked.</p></div>" + statusFilterHTML() + "</div>";
+  var nScrape = S.lpas.filter(function (r) { return mapStatus(r.code, "England") === "scraping"; }).length;
+  var html = (nScrape ? '<div class="scraping-note" role="note"><strong>Data scraping in progress for ' + nScrape + " councils</strong>Councils marked \"Data scraping in progress\" still hold an early AI extract. " +
+    "They haven't been rewritten from their own validation lists yet, so use them as a rough guide only and check the council's list.</div>" : "") +
+    '<div class="toolbar"><div><h2 style="margin:0">Councils</h2><p class="muted" style="margin:4px 0 0">' + S.lpas.length + " English councils. Cells are tinted by how far they've been checked.</p></div>" + statusFilterHTML() + "</div>";
   if (missing.length) html += '<div id="loadwrap"><p class="muted">Loading council details… <span id="loadn">0</span> of ' + missing.length + '</p><div class="progress"><div id="loadbar"></div></div></div>';
   html += countsHTML(rows.reduce(function (acc, row) { LPA_CELLS.forEach(function (c) { if (!isEmpty(cellValue(row.y, c)) && row.y["local-authority"]) { var st = cellStatus(row.y, row.code, "_lpa", c).status; acc[st] = (acc[st] || 0) + 1; } }); return acc; }, {}));
   html += tableHTML(cols, sortRows(rows, "councils", cols), function (row, key) {
@@ -1055,7 +1061,7 @@ function renderTable(panel, council) {
   }).filter(function (r) { return !S.statusFilter || REQ_CELLS.some(function (c) { return !isEmpty(cellValue(r.d, c)) && cellStatus(r.d, r.code, r.file, c).status === S.statusFilter; }); })
     .filter(function (r) { return !S.tagFilter || appliesTo(r.d["required-if"]).some(function (t) { return t.key === S.tagFilter; }); });
   var counts = {}; council.files.forEach(function (f) { REQ_CELLS.forEach(function (c) { if (!isEmpty(cellValue(f.data, c))) { var s = cellStatus(f.data, S.lpa, f.id, c).status; counts[s] = (counts[s] || 0) + 1; } }); });
-  var html = '<div class="toolbar"><div><h2 style="margin:0">' + esc(S.lpaByCode[S.lpa].name) + '</h2><p class="muted" style="margin:4px 0 0">' + council.files.length + " requirement files. Every cell is tinted by its review status" + (S.review ? "; tap a cell to mark it." : ".") + "</p></div>" + statusFilterHTML() + "</div>" + scrapingNote(S.lpa) + countsHTML(counts) +
+  var html = councilPanel(council) + '<div class="toolbar"><div><h2 style="margin:0">Requirements</h2><p class="muted" style="margin:4px 0 0">' + council.files.length + " requirement files. Every cell is tinted by its review status" + (S.review ? "; tap a cell to mark it." : ".") + "</p></div>" + statusFilterHTML() + "</div>" + countsHTML(counts) +
     (S.tagFilter ? '<p class="filterbar">Showing requirements that apply to: <span class="chip-ans">' + esc(S.tagFilter === "always" ? "All applications" : S.tagFilter === "discretionary" ? "Council's discretion" : S.tagFilter === "any-site" ? "Any site" : fieldLabel(S.tagFilter)) +
       '<button type="button" id="clearTag" aria-label="Show all requirements">✕</button></span></p>' : "");
   html += tableHTML(cols, sortRows(rows, "table", cols), function (row, key) {
@@ -1068,6 +1074,7 @@ function renderTable(panel, council) {
   }, "table");
   panel.innerHTML = html;
   bindTable(panel, "table", function () { renderTable(panel, council); });
+  var officer = $("#officer"); if (officer) officer.addEventListener("click", function () { window.open(issueURL("council.yml", "Council: " + S.lpa + " ", { council: S.lpa, list: ((council.lpa["validation-list"] || {}).url) || "" }), "_blank", "noopener"); });
   panel.querySelectorAll("button[data-tag]").forEach(function (b) { b.addEventListener("click", function (e) { e.stopPropagation(); S.tagFilter = b.dataset.tag; renderTable(panel, council); }); });
   var ct = $("#clearTag"); if (ct) ct.addEventListener("click", function () { S.tagFilter = ""; renderTable(panel, council); });
 }
