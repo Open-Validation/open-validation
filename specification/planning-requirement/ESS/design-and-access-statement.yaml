@@ -1,15 +1,105 @@
 reference: design-and-access-statement
 local-authority: ESS
 required-if:
-  application-type:
-    in:
-    - mineral-app
-    - waste-dev
-    - reg-3
+  any:
+  - all:
+    - application-type:
+        in:
+        - reg-3
+    - any:
+      - ref: major-development
+      - all:
+        - site:
+            in:
+            - conservation-area
+            - world-heritage-site
+            description: In a designated area (a World Heritage Site or Conservation Area).
+        - any:
+          - condition:
+              field: dwelling-count
+              operator: '>='
+              value: 1
+              description: One or more dwellings.
+          - condition:
+              field: floorspace
+              operator: '>='
+              value: 100
+              description: A building or buildings with a floorspace of 100 square metres or more.
+  - application-type:
+      in:
+      - lbc
+  - all:
+    - application-type:
+        in:
+        - mineral-extraction
+        - mineral-app
+    - condition:
+        field: building-works
+        value: true
+        description: Building works are proposed (the Minerals list says a DAS is not needed for engineering
+          or mining operations or a material change of use).
+    - any:
+      - ref: major-development
+      - all:
+        - site:
+            in:
+            - conservation-area
+            - world-heritage-site
+            description: In a designated area (a World Heritage Site or Conservation Area).
+        - any:
+          - condition:
+              field: dwelling-count
+              operator: '>='
+              value: 1
+              description: One or more dwellings.
+          - condition:
+              field: floorspace
+              operator: '>='
+              value: 100
+              description: A building or buildings with a floorspace of 100 square metres or more.
 source-url: https://www.essex.gov.uk/sites/default/files/2025-03/Regulation%203%20validation%20checklist%20March%202025.pdf
-confidence: low
-notes: 'The workbook guessed the application type (''INFERRED''), so no type is given. Audit (wrong_trigger):
-  the workbook''s excerpt was contents-page text. The list has a Design and Access Statements section
-  (pp12-13) whose trigger was not captured.'
+policy: Article 9, Town and Country Planning (Development Management Procedure) (England) Order 2015
+source-text: 'Required by Article 9 of the Town and Country Planning (Development Management Procedure)
+  (England) Order 2015 for the following: • Major development ... ; • Listed Building Consent • Development
+  in a designated area ... , where the proposed development consists of: ▪ One or more dwellings; or ▪
+  A building or buildings with a floor space of 100 square metres or more. A DAS is not required for an
+  application for a material change of use or a Section 73 (S73 – variation of removal of conditions).
+  ... A DAS is not required for the following applications: • Waste development. • A material change of
+  use. • Engineering or mining operations. • Section 73 (S73 - variation or removal of conditions).'
+must-include:
+- item: An explanation of the design principles and concepts applied to the development
+  level: should
+- item: The steps taken to appraise the context of the development and how the design takes that context
+    into account
+  level: should
+- item: The applicant's approach to access and how relevant Local Plan policies have been taken into account
+  level: should
+- item: Any consultation undertaken on access issues and how its outcome informed the development
+  level: must
+  source-text: They must detail any consultation undertaken in relation to access issues, and how the
+    outcome of this consultation has informed the proposed development.
+- item: How any specific issues which might affect access to the development have been addressed
+  level: must
+- item: 'For listed building consent: how the design principles take account of the building''s special
+    architectural or historic importance, the physical features that justify its listing, and its setting'
+  level: must
+  required-if:
+    application-type:
+      in:
+      - lbc
+- item: 'For listed building consent, unless the works only affect the interior: how access issues have
+    been dealt with, including alternative means of access considered'
+  level: must
+  required-if:
+    application-type:
+      in:
+      - lbc
+confidence: medium
+notes: 'From the council''s list (published March 2025), page 14-15 of the Regulation 3 list (page 14-15
+  of the Minerals list). Footnote: major development as defined in Article 2 of the DMPO; a designated
+  area is a World Heritage Site or Conservation Area. The Waste list does not include a DAS and the Minerals
+  list says one is not needed for waste development, engineering or mining operations, a material change
+  of use or a Section 73 application, so for minerals the rule only applies where building works are proposed.
+  The level of detail should be commensurate with the scale of the development.'
 review-status: unverified
 field-status: {}
