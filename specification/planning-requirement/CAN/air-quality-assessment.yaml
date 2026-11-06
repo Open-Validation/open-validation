@@ -1,21 +1,74 @@
 reference: air-quality-assessment
 local-authority: CAN
 required-if:
-  all:
-  - site:
-      in:
-      - air-quality-management-area
-      description: The site is in an Air Quality Management Area.
+  any:
+  - all:
+    - site:
+        in:
+        - air-quality-management-area
+        description: Located in an Air Quality Management Area.
+    - any:
+      - condition:
+          field: dwelling-count
+          operator: '>='
+          value: 1
+          description: Residential development (Checklist 2).
+      - condition:
+          field: floorspace-non-residential
+          operator: '>='
+          value: 1
+          description: New non-residential development.
+  - all:
+    - condition:
+        field: dwelling-count
+        operator: '>='
+        value: 10
+        description: 10 or more dwellings.
+    - discretionary
+  - all:
+    - ref: major-development
+    - discretionary
+  - all:
+    - site:
+        in:
+        - air-quality-management-area
+        description: Non-residential development likely to have an effect on an AQMA.
+    - discretionary
   - condition:
-      field: dwelling-count
-      operator: '>='
-      value: 1
-      description: New residential development.
+      field: biomass-or-chp
+      value: true
+      description: A biomass boiler.
+  - condition:
+      field: direct-air-emissions
+      value: true
+      description: A proposal that results in emissions.
 source-url: https://www.cannockchasedc.gov.uk/sites/default/files/document-library/CCDC%20validations_document_Jan%202024_final_0_0.docx
-source-text: Air Quality Assessment Required where new residential development located in Air Quality
-  Management Areas.
-confidence: low
-notes: The workbook guessed the application type ('INFERRED'), so no type is given. The audit couldn't
-  read this council's list, so its contents weren't checked.
+policy: NPPF; national air quality standards
+source-text: Required where new residential development located in Air Quality Management Areas. Also
+  required for applications for 10 or more dwellings, where the scale of development could potentially
+  contribute to a significant worsening of local air quality. In addition, such schemes would need to
+  be supported by a damage cost calculation. Also required for all applications for biomass boilers or
+  those which result in emissions. ... Required where new development is located in or likely to have
+  an effect on an Air Quality Management Area. Also required major planning applications, where the scale
+  of development could potentially contribute to a significant worsening of local air quality.
+must-include:
+- item: A formal report in line with national standards showing how pollution levels may change because
+    of the development and/or exposure levels for new receptors
+  level: must
+- item: A damage cost calculation, itemising mitigation measures to offset the development's traffic emissions
+  level: must
+  required-if:
+    any:
+    - ref: major-development
+    - condition:
+        field: dwelling-count
+        operator: '>='
+        value: 10
+        description: 10 or more dwellings.
+confidence: medium
+notes: From the council's list (published January 2024), Validation Checklist 2 (Residential) and Validation
+  Checklist 3 (Non-Residential). 'Could potentially contribute to a significant worsening of local air
+  quality' and 'likely to have an effect on an AQMA' are judgements, so those parts show as discretionary.
+  Not needed where Environmental Health confirm in writing that a report is not required.
 review-status: unverified
 field-status: {}
