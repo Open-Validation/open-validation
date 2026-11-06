@@ -1,23 +1,66 @@
 reference: flood-risk-assessment
 local-authority: CHE
 required-if:
-  all:
-  - application-type:
-      in:
-      - hh
-  - site:
-      in:
-      - flood-risk-zone
-      - critical-drainage-area
-      description: The property is in flood zone 2 or 3 and/or the site suffers from critical drainage
-        issues.
-source-url: https://www.cheshireeast.gov.uk/pdf/planning/validation-checklists/vc2-householder-validation-checklist-2024.pdf
-source-text: 'Flood Risk Assessment where: Property is located in flood zone 2 or 3 and / or the site
-  suffers from critical drainage issues'
-confidence: low
-notes: 'The workbook guessed the application type (''INFERRED''), so no type is given. From the VC2 householder
-  checklist. Audit (wrong_app_type): the Full planning row was VC3 minerals text with no trigger; the
-  VC1 general trigger could not be checked. The audit couldn''t read this council''s list, so its contents
-  weren''t checked.'
+  any:
+  - all:
+    - application-type:
+        in:
+        - full
+        - outline
+        - reserved-matters
+        - mineral-app
+        - mineral-extraction
+        - waste-dev
+    - any:
+      - site:
+          in:
+          - flood-risk-zone
+          description: Flood Zone 2 or 3, including minor development and change of use.
+      - any:
+        - condition:
+            field: site-area-residential
+            operator: '>'
+            value: 1
+            description: Site more than 1 hectare in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: '>'
+            value: 1
+            description: Site more than 1 hectare in Flood Zone 1.
+      - site:
+          in:
+          - surface-water-flood-risk
+          - groundwater-flood-risk
+          description: Site under 1 ha in Flood Zone 1, including a change of use to a more vulnerable
+            class, that could be affected by sources of flooding other than rivers and the sea.
+      - site:
+          in:
+          - critical-drainage-area
+          description: An area within Flood Zone 1 with critical drainage problems notified by the Environment
+            Agency.
+  - all:
+    - application-type:
+        in:
+        - hh
+    - site:
+        in:
+        - flood-risk-zone
+        - critical-drainage-area
+        description: Flood Zone 2 or 3 and/or the site suffers from critical drainage issues.
+source-url: https://www.cheshireeast.gov.uk/pdf/planning/validation-checklists/vc1-draft-general-validation-checklist-2024.pdf
+policy: Cheshire East Local Plan Strategy policies SD2 and SE13
+source-text: 'Flood Risk Assessment when development is: • Located in flood zone 2 or 3 including minor
+  development and change of use • Site measures more than 1 hectare in size (ha) in flood zone 1 • Site
+  measures less than 1 ha in flood zone 1, including a change of use in development type to a ‘more vulnerable
+  class; (for example from commercial to residential), where they could be affected by sources of flooding
+  other than rivers and the sea (for example groundwater, surface water drains, reservoirs) • Located
+  in an area within flood zone 1 which has critical drainage problems as notified by the Environment Agency'
+must-include:
+- item: Risks of all forms of flooding to and from the development and how they will be managed, taking
+    climate change into account, with sequential and exception tests as appropriate
+  level: must
+confidence: medium
+notes: From the council's list (adopted 11 March 2024), VC1 page 5; VC2 page 3. Application types follow
+  the checklist matrix (Guidance Appendix 01) plus the minerals (VC3) and waste (VC4) checklists.
 review-status: unverified
 field-status: {}
