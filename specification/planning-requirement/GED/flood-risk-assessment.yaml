@@ -2,34 +2,156 @@ reference: flood-risk-assessment
 local-authority: GED
 required-if:
   any:
-  - site:
-      in:
-      - flood-risk-zone
-      description: The site is in Flood Zone 2 or 3.
-  - condition:
-      field: site-area-residential
-      operator: '>'
-      value: 1
-      description: The site (in Flood Zone 1) is over 1 hectare.
-  - condition:
-      field: site-area-non-residential
-      operator: '>'
-      value: 1
-      description: The site (in Flood Zone 1) is over 1 hectare.
-  - condition:
-      field: dwelling-count
-      operator: '>='
-      value: 10
-      description: The proposal creates 10 or more dwellings.
+  - all:
+    - application-type:
+        in:
+        - hh
+    - site:
+        in:
+        - flood-risk-zone
+        description: Flood zone 2 or 3.
+    - condition:
+        field: footprint-area
+        operator: <
+        value: 250
+        description: The footprint is less than 250 square metres.
+  - all:
+    - application-type:
+        in:
+        - full
+        - outline-some
+        - outline-all
+    - any:
+      - site:
+          in:
+          - flood-risk-zone
+          description: Flood zone 2 or 3.
+      - condition:
+          field: site-area-residential
+          operator: '>='
+          value: 1
+          description: Housing development on 1 hectare or more in flood zone 1.
+      - condition:
+          field: site-area-non-residential
+          operator: '>='
+          value: 1
+          description: Development on 1 hectare (10,000 sq m) or more in flood zone 1.
+      - condition:
+          field: dwelling-count
+          operator: '>='
+          value: 10
+          description: 10 or more houses in flood zone 1.
+      - site:
+          in:
+          - critical-drainage-area
+          description: Land identified by the Environment Agency as having critical drainage problems.
+      - site:
+          in:
+          - future-flood-risk
+          description: Land identified in a strategic flood risk assessment as being at increased flood
+            risk in future.
+      - condition:
+          field: more-vulnerable-use-change
+          value: true
+          description: A use changing to a more vulnerable flood use.
+  - all:
+    - application-type:
+        in:
+        - cho-agri-to-dwh
+        - cho-agri-to-school
+        - cho-agri-to-flexcom
+        - cho-sui-to-dwh
+        - cho-commercial-to-dwh
+        - pa-tmp-use-comm-film
+        - pa-tmp-school-vacant-comm
+        - pa-flats-de-blocks
+        - pa-flats-de-comm
+        - pa-flats-terr-comm
+        - pa-flats-terr-dwh
+        - pa-flats-de-dwh
+    - site:
+        in:
+        - flood-risk-zone
+        description: Flood zone 2 or 3.
 source-url: https://www.gedling.gov.uk/sites/default/files/2025-08/GBC%20Local%20Requirements%20List%20May%202025.docx
-source-text: Flood risk assessment Flood risk assessment All flood risk assessments must be written by
-  a suitably qualified person and should include their name and qualifications.
+policy: Gedling Local Planning Document Policy 3
+source-text: 'Flood Risk Standing Advice - applications where the site is located in flood zones 2 or
+  3 and the footprint is less than 250 square metres. … Flood risk assessment – all new housing development
+  in flood zone 2 or 3, housing development on more than 1 hectare or 10 or more houses in flood zone
+  1. See LPD Policy 3. … Flood risk assessment – when a use is changing to a more vulnerable flood use.
+  … A site-specific flood risk assessment should be provided for all development in Flood Zones 2 and
+  3, including for a change of use to a more vulnerable use, save for householder extensions. In Flood
+  Zone 1, an assessment should accompany all proposals involving: sites of 1 hectare or more; land which
+  has been identified by the Environment Agency as having critical drainage problems; land identified
+  in a strategic flood risk assessment as being at increased flood risk in future; or land that may be
+  subject to other sources of flooding, where its development would introduce a more vulnerable use. …
+  a site specific flood risk assessment when the site is in Flood Zone 2 or 3.'
 must-include:
 - item: Written by a suitably qualified person, with their name and qualifications
   level: must
+- item: 'Householder standing advice: a plan showing the finished floor levels and the estimated flood
+    levels'
+  level: must
+  required-if:
+    application-type:
+      in:
+      - hh
+- item: Levels stated in relation to Ordnance Datum
+  level: must
+- item: Location plan showing street names, any bodies of water and other geographical features; site
+    plan showing the existing site, the proposal and any structures that could affect water flow
+  level: must
+  required-if:
+    application-type:
+      in:
+      - full
+      - outline-some
+      - outline-all
+- item: Survey of existing site levels, proposed levels and the site in relation to its surroundings
+  level: must
+  required-if:
+    application-type:
+      in:
+      - full
+      - outline-some
+      - outline-all
+- item: Assessment of flood risk from all sources, including climate change
+  level: must
+  required-if:
+    application-type:
+      in:
+      - full
+      - outline-some
+      - outline-all
+- item: Assessment of surface water runoff and how it will be managed with no increase in volume or rate
+  level: must
+  required-if:
+    application-type:
+      in:
+      - full
+      - outline-some
+      - outline-all
+- item: 'Flood zones 2 and 3: sequential test and, where needed, exception test; cross-section with finished
+    floor or road levels; flood level, duration and consequences; residual risks and their management'
+  level: must
+  required-if:
+    all:
+    - application-type:
+        in:
+        - full
+        - outline-some
+        - outline-all
+    - site:
+        in:
+        - flood-risk-zone
+        description: Flood zone 2 or 3.
 confidence: medium
-notes: 'The workbook guessed the application type (''INFERRED''), so no type is given. Audit (wrong_trigger):
-  the excerpt only gave the authorship rule. From the audit: Flood Zones 2/3, and in Flood Zone 1 sites
-  over 1ha or 10+ dwellings (''Flood Zone 1 ... over 1 ha ... 10+ dwellings'').'
+notes: 'From the council''s list (adopted 22 May 2025), pages 7, 10-17, 24-27, 44-49. Triggers vary by
+  sub-type: residential new build and outline add ''10 or more houses/dwellings in flood zone 1''; residential
+  conversions need it in flood zone 2 or 3; commercial and agricultural development and outline add ''development
+  on more than 1 hectare or 10,000 square metres in flood zone 1'' (read here as site area); change of
+  use needs it when the use changes to a more vulnerable one. The per-type lists say ''more than 1 hectare''
+  while page 44 says ''1 hectare or more''; the detailed wording is used. For the prior notifications
+  listed it is a national requirement in flood zone 2 or 3.'
 review-status: unverified
 field-status: {}
