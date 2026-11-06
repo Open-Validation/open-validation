@@ -107,6 +107,12 @@ button.tag { cursor: pointer; } button.tag:hover { border-color: var(--accent); 
 .st-incorrect { --c: var(--status-incorrect); } .st-unverified { --c: var(--status-unverified); }
 .st-human-verified { --c: var(--status-human); } .st-council-verified { --c: var(--status-council); }
 .st-council-updated { --c: var(--status-updated); } .st-out { --c: var(--status-out); }
+.st-scraping { --c: var(--status-out); }
+.badge.st-scraping, .legend .st-scraping .swatch, .chip.st-scraping { background-image: repeating-linear-gradient(45deg, rgba(255,255,255,.28) 0 2px, transparent 2px 6px); }
+.badge.st-scraping { color: var(--text); border: 1px solid var(--line); }
+.scraping-note { border: 1px dashed var(--line); border-radius: 12px; padding: 10px 14px; margin: 0 0 12px; background-color: var(--surface);
+  background-image: repeating-linear-gradient(45deg, rgba(255,255,255,.05) 0 2px, transparent 2px 10px); }
+.scraping-note strong { display: block; margin-bottom: 2px; }
 .badge { display: inline-block; border-radius: 999px; padding: 1px 9px; font-size: 12px; font-weight: 600; background: var(--c, var(--line-soft)); color: var(--bg); white-space: nowrap; }
 .badge.st-out { color: var(--text); border: 1px solid var(--line); }
 .badge.plain { background: transparent; color: var(--text); border: 1px solid var(--line-soft); }
@@ -293,9 +299,11 @@ var API = "https://api.github.com/repos/" + OWNER + "/" + REPO;
 
 var STATUSES = ["incorrect", "unverified", "human-verified", "council-verified", "council-updated"];
 var STATUS_LABEL = { "incorrect": "Incorrect", "unverified": "Unverified", "human-verified": "Human verified",
-  "council-verified": "Council verified", "council-updated": "Council updated", "out": "Not covered yet" };
+  "council-verified": "Council verified", "council-updated": "Council updated", "out": "Not covered yet",
+  "scraping": "Data scraping in progress" };
 var STATUS_HELP = {
   "out": "We don't have this council's requirements yet, or it is outside England.",
+  "scraping": "An early AI extract, not yet rewritten from the council's own list. Use as a rough guide only.",
   "incorrect": "Someone checked it and found it wrong; a note says what.",
   "unverified": "Collected by AI; nobody has checked it against the council's list yet.",
   "human-verified": "A person compared it with the council's current list.",
@@ -646,6 +654,7 @@ function mapStatus(code, nation) {
   if ((nation && nation !== "England") || !code) return "out";
   var r = S.lpaByCode[code];
   if (!r || r.coverage !== "covered") return "out";
+  if (r["data-stage"] === "scraping-in-progress") return "scraping";
   return r["review-status"] || "unverified";
 }
 function badge(status, extra) {
@@ -893,7 +902,7 @@ function loadingState(msg) { return '<div class="empty" role="status">' + SVG_ST
 // Map
 // ======================================================================
 function legendCounts() {
-  var c = { out: 0, outUK: 0, outEngland: 0 }; STATUSES.forEach(function (s) { c[s] = 0; });
+  var c = { out: 0, outUK: 0, outEngland: 0, scraping: 0 }; STATUSES.forEach(function (s) { c[s] = 0; });
   S.lpas.forEach(function (r) { var s = mapStatus(r.code, "England"); c[s]++; if (s === "out") c.outEngland++; });
   if (S.geo) S.geo.features.forEach(function (f) { if (f.properties.nation !== "England") { c.out++; c.outUK++; } });
   return c;
@@ -901,7 +910,7 @@ function legendCounts() {
 function renderMap(panel) {
   var counts = legendCounts();
   var legend = '<aside class="legend" aria-label="Map key"><h3>Verification progress</h3><ul>' +
-    ["out"].concat(STATUSES).map(function (s) {
+    ["out", "scraping"].concat(STATUSES).map(function (s) {
       var n = counts[s], extra = s === "out" ? "England " + counts.outEngland + ", rest of the UK " + counts.outUK : "";
       return '<li><button class="st-' + s + '" data-status="' + s + '" aria-pressed="' + (S.highlight === s) + '"><span class="swatch"></span><span>' + esc(STATUS_LABEL[s]) +
         "<small>" + esc(STATUS_HELP[s]) + (extra ? "<br>" + extra : "") + '</small></span><span class="count">' + n + "</span></button></li>";
@@ -925,8 +934,9 @@ var PATTERN_DEFS = '<defs>' +
   '<pattern id="p-human-verified" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" fill="#FB8C00"/><circle cx="3" cy="3" r="1.2" fill="#0B1F3A" opacity=".6"/></pattern>' +
   '<pattern id="p-council-verified" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#43A047"/><rect width="1.6" height="6" fill="#0B1F3A" opacity=".55"/></pattern>' +
   '<pattern id="p-council-updated" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#AED581"/><rect width="1.4" height="6" fill="#0B1F3A" opacity=".5"/><rect width="6" height="1.4" fill="#0B1F3A" opacity=".5"/></pattern>' +
+  '<pattern id="p-scraping" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#3A4A60"/><rect width="2" height="6" fill="#FFFFFF" opacity=".28"/></pattern>' +
   '<pattern id="p-incorrect" width="6" height="5" patternUnits="userSpaceOnUse"><rect width="6" height="5" fill="#B388FF"/><rect width="6" height="1.4" fill="#0B1F3A" opacity=".55"/></pattern></defs>';
-var FILL = { "out": "#3A4A60", "incorrect": "#B388FF", "unverified": "#EF5350", "human-verified": "#FB8C00", "council-verified": "#43A047", "council-updated": "#AED581" };
+var FILL = { "out": "#3A4A60", "scraping": "#3A4A60", "incorrect": "#B388FF", "unverified": "#EF5350", "human-verified": "#FB8C00", "council-verified": "#43A047", "council-updated": "#AED581" };
 var mapZoom = null;
 // The map file follows the GeoJSON standard (outer rings anticlockwise). d3 wants the opposite
 // (outer rings clockwise), otherwise it fills everything *outside* each council. Flip them once.
@@ -949,7 +959,7 @@ function drawMap() {
   g.selectAll("path").data(S.geo.features).join("path")
     .attr("d", path)
     .attr("class", function (f) { var s = mapStatus(f.properties.code, f.properties.nation); return "lpa st-" + s + (s === "out" ? " out" : "") + (S.highlight && S.highlight !== s ? " dim" : "") + (f.properties.code && f.properties.code === S.lpa ? " selected" : ""); })
-    .attr("fill", function (f) { var s = mapStatus(f.properties.code, f.properties.nation); return S.patterns && s !== "out" && s !== "unverified" ? "url(#p-" + s + ")" : FILL[s]; })
+    .attr("fill", function (f) { var s = mapStatus(f.properties.code, f.properties.nation); return s === "scraping" || (S.patterns && s !== "out" && s !== "unverified") ? "url(#p-" + s + ")" : FILL[s]; })
     .attr("tabindex", function (f) { return f.properties.code ? 0 : -1; })
     .attr("role", "button")
     .attr("aria-label", function (f) { return f.properties.name + ": " + tipText(f).replace(/<[^>]+>/g, " "); })
@@ -1045,7 +1055,7 @@ function renderTable(panel, council) {
   }).filter(function (r) { return !S.statusFilter || REQ_CELLS.some(function (c) { return !isEmpty(cellValue(r.d, c)) && cellStatus(r.d, r.code, r.file, c).status === S.statusFilter; }); })
     .filter(function (r) { return !S.tagFilter || appliesTo(r.d["required-if"]).some(function (t) { return t.key === S.tagFilter; }); });
   var counts = {}; council.files.forEach(function (f) { REQ_CELLS.forEach(function (c) { if (!isEmpty(cellValue(f.data, c))) { var s = cellStatus(f.data, S.lpa, f.id, c).status; counts[s] = (counts[s] || 0) + 1; } }); });
-  var html = '<div class="toolbar"><div><h2 style="margin:0">' + esc(S.lpaByCode[S.lpa].name) + '</h2><p class="muted" style="margin:4px 0 0">' + council.files.length + " requirement files. Every cell is tinted by its review status" + (S.review ? "; tap a cell to mark it." : ".") + "</p></div>" + statusFilterHTML() + "</div>" + countsHTML(counts) +
+  var html = '<div class="toolbar"><div><h2 style="margin:0">' + esc(S.lpaByCode[S.lpa].name) + '</h2><p class="muted" style="margin:4px 0 0">' + council.files.length + " requirement files. Every cell is tinted by its review status" + (S.review ? "; tap a cell to mark it." : ".") + "</p></div>" + statusFilterHTML() + "</div>" + scrapingNote(S.lpa) + countsHTML(counts) +
     (S.tagFilter ? '<p class="filterbar">Showing requirements that apply to: <span class="chip-ans">' + esc(S.tagFilter === "always" ? "All applications" : S.tagFilter === "discretionary" ? "Council's discretion" : S.tagFilter === "any-site" ? "Any site" : fieldLabel(S.tagFilter)) +
       '<button type="button" id="clearTag" aria-label="Show all requirements">✕</button></span></p>' : "");
   html += tableHTML(cols, sortRows(rows, "table", cols), function (row, key) {
@@ -1213,6 +1223,11 @@ function corpRows() {
   });
   return out;
 }
+function scrapingNote(code) {
+  if (mapStatus(code, "England") !== "scraping") return "";
+  return '<div class="scraping-note" role="note"><strong>Data scraping in progress</strong>This council\'s requirements are an early AI extract from a spreadsheet. ' +
+    "They haven't been rewritten from the council's own validation list yet, so treat them as a rough guide and check the council's list before you submit.</div>";
+}
 function councilPanel(council) {
   var y = council.lpa, vl = y["validation-list"] || {}, audit = y.audit || {}, r = S.lpaByCode[S.lpa], status = mapStatus(S.lpa, "England");
   var old = vl.date && String(vl.date) < new Date(Date.now() - 730 * 864e5).toISOString().slice(0, 10);
@@ -1221,7 +1236,7 @@ function councilPanel(council) {
   var partners = (y["joint-list"] || {}).partners || [];
   var issues = audit["issues-open"] == null ? "" : ", " + audit["issues-open"] + " issue" + (audit["issues-open"] === 1 ? "" : "s") + " found";
   // Compact: one short row each for the list and the audit; standards fold away on small screens
-  return '<section class="card council-panel" aria-label="Council"><h2>' + esc(r.name) + ' <span class="mono muted" style="font-size:14px">' + esc(S.lpa) + "</span> " + badge(status) + "</h2>" +
+  return '<section class="card council-panel" aria-label="Council"><h2>' + esc(r.name) + ' <span class="mono muted" style="font-size:14px">' + esc(S.lpa) + "</span> " + badge(status) + "</h2>" + scrapingNote(S.lpa) +
     '<dl class="kv"><dt>List</dt><dd>' + (vl.url ? '<a href="' + esc(vl.url) + '" target="_blank" rel="noopener">Open the council\'s list</a>' : "Not found") +
     (vl.date ? " · " + '<span' + (old ? ' class="warn" title="More than 2 years old: the NPPF expects a review every 2 years"' : "") + ">" + esc(vl.date) + (old ? " ⚠ over 2 years old" : "") + "</span>" : "") +
     (vl.status && vl.status !== "outdated" ? ' · <span class="muted">' + esc(vl.status) + "</span>" : "") + "</dd>" +

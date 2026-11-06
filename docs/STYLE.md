@@ -27,6 +27,7 @@ anything that could be mistaken for a council or government service.
 | human-verified | `--status-human` | `#FB8C00` orange | 7.0 | `#403E3E` | 9.8 |
 | council-verified | `--status-council` | `#43A047` dark green | 5.0 | `#1B424D` | 10.0 |
 | council-updated | `--status-updated` | `#AED581` light green | 9.9 | `#304D58` | 8.3 |
+| data scraping in progress | `--status-out` + white 45° hatch | `#3A4A60` hatched | always hatched (not only with Patterns) | n/a | n/a |
 | not covered yet | `--status-out` | `#3A4A60` grey | 1.8 (so it has a 1px `--line` border) | n/a | n/a |
 
 All pass WCAG AA: status colours are at least 3:1 against the background, and text on every tint

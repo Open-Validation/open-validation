@@ -221,6 +221,8 @@ def main():
             vstatus = (data.get("validation-list") or {}).get("status")
             if vstatus not in ("current", "outdated", "not-found", "national-only"):
                 problem(f"{where}: validation-list.status '{vstatus}' isn't current/outdated/not-found/national-only")
+            if data.get("data-stage") not in (None, "scraping-in-progress"):
+                problem(f"{where}: data-stage '{data.get('data-stage')}' isn't 'scraping-in-progress' (or leave it out)")
             check_items(data.get("submission-standards"), where, ctx, "submission-standards")
             check_marks(data, where, "_lpa")
         else:
