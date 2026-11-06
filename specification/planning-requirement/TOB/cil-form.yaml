@@ -1,18 +1,57 @@
 reference: cil-form
 local-authority: TOB
 required-if:
-  application-type:
-    in:
-    - full
-    - outline
-    - reserved-matters
-source-url: https://www.torbay.gov.uk/media/20032/local-validation-list-2023.docx
-source-text: '3.14.1 Community Infrastructure Levy – Planning Application Additional Information Requirement
-  Form All applications for built development, including changes of use or creation of floor space, with
-  the exception of: Householder Applications'
-confidence: low
-notes: 'Audit (wrong_app_type): not householder (nor listed building consent or demolition in a conservation
-  area). ''Built development, including changes of use or creation of floor space'' can''t be expressed,
-  so the main planning types are listed.'
+  any:
+  - all:
+    - application-type:
+        in:
+        - full
+        - outline
+        - reserved-matters
+    - any:
+      - condition:
+          field: building-works
+          value: true
+          description: Built development.
+      - condition:
+          field: involves-change-of-use
+          value: true
+          description: A change of use.
+      - condition:
+          field: floorspace
+          operator: '>'
+          value: 0
+          description: Creation of floor space.
+  - all:
+    - application-type:
+        in:
+        - prior-approval
+    - any:
+      - condition:
+          field: dwelling-count
+          operator: '>='
+          value: 1
+          description: New dwellings.
+      - condition:
+          field: floorspace
+          operator: '>'
+          value: 100
+          description: Development of more than 100 sq m of gross internal floorspace.
+      - discretionary
+source-url: https://www.torbay.gov.uk/media/21130/local-validation-list-nov24-website-version-v3.docx
+policy: The Community Infrastructure Levy Regulations 2010; Torbay Local Plan policy SS7; NPPF
+source-text: 'All applications for built development, including changes of use or creation of floor space,
+  with the exception of: Householder Applications Listed Building Consent Relevant Demolition in a Conservation
+  Area CIL is charged for the following developments: - New dwellings - Larger out-of-town/ district centre
+  retail and food and drink developments - development of more than 100 sq m of gross internal floorspace
+  ... CIL is charged for the following developments: - New dwellings - Larger out-of-town/ district centre
+  retail and food and drink developments - development of more than 100 sq m of gross internal floorspace'
+confidence: medium
+notes: From the council's list (published November 2024), pages 46, 59 (sections 3.14.1, 4.2.24). The
+  list calls it the Community Infrastructure Levy - Planning Application Additional Information Requirement
+  Form. Householder, listed building consent and relevant demolition in a conservation area applications
+  are excepted; the types are those whose checklists list the form (outline or full major and minor, reserved
+  matters). For prior approvals (section 4.2.24) the list names the developments CIL is charged for; 'larger
+  out-of-town/district centre retail and food and drink developments' gives no size, so it shows as discretionary.
 review-status: unverified
 field-status: {}
