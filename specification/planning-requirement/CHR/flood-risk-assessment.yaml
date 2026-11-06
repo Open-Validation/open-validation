@@ -1,15 +1,79 @@
 reference: flood-risk-assessment
 local-authority: CHR
+required-if:
+  any:
+  - all:
+    - application-type:
+        in:
+        - full
+    - any:
+      - condition:
+          field: dwelling-count
+          operator: '>='
+          value: 10
+          description: 10 or more new dwellings (the council's 'Major residential development' checklists).
+      - condition:
+          field: site-area-residential
+          operator: '>='
+          value: 0.5
+          description: Dwellings on a site of 0.5 hectares or more.
+      - condition:
+          field: site-area-non-residential
+          operator: '>'
+          value: 1
+          description: Non-residential/commercial development on a site greater than 1 hectare.
+      - condition:
+          field: floorspace-non-residential
+          operator: '>'
+          value: 1000
+          description: Non-residential/commercial development of more than 1000 sq m (the checklist matrix
+            row 'More than 1000m2 / 1.0 hectare').
+  - all:
+    - application-type:
+        in:
+        - hh
+        - full
+        - change-of-use
+        - outline
+        - reserved-matters
+        - s73
+        - cho-agri-to-dwh
+        - cho-commercial-to-dwh
+        - cho-commercial-to-mixed
+        - cho-sui-to-dwh
+        - cho-agri-to-flexcom
+        - cho-agri-to-school
+        - cho-comm-to-school
+        - cho-amusements-to-dwh
+    - any:
+      - site:
+          in:
+          - flood-risk-zone
+          description: Any part of the development is in flood zone 2 or 3.
+      - condition:
+          field: site-area-residential
+          operator: '>'
+          value: 1
+          description: The site is larger than 1 hectare (flood zone 1).
+      - condition:
+          field: site-area-non-residential
+          operator: '>'
+          value: 1
+          description: The site is larger than 1 hectare (flood zone 1).
 source-url: https://www.cherwell.gov.uk/download/downloads/id/15909/validation-guidance.pdf
-source-text: The FRA should include a surface water drainage strategy.
+policy: Cherwell Local Plan 2011-2031 Part 1 (CLP 2015) policy ESD7
+source-text: If any part of the development is located within flood zones 2 or 3; … If the site is larger
+  than 1 hectare and is located within flood zone 1.
 must-include:
+- item: The likelihood of the development being affected by flooding and the measures to protect it
+  level: must
 - item: A surface water drainage strategy
   level: should
-confidence: low
-notes: 'The workbook guessed the application type (''INFERRED''), so no type is given. Audit (wrong_trigger):
-  the excerpt gives no flood zone or site area threshold. Audit (wrong_app_type): the council''s matrix
-  separates minor residential (<10), major residential (10-49), 50+ units and non-residential <1ha / >1ha;
-  those distinctions are lost here. The audit couldn''t read this council''s list, so its contents weren''t
-  checked.'
+  source-text: The FRA should include a surface water drainage strategy.
+confidence: medium
+notes: From the council's list (published March 2024, reviewed March 2026), page 13-14. Simple householder
+  development may use the Environment Agency's standing advice. The council's Validation Checklist Forms
+  (March 2024) list which documents each application type 'may also' need; only those marked '(essential)'
+  are always needed. The major residential and non-residential over 1 hectare checklists mark it essential.
 review-status: unverified
 field-status: {}

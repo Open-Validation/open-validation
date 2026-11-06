@@ -1,13 +1,114 @@
 reference: flood-risk-assessment
 local-authority: OXO
+required-if:
+  any:
+  - all:
+    - application-type:
+        in:
+        - hh
+        - full
+        - outline
+        - reserved-matters
+        - pa-flats-de-blocks
+        - pa-flats-de-comm
+        - pa-flats-terr-comm
+        - pa-flats-terr-dwh
+        - pa-flats-de-dwh
+        - pa-demo-replace-dwh
+        - cho-commercial-to-dwh
+    - site:
+        in:
+        - flood-risk-zone
+        description: In flood zone 2 or 3.
+  - all:
+    - application-type:
+        in:
+        - hh
+        - full
+        - outline
+        - reserved-matters
+        - pa-flats-de-blocks
+        - pa-flats-de-comm
+        - pa-flats-terr-comm
+        - pa-flats-terr-dwh
+        - pa-flats-de-dwh
+        - pa-demo-replace-dwh
+        - cho-commercial-to-dwh
+    - site:
+        in:
+        - critical-drainage-area
+        description: In an area with critical drainage problems (Critical Drainage Area).
+  - all:
+    - application-type:
+        in:
+        - hh
+        - full
+        - outline
+        - reserved-matters
+    - any:
+      - site:
+          in:
+          - surface-water-flood-risk
+          - groundwater-flood-risk
+          description: Affected by other sources of flooding (surface water, groundwater, reservoirs).
+      - discretionary
+  - all:
+    - application-type:
+        in:
+        - full
+        - outline
+        - reserved-matters
+    - any:
+      - condition:
+          field: site-area-residential
+          operator: '>'
+          value: 1
+          description: More than 1 hectare in flood zone 1.
+      - condition:
+          field: site-area-non-residential
+          operator: '>'
+          value: 1
+          description: More than 1 hectare in flood zone 1.
 source-url: https://www.oxford.gov.uk/downloads/file/1092/list-of-national-and-local-planning-application-requirements
-source-text: 'include in a FRA: ng_application_guidance_-_flooding 53 • flood resilient and resistant
-  are to be provided and shown on plans.'
-confidence: low
-notes: 'The workbook guessed the application type (''INFERRED''), so no type is given. Audit (wrong_app_type):
-  the list is in numbered sections by application type, which the workbook did not map; Grokbot also read
-  a same-titled, higher-numbered file (file/1658) that may supersede the linked file/1092. Neither could
-  be checked. Audit (wrong_trigger): the excerpt is a URL fragment and gives no flood-zone trigger. The
-  audit couldn''t read this council''s list, so its contents weren''t checked.'
+policy: Oxford Local Plan 2036 policies RE3 and RE4; National Planning Policy Framework
+source-text: In flood zone 2 or 3, … More than 1 hectare in flood zone 1, … Less than 1 hectare in flood
+  zone 1 where there is a change of use to a more vulnerable class, or where the development is affected
+  by other sources of flooding (surface water, groundwater, reservoirs), … In flood zone 1 in areas designated
+  as having critical drainage problems by the Environment Agency. … A Flood Risk Assessment when the site
+  is in FZ 2/3 or 1 AND critical drainage problems are known.
+must-include:
+- item: The risks of all forms of flooding to and from the development and how they will be managed, taking
+    climate change into account
+  level: must
+- item: Proportionate to the scale of development and flood risk
+  level: must
+- item: A topographic survey (to Ordnance Datum) and Environment Agency flood data where extensions, building
+    works, subdivision of a dwelling or change of use to a dwelling are proposed
+  level: must
+  required-if:
+    any:
+    - condition:
+        field: building-works
+        value: true
+        description: Physical extensions or building works.
+    - condition:
+        field: dwelling-subdivision
+        value: true
+        description: Subdivision of a dwelling.
+    - condition:
+        field: involves-change-of-use
+        value: true
+        description: Change of use to a dwelling.
+- item: Plans showing compensation for any loss of flood plain storage for extensions or building works
+    in the 1 in 100 year plus climate change flood extent
+  level: must
+  required-if: discretionary
+- item: Flood resilience and resistance measures shown on plans, in line with DEFRA's 'Improving the Flood
+    Performance of New Buildings'
+  level: must
+confidence: medium
+notes: From the council's list (published August 2021), page 6, 11, 38, 40-44, 46, 52-54. A change of
+  use to a more vulnerable class in flood zone 1 is shown as discretionary. Outline and reserved matters
+  applications need the full-application documents for the matters considered at that stage ('as applicable').
 review-status: unverified
 field-status: {}
