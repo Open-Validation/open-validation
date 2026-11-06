@@ -2,26 +2,93 @@ reference: flood-risk-assessment
 local-authority: HAV
 required-if:
   any:
-  - site:
-      in:
-      - flood-risk-zone
-      description: All development in Flood Zones 2 and 3, including those benefitting from defences.
-  - condition:
-      field: site-area-residential
-      operator: '>='
-      value: 1
-      description: Sites of 1 hectare or greater in Flood Zone 1.
-  - condition:
-      field: site-area-non-residential
-      operator: '>='
-      value: 1
-      description: Sites of 1 hectare or greater in Flood Zone 1.
+  - all:
+    - application-type:
+        in:
+        - full
+        - outline
+    - any:
+      - site:
+          in:
+          - flood-risk-zone
+          description: All development in Flood Zones 2 and 3 (including those benefitting from defences).
+      - condition:
+          field: site-area-residential
+          operator: '>='
+          value: 1
+          description: Sites of 1 hectare or greater in Flood Zone 1 (residential).
+      - condition:
+          field: site-area-non-residential
+          operator: '>='
+          value: 1
+          description: Sites of 1 hectare or greater in Flood Zone 1.
+      - site:
+          in:
+          - critical-drainage-area
+          description: Land identified by the Environment Agency as having critical drainage problems.
+      - site:
+          in:
+          - future-flood-risk
+          description: Land identified in a strategic flood risk assessment as being at increased flood
+            risk in future.
+      - all:
+        - condition:
+            field: sensitive-end-use
+            value: true
+            description: Development would introduce a more vulnerable use on land that may be subject
+              to other sources of flooding.
+        - discretionary
+      - discretionary
+  - all:
+    - application-type:
+        in:
+        - hh
+    - site:
+        in:
+        - flood-risk-zone
+        description: All development in Flood Zones 2 and 3 (including those benefitting from defences).
+  - all:
+    - application-type:
+        in:
+        - s73
+    - condition:
+        field: varied-condition-topic
+        value: flood-risk
+        description: The condition being removed or varied relates to flood risk mitigation.
 source-url: https://www.havering.gov.uk/downloads/file/5748/checklist-004
-source-text: All development in Flood Zones 2 and 3 (including those benefitting from defences) … All
-  development on sites of 1 hectare or greater in Flood Zone 1
+policy: NPPF paragraphs 159-169; London Plan 2021 policy SI12; Havering Local Plan 2016-2031 policy 32
+source-text: 'Required for: All development in Flood Zones 2 and 3 (including those benefitting from defences)
+  … All development on sites of 1 hectare or greater in Flood Zone 1 … Land which has been identified
+  by the Environment Agency as having critical drainage problems … Land identified in a strategic flood
+  risk assessment as being at increased flood risk in future … Land that may be subject to other sources
+  of flooding, where its development would introduce a more vulnerable use … Sites where drainage problems
+  have been identified by the Council … The Washlands Flood Storage Area … Sites deemed necessary by the
+  Council as a Lead Local Flood Authority.'
+must-include:
+- item: Proportionate to the degree of flood risk, using the Strategic Flood Risk Assessment and the Environment
+    Agency flood maps
+  level: should
+- item: 'Where basement development is proposed: a Basement Impact Assessment'
+  level: should
+  required-if:
+    condition:
+      field: basement
+      value: true
+      description: Basement development is proposed.
+- item: 'For More Vulnerable Uses: a flood warning and evacuation plan in addition to the FRA (generally
+    required)'
+  level: should
+  required-if:
+    condition:
+      field: sensitive-end-use
+      value: true
+      description: A More Vulnerable Use is proposed.
 confidence: medium
-notes: 'Audit (wrong_trigger): the householder row quoted the structural survey sentence and the Outline
-  row the town-centre text; Checklist 001 also requires an FRA for all development in Flood Zones 2 and
-  3. The Checklist 004 text goes on to a basement case that is cut off.'
+notes: 'From the council''s list (Checklist 004, revised March 2024), pages 19-20. Sites with drainage
+  problems identified by the Council, the Washlands Flood Storage Area, sites the Council as Lead Local
+  Flood Authority deems necessary, and ''other sources of flooding'' have no field, so they show as discretionary.
+  Householder wording from Checklist 001 (https://www.havering.gov.uk/downloads/file/5747/checklist-001),
+  page 11. Householder: Flood Zones 2 and 3 only. The S73 branch comes from Checklist 025 (https://www.havering.gov.uk/downloads/file/161/checklist-025.pdf),
+  which asks for this only where the condition being removed or varied relates to it.'
 review-status: unverified
 field-status: {}
