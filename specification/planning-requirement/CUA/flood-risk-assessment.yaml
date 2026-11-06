@@ -1,15 +1,222 @@
 reference: flood-risk-assessment
 local-authority: CUA
 required-if:
-  application-type:
-    in:
-    - mineral-app
-    - waste-dev
-    - reg-3
-source-url: https://www.cumberland.gov.uk/sites/default/files/2026-10/Local%20validation%20list.pdf
-source-text: Drainage assessments may be incorporated in the Flood Risk Assessment where one is required.
-confidence: low
-notes: 'The workbook guessed the application type (''INFERRED''), so no type is given. Audit (wrong_app_type):
-  moved from Full planning to minerals, waste and Regulation 3. The excerpt gives no trigger.'
+  any:
+  - all:
+    - any:
+      - condition:
+          field: former-district
+          value: allerdale
+          description: The site is in the former Allerdale area.
+      - condition:
+          field: former-district
+          value: copeland
+          description: The site is in the former Copeland area.
+    - site:
+        in:
+        - flood-risk-zone
+        description: In Flood Zone 2 or 3 (3a or 3b).
+  - all:
+    - any:
+      - condition:
+          field: former-district
+          value: allerdale
+          description: The site is in the former Allerdale area.
+      - condition:
+          field: former-district
+          value: copeland
+          description: The site is in the former Copeland area.
+    - condition:
+        field: watercourse-culverting
+        value: true
+        description: Operational development including culverting or control of flow of any river or stream.
+  - all:
+    - any:
+      - condition:
+          field: former-district
+          value: allerdale
+          description: The site is in the former Allerdale area.
+      - condition:
+          field: former-district
+          value: copeland
+          description: The site is in the former Copeland area.
+    - any:
+      - condition:
+          field: site-area-residential
+          operator: '>='
+          value: 1
+          description: Site of 1 hectare or more.
+      - condition:
+          field: site-area-non-residential
+          operator: '>='
+          value: 1
+          description: Site of 1 hectare or more.
+  - all:
+    - condition:
+        field: former-district
+        value: allerdale
+        description: The site is in the former Allerdale area.
+    - any:
+      - site:
+          in:
+          - critical-drainage-area
+          description: Flood Zone 1 land identified by the Environment Agency as having critical drainage
+            problems.
+      - site:
+          in:
+          - future-flood-risk
+          description: Flood Zone 1 land identified in a strategic flood risk assessment as being at increased
+            flood risk in future.
+      - all:
+        - site:
+            in:
+            - surface-water-flood-risk
+            - groundwater-flood-risk
+            description: Flood Zone 1 land that may be subject to other sources of flooding.
+        - condition:
+            field: more-vulnerable-use-change
+            value: true
+            description: The development would introduce a more vulnerable use.
+  - all:
+    - application-type:
+        in:
+        - mineral-app
+        - mineral-extraction
+        - romp
+        - waste-dev
+        - reg-3
+    - any:
+      - any:
+        - condition:
+            field: site-area-residential
+            operator: '>='
+            value: 1
+            description: Site of 1 hectare or more.
+        - condition:
+            field: site-area-non-residential
+            operator: '>='
+            value: 1
+            description: Site of 1 hectare or more.
+      - site:
+          in:
+          - flood-risk-zone
+          description: In Flood Zone 2 or 3 (3a or 3b).
+      - all:
+        - ref: major-development
+        - site:
+            in:
+            - critical-drainage-area
+            description: In a designated critical drainage area, or where the Environment Agency, Internal
+              Drainage Body or another relevant body has indicated a drainage problem.
+      - discretionary
+source-url: https://www.cumberland.gov.uk/sites/default/files/2025-03/allerdale_full_validation_checklist.pdf
+policy: Allerdale Local Plan (Part 1) 2014 policies S29 and S30; Copeland Local Plan 2013-2028 policies
+  ST1, ENV1, DM11 and DM24; Cumbria Minerals and Waste Local Plan 2015-2030 policies SP13 and DC19; NPPF
+  chapter 14
+source-text: 'a) Development proposals in high-risk flood zone (Flood Zone 3a and 3b). b) Development
+  proposals in medium risk flood zone (Flood Zone 2). c) In Flood Zone 1, an assessment should accompany
+  any proposals involving: sites of 1 hectare or more; land which has been identified by the Environment
+  Agency as having critical drainage problems: land identified in a strategic flood risk assessment as
+  being at increased flood risk in future; or land that may be subject to other sources of flooding, where
+  its development would introduce a more vulnerable use above in low flood risk zone (Flood Zone 1). d)
+  Any operational development which includes culverting or control of flow of any river or stream. ...
+  c) Any development of 1ha or above in low flood risk zone (Flood Zone 1). ... For any development of
+  1ha or greater in any flood zone category. • Any new development which lies within Flood Zones 2 or
+  3 or, for major applications, in designated critical drainage areas or where the Environment Agency,
+  Internal Drainage Body or other relevant bodies have indicated there may be a drainage problem. • An
+  FRA may also be required for significant extensions or increases in areas of hard surfacing within the
+  floodplain or adjacent to a main river. Any applications for engineering operations or land raising
+  which may significantly increasing surface water run-off to watercourses and soakaways may also require
+  a flood risk assessment.'
+must-include:
+- item: Identification and assessment of the risks of all forms of flooding to and from the development,
+    taking climate change into account, and how the risk will be managed
+  level: must
+  required-if:
+    any:
+    - condition:
+        field: former-district
+        value: allerdale
+        description: The site is in the former Allerdale area.
+    - condition:
+        field: former-district
+        value: copeland
+        description: The site is in the former Copeland area.
+- item: Demonstration that the development complies with the policies in national planning guidance
+  level: must
+  required-if:
+    any:
+    - condition:
+        field: former-district
+        value: allerdale
+        description: The site is in the former Allerdale area.
+    - condition:
+        field: former-district
+        value: copeland
+        description: The site is in the former Copeland area.
+- item: An Emergency Planning Statement on flood warning and evacuation, where applicable
+  level: must
+  required-if:
+    any:
+    - condition:
+        field: former-district
+        value: allerdale
+        description: The site is in the former Allerdale area.
+    - condition:
+        field: former-district
+        value: copeland
+        description: The site is in the former Copeland area.
+- item: 'In Flood Zones 2 and 3, where applicable: a Sequential and Exception Test'
+  level: should
+  required-if:
+    all:
+    - any:
+      - condition:
+          field: former-district
+          value: allerdale
+          description: The site is in the former Allerdale area.
+      - condition:
+          field: former-district
+          value: copeland
+          description: The site is in the former Copeland area.
+    - site:
+        in:
+        - flood-risk-zone
+        description: In Flood Zone 2 or 3 (3a or 3b).
+- item: 'Minor development: a basic FRA screening study is acceptable (Appendix G)'
+  level: should
+  required-if:
+    any:
+    - condition:
+        field: former-district
+        value: allerdale
+        description: The site is in the former Allerdale area.
+    - condition:
+        field: former-district
+        value: copeland
+        description: The site is in the former Copeland area.
+- item: 'Minerals, waste and council development: information about the site and how flood risk will be
+    managed and controlled, including mitigation and evacuation procedures, the proposed drainage system
+    and the management of surface water runoff'
+  level: must
+  required-if:
+    application-type:
+      in:
+      - mineral-app
+      - mineral-extraction
+      - romp
+      - waste-dev
+      - reg-3
+confidence: medium
+notes: 'From the council''s list (Allerdale area checklist, final December 2022), page 22. Copeland area:
+  the Copeland Local Validation List draft proposal (consultation draft February 2023), page 27. Copeland''s
+  Flood Zone 1 trigger is only sites of 1ha or more. Minerals, waste and the council''s own (Regulation
+  3) development: the inherited Cumbria County Council list (November 2021), https://www.cumberland.gov.uk/sites/default/files/2026-10/Local%20validation%20list.pdf,
+  page 22. The minerals and waste list says an FRA ''may also be required'' for significant extensions
+  or hard surfacing in or next to the floodplain, and for engineering operations or land raising, which
+  shows as ''check''. The Allerdale per-type checklists summarise it as ''Flood Zones 2/3 or is in Flood
+  Zone 1 but over 1 hectare in size'' (householder: ''Flood Zones 2/3''). The Allerdale list''s separate
+  Flood Risk Sequential Test item is unmapped. The Carlisle area has no local list, so nothing applies
+  there.'
 review-status: unverified
 field-status: {}

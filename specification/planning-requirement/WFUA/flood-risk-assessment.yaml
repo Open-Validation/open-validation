@@ -1,16 +1,119 @@
 reference: flood-risk-assessment
 local-authority: WFUA
 required-if:
-  site:
-    in:
-    - flood-risk-zone
-    description: All development within Flood Zones 2 and 3.
+  any:
+  - site:
+      in:
+      - flood-risk-zone
+      description: In Flood Zone 2 or 3.
+  - any:
+    - condition:
+        field: site-area-residential
+        operator: '>'
+        value: 1
+        description: Over 1 hectare.
+    - condition:
+        field: site-area-non-residential
+        operator: '>'
+        value: 1
+        description: Over 1 hectare.
+  - site:
+      in:
+      - critical-drainage-area
+      description: Flood Zone 1 in an Area with Critical Drainage Problems notified by the Environment
+        Agency.
+  - condition:
+      field: near-watercourse
+      value: true
+      description: Works or operations in the bed of, or within 8 metres of the top of the bank of, a
+        Main River.
+  - site:
+      in:
+      - future-flood-risk
+      description: Land identified in a Strategic Flood Risk Assessment as being at increased flood risk
+        in future.
+  - all:
+    - site:
+        in:
+        - surface-water-flood-risk
+        - groundwater-flood-risk
+        description: Land that may be subject to other sources of flooding.
+    - condition:
+        field: more-vulnerable-use-change
+        value: true
+        description: The development would introduce a more vulnerable use.
+  - all:
+    - application-type:
+        in:
+        - mineral-app
+        - mineral-extraction
+        - romp
+        - waste-dev
+    - any:
+      - any:
+        - condition:
+            field: site-area-residential
+            operator: '>='
+            value: 1
+            description: 1ha or greater.
+        - condition:
+            field: site-area-non-residential
+            operator: '>='
+            value: 1
+            description: 1ha or greater.
+      - site:
+          in:
+          - flood-risk-zone
+          description: In Flood Zone 2 or 3.
+      - all:
+        - ref: major-development
+        - site:
+            in:
+            - critical-drainage-area
+            description: In a designated critical drainage area, or where a drainage problem has been
+              indicated.
+      - discretionary
 source-url: https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-12/Local%20Planning%20Validation%20Requirements%20%E2%80%93%20Updated%20January%202026.pdf
-source-text: assessment and sequential test for all development within Flood Zones 2 & 3, there will be
-  some proposals that will have no flood risk implications (e.g.
-confidence: low
-notes: The workbook's Flood Risk row was form-link text; this wording was in its 'Sequential test' row
-  and is cut off. The list notes some proposals have no flood risk implications. Applies to all types,
-  not only Full planning.
+policy: South Lakeland Local Plan policies CS8.8 and DM6; Eden Local Plan policy DEV2; Cumbria Minerals
+  and Waste Local Plan 2015-2030 policies SP13 and DC19
+source-text: 'Required for: • all development* in Flood Zone 3 • all development* in Flood Zone 2 • all
+  development over 1 hectare in Flood Zone 1 ... • all development in Flood Zone 1 in an Area with Critical
+  Drainage Problems (ACDP) as notified by the Environment Agency • all development involving works or
+  operations in the bed of or within 8 metres of the top of the bank of a Main River (As identified by
+  the Environment Agency) • all development on land identified in a Strategic Flood Risk Assessment as
+  being at increased flood risk in the future (For example, as a result of climate change) • all development
+  on land that may be subject to other sources of flooding, where its development would introduce a more
+  vulnerable use ... Required for: • any new development of 1ha or greater • any new development which
+  lies within Flood Zones 2 or 3 or, for major applications, in designated critical drainage areas or
+  where the Environment Agency, Internal Drainage Body or other relevant bodies have indicated there may
+  be a drainage problem. • any new development • significant extensions or increases in areas of hard
+  surfacing within the floodplain or adjacent to a main river. • any applications for engineering operations
+  or land raising which may significantly increase surface water run-off to watercourses and soakaways
+  may also require a flood risk assessment.'
+must-include:
+- item: Where appropriate, the sequential approach and the exception test, with results
+  level: must
+- item: Risks from all forms of flooding to the development and to other land from it; how they will be
+    managed and opportunities to reduce flood probability and consequences
+  level: must
+- item: How the likely consequences of climate change have been taken into account
+  level: must
+- item: 'Minerals and waste: information about the site and how flood risk will be managed (mitigation,
+    evacuation), the proposed drainage system and surface water runoff management'
+  level: must
+  required-if:
+    application-type:
+      in:
+      - mineral-app
+      - mineral-extraction
+      - romp
+      - waste-dev
+confidence: medium
+notes: 'From the council''s list (updated January 2026), page 28. For proposals in Flood Zones 2 or 3
+  with no flood risk implications (e.g. replacement windows, plant on an existing building, change to
+  a less flood-sensitive use), a brief explanation can be submitted instead. Minerals and waste: the council''s
+  Local Validation Requirements for Minerals & Waste Developments (August 2025), https://www.westmorlandandfurness.gov.uk/sites/default/files/2025-08/Local%20Validation%20Requirements%20for%20Minerals%20%26%20Waste%20Developments%20%28accessible%20August%202025%29.pdf,
+  page 20. Significant extensions or hard surfacing in or next to the floodplain, and engineering or land
+  raising, show as ''check'' (''may also require'').'
 review-status: unverified
 field-status: {}
