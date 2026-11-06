@@ -3,35 +3,124 @@ local-authority: NET
 required-if:
   any:
   - all:
+    - application-type:
+        in:
+        - full
+        - outline
+        - reserved-matters
+        - hh
+    - any:
+      - all:
+        - site:
+            in:
+            - critical-drainage-area
+            description: In a critical drainage area identified by the council's strategic flood risk
+              assessment.
+        - any:
+          - condition:
+              field: site-area-residential
+              operator: '>'
+              value: 0.5
+              description: A site of more than 0.5 hectare.
+          - condition:
+              field: site-area-non-residential
+              operator: '>'
+              value: 0.5
+              description: A site of more than 0.5 hectare.
+      - site:
+          in:
+          - flood-risk-zone
+          description: In Flood Zone 2 and/or 3 (including householder and other minor development and
+            change of use).
+      - any:
+        - condition:
+            field: site-area-residential
+            operator: '>'
+            value: 1
+            description: A site of more than 1 hectare in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: '>'
+            value: 1
+            description: A site of more than 1 hectare in Flood Zone 1.
+      - site:
+          in:
+          - surface-water-flood-risk
+          - groundwater-flood-risk
+          description: In Flood Zone 1 with critical drainage problems notified by the Environment Agency,
+            or on a site under 1 ha (including a change to a more vulnerable use) that could be affected
+            by flooding from sources other than rivers and the sea.
+  - all:
+    - application-type:
+        in:
+        - cho-commercial-to-mixed
+        - cho-commercial-to-dwh
+        - cho-sui-to-dwh
+        - cho-amusements-to-dwh
+        - cho-agri-to-dwh
+        - cho-agri-to-flexcom
+        - cho-agri-to-school
+        - cho-comm-to-school
+        - pa-tmp-school-vacant-comm
+        - pa-demo-replace-dwh
+        - pa-flats-de-blocks
+        - pa-flats-de-comm
+        - pa-flats-terr-comm
+        - pa-flats-terr-dwh
+        - pa-flats-de-dwh
     - site:
         in:
+        - flood-risk-zone
         - critical-drainage-area
-        description: The site is in a critical drainage area identified in the strategic flood risk assessment.
-    - any:
-      - condition:
-          field: site-area-residential
-          operator: '>'
-          value: 0.5
-          description: The site is more than 0.5 hectare.
-      - condition:
-          field: site-area-non-residential
-          operator: '>'
-          value: 0.5
-          description: The site is more than 0.5 hectare.
-  - site:
+        description: 'The Environment Agency must be consulted: Flood Zone 2 or 3, or Flood Zone 1 with
+          critical drainage problems notified by the Environment Agency.'
+  - application-type:
       in:
-      - flood-risk-zone
-      description: The site is in Flood Zone 2 or 3 (including householder and other minor development
-        and change of use).
+      - pa-tmp-use-comm-film
 source-url: https://www.newcastle.gov.uk/sites/default/files/planning/Tyneside%20Validation%20Checklist%20Jan%2025%20-Final%20with%20bookmarks.pdf
-source-text: 'A Flood Risk Assessment (FRA) will be required for all planning applications for: Development
-  on sites of more than 0.5 hectare within a local authority''s own identified critical drainage area
-  (as identified within the strategic flood risk assessment) Development in Flood Zones 2 and/or 3 including
-  householder and other minor development and change of use; …'
+policy: Core Strategy and Urban Core Plan for Gateshead and Newcastle policy CS17; Newcastle Development
+  and Allocations Plan DM26
+source-text: 'A Flood Risk Assessment (FRA) will be required for all planning applications for: • Development
+  on sites of more than 0.5 hectare within a local authority’s own identified critical drainage area (as
+  identified within the strategic flood risk assessment) • Development in Flood Zones 2 and/or 3 including
+  householder and other minor development and change of use; … • Development on sites of more than 1 hectare
+  in Flood Zone 1; • Development in Flood Zone 1 which has critical drainage problems as notified by the
+  Environment Agency; • Development on sites less than 1 hectare in Flood Zone 1, including a change of
+  use in development type to a more vulnerable class (for example from commercial to residential), where
+  they could be affected by sources of flooding other than rivers and the sea (for example surface water
+  drains, reservoirs)'
+must-include:
+- item: Title states the document is/includes a Flood Risk Assessment
+  level: must
+- item: Clear evidence that the report was produced within the last 3 years and is up to date
+  level: must
+- item: 'Householder extensions in Flood Zones 2 and 3, and non-residential extensions under 250 sq m
+    in a critical drainage area or Flood Zone 2 or 3: a simple flood risk assessment using the Environment
+    Agency standing advice form, with site address and description, flood risk from all sources plus climate
+    change, estimated flood level, flood resistance and resilience plans, and supporting plans'
+  level: must
+  required-if:
+    any:
+    - application-type:
+        in:
+        - hh
+    - condition:
+        field: floorspace-non-residential
+        operator: <
+        value: 250
+        description: A non-residential extension of less than 250 sq m.
+- item: 'Part 4 Class BC temporary campsites: provision for warning and evacuation'
+  level: must
+  required-if:
+    application-type:
+      in:
+      - prior-approval
+  source-text: a site-specific flood risk assessment, including provision for warning and evacuation;
 confidence: medium
-notes: 'The workbook''s Householder and Full rows give this trigger; the prior approval row is dropped
-  (the ''change of use'' wording refers to planning applications). The Gateshead audit quotes Note 17:
-  ''A simple FRA is needed for householder extensions in Flood Zones 2 and 3''. The list goes on to further
-  cases not extracted.'
+notes: From the council's list (published January 2025), page 35-37, 106, 113-118. Note 17A of the list.
+  Not required for listed building consent, lawful development certificates, advertisement consent and
+  tree works. Prior approvals (Checklist 8) need a site-specific FRA where the Environment Agency must
+  be consulted, and always for Part 4 Class E film-making and Class BC temporary campsites (which has
+  no application-type id of its own).
 review-status: unverified
 field-status: {}
