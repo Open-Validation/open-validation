@@ -1,9 +1,93 @@
 reference: planning-statement
 local-authority: SLG
-required-if: discretionary
-source-url: https://www.slough.gov.uk/directory/27/local-validation-list-directory/category/61
-confidence: low
-notes: 'From the audit (missing_requirement): ''Planning statement or supporting letter'' is ''Often required''
-  for householder applications; the trigger wasn''t captured.'
+required-if:
+  any:
+  - all:
+    - application-type:
+        in:
+        - full
+        - outline
+    - ref: major-development
+  - all:
+    - application-type:
+        in:
+        - full
+        - outline
+    - condition:
+        field: minor-development
+        value: true
+        description: Minor development.
+    - condition:
+        field: dwelling-count
+        operator: '>='
+        value: 1
+        description: Minor applications for new residential.
+  - all:
+    - condition:
+        field: involves-change-of-use
+        value: true
+        description: Change of use.
+    - discretionary
+  - all:
+    - site:
+        in:
+        - green-belt
+        description: Green Belt justification.
+    - discretionary
+  - all:
+    - application-type:
+        in:
+        - hh
+    - discretionary
+  - application-type:
+      in:
+      - non-material-amendment
+source-url: https://www.slough.gov.uk/directory-record/35548/planning-statement
+policy: National Planning Policy Framework; local plan
+source-text: ALL major applications, including full or outline, but reserved matters applications will
+  be excluded where a statement has been submitted and considered at outline stage. However, if material
+  circumstances have changed since the grant of outline permission then an updated assessment may be required.
+  Minor applications for new residential. Other applications may require a statement where there is a
+  change of use or Green Belt justification.
+must-include:
+- item: Justification of the scheme against national and local policy (a covering letter or a detailed
+    document)
+  level: must
+- item: 'Commercial activities: anticipated staffing levels, site visitors and hours of operation'
+  level: must
+  required-if:
+    condition:
+      field: floorspace-non-residential
+      operator: '>'
+      value: 0
+      description: Commercial (non-residential) development.
+- item: 'Green Belt: very special circumstances arguments, where applicable'
+  level: must
+  required-if:
+    site:
+      in:
+      - green-belt
+      description: Green Belt.
+- item: 'Householder medical grounds: a letter from a health professional, and why the existing property
+    is unsuitable'
+  level: must
+  required-if:
+    all:
+    - application-type:
+        in:
+        - hh
+    - discretionary
+- item: 'Non-material amendment: a supporting statement explaining the changes'
+  level: must
+  required-if:
+    application-type:
+      in:
+      - non-material-amendment
+confidence: medium
+notes: 'From the council''s list (adopted 1 January 2026), Local Validation List directory (record 35548;
+  record 35531; record 35582). Other records: https://www.slough.gov.uk/directory-record/35531/planning-statement-or-supporting-letter-for-householder-applications,
+  https://www.slough.gov.uk/directory-record/35582/non-material-amendments. Planning statement or supporting
+  letter. Householders: ''rarely required'' (special circumstances), shown as ''check''. Fire statements
+  for buildings over 7 storeys or 18m can be appended to it.'
 review-status: unverified
 field-status: {}

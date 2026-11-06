@@ -1,20 +1,94 @@
 reference: town-centre-impact-assessment
 local-authority: MIK
 required-if:
-  condition:
-    field: floorspace-non-residential
-    operator: '>'
-    value: 350
-    description: Over 350 square metres gross of retail floorspace (over 900 square metres in the city
-      centre).
+  any:
+  - all:
+    - application-type:
+        in:
+        - full
+        - outline
+        - technical-details-consent
+    - any:
+      - condition:
+          field: out-of-centre-town-centre-use
+          value: true
+          description: Main town centre uses not within a city, town, district or local centre, and not
+            on a site allocated for such uses.
+      - all:
+        - site:
+            in:
+            - town-centre
+            description: Within the Central Milton Keynes city centre boundary, outside the Primary Shopping
+              Area and not on an allocated site.
+        - condition:
+            field: town-centre-use-floorspace
+            operator: '>'
+            value: 900
+            description: Main town centre uses over 900 sq m (gross).
+        - discretionary
 source-url: https://www.milton-keynes.gov.uk/file/19351/download?token=flfqBbYj
-policy: Plan:MK ER9 and ER10
-source-text: The retail impact test checklist set out in the Planning Practice Guidance should be followed.
-  80 ER9 and ER10 of Plan:MK Requirement Description Policy drivers Retail sequential assessment An assessment
-  of available premises within or on the edge of town and local centres in an agreed area of search.
-confidence: low
-notes: 'The workbook guessed the application type (''INFERRED''), so no type is given. From the audit
-  (wrong_trigger): retail impact for over 900 sqm gross in the city centre and 350 sqm elsewhere (impact
-  on the Primary Shopping Area in CMK). The rule shows the lower threshold.'
+policy: Plan:MK policies ER9 and ER10
+source-text: for main town centre uses not within a city centre, town centre, district centre or local
+  centre, and which are not on sites specifically allocated for such uses, a retail sequential assessment;
+  ... for main town centre uses not within a city centre, town centre, district centre or local centre,
+  not on sites specifically allocated for such uses, and over 900 sqm (gross) in the city centre or 350
+  sqm (gross) in all other cases, a retail impact assessment; ... for main town centre uses over 900 sqm
+  (gross) within the city centre boundary of Central Milton Keynes and outside of the Primary Shopping
+  Area (PSA), and not on sites specifically allocated for such uses, a retail impact assessment specifically
+  of the impact on the PSA;
+must-include:
+- item: 'Retail sequential assessment: available premises in or on the edge of town and local centres
+    within an agreed area of search, any justification for ''filtering'' premises, and the scope for flexibility
+    in format and scale'
+  level: must
+  required-if:
+    condition:
+      field: out-of-centre-town-centre-use
+      value: true
+      description: Out of centre.
+- item: 'Retail impact assessment over 350 sq m gross (900 sq m in the city centre): impact on all town
+    and local centres that may be affected, over up to 5 years (10 for major schemes), following the PPG
+    checklist'
+  level: must
+  required-if:
+    any:
+    - all:
+      - condition:
+          field: out-of-centre-town-centre-use
+          value: true
+          description: Out of centre.
+      - condition:
+          field: town-centre-use-floorspace
+          operator: '>'
+          value: 350
+          description: Over 350 sq m (gross).
+    - all:
+      - site:
+          in:
+          - town-centre
+          description: City centre.
+      - condition:
+          field: town-centre-use-floorspace
+          operator: '>'
+          value: 900
+          description: Over 900 sq m (gross).
+- item: 'City centre outside the Primary Shopping Area: the impact on the Primary Shopping Area'
+  level: must
+  required-if:
+    all:
+    - site:
+        in:
+        - town-centre
+        description: City centre.
+    - condition:
+        field: town-centre-use-floorspace
+        operator: '>'
+        value: 900
+        description: Over 900 sq m (gross).
+    - discretionary
+confidence: medium
+notes: From the council's list (adopted 12 March 2025), page 14, 20, 80-81. Retail sequential and retail
+  impact assessments. The 900 sq m threshold applies in the city centre (the map can't tell the city centre
+  from other centres yet, so the city centre case shows as 'check').
 review-status: unverified
 field-status: {}

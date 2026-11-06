@@ -2,29 +2,93 @@ reference: flood-risk-assessment
 local-authority: MIK
 required-if:
   any:
-  - site:
-      in:
-      - flood-risk-zone
-      description: The site is in flood zone 2 or 3.
-  - condition:
-      field: site-area-residential
-      operator: '>'
-      value: 1
-      description: The site is over 1 hectare in flood zone 1.
-  - condition:
-      field: site-area-non-residential
-      operator: '>'
-      value: 1
-      description: The site is over 1 hectare in flood zone 1.
+  - any:
+    - all:
+      - application-type:
+          in:
+          - full
+          - technical-details-consent
+      - any:
+        - site:
+            in:
+            - flood-risk-zone
+            description: In Flood Zone 2 or 3 (certain forms of development).
+        - condition:
+            field: site-area-residential
+            operator: '>'
+            value: 1
+            description: Site over 1 hectare in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: '>'
+            value: 1
+            description: Site over 1 hectare in Flood Zone 1.
+    - all:
+      - application-type:
+          in:
+          - outline
+          - reserved-matters
+          - s73
+      - any:
+        - site:
+            in:
+            - flood-risk-zone
+            description: In Flood Zone 2 or 3 (certain forms of development).
+        - condition:
+            field: site-area-residential
+            operator: '>'
+            value: 1
+            description: Site over 1 hectare in Flood Zone 1.
+        - condition:
+            field: site-area-non-residential
+            operator: '>'
+            value: 1
+            description: Site over 1 hectare in Flood Zone 1.
+      - discretionary
+  - all:
+    - application-type:
+        in:
+        - pa-flats-de-blocks
+        - pa-flats-de-comm
+        - pa-flats-terr-comm
+    - any:
+      - site:
+          in:
+          - flood-risk-zone
+          description: In Flood Zone 2 or 3.
+      - site:
+          in:
+          - critical-drainage-area
+          description: In Flood Zone 1 with critical drainage problems.
+  - all:
+    - application-type:
+        in:
+        - prior-approval
+    - discretionary
 source-url: https://www.milton-keynes.gov.uk/file/19351/download?token=flfqBbYj
+policy: Plan:MK policies FR1, FR2 and FR3
+source-text: for certain forms of development within flood zone 2 or 3, or where the site exceeds 1 hectare
+  in site area in flood zone 1, a flood risk assessment supported by evidence for the sequential test
+  and the exception test where necessary;
 must-include:
-- item: Evidence to apply the Sequential Test and, if necessary, to show the development will be safe
-    and pass the Exception Test
+- item: All sources of flood risk to and from the site managed now and over the lifetime, allowing for
+    climate change and urban creep
   level: must
-  source-text: apply the Sequential Test; and if necessary, evidence to establish whether the development
-    will be safe and pass the Exception Test.
+- item: Whether the development is likely to be affected by current or future flooding, and whether it
+    increases flood risk elsewhere
+  level: must
+- item: Whether the proposed measures are appropriate
+  level: must
+- item: Evidence for the Sequential Test and, if necessary, the Exception Test
+  level: must
+- item: Accompanied by a surface water management strategy
+  level: must
+- item: Regard to part E of policy FR1 (Critical Drainage Catchments)
+  level: must
 confidence: medium
-notes: 'Audit (wrong_trigger): the excerpt was cut to ''or 3, a flood risk assessment''. From the audit:
-  flood zone 2/3, or over 1 ha in zone 1.'
+notes: From the council's list (adopted 12 March 2025), page 15, 42-46, 73. 'Certain forms of development'
+  in Flood Zones 2 and 3 is shown as the flood zone itself. Also needed for some prior approvals (additional
+  storeys in Flood Zone 2 or 3 or with critical drainage problems, campsites in Flood Zone 2 or 3, film-making)
+  and where constraints raise concern.
 review-status: unverified
 field-status: {}
