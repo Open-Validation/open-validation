@@ -1,15 +1,65 @@
 reference: floor-plan-existing
 local-authority: TEN
 required-if:
-  application-type:
-    in:
-    - hh
-    - reserved-matters
-    - ldc
+  any:
+  - all:
+    - application-type:
+        in:
+        - full
+        - hh
+        - reserved-matters
+        - lbc
+        - technical-details-consent
+        - outline-some
+    - any:
+      - condition:
+          field: floorspace
+          operator: '>'
+          value: 0
+          description: Floor area is created.
+      - condition:
+          field: internal-works
+          value: true
+          description: Floor area or the internal layout is altered.
+  - all:
+    - application-type:
+        in:
+        - full
+    - condition:
+        field: hmo-creation
+        value: true
+        description: The proposal creates a house in multiple occupation (HMO) and/or bedsits.
 source-url: https://legacy.tendringdc.gov.uk/sites/default/files/documents/planning/FINAL%20VERSION%20-%20Local%20Validation%20List%20-%20August%202026.pdf
-confidence: low
-notes: 'Audit (wrong_trigger / wrong_app_type): table-of-contents text filed under adverts and PiP. From
-  the audit, floor plans are ticked for householder, reserved matters and LDC applications; other types
-  not stated.'
+source-text: All development where floor area is being created / altered.
+must-include:
+- item: Rooms labelled with their use (e.g. bedroom)
+  level: must
+- item: At an appropriate scale, 1:50 or 1:100, with a scale bar
+  level: must
+- item: Details consistent with the associated elevations (position/size of windows and doors)
+  level: should
+- item: The relationship between rooms, and any existing walls or buildings to be demolished (where applicable)
+  level: should
+- item: Dimensions of new or altered door way openings
+  level: must
+  required-if:
+    condition:
+      field: external-alterations
+      value: true
+      description: New or altered doorway openings.
+- item: 'For HMOs and bedsits: enough to show the size of each proposed HMO room or bedsit'
+  level: should
+  required-if:
+    condition:
+      field: hmo-creation
+      value: true
+      description: The proposal creates a house in multiple occupation (HMO) and/or bedsits.
+confidence: medium
+notes: From the council's list (final version published July/August 2026), pages 17, 38. Listed as 'Floorplans'.
+  For a change of use with the floor layout unaltered, one floor plan labelled as existing and proposed
+  is acceptable. Lawful development certificates need proposed plans only, unless the case officer asks.
+  The HMO section asks for existing and proposed floor plans for all HMO proposals. A north point is not
+  required. 'HMO Applications' are planning applications for a house in multiple occupation, so they are
+  shown as full applications.
 review-status: unverified
 field-status: {}
