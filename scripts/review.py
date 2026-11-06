@@ -238,7 +238,7 @@ def recompute_council(code, reset_stale=True, report=None):
 
 
 LPA_COLUMNS = ["code", "ons-code", "name", "region", "type", "validation-list-url", "list-date",
-               "list-status", "coverage", "review-status", "audit-status", "issues-open",
+               "list-status", "coverage", "data-stage", "review-status", "audit-status", "issues-open",
                "joint-list", "partners", "notes", "entry-date"]
 
 
@@ -260,6 +260,7 @@ def lpa_csv_row(code, base):
         "list-date": str(vl.get("date") or ""),
         "list-status": vl.get("status") or "",
         "coverage": coverage(lpa, len(reqs)),
+        "data-stage": lpa.get("data-stage") or "",
         "review-status": lpa.get("review-status", "unverified"),
         "audit-status": audit.get("status", "not-audited"),
         "issues-open": "" if audit.get("issues-open") is None else str(audit.get("issues-open")),

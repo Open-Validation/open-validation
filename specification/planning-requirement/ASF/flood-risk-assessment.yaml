@@ -1,11 +1,67 @@
 reference: flood-risk-assessment
 local-authority: ASF
+required-if:
+  all:
+  - application-type:
+      in:
+      - hh
+      - full
+      - outline
+      - reserved-matters
+      - lbc
+      - prior-approval
+  - any:
+    - ref: major-development
+    - condition:
+        field: site-area-residential
+        operator: '>='
+        value: 1
+        description: Site of 1 hectare or greater.
+    - condition:
+        field: site-area-non-residential
+        operator: '>='
+        value: 1
+        description: Site of 1 hectare or greater.
+    - site:
+        in:
+        - critical-drainage-area
+        description: Site of less than 1 hectare with critical drainage problems.
+    - all:
+      - condition:
+          field: involves-change-of-use
+          value: true
+          description: Change of use to a more vulnerable class.
+      - discretionary
+    - all:
+      - site:
+          in:
+          - flood-risk-zone
+          description: In Flood Zone 2 or 3.
+      - condition:
+          field: building-works
+          value: true
+          description: New built development.
 source-url: https://www.ashford.gov.uk/publications/validation-checklist/?pid=13415
-source-text: Site Specific Flood Risk Assessment (FRA) - where one is required under the National Planning
-  Policy Framework.
-confidence: low
-notes: 'The workbook guessed the application type (''INFERRED''), so no type is given. Audit (missing_requirement):
-  the LV codes run to at least LV18 but only about 14 items were captured, so other local requirements
-  are probably missing. The audit couldn''t read this council''s list, so its contents weren''t checked.'
+policy: Ashford Local Plan 2030 policy ENV6
+source-text: 'All Major Developments All developments in Floodzone 1 when: The site is 1 hectare or greater;
+  The site is less than 1 hectare but has critical drainage problems; The site is less than 1 hectare
+  and includes the change of use of development type to a more vulnerable class where they can be affected
+  by sources of flooding other than rivers and sea (e.g. surface water, drains) All new built developments
+  within Flood Zones 2 and 3.'
+must-include:
+- item: Supporting evidence, including plans, drawings and calculations
+  level: must
+- item: 'In Flood Zones 2 and 3: the flood risk sequential test/exception test addressed'
+  level: must
+  required-if:
+    site:
+      in:
+      - flood-risk-zone
+      description: In Flood Zone 2 or 3.
+confidence: medium
+notes: From the council's list (last revised July 2024), Table 2 (Local Validation Requirements), page
+  4 of 4, item LV3. Application types from the council's Supplementary Matrix. A change to a more vulnerable
+  use shows as discretionary because it depends on whether the site can be affected by other sources of
+  flooding.
 review-status: unverified
 field-status: {}

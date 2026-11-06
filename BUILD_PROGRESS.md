@@ -98,6 +98,9 @@ All checks passed.
 - National parks use short codes (BROADS, DNPA, ENPA, LDNPA, NFNPA, NYMNPA, NNPA, PDNPA, SDNPA, YDNPA).
 - The council register lives in `data/organisation.csv` (refreshed by `scripts/update_register.py`), not `inputs/`.
 - Working branch is `ccr-f743743a-pji9c0`, not `build`.
+- **After the first build the workbook route is retired**: the council files are the only copy of the data
+  and are edited directly (`build_from_workbook.py` refuses to run without `--rebuild-from-workbook`;
+  `set_status.py --recompute` rebuilds the index). `scripts/audit_corrections/` is historical.
 - A fifth status, **`incorrect`** (purple `#B388FF`, CSS `--status-incorrect`), sits below `unverified`.
   It needs a `note`. Fixing the value clears it (hash). It has its own texture in Patterns mode
   (horizontal lines) and a ✕ in table cells. Every new `incorrect` flag landing on `main` opens an
@@ -131,3 +134,23 @@ All checks passed.
 
 - Inputs are in `inputs/`; never edit them.
 - After any data change: `python scripts/set_status.py --recompute && python scripts/check.py`.
+
+### 2026-11-05: Crawley rewritten from its list
+Crawley's files were rebuilt by hand from its list adopted 3 November 2025, the first council done
+under the new everyday routine. Every file now has a trigger, the policy the council cites, the
+council's own wording and what the document must show. Eight files were added: location plan, fire
+statement, habitat baseline, sustainable drainage strategy, and four tree-works documents. The
+unmapped items (data/unmapped-requirement.csv) now quote the list itself, not the audit.
+
+### 2026-11-05: 51 more councils rewritten from their own latest lists
+Helpers (one brief, see the PR) rewrote each council from the list on its own website, after
+confirming it was the newest one. Every quoted wording was checked automatically against the
+downloaded list. Lists over two years old are marked `outdated`. Done: MSS TAN WAE REI WEA SEV BNH
+(full checklist only) FAR POR STH GRT DAR GRA WND MRT WOT ADU HAS ROH CRY BRY MDW THA CAT SDNPA
+HAA DOV SHE BEX RUN SPE RUH WNM BRC WOK GRE SWK RIC HNS HIL RDG BAN EHA HAT ASF WIN TES EAT EPS
+ELM KTT. Fixes found in review: Tandridge housing thresholds (residential site area only),
+Spelthorne BNG (follows the statutory condition), Southwark gateway 1 (use AND height), and no
+YAML anchors (the writer and check.py now prevent them).
+
+Blocked by the councils' own bot checks or logins (need a manual download): HOR LEE MOL TUN TON
+MAI GOS NEW IOW WOI SUR SWL LBH ARU EAS STN CHI LEW WBK, plus BNH's other checklists.

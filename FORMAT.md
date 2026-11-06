@@ -92,6 +92,14 @@ submission-standards:
 - Vague triggers ("where appropriate", "officer discretion"): `required-if: discretionary`.
   **Never invent thresholds.**
 
+#### `data-stage` (in `_lpa.yaml`)
+
+`data-stage: scraping-in-progress` marks a council whose files are still the early AI extract from
+the workbook and haven't been rewritten from the council's own list. The explorer shows these
+councils grey and hatched ("Data scraping in progress") with a warning on their pages. Delete the
+key once every file has been rewritten from the council's latest list. It is not a review status
+and has no marks: it says where the data came from, not whether someone checked it.
+
 #### Review status (cell by cell)
 
 Every piece of data we collected is a **cell**, and every cell has one of five statuses, from

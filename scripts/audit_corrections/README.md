@@ -1,4 +1,9 @@
-# Audit corrections
+# Audit corrections (historical)
+
+**These files were used once, to build the data, and are no longer used.** The council files in
+`specification/planning-requirement/` are now edited directly; see "How to fix or add data" in the
+main README. This folder is kept as a record of how each council's audit was applied.
+
 
 One file per council, `<CODE>.yaml`. It records what the council's audit
 (`inputs/audit/<slug>.json`) says is wrong with Grokbot's workbook, in a form

@@ -1,29 +1,53 @@
 reference: floor-plan-proposed
 local-authority: POR
+required-if:
+  always: true
 source-url: https://www.portsmouth.gov.uk/services/development-and-planning/planning-applications/planning-application-validation-checklists
 source-text: Floor plans – Existing and proposed floor plans of all floors drawn to a metric scale of
   1:50 or 100 and showing the direction of North.
 must-include:
-- item: All floors
+- item: All floors, drawn to a metric scale of 1:50 or 1:100, showing the direction of North
   level: must
-- item: Metric scale of 1:50 or 1:100
+- item: 'For additional dwellinghouses (flats, houses or maisonettes) or a new or altered House in Multiple
+    Occupation: the internal layout of that accommodation and every room within it'
   level: must
-- item: Direction of north
+  required-if:
+    any:
+    - condition:
+        field: dwelling-count
+        operator: '>='
+        value: 1
+        description: The development provides additional dwellinghouses.
+    - condition:
+        field: housing-type
+        value: hmo
+        description: The development alters or provides a House in Multiple Occupation.
+- item: 'For additional dwellinghouses or an HMO: a schedule of the gross internal floor areas of the
+    proposed accommodation'
   level: must
-- item: Internal layout of the accommodation and every room within it, with a schedule of gross internal
-    floor areas
+  required-if:
+    any:
+    - condition:
+        field: dwelling-count
+        operator: '>='
+        value: 1
+        description: The development provides additional dwellinghouses.
+    - condition:
+        field: housing-type
+        value: hmo
+        description: The development alters or provides a House in Multiple Occupation.
+- item: 'Where accommodation is provided in the roof space: plans (with elevations and cross-sections)
+    showing the floor area with a headroom of at least 1.5m'
   level: must
   required-if:
     condition:
-      field: housing-type
-      value: hmo
-      description: The proposal is for a House in Multiple Occupancy.
-  source-text: Multiple Occupancy, floor plans must show the internal layout of that accommodation and
-    every room within it, accompanied by a schedule of the gross internal floor areas of the proposed
-    accommodation.
-confidence: low
-notes: 'The workbook guessed the application type (''INFERRED''), so no type is given. Audit (wrong_trigger):
-  the HMO rule applies only to HMO proposals, so it is an item with its own rule. The audit couldn''t
-  read this council''s list, so its contents weren''t checked.'
+      field: roof-alteration
+      value: true
+      description: Accommodation is to be provided within the roof space.
+confidence: medium
+notes: From the council's list (adopted 23 July 2024), page 1 (single web page), section 'Local mandatory
+  planning documents'. Listed among the 'general or site specific requirements that will apply to planning
+  applications', with no further trigger, so it is shown as always required; in practice only where the
+  drawing is relevant to the proposal.
 review-status: unverified
 field-status: {}

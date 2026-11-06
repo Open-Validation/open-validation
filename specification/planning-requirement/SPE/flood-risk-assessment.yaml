@@ -6,48 +6,76 @@ required-if:
     - site:
         in:
         - flood-risk-zone
-        description: The site is in Flood Zone 2, 3 or 3b.
+        description: Flood Zones 2 and 3 as defined by the Environment Agency.
     - any:
+      - condition:
+          field: new-build
+          value: true
+          description: New built development.
       - condition:
           field: dwelling-count
           operator: '>='
           value: 1
           description: Residential development created by new build or conversion.
-      - condition:
-          field: residential-extension
-          value: true
-          description: Residential extensions (in Flood Zone 3b).
-  - site:
-      in:
-      - critical-drainage-area
-      description: The site is in an area at risk of surface water flooding.
-  - condition:
-      field: site-area-residential
-      operator: '>'
-      value: 0.5
-      description: The site is over 0.5 hectares.
-  - condition:
-      field: site-area-non-residential
-      operator: '>'
-      value: 0.5
-      description: The site is over 0.5 hectares.
+  - all:
+    - site:
+        in:
+        - flood-risk-zone
+        description: Flood zone 3b.
+    - condition:
+        field: residential-extension
+        value: true
+        description: Residential extensions.
+  - any:
+    - condition:
+        field: site-area-residential
+        operator: '>'
+        value: 0.5
+        description: Sites above 0.5 ha in Flood Zone 1.
+    - condition:
+        field: site-area-non-residential
+        operator: '>'
+        value: 0.5
+        description: Sites above 0.5 ha in Flood Zone 1.
   - condition:
       field: dwelling-count
       operator: '>='
       value: 10
       description: 10 or more dwellings.
   - condition:
-      field: floorspace
-      operator: '>='
+      field: floorspace-non-residential
+      operator: '>'
       value: 1000
-      description: 1,000 square metres or more of floorspace.
+      description: More than 1,000 sq m of commercial floorspace.
+  - all:
+    - site:
+        in:
+        - surface-water-flood-risk
+        description: Surface water medium and high risk categories identified by the Environment Agency.
+    - discretionary
 source-url: https://www.spelthorne.gov.uk/sites/default/files/2026-06/Local%20List%20of%20Requirements_0.pdf
-source-text: Residential development created by new build or conversion
-confidence: low
-notes: 'Audit (wrong_trigger): the excerpt was column headers. From the audit: Flood Zones 2/3/3b and
-  surface-water risk areas, for new dwellings/conversions, residential extensions in FZ3b and sites over
-  0.5ha / 10+ dwellings / 1,000 sq m. How the site-size thresholds combine with the locations needs checking
-  in Item 19. Audit (other): the council page presents the June 2026 list as a consultation version (11
-  June to 9 July 2026) and never says it has been adopted; adoption should be confirmed.'
+policy: Spelthorne Local Plan 2024-2039/40 (March 2026) policy E3
+source-text: A Flood Risk Assessment (FRA) will be required for development proposals on sites above 0.5
+  ha ,or 10 dwellings or more or over 1000sq m of non-residential development outside the 1;1000 flood
+  risk area in Zone 1 because surface water into the flood plain from outside can contribute to risk.
+  A FRA will also be required for all proposals for new development located in Flood Zones 2 and 3 and
+  for residential extensions in Flood Zone 3b as designated by the Environment Agency.
+must-include:
+- item: The risks of all forms of flooding to and from the development, and how they will be managed,
+    taking climate change into account
+  level: must
+- item: Opportunities to reduce the probability and consequences of flooding
+  level: must
+- item: Design of surface water management systems, including Sustainable Drainage Systems
+  level: must
+- item: Safe access to and from the development in areas at risk of flooding
+  level: must
+- item: Plans showing ground levels above AOD, how far buildings are raised above flood level, and any
+    flood apertures in external walls below the floor
+  level: must
+confidence: medium
+notes: From the council's list (published June 2026), item 19 and note 4, page 10, 22. The table also
+  lists more vulnerable and highly vulnerable uses in the Environment Agency's surface water medium and
+  high risk areas; there is no field for vulnerability class, so that part shows as 'check'.
 review-status: unverified
 field-status: {}

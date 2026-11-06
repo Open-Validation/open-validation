@@ -1,19 +1,80 @@
 reference: flood-risk-assessment
 local-authority: HAA
 required-if:
-  site:
-    in:
-    - flood-risk-zone
-    description: The site is in an area at risk of flooding.
-source-url: https://www.havant.gov.uk/media/10122/download?inline
-source-text: of 27 Flood Risk Assessment In accordance with Local Plan (Core Strategy) policy CS15 and
-  national policy, a sitespecific Flood Risk Assessment (FRA) will be required for
-confidence: low
-notes: 'The workbook guessed the application type (''INFERRED''), so no type is given. Audit (wrong_trigger,
-  wrong_app_type): the excerpt is cut off at ''will be required for''; the audit says the FRA applies
-  to all development in flood risk areas. Other national cases (such as large sites in flood zone 1) may
-  also apply. Audit (wrong_document): most excerpts come from the 2024 consultation draft (media/10122),
-  not the adopted list (media/9115, 3 April 2023); draft-only changes may not be in force. The audit couldn''t
-  read this council''s list, so its contents weren''t checked.'
+  any:
+  - site:
+      in:
+      - flood-risk-zone
+      description: New development in Flood Zone 2 or 3.
+  - site:
+      in:
+      - future-flood-risk
+      description: In Flood Zone 2 or 3 in future taking account of climate change, or identified in a
+        strategic flood risk assessment as at increased flood risk in future.
+  - condition:
+      field: site-area-residential
+      operator: '>='
+      value: 1
+      description: Site of 1 hectare or more (Flood Zone 1).
+  - condition:
+      field: site-area-non-residential
+      operator: '>='
+      value: 1
+      description: Site of 1 hectare or more (Flood Zone 1).
+  - site:
+      in:
+      - critical-drainage-area
+      - surface-water-flood-risk
+      description: In an area at risk of surface water flooding (land the Environment Agency has identified
+        as having critical drainage problems).
+  - condition:
+      field: new-build
+      value: true
+      description: New buildings or engineering works in Flood Zone 1 (a proportionate Flood Risk Statement).
+  - discretionary
+source-url: https://www.havant.gov.uk/media/9115/download?inline
+policy: Havant Borough Local Plan (Core Strategy/Allocations) policies CS15, DM25; Havant Borough Council
+  Sequential Test Guidance
+source-text: 'In accordance with Local Plan (Core Strategy) policy CS15 and national policy, a site-specific
+  Flood Risk Assessment (FRA) will be required for • all proposals for new development located in Flood
+  Zones 2 and 3 (now or in the future taking into account climate change) • development proposals in Flood
+  Zone 1 as listed below: o sites of 1 hectare or more; o any development in an area at risk of surface
+  water flooding (land which has been identified by the Environment Agency as having critical drainage
+  problems – see ‘check whether you site is at risk’ above); o land identified in a strategic flood risk
+  assessment as being at increased flood risk in future; or o land that may be subject to other sources
+  of flooding, where its development would introduce a more vulnerable use'
+must-include:
+- item: 'Sequential Test: no reasonably available sites with a lower probability of flooding (for present
+    day and future flood risk; ''the site'' is the red line)'
+  level: must
+  required-if:
+    site:
+      in:
+      - flood-risk-zone
+      - future-flood-risk
+      - surface-water-flood-risk
+      description: A site at risk of flooding, now or in future.
+  source-text: The Sequential Test is required for all major and non-major development on sites at risk
+    of flooding. This applies to the present day flood risk AND areas at risk in the future, as identified
+    by a Strategic Flood Risk Assessment or other information.
+- item: 'Flood Risk Statement (Flood Zone 1): an outline of the existing and proposed surface water drainage,
+    considering SuDS where practical, showing run-off rates and volumes will not increase and wherever
+    possible will reduce'
+  level: must
+  required-if:
+    condition:
+      field: new-build
+      value: true
+      description: New buildings or engineering works in Flood Zone 1.
+  source-text: Therefore, a Flood Risk Statement is required for all new buildings and engineering works
+    in Flood Zone 1. It is not required for extensions to houses and changes of use where no building
+    or engineering works are proposed.
+confidence: medium
+notes: From the council's list (implemented 12 December 2022, minor updates 3 April 2023), Part Two (Local
+  Requirements), page 9-11. Land subject to other sources of flooding where a more vulnerable use is introduced
+  has no field, so it is shown as discretionary. The Flood Risk Statement for new buildings and engineering
+  works in Flood Zone 1 is a proportionate document, not a full FRA; it is not needed for house extensions
+  or changes of use without building or engineering works. The Sequential Test has exceptions set out
+  in the council's guide.
 review-status: unverified
 field-status: {}

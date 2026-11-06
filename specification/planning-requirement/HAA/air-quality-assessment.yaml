@@ -1,14 +1,51 @@
 reference: air-quality-assessment
 local-authority: HAA
-source-url: https://www.havant.gov.uk/media/10122/download?inline
-source-text: July 2011 Air Quality Assessment Part IV of the Environment Act 1995 requires local authorities
-  in the UK to review air quality in their area and designate air quality management areas, if improvements
-  are necessary.
-confidence: low
-notes: 'The workbook guessed the application type (''INFERRED''), so no type is given. Audit (wrong_document):
-  most excerpts come from the 2024 consultation draft (media/10122), not the adopted list (media/9115,
-  3 April 2023); draft-only changes may not be in force. Audit (wrong_trigger): the excerpt is background
-  on Part IV of the Environment Act 1995, not a trigger. The audit couldn''t read this council''s list,
-  so its contents weren''t checked.'
+required-if:
+  any:
+  - condition:
+      field: dwelling-count
+      operator: '>'
+      value: 100
+      description: More than 100 dwellings.
+  - condition:
+      field: floorspace
+      operator: '>'
+      value: 10000
+      description: More than 10,000 sq m of new floorspace.
+  - condition:
+      field: industrial-floorspace
+      operator: '>='
+      value: 1000
+      description: Use Class B2 floorspace of 1,000 sq m or more.
+  - condition:
+      field: parking-spaces
+      operator: '>'
+      value: 300
+      description: More than 300 new parking spaces.
+  - all:
+    - ref: major-development
+    - site:
+        in:
+        - air-quality-management-area
+        description: Within or adjacent to an Air Quality Management Area.
+source-url: https://www.havant.gov.uk/media/9115/download?inline
+policy: Havant Borough Local Plan (Core Strategy/Allocations) policy DM10; The Air Quality Standards Regulations
+  2010
+source-text: 'An Air Quality Assessment will be required for: • Development in excess of 100 dwellings
+  or 10,000m2 new floor space • Development falling within Use Class B2 with floor space of 1000m 2 or
+  more • Development where more than 300 new parking spaces are proposed. • Major development within/or
+  adjacent to an Air Quality Management Area(AQMA).'
+must-include:
+- item: Predicted concentrations of pollutants of concern at appropriate dates and sensitive locations
+  level: should
+- item: The predicted change in air quality and the spatial impact of the change
+  level: should
+- item: Measures to prevent or minimise impact, if significant impacts or increased exposure are likely
+  level: should
+  required-if: discretionary
+confidence: medium
+notes: From the council's list (implemented 12 December 2022, minor updates 3 April 2023), Part Two (Local
+  Requirements), page 6. The list notes there is currently no AQMA in the borough, but an area is being
+  monitored.
 review-status: unverified
 field-status: {}

@@ -1,32 +1,83 @@
 reference: flood-risk-assessment
 local-authority: STH
 required-if:
-  any:
-  - site:
+  all:
+  - application-type:
       in:
-      - flood-risk-zone
-      description: The site is in flood zone 2 or 3.
-  - condition:
-      field: site-area-residential
-      operator: '>='
-      value: 1
-      description: The site is 1 hectare or more (flood zone 1).
-  - condition:
-      field: site-area-non-residential
-      operator: '>='
-      value: 1
-      description: The site is 1 hectare or more (flood zone 1).
+      - hh
+      - full
+      - outline
+      - reserved-matters
+  - any:
+    - site:
+        in:
+        - flood-risk-zone
+        description: New development in Flood Zone 2 or 3.
+    - condition:
+        field: site-area-residential
+        operator: '>='
+        value: 1
+        description: Site of one hectare or more.
+    - condition:
+        field: site-area-non-residential
+        operator: '>='
+        value: 1
+        description: Site of one hectare or more.
+    - site:
+        in:
+        - critical-drainage-area
+        description: Land identified by the Environment Agency as having critical drainage problems.
+    - site:
+        in:
+        - future-flood-risk
+        - surface-water-flood-risk
+        description: Land identified in a strategic flood risk assessment or the Flood Map for Planning
+          as at risk of flooding from any source, now or in the future.
 source-url: https://www.southampton.gov.uk/media/fgvnzbbg/1app-2026-170926.pdf
+policy: NPPF (2026) policy F4
+source-text: 'Planning applications for development proposals of 1 hectare or greater in Flood Zone 1,
+  and all proposals for new development located in Flood Zones 2 and 3 will require a site specific Floor
+  Risk Assessment ... In Flood Zone 1 a site specific Floor Risk Assessment should inform and accompany
+  all development proposals involving: a) Sites of one hectare or more; b) Land which has been identified
+  by the Environment Agency as having critical drainage problems; and c) Land identified in a strategic
+  flood risk assessment or the Flood Map for Planning as being at risk of flooding from any source, whether
+  now or in the future.'
 must-include:
-- item: Minimum flood details for householder extensions and outbuildings (finished floor levels, flood
-    level, Environment Agency Flood Warning sign-up)
+- item: 'Householder extensions/outbuildings in Flood Zones 2 and 3 (no full FRA needed): the proposed
+    finished floor level, either 300mm above the estimated flood level or the same as the existing dwelling
+    with suitable flood resilience or resistance measures'
+  level: must
+  required-if:
+    application-type:
+      in:
+      - hh
+  source-text: 'Applications for house extensions/outbuildings in Flood Zones 2 and 3 do not need to provide
+    a full FRA, but the following details will be required as a minimum: Details of the proposed Finished
+    Floor Level (FFL) – and either: a) For the FFL to be 300mm above the estimated flood level (see below);
+    or, b) The FFL to be the same level of the existing dwelling with a suitable flood resilience or resistance
+    measures (most relevant option)'
+- item: 'Householder: details of the estimated flood level'
+  level: must
+  required-if:
+    application-type:
+      in:
+      - hh
+- item: 'Householder, if the FFL matches the existing dwelling: the resilience/resistance measures chosen,
+    confirming the flood level within the development will not exceed 0.6m'
+  level: must
+  required-if:
+    application-type:
+      in:
+      - hh
+- item: 'Householder: commitment to sign up to the Environment Agency Flood Warning Service'
   level: must
   required-if:
     application-type:
       in:
       - hh
 confidence: medium
-notes: 'Audit (wrong_trigger): the workbook quoted the SuDS sentence. From the audit: all proposals in
-  flood zones 2/3 and sites of 1ha+ in flood zone 1; householders give minimum flood details.'
+notes: 'From the council''s list (published September 2026), page 4-5, 23-24. The list quotes NPPF (2026)
+  policy F4 alongside its own wording. Flood levels: 1 in 100 annual probability for river flooding, 1
+  in 200 for tidal, each plus climate change.'
 review-status: unverified
 field-status: {}

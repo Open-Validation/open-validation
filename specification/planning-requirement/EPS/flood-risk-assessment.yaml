@@ -2,23 +2,64 @@ reference: flood-risk-assessment
 local-authority: EPS
 required-if:
   any:
-  - ref: major-development
-  - site:
-      in:
-      - flood-risk-zone
-      - critical-drainage-area
-      description: The site is in Flood Zone 2 or 3 or a Critical Drainage Area.
+  - all:
+    - application-type:
+        in:
+        - full
+        - outline
+        - pip
+    - ref: major-development
+  - all:
+    - application-type:
+        in:
+        - hh
+        - full
+        - outline
+        - pip
+    - any:
+      - site:
+          in:
+          - flood-risk-zone
+          - critical-drainage-area
+          description: 'Flood Zone 2 or 3, or a Critical Drainage Area (householder: ground floor development).'
+      - condition:
+          field: site-area-residential
+          operator: '>'
+          value: 1
+          description: A site of more than 1 hectare (Flood Zone 1).
+      - condition:
+          field: site-area-non-residential
+          operator: '>'
+          value: 1
+          description: A site of more than 1 hectare (Flood Zone 1).
+  - all:
+    - application-type:
+        in:
+        - prior-approval
+    - discretionary
 source-url: https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/planning-advice/Applications%20Validation%20Requirements_0.pdf
+policy: Section 15 of the NPPF; Policy CS6 of the Core Strategy 2007; Policy DM19 of the Development Management
+  Policies Document 2015 (DMPD)
+source-text: For major development, and where development falls within Flood Zones 2 or 3 or in a Critical
+  Drainage Area and for all new buildings or the change of vulnerability use of existing buildings, or
+  for sites in Flood Zone 1 where the site is >1 hectare. ... Where ground floor development falls within
+  Flood Zones 2 or 3 or in a Critical Drainage Area.
 must-include:
-- item: Shows that the Sequential and Exception Tests of the NPPF have been met
+- item: How flood risk on and off site will be managed over the development's lifetime, taking climate
+    change and the vulnerability of users into account
+  level: must
+- item: Mitigation and recommendations, incorporated into the submitted plans
+  level: must
+- item: Design of surface water management systems, including SuDS wherever possible
+  level: should
+- item: Evidence that the Sequential and Exception Tests are met, where required
   level: must
 - item: Details of safe egress from the site in case of flooding
   level: must
 confidence: medium
-notes: 'Audit (wrong_trigger, outdated_link): the Full row had the Parking and Access Plan trigger and
-  the prior approval row was from the 2015 list. From the audit: majors, Flood Zones 2/3 or a Critical
-  Drainage Area (for householders, ground-floor development there). The must-include items are the council''s
-  wording ("Sequential and Exception Test of NPPF have been met and include details of safe egress from
-  the site in case of flooding").'
+notes: From the council's list (adopted 11 July 2024), pages 12, 29 and 35-37. The full planning wording
+  'and for all new buildings or the change of vulnerability use of existing buildings' is read as part
+  of the Flood Zone 2/3 limb. For prior approvals the list says the document 'may need to' be included
+  depending on the class and the matters for prior approval (table, pages 58-60), so it shows as 'check'.
 review-status: unverified
 field-status: {}

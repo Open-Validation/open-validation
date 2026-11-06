@@ -1,9 +1,51 @@
 reference: travel-plan
 local-authority: GRE
+required-if:
+  any:
+  - ref: major-development
+  - condition:
+      field: car-free
+      value: true
+      description: No parking is proposed.
+  - any:
+    - condition:
+        field: dwelling-count
+        operator: '>'
+        value: 50
+        description: Major applications for over 50 residential units.
+    - all:
+      - ref: major-development
+      - condition:
+          field: floorspace-non-residential
+          operator: '>'
+          value: 0
+          description: Major applications for commercial development (including retail).
+  - discretionary
 source-url: https://www.royalgreenwich.gov.uk/sites/default/files/2025-07/Local_Validation_List_2025.pdf
-source-text: London Plan Travel Plan When Required
-confidence: low
-notes: 'The workbook guessed the application type (''INFERRED''), so no type is given. Audit (wrong_trigger):
-  the excerpt is only a heading (''Travel Plan When Required''); no trigger captured.'
+policy: NPPF; Royal Greenwich Core Strategy policy IM4; London Plan policy T4
+source-text: • all major planning applications • others which are likely to have significant transport
+  implications (such as schools, nurseries and hotels) or where there is no parking, or a low level of
+  car parking proposed. • all applications requiring the submission of a Transport Assessment.
+must-include:
+- item: 'Residential development: a full Travel Plan'
+  level: must
+  required-if:
+    condition:
+      field: dwelling-count
+      operator: '>='
+      value: 1
+      description: Residential development.
+- item: 'Non-residential schemes or elements: a framework Travel Plan with a commitment by individual
+    occupiers'
+  level: must
+  required-if:
+    condition:
+      field: floorspace-non-residential
+      operator: '>'
+      value: 0
+      description: Non-residential development.
+confidence: medium
+notes: From the council's list (published June 2025), page 64. Schemes with significant transport implications
+  or a low level of parking show as discretionary.
 review-status: unverified
 field-status: {}
