@@ -1,14 +1,53 @@
 reference: transport-assessment
 local-authority: MSU
 required-if:
-  condition:
-    field: dwelling-count
-    operator: '>='
-    value: 50
-    description: 50 or more dwellings.
+  any:
+  - all:
+    - condition:
+        field: dwelling-count
+        operator: '>='
+        value: 50
+        description: Residential development of between 50 and 80 dwellings (Transport Statement).
+    - condition:
+        field: dwelling-count
+        operator: <=
+        value: 80
+        description: Residential development of between 50 and 80 dwellings (Transport Statement).
+  - condition:
+      field: dwelling-count
+      operator: '>'
+      value: 80
+      description: More than 80 dwellings (Transport Assessment).
+  - condition:
+      field: use-class
+      value: rural-workers-dwelling
+      description: A permanent rural worker's dwelling (transport statement).
+  - condition:
+      field: renewable-energy-development
+      value: true
+      description: Renewable or low carbon energy projects (traffic impact assessment).
+  - discretionary
 source-url: https://www.midsuffolk.gov.uk/documents/d/asset-library-54706/joint-lvl-part-2-major-and-minor-v3-final
+source-text: This is required for residential developments of between –50 and 80 dwellings. … This is
+  required for developments of over 80 dwellings. We may request a transport statement/assessment for
+  other applications which are likely to lead to a significant increase in transport movement. … In addition,
+  a transport statement shall be provided, demonstrating that the proposal would not have an unacceptable
+  impact on highway safety. … Shall include a traffic impact assessment and confirmation that full approval
+  of connection rights and capacity in the UK power network have been obtained.
+must-include:
+- item: 'For rural workers'' dwellings: shows the proposal would not have an unacceptable impact on highway
+    safety'
+  level: must
+  required-if:
+    condition:
+      field: use-class
+      value: rural-workers-dwelling
+      description: A permanent rural worker's dwelling.
 confidence: medium
-notes: 'From the audit (missing_requirement): a Transport Statement for 50-80 dwellings and a Transport
-  Assessment for more than 80 (items 35a, 35b).'
+notes: From the council's list (updated April 2024), Part Two (Major and Minor), page 23, 25, 27. Sections
+  35a (Transport Statement, 50-80 dwellings; the list prints '–50'), 35b (Transport Assessment, over 80),
+  29c (rural workers' dwellings) and 38 (renewable/low carbon energy projects). Other applications 'likely
+  to lead to a significant increase in transport movement' are discretionary. A Policy LP29 compliance
+  statement can form a section of it.
 review-status: unverified
 field-status: {}
