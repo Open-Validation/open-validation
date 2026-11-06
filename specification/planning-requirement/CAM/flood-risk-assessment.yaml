@@ -1,39 +1,79 @@
 reference: flood-risk-assessment
 local-authority: CAM
 required-if:
-  all:
-  - application-type:
+  any:
+  - site:
       in:
-      - waste-dev
-      - reg-3
-      - s73
-  - any:
-    - site:
-        in:
-        - flood-risk-zone
-        description: The site is in Flood Zone 2 or 3.
-    - condition:
-        field: site-area-residential
-        operator: '>'
-        value: 1
-        description: A Flood Zone 1 site over 1 hectare.
-    - condition:
-        field: site-area-non-residential
-        operator: '>'
-        value: 1
-        description: A Flood Zone 1 site over 1 hectare.
-    - site:
-        in:
-        - critical-drainage-area
-        - surface-water-flood-risk
-        description: A site with critical drainage problems or other sources of flooding.
+      - flood-risk-zone
+      description: The site is in Flood Zone 2 or 3 (including minor development and changes of use).
+  - all:
+    - any:
+      - condition:
+          field: site-area-residential
+          operator: '>'
+          value: 1
+          description: Site area more than 1 hectare in Flood Zone 1.
+      - condition:
+          field: site-area-non-residential
+          operator: '>'
+          value: 1
+          description: Site area more than 1 hectare in Flood Zone 1.
     - discretionary
+  - site:
+      in:
+      - surface-water-flood-risk
+      description: Less than 1 ha in Flood Zone 1 and the site could be affected by sources of flooding
+        other than rivers and the sea (e.g. surface water drains, reservoirs).
+  - condition:
+      field: more-vulnerable-use-change
+      value: true
+      description: A change of use to a more vulnerable class (e.g. commercial to residential) where the
+        site could be affected by other sources of flooding.
+  - all:
+    - condition:
+        field: hard-surfacing
+        value: true
+        description: Less than 1 ha in Flood Zone 1 with proposed changes to hard standing.
+    - discretionary
+  - site:
+      in:
+      - future-flood-risk
+      description: Flood Zone 1 sites identified in a Strategic Flood Risk Assessment as being at increased
+        flood risk in the future.
+  - site:
+      in:
+      - critical-drainage-area
+      description: Less than 1 hectare in Flood Zone 1 with critical drainage problems as notified by
+        the Environment Agency.
 source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
-source-text: … include an FRA whether or not the development is likely to have an impact on flood risk
-  (as set out in footnote 63 of the NPPF).
+policy: NPPF (December 2024) section 14 and footnote 63; Cambridgeshire and Peterborough Minerals and
+  Waste Local Plan (July 2021) policies 1 and 22; district local plan flood risk policies
+source-text: 'When the application site is: • In flood zone 2 or 3, including minor development (as defined
+  by the Environment Agency) and change of use for all development in Flood Zones 2 and 3, including changes
+  of use, should include an FRA whether or not the development is likely to have an impact on flood risk
+  (as set out in footnote 63 of the NPPF). For more information see The Environment Agency''s guidance
+  on Flood Risk and Coastal Change; • More than 1 hectare in flood zone 1 for all development likely to
+  have any impact upon flood risk. • Less than 1 ha in flood zone 1 where the site could be affected by
+  sources of flooding other than rivers and the sea (e.g. surface water drains, reservoirs), including
+  a change of use in development type to a more vulnerable class (e.g. from a commercial to a residential
+  use). • Less than 1 ha in Flood zone 1 if there are proposed changes to hard standing likely to affect
+  the level of flood risk. • Any sites in Flood Zone 1 identified in a Strategic Flood Risk Assessment
+  as being at increased flood risk in the future require a FRA, in accordance with Footnote 63 of the
+  NPPF. • Less than 1 hectare within flood zone 1 which has critical drainage problems as notified by
+  the Environment Agency.'
+must-include:
+- item: Scope proportionate to the nature, scale and location of the development, considering any relevant
+    significant impacts on local infrastructure
+  level: must
+- item: Follows the Environment Agency's advice on flood risk assessments for planning applications
+  level: must
 confidence: medium
-notes: 'Audit (wrong_trigger): the workbook kept only the Flood Zone 2/3 clause. From the audit: also
-  Flood Zone 1 sites over 1 ha, and smaller sites with other flood sources, a more vulnerable use, hardstanding
-  changes, SFRA future-risk areas or critical drainage problems (the last few shown as officer judgement).'
+notes: 'From the council''s list (published June 2025), Local Validation List Requirements pages 11, 12;
+  Local Validation Checklist page 4. The list applies to every planning application the county decides
+  for waste and County Council (Regulation 3) development, including s73 and s73A applications; it does
+  not apply to mineral development, so ''all'' is shown as those types. Sites over 1 ha in Flood Zone
+  1 need an FRA for ''all development likely to have any impact upon flood risk'', and small sites with
+  hard standing changes only where they are ''likely to affect the level of flood risk'': those judgements
+  are shown as discretionary.'
 review-status: unverified
 field-status: {}

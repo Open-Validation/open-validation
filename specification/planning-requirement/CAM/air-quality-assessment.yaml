@@ -1,27 +1,115 @@
 reference: air-quality-assessment
 local-authority: CAM
 required-if:
-  all:
-  - application-type:
+  any:
+  - site:
       in:
-      - waste-dev
-      - reg-3
-      - s73
-  - any:
-    - site:
+      - air-quality-management-area
+      description: Within or adjacent to an Air Quality Management Area (AQMA).
+  - all:
+    - application-type:
         in:
-        - air-quality-management-area
-        description: The site is within or next to an Air Quality Management Area.
-    - discretionary
+        - waste-dev
+    - condition:
+        field: direct-air-emissions
+        value: true
+        description: A waste proposal with emissions to air, including dust, odour and bioaerosols.
+  - all:
+    - condition:
+        field: county-district
+        value: huntingdonshire
+        description: Within Huntingdonshire District Council's area.
+    - any:
+      - condition:
+          field: floorspace
+          operator: '>='
+          value: 10000
+          description: Floor space to be built of 10,000 square metres or more.
+      - any:
+        - condition:
+            field: site-area-residential
+            operator: '>='
+            value: 2
+            description: Site area of 2 hectares or more.
+        - condition:
+            field: site-area-non-residential
+            operator: '>='
+            value: 2
+            description: Site area of 2 hectares or more.
+      - site:
+          in:
+          - air-quality-management-area
+          description: Any part of the site within 50m of an Air Quality Management Area (AQMA) or a clean
+            air zone (CAZ).
+      - condition:
+          field: near-no2-exceedance
+          value: true
+          description: Any part of the site within 100 metres of a monitoring site where the annual mean
+            nitrogen dioxide level exceeds 35µg/m³.
+      - discretionary
+  - discretionary
 source-url: https://www.cambridgeshire.gov.uk/asset-library/Local-Validation-List-requirements.pdf
-source-text: 'Is a waste proposal where there will be emissions to air, including dust, odour and bioaerosols.
-  … Within Huntingdonshire District Council’s area Air Quality Assessments are also required for the following
-  proposals: For developments where the floor space to be built is 10,000 square metres or more or where
-  the site area is 2 Hectares or more).'
+policy: NPPF (December 2024); Cambridgeshire and Peterborough Minerals and Waste Local Plan (July 2021)
+  policies 1 and 18; Huntingdonshire Local Plan to 2036 (May 2019) policies LP 14, LP 29 and LP 36; other
+  district plan air quality policies
+source-text: 'Where the development: - • Is proposed within or adjacent to an Air Quality Management Area
+  (AQMA). • Could itself result in the designation of an AQMA and/or result in a significant worsening
+  of existing air quality within an area. • Would conflict with or render unworkable elements of a local
+  authority’s air quality action plan, or • Is a waste proposal where there will be emissions to air,
+  including dust, odour and bioaerosols. Within Huntingdonshire District Council’s area Air Quality Assessments
+  are also required for the following proposals: - • For developments where the floor space to be built
+  is 10,000 square metres or more or where the site area is 2 Hectares or more). • Or any part of the
+  site is located within 50m of an Air Quality Management Area (AQMA) or a clean air zone (CAZ), or •
+  A significant proportion of the traffic generated would go through an AQMA or a CAZ. Or • Any part of
+  the site is located within 100 metres of a monitoring site where the annual mean level of nitrogen dioxide
+  exceeds 35µg/m³.'
+must-include:
+- item: Such information as is necessary to allow full consideration of the impact on the air quality
+    of the area
+  level: must
+- item: 'Where dust is likely to be an issue: a Dust Management Scheme (dust sources, sensitive receptors,
+    mitigation and monitoring)'
+  level: should
+  required-if: discretionary
+- item: 'Where odour is likely to be an issue: an Odour Management Scheme (odour sources, sensitive receptors,
+    mitigation and monitoring)'
+  level: should
+  required-if: discretionary
+- item: A bioaerosols risk assessment for open air composting facilities within 250m of a residential
+    property
+  level: must
+  required-if:
+    all:
+    - application-type:
+        in:
+        - waste-dev
+    - condition:
+        field: distance-to-residential-boundary
+        operator: <=
+        value: 250
+        description: An open air composting facility within 250m of a residential property.
+  source-text: A bioaerosols risk assessment is required for open air composting facilities within 250m
+    of a residential property.
+- item: 'Within Huntingdonshire: a low emissions strategy where the assessment shows a significant effect
+    on air quality'
+  level: must
+  required-if:
+    all:
+    - condition:
+        field: county-district
+        value: huntingdonshire
+        description: The site is in Huntingdonshire District Council's area.
+    - discretionary
+  source-text: '(i) Within Huntingdonshire only: - A low emissions strategy is required if the air quality
+    assessment demonstrates significant effects.'
 confidence: medium
-notes: 'Audit (wrong_trigger): the workbook quoted only the Huntingdonshire extra trigger. From the audit:
-  within or next to an AQMA; risk of AQMA designation or significant worsening; conflict with an air quality
-  action plan; or a waste proposal with emissions to air. These, and the Huntingdonshire-only thresholds,
-  have no fields, so they are shown as officer judgement.'
+notes: From the council's list (published June 2025), Local Validation List Requirements pages 27, 28;
+  Local Validation Checklist page 4. The list applies to every planning application the county decides
+  for waste and County Council (Regulation 3) development, including s73 and s73A applications; it does
+  not apply to mineral development, so 'all' is shown as those types. Proposals that could cause an AQMA
+  designation or significantly worsen air quality, that would conflict with an air quality action plan,
+  or (in Huntingdonshire) where a significant proportion of traffic would pass through an AQMA or CAZ,
+  are shown as discretionary. The Huntingdonshire 50m distance from an AQMA or CAZ is shown with the AQMA
+  designation.
 review-status: unverified
 field-status: {}

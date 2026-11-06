@@ -1,31 +1,188 @@
 reference: transport-assessment
 local-authority: HUN
 required-if:
-  all:
-  - application-type:
-      in:
-      - full
-      - outline
-  - any:
-    - condition:
-        field: dwelling-count
-        operator: '>='
-        value: 50
-        description: 50 or more residential dwellings.
+  any:
+  - all:
+    - application-type:
+        in:
+        - full
+        - change-of-use
+        - outline-all
+        - outline-some
+    - any:
+      - condition:
+          field: retail-floorspace
+          operator: '>='
+          value: 1000
+          description: 1000m² or more for retail.
+      - condition:
+          field: office-floorspace
+          operator: '>='
+          value: 2500
+          description: 2500m² for employment (offices).
+      - condition:
+          field: industrial-floorspace
+          operator: '>='
+          value: 2500
+          description: 2500m² for employment (industrial).
+      - condition:
+          field: warehousing-floorspace
+          operator: '>='
+          value: 2500
+          description: 2500m² for employment (warehousing).
+      - all:
+        - condition:
+            field: hotel-development
+            value: true
+            description: Hotels.
+        - condition:
+            field: bedroom-count
+            operator: '>='
+            value: 50
+            description: 50 rooms or more.
+      - condition:
+          field: residential-capacity
+          operator: '>='
+          value: 100
+          description: 100+ bedrooms for residential homes.
+      - condition:
+          field: dwelling-count
+          operator: '>='
+          value: 50
+          description: 50 residential dwellings.
+      - condition:
+          field: entertainment-leisure-use
+          value: true
+          description: All leisure.
+      - all:
+        - any:
+          - condition:
+              field: use-class
+              value: medical-health-services
+              description: Health care.
+          - condition:
+              field: use-class
+              value: learning-non-residential-institution
+              description: Education.
+        - condition:
+            field: floorspace
+            operator: '>='
+            value: 2500
+            description: 2500m² or more for health care and education.
+      - condition:
+          field: traffic-movements-peak-hour
+          operator: '>'
+          value: 100
+          description: More than 100 vehicles visit the site in an hour.
+      - condition:
+          field: hgv-movements-daily
+          operator: '>'
+          value: 20
+          description: More than 20 HGV vehicles visit the site in one day.
+      - condition:
+          field: night-time-servicing
+          value: true
+          description: HGVs access the site between midnight and 06:00.
+  - all:
+    - application-type:
+        in:
+        - full
+        - change-of-use
+    - ref: major-development
+source-url: https://www.huntingdonshire.gov.uk/media/h3hl1orl/application-for-planning-permission-including-change-of-use.pdf
+policy: Huntingdonshire Local Plan to 2036 (May 2019) policies LP16 and LP17
+source-text: 'A proposal that includes: 1000m2 or more for retail OR 2500m2 for employment OR 50 rooms
+  + for hotels OR 100+bedrooms for residential homes OR 50 residential dwellings OR all leisure and 2500m2
+  or more for Health care and education. Other circumstances may be where more than 100 vehicles visit
+  the site in an hour OR more than 20 HGV vehicles visit the site in one day OR if HGV’s are accessing
+  the site between the hours of midnight and 06:00. A proposal for major development below the thresholds
+  set out above for a Transport Assessment.'
+must-include:
+- item: 'Transport Assessment: accessibility by all modes, sustainability (public transport, parking)
+    and mitigation of transport impacts, in proportion to the scheme'
+  level: must
+  required-if:
+    any:
     - condition:
         field: retail-floorspace
         operator: '>='
         value: 1000
-        description: 1000m2 or more of retail.
-    - discretionary
-source-url: https://www.huntingdonshire.gov.uk/media/xezhqajy/application-for-outline-planning.pdf
-source-text: 'Transport Assessment & Travel Plan … A proposal that includes: 1000m2 or more for retail
-  OR 2500m2 for employment OR 50 rooms + for hotels OR 100+bedrooms for residential homes OR 50 residential
-  dwellings OR all leisure and 2500m2 or more for Health care and education.'
+        description: 1000m² or more for retail.
+    - condition:
+        field: office-floorspace
+        operator: '>='
+        value: 2500
+        description: 2500m² for employment (offices).
+    - condition:
+        field: industrial-floorspace
+        operator: '>='
+        value: 2500
+        description: 2500m² for employment (industrial).
+    - condition:
+        field: warehousing-floorspace
+        operator: '>='
+        value: 2500
+        description: 2500m² for employment (warehousing).
+    - all:
+      - condition:
+          field: hotel-development
+          value: true
+          description: Hotels.
+      - condition:
+          field: bedroom-count
+          operator: '>='
+          value: 50
+          description: 50 rooms or more.
+    - condition:
+        field: residential-capacity
+        operator: '>='
+        value: 100
+        description: 100+ bedrooms for residential homes.
+    - condition:
+        field: dwelling-count
+        operator: '>='
+        value: 50
+        description: 50 residential dwellings.
+    - condition:
+        field: entertainment-leisure-use
+        value: true
+        description: All leisure.
+    - all:
+      - any:
+        - condition:
+            field: use-class
+            value: medical-health-services
+            description: Health care.
+        - condition:
+            field: use-class
+            value: learning-non-residential-institution
+            description: Education.
+      - condition:
+          field: floorspace
+          operator: '>='
+          value: 2500
+          description: 2500m² or more for health care and education.
+    - condition:
+        field: traffic-movements-peak-hour
+        operator: '>'
+        value: 100
+        description: More than 100 vehicles visit the site in an hour.
+    - condition:
+        field: hgv-movements-daily
+        operator: '>'
+        value: 20
+        description: More than 20 HGV vehicles visit the site in one day.
+    - condition:
+        field: night-time-servicing
+        value: true
+        description: HGVs access the site between midnight and 06:00.
+- item: 'Transport Statement (major development below the thresholds): the transport implications of the
+    development'
+  level: must
+  source-text: A Transport Statement is required which outlines the transport implications of the development.
 confidence: medium
-notes: 'Audit (wrong_trigger, wrong_app_type): the workbook''s trigger was the Structural Survey text
-  and it was copied into reserved matters. Employment, hotel, care home, leisure, health and education
-  thresholds have no fields, so they are shown as officer judgement. From the audit: also high HGV movements;
-  a Transport Statement is on the Full checklist.'
+notes: 'From the council''s list (published 9 February 2024: PDF date, no date printed), planning permission
+  (including change of use) checklist page 10; planning permission (including change of use) checklist
+  page 10. The Transport Statement row is on the planning permission checklist only.'
 review-status: unverified
 field-status: {}
