@@ -1471,6 +1471,28 @@ function setupReview() {
   document.addEventListener("click", function (e) { if (!S.review) return; var td = e.target.closest("td.cell[data-cell]"); if (td && !e.target.closest("a,button")) { if (e.target.closest("summary")) e.preventDefault(); openCellMenu(td); } });
   document.addEventListener("keydown", function (e) { if (!S.review || e.key !== "Enter") return; var td = e.target.closest && e.target.closest("td.cell[data-cell]"); if (td) { e.preventDefault(); openCellMenu(td); } });
 }
+// Visitors' disclaimer: shown the first time someone opens the tool (same wording as DISCLAIMER.md).
+// "I understand" is remembered in this browser by version; raise the version to show it again.
+var VISITOR_NOTICE_VERSION = "2026-11-08";
+function visitorNoticeAccepted() { var a = recall("localStorage", "ov-visitor-notice"); return !!(a && a.version === VISITOR_NOTICE_VERSION); }
+function showVisitorNotice() {
+  var dlg = $("#dialog");
+  dlg.innerHTML = '<h2 id="visTitle">Before you use this</h2>' +
+    "<p>open-validation is draft open data from an independent, volunteer project. It is not a council or government service, and no council has endorsed it.</p>" +
+    '<ol class="stages" aria-label="How the data gets checked"><li><strong>AI draft</strong><span>Collected by AI from the council\'s list. Most data is here.</span></li>' +
+    "<li><strong>Volunteer check</strong><span>A person has compared it with the council's published list</span></li>" +
+    "<li><strong>Council confirmed</strong><span>The council confirms or maintains its own requirements</span></li></ol>" +
+    '<p style="margin-bottom:4px">The colours on the map and in the tables show which step each council and each cell has reached. <strong>Please note:</strong></p><ul class="disc">' +
+    "<li><strong>Always check the council's own validation list</strong> before you submit an application. It takes precedence over this data.</li>" +
+    "<li>The data and the tool are provided \u201cas is\u201d, without warranty of any kind, including as to accuracy, completeness or being up to date.</li>" +
+    "<li>As far as the law allows, the maintainers, contributors and volunteer checkers are not liable for any loss, damage, cost or delay, including an application being made invalid or delayed, that comes from using or relying on the data.</li>" +
+    "<li>Nothing here is planning, legal or other professional advice.</li></ul>" +
+    '<p class="muted" style="font-size:13px">Nothing here limits any liability that cannot be limited by law.</p>' +
+    '<div style="display:flex;gap:8px;margin-top:12px"><button class="btn primary" id="visOK">I understand</button></div>';
+  dlg.setAttribute("aria-labelledby", "visTitle");
+  dlg.showModal();
+  $("#visOK").addEventListener("click", function () { store("localStorage", "ov-visitor-notice", { version: VISITOR_NOTICE_VERSION, date: today() }); dlg.close(); });
+}
 // Volunteer checkers' disclaimer: shown the first time someone turns on Review mode. Accepting it is
 // remembered in this browser (by version) and noted in the marks they submit.
 var DISCLAIMER_VERSION = "2026-11-08";
@@ -1628,6 +1650,7 @@ function start() {
     document.addEventListener("click", function (e) { var b = e.target.closest("[data-select]"); if (b && !b.closest("table")) selectCouncil(b.dataset.select); });
     window.addEventListener("resize", function () { if (S.tab === "map" && S.geo) { clearTimeout(S.rt); S.rt = setTimeout(drawMap, 200); } });
     writeHash(true); render();
+    if (!visitorNoticeAccepted()) showVisitorNotice();
   }).catch(function (e) {
     panel.innerHTML = '<div class="error">Couldn\'t load the data (' + esc(e.message) + '). If you opened this file directly, run <span class="mono">python -m http.server</span> in the repo folder and open <span class="mono">http://localhost:8000/docs/</span>.</div>';
   });
