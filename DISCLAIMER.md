@@ -1,6 +1,9 @@
 # Disclaimer
 
-*Version 2026-11-08*
+*Version 2026-11-09*
+
+**These are the terms of use for the open-validation data and tool. By using the data or the tool,
+you accept them.**
 
 open-validation is an independent, volunteer project. It is **not** a council or government
 service, and it is not endorsed by any council, by MHCLG or by the Planning Portal.
@@ -42,8 +45,8 @@ are not liable for any loss, damage, cost or delay that comes from using or rely
 the tool. That includes an application being made invalid or delayed, fees, missed deadlines and
 the cost of preparing extra documents.
 
-Nothing in this disclaimer limits or excludes any liability that cannot be limited or excluded by
-law.
+These terms do not remove any liability that the law does not allow to be removed (for example,
+liability for fraud).
 
 ## Not professional advice
 
@@ -52,7 +55,8 @@ particular application, ask the council or a qualified professional.
 
 ## Volunteer checkers
 
-Volunteers who check data in the tool's Review mode agree, before they start, that they:
+Before they start, volunteers who check data in the tool's Review mode accept these terms and agree
+that they:
 
 - check against the council's own published documents and record what they find honestly;
 - take part as volunteers, not acting for any council (unless they say so), and do not give

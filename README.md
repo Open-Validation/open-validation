@@ -1,6 +1,6 @@
 # open-validation
 
-> **[Disclaimer](DISCLAIMER.md).** Draft open data from an independent, volunteer project, not a
+> **[Disclaimer and terms of use](DISCLAIMER.md).** By using the data or the tool, you accept these terms. Draft open data from an independent, volunteer project, not a
 > council or government service. It is collected by AI, then checked by volunteers, then (ideally)
 > confirmed by councils; most of it has not been checked yet. It is provided "as is", without
 > warranty, and as far as the law allows the maintainers, contributors and volunteer checkers are
