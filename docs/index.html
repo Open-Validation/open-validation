@@ -249,9 +249,12 @@ pre.yaml .k { color: var(--accent); } pre.yaml .s { color: #C5E1A5; } pre.yaml .
 .menu .row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .reviewbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; background: var(--surface); border-top: 1px solid var(--line); padding: 10px 16px; display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; }
 .stages { list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 0; margin: 4px 0 12px; counter-reset: st; }
-.stages li { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font-size: 13px; color: var(--text-muted); position: relative; }
-.stages li strong { display: block; color: var(--text); font-size: 14px; margin-bottom: 2px; }
-.stages li.here { border-color: var(--accent); background: rgba(127,178,240,0.12); }
+/* The three steps, coloured like the map: AI draft = Unverified, Volunteer check = Human verified, Council confirmed = Council verified */
+.stages li { border: 1px solid var(--line); border-top: 5px solid var(--c, var(--line)); border-radius: 10px; padding: 8px 10px; font-size: 13px; color: var(--text-muted); position: relative;
+  background: color-mix(in srgb, var(--c, transparent) 12%, transparent); }
+.stages li strong { display: flex; align-items: center; gap: 6px; color: var(--text); font-size: 14px; margin-bottom: 2px; }
+.stages li strong::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--c); flex: none; }
+.stages li.here { border-color: var(--c); border-width: 5px 2px 2px; background: color-mix(in srgb, var(--c) 22%, transparent); }
 @media (max-width: 520px) { .stages { grid-template-columns: 1fr; } }
 ul.disc { margin: 4px 0 8px; padding-left: 20px; } ul.disc li { margin: 4px 0; }
 dialog { background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: 12px; max-width: min(620px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow-y: auto; padding: 18px; }
@@ -1479,9 +1482,9 @@ function showVisitorNotice() {
   var dlg = $("#dialog");
   dlg.innerHTML = '<h2 id="visTitle">Before you use this</h2>' +
     "<p>open-validation is draft open data from an independent, volunteer project. It is not a council or government service, and no council has endorsed it.</p>" +
-    '<ol class="stages" aria-label="How the data gets checked"><li><strong>AI draft</strong><span>Collected by AI from the council\'s list. Most data is here.</span></li>' +
-    "<li><strong>Volunteer check</strong><span>A person has compared it with the council's published list</span></li>" +
-    "<li><strong>Council confirmed</strong><span>The council confirms or maintains its own requirements</span></li></ol>" +
+    '<ol class="stages" aria-label="How the data gets checked"><li class="st-unverified"><strong>AI draft</strong><span>Collected by AI from the council\'s list. Most data is here.</span></li>' +
+    "<li class=\"st-human-verified\"><strong>Volunteer check</strong><span>A person has compared it with the council's published list</span></li>" +
+    "<li class=\"st-council-verified\"><strong>Council confirmed</strong><span>The council confirms or maintains its own requirements</span></li></ol>" +
     '<p style="margin-bottom:4px">The colours on the map and in the tables show which step each council and each cell has reached. <strong>Please note:</strong></p><ul class="disc">' +
     "<li><strong>Always check the council's own validation list</strong> before you submit an application. It takes precedence over this data.</li>" +
     "<li>The data and the tool are provided \u201cas is\u201d, without warranty of any kind, including as to accuracy, completeness or being up to date.</li>" +
@@ -1501,9 +1504,9 @@ function disclaimerNote() { var a = recall("localStorage", "ov-disclaimer"); ret
 function showDisclaimer(done) {
   var dlg = $("#dialog");
   dlg.innerHTML = '<h2 id="discTitle">Before you start checking</h2>' +
-    '<ol class="stages" aria-label="How the data gets checked"><li><strong>AI draft</strong><span>Collected by AI from the council\'s list</span></li>' +
-    '<li class="here"><strong>Volunteer check</strong><span>A person compares it with the council\'s published list. This is your step.</span></li>' +
-    '<li><strong>Council confirmed</strong><span>The council confirms or maintains its own requirements</span></li></ol>' +
+    '<ol class="stages" aria-label="How the data gets checked"><li class="st-unverified"><strong>AI draft</strong><span>Collected by AI from the council\'s list</span></li>' +
+    '<li class="st-human-verified here"><strong>Volunteer check</strong><span>A person compares it with the council\'s published list. This is your step.</span></li>' +
+    '<li class="st-council-verified"><strong>Council confirmed</strong><span>The council confirms or maintains its own requirements</span></li></ol>' +
     "<p>Volunteer checking sits between the AI's first draft and a council confirming its own requirements. When you mark a cell as checked, you are saying that, " +
     "in good faith, you compared it with the council's published validation list on that day and it matched as far as you could tell. It is not the council's confirmation, and it is not professional advice.</p>" +
     '<p style="margin-bottom:4px"><strong>By continuing, you agree that:</strong></p><ul class="disc">' +
