@@ -1,5 +1,12 @@
 # open-validation
 
+> **[Disclaimer and terms of use](DISCLAIMER.md).** By using the data or the tool, you accept these terms. Draft open data from an independent, volunteer project, not a
+> council or government service. It is collected by AI, then checked by volunteers, then (ideally)
+> confirmed by councils; most of it has not been checked yet. It is provided "as is", without
+> warranty, and as far as the law allows the maintainers, contributors and volunteer checkers are
+> not liable for any loss, cost or delay from relying on it. **Always check the council's own
+> validation list before you submit an application: it takes precedence over this data.**
+
 **[Open the explorer tool](https://open-validation.github.io/open-validation/docs/)**: a UK map
 of verification progress, every council's requirements in tables, and a checklist for your site.
 
@@ -8,9 +15,6 @@ open data. A validation list says which documents a council needs before it will
 ("validate") a planning application. Every council publishes its own, in its own format. This repo
 puts all 328 English councils' lists into one consistent format that computers can read.
 
-> **Caveat.** Everything here starts as `unverified`: most of it was collected by AI from Grokbot's
-> workbook and Claude's audit, and nobody has checked it against the council's own list yet. **Always check
-> the council's current validation list before you submit an application.**
 
 ## How it relates to MHCLG's data specification
 
